@@ -151,7 +151,23 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 if (item.system.active) {
                     weightTotal += parseFloat(item.system.WEIGHT) || 0
                 }
+                if (parseFloat(item.system.WEIGHT) > 0)
+                {
+                    item.system.WEIGHTtext = parseFloat(item.system.WEIGHT) + "kg"
+                }
+                else {
+                    item.system.WEIGHTtext = ""
+                }
+
+
                 priceTotal += parseFloat(item.system.PRICE) || 0
+                if (parseFloat(item.system.PRICE) > 0)
+                {
+                    item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE))
+                }
+                else {
+                    item.system.PRICEtext = ""
+                }
             }
 
             if (item.type == 'skill') {
