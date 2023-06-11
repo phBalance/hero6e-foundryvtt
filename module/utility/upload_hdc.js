@@ -608,6 +608,9 @@ function XmlToItemData(xml, type) {
     let name = xml.getAttribute('NAME')
     name = (name === '') ? xml.getAttribute('ALIAS') : name
 
+    // This item was created via HDC Uploadn (could be useful later)
+    system.FromHdcUpload = true
+
     // Create Item Data
     let itemData = {
         'type': type,

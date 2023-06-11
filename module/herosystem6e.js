@@ -20,142 +20,142 @@ import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 
 Hooks.once('init', async function () {
 
-  game.herosystem6e = {
-    applications: {
-      // HeroSystem6eActorSheet,
-      HeroSystem6eItemSheet,
-    },
-    entities: {
-      HeroSystem6eActor,
-      HeroSystem6eItem,
-      HeroSystem6eTokenDocument,
-      HeroSystem6eToken
-    },
-    canvas: {
-      HeroSystem6eTemplate
-    },
-    macros: macros,
-    rollItemMacro: rollItemMacro,
-    config: HERO
-  };
+    game.herosystem6e = {
+        applications: {
+            // HeroSystem6eActorSheet,
+            HeroSystem6eItemSheet,
+        },
+        entities: {
+            HeroSystem6eActor,
+            HeroSystem6eItem,
+            HeroSystem6eTokenDocument,
+            HeroSystem6eToken
+        },
+        canvas: {
+            HeroSystem6eTemplate
+        },
+        macros: macros,
+        rollItemMacro: rollItemMacro,
+        config: HERO
+    };
 
-  CONFIG.HERO = HERO;
+    CONFIG.HERO = HERO;
 
-  CONFIG.POWERS = POWERS;
+    CONFIG.POWERS = POWERS;
 
-  CONFIG.Combat.documentClass = HeroSystem6eCombat;
+    CONFIG.Combat.documentClass = HeroSystem6eCombat;
 
-  /**
-  * Set an initiative formula for the system
-  * @type {String}
-  */
-  CONFIG.Combat.initiative = {
-    formula: "@characteristics.dex.value + (@characteristics.int.value / 100)",
-    decimals: 2
-  };
+    /**
+    * Set an initiative formula for the system
+    * @type {String}
+    */
+    CONFIG.Combat.initiative = {
+        formula: "@characteristics.dex.value + (@characteristics.int.value / 100)",
+        decimals: 2
+    };
 
-  // debug
-  // CONFIG.debug.hooks = true;
+    // debug
+    // CONFIG.debug.hooks = true;
 
-  // Define custom Entity classes
-  CONFIG.Actor.documentClass = HeroSystem6eActor;
-  CONFIG.Item.documentClass = HeroSystem6eItem;
-  CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
-  CONFIG.Token.objectClass = HeroSystem6eToken;
-  //CONFIG.Token.prototypeSheetClass = HeroSystem6eTokenConfig
-  CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects();
-  CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-  //CONFIG.MeasuredTemplate.objectClass = HeroSystem6eTemplate;
-  CONFIG.ui.combat = HeroSystem6eCombatTracker;
+    // Define custom Entity classes
+    CONFIG.Actor.documentClass = HeroSystem6eActor;
+    CONFIG.Item.documentClass = HeroSystem6eItem;
+    CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
+    CONFIG.Token.objectClass = HeroSystem6eToken;
+    //CONFIG.Token.prototypeSheetClass = HeroSystem6eTokenConfig
+    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects();
+    CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
+    //CONFIG.MeasuredTemplate.objectClass = HeroSystem6eTemplate;
+    CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
-  HeroRuler.initialize()
+    HeroRuler.initialize()
 
-  SettingsHelpers.initLevelSettings();
+    SettingsHelpers.initLevelSettings();
 
-  initializeHandlebarsHelpers();
+    initializeHandlebarsHelpers();
 
-  // Register sheet application classes
-  Actors.unregisterSheet("core", ActorSheet);
-  // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheet);
-  Actors.registerSheet("herosystem6e", HeroSystem6eActorSidebarSheet, { makeDefault: true });
-  Items.unregisterSheet("core", ItemSheet);
-  Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, { makeDefault: true });
+    // Register sheet application classes
+    Actors.unregisterSheet("core", ActorSheet);
+    // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheet);
+    Actors.registerSheet("herosystem6e", HeroSystem6eActorSidebarSheet, { makeDefault: true });
+    Items.unregisterSheet("core", ItemSheet);
+    Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, { makeDefault: true });
 
-  // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheetMini, { makeDefault: false });
+    // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheetMini, { makeDefault: false });
 
-  // If you need to add Handlebars helpers, here are a few useful examples:
-  Handlebars.registerHelper('concat', function () {
-    var outStr = '';
-    for (var arg in arguments) {
-      if (typeof arguments[arg] != 'object') {
-        outStr += arguments[arg];
-      }
-    }
-    return outStr;
-  });
+    // If you need to add Handlebars helpers, here are a few useful examples:
+    Handlebars.registerHelper('concat', function () {
+        var outStr = '';
+        for (var arg in arguments) {
+            if (typeof arguments[arg] != 'object') {
+                outStr += arguments[arg];
+            }
+        }
+        return outStr;
+    });
 
-  Handlebars.registerHelper('toLowerCase', function (str) {
-    return str.toLowerCase();
-  });
+    Handlebars.registerHelper('toLowerCase', function (str) {
+        return str.toLowerCase();
+    });
 
-  Handlebars.registerHelper('is_active_segment', function (actives, index) {
-    return actives[index];
-  });
+    Handlebars.registerHelper('is_active_segment', function (actives, index) {
+        return actives[index];
+    });
 
-  // Handlebars Templates and Partials
-  loadTemplates([
-    `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
-    `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
+    // Handlebars Templates and Partials
+    loadTemplates([
+        `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
+        `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
 
-  ]);
+    ]);
 
 });
 
 Hooks.once("ready", async function () {
-  // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
-  Hooks.on("hotbarDrop", (bar, data, slot) => createHeroSystem6eMacro(bar, data, slot));
+    // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
+    Hooks.on("hotbarDrop", (bar, data, slot) => createHeroSystem6eMacro(bar, data, slot));
 });
 
 Hooks.on("renderChatMessage", (app, html, data) => {
-  // Display action buttons
-  chat.displayChatActionButtons(app, html, data);
-  HeroSystem6eCardHelpers.onMessageRendered(html);
+    // Display action buttons
+    chat.displayChatActionButtons(app, html, data);
+    HeroSystem6eCardHelpers.onMessageRendered(html);
 });
 Hooks.on("renderChatLog", (app, html, data) => HeroSystem6eCardHelpers.chatListeners(html));
 Hooks.on("renderChatPopout", (app, html, data) => HeroSystem6eCardHelpers.chatListeners(html));
 Hooks.on("updateActor", (app, html, data) => {
-  app.sheet._render()
+    app.sheet._render()
 
-  for (let combat of game.combats) {
-    combat._onActorDataUpdate();
-  }
+    for (let combat of game.combats) {
+        combat._onActorDataUpdate();
+    }
 });
 
 Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
-  registerPackageDebugFlag(HEROSYS.ID);
+    registerPackageDebugFlag(HEROSYS.ID);
 });
 
 export class HEROSYS {
-  static ID = "HEROSYS";
+    static ID = "HEROSYS";
 
-  static module = "hero6efoundryvttv2";
+    static module = "hero6efoundryvttv2";
 
-  static log(force, ...args) {
-    const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
+    static log(force, ...args) {
+        const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
 
-    if (shouldLog) {
-      let shortTrace = (new Error()).stack.split("\n")[2].trim().split(" ")[2]
-      console.log(this.ID, '|' + shortTrace, ...args);
+        if (shouldLog) {
+            let shortTrace = (new Error()).stack.split("\n")[2].trim().split(" ")[2]
+            console.log(this.ID, '|' + shortTrace, ...args);
+        }
     }
-  }
 
-  static trace(force, ...args) {
-    const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
+    static trace(force, ...args) {
+        const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
 
-    if (shouldLog) {
-      console.trace(this.ID, '|', ...args);
+        if (shouldLog) {
+            console.trace(this.ID, '|', ...args);
+        }
     }
-  }
 }
 
 /* -------------------------------------------- */
@@ -171,34 +171,34 @@ export class HEROSYS {
  */
 function createHeroSystem6eMacro(bar, data, slot) {
 
-  // Check if we want to override the default macro (open sheet)
-  if (data.type === "Item" && typeof data.uuid === "string") {
-    const item = fromUuidSync(data.uuid);
-    if (item.isRollable()) {
-      handleMacroCreation(bar, data, slot, item)
-      return false
+    // Check if we want to override the default macro (open sheet)
+    if (data.type === "Item" && typeof data.uuid === "string") {
+        const item = fromUuidSync(data.uuid);
+        if (item.isRollable()) {
+            handleMacroCreation(bar, data, slot, item)
+            return false
+        }
     }
-  }
 }
 
 async function handleMacroCreation(bar, data, slot, item) {
-  HEROSYS.log(false, "createHeroSystem6eMacro", item)
-  if (!item) return;
-  if (!item.roll) return;
+    HEROSYS.log(false, "createHeroSystem6eMacro", item)
+    if (!item) return;
+    if (!item.roll) return;
 
-  // Create the macro command
-  const command = `game.herosystem6e.rollItemMacro("${item.name}", "${item.type}");`;
-  let macro = game.macros.find(m => m.command === command && m.name === item.name && m.img === item.img);
-  if (!macro) {
-    macro = await Macro.create({
-      name: item.name,
-      type: "script",
-      img: item.img,
-      command: command,
-      flags: { "herosystem6e.itemMacro": true }
-    });
-  }
-  game.user.assignHotbarMacro(macro, slot);
+    // Create the macro command
+    const command = `game.herosystem6e.rollItemMacro("${item.name}", "${item.type}");`;
+    let macro = game.macros.find(m => m.command === command && m.name === item.name && m.img === item.img);
+    if (!macro) {
+        macro = await Macro.create({
+            name: item.name,
+            type: "script",
+            img: item.img,
+            command: command,
+            flags: { "herosystem6e.itemMacro": true }
+        });
+    }
+    game.user.assignHotbarMacro(macro, slot);
 }
 
 
@@ -209,31 +209,31 @@ async function handleMacroCreation(bar, data, slot, item) {
  * @return {Promise}
  */
 function rollItemMacro(itemName, itemType) {
-  const speaker = ChatMessage.getSpeaker();
-  let actor;
-  if (speaker.token) actor = game.actors.tokens[speaker.token];
-  if (!actor) actor = game.actors.get(speaker.actor);
-  let item = actor ? actor.items.find(i => i.name === itemName && (!itemType || i.type == itemType)) : null;
-  HEROSYS.log(false, "rollItemMacro", item)
+    const speaker = ChatMessage.getSpeaker();
+    let actor;
+    if (speaker.token) actor = game.actors.tokens[speaker.token];
+    if (!actor) actor = game.actors.get(speaker.actor);
+    let item = actor ? actor.items.find(i => i.name === itemName && (!itemType || i.type == itemType)) : null;
+    HEROSYS.log(false, "rollItemMacro", item)
 
-  // The selected actor does not have an item with this name.
-  if (!item) {
-    item = null
-    // Search all owned tokens for this item
-    for (let token of canvas.tokens.ownedTokens) {
-      actor = token.actor
-      item = actor.items.find(i => i.name === itemName && (!itemType || i.type == itemType))
-      if (item) {
-        break;
-      }
+    // The selected actor does not have an item with this name.
+    if (!item) {
+        item = null
+        // Search all owned tokens for this item
+        for (let token of canvas.tokens.ownedTokens) {
+            actor = token.actor
+            item = actor.items.find(i => i.name === itemName && (!itemType || i.type == itemType))
+            if (item) {
+                break;
+            }
+        }
+
+        if (!item) return ui.notifications.warn(`Your controlled Actor does not have an ${itemType || 'item'} named ${itemName}`);
     }
 
-    if (!item) return ui.notifications.warn(`Your controlled Actor does not have an ${itemType || 'item'} named ${itemName}`);
-  }
 
-
-  // Trigger the item roll
-  return item.roll();
+    // Trigger the item roll
+    return item.roll();
 }
 
 
@@ -248,15 +248,44 @@ Hooks.on("setup", () => CONFIG.MeasuredTemplate.defaults.angle = 60);
 // TODO: add version setting check
 // REF: https://www.youtube.com/watch?v=Hl23n3MvtaI
 Hooks.once("ready", function () {
-  if (!game.user.isGM) {
-    return;
-  }
+    if (!game.user.isGM) {
+        return;
+    }
 
-  migrateActorTypes()
-  migrateKnockback()
-  //migrateWorld();
+    migrateActorTypes()
+    migrateKnockback()
+    migrateRemoveDuplicateDefenseItems()
+    //migrateWorld();
 
 });
+
+async function migrateRemoveDuplicateDefenseItems() {
+    let count = 0
+    for (let actor of game.actors.contents) {
+        if (migrateActorDefenseData(actor)) count++
+    }
+    if (count > 0) {
+        ui.notifications.info(`${count} actors migrated.`)
+    }
+}
+
+function migrateActorDefenseData(actor) {
+    let didWeDeleteItems = false
+
+    // Place a migrationTag in the actor with today's date.
+    // This allows us to skip this migration in the future.
+    // Specifically it allows custom defenses to be manually added
+    // without deleting it eveytime world loads.
+    if (actor.system.migrationTag != 20230611) {
+        for (let item of actor.items.filter(o => o.type == 'defense')) {
+            item.delete()
+            didWeDeleteItems = true
+        }
+
+        actor.update({ 'system.migrationTag': 20230611 })
+    }
+    return didWeDeleteItems
+}
 
 // async function migrateWorld()
 // {
@@ -278,50 +307,50 @@ Hooks.once("ready", function () {
 
 // Change Actor type from "character" to "pc"
 async function migrateActorTypes() {
-  const updates = [];
-  for (let actor of game.actors) {
-    if (actor.type !== "character") continue;
+    const updates = [];
+    for (let actor of game.actors) {
+        if (actor.type !== "character") continue;
 
-    if (actor.prototypeToken.disposition == CONST.TOKEN_DISPOSITIONS.FRIENDLY) {
-      updates.push({ _id: actor.id, type: "pc" });
-    }
-    else {
-      updates.push({ _id: actor.id, type: "npc" });
-    }
+        if (actor.prototypeToken.disposition == CONST.TOKEN_DISPOSITIONS.FRIENDLY) {
+            updates.push({ _id: actor.id, type: "pc" });
+        }
+        else {
+            updates.push({ _id: actor.id, type: "npc" });
+        }
 
-  }
-  if (updates.length > 0) {
-    await Actor.updateDocuments(updates);
-    ui.notifications.info(`${updates.length} actors migrated.`)
-  }
+    }
+    if (updates.length > 0) {
+        await Actor.updateDocuments(updates);
+        ui.notifications.info(`${updates.length} actors migrated.`)
+    }
 }
 
 // Change Attack knockback to knockbackMultiplier
 async function migrateKnockback() {
-  let updates = [];
-  for (let actor of game.actors) {
-    for (let item of actor.items) {
-      if (item.type === 'attack') {
-        if (item.system.knockback && parseInt(item.system.knockbackMultiplier) == 0) {
-          updates.push({ _id: item.id, system: { knockbackMultiplier: 1, knockback: null } });
+    let updates = [];
+    for (let actor of game.actors) {
+        for (let item of actor.items) {
+            if (item.type === 'attack') {
+                if (item.system.knockback && parseInt(item.system.knockbackMultiplier) == 0) {
+                    updates.push({ _id: item.id, system: { knockbackMultiplier: 1, knockback: null } });
+                }
+            }
         }
-      }
+        if (updates.length > 0) {
+            await Item.updateDocuments(updates, { parent: actor });
+            ui.notifications.info(`${updates.length} attacks migrated for ${actor.name}.`)
+            updates = []
+        }
     }
-    if (updates.length > 0) {
-      await Item.updateDocuments(updates, { parent: actor });
-      ui.notifications.info(`${updates.length} attacks migrated for ${actor.name}.`)
-      updates = []
-    }
-  }
 
 }
 
 
 // Remove Character from selectable actor types
 Hooks.on("renderDialog", (dialog, html, data) => {
-  if (html[0].querySelector(".window-title").textContent != "Create New Actor") return
-  let option = html[0].querySelector("option[value*='character']")
-  if (option) option.remove()
+    if (html[0].querySelector(".window-title").textContent != "Create New Actor") return
+    let option = html[0].querySelector("option[value*='character']")
+    if (option) option.remove()
 })
 
 
