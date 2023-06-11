@@ -140,7 +140,8 @@ function determineDefense(targetActor, attackItem) {
                         break;
                     default:
                         if (game.settings.get(game.system.id, 'alphaTesting')) {
-                            HEROSYS.log(false, i.system.defenseType + " not yet supported!");
+                            //ui.notifications.warn(i.system.defenseType + " not yet supported!")
+                            //HEROSYS.log(false, i.system.defenseType + " not yet supported!");
                         }
                         break;
                 }

@@ -252,9 +252,8 @@
                         <td>{{item.system.hardened}}</td>
                         <td>{{item.system.impenetrable}}</td>
                         <td>
-                            <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
+                            <input class="item-toggle" type="checkbox" {{checked
                                 item.system.active}} data-dtype="Boolean" />
-
                         </td>
                         <td>
                             <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
@@ -430,7 +429,7 @@
                         <td class="left">{{item.system.description}}</td>
                         <td>
                             {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
-                                name="item.system.active" {{checked item.system.active}} data-dtype="Boolean" />
+                                name="item.system.active" {{checked item.system.active}} data-dtype="Boolean" data-action="toggle"/>
                             {{/if}}
                         </td>
                         <td>
@@ -675,7 +674,7 @@
                         <td class="left">{{effect.label}}</td>
                         <td>
                             <input class="effect-toggle" type="checkbox" {{checked (not effect.disabled)}}
-                                data-dtype="Boolean" />
+                                data-dtype="Boolean" data-action="toggle"/>
                         </td>
                         <td class="right">
                             <a class="item-control effect-edit" title="Edit effect"><i class="fas fa-edit"></i></a>

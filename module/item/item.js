@@ -6,6 +6,7 @@ import * as Attack from "../item/item-attack.js"
 import { createSkillPopOutFromItem } from '../item/skill.js'
 import { enforceManeuverLimits } from '../item/manuever.js'
 import { SkillRollUpdateValue } from '../utility/upload_hdc.js'
+import { onActiveEffectToggle } from '../utility/effects.js'
 
 
 /**
@@ -23,8 +24,7 @@ export class HeroSystem6eItem extends Item {
     // persisted should be performed with this.updateSource().
     async _preCreate(data, options, userId) {
 
-        if (this.type == "martialart")
-        {
+        if (this.type == "martialart") {
             HEROSYS.log(false, this.name)
         }
 
@@ -141,52 +141,38 @@ export class HeroSystem6eItem extends Item {
         let item = this
         const attr = 'system.active'
         const newValue = !getProperty(item, attr)
-        await item.update({ [attr]: newValue })
+        // await item.update({ [attr]: newValue })
+
+        const firstAE = item.actor.effects.find(o => o.origin === item.uuid)
 
         switch (this.type) {
             case "defense":
-                // Check for associated ActiveEffects
-                for (const activeEffect of item.actor.effects.filter(o => o.origin === item.uuid)) {
-                    await activeEffect.update({ disabled: !item.system.active })
-                    for (let change of activeEffect.changes) {
-                        const key = change.key.match(/characteristics\.(.*)\./)[1]
-                        const max = item.actor.system.characteristics[key].max
-                        if (item.system.active) {
-                            let value = parseInt(item.actor.system.characteristics[key].value)
-                            const levels = change?.value
-                            if (levels) {
-                                value += parseInt(levels)
-                                await item.actor.update({ [`system.characteristics.${key}.value`]: value })
-                            }
-
-                        }
-
-                        if (item.actor.system.characteristics[key].value > max) {
-                            await item.actor.update({ [`system.characteristics.${key}.value`]: max })
-                        }
-
-                    }
-
-                }
+                // TODO: Remove duplicate defense items and make them ActiveEffects
+                await item.update({ [attr]: newValue })
                 break;
 
             case "power":
-                for (const activeEffect of item.actor.effects.filter(o => o.origin === item.uuid)) {
-                    await activeEffect.update({ disabled: !item.system.active })
-                    for (let change of activeEffect.changes) {
-                        const key = change.key.match(/characteristics\.(.*)\./)[1]
-                        const max = item.actor.system.characteristics[key].max
-                        if (item.system.active) {
-                            let value = parseInt(item.actor.system.characteristics[key].value)
-                            const levels = change?.value
-                            if (levels) {
-                                value += parseInt(levels)
-                                await item.actor.update({ [`system.characteristics.${key}.value`]: value })
-                            }
-                        }
-                        if (item.actor.system.characteristics[key].value > max) {
-                            await item.actor.update({ [`system.characteristics.${key}.value`]: max })
-                        }
+
+                if (firstAE) {
+                    const newState = !firstAE.disabled
+                    await item.update({ [attr]: !newState })
+                    for (const activeEffect of item.actor.effects.filter(o => o.origin === item.uuid)) {
+                        await onActiveEffectToggle(activeEffect, newState)
+                        // for (let change of activeEffect.changes) {
+                        //     const key = change.key.match(/characteristics\.(.*)\./)[1]
+                        //     const max = item.actor.system.characteristics[key].max
+                        //     if (item.system.active) {
+                        //         let value = parseInt(item.actor.system.characteristics[key].value)
+                        //         const levels = change?.value
+                        //         if (levels) {
+                        //             value += parseInt(levels)
+                        //             await item.actor.update({ [`system.characteristics.${key}.value`]: value })
+                        //         }
+                        //     }
+                        //     if (item.actor.system.characteristics[key].value > max) {
+                        //         await item.actor.update({ [`system.characteristics.${key}.value`]: max })
+                        //     }
+                        // }
                     }
                 }
                 break;

@@ -104,6 +104,7 @@ Hooks.once('init', async function () {
   // Handlebars Templates and Partials
   loadTemplates([
     `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
+    `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
 
   ]);
 
@@ -139,10 +140,19 @@ export class HEROSYS {
   static module = "hero6efoundryvttv2";
 
   static log(force, ...args) {
-    const shouldLog = force || game.modules.get('_dev-mode')?.active;
+    const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
 
     if (shouldLog) {
-      console.log(this.ID, '|', ...args);
+      let shortTrace = (new Error()).stack.split("\n")[2].trim().split(" ")[2]
+      console.log(this.ID, '|' + shortTrace, ...args);
+    }
+  }
+
+  static trace(force, ...args) {
+    const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
+
+    if (shouldLog) {
+      console.trace(this.ID, '|', ...args);
     }
   }
 }

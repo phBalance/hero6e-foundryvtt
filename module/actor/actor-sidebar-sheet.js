@@ -5,6 +5,7 @@ import { presenceAttackPopOut } from '../utility/presence-attack.js'
 import { applyCharacterSheet, SkillRollUpdateValue } from '../utility/upload_hdc.js'
 import { RoundFavorPlayerDown } from "../utility/round.js"
 import { HEROSYS } from '../herosystem6e.js';
+import { onManageActiveEffect } from '../utility/effects.js'
 
 export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
@@ -43,14 +44,18 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // showToggle
             if (data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)) {
                 item.system.showToggle = true
+
+                // Active (reverse of disabled)
+                //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
+                //HEROSYS.log(item.system.active)
             }
+
+            // Active (reverse of disabled)
+            //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
+            //HEROSYS.log(item.system.active)
 
             // Endurance
             item.system.endEstimate = item.system.end || 0
-
-            if (item.type == 'power')
-                HEROSYS.log(false, item.type)
-            HEROSYS.log(false, item.type)
 
             // Damage
             if (item.type == 'attack') {
@@ -141,8 +146,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             if (item.type == 'martialart') {
-                HEROSYS.log(false, item.system)
-                HEROSYS.log(false, item.system)
                 data.hasMartialArts = true
             }
 
@@ -151,8 +154,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 if (item.system.active) {
                     weightTotal += parseFloat(item.system.WEIGHT) || 0
                 }
-                if (parseFloat(item.system.WEIGHT) > 0)
-                {
+                if (parseFloat(item.system.WEIGHT) > 0) {
                     item.system.WEIGHTtext = parseFloat(item.system.WEIGHT) + "kg"
                 }
                 else {
@@ -161,8 +163,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
                 priceTotal += parseFloat(item.system.PRICE) || 0
-                if (parseFloat(item.system.PRICE) > 0)
-                {
+                if (parseFloat(item.system.PRICE) > 0) {
                     item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE))
                 }
                 else {
@@ -402,10 +403,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         data.defense = defense
 
-        HEROSYS.log(false, data)
-
-        HEROSYS.log(false, data)
-
         return data
     }
 
@@ -583,12 +580,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
     }
 
-    async _onEffectToggle(event)
-    {
-        event.preventDefault()
-        const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        const effect = this.actor.effects.get(effectId)
-        return effect.update({disabled: !effect.disabled});
+    async _onEffectToggle(event) {
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+        // const effect = this.actor.effects.get(effectId)
+        // await effect.update({ disabled: !effect.disabled });
     }
 
     async _onEffectEdit(event) {
@@ -597,7 +594,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         const effect = this.actor.effects.get(effectId)
         effect.sheet.render(true)
     }
-        
+
 
     async _onRecovery(event) {
         const chars = this.actor.system.characteristics

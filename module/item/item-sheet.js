@@ -1,6 +1,7 @@
 import { HeroSystem6eItem, getItem } from './item.js'
 import { editSubItem, deleteSubItem, isPowerSubItem, subItemUpdate } from '../powers/powers.js'
 import { HEROSYS } from '../herosystem6e.js'
+import { onManageActiveEffect } from '../utility/effects.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -51,6 +52,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     data.config = CONFIG.HERO
     data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
+    // Easy reference to ActiveEffects with an origin of this item
     if (this.actor) {
       data.effects = this.actor.effects.filter(o => o.origin === item.uuid)
     }
@@ -64,13 +66,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     }
 
     // Signed OCV and DCV
-    if (data.system.ocv != undefined)
-    {
-      data.system.ocv = ( "+" + parseInt(data.system.ocv)).replace("+-", "-")
+    if (data.system.ocv != undefined) {
+      data.system.ocv = ("+" + parseInt(data.system.ocv)).replace("+-", "-")
     }
-    if (data.system.dcv != undefined)
-    {
-      data.system.dcv = ( "+" + parseInt(data.system.dcv)).replace("+-", "-")
+    if (data.system.dcv != undefined) {
+      data.system.dcv = ("+" + parseInt(data.system.dcv)).replace("+-", "-")
     }
 
 
@@ -108,6 +108,12 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
     // Delete Inventory Item
     html.find('.item-delete').click(this._onDeleteItem.bind(this))
+
+    // Active Effects
+    html.find('.effect-create').click(this._onEffectCreate.bind(this))
+    html.find('.effect-delete').click(this._onEffectDelete.bind(this))
+    html.find('.effect-edit').click(this._onEffectEdit.bind(this))
+    html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
     // Item Description
     html.find('.textarea').each((id, inp) => {
@@ -270,5 +276,49 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
   async _onDeleteItem(event) {
     await deleteSubItem(event, this.item)
+  }
+
+  async _onEffectCreate(event) {
+    event.preventDefault()
+    return await this.actor.createEmbeddedDocuments("ActiveEffect", [{
+      label: "New Effect",
+      icon: "icons/svg/aura.svg",
+      origin: this.actor.uuid,
+      //"duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
+      disabled: true
+    }]);
+
+  }
+
+  async _onEffectDelete(event) {
+    event.preventDefault()
+    const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+    const effect = this.actor.effects.get(effectId)
+    if (!effect) return
+    const confirmed = await Dialog.confirm({
+      title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+      content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
+    });
+
+    if (confirmed) {
+      effect.delete()
+      this.render();
+    }
+  }
+
+  async _onEffectToggle(event) {
+    onManageActiveEffect(event, this.actor)
+    // event.preventDefault()
+    // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+    // const effect = this.actor.effects.get(effectId)
+    // await effect.update({ disabled: !effect.disabled });
+    //this.render();
+  }
+
+  async _onEffectEdit(event) {
+    event.preventDefault()
+    const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+    const effect = this.actor.effects.get(effectId)
+    effect.sheet.render(true)
   }
 }

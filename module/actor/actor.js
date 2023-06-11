@@ -158,6 +158,7 @@ export class HeroSystem6eActor extends Actor {
                     //id: newPower.system.rules,
                     icon: 'icons/svg/upgrade.svg',
                     origin: power.uuid,
+                    disabled: false,
                     changes: [
                         {
                             key: "system.characteristics.str.max",
