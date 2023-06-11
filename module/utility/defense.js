@@ -91,6 +91,23 @@ function determineDefense(targetActor, attackItem) {
                     }
                 }
 
+                if (!value && ["DAMAGENEGATION"].includes(xmlid)) {
+                    switch (attackType) {
+                        case 'physical':
+                            i.system.defenseType = "dnp"
+                            value = parseInt(i.system.adders.find(o=> o.XMLID == "PHYSICAL")?.LEVELS) || 0
+                            break;
+                        case 'energy':
+                            i.system.defenseType = "dne"
+                            value = parseInt(i.system.adders.find(o=> o.XMLID == "ENERGY")?.LEVELS) || 0
+                            break;
+                        case 'mental':
+                            i.system.defenseType = "dnm"
+                            value = parseInt(i.system.adders.find(o=> o.XMLID == "MENTAL")?.LEVELS) || 0
+                            break;
+                    }
+                }
+
                 let valueAp = value
                 let valueImp = 0
 

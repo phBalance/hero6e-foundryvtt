@@ -998,8 +998,7 @@ function calcBasePointsPlusAdders(system) {
     }
 
     // FORCEWALL/BARRIER
-    if (system.XMLID  == "FORCEWALL")
-    {
+    if (system.XMLID == "FORCEWALL") {
         baseCost += (parseInt(system.BODYLEVELS) || 0)
         baseCost += (parseInt(system.LENGTHLEVELS) || 0)
         baseCost += (parseInt(system.HEIGHTLEVELS) || 0)
@@ -1586,6 +1585,11 @@ function updateItemDescription(system) {
                 case "EFFECTS":
                 case "OCCUR":
                     _adderArray.push(adder.OPTION_ALIAS.replace("(", ""))
+                    break;
+                case "PHYSICAL":
+                case "ENERGY":
+                case "MENTAL":
+                    _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
                     break;
                 default: _adderArray.push(adder.ALIAS)
             }

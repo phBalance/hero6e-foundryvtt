@@ -369,8 +369,10 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 defense.PDtags += `${tag.value} ${tag.title}\n`
             }
         }
-
         defense.drp = damageReductionValue
+        defense.drptags = "Damage Reduction (physical)"
+        defense.dnp = damageNegationValue
+        defense.dnptags = "Damage Negation (physical)"
      
 
         // Defense ED
@@ -393,6 +395,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
         defense.dre = damageReductionValueE
+        defense.dretags = "Damage Reduction (energy)"
+        defense.dne = damageNegationValueE
+        defense.dnetags = "Damage Negation (energy)"
 
         // Defense MD
         let mdAttack = {
@@ -414,6 +419,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
         defense.drm = damageReductionValueM
+        defense.dretags = "Damage Reduction (mental)"
+        defense.dnm = damageNegationValueM
+        defense.dnmtags = "Damage Negation (mental)"
 
         data.defense = defense
 
