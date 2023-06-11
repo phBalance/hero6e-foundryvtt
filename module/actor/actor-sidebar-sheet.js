@@ -50,6 +50,15 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 //HEROSYS.log(item.system.active)
             }
 
+            // Is this a defense power?
+            let _xmlid = CONFIG.HERO.powersRebrand[item.system.XMLID] || item.system.XMLID;
+            let configPowerInfo = CONFIG.HERO.powers[_xmlid]
+            if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+                item.subType = 'defense'
+                item.system.showToggle = true
+            }
+
+
             // Active (reverse of disabled)
             //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
             //HEROSYS.log(item.system.active)
@@ -361,6 +370,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
 
+        defense.drp = damageReductionValue
+     
+
         // Defense ED
         let edAttack = {
             system: {
@@ -380,6 +392,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 defense.EDtags += `${tag.value} ${tag.title}\n`
             }
         }
+        defense.dre = damageReductionValueE
 
         // Defense MD
         let mdAttack = {
@@ -400,6 +413,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 defense.MDtags += `${tag.value} ${tag.title}\n`
             }
         }
+        defense.drm = damageReductionValueM
 
         data.defense = defense
 

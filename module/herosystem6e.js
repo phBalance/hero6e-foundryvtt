@@ -64,6 +64,7 @@ Hooks.once('init', async function () {
   CONFIG.Token.objectClass = HeroSystem6eToken;
   //CONFIG.Token.prototypeSheetClass = HeroSystem6eTokenConfig
   CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects();
+  CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
   //CONFIG.MeasuredTemplate.objectClass = HeroSystem6eTemplate;
   CONFIG.ui.combat = HeroSystem6eCombatTracker;
 

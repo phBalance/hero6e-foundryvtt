@@ -153,6 +153,13 @@ export class HeroSystem6eItem extends Item {
 
             case "power":
 
+                // Is this a defense power?  If so toggle active state
+                let _xmlid = CONFIG.HERO.powersRebrand[item.system.XMLID] || item.system.XMLID;
+                let configPowerInfo = CONFIG.HERO.powers[_xmlid]
+                if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+                    await item.update({ [attr]: newValue })
+                }
+
                 if (firstAE) {
                     const newState = !firstAE.disabled
                     await item.update({ [attr]: !newState })
@@ -177,10 +184,12 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
             case "maneuver":
+                await item.update({ [attr]: newValue })
                 await enforceManeuverLimits(this.actor, item.id, item.name)
                 await updateCombatAutoMod(item.actor, item)
                 break;
             case "equipment":
+                await item.update({ [attr]: newValue })
                 // Do nothing special for now.
                 // Weight/encumbrance will automtically be calculated.
                 // TODO: tie defensive/buff items into equipment.

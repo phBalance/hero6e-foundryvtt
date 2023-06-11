@@ -56,6 +56,15 @@
                     <li title="{{defense.rEDtags}}">rED={{defense.rED}}</li>
                     <li title="{{defense.MDtags}}">MD={{defense.MD}}</li>
                     <li title="{{defense.rMDtags}}">rMD={{defense.rMD}}</li>
+
+                    {{#if defense.drp}}<li title="{{defense.drptags}}">drp={{defense.drp}}</li>{{/if}}
+                    {{#if defense.dre}}<li title="{{defense.dretags}}">dre={{defense.dre}}</li>{{/if}}
+                    {{#if defense.drm}}<li title="{{defense.drmtags}}">drm={{defense.drm}}</li>{{/if}}
+                    
+                    {{#if defense.dnp}}<li title="{{defense.dnptags}}">drp={{defense.dnp}}</li>{{/if}}
+                    {{#if defense.dne}}<li title="{{defense.dnetags}}">dre={{defense.dne}}</li>{{/if}}
+                    {{#if defense.dnm}}<li title="{{defense.dnmtags}}">drm={{defense.dnm}}</li>{{/if}}
+
                 </ul>
 
                 <div class="sidebar-actions flexrow flex-group-center">
@@ -239,7 +248,7 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "defense") }}
+                    {{#if (or (eq item.type "defense") (eq item.subType "defense")) }}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"

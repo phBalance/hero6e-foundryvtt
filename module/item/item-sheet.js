@@ -47,7 +47,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     const item = data.item;
 
     // Re-define the template data references.
-    data.item = item
+    //data.item = item
     data.system = item.system
     data.config = CONFIG.HERO
     data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
@@ -55,6 +55,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     // Easy reference to ActiveEffects with an origin of this item
     if (this.actor) {
       data.effects = this.actor.effects.filter(o => o.origin === item.uuid)
+    } else {
+      data.effects = this.document.effects
     }
 
     // skillCharacteristics should be lowercase to match CONFIG.HERO.skillCharacteristics.
@@ -318,7 +320,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
   async _onEffectEdit(event) {
     event.preventDefault()
     const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-    const effect = this.actor.effects.get(effectId)
+    let effect = this.document.effects.get(effectId)
+    if (!effect && this.actor) {
+      effect = this.actor.effects.get(effectId)
+    }
+
     effect.sheet.render(true)
   }
 }

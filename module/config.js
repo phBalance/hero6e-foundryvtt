@@ -545,7 +545,12 @@ HERO.powers = {
 
 
     // Defense
-    "FORCEWALL": { powerType: ["defense"], name: "Barrier" }, // AKA BARRIER
+    "FORCEWALL": {
+        powerType: ["defense"],
+        name: "Barrier",
+        costEnd: true,
+        costPerLevel: 3 / 2,
+    }, // AKA BARRIER
     "FORCEFIELD": {
         powerType: ["defense"],
         name: "Resistant Protection",
@@ -730,6 +735,7 @@ HERO.ModifierOverride = {
     "DEFBONUS": { BASECOST: 2 },
     "CONTINUOUSCONCENTRATION": { BASECOST: -0.25 },
     "ALWAYSOCCURS": { BASECOST: 0, MULTIPLIER: 2 },
+    "HARDENED": { BASECOST: 0.25 },
 }
 
 HERO.areaOfEffect = {
