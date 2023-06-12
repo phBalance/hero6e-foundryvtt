@@ -301,7 +301,7 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left">{{#if item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.characteristic}}</td>
                         <td>

@@ -80,7 +80,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     // Create & Apply ActiveEffects based on item powers
-    async XXapplyPowerEffects() {
+    async applyPowerEffects() {
 
         //TODO: Alll the ActiveEffects will bubble up to UI
         // showing all deletes and create.
@@ -318,19 +318,19 @@ export class HeroSystem6eActor extends Actor {
                 if (power.system.rules == "DAMAGENEGATION" && !addedDefense) {
                     itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
                     itemData.system.defenseType = 'dnp'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.xmlid === 'PHYSICAL').LEVELS)
+                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'PHYSICAL')?.LEVELS)
                     if (itemData.system.value > 0) {
                         await HeroSystem6eItem.create(itemData, { parent: this })
                     }
 
                     itemData.system.defenseType = 'dne'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.xmlid === 'ENERGY').LEVELS)
+                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'ENERGY')?.LEVELS)
                     if (itemData.system.value > 0) {
                         await HeroSystem6eItem.create(itemData, { parent: this })
                     }
 
                     itemData.system.defenseType = 'dnm'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.xmlid === 'MENTAL').LEVELS)
+                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'MENTAL')?.LEVELS)
                     if (itemData.system.value > 0) {
                         await HeroSystem6eItem.create(itemData, { parent: this })
                     }

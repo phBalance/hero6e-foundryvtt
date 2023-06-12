@@ -259,32 +259,46 @@ Hooks.once("ready", function () {
 
 });
 
+const migrationTag = 20230611
+
 async function migrateRemoveDuplicateDefenseItems() {
+
+    if (game.actors.contents.find(o => o.system.migrationTag != migrationTag)) {
+        ui.notifications.info(`Migragrating actor data.`)
+    } else {
+        return;
+    }
+
     let count = 0
     for (let actor of game.actors.contents) {
-        if (migrateActorDefenseData(actor)) count++
+        if (await migrateActorDefenseData(actor)) count++
     }
-    if (count > 0) {
-        ui.notifications.info(`${count} actors migrated.`)
-    }
+
+    ui.notifications.info(`${count} actors migrated.`)
+
 }
 
-function migrateActorDefenseData(actor) {
-    let didWeDeleteItems = false
+async function migrateActorDefenseData(actor) {
+    let itemsToDelete = []
 
     // Place a migrationTag in the actor with today's date.
     // This allows us to skip this migration in the future.
     // Specifically it allows custom defenses to be manually added
     // without deleting it eveytime world loads.
-    if (actor.system.migrationTag != 20230611) {
+    if (actor.system.migrationTag != migrationTag) {
         for (let item of actor.items.filter(o => o.type == 'defense')) {
-            item.delete()
-            didWeDeleteItems = true
+
+            // Try not to delete items that have been manually created.
+            // We can make an educated guess by looking for XMLID
+            if (item.system.xmlid || item.system.XMLID || item.system.rules == "COMBAT_LUCK") {
+                itemsToDelete.push(item.id)
+            }
         }
 
-        actor.update({ 'system.migrationTag': 20230611 })
+        await actor.deleteEmbeddedDocuments("Item", itemsToDelete)
+        actor.update({ 'system.migrationTag': migrationTag })
     }
-    return didWeDeleteItems
+    return (itemsToDelete.length > 0)
 }
 
 // async function migrateWorld()

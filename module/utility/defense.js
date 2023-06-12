@@ -108,6 +108,21 @@ function determineDefense(targetActor, attackItem) {
                     }
                 }
 
+                if (!value && ["COMBAT_LUCK"].includes(xmlid)) {
+                    switch (attackType) {
+                        case 'physical':
+                            i.system.defenseType = "pd"
+                            value = (parseInt(i.system.LEVELS) || 0) * 3
+                            i.system.resistant = true
+                            break;
+                        case 'energy':
+                            i.system.defenseType = "ed"
+                            value = (parseInt(i.system.LEVELS) || 0) * 3
+                            i.system.resistant = true
+                            break;
+                    }
+                }
+
                 let valueAp = value
                 let valueImp = 0
 

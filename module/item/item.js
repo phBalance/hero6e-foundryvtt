@@ -194,6 +194,9 @@ export class HeroSystem6eItem extends Item {
                 // Weight/encumbrance will automtically be calculated.
                 // TODO: tie defensive/buff items into equipment.
                 break;
+            case "talent": // COMBAT_LUCK
+                await item.update({ [attr]: newValue })
+                break;
             default: ui.notifications.warn(`${this.name} toggle may be incompmlete`)
         }
     }

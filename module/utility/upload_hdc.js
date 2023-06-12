@@ -609,7 +609,7 @@ function XmlToItemData(xml, type) {
     name = (name === '') ? xml.getAttribute('ALIAS') : name
 
     // This item was created via HDC Uploadn (could be useful later)
-    system.FromHdcUpload = true
+    systemData.FromHdcUpload = true
 
     // Create Item Data
     let itemData = {
@@ -626,6 +626,9 @@ function XmlToItemData(xml, type) {
 export async function uploadBasic(xml, type) {
 
     let itemData = XmlToItemData(xml, type)
+    if (itemData.system.XMLID == "COMBAT_LUCK") {
+        itemData.system.active = true
+    }
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // Some items should be copied and created as an attack

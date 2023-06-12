@@ -642,7 +642,7 @@ HERO.powers = {
     },
 
     // Powers can include Talents
-    "COMBAT_LUCK": { powerType: ["talent"], costPerLevel: 6 },
+    "COMBAT_LUCK": { powerType: ["talent", "defense"], costPerLevel: 6 },
     "COMBAT_SENSE": {
         powerType: ["talent"],
         name: "Combat Sense",

@@ -1,7 +1,11 @@
+# Version 2.2.0-alpha
+- Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.
+- Reworked ActiveEffects to be placed on items (per FoundryVtt design).  This should allow world items to be created with ActiveEffects and dragged onto an actor.  ActiveEffect can be edited/created on most items, although not fully tested.
+
 # Version 2.1.9-alpha
 - Fixed equipment price showing NaN.  Summary weight/price for equipment now only shows when there are items with weight/price.
 - Fixed [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module errors when Drag Ruler not installed.  Drag Ruler is recommended, but not required.
-- Active Effects on actor are editable. A minor step toward enhancing Active Effects and associated temporary bonuses and penalties. [#126](https://github.com/dmdorman/hero6e-foundryvtt/issues/126) [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118) [#103](https://github.com/dmdorman/hero6e-foundryvtt/issues/103)
+- Active Effects on actors are editable. A minor step toward enhancing Active Effects and associated temporary bonuses and penalties. [#126](https://github.com/dmdorman/hero6e-foundryvtt/issues/126) [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118) [#103](https://github.com/dmdorman/hero6e-foundryvtt/issues/103)
 
 # Version 2.1.8-alpha
 - Improved power descriptions. [#78](https://github.com/dmdorman/hero6e-foundryvtt/issues/78)
