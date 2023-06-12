@@ -1140,7 +1140,7 @@ function calcBasePointsPlusAdders(system) {
         cost = cost * advantages
     }
 
-    return cost
+    return Math.max(0, cost)
 }
 
 function calcActivePoints(_basePointsPlusAdders, system) {
@@ -1565,6 +1565,18 @@ function updateItemDescription(system) {
             system.description = system.ALIAS + " " + system.OPTION_ALIAS
             break;
 
+        case "KNOWLEDGE_SKILL":
+        case "LANGUAGES":
+            system.description = system.NAME + ": " + (system.INPUT || system.ALIAS)
+            if (system.OPTION_ALIAS) {
+                system.description += " (" + system.OPTION_ALIAS + ")"
+            }
+            break;
+
+        case "PENALTY_SKILL_LEVELS":
+            system.description = system.NAME + ": +" + system.LEVELS + " " + system.OPTION_ALIAS
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS + " " + system.ALIAS;
@@ -1911,6 +1923,7 @@ export function SkillRollUpdateValue(item) {
         //} else if (skillData.state === 'trained') {
     } else if (skillData.CHARACTERISTIC || skillData.characteristic) {
         let characteristic = (skillData.CHARACTERISTIC || skillData.characteristic).toLowerCase()
+        skillData.characteristic = characteristic
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
