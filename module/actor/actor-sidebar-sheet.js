@@ -34,6 +34,10 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         data.hasEquipment = false
         data.hasMartialArts = false
 
+        // NPC or PC dropdown
+        data.isGM = game.user.isGM
+        data.actorTypeChoices = { pc: "PC", npc: "NPC" }
+
         let weightTotal = 0
         let priceTotal = 0
 

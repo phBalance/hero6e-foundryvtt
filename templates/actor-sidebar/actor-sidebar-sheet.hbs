@@ -60,7 +60,7 @@
                     {{#if defense.drp}}<li title="{{defense.drptags}}">drp={{defense.drp}}</li>{{/if}}
                     {{#if defense.dre}}<li title="{{defense.dretags}}">dre={{defense.dre}}</li>{{/if}}
                     {{#if defense.drm}}<li title="{{defense.drmtags}}">drm={{defense.drm}}</li>{{/if}}
-                    
+
                     {{#if defense.dnp}}<li title="{{defense.dnptags}}">dnp={{defense.dnp}}</li>{{/if}}
                     {{#if defense.dne}}<li title="{{defense.dnetags}}">dne={{defense.dne}}</li>{{/if}}
                     {{#if defense.dnm}}<li title="{{defense.dnmtags}}">dnm={{defense.dnm}}</li>{{/if}}
@@ -98,6 +98,12 @@
                 <span>Upload&nbsp;.HDC</span>
                 <input type="file" accept=".hdc" />
             </label>
+
+            {{#if isGM}}
+            <select name="type" data-dtype="text">
+                {{selectOptions actorTypeChoices selected=actor.type localize=true}}
+            </select>
+            {{/if}}
         </div>
     </header>
 
@@ -261,8 +267,8 @@
                         <td>{{item.system.hardened}}</td>
                         <td>{{item.system.impenetrable}}</td>
                         <td>
-                            <input class="item-toggle" type="checkbox" {{checked
-                                item.system.active}} data-dtype="Boolean" />
+                            <input class="item-toggle" type="checkbox" {{checked item.system.active}}
+                                data-dtype="Boolean" />
                         </td>
                         <td>
                             <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
@@ -301,7 +307,8 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{#if item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}</td>
+                        <td class="left">{{#if
+                            item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.characteristic}}</td>
                         <td>
@@ -438,7 +445,8 @@
                         <td class="left">{{item.system.description}}</td>
                         <td>
                             {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
-                                name="item.system.active" {{checked item.system.active}} data-dtype="Boolean" data-action="toggle"/>
+                                name="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
+                                data-action="toggle" />
                             {{/if}}
                         </td>
                         <td>
@@ -683,7 +691,7 @@
                         <td class="left">{{effect.label}}</td>
                         <td>
                             <input class="effect-toggle" type="checkbox" {{checked (not effect.disabled)}}
-                                data-dtype="Boolean" data-action="toggle"/>
+                                data-dtype="Boolean" data-action="toggle" />
                         </td>
                         <td class="right">
                             <a class="item-control effect-edit" title="Edit effect"><i class="fas fa-edit"></i></a>
