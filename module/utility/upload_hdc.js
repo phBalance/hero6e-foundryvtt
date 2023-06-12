@@ -1561,6 +1561,10 @@ function updateItemDescription(system) {
             system.description = `${system.ALIAS} for up to ${system.LEVELS} Active points of ${system.INPUT}`
             break;
 
+        case "DEFENSE_MANEUVER":
+            system.description = system.ALIAS + " " + system.OPTION_ALIAS
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS + " " + system.ALIAS;

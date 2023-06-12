@@ -655,7 +655,7 @@ HERO.powers = {
     "ANALYZE": { powerType: ["skill"] },
     "ANIMAL_HANDLER": { powerType: ["skill"], categorized: true },
     "AUTOFIRE_SKILLS": { powerType: ["skill"] },
-    "BREAKFALL": { powerType: ["skill"] },
+    "BREAKFALL": { powerType: ["skill"] , costPerLevel: 1 },
     "BRIBERY": { powerType: ["skill"] },
     "BUGGING": { powerType: ["skill"] },
     "BUREAUCRATICS": { powerType: ["skill"] },
