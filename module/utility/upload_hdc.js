@@ -1585,6 +1585,11 @@ function updateItemDescription(system) {
             system.description = `${system.ALIAS} +${system.LEVELS}d6`
             break;
 
+        case "KBRESISTANCE":
+            system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
+            + ` -${system.LEVELS}m`
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS + " " + system.ALIAS;
