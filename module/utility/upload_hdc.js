@@ -1577,6 +1577,14 @@ function updateItemDescription(system) {
             system.description = system.NAME + ": +" + system.LEVELS + " " + system.OPTION_ALIAS
             break;
 
+        case "RKA":
+            system.description = `${system.ALIAS} ${system.LEVELS}d6 ${system.INPUT}`
+            break;
+
+        case "HANDTOHANDATTACK":
+            system.description = `${system.ALIAS} +${system.LEVELS}d6`
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS + " " + system.ALIAS;
