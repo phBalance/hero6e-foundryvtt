@@ -760,3 +760,8 @@ div.fifthEd {
 .radio input[type="radio"] + .radio-label:empty:before {
   margin-right: 0;
 }
+
+div.item-chat {
+  color: darkgreen;
+  font-weight: 100;
+}

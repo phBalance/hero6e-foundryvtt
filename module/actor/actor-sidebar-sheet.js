@@ -466,6 +466,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         html.find('.effect-edit').click(this._onEffectEdit.bind(this))
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
+        html.find('.item-chat').click(this._onItemChat.bind(this))
+
         // Drag events for macros.
         if (this.actor.isOwner) {
             const handler = ev => this._onDragStart(ev)
@@ -496,11 +498,16 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
     async _onItemRoll(event) {
         event.preventDefault()
-        HEROSYS.log(false, "_onItemRoll")
-        HEROSYS.log(false, "_onItemRoll")
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId
         const item = this.actor.items.get(itemId)
         item.roll()
+    }
+
+    async _onItemChat(event) {
+        event.preventDefault()
+        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId
+        const item = this.actor.items.get(itemId)
+        item.chat()
     }
 
     async _onCharacteristicRoll(event) {

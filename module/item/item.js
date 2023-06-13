@@ -137,6 +137,16 @@ export class HeroSystem6eItem extends Item {
 
     }
 
+    async chat() {
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.ChatMessage,
+            content: `<div class="item-chat"><b>${this.name}</b> ${this.system.description}</div>`,
+            //speaker: speaker
+        }
+        ChatMessage.create(chatData)
+    }
+
     async toggle() {
         let item = this
         const attr = 'system.active'
