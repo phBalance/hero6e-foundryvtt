@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { RoundFavorPlayerDown } from "../utility/round.js"
+import { getPowerInfo } from '../utility/util.js'
 
 
 export async function applyCharacterSheet(xmlDoc) {
@@ -60,13 +61,13 @@ export async function applyCharacterSheet(xmlDoc) {
     await this.actor.deleteEmbeddedDocuments("ActiveEffect", this.actor.effects.map(o => o.id))
 
     // 6e vs 5e
-    let characteristicCosts = CONFIG.HERO.characteristicCosts
-    if (this.actor.system.is5e) {
-        characteristicCosts = CONFIG.HERO.characteristicCosts5e
+    if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
+        this.actor.update([{ 'system.is5e': true }])
     }
+    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts : CONFIG.HERO.characteristicCosts5e
 
     // Caracteristics for 6e
-    let characteristicKeys = Object.keys(characteristicCosts)
+    //let characteristicKeys = Object.keys(characteristicCosts)
 
 
     // determine spd upfront for velocity calculations
@@ -594,7 +595,7 @@ function XmlToItemData(xml, type) {
     }
 
     // Calculate RealCost, ActivePoints, and END
-    let _basePointsPlusAdders = calcBasePointsPlusAdders(systemData)
+    let _basePointsPlusAdders = calcBasePointsPlusAdders.call(this, systemData)
     let _activePoints = calcActivePoints(_basePointsPlusAdders, systemData)
     let _realCost = calcRealCost(_activePoints, systemData)
     systemData.basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
@@ -602,7 +603,7 @@ function XmlToItemData(xml, type) {
     systemData.realCost = RoundFavorPlayerDown(_realCost)
 
     // Update Item Description (to closely match Hero Designer)
-    updateItemDescription(systemData)
+    updateItemDescription.call(this, systemData)
 
     // Item name
     let name = xml.getAttribute('NAME')
@@ -618,23 +619,23 @@ function XmlToItemData(xml, type) {
         system: systemData,
     }
 
-    createEffects(itemData)
+    createEffects.call(this, itemData)
 
     return itemData
 }
 
 export async function uploadBasic(xml, type) {
 
-    let itemData = XmlToItemData(xml, type)
+    let itemData = XmlToItemData.call(this, xml, type)
     if (itemData.system.XMLID == "COMBAT_LUCK") {
         itemData.system.active = true
     }
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // Some items should be copied and created as an attack
-    const configPowerInfo = CONFIG.HERO.powers[itemData.system.id]
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
     if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
-        await uploadAttack.call(this, xml);
+        await uploadAttack.call(this, xml)
     }
 }
 
@@ -668,7 +669,7 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
     // itemData['system.realCost'] = parseInt(itemData['system.baseCost'])
     // itemData['system.activePoints'] = parseInt(itemData['system.baseCost'])
 
-    let itemData = XmlToItemData(power, type)
+    let itemData = XmlToItemData.call(this, power, type)
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // Make attack out of the martial art
@@ -816,7 +817,7 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
 export async function uploadSkill(skill, duplicate) {
 
     if (skill.getAttribute('XMLID') == "GENERIC_OBJECT") return;
-    let itemData = XmlToItemData(skill, 'skill')
+    let itemData = XmlToItemData.call(this, skill, 'skill')
     itemData.system.duplicate = duplicate
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
@@ -966,11 +967,8 @@ function calcBasePointsPlusAdders(system) {
         return 0
     }
 
-    // Rebrand?
-    let _xmlid = CONFIG.HERO.powersRebrand[system.XMLID] || system.XMLID;
-
     // Check if we have CONFIG info about this power
-    let configPowerInfo = CONFIG.HERO.powers[_xmlid]
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
 
     // Base Cost is typcailly extracted directly from HDC
@@ -981,7 +979,7 @@ function calcBasePointsPlusAdders(system) {
     // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
     let costPerLevel = parseFloat(
         configPowerInfo?.costPerLevel ||
-        CONFIG.HERO.characteristicCosts[_xmlid.toLocaleLowerCase()] ||
+        CONFIG.HERO.characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
         system.costPerLevel ||
         baseCost
         || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
@@ -1259,7 +1257,7 @@ function calcRealCost(_activeCost, system) {
 
 export async function uploadPower(power, type) {
     if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
-    let itemData = XmlToItemData(power, type)
+    let itemData = XmlToItemData.call(this, power, type)
 
     let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
@@ -1279,21 +1277,19 @@ export async function uploadPower(power, type) {
     // ]
     //if (xmlid === 'GENERIC_OBJECT') return;
 
-    // Rebrand?
-    xmlid = CONFIG.HERO.powersRebrand[xmlid] || xmlid;
-
     // Check if we have CONFIG info about this power
-    let configPowerInfo = CONFIG.HERO.powers[xmlid]
+    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
+
     if (configPowerInfo) {
 
         if ((configPowerInfo?.powerType || "").includes("skill")) {
-            await uploadSkill.call(this, power, true);
+            await uploadSkill.call(this, power, true)
         }
 
         // Detect attacks
         //let configPowerInfo = CONFIG.HERO.powers[power.system.rules]
         if (configPowerInfo.powerType.includes("attack")) {
-            await uploadAttack.call(this, power, true);
+            await uploadAttack.call(this, power, true)
         }
 
     }
@@ -1499,11 +1495,9 @@ function updateItemDescription(system) {
     // description updates as well.
     // If in sheets code it may handle drains/suppresses nicely.
 
-    const xmlid = CONFIG.HERO.powersRebrand[system.XMLID] || system.XMLID;
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
-    const configPowerInfo = CONFIG.HERO.powers[xmlid]
-
-    switch (xmlid) {
+    switch (configPowerInfo?.xmlid || system.XMLID) {
 
         case "Mind Scan":
             system.description = levels + "d6 Mind Scan (" +
@@ -1532,12 +1526,15 @@ function updateItemDescription(system) {
             system.description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${parseInt(system.HEIGHTLEVELS) + 1}m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`
             break;
 
+        case "TRANSFER":
+        case "DRAIN":
         case "AID":
             // Aid  STR 5d6 (standard effect: 15 points)
-            system.description = system.ALIAS + " " + system.INPUT + " " + system.LEVELS + "d6"
+            system.description = system.ALIAS + (system.INPUT ? " " + system.INPUT : "") + " " + system.LEVELS + "d6"
             if (system.USESTANDARDEFFECT == "Yes") {
                 system.description += " (standard effect: " + (parseInt(system.LEVELS) * 3) + " points)"
             }
+            //system.description = `${system.ALIAS} ${system.LEVELS}d6`
             break;
 
         case "STRETCHING":
@@ -1587,7 +1584,7 @@ function updateItemDescription(system) {
 
         case "KBRESISTANCE":
             system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
-            + ` -${system.LEVELS}m`
+                + ` -${system.LEVELS}m`
             break;
 
         default:
@@ -1774,7 +1771,7 @@ function createPowerDescriptionModifier(modifier, powerName) {
 export async function uploadAttack(power) {
     const xmlid = power.getAttribute('XMLID')
 
-    let configPowerInfo = CONFIG.HERO.powers[xmlid]
+    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
 
     // Verify we have an attack
     if (!configPowerInfo.powerType.includes("attack")) return
@@ -1953,11 +1950,8 @@ export function SkillRollUpdateValue(item) {
 }
 
 async function createEffects(itemData) {
-    // Rebrand?
-    let xmlid = itemData.system.XMLID || itemData.system.id || itemData.system.rules
-    xmlid = CONFIG.HERO.powersRebrand[xmlid] || xmlid;
 
-    let configPowerInfo = CONFIG.HERO.powers[xmlid]
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.XMLID, actor: this.actor })
 
     // Not every powers will have effects
     if (!configPowerInfo) return

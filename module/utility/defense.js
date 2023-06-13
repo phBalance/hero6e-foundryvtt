@@ -52,10 +52,10 @@ function determineDefense(targetActor, attackItem) {
             if ((i.subType || i.type) === "defense" && i.system.active) {
                 let value = parseInt(i.system.value) || 0;
 
-                const xmlid = CONFIG.HERO.powersRebrand[i.system.XMLID] || i.system.XMLID;
+                const xmlid = i.system.XMLID
 
                 // Newer solution is to use POWER item, instead of a sepearete defense item
-                if (!value && ["FORCEFIELD", "FORCEWALL"].includes(xmlid)) {
+                if (!value && ["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
                     switch (attackType) {
                         case 'physical':
                             value = parseInt(i.system.PDLEVELS) || 0

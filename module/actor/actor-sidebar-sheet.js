@@ -6,6 +6,7 @@ import { applyCharacterSheet, SkillRollUpdateValue } from '../utility/upload_hdc
 import { RoundFavorPlayerDown } from "../utility/round.js"
 import { HEROSYS } from '../herosystem6e.js';
 import { onManageActiveEffect } from '../utility/effects.js'
+import { getPowerInfo } from '../utility/util.js'
 
 export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
@@ -55,8 +56,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             // Is this a defense power?
-            let _xmlid = CONFIG.HERO.powersRebrand[item.system.XMLID] || item.system.XMLID;
-            let configPowerInfo = CONFIG.HERO.powers[_xmlid]
+            const configPowerInfo = getPowerInfo({ item: item })
             if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
                 item.subType = 'defense'
                 item.system.showToggle = true
@@ -360,7 +360,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 class: "physical"
             }
         }
-        let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTagsP] = determineDefense(this.actor, pdAttack)
+        let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTagsP] = determineDefense.call(this, this.actor, pdAttack)
         defense.PD = defenseValue
         defense.rPD = resistantValue
         defense.PDtags = "";
@@ -377,7 +377,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         defense.drptags = "Damage Reduction (physical)"
         defense.dnp = damageNegationValue
         defense.dnptags = "Damage Negation (physical)"
-     
+
 
         // Defense ED
         let edAttack = {
@@ -385,7 +385,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 class: "energy"
             }
         }
-        let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense(this.actor, edAttack)
+        let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
         defense.ED = defenseValueE
         defense.rED = resistantValueE
         defense.EDtags = "";
@@ -409,7 +409,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 class: "mental"
             }
         }
-        let [defenseValueM, resistantValueM, impenetrableValueM, damageReductionValueM, damageNegationValueM, knockbackResistanceM, defenseTagsM] = determineDefense(this.actor, mdAttack)
+        let [defenseValueM, resistantValueM, impenetrableValueM, damageReductionValueM, damageNegationValueM, knockbackResistanceM, defenseTagsM] = determineDefense.call(this, this.actor, mdAttack)
         defense.MD = defenseValueM
         defense.rMD = resistantValueM
         defense.MDtags = "";

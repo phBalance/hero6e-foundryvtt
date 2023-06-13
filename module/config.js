@@ -415,6 +415,26 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 6,
     },
+    "DRAIN": {
+        name: "Drain",
+        powerType: ["adjustment", "attack"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "standard",
+        costEnd: true,
+        costPerLevel: 10,
+    },
+    "TRANSFER": {
+        name: "Transfer",
+        powerType: ["adjustment", "attack"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "no range",
+        costEnd: true,
+        costPerLevel: 15,
+    },
     "SHAPESHIFT": {
         name: "Shape Shift",
         powerType: ["body-affecting"],
@@ -655,7 +675,7 @@ HERO.powers = {
     "ANALYZE": { powerType: ["skill"] },
     "ANIMAL_HANDLER": { powerType: ["skill"], categorized: true },
     "AUTOFIRE_SKILLS": { powerType: ["skill"] },
-    "BREAKFALL": { powerType: ["skill"] , costPerLevel: 1 },
+    "BREAKFALL": { powerType: ["skill"], costPerLevel: 1 },
     "BRIBERY": { powerType: ["skill"] },
     "BUGGING": { powerType: ["skill"] },
     "BUREAUCRATICS": { powerType: ["skill"] },
@@ -720,11 +740,39 @@ HERO.powers = {
     "WEAPONSMITH": { powerType: ["skill"], categorized: true },
 }
 
+HERO.powers5e = {
+    ...HERO.powers,
+    "AID": {
+        name: "Aid",
+        powerType: ["adjustment"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "no range",
+        costEnd: false,
+        costPerLevel: 6,
+    },
+    "TRANSFER": {
+        name: "Transfer",
+        powerType: ["adjustment", "attack"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "no range",
+        costEnd: true,
+        costPerLevel: 15,
+    },
+    "ARMOR": {
+        powerType: ["defense"],
+        name: "Resistant Protection",
+        costPerLevel: 3 / 2
+    },  // AKA RESISTANT PROTECTION
+}
 
 // These (mostly 5e) powers are rebranded as 6e powers
-HERO.powersRebrand = {
-    "ARMOR": "FORCEFIELD"
-}
+// HERO.powersRebrand = {
+//     "ARMOR": "FORCEFIELD"
+// }
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
 HERO.ModifierOverride = {
