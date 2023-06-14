@@ -30,6 +30,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     getData() {
         const data = super.getData()
 
+        // Alpha Testing (use to show/hide effects)
+        data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
         // Equipment & MartialArts are uncommon.  If there isn't any, then don't show the navigation tab.
         data.hasEquipment = false
@@ -586,31 +588,33 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     }
 
     async _onEffectCreate(event) {
-        event.preventDefault()
-        return await this.actor.createEmbeddedDocuments("ActiveEffect", [{
-            label: "New Effect",
-            icon: "icons/svg/aura.svg",
-            origin: this.actor.uuid,
-            //"duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
-            disabled: true
-        }]);
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // return await this.actor.createEmbeddedDocuments("ActiveEffect", [{
+        //     label: "New Effect",
+        //     icon: "icons/svg/aura.svg",
+        //     origin: this.actor.uuid,
+        //     //"duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
+        //     disabled: true
+        // }]);
 
     }
 
     async _onEffectDelete(event) {
-        event.preventDefault()
-        const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        const effect = this.actor.effects.get(effectId)
-        if (!effect) return
-        const confirmed = await Dialog.confirm({
-            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
-            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
-        });
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+        // const effect = this.actor.effects.get(effectId)
+        // if (!effect) return
+        // const confirmed = await Dialog.confirm({
+        //     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+        //     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
+        // });
 
-        if (confirmed) {
-            effect.delete()
-            this.render();
-        }
+        // if (confirmed) {
+        //     effect.delete()
+        //     this.render();
+        // }
     }
 
     async _onEffectToggle(event) {
@@ -622,10 +626,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     }
 
     async _onEffectEdit(event) {
-        event.preventDefault()
-        const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        const effect = this.actor.effects.get(effectId)
-        effect.sheet.render(true)
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+        // const effect = this.actor.effects.get(effectId)
+        // effect.sheet.render(true)
     }
 
 

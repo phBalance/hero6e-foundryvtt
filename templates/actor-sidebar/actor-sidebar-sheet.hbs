@@ -691,6 +691,7 @@
 
                 </table>
 
+                {{#if alphaTesting}}
                 <br />
 
                 <table>
@@ -699,8 +700,8 @@
                         <th class="left">{{localize "ActorSheet.ActiveEffect"}}</th>
                         <th>Active</th>
                         <th>
-                            <a class="item-control effect-create" title="Create Active Effecct"
-                                data-type="activeEffect">
+                            <a class="item-control effect-create" title="Create Active Effecct" data-type="activeEffect"
+                                data-action="create">
                                 <i class="fas fa-plus"></i> Add ActiveEffect</a>
                         </th>
                     </tr>
@@ -712,12 +713,13 @@
                         </td>
                         <td class="left">{{effect.label}}</td>
                         <td>
-                            <input class="effect-toggle" type="checkbox" {{checked (not effect.disabled)}}
-                                data-dtype="Boolean" data-action="toggle" />
+                            <input class="effect-toggle" data-action="toggle" type="checkbox" {{checked (not
+                                effect.disabled)}} data-dtype="Boolean" data-action="toggle" />
                         </td>
                         <td class="right">
-                            <a class="item-control effect-edit" title="Edit effect"><i class="fas fa-edit"></i></a>
-                            <a class="item-control effect-delete" title="Delete effect">
+                            <a class="item-control effect-edit" data-action="edit" title="Edit effect"><i
+                                    class="fas fa-edit"></i></a>
+                            <a class="item-control effect-delete" data-action="delete" title="Delete effect">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </td>
@@ -725,6 +727,7 @@
                     {{/each}}
 
                 </table>
+                {{/if}}
 
                 <br />
 
