@@ -247,27 +247,40 @@ Hooks.on("setup", () => CONFIG.MeasuredTemplate.defaults.angle = 60);
 // For now we will migrate EVERY time
 // TODO: add version setting check
 // REF: https://www.youtube.com/watch?v=Hl23n3MvtaI
-Hooks.once("ready", function () {
+Hooks.once("ready", async function () {
     if (!game.user.isGM) {
         return;
     }
 
-    migrateActorTypes()
-    migrateKnockback()
-    migrateRemoveDuplicateDefenseItems()
+    // Check if we have already migrated
+    const lastMigration = game.settings.get(game.system.id, 'lastMigration')
+    if (foundry.utils.isNewerVersion(game.system.version.replace("-alpha", ""), lastMigration)) {
+
+        // Update lastMigration
+        await game.settings.set(game.system.id, 'lastMigration', game.system.version.replace("-alpha", ""))
+
+        // if lastMigration < 2.2.0-alpha
+        if (foundry.utils.isNewerVersion('2.2.0', lastMigration)) {
+            migrateActorTypes()
+            migrateKnockback()
+            migrateRemoveDuplicateDefenseItems()
+        }
+    }
+
+
     //migrateWorld();
 
 });
 
-const migrationTag = 20230611
+//const migrationTag = 20230611
 
 async function migrateRemoveDuplicateDefenseItems() {
 
-    if (game.actors.contents.find(o => o.system.migrationTag != migrationTag)) {
-        ui.notifications.info(`Migragrating actor data.`)
-    } else {
-        return;
-    }
+    //if (game.actors.contents.find(o => o.system.migrationTag != migrationTag)) {
+    ui.notifications.info(`Migragrating actor data.`)
+    // } else {
+    //     return;
+    // }
 
     let count = 0
     for (let actor of game.actors.contents) {
@@ -285,19 +298,19 @@ async function migrateActorDefenseData(actor) {
     // This allows us to skip this migration in the future.
     // Specifically it allows custom defenses to be manually added
     // without deleting it eveytime world loads.
-    if (actor.system.migrationTag != migrationTag) {
-        for (let item of actor.items.filter(o => o.type == 'defense')) {
+    //if (actor.system.migrationTag != migrationTag) {
+    for (let item of actor.items.filter(o => o.type == 'defense')) {
 
-            // Try not to delete items that have been manually created.
-            // We can make an educated guess by looking for XMLID
-            if (item.system.xmlid || item.system.XMLID || item.system.rules == "COMBAT_LUCK") {
-                itemsToDelete.push(item.id)
-            }
+        // Try not to delete items that have been manually created.
+        // We can make an educated guess by looking for XMLID
+        if (item.system.xmlid || item.system.XMLID || item.system.rules == "COMBAT_LUCK") {
+            itemsToDelete.push(item.id)
         }
-
-        await actor.deleteEmbeddedDocuments("Item", itemsToDelete)
-        actor.update({ 'system.migrationTag': migrationTag })
     }
+
+    await actor.deleteEmbeddedDocuments("Item", itemsToDelete)
+    //actor.update({ 'system.migrationTag': migrationTag })
+    //}
     return (itemsToDelete.length > 0)
 }
 
