@@ -309,7 +309,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
   }
 
   async _onEffectToggle(event) {
-    onManageActiveEffect(event, this.actor)
+    //onManageActiveEffect(event, this.actor)
+    return this.item.toggle()
+    
     // event.preventDefault()
     // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
     // const effect = this.actor.effects.get(effectId)

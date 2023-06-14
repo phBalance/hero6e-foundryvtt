@@ -1951,12 +1951,13 @@ export function SkillRollUpdateValue(item) {
 
 async function createEffects(itemData) {
 
-    const configPowerInfo = getPowerInfo({ xmlid: itemData.XMLID, actor: this.actor })
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: this.actor })
 
     // Not every powers will have effects
     if (!configPowerInfo) return
     if (!configPowerInfo?.powerType) return
 
+    const xmlid = configPowerInfo.xmlid
     const key = xmlid.toLowerCase()
 
     // Characteristics (via ActiveEffects)

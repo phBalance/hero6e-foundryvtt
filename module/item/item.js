@@ -7,7 +7,7 @@ import { createSkillPopOutFromItem } from '../item/skill.js'
 import { enforceManeuverLimits } from '../item/manuever.js'
 import { SkillRollUpdateValue } from '../utility/upload_hdc.js'
 import { onActiveEffectToggle } from '../utility/effects.js'
-
+import { getPowerInfo } from '../utility/util.js'
 
 /**
  * Extend the basic Item with some very simple modifications.
@@ -164,8 +164,7 @@ export class HeroSystem6eItem extends Item {
             case "power":
 
                 // Is this a defense power?  If so toggle active state
-                let _xmlid = CONFIG.HERO.powersRebrand[item.system.XMLID] || item.system.XMLID;
-                let configPowerInfo = CONFIG.HERO.powers[_xmlid]
+                const configPowerInfo = getPowerInfo({ item: item })
                 if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
                     await item.update({ [attr]: newValue })
                 }

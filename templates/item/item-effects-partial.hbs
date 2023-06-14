@@ -1,11 +1,12 @@
+{{#if effects}}
 <table class="item-list effects-list">
     <tr>
         <th></th>
         <th class="left">{{localize "ActorSheet.ActiveEffect"}}</th>
         <th>Active</th>
         <th>
-            <a class="item-control effect-create" title="Create Active Effecct" data-type="activeEffect">
-                <i class="fas fa-plus"></i> Add ActiveEffect</a>
+            {{!-- <a class="item-control effect-create" title="Create Active Effecct" data-type="activeEffect">
+                <i class="fas fa-plus"></i> Add ActiveEffect</a> --}}
         </th>
     </tr>
     {{#each effects as |effect|}}
@@ -29,3 +30,4 @@
     </tr>
     {{/each}}
 </table>
+{{/if}}
