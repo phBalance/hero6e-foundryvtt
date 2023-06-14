@@ -1262,7 +1262,7 @@ export async function uploadPower(power, type) {
     if (power.getAttribute('XMLID') == "GENERIC_OBJECT") {
         power.setAttribute('XMLID', power.tagName)
     }
-    
+
     let itemData = XmlToItemData.call(this, power, type)
 
     let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
@@ -1511,6 +1511,7 @@ function updateItemDescription(system) {
             break;
 
         case "FORCEFIELD":
+        case "ARMOR":
             system.description = system.ALIAS + " ("
             let ary = []
             if (parseInt(system.PDLEVELS)) ary.push(system.PDLEVELS + " PD")
@@ -1581,7 +1582,8 @@ function updateItemDescription(system) {
             break;
 
         case "RKA":
-            system.description = `${system.ALIAS} ${system.LEVELS}d6 ${system.INPUT}`
+        case "ENERGYBLAST": //Energy Blast 1d6
+            system.description = `${system.ALIAS} ${system.LEVELS}d6`
             break;
 
         case "HANDTOHANDATTACK":
@@ -1591,6 +1593,16 @@ function updateItemDescription(system) {
         case "KBRESISTANCE":
             system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
                 + ` -${system.LEVELS}m`
+            break;
+
+        case "ELEMENTAL_CONTROL":
+            // Elemental Control, 12-point powers
+            system.description = `${system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`
+            break;
+
+        case "FLIGHT":
+            // Flight 5m
+            system.description = `${system.ALIAS} ${system.LEVELS}m`
             break;
 
         default:
