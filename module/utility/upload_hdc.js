@@ -449,7 +449,7 @@ function XmlToItemData(xml, type) {
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-        "BODYLEVELS",
+        "BODYLEVELS", "ID", "PARENTID", "POSITION"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -1256,7 +1256,13 @@ function calcRealCost(_activeCost, system) {
 }
 
 export async function uploadPower(power, type) {
-    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
+
+    // GENERIC_OBJECT are likely Power Frameworks.
+    // Rename GENERIC_OBJECT with TAGNAME to make it easier to parse.
+    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") {
+        power.setAttribute('XMLID', power.tagName)
+    }
+    
     let itemData = XmlToItemData.call(this, power, type)
 
     let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
