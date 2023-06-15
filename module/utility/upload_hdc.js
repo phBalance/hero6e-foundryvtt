@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
-import { RoundFavorPlayerDown } from "../utility/round.js"
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
 import { getPowerInfo } from '../utility/util.js'
 
 
@@ -116,7 +116,7 @@ export async function applyCharacterSheet(xmlDoc) {
             if (str >= 90) value = 18
             if (str >= 95) value = 19
             if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
-            changes[`system.characteristics.leaping.base`] = value
+            changes[`system.characteristics.leaping.base`] = RoundFavorPlayerUp(value)
             value += parseInt(characteristic.getAttribute('LEVELS'))
 
         }
@@ -607,8 +607,7 @@ function XmlToItemData(xml, type) {
     updateItemDescription.call(this, systemData, type)
 
     // Item name
-    let name = xml.getAttribute('NAME')
-    name = (name === '') ? xml.getAttribute('ALIAS') : name
+    let name = xml.getAttribute('NAME').trim() || xml.getAttribute('ALIAS').trim() || xml.tagName
 
     // This item was created via HDC Uploadn (could be useful later)
     systemData.FromHdcUpload = true
