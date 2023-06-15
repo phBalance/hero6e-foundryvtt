@@ -1607,7 +1607,7 @@ function updateItemDescription(system) {
             if (system.ALIAS == "KS") {
                 system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
             } else {
-                system.description = "KS: " + system.NAME.replace(/^KS /, "")
+                system.description =system.NAME
             }
 
             break;
@@ -1726,6 +1726,11 @@ function updateItemDescription(system) {
     // Can get a bit messy, like when resisting an entangle, but will deal with that later.
     if (system.XMLID == "STR")
     {
+        system.end = 0
+    }
+
+    // MOVEMENT only costs endurance when used.  Typically per round.
+    if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
         system.end = 0
     }
 

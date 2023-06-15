@@ -796,7 +796,13 @@ HERO.powers5e = {
         range: "Self",
         costEnd: false,
         costPerLevel: 1 / 2
-    }
+    },
+    "FORCEFIELD": {
+        powerType: ["defense"],
+        name: "Resistant Protection",
+        costEnd: true,
+        costPerLevel: 3 / 2
+    }, 
 }
 
 // These (mostly 5e) powers are rebranded as 6e powers

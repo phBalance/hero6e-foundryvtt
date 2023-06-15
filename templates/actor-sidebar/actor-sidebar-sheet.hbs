@@ -314,7 +314,7 @@
                                     height="24" /></div>
                         </td>
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
-                            {{#if item.system.PARENTID}}{{item.system.POSITION}}) {{/if}}
+                            {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
                             {{#if item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}
                         </td>
                         <td>{{item.system.realCost}}</td>
@@ -456,7 +456,7 @@
                                     height="24" /></div>
                         </td>
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">{{#if
-                            item.system.PARENTID}}{{item.system.POSITION}}) {{/if}}{{item.name}}</td>
+                            item.system.childIdx}}{{item.system.childIdx}}) {{/if}}{{item.name}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.endEstimate}}</td>
                         <td class="left">{{item.system.description}}</td>
