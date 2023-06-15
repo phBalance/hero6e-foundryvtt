@@ -5,6 +5,8 @@
 - Power/item descriptions can be sent to chat [#128](https://github.com/dmdorman/hero6e-foundryvtt/issues/128)
 - Initial power framework support.
 - Improved 5e support (COM, DAMAGERESISTANCE, FORCEFIELD).
+- All movements collapsed to characteritics tab.  Movement powers are now toggles [#88](https://github.com/dmdorman/hero6e-foundryvtt/issues/128).
+- Most powers can be toggled [#38](https://github.com/dmdorman/hero6e-foundryvtt/issues/38).  The remaining powers that do not have toggles (but should) are not fully implemented in the system.  As support for those powers is added, so will the toggle.
 
 # Version 2.1.9-alpha
 - Fixed equipment price showing NaN.  Summary weight/price for equipment now only shows when there are items with weight/price.

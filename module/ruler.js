@@ -85,14 +85,24 @@ export class HeroRuler {
             return
         });
 
-        Hooks.on('updateItem', function (item, args) {
-            if (item.type !== 'movement') { return; }
+        // Hooks.on('updateItem', function (item, args) {
+        //     if (item.type !== 'movement') { return; }
 
+        //     const sceneControls = ui.controls
+        //     if (sceneControls.activeControl !== "token") { return; }
+        //     if (sceneControls.activeTool !== "select") { return; }
+
+        //     movementRadioSelectRender()
+        // });
+
+        Hooks.on('updateActor', function (actor, args) {
             const sceneControls = ui.controls
             if (sceneControls.activeControl !== "token") { return; }
             if (sceneControls.activeTool !== "select") { return; }
-
-            movementRadioSelectRender()
+            if (!args?.system?.characteristics) { return; }
+            if (CONFIG.HERO.movementPowers[Object.keys(args.system.characteristics)[0]]) {
+                movementRadioSelectRender()
+            }
         });
 
         Hooks.on('hdcUpload', function () {
@@ -122,7 +132,7 @@ export class HeroRuler {
             }
 
             const renderRadioOptions = () => {
-                const activeMovement = (movementItems.length === 0) ? "none" : movementItems.find(o=> o._id == relevantToken.actor.flags.activeMovement)?._id || movementItems[0]._id
+                const activeMovement = (movementItems.length === 0) ? "none" : movementItems.find(o => o._id == relevantToken.actor.flags.activeMovement)?._id || movementItems[0]._id
 
                 // const radioOptions = movmentItems.map((item, index) => `
                 //     <div class="radio" data-tool="${item._id}">
@@ -183,7 +193,7 @@ function setHeroRulerLabel() {
             }
 
             //const activeMovement = (movementItems.length === 0) ? "none" : relevantToken.actor.flags.activeMovement || movementItems[0]._id
-            const activeMovement = (movementItems.length === 0) ? "none" : movementItems.find(o=> o._id == relevantToken.actor.flags.activeMovement)?._id || movementItems[0]._id
+            const activeMovement = (movementItems.length === 0) ? "none" : movementItems.find(o => o._id == relevantToken.actor.flags.activeMovement)?._id || movementItems[0]._id
 
             const activeMovementLabel = (activeMovement === "none") ? "Running" : movementItems.find((e) => e._id === activeMovement)?.name
             if (activeMovementLabel) {
