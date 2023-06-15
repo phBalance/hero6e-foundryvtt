@@ -64,6 +64,15 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 item.system.showToggle = true
             }
 
+            // Framework?  Repurpose POSITION to be the POSITION within the framework.
+            if (item.system.PARENTID) {
+                const parent = data.actor.items.find(o => o.system.ID === item.system.PARENTID)
+                if (parent) {
+                    const parentPosition = parseInt(parent.system.POSITION)
+                    item.system.POSITION = parseInt(item.system.POSITION) - parseInt(parentPosition)
+                }
+            }
+
 
             // Active (reverse of disabled)
             //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false

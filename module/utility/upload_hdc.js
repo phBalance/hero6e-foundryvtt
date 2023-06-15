@@ -64,7 +64,7 @@ export async function applyCharacterSheet(xmlDoc) {
     if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
         this.actor.update([{ 'system.is5e': true }])
     }
-    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts : CONFIG.HERO.characteristicCosts5e
+    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
     // Caracteristics for 6e
     //let characteristicKeys = Object.keys(characteristicCosts)
@@ -404,15 +404,16 @@ async function CalcRealAndActivePoints(actor) {
     // Calculate realCost & Active Points for bought as characteristics
     let realCost = 0;
     let activePoints = 0;
-    if (actor.system.is5e) {
-        for (const key of Object.keys(CONFIG.HERO.characteristicCosts5e)) {
-            realCost += parseInt(actor.system.characteristics[key].realCost || 0);
-        }
-    } else {
-        for (const key of Object.keys(CONFIG.HERO.characteristicCosts)) {
-            realCost += parseInt(actor.system.characteristics[key].realCost || 0);
-        }
+    const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts : CONFIG.HERO.characteristicCosts5e
+    //if (actor.system.is5e) {
+    for (const key of Object.keys(characteristicCosts)) {
+        realCost += parseInt(actor.system.characteristics[key].realCost || 0);
     }
+    // } else {
+    //     for (const key of Object.keys(CONFIG.HERO.characteristicCosts)) {
+    //         realCost += parseInt(actor.system.characteristics[key].realCost || 0);
+    //     }
+    // }
     activePoints = realCost
     // Add in costs for items
     let _splitCost = {}
@@ -640,7 +641,12 @@ export async function uploadBasic(xml, type) {
 }
 
 export async function uploadMartial(power, type, extraDc, usesTk) {
-    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
+    //if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
+    // GENERIC_OBJECT are likely Power Frameworks.
+    // Rename GENERIC_OBJECT with TAGNAME to make it easier to parse.
+    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") {
+        power.setAttribute('XMLID', power.tagName)
+    }
 
     // let name = power.getAttribute('NAME')
     // name = (name === '') ? power.getAttribute('ALIAS') : name
@@ -816,10 +822,25 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
 
 export async function uploadSkill(skill, duplicate) {
 
-    if (skill.getAttribute('XMLID') == "GENERIC_OBJECT") return;
-    let itemData = XmlToItemData.call(this, skill, 'skill')
+    let itemData
+
+    // GENERIC_OBJECT are likely Power Frameworks.
+    // Rename GENERIC_OBJECT with TAGNAME to make it easier to parse.
+    if (skill.getAttribute('XMLID') == "GENERIC_OBJECT") {
+        skill.setAttribute('XMLID', skill.tagName)
+        itemData = XmlToItemData.call(this, skill, 'skill')
+
+        // This really isn't a skill so get rid of roll so sheet doesn't display a roll button
+        itemData.system.characteristic = null
+        itemData.system.state = null
+        itemData.system.roll = null
+    }
+    else {
+        itemData = XmlToItemData.call(this, skill, 'skill')
+    }
+
     itemData.system.duplicate = duplicate
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // const XMLID = skill.getAttribute('XMLID')
 
@@ -950,7 +971,7 @@ function calcBasePointsPlusAdders(system) {
     // const adders = system.adders || [] //xmlItem.getElementsByTagName("ADDER")
 
 
-    if (system.XMLID == "PD")
+    if (system.XMLID == "COM")
         HEROSYS.log(false, system.XMLID)
 
     if (system.NAME == "Sheet of Steel")
@@ -974,12 +995,14 @@ function calcBasePointsPlusAdders(system) {
     // Base Cost is typcailly extracted directly from HDC
     let baseCost = parseInt(system.BASECOST)
 
+
     // Cost per level is NOT included in the HDC file.
     // We will try to get cost per level via config.js
     // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
+    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
     let costPerLevel = parseFloat(
         configPowerInfo?.costPerLevel ||
-        CONFIG.HERO.characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
+        characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
         system.costPerLevel ||
         baseCost
         || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
@@ -1512,6 +1535,7 @@ function updateItemDescription(system) {
 
         case "FORCEFIELD":
         case "ARMOR":
+        case "DAMAGERESISTANCE":
             system.description = system.ALIAS + " ("
             let ary = []
             if (parseInt(system.PDLEVELS)) ary.push(system.PDLEVELS + " PD")
@@ -1569,12 +1593,23 @@ function updateItemDescription(system) {
             system.description = system.ALIAS + " " + system.OPTION_ALIAS
             break;
 
-        case "KNOWLEDGE_SKILL":
+
         case "LANGUAGES":
+            //English:  Language (basic conversation) (1 Active Points)
             system.description = system.NAME + ": " + (system.INPUT || system.ALIAS)
             if (system.OPTION_ALIAS) {
                 system.description += " (" + system.OPTION_ALIAS + ")"
             }
+            break;
+
+        case "KNOWLEDGE_SKILL":
+            // 6e HDC
+            if (system.ALIAS == "KS") {
+                system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
+            } else {
+                system.description = "KS: " + system.NAME.replace(/^KS /, "")
+            }
+
             break;
 
         case "PENALTY_SKILL_LEVELS":
@@ -1615,7 +1650,7 @@ function updateItemDescription(system) {
 
     // ADDRS
     if (system.adders.length > 0) {
-        system.description += " ("
+
         let _adderArray = []
         for (let adder of system.adders) {
             switch (adder.XMLID) {
@@ -1641,13 +1676,15 @@ function updateItemDescription(system) {
                 case "MENTAL":
                     _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
                     break;
-                default: _adderArray.push(adder.ALIAS)
+                default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
             }
 
 
 
         }
-        system.description += _adderArray.join("; ") + ")"
+        if (_adderArray.length > 0) {
+            system.description += "(" + _adderArray.join("; ") + ")"
+        }
     }
 
 
@@ -1668,6 +1705,10 @@ function updateItemDescription(system) {
 
     system.description = system.description.trim()
 
+    if (system.XMLID == "STR") {
+        HEROSYS.log(false, system)
+    }
+
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10))
     const costsEnd = system.modifiers.find(o => o.XMLID == "COSTSEND")
@@ -1678,6 +1719,13 @@ function updateItemDescription(system) {
 
     // Some powers do not use Endurance
     if (configPowerInfo && !configPowerInfo.costEnd && !costsEnd) {
+        system.end = 0
+    }
+
+    // STR only costs endurance when used.
+    // Can get a bit messy, like when resisting an entangle, but will deal with that later.
+    if (system.XMLID == "STR")
+    {
         system.end = 0
     }
 
@@ -1699,9 +1747,6 @@ function createPowerDescriptionModifier(modifier, powerName) {
 
 
     let result = ""
-
-    if (modifier.XMLID == "")
-        console.log(modifier)
 
     switch (modifier.XMLID) {
         case "CHARGES":
@@ -1732,11 +1777,11 @@ function createPowerDescriptionModifier(modifier, powerName) {
 
     }
 
-    if ((parseInt(modifier.LEVELS) || 0) > 1) {
-        if (["HARDENED"].includes(modifier.XMLID)) {
-            result += "x" + parseInt(modifier.LEVELS)
-        }
-    }
+    // if ((parseInt(modifier.LEVELS) || 0) > 1) {
+    //     if (["HARDENED"].includes(modifier.XMLID)) {
+    //         result += "x" + parseInt(modifier.LEVELS)
+    //     }
+    // }
 
     // ADDERS
 
@@ -1746,6 +1791,15 @@ function createPowerDescriptionModifier(modifier, powerName) {
     // if (modifier.optionId) powerData.description += "; " + modifier.optionId
 
     result += " ("
+
+    // Multiple levels?
+    if ((parseInt(modifier.LEVELS) || 0) > 1) {
+        if (["HARDENED"].includes(modifier.XMLID)) {
+            result += "x" + parseInt(modifier.LEVELS) + "; "
+        }
+    }
+
+
     if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) result += modifier.OPTION_ALIAS + "; "
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
