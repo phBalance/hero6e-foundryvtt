@@ -415,6 +415,26 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 6,
     },
+    "DRAIN": {
+        name: "Drain",
+        powerType: ["adjustment", "attack"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "standard",
+        costEnd: true,
+        costPerLevel: 10,
+    },
+    "TRANSFER": {
+        name: "Transfer",
+        powerType: ["adjustment", "attack"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "no range",
+        costEnd: true,
+        costPerLevel: 15,
+    },
     "SHAPESHIFT": {
         name: "Shape Shift",
         powerType: ["body-affecting"],
@@ -545,7 +565,12 @@ HERO.powers = {
 
 
     // Defense
-    "FORCEWALL": { powerType: ["defense"], name: "Barrier" }, // AKA BARRIER
+    "FORCEWALL": {
+        powerType: ["defense"],
+        name: "Barrier",
+        costEnd: true,
+        costPerLevel: 3 / 2,
+    }, // AKA BARRIER
     "FORCEFIELD": {
         powerType: ["defense"],
         name: "Resistant Protection",
@@ -637,7 +662,7 @@ HERO.powers = {
     },
 
     // Powers can include Talents
-    "COMBAT_LUCK": { powerType: ["talent"], costPerLevel: 6 },
+    "COMBAT_LUCK": { powerType: ["talent", "defense"], costPerLevel: 6 },
     "COMBAT_SENSE": {
         powerType: ["talent"],
         name: "Combat Sense",
@@ -650,7 +675,7 @@ HERO.powers = {
     "ANALYZE": { powerType: ["skill"] },
     "ANIMAL_HANDLER": { powerType: ["skill"], categorized: true },
     "AUTOFIRE_SKILLS": { powerType: ["skill"] },
-    "BREAKFALL": { powerType: ["skill"] },
+    "BREAKFALL": { powerType: ["skill"], costPerLevel: 1 },
     "BRIBERY": { powerType: ["skill"] },
     "BUGGING": { powerType: ["skill"] },
     "BUREAUCRATICS": { powerType: ["skill"] },
@@ -715,11 +740,39 @@ HERO.powers = {
     "WEAPONSMITH": { powerType: ["skill"], categorized: true },
 }
 
+HERO.powers5e = {
+    ...HERO.powers,
+    "AID": {
+        name: "Aid",
+        powerType: ["adjustment"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "no range",
+        costEnd: false,
+        costPerLevel: 6,
+    },
+    "TRANSFER": {
+        name: "Transfer",
+        powerType: ["adjustment", "attack"],
+        percievability: "obvious",
+        duration: "Instant",
+        target: "target’s DCV",
+        range: "no range",
+        costEnd: true,
+        costPerLevel: 15,
+    },
+    "ARMOR": {
+        powerType: ["defense"],
+        name: "Resistant Protection",
+        costPerLevel: 3 / 2
+    },  // AKA RESISTANT PROTECTION
+}
 
 // These (mostly 5e) powers are rebranded as 6e powers
-HERO.powersRebrand = {
-    "ARMOR": "FORCEFIELD"
-}
+// HERO.powersRebrand = {
+//     "ARMOR": "FORCEFIELD"
+// }
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
 HERO.ModifierOverride = {
@@ -730,6 +783,10 @@ HERO.ModifierOverride = {
     "DEFBONUS": { BASECOST: 2 },
     "CONTINUOUSCONCENTRATION": { BASECOST: -0.25 },
     "ALWAYSOCCURS": { BASECOST: 0, MULTIPLIER: 2 },
+    "HARDENED": { BASECOST: 0.25 },
+    "PHYSICAL": { BASECOST: 5 }, // DAMAGENEGATION
+    "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
+    "MENTAL": { BASECOST: 5 }, // DAMAGENEGATION
 }
 
 HERO.areaOfEffect = {

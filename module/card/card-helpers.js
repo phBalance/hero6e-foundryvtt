@@ -9,6 +9,7 @@ export class HeroSystem6eCardHelpers {
         HeroSystem6eAttackCard.onMessageRendered(html);
         HeroSystem6eToHitCard2.onMessageRendered(html);
         HeroSystem6eDamageCard.onMessageRendered(html);
+        Attack.onMessageRendered(html);
     }
 
     static chatListeners(html) {

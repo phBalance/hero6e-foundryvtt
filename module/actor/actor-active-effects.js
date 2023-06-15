@@ -1,4 +1,4 @@
-export class HeroSystem6eActorActiveEffects {
+export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static getEffects() {
         return [
             HeroSystem6eActorActiveEffects.stunEffect,
@@ -43,4 +43,42 @@ export class HeroSystem6eActorActiveEffects {
             { key: "data.characteristics.dcv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
         ]
     };
+
+    /** @override */
+    // apply(actor, change) {
+    //     // super.apply(actor, change)
+    //     //console.log("apply", change)
+
+    //     // In Hero if we increase MAX then VALUE increases as well
+    //     if (change.key.indexOf('.max') > -1 && actor.name == "Aaron1") 
+    //     {
+    //         let keyBase = change.key.replace(".max", "")
+    //         //console.log(keyBase)
+    //         let attr= keyBase + '.value'
+    //         let newValue = parseInt(foundry.utils.getProperty(actor, attr))
+
+    //         if (change.mode == CONST.ACTIVE_EFFECT_MODES.ADD)
+    //         {
+    //             newValue += parseInt(change.value)
+    //             console.log(actor, change, newValue)
+    //             foundry.utils.setProperty(actor, attr, newValue)
+    //             //actor.update({ [attr]: newValue})
+    //         }
+
+
+    //         //actor.update({ [keyValue]: newValue})
+    //     }
+    //     // change.value = Roll.replaceFormulaData(change.value, actor.data);
+    //     // try {
+    //     //     change.value = Roll.safeEval(change.value).toString();
+    //     // } catch (e) {
+    //     //     // this is a valid case, e.g., if the effect change simply is a string
+    //     // }
+    //     return super.apply(actor, change);
+    // }
+
+    // _onUpdate(data, options, userId) {
+    //     console.log("_onUpdate")
+    //     return super._onUpdate(data, options, userId)
+    // }
 }

@@ -16,6 +16,12 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
             HeroSystem6eDamageCard.setCardStateAsync(button);
             button.style.display = "block";
         });
+
+        if (game.user.isGM) {
+            html.find(".hideFromPlayers").each((i, element) => {
+                element.classList.remove('hideFromPlayers');
+            });
+        }
     }
 
     static async setCardStateAsync(button) {
@@ -122,11 +128,11 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
             let attackItemData = actor.items.get(powerId).system.items["attack"][`${subId}`]
 
             const itemData = {
-              name: attackItemData.name,
-              type: attackItemData.type,
-              data: attackItemData,
+                name: attackItemData.name,
+                type: attackItemData.type,
+                data: attackItemData,
             }
-        
+
             item = new HeroSystem6eItem(itemData)
         } else {
             item = cardObject.item
@@ -173,7 +179,7 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
             hitLocation = toHitData.aim;
             if (toHitData.aim === 'none') {
                 let locationRoll = new Roll("3D6")
-                let locationResult = await locationRoll.roll({async: true});
+                let locationResult = await locationRoll.roll({ async: true });
                 hitLocation = CONFIG.HERO.hitLocationsToHit[locationResult.total];
             }
 
@@ -190,14 +196,14 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
                     } else {
                         hitLocation = "Right " + hitLocation;
                     }
-                }   
+                }
             }
         }
 
-        if(itemData.usesStrength) {
-            let strDamage = Math.floor((actor.system.characteristics.str.value - 10)/5)
+        if (itemData.usesStrength) {
+            let strDamage = Math.floor((actor.system.characteristics.str.value - 10) / 5)
             if (toHitData.effectivestr <= actor.system.characteristics.str.value) {
-                strDamage = Math.floor((toHitData.effectivestr)/5);
+                strDamage = Math.floor((toHitData.effectivestr) / 5);
             }
 
             if (strDamage > 0) {
@@ -254,7 +260,7 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
         damageRoll = modifyRollEquation(damageRoll, toHitData.damageMod);
 
         let roll = new Roll(damageRoll, actor.getRollData());
-        let damageResult = await roll.roll({async: true});
+        let damageResult = await roll.roll({ async: true });
         let damageRenderedResult = await damageResult.render();
         let body = 0;
         let stun = 0;
@@ -271,23 +277,22 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
         // a return result to card.js.
         // Not prepared to chase all that down at the moment.
         // A temporary kluge is to call Dice So Dice directly.
-        if (game.dice3d?.showForRoll)
-        {
+        if (game.dice3d?.showForRoll) {
             game.dice3d.showForRoll(damageResult)
         }
-        
+
 
         if (itemData.killing) {
             hasStunMultiplierRoll = true;
             body = damageResult.total;
 
             let stunRoll = new Roll("1D3", actor.getRollData());
-            let stunResult = await stunRoll.roll({async:true});
+            let stunResult = await stunRoll.roll({ async: true });
             let renderedStunResult = await stunResult.render();
             renderedStunMultiplierRoll = renderedStunResult;
 
             if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
-                stunMultiplier =  hitLocationModifiers[0];
+                stunMultiplier = hitLocationModifiers[0];
             } else {
                 stunMultiplier = stunResult.total;
             }
@@ -326,7 +331,7 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
         // determine effective damage
         // -------------------------------------------------
 
-        if(itemData.killing) {
+        if (itemData.killing) {
             stun = stun - defenseValue - resistantValue;
             body = body - resistantValue;
         } else {
@@ -339,7 +344,7 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
 
         let hitLocText = "";
         if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
-            if(itemData.killing) {
+            if (itemData.killing) {
                 // killing attacks apply hit location multiplier after resistant damage protection has been subtracted
                 body = body * hitLocationModifiers[2];
 
@@ -364,14 +369,14 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
             // body - 2d6 m
             let knockBackEquation = body + " - 2D6"
             // knockback modifier added on an attack by attack basis
-            if (toHitData.knockbackMod != 0 ) {
+            if (toHitData.knockbackMod != 0) {
                 knockBackEquation = modifyRollEquation(knockBackEquation, data.knockbackMod + "D6");
             }
             // knockback resistance effect
             knockBackEquation = modifyRollEquation(knockBackEquation, " -" + knockbackResistance);
 
             let knockbackRoll = new Roll(knockBackEquation);
-            let knockbackResult = await knockbackRoll.roll({async:true});
+            let knockbackResult = await knockbackRoll.roll({ async: true });
             knockbackRenderedResult = await knockbackResult.render();
             let knockbackResultTotal = Math.round(knockbackResult.total);
 
@@ -380,15 +385,15 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
             } else if (knockbackResultTotal == 0) {
                 knockback = "inflicts Knockdown";
             } else {
-                knockback= "Knocked back " + knockbackResultTotal + "m";
+                knockback = "Knocked back " + knockbackResultTotal + "m";
             }
         }
 
         // apply damage reduction
         if (damageReductionValue > 0) {
             defense += "; damage reduction " + damageReductionValue + "%";
-            stun = Math.round(stun * (1 - (damageReductionValue/100)));
-            body = Math.round(body * (1 - (damageReductionValue/100)));
+            stun = Math.round(stun * (1 - (damageReductionValue / 100)));
+            body = Math.round(body * (1 - (damageReductionValue / 100)));
         }
 
         // minimum damage rule
@@ -419,7 +424,7 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
 
                 let newStun = getTokenChar(token, "stun", "value") - stun;
                 let newBody = getTokenChar(token, "body", "value") - body;
-    
+
                 let changes = {
                     "data.characteristics.stun.value": newStun,
                     "data.characteristics.body.value": newBody,
@@ -433,7 +438,7 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
                         effects = effects + "inflicts Impaired " + hitLocation + "; ";
                     }
                 }
-                
+
                 await targetActor.update(changes);
             } else {
                 // attack failure
@@ -484,12 +489,12 @@ export class HeroSystem6eDamageCard extends HeroSystem6eCard {
 
         // render card
         let cardHtml = await HeroSystem6eDamageCard._renderInternal(actor, item, targetActor, stateData);
-        
+
         let speaker = ChatMessage.getSpeaker({ actor: actor, token: token.document })
         speaker["alias"] = actor.name;
 
         const chatData = {
-            user:  game.user._id,
+            user: game.user._id,
             content: cardHtml,
             speaker: speaker,
         }

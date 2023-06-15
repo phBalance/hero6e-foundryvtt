@@ -57,7 +57,7 @@ export class HeroSystem6eActor extends Actor {
     // Make sure only one of the same ActiveEffect is added
     // Assumes ActiveEffect is a statusEffects.
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
-    async addActiveEffect(activeEffect) {
+    async XXaddActiveEffect(activeEffect) {
 
         const newEffect = deepClone(activeEffect)
         newEffect.label = `${game.i18n.localize(newEffect.label)}`
@@ -158,6 +158,7 @@ export class HeroSystem6eActor extends Actor {
                     //id: newPower.system.rules,
                     icon: 'icons/svg/upgrade.svg',
                     origin: power.uuid,
+                    disabled: false,
                     changes: [
                         {
                             key: "system.characteristics.str.max",
@@ -317,19 +318,19 @@ export class HeroSystem6eActor extends Actor {
                 if (power.system.rules == "DAMAGENEGATION" && !addedDefense) {
                     itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
                     itemData.system.defenseType = 'dnp'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.xmlid === 'PHYSICAL').LEVELS)
+                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'PHYSICAL')?.LEVELS)
                     if (itemData.system.value > 0) {
                         await HeroSystem6eItem.create(itemData, { parent: this })
                     }
 
                     itemData.system.defenseType = 'dne'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.xmlid === 'ENERGY').LEVELS)
+                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'ENERGY')?.LEVELS)
                     if (itemData.system.value > 0) {
                         await HeroSystem6eItem.create(itemData, { parent: this })
                     }
 
                     itemData.system.defenseType = 'dnm'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.xmlid === 'MENTAL').LEVELS)
+                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'MENTAL')?.LEVELS)
                     if (itemData.system.value > 0) {
                         await HeroSystem6eItem.create(itemData, { parent: this })
                     }

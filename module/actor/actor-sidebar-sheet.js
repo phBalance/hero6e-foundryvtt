@@ -5,6 +5,8 @@ import { presenceAttackPopOut } from '../utility/presence-attack.js'
 import { applyCharacterSheet, SkillRollUpdateValue } from '../utility/upload_hdc.js'
 import { RoundFavorPlayerDown } from "../utility/round.js"
 import { HEROSYS } from '../herosystem6e.js';
+import { onManageActiveEffect } from '../utility/effects.js'
+import { getPowerInfo } from '../utility/util.js'
 
 export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
@@ -28,10 +30,16 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     getData() {
         const data = super.getData()
 
+        // Alpha Testing (use to show/hide effects)
+        data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
         // Equipment & MartialArts are uncommon.  If there isn't any, then don't show the navigation tab.
         data.hasEquipment = false
         data.hasMartialArts = false
+
+        // NPC or PC dropdown
+        data.isGM = game.user.isGM
+        data.actorTypeChoices = { pc: "PC", npc: "NPC" }
 
         let weightTotal = 0
         let priceTotal = 0
@@ -43,14 +51,26 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // showToggle
             if (data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)) {
                 item.system.showToggle = true
+
+                // Active (reverse of disabled)
+                //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
+                //HEROSYS.log(item.system.active)
             }
+
+            // Is this a defense power?
+            const configPowerInfo = getPowerInfo({ item: item })
+            if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+                item.subType = 'defense'
+                item.system.showToggle = true
+            }
+
+
+            // Active (reverse of disabled)
+            //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
+            //HEROSYS.log(item.system.active)
 
             // Endurance
             item.system.endEstimate = item.system.end || 0
-
-            if (item.type == 'power')
-                HEROSYS.log(false, item.type)
-            HEROSYS.log(false, item.type)
 
             // Damage
             if (item.type == 'attack') {
@@ -141,8 +161,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             if (item.type == 'martialart') {
-                HEROSYS.log(false, item.system)
-                HEROSYS.log(false, item.system)
                 data.hasMartialArts = true
             }
 
@@ -151,7 +169,21 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 if (item.system.active) {
                     weightTotal += parseFloat(item.system.WEIGHT) || 0
                 }
+                if (parseFloat(item.system.WEIGHT) > 0) {
+                    item.system.WEIGHTtext = parseFloat(item.system.WEIGHT) + "kg"
+                }
+                else {
+                    item.system.WEIGHTtext = ""
+                }
+
+
                 priceTotal += parseFloat(item.system.PRICE) || 0
+                if (parseFloat(item.system.PRICE) > 0) {
+                    item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE))
+                }
+                else {
+                    item.system.PRICEtext = ""
+                }
             }
 
             if (item.type == 'skill') {
@@ -330,7 +362,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 class: "physical"
             }
         }
-        let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTagsP] = determineDefense(this.actor, pdAttack)
+        let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTagsP] = determineDefense.call(this, this.actor, pdAttack)
         defense.PD = defenseValue
         defense.rPD = resistantValue
         defense.PDtags = "";
@@ -343,6 +375,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 defense.PDtags += `${tag.value} ${tag.title}\n`
             }
         }
+        defense.drp = damageReductionValue
+        defense.drptags = "Damage Reduction (physical)"
+        defense.dnp = damageNegationValue
+        defense.dnptags = "Damage Negation (physical)"
+
 
         // Defense ED
         let edAttack = {
@@ -350,7 +387,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 class: "energy"
             }
         }
-        let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense(this.actor, edAttack)
+        let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
         defense.ED = defenseValueE
         defense.rED = resistantValueE
         defense.EDtags = "";
@@ -363,6 +400,10 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 defense.EDtags += `${tag.value} ${tag.title}\n`
             }
         }
+        defense.dre = damageReductionValueE
+        defense.dretags = "Damage Reduction (energy)"
+        defense.dne = damageNegationValueE
+        defense.dnetags = "Damage Negation (energy)"
 
         // Defense MD
         let mdAttack = {
@@ -370,7 +411,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 class: "mental"
             }
         }
-        let [defenseValueM, resistantValueM, impenetrableValueM, damageReductionValueM, damageNegationValueM, knockbackResistanceM, defenseTagsM] = determineDefense(this.actor, mdAttack)
+        let [defenseValueM, resistantValueM, impenetrableValueM, damageReductionValueM, damageNegationValueM, knockbackResistanceM, defenseTagsM] = determineDefense.call(this, this.actor, mdAttack)
         defense.MD = defenseValueM
         defense.rMD = resistantValueM
         defense.MDtags = "";
@@ -383,12 +424,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 defense.MDtags += `${tag.value} ${tag.title}\n`
             }
         }
+        defense.drm = damageReductionValueM
+        defense.dretags = "Damage Reduction (mental)"
+        defense.dnm = damageNegationValueM
+        defense.dnmtags = "Damage Negation (mental)"
 
         data.defense = defense
-
-        HEROSYS.log(false, data)
-
-        HEROSYS.log(false, data)
 
         return data
     }
@@ -427,6 +468,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         html.find('.effect-edit').click(this._onEffectEdit.bind(this))
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
+        html.find('.item-chat').click(this._onItemChat.bind(this))
+
         // Drag events for macros.
         if (this.actor.isOwner) {
             const handler = ev => this._onDragStart(ev)
@@ -457,11 +500,16 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
     async _onItemRoll(event) {
         event.preventDefault()
-        HEROSYS.log(false, "_onItemRoll")
-        HEROSYS.log(false, "_onItemRoll")
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId
         const item = this.actor.items.get(itemId)
         item.roll()
+    }
+
+    async _onItemChat(event) {
+        event.preventDefault()
+        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId
+        const item = this.actor.items.get(itemId)
+        item.chat()
     }
 
     async _onCharacteristicRoll(event) {
@@ -540,48 +588,51 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     }
 
     async _onEffectCreate(event) {
-        event.preventDefault()
-        return await this.actor.createEmbeddedDocuments("ActiveEffect", [{
-            label: "New Effect",
-            icon: "icons/svg/aura.svg",
-            origin: this.actor.uuid,
-            //"duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
-            disabled: true
-        }]);
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // return await this.actor.createEmbeddedDocuments("ActiveEffect", [{
+        //     label: "New Effect",
+        //     icon: "icons/svg/aura.svg",
+        //     origin: this.actor.uuid,
+        //     //"duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
+        //     disabled: true
+        // }]);
 
     }
 
     async _onEffectDelete(event) {
-        event.preventDefault()
-        const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        const effect = this.actor.effects.get(effectId)
-        if (!effect) return
-        const confirmed = await Dialog.confirm({
-            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
-            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
-        });
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+        // const effect = this.actor.effects.get(effectId)
+        // if (!effect) return
+        // const confirmed = await Dialog.confirm({
+        //     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+        //     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
+        // });
 
-        if (confirmed) {
-            effect.delete()
-            this.render();
-        }
+        // if (confirmed) {
+        //     effect.delete()
+        //     this.render();
+        // }
     }
 
-    async _onEffectToggle(event)
-    {
-        event.preventDefault()
-        const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        const effect = this.actor.effects.get(effectId)
-        return effect.update({disabled: !effect.disabled});
+    async _onEffectToggle(event) {
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+        // const effect = this.actor.effects.get(effectId)
+        // await effect.update({ disabled: !effect.disabled });
     }
 
     async _onEffectEdit(event) {
-        event.preventDefault()
-        const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        const effect = this.actor.effects.get(effectId)
-        effect.sheet.render(true)
+        onManageActiveEffect(event, this.actor)
+        // event.preventDefault()
+        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
+        // const effect = this.actor.effects.get(effectId)
+        // effect.sheet.render(true)
     }
-        
+
 
     async _onRecovery(event) {
         const chars = this.actor.system.characteristics

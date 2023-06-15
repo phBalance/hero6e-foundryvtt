@@ -49,13 +49,90 @@ function determineDefense(targetActor, attackItem) {
 
     if (targetActor.items.size > 0) {
         for (let i of targetActor.items) {
-            if (i.type === "defense" && i.system.active) {
-                let value = parseInt(i.system.value);
+            if ((i.subType || i.type) === "defense" && i.system.active) {
+                let value = parseInt(i.system.value) || 0;
+
+                const xmlid = i.system.XMLID
+
+                // Newer solution is to use POWER item, instead of a sepearete defense item
+                if (!value && ["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
+                    switch (attackType) {
+                        case 'physical':
+                            value = parseInt(i.system.PDLEVELS) || 0
+                            i.system.defenseType = "pd"
+                            i.system.resistant = true
+                            break;
+                        case 'energy':
+                            value = parseInt(i.system.EDLEVELS) || 0
+                            i.system.defenseType = "ed"
+                            i.system.resistant = true
+                            break;
+                        case 'mental':
+                            i.system.defenseType = "md"
+                            value = parseInt(i.system.MDLEVELS) || 0
+                            i.system.resistant = true
+                            break;
+                    }
+                }
+
+                if (!value && ["DAMAGEREDUCTION"].includes(xmlid) && i.system.INPUT.toLowerCase() == attackType) {
+                    value = parseInt(i.system.OPTIONID.match(/\d+/)) || 0
+                    i.system.resistant = i.system.OPTIONID.match(/RESISTANT/) ? true : false
+                    switch (attackType) {
+                        case 'physical':
+                            i.system.defenseType = "drp"
+                            break;
+                        case 'energy':
+                            i.system.defenseType = "dre"
+                            break;
+                        case 'mental':
+                            i.system.defenseType = "drm"
+                            break;
+                    }
+                }
+
+                if (!value && ["DAMAGENEGATION"].includes(xmlid)) {
+                    switch (attackType) {
+                        case 'physical':
+                            i.system.defenseType = "dnp"
+                            value = parseInt(i.system.adders.find(o=> o.XMLID == "PHYSICAL")?.LEVELS) || 0
+                            break;
+                        case 'energy':
+                            i.system.defenseType = "dne"
+                            value = parseInt(i.system.adders.find(o=> o.XMLID == "ENERGY")?.LEVELS) || 0
+                            break;
+                        case 'mental':
+                            i.system.defenseType = "dnm"
+                            value = parseInt(i.system.adders.find(o=> o.XMLID == "MENTAL")?.LEVELS) || 0
+                            break;
+                    }
+                }
+
+                if (!value && ["COMBAT_LUCK"].includes(xmlid)) {
+                    switch (attackType) {
+                        case 'physical':
+                            i.system.defenseType = "pd"
+                            value = (parseInt(i.system.LEVELS) || 0) * 3
+                            i.system.resistant = true
+                            break;
+                        case 'energy':
+                            i.system.defenseType = "ed"
+                            value = (parseInt(i.system.LEVELS) || 0) * 3
+                            i.system.resistant = true
+                            break;
+                    }
+                }
+
                 let valueAp = value
                 let valueImp = 0
 
                 // Hardened
-                const hardened = parseInt(i.system.hardened)
+                let hardened = parseInt(i.system.hardened) || 0
+                if (!hardened)
+                {
+                    hardened = parseInt(i.system.modifiers.find(o=> o.XMLID == "HARDENED")?.LEVELS) || 0
+                }
+                
 
                 // Armor Piercing
                 if (piericng > hardened) {
@@ -63,7 +140,11 @@ function determineDefense(targetActor, attackItem) {
                 }
 
                 // Impenetrable
-                const impenetrable = parseInt(i.system.impenetrable)
+                let impenetrable = parseInt(i.system.impenetrable) || 0
+                if (!impenetrable)
+                {
+                    impenetrable = parseInt(i.system.modifiers.find(o=> o.XMLID == "IMPENETRABLE")?.LEVELS) || 0
+                }
 
                 // Penetrating
                 if (penetrating <= impenetrable) {
@@ -115,12 +196,15 @@ function determineDefense(targetActor, attackItem) {
                         }
                         break;
                     case "drp": // Damage Reduction Physical
+                    case "rdrp":
                         DRP = Math.max(DRP, value);
                         break;
                     case "dre": // Damage Reduction Energy
+                    case "rdre":
                         DRE = Math.max(DRE, value);
                         break;
                     case "drm": // Damage Reduction Mental
+                    case "rdrm":
                         DRM = Math.max(DRM, value);
                         break;
                     case "dnp": // Damage Negation Physical
@@ -140,7 +224,8 @@ function determineDefense(targetActor, attackItem) {
                         break;
                     default:
                         if (game.settings.get(game.system.id, 'alphaTesting')) {
-                            HEROSYS.log(false, i.system.defenseType + " not yet supported!");
+                            //ui.notifications.warn(i.system.defenseType + " not yet supported!")
+                            //HEROSYS.log(false, i.system.defenseType + " not yet supported!");
                         }
                         break;
                 }

@@ -5,12 +5,21 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js
 import { HEROSYS } from "../herosystem6e.js";
 
 export async function chatListeners(html) {
-    // Called by carrd-helpers.js
+    // Called by card-helpers.js
     html.on('click', 'button.roll-damage', this._onRollDamage.bind(this));
     html.on('click', 'button.apply-damage', this._onApplyDamage.bind(this));
 }
 
+export async function onMessageRendered(html) {
 
+    //[data-visibility="gm"]
+    if (!game.user.isGM) {
+        html.find(`[data-visibility="gm"]`).remove();
+        // .each((i, element) => {
+        //     element.classList.remove('hideFromPlayers');
+        // });
+    }
+}
 
 /// Dialog box for AttackOptions
 export async function AttackOptions(item) {
@@ -400,6 +409,7 @@ export async function _onRollDamage(event) {
         targetIds: toHitData.targetids,
         tags: tags,
         targetTokens: targetTokens,
+        user: game.user,
 
 
     };

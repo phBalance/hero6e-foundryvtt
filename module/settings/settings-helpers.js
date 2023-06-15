@@ -85,10 +85,18 @@ export default class SettingsHelpers {
         config: true,
         type: Boolean,
         default: false,
-        onChange: value=> HEROSYS.log(false, value)
+        //onChange: foundry.utils.debouncedReload(),
       });
 
-      
+      // Keep track of last migration version
+      game.settings.register(module, "lastMigration", {
+        name: "Last Migration",
+        scope: "world",
+        config: game.settings.get(game.system.id, 'alphaTesting'),
+        type: String,
+        default: '1.0.0',
+      });
+
     }
   }
 

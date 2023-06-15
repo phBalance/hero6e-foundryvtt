@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { RoundFavorPlayerDown } from "../utility/round.js"
+import { getPowerInfo } from '../utility/util.js'
 
 
 export async function applyCharacterSheet(xmlDoc) {
@@ -17,9 +18,6 @@ export async function applyCharacterSheet(xmlDoc) {
     const complications = xmlDoc.getElementsByTagName('DISADVANTAGES')[0]
     const equipment = xmlDoc.getElementsByTagName('EQUIPMENT')[0]
     const image = xmlDoc.getElementsByTagName('IMAGE')[0]
-
-
-
 
 
     // let elementsToLoad = ["POWERS", "PERKS", "TALENTS", "MARTIALARTS", "DISADVANTAGES"]
@@ -57,20 +55,19 @@ export async function applyCharacterSheet(xmlDoc) {
     changes[`system.biography`] = Biography;
 
     // Remove all items from
-    // for (const item of this.actor.items) {
-    //   await item.delete()
-    // }
-    // This is a faster (bulk) operation to delete all the items
     await this.actor.deleteEmbeddedDocuments("Item", Array.from(this.actor.items.keys()))
 
+    // Remove all existing effects
+    await this.actor.deleteEmbeddedDocuments("ActiveEffect", this.actor.effects.map(o => o.id))
+
     // 6e vs 5e
-    let characteristicCosts = CONFIG.HERO.characteristicCosts
-    if (this.actor.system.is5e) {
-        characteristicCosts = CONFIG.HERO.characteristicCosts5e
+    if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
+        this.actor.update([{ 'system.is5e': true }])
     }
+    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts : CONFIG.HERO.characteristicCosts5e
 
     // Caracteristics for 6e
-    let characteristicKeys = Object.keys(characteristicCosts)
+    //let characteristicKeys = Object.keys(characteristicCosts)
 
 
     // determine spd upfront for velocity calculations
@@ -351,8 +348,8 @@ export async function applyCharacterSheet(xmlDoc) {
     // ActiveEffects
     // TODO: Creating ActiveEffects initially on the Item should
     // allow easier implementation of power toggles and associated ActiveEffects.
-    await this.actor.applyPowerEffects()
-
+    //await this.actor.applyPowerEffects()
+    //await applyPowerEffects()
 
 
     // Actor Image
@@ -382,6 +379,15 @@ export async function applyCharacterSheet(xmlDoc) {
     }
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
+
+    // Make sure VALUE = MAX.
+    // We may have applied ActiveEffectcs to MAX.
+    for (let char of Object.keys(this.actor.system.characteristics)) {
+        if (this.actor.system.characteristics[char].value != this.actor.system.characteristics[char].max) {
+            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max })
+        }
+
+    }
 
     await CalcRealAndActivePoints(this.actor)
 
@@ -421,7 +427,7 @@ async function CalcRealAndActivePoints(actor) {
 
         _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
     }
-    HEROSYS.log(false, _splitCost)
+    //HEROSYS.log(false, _splitCost)
     await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints })
 }
 
@@ -442,7 +448,8 @@ function XmlToItemData(xml, type) {
         'XMLID', 'BASECOST', 'LEVELS', 'ALIAS', 'MULTIPLIER', 'NAME', 'OPTION_ALIAS', 'SFX',
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
-        "WEIGHT", "PRICE", "CARRIED"
+        "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
+        "BODYLEVELS",
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -588,7 +595,7 @@ function XmlToItemData(xml, type) {
     }
 
     // Calculate RealCost, ActivePoints, and END
-    let _basePointsPlusAdders = calcBasePointsPlusAdders(systemData)
+    let _basePointsPlusAdders = calcBasePointsPlusAdders.call(this, systemData)
     let _activePoints = calcActivePoints(_basePointsPlusAdders, systemData)
     let _realCost = calcRealCost(_activePoints, systemData)
     systemData.basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
@@ -596,11 +603,14 @@ function XmlToItemData(xml, type) {
     systemData.realCost = RoundFavorPlayerDown(_realCost)
 
     // Update Item Description (to closely match Hero Designer)
-    updateItemDescription(systemData)
+    updateItemDescription.call(this, systemData)
 
     // Item name
     let name = xml.getAttribute('NAME')
     name = (name === '') ? xml.getAttribute('ALIAS') : name
+
+    // This item was created via HDC Uploadn (could be useful later)
+    systemData.FromHdcUpload = true
 
     // Create Item Data
     let itemData = {
@@ -609,18 +619,23 @@ function XmlToItemData(xml, type) {
         system: systemData,
     }
 
+    createEffects.call(this, itemData)
+
     return itemData
 }
 
 export async function uploadBasic(xml, type) {
 
-    let itemData = XmlToItemData(xml, type)
+    let itemData = XmlToItemData.call(this, xml, type)
+    if (itemData.system.XMLID == "COMBAT_LUCK") {
+        itemData.system.active = true
+    }
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // Some items should be copied and created as an attack
-    const configPowerInfo = CONFIG.HERO.powers[itemData.system.id]
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
     if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
-        await uploadAttack.call(this, xml);
+        await uploadAttack.call(this, xml)
     }
 }
 
@@ -654,7 +669,7 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
     // itemData['system.realCost'] = parseInt(itemData['system.baseCost'])
     // itemData['system.activePoints'] = parseInt(itemData['system.baseCost'])
 
-    let itemData = XmlToItemData(power, type)
+    let itemData = XmlToItemData.call(this, power, type)
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // Make attack out of the martial art
@@ -802,7 +817,7 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
 export async function uploadSkill(skill, duplicate) {
 
     if (skill.getAttribute('XMLID') == "GENERIC_OBJECT") return;
-    let itemData = XmlToItemData(skill, 'skill')
+    let itemData = XmlToItemData.call(this, skill, 'skill')
     itemData.system.duplicate = duplicate
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
@@ -952,11 +967,8 @@ function calcBasePointsPlusAdders(system) {
         return 0
     }
 
-    // Rebrand?
-    let _xmlid = CONFIG.HERO.powersRebrand[system.XMLID] || system.XMLID;
-
     // Check if we have CONFIG info about this power
-    let configPowerInfo = CONFIG.HERO.powers[_xmlid]
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
 
     // Base Cost is typcailly extracted directly from HDC
@@ -967,7 +979,7 @@ function calcBasePointsPlusAdders(system) {
     // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
     let costPerLevel = parseFloat(
         configPowerInfo?.costPerLevel ||
-        CONFIG.HERO.characteristicCosts[_xmlid.toLocaleLowerCase()] ||
+        CONFIG.HERO.characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
         system.costPerLevel ||
         baseCost
         || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
@@ -987,6 +999,14 @@ function calcBasePointsPlusAdders(system) {
         let _threePerTwo = Math.ceil(costPerLevel * levels) + 1
         subCost = _threePerTwo
         system.title = (system.title || "") + '3 CP per 2 points; \n+1 level may cost nothing. '
+    }
+
+    // FORCEWALL/BARRIER
+    if (system.XMLID == "FORCEWALL") {
+        baseCost += (parseInt(system.BODYLEVELS) || 0)
+        baseCost += (parseInt(system.LENGTHLEVELS) || 0)
+        baseCost += (parseInt(system.HEIGHTLEVELS) || 0)
+        baseCost += (Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0)  // per +½m of thickness
     }
 
     // Start adding up the costs
@@ -1118,7 +1138,7 @@ function calcBasePointsPlusAdders(system) {
         cost = cost * advantages
     }
 
-    return cost
+    return Math.max(0, cost)
 }
 
 function calcActivePoints(_basePointsPlusAdders, system) {
@@ -1237,8 +1257,10 @@ function calcRealCost(_activeCost, system) {
 
 export async function uploadPower(power, type) {
     if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
-    let itemData = XmlToItemData(power, type)
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    let itemData = XmlToItemData.call(this, power, type)
+
+    let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
+
 
     // let itemData = XmlToItemData(xml, type)
     // await HeroSystem6eItem.create(itemData, { parent: this.actor })
@@ -1255,21 +1277,19 @@ export async function uploadPower(power, type) {
     // ]
     //if (xmlid === 'GENERIC_OBJECT') return;
 
-    // Rebrand?
-    xmlid = CONFIG.HERO.powersRebrand[xmlid] || xmlid;
-
     // Check if we have CONFIG info about this power
-    let configPowerInfo = CONFIG.HERO.powers[xmlid]
+    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
+
     if (configPowerInfo) {
 
         if ((configPowerInfo?.powerType || "").includes("skill")) {
-            await uploadSkill.call(this, power, true);
+            await uploadSkill.call(this, power, true)
         }
 
         // Detect attacks
         //let configPowerInfo = CONFIG.HERO.powers[power.system.rules]
         if (configPowerInfo.powerType.includes("attack")) {
-            await uploadAttack.call(this, power, true);
+            await uploadAttack.call(this, power, true)
         }
 
     }
@@ -1475,9 +1495,9 @@ function updateItemDescription(system) {
     // description updates as well.
     // If in sheets code it may handle drains/suppresses nicely.
 
-    const configPowerInfo = CONFIG.HERO.powers[system.XMLID]
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
-    switch (system.XMLID) {
+    switch (configPowerInfo?.xmlid || system.XMLID) {
 
         case "Mind Scan":
             system.description = levels + "d6 Mind Scan (" +
@@ -1494,12 +1514,27 @@ function updateItemDescription(system) {
             system.description += ary.join("/") + ")"
             break;
 
+        case "FORCEWALL":
+            system.description = system.ALIAS + " "
+            let aryFW = []
+            if (parseInt(system.PDLEVELS)) aryFW.push(system.PDLEVELS + " PD")
+            if (parseInt(system.EDLEVELS)) aryFW.push(system.EDLEVELS + " ED")
+            if (parseInt(system.MDLEVELS)) aryFW.push(system.MDLEVELS + " MD")
+            if (parseInt(system.POWDLEVELS)) aryFW.push(system.POWDLEVELS + " POW")
+            if (parseInt(system.BODYLEVELS)) aryFW.push(system.BODYLEVELS + " BODY")
+            system.description += aryFW.join("/")
+            system.description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${parseInt(system.HEIGHTLEVELS) + 1}m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`
+            break;
+
+        case "TRANSFER":
+        case "DRAIN":
         case "AID":
             // Aid  STR 5d6 (standard effect: 15 points)
-            system.description = system.ALIAS + " " + system.INPUT + " " + system.LEVELS + "d6"
+            system.description = system.ALIAS + (system.INPUT ? " " + system.INPUT : "") + " " + system.LEVELS + "d6"
             if (system.USESTANDARDEFFECT == "Yes") {
                 system.description += " (standard effect: " + (parseInt(system.LEVELS) * 3) + " points)"
             }
+            //system.description = `${system.ALIAS} ${system.LEVELS}d6`
             break;
 
         case "STRETCHING":
@@ -1521,6 +1556,35 @@ function updateItemDescription(system) {
         case "NAKEDMODIFIER":
             // Area Of Effect (8m Radius; +1/2) for up to 53 Active Points of STR
             system.description = `${system.ALIAS} for up to ${system.LEVELS} Active points of ${system.INPUT}`
+            break;
+
+        case "DEFENSE_MANEUVER":
+            system.description = system.ALIAS + " " + system.OPTION_ALIAS
+            break;
+
+        case "KNOWLEDGE_SKILL":
+        case "LANGUAGES":
+            system.description = system.NAME + ": " + (system.INPUT || system.ALIAS)
+            if (system.OPTION_ALIAS) {
+                system.description += " (" + system.OPTION_ALIAS + ")"
+            }
+            break;
+
+        case "PENALTY_SKILL_LEVELS":
+            system.description = system.NAME + ": +" + system.LEVELS + " " + system.OPTION_ALIAS
+            break;
+
+        case "RKA":
+            system.description = `${system.ALIAS} ${system.LEVELS}d6 ${system.INPUT}`
+            break;
+
+        case "HANDTOHANDATTACK":
+            system.description = `${system.ALIAS} +${system.LEVELS}d6`
+            break;
+
+        case "KBRESISTANCE":
+            system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
+                + ` -${system.LEVELS}m`
             break;
 
         default:
@@ -1554,8 +1618,15 @@ function updateItemDescription(system) {
                 case "OCCUR":
                     _adderArray.push(adder.OPTION_ALIAS.replace("(", ""))
                     break;
+                case "PHYSICAL":
+                case "ENERGY":
+                case "MENTAL":
+                    _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
+                    break;
                 default: _adderArray.push(adder.ALIAS)
             }
+
+
 
         }
         system.description += _adderArray.join("; ") + ")"
@@ -1639,6 +1710,14 @@ function createPowerDescriptionModifier(modifier, powerName) {
 
         default:
             if (modifier.ALIAS) result += "; " + modifier.ALIAS || "?"
+
+
+    }
+
+    if ((parseInt(modifier.LEVELS) || 0) > 1) {
+        if (["HARDENED"].includes(modifier.XMLID)) {
+            result += "x" + parseInt(modifier.LEVELS)
+        }
     }
 
     // ADDERS
@@ -1692,7 +1771,7 @@ function createPowerDescriptionModifier(modifier, powerName) {
 export async function uploadAttack(power) {
     const xmlid = power.getAttribute('XMLID')
 
-    let configPowerInfo = CONFIG.HERO.powers[xmlid]
+    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
 
     // Verify we have an attack
     if (!configPowerInfo.powerType.includes("attack")) return
@@ -1854,6 +1933,7 @@ export function SkillRollUpdateValue(item) {
         //} else if (skillData.state === 'trained') {
     } else if (skillData.CHARACTERISTIC || skillData.characteristic) {
         let characteristic = (skillData.CHARACTERISTIC || skillData.characteristic).toLowerCase()
+        skillData.characteristic = characteristic
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
@@ -1867,4 +1947,75 @@ export function SkillRollUpdateValue(item) {
         HEROSYS.log(false, (skillData.xmlid || item.name) + ' was not included in skills.  Likely Skill Enhancer')
         return
     }
+}
+
+async function createEffects(itemData) {
+
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: this.actor })
+
+    // Not every powers will have effects
+    if (!configPowerInfo) return
+    if (!configPowerInfo?.powerType) return
+
+    const xmlid = configPowerInfo.xmlid
+    const key = xmlid.toLowerCase()
+
+    // Characteristics (via ActiveEffects)
+    if (configPowerInfo?.powerType.includes("characteristic")) {
+
+        // Add LEVELS to MAX
+        let activeEffect =
+        {
+            label: itemData.name,
+            //id: newPower.system.rules,
+            icon: 'icons/svg/upgrade.svg',
+            changes: [
+                {
+                    key: "system.characteristics." + key + ".max",
+                    value: parseInt(itemData.system.LEVELS),
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                }
+            ]
+
+        }
+
+        itemData.effects = [activeEffect]
+        return
+    }
+
+
+    if (xmlid === "DENSITYINCREASE") {
+        const levels = parseInt(parseInt(itemData.system.LEVELS))
+
+        const strAdd = Math.floor(levels) * 5
+        const pdAdd = Math.floor(levels)
+        const edAdd = Math.floor(levels)
+
+        let activeEffect =
+        {
+            label: itemData.name,
+            icon: 'icons/svg/upgrade.svg',
+            changes: [
+                {
+                    key: "system.characteristics.str.max",
+                    value: strAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.pd.max",
+                    value: pdAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.ed.max",
+                    value: edAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                }
+            ]
+        }
+
+        itemData.effects = [activeEffect]
+        return
+    }
+
 }
