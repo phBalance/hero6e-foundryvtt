@@ -451,7 +451,7 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">{{#if item.system.PARENTID}}{{item.system.POSITION}}) {{/if}}{{item.name}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.endEstimate}}</td>
                         <td class="left">{{item.system.description}}</td>

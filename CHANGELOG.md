@@ -1,3 +1,6 @@
+# Version 2.2.1-alpha
+- Initial power framework support.
+
 # Version 2.2.0-alpha
 - Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.
 - Reworked ActiveEffects to be placed on items (per FoundryVtt design).  This should allow world items to be created with ActiveEffects and dragged onto an actor.  ActiveEffect can be edited/created on most items, although not fully tested.
