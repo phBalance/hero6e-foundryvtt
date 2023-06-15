@@ -4,6 +4,7 @@
 - Apply damage only shown to GMs [#95](https://github.com/dmdorman/hero6e-foundryvtt/issues/95)
 - Power/item descriptions can be sent to chat [#128](https://github.com/dmdorman/hero6e-foundryvtt/issues/128)
 - Initial power framework support.
+- Improved 5e support (COM, DAMAGERESISTANCE, FORCEFIELD).
 
 # Version 2.1.9-alpha
 - Fixed equipment price showing NaN.  Summary weight/price for equipment now only shows when there are items with weight/price.

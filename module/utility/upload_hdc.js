@@ -129,26 +129,26 @@ export async function applyCharacterSheet(xmlDoc) {
         changes[`system.characteristics.${key}.realCost`] = cost
         changes[`system.characteristics.${key}.activePoints`] = cost
 
-        if (key in CONFIG.HERO.movementPowers) {
-            let name = characteristic.getAttribute('NAME')
-            name = (name === '') ? characteristic.getAttribute('ALIAS') : name
-            //const velocity = Math.round((spd * value) / 12)
-            const itemData = {
-                name: name,
-                type: 'movement',
-                system: {
-                    type: key,
-                    editable: false,
-                    base: value,
-                    value,
-                    //velBase: velocity,
-                    //velValue: velocity,
-                    class: key,
-                }
-            }
+        // if (key in CONFIG.HERO.movementPowers) {
+        //     let name = characteristic.getAttribute('NAME')
+        //     name = (name === '') ? characteristic.getAttribute('ALIAS') : name
+        //     //const velocity = Math.round((spd * value) / 12)
+        //     const itemData = {
+        //         name: name,
+        //         type: 'movement',
+        //         system: {
+        //             type: key,
+        //             editable: false,
+        //             base: value,
+        //             value,
+        //             //velBase: velocity,
+        //             //velValue: velocity,
+        //             class: key,
+        //         }
+        //     }
 
-            await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        }
+        //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // }
     }
 
     await this.actor.update(changes)
@@ -604,7 +604,7 @@ function XmlToItemData(xml, type) {
     systemData.realCost = RoundFavorPlayerDown(_realCost)
 
     // Update Item Description (to closely match Hero Designer)
-    updateItemDescription.call(this, systemData)
+    updateItemDescription.call(this, systemData, type)
 
     // Item name
     let name = xml.getAttribute('NAME')
@@ -1510,14 +1510,14 @@ export async function uploadPower(power, type) {
     //await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // Create a copy for movements
-    if (xmlid.toLowerCase() in CONFIG.HERO.movementPowers) {
-        itemData.type = 'movement'
-        itemData.system.value = parseInt(itemData.system.LEVELS) || 0
-        await HeroSystem6eItem.create(itemData, { parent: this.actor })
-    }
+    // if (xmlid.toLowerCase() in CONFIG.HERO.movementPowers) {
+    //     itemData.type = 'movement'
+    //     itemData.system.value = parseInt(itemData.system.LEVELS) || 0
+    //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    // }
 }
 
-function updateItemDescription(system) {
+function updateItemDescription(system, type) {
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
     // so when the power is modified in foundry, the power
@@ -1573,6 +1573,9 @@ function updateItemDescription(system) {
             break;
 
         case "RUNNING":
+        case "SWIMMING":
+        case "LEAPING":
+        case "TELEPORTATION":
             // Running +25m (12m/37m total)
             system.description = system.ALIAS + " +" + system.LEVELS + "m"
             break;
@@ -1607,7 +1610,7 @@ function updateItemDescription(system) {
             if (system.ALIAS == "KS") {
                 system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
             } else {
-                system.description =system.NAME
+                system.description = system.NAME
             }
 
             break;
@@ -1724,13 +1727,18 @@ function updateItemDescription(system) {
 
     // STR only costs endurance when used.
     // Can get a bit messy, like when resisting an entangle, but will deal with that later.
-    if (system.XMLID == "STR")
-    {
+    if (system.XMLID == "STR") {
         system.end = 0
     }
 
     // MOVEMENT only costs endurance when used.  Typically per round.
+
     if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+        system.end = 0
+    }
+
+    // PERKS, TALENTS, COMPLICATIONS do not use endurance.
+    if (["perk", "talent", "complication"].includes(type)) {
         system.end = 0
     }
 
@@ -2054,6 +2062,28 @@ async function createEffects(itemData) {
                 }
             ]
 
+        }
+
+        itemData.effects = [activeEffect]
+        return
+    }
+
+
+    // Movement Powers
+    if (configPowerInfo?.powerType.includes("movement")) {
+        const key = itemData.system.XMLID.toLowerCase()
+
+        let activeEffect =
+        {
+            label: itemData.name,
+            icon: 'icons/svg/upgrade.svg',
+            changes: [
+                {
+                    key: `system.characteristics.${key}.max`,
+                    value: parseInt(itemData.system.LEVELS),
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+            ]
         }
 
         itemData.effects = [activeEffect]

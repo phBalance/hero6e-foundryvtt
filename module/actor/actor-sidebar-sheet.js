@@ -225,7 +225,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         for (const key of characteristicKeys) {
             let characteristic = data.actor.system.characteristics[key]
 
+            if (!characteristic) {
+                characteristic = {}
+            }
+
             characteristic.key = key
+            characteristic.value = parseInt(characteristic.value) || 0;
+            characteristic.max = parseInt(characteristic.max) || 0;
 
             if (!characteristic.base) {
                 if (data.actor.system.is5e) {
@@ -236,13 +242,17 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             if (data.actor.system.is5e) {
-                if (!CONFIG.HERO.characteristicCosts5e[key]) continue;
+                if (!CONFIG.HERO.characteristicCosts5e[key]) {
+                    continue;
+                }
                 characteristic.name = CONFIG.HERO.characteristics5e[key]
                 //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts5e[key])
 
             }
             else {
-                if (!CONFIG.HERO.characteristicCosts[key]) continue;
+                if (!CONFIG.HERO.characteristicCosts[key]) {
+                    continue;
+                }
                 characteristic.name = CONFIG.HERO.characteristics[key]
                 //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts[key])
             }

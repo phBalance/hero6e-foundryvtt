@@ -91,7 +91,10 @@ HERO.characteristics = {
     "running": "Running",
     "swimming": "Swimming",
     "leaping": "Leaping",
-    "flying": "Flying",
+    "flight": "Flight",
+    "swinging": "Swinging",
+    "teleportation": "Teleportation",
+    "tunneling": "Tunneling",
 };
 
 HERO.characteristics5e = {
@@ -116,7 +119,10 @@ HERO.characteristics5e = {
     "running": "Running",
     "swimming": "Swimming",
     "leaping": "Leaping",
-    "flying": "Flying",
+    "flight": "Flight",
+    "swinging": "Swinging",
+    "teleportation": "Teleportation",
+    "tunneling": "Tunneling",
 };
 
 HERO.characteristicDefaults = {
@@ -141,6 +147,10 @@ HERO.characteristicDefaults = {
     "running": 12,
     "swimming": 4,
     "leaping": 4,
+    "flight": 0,
+    "swinging": 0,
+    "teleportation": 0,
+    "tunneling": 0,
 };
 
 HERO.characteristicDefaults5e = {
@@ -165,6 +175,10 @@ HERO.characteristicDefaults5e = {
     "running": 6,
     "swimming": 2,
     "leaping": 1,
+    "flight": 0,
+    "swinging": 0,
+    "teleportation": 0,
+    "tunneling": 0,
 };
 
 HERO.characteristicCosts = {
@@ -188,6 +202,10 @@ HERO.characteristicCosts = {
     "running": 1,
     "swimming": 1 / 2,
     "leaping": 1 / 2,
+    "flight": 1,
+    "swinging": 1,
+    "teleportation": 1,
+    "tunneling": 1,
 };
 
 HERO.characteristicCosts5e = {
@@ -212,6 +230,10 @@ HERO.characteristicCosts5e = {
     "running": 2,
     "swimming": 1 / 2,
     "leaping": 1 / 2,
+    "flight": 1,
+    "swinging": 1,
+    "teleportation": 1,
+    "tunneling": 1,
 };
 
 
@@ -237,7 +259,10 @@ HERO.characteristicsXMLKey = {
     "RUNNING": "running",
     "SWIMMING": "swimming",
     "LEAPING": "leaping",
-    "FLIGHT": "flying",
+    "FLIGHT": "flight",
+    "SWINGING": "swinging",
+    "TELEPORTATION": "teleportation",
+    "TUNNELING": "tunneling",
     "GENERAL": "general"
 };
 

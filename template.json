@@ -147,7 +147,22 @@
                         "max": 4,
                         "type": "movement"
                     },
-                    "flying": {
+                    "flight": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "movement"
+                    },
+                    "swinging": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "movement"
+                    },
+                    "teleportation": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "movement"
+                    },
+                    "tunneling": {
                         "value": 0,
                         "max": 0,
                         "type": "movement"
