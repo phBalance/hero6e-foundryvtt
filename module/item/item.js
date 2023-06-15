@@ -171,6 +171,7 @@ export class HeroSystem6eItem extends Item {
 
         const chatData = {
             user: game.user._id,
+            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
             type: CONST.CHAT_MESSAGE_TYPES.ChatMessage,
             content: content,
             //speaker: speaker
