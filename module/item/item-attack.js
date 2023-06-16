@@ -153,7 +153,7 @@ export async function AttackToHit(item, options) {
             // if (options.effectivestr <= actor.system.characteristics.str.value) {
             //     strEnd = Math.round(options.effectivestr / 10);
             // }
-            let strEnd = Math.max(1, Math.round(options.effectivestr / 10));
+            let strEnd = Math.max(1, Math.round(options.effectiveStr / 10));
             item.system.endEstimate += strEnd
 
             newEnd = parseInt(newEnd) - parseInt(strEnd);
@@ -161,7 +161,24 @@ export async function AttackToHit(item, options) {
         }
 
         if (newEnd < 0) {
+            let stunDice = Math.ceil(Math.abs(newEnd) / 2)
+            let stunRollEquation = `${stunDice}d6`
+            let stunDamageRoll = new Roll(stunRollEquation, actor.getRollData());
+            let stunDamageresult = await stunDamageRoll.evaluate({ async: true });
+            let stunRenderedResult = await stunDamageresult.render();
+            newEnd = -stunDamageresult.total
+
             enduranceText = 'Spent ' + valueEnd + ' END and ' + Math.abs(newEnd) + ' STUN';
+
+            enduranceText += ` <i class="fal fa-circle-info" data-tooltip="` +
+                `<b>USING STUN FOR ENDURANCE</b><br>` +
+                `A character at 0 END who still wishes to perform Actions
+                may use STUN as END. The character takes 1d6 STUN Only
+                damage (with no defense) for every 2 END (or fraction thereof)
+                expended. Yes, characters can Knock themselves out this way.` +
+                `"></i> `
+            enduranceText += stunRenderedResult;
+
         } else {
             enduranceText = 'Spent ' + spentEnd + ' END';
         }
@@ -235,7 +252,7 @@ export async function AttackToHit(item, options) {
     };
 
     // render card
-    let cardHtml = await renderTemplate(template, cardData) 
+    let cardHtml = await renderTemplate(template, cardData)
 
     let token = actor.token;
 
@@ -921,9 +938,14 @@ async function _calcDamage(damageResult, item, options) {
     // minimum damage rule
     if (stun < body) {
         stun = body;
-        effects += "minimum damage invoked; "
+        effects += `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
+            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
+            `A character automatically takes 1 STUN for every 1 point of BODY
+        damage that gets through his defenses. He can Recover this STUN
+        normally; he doesn’t have to heal the BODY damage first.` +
+            `"></i>; `
     }
-
+    l
     // The body of a penetrating attack is the minimum damage
     if (penetratingBody > body) {
         if (itemData.killing) {
