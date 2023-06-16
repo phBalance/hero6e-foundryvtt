@@ -17,6 +17,8 @@ import { HeroSystem6eTokenHud } from "./bar3/tokenHud.js";
 import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
+import { getPowerInfo } from './utility/util.js'
+import { createEffects } from "./utility/upload_hdc.js"
 
 Hooks.once('init', async function () {
 
@@ -308,9 +310,25 @@ async function migrateActorDefenseMovementData(actor) {
         }
     }
 
+    // Apply AE to movement items
+    let itemsToCreate = []
+    for (let item of actor.items) {
+        const configPowerInfo = getPowerInfo({ item: item })
+        if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+
+            // You can't just add AE to items owned by actor. A flaw in Foundry v10.
+            // So we will create a new item with proper AE, then delete the old item.
+            let itemData = item.toJSON()
+            itemData.system.active = true
+            createEffects(itemData, actor)
+            itemsToCreate.push(itemData)
+            itemsToDelete.push(item.id)
+        }
+    }
+
     await actor.deleteEmbeddedDocuments("Item", itemsToDelete)
-    //actor.update({ 'system.migrationTag': migrationTag })
-    //}
+    await HeroSystem6eItem.create(itemsToCreate, { parent: actor })
+
     return (itemsToDelete.length > 0)
 }
 

@@ -2033,9 +2033,9 @@ export function SkillRollUpdateValue(item) {
     }
 }
 
-async function createEffects(itemData) {
+export async function createEffects(itemData, actor) {
 
-    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: this.actor })
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: actor || this.actor })
 
     // Not every powers will have effects
     if (!configPowerInfo) return
