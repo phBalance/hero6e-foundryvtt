@@ -44,7 +44,7 @@ export class HeroRuler {
 
                     // const movementValue = parseInt(token.actor.items.get(relevantMovementItemId)?.system.value)
                     //     || parseInt(token.actor.system.characteristics.running.value)
-                    const key = token.actor.flags.activeMovement
+                    const key = token.actor.flags.activeMovement || "running"
                     const movementValue = parseInt(token.actor.system.characteristics[key].value) || 0
 
                     return movementValue
