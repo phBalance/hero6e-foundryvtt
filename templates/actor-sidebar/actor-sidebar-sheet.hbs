@@ -119,7 +119,7 @@
         <a class="item-nav" data-tab="skills">Skills</a>
 
         <a class="item-nav" data-tab="maneuvers">Maneuvers</a>
-        {{!-- <a class="item-nav" data-tab="movement">Movement</a> --}}
+        <a class="item-nav" data-tab="movement">Movement</a>
         <a class="item-nav" data-tab="powers">Powers</a>
 
         {{#if hasEquipment}}
@@ -398,16 +398,16 @@
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
-                        <th>{{localize "ActorSheet.Max"}}</th>
                         <th>{{localize "ActorSheet.Value"}}</th>
                         <th>{{localize "ActorSheet.Velocity"}}</th>
+                        <th>{{localize "ActorSheet.Active"}}</th>
                         <th class="right">
                             <a class="item-control item-create" title="Create movement" data-type="movement">
                                 <i class="fas fa-plus"></i> Add Movement</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "movement") }}
+                    {{#if (or (eq item.type "movement")(eq item.subType "movement")) }}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -415,9 +415,14 @@
                         </td>
                         <td class="left">{{item.name}}</td>
                         <td class="left">{{item.system.description}}</td>
-                        <td>{{item.system.max}}</td>
                         <td>{{item.system.value}}</td>
                         <td>{{item.system.velValue}}</td>
+                        <td>
+                            {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
+                                name="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
+                                data-action="toggle" />
+                            {{/if}}
+                        </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>

@@ -64,6 +64,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 item.system.showToggle = true
             }
 
+            // Is theis a movement power?
+            if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+                item.subType = 'movement'
+                item.system.showToggle = true
+            }
+
             // Framework?
             if (item.system.PARENTID) {
                 const parent = data.actor.items.find(o => o.system.ID === item.system.PARENTID)
