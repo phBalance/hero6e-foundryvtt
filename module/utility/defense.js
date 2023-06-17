@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.js";
+import { getPowerInfo } from './util.js'
 
 function determineDefense(targetActor, attackItem) {
     const attackType = attackItem.system.class
@@ -68,6 +69,12 @@ function determineDefense(targetActor, attackItem) {
 
     if (targetActor.items.size > 0) {
         for (let i of targetActor.items) {
+
+            const configPowerInfo = getPowerInfo({ item: i })
+            if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+                i.subType = 'defense'
+            }
+
             if ((i.subType || i.type) === "defense" && i.system.active) {
                 let value = parseInt(i.system.value) || 0;
 

@@ -54,21 +54,21 @@
         <div data-visibility="gm">
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
                 data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-terms="{{terms}}"
-                data-stunMultiplier="{{stunMultiplier}}">Apply Damage</button>
+                data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">Apply Damage</button>
 
 
             {{#each targetTokens as |target id|}}
             <button class="apply-damage" title="Apply damage to {{target.name}}." data-itemId="{{../item.uuid}}"
                 data-target-token-id="{{target.id}}" data-bodyDamage="{{../bodyDamage}}"
                 data-stunDamage="{{../stunDamage}}" data-terms="{{../terms}}"
-                data-stunMultiplier="{{../stunMultiplier}}">Apply Damage to
+                data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">Apply Damage to
                 <b>{{target.name}}</b></button>
             {{/each}}
 
             {{#if targetIds}}
             <button class="apply-damage" title="Apply damage to ALL tokens that were hit." data-itemId="{{item.uuid}}"
                 data-target-Ids="{{targetIds}}" data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}"
-                data-terms="{{terms}}" data-stunMultiplier="{{stunMultiplier}}">Apply Damage to <b>ALL</b></button>
+                data-terms="{{terms}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">Apply Damage to <b>ALL</b></button>
             {{/if}}
         </div>
 
