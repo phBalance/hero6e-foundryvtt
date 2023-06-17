@@ -3,6 +3,7 @@ import { modifyRollEquation, getTokenChar } from "../utility/util.js"
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js"
 import { HEROSYS } from "../herosystem6e.js";
+import { RoundFavorPlayerDown } from "../utility/round.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -979,12 +980,8 @@ async function _calcDamage(damageResult, item, options) {
         body = 0;
     }
 
-    stun = Math.round(stun)
-    body = Math.round(body)
-
-
-
-
+    stun = RoundFavorPlayerDown(stun)
+    body = RoundFavorPlayerDown(body)
 
     damageDetail.body = body
     damageDetail.stun = stun
