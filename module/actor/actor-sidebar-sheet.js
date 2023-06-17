@@ -64,6 +64,21 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 item.system.showToggle = true
             }
 
+            // Is theis a movement power?
+            if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+                item.subType = 'movement'
+                item.system.showToggle = true
+            }
+
+            // Framework?
+            if (item.system.PARENTID) {
+                const parent = data.actor.items.find(o => o.system.ID === item.system.PARENTID)
+                if (parent) {
+                    const parentPosition = parseInt(parent.system.POSITION)
+                    item.system.childIdx = parseInt(item.system.POSITION) - parseInt(parentPosition)
+                }
+            }
+
 
             // Active (reverse of disabled)
             //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
@@ -216,7 +231,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         for (const key of characteristicKeys) {
             let characteristic = data.actor.system.characteristics[key]
 
+            if (!characteristic) {
+                characteristic = {}
+            }
+
             characteristic.key = key
+            characteristic.value = parseInt(characteristic.value) || 0;
+            characteristic.max = parseInt(characteristic.max) || 0;
 
             if (!characteristic.base) {
                 if (data.actor.system.is5e) {
@@ -227,13 +248,17 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             if (data.actor.system.is5e) {
-                if (!CONFIG.HERO.characteristicCosts5e[key]) continue;
+                if (!CONFIG.HERO.characteristicCosts5e[key]) {
+                    continue;
+                }
                 characteristic.name = CONFIG.HERO.characteristics5e[key]
                 //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts5e[key])
 
             }
             else {
-                if (!CONFIG.HERO.characteristicCosts[key]) continue;
+                if (!CONFIG.HERO.characteristicCosts[key]) {
+                    continue;
+                }
                 characteristic.name = CONFIG.HERO.characteristics[key]
                 //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts[key])
             }

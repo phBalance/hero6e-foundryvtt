@@ -3,6 +3,7 @@ import { modifyRollEquation, getTokenChar } from "../utility/util.js"
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js"
 import { HEROSYS } from "../herosystem6e.js";
+import { RoundFavorPlayerDown } from "../utility/round.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -118,6 +119,7 @@ export async function AttackToHit(item, options) {
     //     tags.push({ value: options.toHitMod, name: "toHitMod" })
     // }
 
+    // [x Stun, x N Stun, x Body, OCV modifier]
     let noHitLocationsPower = false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim !== "none" && !noHitLocationsPower) {
         rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[options.aim][3]);
@@ -153,7 +155,7 @@ export async function AttackToHit(item, options) {
             // if (options.effectivestr <= actor.system.characteristics.str.value) {
             //     strEnd = Math.round(options.effectivestr / 10);
             // }
-            let strEnd = Math.max(1, Math.round(options.effectivestr / 10));
+            let strEnd = Math.max(1, Math.round(options.effectiveStr / 10));
             item.system.endEstimate += strEnd
 
             newEnd = parseInt(newEnd) - parseInt(strEnd);
@@ -161,7 +163,24 @@ export async function AttackToHit(item, options) {
         }
 
         if (newEnd < 0) {
+            let stunDice = Math.ceil(Math.abs(newEnd) / 2)
+            let stunRollEquation = `${stunDice}d6`
+            let stunDamageRoll = new Roll(stunRollEquation, actor.getRollData());
+            let stunDamageresult = await stunDamageRoll.evaluate({ async: true });
+            let stunRenderedResult = await stunDamageresult.render();
+            newEnd = -stunDamageresult.total
+
             enduranceText = 'Spent ' + valueEnd + ' END and ' + Math.abs(newEnd) + ' STUN';
+
+            enduranceText += ` <i class="fal fa-circle-info" data-tooltip="` +
+                `<b>USING STUN FOR ENDURANCE</b><br>` +
+                `A character at 0 END who still wishes to perform Actions
+                may use STUN as END. The character takes 1d6 STUN Only
+                damage (with no defense) for every 2 END (or fraction thereof)
+                expended. Yes, characters can Knock themselves out this way.` +
+                `"></i> `
+            enduranceText += stunRenderedResult;
+
         } else {
             enduranceText = 'Spent ' + spentEnd + ' END';
         }
@@ -235,7 +254,7 @@ export async function AttackToHit(item, options) {
     };
 
     // render card
-    let cardHtml = await renderTemplate(template, cardData) 
+    let cardHtml = await renderTemplate(template, cardData)
 
     let token = actor.token;
 
@@ -391,6 +410,7 @@ export async function _onRollDamage(event) {
         // hit locations
         useHitLoc: damageDetail.useHitLoc,
         hitLocText: damageDetail.hitLocText,
+        hitLocation: damageDetail.hitLocation,
 
         // body
         bodyDamage: damageDetail.bodyDamage,
@@ -510,7 +530,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // determine active defenses
     // -------------------------------------------------
     let defense = "";
-    HEROSYS.log(false, defense)
     let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(token.actor, item)
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); "
@@ -724,7 +743,7 @@ async function _calcDamage(damageResult, item, options) {
     }
 
     let hasStunMultiplierRoll = false;
-    let renderedStunMultiplierRoll = null;
+    //let renderedStunMultiplierRoll = null;
     let stunMultiplier = 1;
     let noHitLocationsPower = false
 
@@ -748,12 +767,45 @@ async function _calcDamage(damageResult, item, options) {
     }
     penetratingBody = Math.max(0, penetratingBody - options.impenetrableValue)
 
+    // get hit location
+    let hitLocationModifiers = [1, 1, 1, 0];
+    let hitLocation =  "None";
+    let useHitLoc = false;
+    //let noHitLocationsPower = false;
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
+        useHitLoc = true;
+
+        options.aim = options.aim || options.hitLocation
+        hitLocation = options.aim;
+        if (options.aim === 'none' || !options.aim) {
+            let locationRoll = new Roll("3D6")
+            let locationResult = await locationRoll.roll({ async: true });
+            hitLocation = CONFIG.HERO.hitLocationsToHit[locationResult.total];
+        }
+
+        hitLocationModifiers = CONFIG.HERO.hitLocations[hitLocation];
+
+        if (game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all") {
+            let sidedLocations = ["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]
+            if (sidedLocations.includes(hitLocation)) {
+                let sideRoll = new Roll("1D2", actor.getRollData());
+                let sideResult = await sideRoll.roll();
+
+                if (sideResult.result === 1) {
+                    hitLocation = "Left " + hitLocation;
+                } else {
+                    hitLocation = "Right " + hitLocation;
+                }
+            }
+        }
+    }
+    
 
     if (itemData.killing) {
         // Killing Attack
         hasStunMultiplierRoll = true;
         body = damageResult.total;
-        let hitLocationModifiers = [1, 1, 1, 0];
+        //let hitLocationModifiers = [1, 1, 1, 0];
 
         // 6E uses 1d3 stun multiplier
         let stunRoll = new Roll("1D3", item.actor.getRollData());
@@ -828,42 +880,13 @@ async function _calcDamage(damageResult, item, options) {
     stun = stun < 0 ? 0 : stun;
     body = body < 0 ? 0 : body;
 
-    // get hit location
-    let hitLocationModifiers = [1, 1, 1, 0];
-    let hitLocation = "None";
-    let useHitLoc = false;
-    //let noHitLocationsPower = false;
-    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
-        useHitLoc = true;
-
-        hitLocation = options.aim;
-        if (options.aim === 'none' || !options.aim) {
-            let locationRoll = new Roll("3D6")
-            let locationResult = await locationRoll.roll({ async: true });
-            hitLocation = CONFIG.HERO.hitLocationsToHit[locationResult.total];
-        }
-
-        hitLocationModifiers = CONFIG.HERO.hitLocations[hitLocation];
-
-        if (game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all") {
-            let sidedLocations = ["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]
-            if (sidedLocations.includes(hitLocation)) {
-                let sideRoll = new Roll("1D2", actor.getRollData());
-                let sideResult = await sideRoll.roll();
-
-                if (sideResult.result === 1) {
-                    hitLocation = "Left " + hitLocation;
-                } else {
-                    hitLocation = "Right " + hitLocation;
-                }
-            }
-        }
-    }
+    
 
     let hitLocText = "";
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
         if (itemData.killing) {
             // killing attacks apply hit location multiplier after resistant damage protection has been subtracted
+            // Location : [x Stun, x N Stun, x Body, OCV modifier]
             body = body * hitLocationModifiers[2];
 
             hitLocText = "Hit " + hitLocation + " (x" + hitLocationModifiers[0] + " STUN x" + hitLocationModifiers[2] + " BODY)";
@@ -921,7 +944,12 @@ async function _calcDamage(damageResult, item, options) {
     // minimum damage rule
     if (stun < body) {
         stun = body;
-        effects += "minimum damage invoked; "
+        effects += `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
+            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
+            `A character automatically takes 1 STUN for every 1 point of BODY
+        damage that gets through his defenses. He can Recover this STUN
+        normally; he doesn't have to heal the BODY damage first.` +
+            `"></i> `
     }
 
     // The body of a penetrating attack is the minimum damage
@@ -952,12 +980,8 @@ async function _calcDamage(damageResult, item, options) {
         body = 0;
     }
 
-    stun = Math.round(stun)
-    body = Math.round(body)
-
-
-
-
+    stun = RoundFavorPlayerDown(stun)
+    body = RoundFavorPlayerDown(body)
 
     damageDetail.body = body
     damageDetail.stun = stun
@@ -968,6 +992,7 @@ async function _calcDamage(damageResult, item, options) {
     damageDetail.hasStunMultiplierRoll = hasStunMultiplierRoll
     damageDetail.useHitLoc = useHitLoc
     damageDetail.hitLocText = hitLocText
+    damageDetail.hitLocation = hitLocation
 
     damageDetail.knockbackMessage = knockbackMessage
     damageDetail.useKnockBack = useKnockBack

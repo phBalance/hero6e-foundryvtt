@@ -17,6 +17,8 @@ import { HeroSystem6eTokenHud } from "./bar3/tokenHud.js";
 import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
+import { getPowerInfo } from './utility/util.js'
+import { createEffects } from "./utility/upload_hdc.js"
 
 Hooks.once('init', async function () {
 
@@ -263,7 +265,7 @@ Hooks.once("ready", async function () {
         if (foundry.utils.isNewerVersion('2.2.0', lastMigration)) {
             migrateActorTypes()
             migrateKnockback()
-            migrateRemoveDuplicateDefenseItems()
+            migrateRemoveDuplicateDefenseMovementItems()
         }
     }
 
@@ -274,7 +276,7 @@ Hooks.once("ready", async function () {
 
 //const migrationTag = 20230611
 
-async function migrateRemoveDuplicateDefenseItems() {
+async function migrateRemoveDuplicateDefenseMovementItems() {
 
     //if (game.actors.contents.find(o => o.system.migrationTag != migrationTag)) {
     ui.notifications.info(`Migragrating actor data.`)
@@ -284,14 +286,14 @@ async function migrateRemoveDuplicateDefenseItems() {
 
     let count = 0
     for (let actor of game.actors.contents) {
-        if (await migrateActorDefenseData(actor)) count++
+        if (await migrateActorDefenseMovementData(actor)) count++
     }
 
     ui.notifications.info(`${count} actors migrated.`)
 
 }
 
-async function migrateActorDefenseData(actor) {
+async function migrateActorDefenseMovementData(actor) {
     let itemsToDelete = []
 
     // Place a migrationTag in the actor with today's date.
@@ -299,18 +301,34 @@ async function migrateActorDefenseData(actor) {
     // Specifically it allows custom defenses to be manually added
     // without deleting it eveytime world loads.
     //if (actor.system.migrationTag != migrationTag) {
-    for (let item of actor.items.filter(o => o.type == 'defense')) {
+    for (let item of actor.items.filter(o => o.type == 'defense' || o.type == 'movement')) {
 
         // Try not to delete items that have been manually created.
         // We can make an educated guess by looking for XMLID
-        if (item.system.xmlid || item.system.XMLID || item.system.rules == "COMBAT_LUCK") {
+        if (item.system.xmlid || item.system.XMLID || item.system.rules == "COMBAT_LUCK" || item.type == 'movement') {
+            itemsToDelete.push(item.id)
+        }
+    }
+
+    // Apply AE to movement items
+    let itemsToCreate = []
+    for (let item of actor.items) {
+        const configPowerInfo = getPowerInfo({ item: item })
+        if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+
+            // You can't just add AE to items owned by actor. A flaw in Foundry v10.
+            // So we will create a new item with proper AE, then delete the old item.
+            let itemData = item.toJSON()
+            itemData.system.active = true
+            createEffects(itemData, actor)
+            itemsToCreate.push(itemData)
             itemsToDelete.push(item.id)
         }
     }
 
     await actor.deleteEmbeddedDocuments("Item", itemsToDelete)
-    //actor.update({ 'system.migrationTag': migrationTag })
-    //}
+    await HeroSystem6eItem.create(itemsToCreate, { parent: actor })
+
     return (itemsToDelete.length > 0)
 }
 

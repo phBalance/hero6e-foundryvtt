@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.js";
+import { getPowerInfo } from './util.js'
 
 function determineDefense(targetActor, attackItem) {
     const attackType = attackItem.system.class
@@ -20,6 +21,25 @@ function determineDefense(targetActor, attackItem) {
     let DNE = 0; // damage negation energy
     let DNM = 0; // damage negation mental
     let knockbackResistance = 0;
+
+    // DAMAGERESISTANCE (converts PD to rPD)
+    for (const item of targetActor.items.filter(o => o.system.XMLID == "DAMAGERESISTANCE")) {
+        const pdLevels = Math.min(PD, parseInt(item.system.PDLEVELS) || 0)
+        PD -= pdLevels
+        rPD += pdLevels
+        const edLevels = Math.min(PD, parseInt(item.system.EDLEVELS) || 0)
+        ED -= edLevels
+        rED += edLevels
+        const mdLevels = Math.min(PD, parseInt(item.system.MDLEVELS) || 0)
+        MD -= mdLevels
+        rMD += mdLevels
+
+        // TODO:
+        // Characters can also purchase Damage Resistance
+        // for Mental Defense, Flash Defense, Power
+        // Defense, or similar Defense Powers to make them
+        // Resistant.: 
+    }
 
     // Armor Piericng of natural PD and ED
     if (piericng) {
@@ -49,6 +69,12 @@ function determineDefense(targetActor, attackItem) {
 
     if (targetActor.items.size > 0) {
         for (let i of targetActor.items) {
+
+            const configPowerInfo = getPowerInfo({ item: i })
+            if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+                i.subType = 'defense'
+            }
+
             if ((i.subType || i.type) === "defense" && i.system.active) {
                 let value = parseInt(i.system.value) || 0;
 
@@ -95,15 +121,15 @@ function determineDefense(targetActor, attackItem) {
                     switch (attackType) {
                         case 'physical':
                             i.system.defenseType = "dnp"
-                            value = parseInt(i.system.adders.find(o=> o.XMLID == "PHYSICAL")?.LEVELS) || 0
+                            value = parseInt(i.system.adders.find(o => o.XMLID == "PHYSICAL")?.LEVELS) || 0
                             break;
                         case 'energy':
                             i.system.defenseType = "dne"
-                            value = parseInt(i.system.adders.find(o=> o.XMLID == "ENERGY")?.LEVELS) || 0
+                            value = parseInt(i.system.adders.find(o => o.XMLID == "ENERGY")?.LEVELS) || 0
                             break;
                         case 'mental':
                             i.system.defenseType = "dnm"
-                            value = parseInt(i.system.adders.find(o=> o.XMLID == "MENTAL")?.LEVELS) || 0
+                            value = parseInt(i.system.adders.find(o => o.XMLID == "MENTAL")?.LEVELS) || 0
                             break;
                     }
                 }
@@ -128,11 +154,10 @@ function determineDefense(targetActor, attackItem) {
 
                 // Hardened
                 let hardened = parseInt(i.system.hardened) || 0
-                if (!hardened)
-                {
-                    hardened = parseInt(i.system.modifiers.find(o=> o.XMLID == "HARDENED")?.LEVELS) || 0
+                if (!hardened) {
+                    hardened = parseInt(i.system.modifiers.find(o => o.XMLID == "HARDENED")?.LEVELS) || 0
                 }
-                
+
 
                 // Armor Piercing
                 if (piericng > hardened) {
@@ -141,9 +166,8 @@ function determineDefense(targetActor, attackItem) {
 
                 // Impenetrable
                 let impenetrable = parseInt(i.system.impenetrable) || 0
-                if (!impenetrable)
-                {
-                    impenetrable = parseInt(i.system.modifiers.find(o=> o.XMLID == "IMPENETRABLE")?.LEVELS) || 0
+                if (!impenetrable) {
+                    impenetrable = parseInt(i.system.modifiers.find(o => o.XMLID == "IMPENETRABLE")?.LEVELS) || 0
                 }
 
                 // Penetrating

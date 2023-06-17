@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
-import { RoundFavorPlayerDown } from "../utility/round.js"
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
 import { getPowerInfo } from '../utility/util.js'
 
 
@@ -64,7 +64,7 @@ export async function applyCharacterSheet(xmlDoc) {
     if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
         this.actor.update([{ 'system.is5e': true }])
     }
-    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts : CONFIG.HERO.characteristicCosts5e
+    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
     // Caracteristics for 6e
     //let characteristicKeys = Object.keys(characteristicCosts)
@@ -116,7 +116,7 @@ export async function applyCharacterSheet(xmlDoc) {
             if (str >= 90) value = 18
             if (str >= 95) value = 19
             if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
-            changes[`system.characteristics.leaping.base`] = value
+            changes[`system.characteristics.leaping.base`] = RoundFavorPlayerUp(value)
             value += parseInt(characteristic.getAttribute('LEVELS'))
 
         }
@@ -129,26 +129,26 @@ export async function applyCharacterSheet(xmlDoc) {
         changes[`system.characteristics.${key}.realCost`] = cost
         changes[`system.characteristics.${key}.activePoints`] = cost
 
-        if (key in CONFIG.HERO.movementPowers) {
-            let name = characteristic.getAttribute('NAME')
-            name = (name === '') ? characteristic.getAttribute('ALIAS') : name
-            //const velocity = Math.round((spd * value) / 12)
-            const itemData = {
-                name: name,
-                type: 'movement',
-                system: {
-                    type: key,
-                    editable: false,
-                    base: value,
-                    value,
-                    //velBase: velocity,
-                    //velValue: velocity,
-                    class: key,
-                }
-            }
+        // if (key in CONFIG.HERO.movementPowers) {
+        //     let name = characteristic.getAttribute('NAME')
+        //     name = (name === '') ? characteristic.getAttribute('ALIAS') : name
+        //     //const velocity = Math.round((spd * value) / 12)
+        //     const itemData = {
+        //         name: name,
+        //         type: 'movement',
+        //         system: {
+        //             type: key,
+        //             editable: false,
+        //             base: value,
+        //             value,
+        //             //velBase: velocity,
+        //             //velValue: velocity,
+        //             class: key,
+        //         }
+        //     }
 
-            await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        }
+        //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // }
     }
 
     await this.actor.update(changes)
@@ -404,15 +404,16 @@ async function CalcRealAndActivePoints(actor) {
     // Calculate realCost & Active Points for bought as characteristics
     let realCost = 0;
     let activePoints = 0;
-    if (actor.system.is5e) {
-        for (const key of Object.keys(CONFIG.HERO.characteristicCosts5e)) {
-            realCost += parseInt(actor.system.characteristics[key].realCost || 0);
-        }
-    } else {
-        for (const key of Object.keys(CONFIG.HERO.characteristicCosts)) {
-            realCost += parseInt(actor.system.characteristics[key].realCost || 0);
-        }
+    const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts : CONFIG.HERO.characteristicCosts5e
+    //if (actor.system.is5e) {
+    for (const key of Object.keys(characteristicCosts)) {
+        realCost += parseInt(actor.system.characteristics[key].realCost || 0);
     }
+    // } else {
+    //     for (const key of Object.keys(CONFIG.HERO.characteristicCosts)) {
+    //         realCost += parseInt(actor.system.characteristics[key].realCost || 0);
+    //     }
+    // }
     activePoints = realCost
     // Add in costs for items
     let _splitCost = {}
@@ -449,7 +450,7 @@ function XmlToItemData(xml, type) {
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-        "BODYLEVELS",
+        "BODYLEVELS", "ID", "PARENTID", "POSITION"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -603,11 +604,10 @@ function XmlToItemData(xml, type) {
     systemData.realCost = RoundFavorPlayerDown(_realCost)
 
     // Update Item Description (to closely match Hero Designer)
-    updateItemDescription.call(this, systemData)
+    updateItemDescription.call(this, systemData, type)
 
     // Item name
-    let name = xml.getAttribute('NAME')
-    name = (name === '') ? xml.getAttribute('ALIAS') : name
+    let name = xml.getAttribute('NAME').trim() || xml.getAttribute('ALIAS').trim() || xml.tagName
 
     // This item was created via HDC Uploadn (could be useful later)
     systemData.FromHdcUpload = true
@@ -640,7 +640,12 @@ export async function uploadBasic(xml, type) {
 }
 
 export async function uploadMartial(power, type, extraDc, usesTk) {
-    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
+    //if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
+    // GENERIC_OBJECT are likely Power Frameworks.
+    // Rename GENERIC_OBJECT with TAGNAME to make it easier to parse.
+    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") {
+        power.setAttribute('XMLID', power.tagName)
+    }
 
     // let name = power.getAttribute('NAME')
     // name = (name === '') ? power.getAttribute('ALIAS') : name
@@ -816,10 +821,25 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
 
 export async function uploadSkill(skill, duplicate) {
 
-    if (skill.getAttribute('XMLID') == "GENERIC_OBJECT") return;
-    let itemData = XmlToItemData.call(this, skill, 'skill')
+    let itemData
+
+    // GENERIC_OBJECT are likely Power Frameworks.
+    // Rename GENERIC_OBJECT with TAGNAME to make it easier to parse.
+    if (skill.getAttribute('XMLID') == "GENERIC_OBJECT") {
+        skill.setAttribute('XMLID', skill.tagName)
+        itemData = XmlToItemData.call(this, skill, 'skill')
+
+        // This really isn't a skill so get rid of roll so sheet doesn't display a roll button
+        itemData.system.characteristic = null
+        itemData.system.state = null
+        itemData.system.roll = null
+    }
+    else {
+        itemData = XmlToItemData.call(this, skill, 'skill')
+    }
+
     itemData.system.duplicate = duplicate
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // const XMLID = skill.getAttribute('XMLID')
 
@@ -950,7 +970,7 @@ function calcBasePointsPlusAdders(system) {
     // const adders = system.adders || [] //xmlItem.getElementsByTagName("ADDER")
 
 
-    if (system.XMLID == "PD")
+    if (system.XMLID == "COM")
         HEROSYS.log(false, system.XMLID)
 
     if (system.NAME == "Sheet of Steel")
@@ -974,12 +994,14 @@ function calcBasePointsPlusAdders(system) {
     // Base Cost is typcailly extracted directly from HDC
     let baseCost = parseInt(system.BASECOST)
 
+
     // Cost per level is NOT included in the HDC file.
     // We will try to get cost per level via config.js
     // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
+    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
     let costPerLevel = parseFloat(
         configPowerInfo?.costPerLevel ||
-        CONFIG.HERO.characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
+        characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
         system.costPerLevel ||
         baseCost
         || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
@@ -1256,7 +1278,13 @@ function calcRealCost(_activeCost, system) {
 }
 
 export async function uploadPower(power, type) {
-    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") return;
+
+    // GENERIC_OBJECT are likely Power Frameworks.
+    // Rename GENERIC_OBJECT with TAGNAME to make it easier to parse.
+    if (power.getAttribute('XMLID') == "GENERIC_OBJECT") {
+        power.setAttribute('XMLID', power.tagName)
+    }
+
     let itemData = XmlToItemData.call(this, power, type)
 
     let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
@@ -1481,14 +1509,14 @@ export async function uploadPower(power, type) {
     //await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     // Create a copy for movements
-    if (xmlid.toLowerCase() in CONFIG.HERO.movementPowers) {
-        itemData.type = 'movement'
-        itemData.system.value = parseInt(itemData.system.LEVELS) || 0
-        await HeroSystem6eItem.create(itemData, { parent: this.actor })
-    }
+    // if (xmlid.toLowerCase() in CONFIG.HERO.movementPowers) {
+    //     itemData.type = 'movement'
+    //     itemData.system.value = parseInt(itemData.system.LEVELS) || 0
+    //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    // }
 }
 
-function updateItemDescription(system) {
+function updateItemDescription(system, type) {
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
     // so when the power is modified in foundry, the power
@@ -1505,6 +1533,8 @@ function updateItemDescription(system) {
             break;
 
         case "FORCEFIELD":
+        case "ARMOR":
+        case "DAMAGERESISTANCE":
             system.description = system.ALIAS + " ("
             let ary = []
             if (parseInt(system.PDLEVELS)) ary.push(system.PDLEVELS + " PD")
@@ -1542,6 +1572,9 @@ function updateItemDescription(system) {
             break;
 
         case "RUNNING":
+        case "SWIMMING":
+        case "LEAPING":
+        case "TELEPORTATION":
             // Running +25m (12m/37m total)
             system.description = system.ALIAS + " +" + system.LEVELS + "m"
             break;
@@ -1562,12 +1595,23 @@ function updateItemDescription(system) {
             system.description = system.ALIAS + " " + system.OPTION_ALIAS
             break;
 
-        case "KNOWLEDGE_SKILL":
+
         case "LANGUAGES":
+            //English:  Language (basic conversation) (1 Active Points)
             system.description = system.NAME + ": " + (system.INPUT || system.ALIAS)
             if (system.OPTION_ALIAS) {
                 system.description += " (" + system.OPTION_ALIAS + ")"
             }
+            break;
+
+        case "KNOWLEDGE_SKILL":
+            // 6e HDC
+            if (system.ALIAS == "KS") {
+                system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
+            } else {
+                system.description = system.NAME
+            }
+
             break;
 
         case "PENALTY_SKILL_LEVELS":
@@ -1575,7 +1619,8 @@ function updateItemDescription(system) {
             break;
 
         case "RKA":
-            system.description = `${system.ALIAS} ${system.LEVELS}d6 ${system.INPUT}`
+        case "ENERGYBLAST": //Energy Blast 1d6
+            system.description = `${system.ALIAS} ${system.LEVELS}d6`
             break;
 
         case "HANDTOHANDATTACK":
@@ -1585,6 +1630,16 @@ function updateItemDescription(system) {
         case "KBRESISTANCE":
             system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
                 + ` -${system.LEVELS}m`
+            break;
+
+        case "ELEMENTAL_CONTROL":
+            // Elemental Control, 12-point powers
+            system.description = `${system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`
+            break;
+
+        case "FLIGHT":
+            // Flight 5m
+            system.description = `${system.ALIAS} ${system.LEVELS}m`
             break;
 
         default:
@@ -1597,7 +1652,7 @@ function updateItemDescription(system) {
 
     // ADDRS
     if (system.adders.length > 0) {
-        system.description += " ("
+
         let _adderArray = []
         for (let adder of system.adders) {
             switch (adder.XMLID) {
@@ -1623,13 +1678,15 @@ function updateItemDescription(system) {
                 case "MENTAL":
                     _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
                     break;
-                default: _adderArray.push(adder.ALIAS)
+                default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
             }
 
 
 
         }
-        system.description += _adderArray.join("; ") + ")"
+        if (_adderArray.length > 0) {
+            system.description += "(" + _adderArray.join("; ") + ")"
+        }
     }
 
 
@@ -1650,6 +1707,10 @@ function updateItemDescription(system) {
 
     system.description = system.description.trim()
 
+    if (system.XMLID == "STR") {
+        HEROSYS.log(false, system)
+    }
+
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10))
     const costsEnd = system.modifiers.find(o => o.XMLID == "COSTSEND")
@@ -1660,6 +1721,23 @@ function updateItemDescription(system) {
 
     // Some powers do not use Endurance
     if (configPowerInfo && !configPowerInfo.costEnd && !costsEnd) {
+        system.end = 0
+    }
+
+    // STR only costs endurance when used.
+    // Can get a bit messy, like when resisting an entangle, but will deal with that later.
+    if (system.XMLID == "STR") {
+        system.end = 0
+    }
+
+    // MOVEMENT only costs endurance when used.  Typically per round.
+
+    if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+        system.end = 0
+    }
+
+    // PERKS, TALENTS, COMPLICATIONS do not use endurance.
+    if (["perk", "talent", "complication"].includes(type)) {
         system.end = 0
     }
 
@@ -1681,9 +1759,6 @@ function createPowerDescriptionModifier(modifier, powerName) {
 
 
     let result = ""
-
-    if (modifier.XMLID == "")
-        console.log(modifier)
 
     switch (modifier.XMLID) {
         case "CHARGES":
@@ -1714,11 +1789,11 @@ function createPowerDescriptionModifier(modifier, powerName) {
 
     }
 
-    if ((parseInt(modifier.LEVELS) || 0) > 1) {
-        if (["HARDENED"].includes(modifier.XMLID)) {
-            result += "x" + parseInt(modifier.LEVELS)
-        }
-    }
+    // if ((parseInt(modifier.LEVELS) || 0) > 1) {
+    //     if (["HARDENED"].includes(modifier.XMLID)) {
+    //         result += "x" + parseInt(modifier.LEVELS)
+    //     }
+    // }
 
     // ADDERS
 
@@ -1728,6 +1803,15 @@ function createPowerDescriptionModifier(modifier, powerName) {
     // if (modifier.optionId) powerData.description += "; " + modifier.optionId
 
     result += " ("
+
+    // Multiple levels?
+    if ((parseInt(modifier.LEVELS) || 0) > 1) {
+        if (["HARDENED"].includes(modifier.XMLID)) {
+            result += "x" + parseInt(modifier.LEVELS) + "; "
+        }
+    }
+
+
     if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) result += modifier.OPTION_ALIAS + "; "
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
@@ -1949,9 +2033,9 @@ export function SkillRollUpdateValue(item) {
     }
 }
 
-async function createEffects(itemData) {
+export async function createEffects(itemData, actor) {
 
-    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: this.actor })
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: actor || this.actor })
 
     // Not every powers will have effects
     if (!configPowerInfo) return
@@ -1977,6 +2061,28 @@ async function createEffects(itemData) {
                 }
             ]
 
+        }
+
+        itemData.effects = [activeEffect]
+        return
+    }
+
+
+    // Movement Powers
+    if (configPowerInfo?.powerType.includes("movement")) {
+        const key = itemData.system.XMLID.toLowerCase()
+
+        let activeEffect =
+        {
+            label: itemData.name,
+            icon: 'icons/svg/upgrade.svg',
+            changes: [
+                {
+                    key: `system.characteristics.${key}.max`,
+                    value: parseInt(itemData.system.LEVELS),
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+            ]
         }
 
         itemData.effects = [activeEffect]

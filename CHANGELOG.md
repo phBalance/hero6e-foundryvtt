@@ -1,8 +1,13 @@
 # Version 2.2.0-alpha
 - Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.
-- Reworked ActiveEffects to be placed on items (per FoundryVtt design).  This should allow world items to be created with ActiveEffects and dragged onto an actor.  ActiveEffect can be edited/created on most items, although not fully tested.
+- Reworked ActiveEffects to be placed on items (per FoundryVtt design).
 - Apply damage only shown to GMs [#95](https://github.com/dmdorman/hero6e-foundryvtt/issues/95)
 - Power/item descriptions can be sent to chat [#128](https://github.com/dmdorman/hero6e-foundryvtt/issues/128)
+- Initial power framework support.
+- Improved 5e support (COM, DAMAGERESISTANCE, FORCEFIELD).
+- All movements collapsed to characteritics tab.  Movement powers are now toggles [#88](https://github.com/dmdorman/hero6e-foundryvtt/issues/128).
+- Most powers can be toggled [#38](https://github.com/dmdorman/hero6e-foundryvtt/issues/38).  The remaining powers that do not have toggles (but should) are not fully implemented in the system.  As support for those powers is added, so will the toggle.
+- Fixed issue where Killing attacks were not applying hit location multipliers. [#136](https://github.com/dmdorman/hero6e-foundryvtt/issues/136)
 
 # Version 2.1.9-alpha
 - Fixed equipment price showing NaN.  Summary weight/price for equipment now only shows when there are items with weight/price.

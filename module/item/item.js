@@ -138,10 +138,42 @@ export class HeroSystem6eItem extends Item {
     }
 
     async chat() {
+
+        let content = `<div class="item-chat">`
+        
+        // Part of a framework (is there a PARENTID?)
+        if (this.system.PARENTID)
+        {
+            const parent = this.actor.items.find(o=> o.system.ID == this.system.PARENTID)
+            content += `<p><b>${parent.name}</b>` 
+            if (parent.system.description && parent.system.description != parent.name) {
+                content += ` ${parent.system.description}`
+            }
+            content += ".</p>"
+
+        }
+        content += `<b>${this.name}</b>`
+        if (this.system.description && this.system.description != this.name) {
+            content += ` ${this.system.description}`
+        }
+        if (this.system.roll) {
+            content += ` (${this.system.roll})`
+        }
+        content += "."
+
+        if (this.system.end) {
+            content += ` Estimated End: ${this.system.end}.`
+        }
+        if (this.system.realCost) {
+            content += ` Total Cost: ${this.system.realCost} CP.`
+        }
+        content += `</div>`
+
         const chatData = {
             user: game.user._id,
+            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
             type: CONST.CHAT_MESSAGE_TYPES.ChatMessage,
-            content: `<div class="item-chat"><b>${this.name}</b> ${this.system.description}</div>`,
+            content: content,
             //speaker: speaker
         }
         ChatMessage.create(chatData)

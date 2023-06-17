@@ -40,10 +40,12 @@ export class HeroRuler {
                 }
 
                 getMovementSpeed(token) {
-                    const relevantMovementItemId = token.actor.flags.activeMovement
+                    //const relevantMovementItemId = token.actor.flags.activeMovement
 
-                    const movementValue = parseInt(token.actor.items.get(relevantMovementItemId)?.system.value)
-                        || parseInt(token.actor.system.characteristics.running.value)
+                    // const movementValue = parseInt(token.actor.items.get(relevantMovementItemId)?.system.value)
+                    //     || parseInt(token.actor.system.characteristics.running.value)
+                    const key = token.actor.flags.activeMovement || "running"
+                    const movementValue = parseInt(token.actor.system.characteristics[key].value) || 0
 
                     return movementValue
                 }
@@ -83,14 +85,24 @@ export class HeroRuler {
             return
         });
 
-        Hooks.on('updateItem', function (item, args) {
-            if (item.type !== 'movement') { return; }
+        // Hooks.on('updateItem', function (item, args) {
+        //     if (item.type !== 'movement') { return; }
 
+        //     const sceneControls = ui.controls
+        //     if (sceneControls.activeControl !== "token") { return; }
+        //     if (sceneControls.activeTool !== "select") { return; }
+
+        //     movementRadioSelectRender()
+        // });
+
+        Hooks.on('updateActor', function (actor, args) {
             const sceneControls = ui.controls
             if (sceneControls.activeControl !== "token") { return; }
             if (sceneControls.activeTool !== "select") { return; }
-
-            movementRadioSelectRender()
+            if (!args?.system?.characteristics) { return; }
+            if (CONFIG.HERO.movementPowers[Object.keys(args.system.characteristics)[0]]) {
+                movementRadioSelectRender()
+            }
         });
 
         Hooks.on('hdcUpload', function () {
@@ -106,15 +118,33 @@ export class HeroRuler {
 
             const relevantToken = canvas.tokens.controlled[0];
 
-            const movmentItems = relevantToken.actor.items.filter((e) => e.type === "movement");
+            // const movementKeys = Object.keys(relevantToken.actor.system.characteristics)
+            // .filter(o=> CONFIG.HERO.movementPowers[o] )
+            //const movementItems = relevantToken.actor.items.filter((e) => e.type === "movement");
+            let movementItems = []
+            for (const key of Object.keys(relevantToken.actor.system.characteristics).filter(o => CONFIG.HERO.movementPowers[o])) {
+                const char = relevantToken.actor.system.characteristics[key]
+                if ((parseInt(char.value) || 0) > 0) {
+                    char._id = key
+                    char.name = CONFIG.HERO.movementPowers[key]
+                    movementItems.push(char)
+                }
+            }
 
             const renderRadioOptions = () => {
-                const activeMovement = (movmentItems.length === 0) ? "none" : relevantToken.actor.flags.activeMovement || movmentItems[0]._id
+                const activeMovement = (movementItems.length === 0) ? "none" : movementItems.find(o => o._id == relevantToken.actor.flags.activeMovement)?._id || movementItems[0]._id
 
-                const radioOptions = movmentItems.map((item, index) => `
+                // const radioOptions = movmentItems.map((item, index) => `
+                //     <div class="radio" data-tool="${item._id}">
+                //         <input id="radio-${index}" name="radio" type="radio" ${activeMovement === item._id ? 'checked' : ''}>
+                //         <label for="radio-${index}" class="radio-label" style="text-shadow: 0 0 8px white;">${item.name} (${item.system.value}m)</label>
+                //     </div>
+                // `).join('');
+
+                const radioOptions = movementItems.map((item, index) => `
                     <div class="radio" data-tool="${item._id}">
                         <input id="radio-${index}" name="radio" type="radio" ${activeMovement === item._id ? 'checked' : ''}>
-                        <label for="radio-${index}" class="radio-label" style="text-shadow: 0 0 8px white;">${item.name} (${item.system.value}m)</label>
+                        <label for="radio-${index}" class="radio-label" style="text-shadow: 0 0 8px white;">${item.name} (${item.value}m)</label>
                     </div>
                 `).join('');
 
@@ -151,11 +181,21 @@ function setHeroRulerLabel() {
         if (game.modules.get("drag-ruler")?.active && canvas.tokens.controlled.length > 0) {
             const relevantToken = canvas.tokens.controlled[0];
 
-            const movmentItems = relevantToken.actor.items.filter((e) => e.type === "movement");
+            //const movementItems = relevantToken.actor.items.filter((e) => e.type === "movement");
+            let movementItems = []
+            for (const key of Object.keys(relevantToken.actor.system.characteristics).filter(o => CONFIG.HERO.movementPowers[o])) {
+                const char = relevantToken.actor.system.characteristics[key]
+                if ((parseInt(char.value) || 0) > 0) {
+                    char._id = key
+                    char.name = CONFIG.HERO.movementPowers[key]
+                    movementItems.push(char)
+                }
+            }
 
-            const activeMovement = (movmentItems.length === 0) ? "none" : relevantToken.actor.flags.activeMovement || movmentItems[0]._id
+            //const activeMovement = (movementItems.length === 0) ? "none" : relevantToken.actor.flags.activeMovement || movementItems[0]._id
+            const activeMovement = (movementItems.length === 0) ? "none" : movementItems.find(o => o._id == relevantToken.actor.flags.activeMovement)?._id || movementItems[0]._id
 
-            const activeMovementLabel = (activeMovement === "none") ? "Running" : movmentItems.find((e) => e._id === activeMovement)?.name
+            const activeMovementLabel = (activeMovement === "none") ? "Running" : movementItems.find((e) => e._id === activeMovement)?.name
             if (activeMovementLabel) {
                 label += "\n" + activeMovementLabel
             }

@@ -91,7 +91,10 @@ HERO.characteristics = {
     "running": "Running",
     "swimming": "Swimming",
     "leaping": "Leaping",
-    "flying": "Flying",
+    "flight": "Flight",
+    "swinging": "Swinging",
+    "teleportation": "Teleportation",
+    "tunneling": "Tunneling",
 };
 
 HERO.characteristics5e = {
@@ -116,7 +119,10 @@ HERO.characteristics5e = {
     "running": "Running",
     "swimming": "Swimming",
     "leaping": "Leaping",
-    "flying": "Flying",
+    "flight": "Flight",
+    "swinging": "Swinging",
+    "teleportation": "Teleportation",
+    "tunneling": "Tunneling",
 };
 
 HERO.characteristicDefaults = {
@@ -141,6 +147,10 @@ HERO.characteristicDefaults = {
     "running": 12,
     "swimming": 4,
     "leaping": 4,
+    "flight": 0,
+    "swinging": 0,
+    "teleportation": 0,
+    "tunneling": 0,
 };
 
 HERO.characteristicDefaults5e = {
@@ -165,6 +175,10 @@ HERO.characteristicDefaults5e = {
     "running": 6,
     "swimming": 2,
     "leaping": 1,
+    "flight": 0,
+    "swinging": 0,
+    "teleportation": 0,
+    "tunneling": 0,
 };
 
 HERO.characteristicCosts = {
@@ -188,6 +202,10 @@ HERO.characteristicCosts = {
     "running": 1,
     "swimming": 1 / 2,
     "leaping": 1 / 2,
+    "flight": 1,
+    "swinging": 1,
+    "teleportation": 1,
+    "tunneling": 1,
 };
 
 HERO.characteristicCosts5e = {
@@ -212,6 +230,10 @@ HERO.characteristicCosts5e = {
     "running": 2,
     "swimming": 1 / 2,
     "leaping": 1 / 2,
+    "flight": 1,
+    "swinging": 1,
+    "teleportation": 1,
+    "tunneling": 1,
 };
 
 
@@ -237,7 +259,10 @@ HERO.characteristicsXMLKey = {
     "RUNNING": "running",
     "SWIMMING": "swimming",
     "LEAPING": "leaping",
-    "FLIGHT": "flying",
+    "FLIGHT": "flight",
+    "SWINGING": "swinging",
+    "TELEPORTATION": "teleportation",
+    "TUNNELING": "tunneling",
     "GENERAL": "general"
 };
 
@@ -371,6 +396,7 @@ HERO.powers = {
     "END": { powerType: ["characteristic"] },
     "BODY": { powerType: ["characteristic"] },
     "STUN": { powerType: ["characteristic"] },
+    "COM": { powerType: ["characteristic"] },
 
     // Misc
     "CLINGING": { powerType: ["standard"] },
@@ -645,6 +671,7 @@ HERO.powers = {
     "FLIGHT": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
     "LEAPING": { powerType: ["movement"], costEnd: true, costPerLevel: 0.5, },
     "TELEPORTATION": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
+    "SWIMMING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
     "SWINGING": { powerType: ["movement"], costEnd: true, costPerLevel: 0.5, },
     "TUNNELING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
     "RUNNING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
@@ -738,6 +765,24 @@ HERO.powers = {
     "VENTRILOQUISM": { powerType: ["skill"] },
     "WEAPON_FAMILIARITY": { powerType: ["skill"] },
     "WEAPONSMITH": { powerType: ["skill"], categorized: true },
+
+    // Power Frameworks
+    "LIST": { powerType: ["framework"] },
+    "VPP": { powerType: ["framework"] },
+    "ELEMENTAL_CONTROL": { powerType: ["framework"] },
+
+    // Misc
+    "DUPLICATION": {
+        powerType: ["BodyAffecting", "special"],
+        name: "Duplication",
+        percievability: "Obvious",
+        duration: "persistent",
+        target: "Self Only",
+        range: "Self",
+        costEnd: false,
+        costPerLevel: 1 / 5,
+    },
+    "CUSTOMPOWER": { powerType: ["custom"] },
 }
 
 HERO.powers5e = {
@@ -767,6 +812,22 @@ HERO.powers5e = {
         name: "Resistant Protection",
         costPerLevel: 3 / 2
     },  // AKA RESISTANT PROTECTION
+    "DAMAGERESISTANCE": {
+        name: "Damage Resistance",
+        powerType: ["defense"],
+        //percievability: "obvious",
+        duration: "Instant",
+        target: "Self Only",
+        range: "Self",
+        costEnd: false,
+        costPerLevel: 1 / 2
+    },
+    "FORCEFIELD": {
+        powerType: ["defense"],
+        name: "Resistant Protection",
+        costEnd: true,
+        costPerLevel: 3 / 2
+    }, 
 }
 
 // These (mostly 5e) powers are rebranded as 6e powers
@@ -787,6 +848,48 @@ HERO.ModifierOverride = {
     "PHYSICAL": { BASECOST: 5 }, // DAMAGENEGATION
     "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
     "MENTAL": { BASECOST: 5 }, // DAMAGENEGATION
+}
+
+// Valid Power Options (found these in Custom Power)
+HERO.ValidPowerOptions = {
+    "Range": {
+        "SelfOnly": "Self Only",
+        "None": "None",
+        "Ranged": "Ranged",
+        "LineOfSight": "Line of Sight",
+    },
+    "Duration": {
+        "Instant": "Instant",
+        "Constant": "Constant",
+        "Persistent": "Persistent",
+        "Inherent": "Inherent"
+    },
+    "Target": {
+        "NA": "N/A",
+        "SelfOnly": "Self Only",
+        "DCV": "DCV",
+        "DMCV": "DMCV",
+        "HEX": "HEX",
+    },
+    "Defense": {
+        "None": "None",
+        "Normal": "Normal",
+        "Mental": "Mental",
+        "Power": "Power",
+        "Flash": "Flash",
+    },
+    "Adders": {
+        "Adjustment": "Adjustment Power",
+        "Attack": "Attack Power",
+        "BodyAffecting": "Body-Affecting Power",
+        "Defense": "Defense Power",
+        "Mental": "Mental Power",
+        "Movement": "Movement Power",
+        "SenseAffecting": "Sense-Affecting Power",
+        "Sensory": "Sensory Power",
+        "Size": "Size Power",
+        "Special": "Special Power",
+    },
 }
 
 HERO.areaOfEffect = {

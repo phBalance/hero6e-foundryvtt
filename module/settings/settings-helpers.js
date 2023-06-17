@@ -86,6 +86,7 @@ export default class SettingsHelpers {
         type: Boolean,
         default: false,
         //onChange: foundry.utils.debouncedReload(),
+        requiresReload: true,
       });
 
       // Keep track of last migration version
@@ -95,6 +96,7 @@ export default class SettingsHelpers {
         config: game.settings.get(game.system.id, 'alphaTesting'),
         type: String,
         default: '1.0.0',
+        requiresReload: true,
       });
 
     }

@@ -313,14 +313,18 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{#if
-                            item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}</td>
+                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
+                            {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
+                            {{#if item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}
+                        </td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.characteristic}}</td>
                         <td>
+                            {{#if item.system.roll}}
                             <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
                                 data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
                                 sign=false}}-</button>
+                            {{/if}}
                         </td>
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
@@ -394,16 +398,16 @@
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
-                        <th>{{localize "ActorSheet.Max"}}</th>
                         <th>{{localize "ActorSheet.Value"}}</th>
                         <th>{{localize "ActorSheet.Velocity"}}</th>
+                        <th>{{localize "ActorSheet.Active"}}</th>
                         <th class="right">
-                            <a class="item-control item-create" title="Create movement" data-type="movement">
-                                <i class="fas fa-plus"></i> Add Movement</a>
+                            {{!-- <a class="item-control item-create" title="Create movement" data-type="movement">
+                                <i class="fas fa-plus"></i> Add Movement</a> --}}
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "movement") }}
+                    {{#if (or (eq item.type "movement")(eq item.subType "movement")) }}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -411,9 +415,14 @@
                         </td>
                         <td class="left">{{item.name}}</td>
                         <td class="left">{{item.system.description}}</td>
-                        <td>{{item.system.max}}</td>
                         <td>{{item.system.value}}</td>
                         <td>{{item.system.velValue}}</td>
+                        <td>
+                            {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
+                                name="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
+                                data-action="toggle" />
+                            {{/if}}
+                        </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>
@@ -451,7 +460,8 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">{{#if
+                            item.system.childIdx}}{{item.system.childIdx}}) {{/if}}{{item.name}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.endEstimate}}</td>
                         <td class="left">{{item.system.description}}</td>
