@@ -409,6 +409,7 @@ export async function _onRollDamage(event) {
         // hit locations
         useHitLoc: damageDetail.useHitLoc,
         hitLocText: damageDetail.hitLocText,
+        hitLocation: damageDetail.hitLocation,
 
         // body
         bodyDamage: damageDetail.bodyDamage,
@@ -528,7 +529,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // determine active defenses
     // -------------------------------------------------
     let defense = "";
-    HEROSYS.log(false, defense)
     let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(token.actor, item)
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); "
@@ -742,7 +742,7 @@ async function _calcDamage(damageResult, item, options) {
     }
 
     let hasStunMultiplierRoll = false;
-    let renderedStunMultiplierRoll = null;
+    //let renderedStunMultiplierRoll = null;
     let stunMultiplier = 1;
     let noHitLocationsPower = false
 
@@ -768,12 +768,13 @@ async function _calcDamage(damageResult, item, options) {
 
     // get hit location
     let hitLocationModifiers = [1, 1, 1, 0];
-    let hitLocation = "None";
+    let hitLocation =  "None";
     let useHitLoc = false;
     //let noHitLocationsPower = false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
         useHitLoc = true;
 
+        options.aim = options.aim || options.hitLocation
         hitLocation = options.aim;
         if (options.aim === 'none' || !options.aim) {
             let locationRoll = new Roll("3D6")
@@ -946,8 +947,8 @@ async function _calcDamage(damageResult, item, options) {
             `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
             `A character automatically takes 1 STUN for every 1 point of BODY
         damage that gets through his defenses. He can Recover this STUN
-        normally; he doesn’t have to heal the BODY damage first.` +
-            `"></i>; `
+        normally; he doesn't have to heal the BODY damage first.` +
+            `"></i> `
     }
 
     // The body of a penetrating attack is the minimum damage
@@ -994,6 +995,7 @@ async function _calcDamage(damageResult, item, options) {
     damageDetail.hasStunMultiplierRoll = hasStunMultiplierRoll
     damageDetail.useHitLoc = useHitLoc
     damageDetail.hitLocText = hitLocText
+    damageDetail.hitLocation = hitLocation
 
     damageDetail.knockbackMessage = knockbackMessage
     damageDetail.useKnockBack = useKnockBack
