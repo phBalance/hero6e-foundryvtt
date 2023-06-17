@@ -57,7 +57,7 @@ export class HeroSystem6eActor extends Actor {
     // Make sure only one of the same ActiveEffect is added
     // Assumes ActiveEffect is a statusEffects.
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
-    async XXaddActiveEffect(activeEffect) {
+    async addActiveEffect(activeEffect) {
 
         const newEffect = deepClone(activeEffect)
         newEffect.label = `${game.i18n.localize(newEffect.label)}`

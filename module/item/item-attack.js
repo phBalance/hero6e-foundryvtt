@@ -118,6 +118,7 @@ export async function AttackToHit(item, options) {
     //     tags.push({ value: options.toHitMod, name: "toHitMod" })
     // }
 
+    // [x Stun, x N Stun, x Body, OCV modifier]
     let noHitLocationsPower = false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim !== "none" && !noHitLocationsPower) {
         rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[options.aim][3]);
@@ -765,12 +766,44 @@ async function _calcDamage(damageResult, item, options) {
     }
     penetratingBody = Math.max(0, penetratingBody - options.impenetrableValue)
 
+    // get hit location
+    let hitLocationModifiers = [1, 1, 1, 0];
+    let hitLocation = "None";
+    let useHitLoc = false;
+    //let noHitLocationsPower = false;
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
+        useHitLoc = true;
+
+        hitLocation = options.aim;
+        if (options.aim === 'none' || !options.aim) {
+            let locationRoll = new Roll("3D6")
+            let locationResult = await locationRoll.roll({ async: true });
+            hitLocation = CONFIG.HERO.hitLocationsToHit[locationResult.total];
+        }
+
+        hitLocationModifiers = CONFIG.HERO.hitLocations[hitLocation];
+
+        if (game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all") {
+            let sidedLocations = ["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]
+            if (sidedLocations.includes(hitLocation)) {
+                let sideRoll = new Roll("1D2", actor.getRollData());
+                let sideResult = await sideRoll.roll();
+
+                if (sideResult.result === 1) {
+                    hitLocation = "Left " + hitLocation;
+                } else {
+                    hitLocation = "Right " + hitLocation;
+                }
+            }
+        }
+    }
+    
 
     if (itemData.killing) {
         // Killing Attack
         hasStunMultiplierRoll = true;
         body = damageResult.total;
-        let hitLocationModifiers = [1, 1, 1, 0];
+        //let hitLocationModifiers = [1, 1, 1, 0];
 
         // 6E uses 1d3 stun multiplier
         let stunRoll = new Roll("1D3", item.actor.getRollData());
@@ -845,42 +878,13 @@ async function _calcDamage(damageResult, item, options) {
     stun = stun < 0 ? 0 : stun;
     body = body < 0 ? 0 : body;
 
-    // get hit location
-    let hitLocationModifiers = [1, 1, 1, 0];
-    let hitLocation = "None";
-    let useHitLoc = false;
-    //let noHitLocationsPower = false;
-    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
-        useHitLoc = true;
-
-        hitLocation = options.aim;
-        if (options.aim === 'none' || !options.aim) {
-            let locationRoll = new Roll("3D6")
-            let locationResult = await locationRoll.roll({ async: true });
-            hitLocation = CONFIG.HERO.hitLocationsToHit[locationResult.total];
-        }
-
-        hitLocationModifiers = CONFIG.HERO.hitLocations[hitLocation];
-
-        if (game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all") {
-            let sidedLocations = ["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]
-            if (sidedLocations.includes(hitLocation)) {
-                let sideRoll = new Roll("1D2", actor.getRollData());
-                let sideResult = await sideRoll.roll();
-
-                if (sideResult.result === 1) {
-                    hitLocation = "Left " + hitLocation;
-                } else {
-                    hitLocation = "Right " + hitLocation;
-                }
-            }
-        }
-    }
+    
 
     let hitLocText = "";
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
         if (itemData.killing) {
             // killing attacks apply hit location multiplier after resistant damage protection has been subtracted
+            // Location : [x Stun, x N Stun, x Body, OCV modifier]
             body = body * hitLocationModifiers[2];
 
             hitLocText = "Hit " + hitLocation + " (x" + hitLocationModifiers[0] + " STUN x" + hitLocationModifiers[2] + " BODY)";
@@ -945,7 +949,7 @@ async function _calcDamage(damageResult, item, options) {
         normally; he doesn’t have to heal the BODY damage first.` +
             `"></i>; `
     }
-    l
+
     // The body of a penetrating attack is the minimum damage
     if (penetratingBody > body) {
         if (itemData.killing) {
