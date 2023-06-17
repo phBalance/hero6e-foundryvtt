@@ -246,11 +246,7 @@
                     <tr class="sticky">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
-                        <th class="left">{{localize "ActorSheet.Type"}}</th>
-                        <th>{{localize "ActorSheet.Value"}}</th>
-                        <th>{{localize "ActorSheet.Res"}}</th>
-                        <th>{{localize "ActorSheet.Hard"}}</th>
-                        <th>{{localize "ActorSheet.Imp"}}</th>
+                        <th class="left">{{localize "ActorSheet.Description"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create defense" data-type="defense">
@@ -266,10 +262,6 @@
                         </td>
                         <td class="left">{{item.name}}</td>
                         <td class="left">{{item.system.description}}</td>
-                        <td>{{item.system.value}}</td>
-                        <td>{{item.system.resistant}}</td>
-                        <td>{{item.system.hardened}}</td>
-                        <td>{{item.system.impenetrable}}</td>
                         <td>
                             <input class="item-toggle" type="checkbox" {{checked item.system.active}}
                                 data-dtype="Boolean" />
