@@ -127,7 +127,7 @@ export class HeroSystem6eCombat extends Combat {
      * @type {number}
      */
     get heroTurn() {
-        return Math.max(this._heroTurn, 0);
+        return Math.max(this._heroTurn, 0) || 0;
     }
 
     set heroTurn(heroTurn) {
@@ -233,12 +233,12 @@ export class HeroSystem6eCombat extends Combat {
 
         const segementIndexes = this.segments.reduce((accumulator, currentValue, currentIndex) => {
             if (currentValue.length > 0) {
-            accumulator.push(currentIndex);
+                accumulator.push(currentIndex);
             }
             return accumulator;
         }, []);
 
-        
+
         if (Number(segement) === 12) {
             nextSegment = segementIndexes[0]
         }
@@ -409,13 +409,13 @@ export class HeroSystem6eCombat extends Combat {
             // const allInitiatives = [[name, initativeValue]]
             const allInitiatives = []
             for (const item of combatant.actor.items) {
-                if (! item.system.hasOwnProperty('id')) { continue; }
+                if (!item.system.hasOwnProperty('id')) { continue; }
 
-                switch(item.system.id) {
+                switch (item.system.id) {
                     case ('LIGHTNING_REFLEXES_ALL'): {
                         const lightning_reflex_initiative = (parseInt(dexValue) + parseInt(item.system.other.levels)) + (parseInt(initativeValue) / 100)
                         const lightning_reflex_alias = '(' + item.system.other.option_alias + ')'
-                        
+
                         allInitiatives.push([name, lightning_reflex_alias, lightning_reflex_initiative])
                         break;
                     }
@@ -427,11 +427,13 @@ export class HeroSystem6eCombat extends Combat {
 
             allInitiatives.sort((a, b) => b[2] - a[2])
 
-            updates.push({ 
-                _id: id, initiative: initativeValue, 
-                name: name,
-                'flags.initiatives': allInitiatives
-            });
+            if (this.combatants.get(id).initiative != initativeValue) {
+                updates.push({
+                    _id: id, initiative: initativeValue,
+                    name: name,
+                    'flags.initiatives': allInitiatives
+                });
+            }
 
             //updates.push({ _id: id, initiative: roll.total });
 
@@ -544,8 +546,8 @@ export class HeroSystem6eCombat extends Combat {
                 }
             }
 
-            segments[i].sort(function(a, b) {
-                return  b.initiative - a.initiative
+            segments[i].sort(function (a, b) {
+                return b.initiative - a.initiative
             });
         }
 
@@ -761,7 +763,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
         const relevantCombat = game.combats.combats.find(e => e.active === true);
 
-        switch(control) {
+        switch (control) {
             case 'startCombat': {
                 relevantCombat.startCombat()
                 this.render();
