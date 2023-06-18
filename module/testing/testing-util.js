@@ -12,34 +12,26 @@ export function registerUtilTests(quench) {
 
             describe("modifyRollEquation Suite", function () {
                 it("1+1", function () {
-                    const equation = "1"
-                    const value = "1"
-
-                    assert.equal(modifyRollEquation(equation, value), "1 + 1");
+                    assert.equal(modifyRollEquation("1", "1"), "1 + 1");
                 });
 
                 it("1-1", function () {
-                    const equation = "1"
-                    const value = "-1"
-
-                    assert.equal(modifyRollEquation(equation, value), "1 - 1");
+                    assert.equal(modifyRollEquation("1", "-1"), "1 - 1");
                 });
 
                 it("1+0", function () {
-                    const equation = "1"
-                    const value = "0"
-
-                    assert.equal(modifyRollEquation(equation, value), "1");
+                    assert.equal(modifyRollEquation("1", "0"), "1");
                 });
 
                 it("1-0", function () {
-                    const equation = "1"
-                    const value = "-0"
+                    assert.equal(modifyRollEquation("1", "-0"), "1");
+                });
 
-                    assert.equal(modifyRollEquation(equation, value), "1");
+                it("1+NaN", function() {
+                    assert.equal(modifyRollEquation("1", NaN), "1")
                 });
             }); 
         },
-        { displayName: "QUENCH: Util Testing" }
+        { displayName: "HERO: Util Testing" }
     );
 }
