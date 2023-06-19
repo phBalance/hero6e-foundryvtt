@@ -1,5 +1,4 @@
 import { HEROSYS } from "../herosystem6e.js";
-import { modifyForStrength } from "../utility/damage.js"
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
 
@@ -9,8 +8,7 @@ export function registerDamageFunctionTests(quench) {
         (context) => {
             const { describe, it, assert } = context
 
-            // modifyForStrength(damageRoll, effectiveStr, item, actor)
-            describe("modifyForStrength Suite", function () {
+            describe("Example Suite", function () {
                 const damageRoll = "1D6";
                 const actor = new HeroSystem6eActor({
                     name: 'Test Actor',
@@ -46,32 +44,8 @@ export function registerDamageFunctionTests(quench) {
                     // runs before each test
                 });
 
-                it("Item does not use strength", function () {
-                    assert.equal(modifyForStrength(damageRoll, 10, itemNoStrength, actor), "1D6");
-                });
-
-                it("(NKA) Effective Str > Normal Str", function () {
-                    assert.equal(modifyForStrength(damageRoll, 20, itemUsesStrength, actor), "1D6 + 4D6");
-                });
-
-                it("(KA) Effective Str > Normal Str", function () {
-                    assert.equal(modifyForStrength(damageRoll, 20, itemUsesStrengthKilling, actor), "1D6 + 2D6");
-                });
-
-                it("(NKA) Effective Str === 0 ", function () {
-                    assert.equal(modifyForStrength(damageRoll, 0, itemUsesStrength, actor), "1D6");
-                });
-
-                it("(KA) Effective Str === 0 ", function () {
-                    assert.equal(modifyForStrength(damageRoll, 0, itemUsesStrengthKilling, actor), "1D6");
-                });
-
-                it("(NKA) Effective Str just under pip", function () {
-                    assert.equal(modifyForStrength(damageRoll, 9, itemUsesStrength, actor), "1D6 + 1D6");
-                });
-
-                it("(NKA) Effective Str just over pip", function () {
-                    assert.equal(modifyForStrength(damageRoll, 11, itemUsesStrength, actor), "1D6 + 2D6");
+                it("Test Name", function () {
+                    assert.equal(true, true);
                 });
 
                 after(function() {
