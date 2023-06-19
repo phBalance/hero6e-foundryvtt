@@ -2028,7 +2028,7 @@ export function SkillRollUpdateValue(item) {
         // Skill Enahncers provide a discount to the purchase of asssociated skills.
         // They no not change the roll.
         // Skip for now.
-        HEROSYS.log(false, (skillData.xmlid || item.name) + ' was not included in skills.  Likely Skill Enhancer')
+        // HEROSYS.log(false, (skillData.xmlid || item.name) + ' was not included in skills.  Likely Skill Enhancer')
         return
     }
 }

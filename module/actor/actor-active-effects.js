@@ -13,8 +13,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         id: "stunned",
         icon: 'icons/svg/daze.svg',
         changes: [
-            { key: "data.characteristics.ocv.modifier", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
-            { key: "data.characteristics.dcv.modifier", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+            { key: "system.characteristics.ocv.modifier", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.dcv.modifier", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
         ]
     };
 
@@ -29,8 +29,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         id: "unconscious",
         icon: 'icons/svg/unconscious.svg',
         changes: [
-            { key: "data.characteristics.ocv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
-            { key: "data.characteristics.dcv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+            { key: "system.characteristics.ocv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.dcv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
         ]
     };
 
@@ -39,8 +39,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         id: "dead",
         icon: 'icons/svg/skull.svg',
         changes: [
-            { key: "data.characteristics.ocv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
-            { key: "data.characteristics.dcv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+            { key: "system.characteristics.ocv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.dcv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
         ]
     };
 

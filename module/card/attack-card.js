@@ -1,7 +1,5 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eCard } from "./card.js";
-import { HeroSystem6eDamageCard } from "./damage-card.js";
-import { HeroSystem6eHitLocCard } from "./hitLoc-card.js";
 import { HeroSystem6eToHitCard2 } from "./toHit-card2.js";
 
 export class HeroSystem6eAttackCard extends HeroSystem6eCard {

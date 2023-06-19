@@ -1,18 +1,29 @@
+import { HEROSYS } from "../herosystem6e.js";
+
 export async function enforceManeuverLimits(actor, itemId, itemName) {
-    let exceptions = ["Set", "Brace"]
+    const exceptions = ["Set", "Brace"]
 
-    for (let i of actor.items) {
-        if (i.type === "maneuver" && i.id !== itemId && i.system.active && !exceptions.includes(i.name) || itemName.includes("Move")) {
-            await i.update({ ["system.active"]: false });
-        }
+    const maneuverItems = actor.items.filter((e) => e.type === "maneuver")
 
-        // check manuever sub items for powers
-        if ((i.type === "power" || i.type === "equipment") && ("items" in i.system) && ("maneuver" in i.system.items)) {
-            for (const [key, value] of Object.entries(i.system.items.maneuver)) {
-                if (value.type && value.visible && value.active && key !== itemId) {
-                    await i.update({ [`system.subItems.maneuver.${key}.active`]: false });
-                }
+    const relevantItem = actor.items.get(itemId)
+
+    if (relevantItem.name.toLowerCase().includes("move") || relevantItem.name.toLowerCase().includes("dodge")) {
+        // Manuevers with a a move step should clear all other maneuvers
+        for (const maneuver of maneuverItems) {
+            if (maneuver === relevantItem) {
+                await maneuver.update({ "system.active": !relevantItem.system.active })
+            } else {
+                await maneuver.update({ "system.active": false })
             }
         }
+    } else {
+        // For manuevers that don't include a move step don't toggle Set or Brace
+        for (const maneuver of maneuverItems) {
+            if (maneuver === relevantItem) {
+                await maneuver.update({ "system.active": !relevantItem.system.active })
+            } else if (!exceptions.includes(maneuver.name)) {
+                await maneuver.update({ "system.active": false })
+            }
+        }        
     }
 }

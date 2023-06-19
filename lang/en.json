@@ -75,6 +75,10 @@
         "DragRuler": {
             "Install": "Drag Ruler module is recommended. Please install.",
             "Active": "Drag Ruler module is not activated. Please activate."
+        },
+        "Quench": {
+            "Install": "Hey, HERO system develeoper, please install the Quench module.",
+            "Active": "Hey, HERO system develeoper, please set the Quench module to active."
         }
     },
     "Movement": {

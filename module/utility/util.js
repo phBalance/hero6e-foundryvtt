@@ -1,10 +1,12 @@
 export function modifyRollEquation(equation, value) {
+    if (!value) { return equation; }
+
     if (value != 0) {
         let sign = " + ";
         if (value < 0) {
-            sign = " ";
+            sign = " - ";
         }
-        equation = equation + sign + value;
+        equation = equation + sign + Math.abs(value);
     }
 
     return equation
@@ -14,7 +16,7 @@ export function getTokenChar(token, char, data) {
     let baseActor = game.actors.get(token.data.actorId);
 
     try {
-        return token.data.actorData.data.characteristics[`${char}`][`${data}`];
+        return token.data.actorData.system.characteristics[`${char}`][`${data}`];
     } catch (TypeError) {
         return baseActor.system.characteristics[`${char}`][`${data}`];
     }

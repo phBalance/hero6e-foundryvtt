@@ -146,8 +146,7 @@ export class HEROSYS {
         const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
 
         if (shouldLog) {
-            let shortTrace = (new Error()).stack.split("\n")[2].trim().split(" ")[2]
-            console.log(this.ID, '|' + shortTrace, ...args);
+            console.log(this.ID, '|', ...args);
         }
     }
 

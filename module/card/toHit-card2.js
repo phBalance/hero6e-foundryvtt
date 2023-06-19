@@ -160,8 +160,6 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
             game.dice3d.showForRoll(attackRoll)
         }
         
-
-
         let hitRollData = result.total;
         let hitRollText = "Hits a " + toHitChar + " of " + hitRollData;
         // -------------------------------------------------
@@ -195,12 +193,12 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
                 let changes = {};
                 if (newEnd < 0) {
                     changes = {
-                        "data.characteristics.end.value": 0,
-                        "data.characteristics.stun.value": parseInt(actor.system.characteristics.stun.value) + parseInt(newEnd),
+                        "system.characteristics.end.value": 0,
+                        "system.characteristics.stun.value": parseInt(actor.system.characteristics.stun.value) + parseInt(newEnd),
                     }
                 } else {
                     changes = {
-                        "data.characteristics.end.value": newEnd,
+                        "system.characteristics.end.value": newEnd,
                     }
                 }
                 await actor.update(changes);
