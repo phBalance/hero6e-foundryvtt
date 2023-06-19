@@ -373,7 +373,7 @@ export class HeroSystem6eCombat extends Combat {
      * @param {string|null} [options.formula]         A non-default initiative formula to roll. Otherwise the system default is used.
      * @param {boolean} [options.updateTurn=true]     Update the Combat heroTurn after adding new initiative scores to keep the heroTurn on the same Combatant.
      * @param {object} [options.messageOptions={}]    Additional options with which to customize created Chat Messages
-     * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete.
+     * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete. 
      */
 
     async rollInitiative(ids, { formula = null, updateTurn = true, messageOptions = {} } = {}) {
