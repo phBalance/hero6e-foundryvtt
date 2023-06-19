@@ -402,10 +402,10 @@ export class HeroSystem6eCombat extends Combat {
 
                 switch(item.system.id) {
                     case ('LIGHTNING_REFLEXES_ALL'): {
-                        const levels = item.system.levels || 0
+                        const levels = item.system.LEVELS || item.system.other.levels
                         const lightning_reflex_initiative = (parseInt(dexValue) + parseInt(levels)) + (parseInt(initativeValue) / 100)
                         
-                        const alias = item.system.OPTION_ALIAS || 'None'
+                        const alias = item.system.OPTION_ALIAS || item.system.other.option_alias
                         const lightning_reflex_alias = '(' + alias + ')'
                         
                         allInitiatives.push([name, lightning_reflex_alias, lightning_reflex_initiative])
