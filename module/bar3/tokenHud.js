@@ -28,7 +28,7 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
     middleColumn.find("div.attribute").remove();
     //html.find(".col.middle .bar1").remove()
 
-    let actor = tokenHud.actor || tokenHud.object.document.getActor()
+    let actor = tokenHud.actor || tokenHud.object.document.actor || tokenHud.object.document.getActor()
     data.actor = actor
 
     // Define bar3data

@@ -225,7 +225,6 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
             case "maneuver":
-                await item.update({ [attr]: newValue })
                 await enforceManeuverLimits(this.actor, item.id, item.name)
                 await updateCombatAutoMod(item.actor, item)
                 break;

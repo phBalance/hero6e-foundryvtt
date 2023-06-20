@@ -289,8 +289,6 @@ export class HeroSystem6eCombat extends Combat {
         // Update the encounter
         const advanceTime = CONFIG.time.turnTime;
 
-        // return this.update({ heroRound: heroRound, turn: next }, { advanceTime });
-
         return this.update({ heroRound: heroRound, turn: next });
     }
 
@@ -314,6 +312,7 @@ export class HeroSystem6eCombat extends Combat {
         const heroRound = Math.max(this.heroRound - 1, 0);
         let advanceTime = -1 * this.heroTurn * CONFIG.time.turnTime;
         if (heroRound > 0) advanceTime -= CONFIG.time.heroRoundTime;
+
         return this.update({ heroRound, segment, heroTurn }, { advanceTime });
     }
 
@@ -359,8 +358,9 @@ export class HeroSystem6eCombat extends Combat {
      */
     async resetAll() {
         for (let c of this.combatants) {
-            c.data.update({ initiative: null });
+            c.update({ initiative: null });
         }
+
         return this.update({ heroTurn: 0, combatants: this.combatants.toJSON() }, { diff: false });
     }
 
@@ -373,19 +373,12 @@ export class HeroSystem6eCombat extends Combat {
      * @param {string|null} [options.formula]         A non-default initiative formula to roll. Otherwise the system default is used.
      * @param {boolean} [options.updateTurn=true]     Update the Combat heroTurn after adding new initiative scores to keep the heroTurn on the same Combatant.
      * @param {object} [options.messageOptions={}]    Additional options with which to customize created Chat Messages
-     * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete.
+     * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete. 
      */
 
     async rollInitiative(ids, { formula = null, updateTurn = true, messageOptions = {} } = {}) {
         // Structure input data
         ids = typeof ids === "string" ? [ids] : ids;
-
-        /*
-        if (this.combatant === undefined) return;
-
-        const currentId = this.combatant.id;
-        const rollMode = messageOptions.rollMode || game.settings.get("core", "rollMode");
-        */
 
         // Iterate over Combatants, performing an initiative roll for each
         const updates = [];
@@ -400,10 +393,6 @@ export class HeroSystem6eCombat extends Combat {
             let intValue = combatant.actor.system.characteristics.int.value
             let initativeValue = dexValue + (intValue / 100)
 
-            //formula = initativeValue.toString()
-
-            //const roll = combatant.getInitiativeRoll(formula);
-
             const name = combatant.actor.name
 
             // const allInitiatives = [[name, initativeValue]]
@@ -413,9 +402,12 @@ export class HeroSystem6eCombat extends Combat {
 
                 switch (item.system.id) {
                     case ('LIGHTNING_REFLEXES_ALL'): {
-                        const lightning_reflex_initiative = (parseInt(dexValue) + parseInt(item.system.other.levels)) + (parseInt(initativeValue) / 100)
-                        const lightning_reflex_alias = '(' + item.system.other.option_alias + ')'
-
+                        const levels = item.system.LEVELS || item.system.other.levels || 0
+                        const lightning_reflex_initiative = (parseInt(dexValue || 0 ) + parseInt(levels)) + (parseInt(initativeValue || 0) / 100)
+                        
+                        const alias = item.system.OPTION_ALIAS || item.system.other.option_alias || 'None'
+                        const lightning_reflex_alias = '(' + alias + ')'
+                        
                         allInitiatives.push([name, lightning_reflex_alias, lightning_reflex_initiative])
                         break;
                     }
@@ -427,37 +419,12 @@ export class HeroSystem6eCombat extends Combat {
 
             allInitiatives.sort((a, b) => b[2] - a[2])
 
-            if (this.combatants.get(id).initiative != initativeValue) {
-                updates.push({
-                    _id: id, initiative: initativeValue,
-                    name: name,
-                    'flags.initiatives': allInitiatives
-                });
-            }
-
-            //updates.push({ _id: id, initiative: roll.total });
-
-            // Construct chat message data
-            /*
-            let messageData = foundry.utils.mergeObject({
-                speaker: {
-                    scene: this.scene.id,
-                    actor: combatant.actor?.id,
-                    token: combatant.token?.id,
-                    alias: combatant.name
-                },
-                flavor: game.i18n.format("COMBAT.RollsInitiative", { name: combatant.name }),
-                flags: { "core.initiativeRoll": true }
-            }, messageOptions);
-            const chatData = await roll.toMessage(messageData, {
-                create: false,
-                rollMode: combatant.hidden && (rollMode === "roll") ? "gmroll" : rollMode
+            updates.push({ 
+                _id: id, 
+                initiative: initativeValue || 0, 
+                name: name,
+                'flags.initiatives': allInitiatives
             });
-            */
-
-            // Play 1 sound for the whole rolled set
-            //if (i > 0) chatData.sound = null;
-            //messages.push(chatData);
         }
         if (!updates.length) return this;
 
@@ -496,6 +463,7 @@ export class HeroSystem6eCombat extends Combat {
     async setInitiative(id, value) {
         const currentId = this.combatant.id;
         const combatant = this.combatants.get(id, { strict: true });
+
         await combatant.update({ initiative: value });
         await this.update({ heroTurn: this.segments[this.segment].findIndex(c => c.id === currentId) });
     }
@@ -561,7 +529,7 @@ export class HeroSystem6eCombat extends Combat {
             segment: this.segment,
             heroTurn: this.heroTurn,
             combatantId: c ? c.id : null,
-            tokenId: c ? c.data.tokenId : null
+            tokenId: c ? c.tokenId : null
         };
 
         let success = this.segments = segments;
@@ -681,7 +649,8 @@ export class HeroSystem6eCombat extends Combat {
         // Keep the current Combatant the same after adding new Combatants to the Combat
         if (current) {
             let heroTurn = Math.max(this.segments[this.segment].findIndex(t => t.id === current.id), 0);
-            if (game.user.id === userId) this.update({ heroTurn });
+
+            if (game.user.id === userId) this.update({ heroTurn });            
             else this.update({ heroTurn });
         }
 
@@ -730,6 +699,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // Update database or perform a local override
         heroTurn = Math.max(heroTurn, 0);
+
         if (game.user.id === userId) this.update({ heroTurn });
         else this.update({ heroTurn });
 
@@ -867,7 +837,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                         initiative: combatant.initiative,
                         hasResource: resource !== null,
                         resource: resource,
-                        actorData: combatant.token._actor.system,
+                        actorData: combatant.token?.actor?.system || combatant.token._actor.system,
                         isFake: combatant.isFake || false
                     };
 
@@ -892,7 +862,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                     }
                     if (combatant.actor) combatant.actor.temporaryEffects.forEach(e => {
                         if (e.getFlag("core", "statusId") === CONFIG.Combat.defeatedStatusId) heroTurn.defeated = true;
-                        else if (e.data.icon) heroTurn.effects.add(e.data.icon);
+                        else if (e.icon) heroTurn.effects.add(e.icon);
                     });
                     heroTurns.push(heroTurn);
                 }

@@ -62,7 +62,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // 6e vs 5e
     if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
-        this.actor.update([{ 'system.is5e': true }])
+        this.actor.update({ 'system.is5e': true }, {render: false})
     }
     const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
@@ -150,8 +150,8 @@ export async function applyCharacterSheet(xmlDoc) {
         //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
         // }
     }
-
-    await this.actor.update(changes)
+   
+    await this.actor.update(changes, {render: false})
     changes = {}
 
     // Initial 5e support
@@ -246,7 +246,7 @@ export async function applyCharacterSheet(xmlDoc) {
         figuredChanges[`system.characteristics.omcv.realCost`] = 0
         figuredChanges[`system.characteristics.dmcv.realCost`] = 0
 
-        await this.actor.update(figuredChanges)
+        await this.actor.update(figuredChanges, {render: false})
     }
     else {
         // Confirm 6E
@@ -255,7 +255,7 @@ export async function applyCharacterSheet(xmlDoc) {
                 ui.notifications.warn(`Actor was incorrectly flagged as 5e.`)
                 console.log(`Actor was incorrectly flagged as 5e.`)
             }
-            await this.actor.update({ 'system.is5e': false })
+            await this.actor.update({ 'system.is5e': false }, {render: false})
         }
     }
 
@@ -360,7 +360,7 @@ export async function applyCharacterSheet(xmlDoc) {
         let path = "worlds/" + game.world.id
         if (this.actor.img.indexOf(filename) == -1) {
             await ImageHelper.uploadBase64(base64, filename, path)
-            await this.actor.update({ [`img`]: path + '/' + filename })
+            await this.actor.update({ [`img`]: path + '/' + filename }, {render: false})
         }
     }
 
@@ -384,7 +384,7 @@ export async function applyCharacterSheet(xmlDoc) {
     // We may have applied ActiveEffectcs to MAX.
     for (let char of Object.keys(this.actor.system.characteristics)) {
         if (this.actor.system.characteristics[char].value != this.actor.system.characteristics[char].max) {
-            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max })
+            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, {render: false})
         }
 
     }
@@ -393,7 +393,9 @@ export async function applyCharacterSheet(xmlDoc) {
 
 
 
-
+    // We did all our updates with render: false
+    // Now were all done so render.
+    this.actor.render()
 
     ui.notifications.info(`${this.actor.name} upload complete`)
 
@@ -429,7 +431,7 @@ async function CalcRealAndActivePoints(actor) {
         _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
     }
     //HEROSYS.log(false, _splitCost)
-    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints })
+    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, {render: false})
 }
 
 
@@ -489,7 +491,7 @@ function XmlToItemData(xml, type) {
             case "RANGED": systemData.costPerLevel = 8; break;
             case "ALL": systemData.costPerLevel = 10; break;
 
-            default: console.log(systemData.OPTION)
+            default: HEROSYS.log(false, systemData.OPTION)
         }
     }
 
@@ -970,11 +972,11 @@ function calcBasePointsPlusAdders(system) {
     // const adders = system.adders || [] //xmlItem.getElementsByTagName("ADDER")
 
 
-    if (system.XMLID == "COM")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "COM")
+    //     HEROSYS.log(false, system.XMLID)
 
-    if (system.NAME == "Sheet of Steel")
-        HEROSYS.log(false, system.NAME)
+    // if (system.NAME == "Sheet of Steel")
+    //     HEROSYS.log(false, system.NAME)
 
 
     // Everyman skills are free
@@ -1169,8 +1171,8 @@ function calcActivePoints(_basePointsPlusAdders, system) {
     // const xmlid = system.rules || system.xmlid //xmlItem.getAttribute('XMLID')
     // const modifiers = system.modifiers || system.MODIFIER || [] //xmlItem.getElementsByTagName("ADDER")
 
-    if (system.XMLID == "RKA")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "RKA")
+    //     HEROSYS.log(false, system.XMLID)
 
     // NAKEDMODIFIER uses PRIVATE=="Yes" to indicate advantages
 
@@ -1188,7 +1190,6 @@ function calcActivePoints(_basePointsPlusAdders, system) {
             _myAdvantage += modifierBaseCost * levels
         }
 
-        console.log(modifier.XMLID, modifierBaseCost)
         // Some modifiers may have ADDERS
         const adders = modifier.adders //modifier.getElementsByTagName("ADDER")
         if (adders.length) {
@@ -1196,7 +1197,7 @@ function calcActivePoints(_basePointsPlusAdders, system) {
                 const adderBaseCost = parseFloat(adder.BASECOST || 0)
                 //if (adderBaseCost > 0) {
                 _myAdvantage += adderBaseCost;
-                HEROSYS.log(false, adder.XMLID, adderBaseCost)
+                //HEROSYS.log(false, adder.XMLID, adderBaseCost)
                 //}
             }
         }
@@ -1215,8 +1216,8 @@ function calcActivePoints(_basePointsPlusAdders, system) {
 function calcRealCost(_activeCost, system) {
     // Real Cost = Active Cost / (1 + total value of all Limitations)
 
-    if (system.XMLID == "PD")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "PD")
+    //     HEROSYS.log(false, system.XMLID)
 
     // if (system.NAME == "Unyielding Defense")
     //     HEROSYS.log(false, system.NAME)
@@ -1257,7 +1258,7 @@ function calcRealCost(_activeCost, system) {
             system.title = (system.title || "") + 'Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. '
         }
 
-        console.log("limitation", modifier.ALIAS, _myLimitation)
+        //console.log("limitation", modifier.ALIAS, _myLimitation)
         modifier.BASECOST_total = -_myLimitation
 
         limitations += _myLimitation
@@ -1707,9 +1708,9 @@ function updateItemDescription(system, type) {
 
     system.description = system.description.trim()
 
-    if (system.XMLID == "STR") {
-        HEROSYS.log(false, system)
-    }
+    // if (system.XMLID == "STR") {
+    //     HEROSYS.log(false, system)
+    // }
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10))
@@ -2028,7 +2029,7 @@ export function SkillRollUpdateValue(item) {
         // Skill Enahncers provide a discount to the purchase of asssociated skills.
         // They no not change the roll.
         // Skip for now.
-        HEROSYS.log(false, (skillData.xmlid || item.name) + ' was not included in skills.  Likely Skill Enhancer')
+        // HEROSYS.log(false, (skillData.xmlid || item.name) + ' was not included in skills.  Likely Skill Enhancer')
         return
     }
 }
