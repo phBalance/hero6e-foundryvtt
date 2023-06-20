@@ -837,7 +837,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                         initiative: combatant.initiative,
                         hasResource: resource !== null,
                         resource: resource,
-                        actorData: combatant.token._actor.system,
+                        actorData: combatant.token?.actor?.system || combatant.token._actor.system,
                         isFake: combatant.isFake || false
                     };
 

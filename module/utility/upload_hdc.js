@@ -62,7 +62,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // 6e vs 5e
     if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
-        this.actor.update([{ 'system.is5e': true }])
+        this.actor.update({ 'system.is5e': true }, {render: false})
     }
     const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
@@ -150,8 +150,18 @@ export async function applyCharacterSheet(xmlDoc) {
         //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
         // }
     }
+    // console.log('max')
+    // await this.actor.update([{'name': 'test'}])
+    // return
 
-    await this.actor.update(changes)
+    // console.log('value')
+    // await this.actor.update({'system.characteristics.str.value': 20})
+    
+    // console.log('max')
+    // await this.actor.update({'system.characteristics.str.max': 31})
+
+    // return
+    await this.actor.update(changes, {render: false})
     changes = {}
 
     // Initial 5e support
@@ -246,7 +256,7 @@ export async function applyCharacterSheet(xmlDoc) {
         figuredChanges[`system.characteristics.omcv.realCost`] = 0
         figuredChanges[`system.characteristics.dmcv.realCost`] = 0
 
-        await this.actor.update(figuredChanges)
+        await this.actor.update(figuredChanges, {render: false})
     }
     else {
         // Confirm 6E
@@ -255,7 +265,7 @@ export async function applyCharacterSheet(xmlDoc) {
                 ui.notifications.warn(`Actor was incorrectly flagged as 5e.`)
                 console.log(`Actor was incorrectly flagged as 5e.`)
             }
-            await this.actor.update({ 'system.is5e': false })
+            await this.actor.update({ 'system.is5e': false }, {render: false})
         }
     }
 
@@ -360,7 +370,7 @@ export async function applyCharacterSheet(xmlDoc) {
         let path = "worlds/" + game.world.id
         if (this.actor.img.indexOf(filename) == -1) {
             await ImageHelper.uploadBase64(base64, filename, path)
-            await this.actor.update({ [`img`]: path + '/' + filename })
+            await this.actor.update({ [`img`]: path + '/' + filename }, {render: false})
         }
     }
 
@@ -384,7 +394,7 @@ export async function applyCharacterSheet(xmlDoc) {
     // We may have applied ActiveEffectcs to MAX.
     for (let char of Object.keys(this.actor.system.characteristics)) {
         if (this.actor.system.characteristics[char].value != this.actor.system.characteristics[char].max) {
-            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max })
+            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, {render: false})
         }
 
     }
@@ -393,7 +403,9 @@ export async function applyCharacterSheet(xmlDoc) {
 
 
 
-
+    // We did all our updates with render: false
+    // Now were all done so render.
+    this.actor.render()
 
     ui.notifications.info(`${this.actor.name} upload complete`)
 
@@ -429,7 +441,7 @@ async function CalcRealAndActivePoints(actor) {
         _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
     }
     //HEROSYS.log(false, _splitCost)
-    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints })
+    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, {render: false})
 }
 
 

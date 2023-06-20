@@ -6,7 +6,7 @@
     "version": "2.2.1-alpha",
     "compatibility": {
         "minimum": 11,
-        "verified": "11.302",
+        "verified": "10.291",
         "maximum": 11
     },
     "authors": [
