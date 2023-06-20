@@ -1269,7 +1269,7 @@ function calcRealCost(_activeCost, system) {
             system.title = (system.title || "") + 'Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. '
         }
 
-        console.log("limitation", modifier.ALIAS, _myLimitation)
+        //console.log("limitation", modifier.ALIAS, _myLimitation)
         modifier.BASECOST_total = -_myLimitation
 
         limitations += _myLimitation
