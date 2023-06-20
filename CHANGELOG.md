@@ -1,3 +1,6 @@
+# Version 3.0.0-alpha
+- FoundryVTT version 11 support
+
 # Version 2.2.0-alpha
 - Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.
 - Reworked ActiveEffects to be placed on items (per FoundryVtt design).

@@ -1,10 +1,16 @@
 {
     "Actor": {
-        "types": [ "pc", "npc", "character"],
+        "types": [
+            "pc",
+            "npc",
+            "character"
+        ],
         "templates": {
             "base": {},
             "characterTemplate": {
-                "templates": [ "base" ],
+                "templates": [
+                    "base"
+                ],
                 "biography": "",
                 "attributes": {
                     "points": {
@@ -170,20 +176,37 @@
                 }
             }
         },
-        "pc":
-        {
-            "templates": [ "characterTemplate" ]
+        "pc": {
+            "templates": [
+                "characterTemplate"
+            ]
         },
-        "npc":
-        {
-            "templates": [ "characterTemplate" ]
+        "npc": {
+            "templates": [
+                "characterTemplate"
+            ]
         },
         "character": {
-            "templates": [ "characterTemplate" ]
+            "templates": [
+                "characterTemplate"
+            ]
         }
     },
     "Item": {
-        "types": [ "skill", "perk", "talent", "martialart", "power", "complication", "equipment", "attack", "defense", "maneuver", "movement", "misc" ],
+        "types": [
+            "skill",
+            "perk",
+            "talent",
+            "martialart",
+            "power",
+            "complication",
+            "equipment",
+            "attack",
+            "defense",
+            "maneuver",
+            "movement",
+            "misc"
+        ],
         "templates": {
             "base": {
                 "description": "",
@@ -209,30 +232,38 @@
                     "defense": {},
                     "maneuver": {},
                     "movement": {},
-                    "skill": {}                    
+                    "skill": {}
                 }
             }
         },
         "skill": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "characteristic": "general",
             "levels": 0,
             "state": "untrained",
             "roll": "6-"
         },
         "power": {
-            "templates": [ "power" ],
+            "templates": [
+                "power"
+            ],
             "rules": "Power Description",
             "active": "false"
         },
         "equipment": {
-            "templates": [ "power" ],
+            "templates": [
+                "power"
+            ],
             "quantity": 1,
             "weight": 0,
             "rules": "Equipment Description"
         },
         "attack": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "defense": "pd",
             "killing": 0,
             "piercing": 0,
@@ -253,7 +284,9 @@
             "stunBodyDamage": "stunbody"
         },
         "defense": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "defenseType": "pd",
             "active": "false",
             "resistant": "false",
@@ -262,14 +295,18 @@
             "value": 0
         },
         "maneuver": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "phase": 0,
             "ocv": "+0",
             "dcv": "+0",
             "active": false
         },
         "movement": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "class": "Running",
             "editable": true,
             "base": 0,
@@ -279,19 +316,25 @@
             "velValue": 0
         },
         "perk": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "id": "",
             "rules": "Perk Description",
             "other": {}
         },
         "talent": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "id": "",
             "rules": "Talent Description",
             "other": {}
         },
         "complication": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "id": "",
             "rules": "Complication Description",
             "other": {
@@ -300,10 +343,12 @@
             }
         },
         "martialart": {
-            "templates": [ "base" ],
+            "templates": [
+                "base"
+            ],
             "id": "",
             "rules": "Martial Art Description",
-            "other": {} 
+            "other": {}
         }
     }
 }
