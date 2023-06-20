@@ -150,17 +150,7 @@ export async function applyCharacterSheet(xmlDoc) {
         //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
         // }
     }
-    // console.log('max')
-    // await this.actor.update([{'name': 'test'}])
-    // return
-
-    // console.log('value')
-    // await this.actor.update({'system.characteristics.str.value': 20})
-    
-    // console.log('max')
-    // await this.actor.update({'system.characteristics.str.max': 31})
-
-    // return
+   
     await this.actor.update(changes, {render: false})
     changes = {}
 
@@ -501,7 +491,7 @@ function XmlToItemData(xml, type) {
             case "RANGED": systemData.costPerLevel = 8; break;
             case "ALL": systemData.costPerLevel = 10; break;
 
-            default: console.log(systemData.OPTION)
+            default: HEROSYS.log(false, systemData.OPTION)
         }
     }
 
@@ -982,11 +972,11 @@ function calcBasePointsPlusAdders(system) {
     // const adders = system.adders || [] //xmlItem.getElementsByTagName("ADDER")
 
 
-    if (system.XMLID == "COM")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "COM")
+    //     HEROSYS.log(false, system.XMLID)
 
-    if (system.NAME == "Sheet of Steel")
-        HEROSYS.log(false, system.NAME)
+    // if (system.NAME == "Sheet of Steel")
+    //     HEROSYS.log(false, system.NAME)
 
 
     // Everyman skills are free
@@ -1181,8 +1171,8 @@ function calcActivePoints(_basePointsPlusAdders, system) {
     // const xmlid = system.rules || system.xmlid //xmlItem.getAttribute('XMLID')
     // const modifiers = system.modifiers || system.MODIFIER || [] //xmlItem.getElementsByTagName("ADDER")
 
-    if (system.XMLID == "RKA")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "RKA")
+    //     HEROSYS.log(false, system.XMLID)
 
     // NAKEDMODIFIER uses PRIVATE=="Yes" to indicate advantages
 
@@ -1200,7 +1190,6 @@ function calcActivePoints(_basePointsPlusAdders, system) {
             _myAdvantage += modifierBaseCost * levels
         }
 
-        console.log(modifier.XMLID, modifierBaseCost)
         // Some modifiers may have ADDERS
         const adders = modifier.adders //modifier.getElementsByTagName("ADDER")
         if (adders.length) {
@@ -1208,7 +1197,7 @@ function calcActivePoints(_basePointsPlusAdders, system) {
                 const adderBaseCost = parseFloat(adder.BASECOST || 0)
                 //if (adderBaseCost > 0) {
                 _myAdvantage += adderBaseCost;
-                HEROSYS.log(false, adder.XMLID, adderBaseCost)
+                //HEROSYS.log(false, adder.XMLID, adderBaseCost)
                 //}
             }
         }
@@ -1227,8 +1216,8 @@ function calcActivePoints(_basePointsPlusAdders, system) {
 function calcRealCost(_activeCost, system) {
     // Real Cost = Active Cost / (1 + total value of all Limitations)
 
-    if (system.XMLID == "PD")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "PD")
+    //     HEROSYS.log(false, system.XMLID)
 
     // if (system.NAME == "Unyielding Defense")
     //     HEROSYS.log(false, system.NAME)
@@ -1719,9 +1708,9 @@ function updateItemDescription(system, type) {
 
     system.description = system.description.trim()
 
-    if (system.XMLID == "STR") {
-        HEROSYS.log(false, system)
-    }
+    // if (system.XMLID == "STR") {
+    //     HEROSYS.log(false, system)
+    // }
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10))

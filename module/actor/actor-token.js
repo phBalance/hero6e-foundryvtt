@@ -101,13 +101,13 @@ export class HeroSystem6eToken extends Token {
         // Determine the color to use
         const blk = 0x000000;
         let color;
-        if (number === 0) color = new PIXI.Color([(1 - (pct / 2)), pct, 0]).toNumber();
-        else color = new PIXI.Color([(0.5 * pct), (0.7 * pct), 0.5 + (pct / 2)]).toNumber();
+        if (number === 0) color = this.HeroColor([(1 - (pct / 2)), pct, 0]);
+        else color = this.HeroColor([(0.5 * pct), (0.7 * pct), 0.5 + (pct / 2)]);
 
         // Override for Hero
-        if (number === 0) color = new PIXI.Color([1, 0, 0]).toNumber() //PIXI.utils.rgb2hex([1, 0, 0]); // Body
-        if (number === 1) color = new PIXI.Color([0, 1, 0]).toNumber() //PIXI.utils.rgb2hex([0, 1, 0]); // Stun
-        if (number === 2) color = new PIXI.Color([0.5, 0.5, 1]).toNumber() // PIXI.utils.rgb2hex([0.5, 0.5, 1]); // Endurance
+        if (number === 0) color = this.HeroColor([1, 0, 0]); // Body
+        if (number === 1) color = this.HeroColor([0, 1, 0]); // Stun
+        if (number === 2) color = this.HeroColor([0.5, 0.5, 1]); // Endurance
 
 
         if (!bar) {
@@ -135,6 +135,16 @@ export class HeroSystem6eToken extends Token {
         this.drawBarLabel(bar, data, data.value, data.max);
 
 
+    }
+
+    HeroColor(ary) {
+        // v11
+        if (PIXI.Color) {
+            return new PIXI.Color(ary).toNumber()
+        }
+
+        // v10
+        return PIXI.utils.rgb2hex(ary)
     }
 
     drawBarLabel(bar, data, value, max) {
