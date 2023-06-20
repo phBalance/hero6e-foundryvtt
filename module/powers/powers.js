@@ -65,19 +65,4 @@ function splitPowerId(id) {
     return [powerItemId, subItemId]
 }
 
-async function subItemUpdate(id, formData) {
-    const [powerItemId, subItemId] = id.split('-')
-
-    const type = getItemCategory(id)
-
-    for (const key in formData) {
-        const newKey = 'system.subItems.' + type + '.' + subItemId + '.' + key
-        formData[newKey] = formData[key]
-        delete formData[key]
-    }
-
-    const item = getItem(powerItemId)
-    item.update(formData)
-}
-
-export { editSubItem, deleteSubItem, getItemCategory, isPowerSubItem, splitPowerId, subItemUpdate };
+export { editSubItem, deleteSubItem, getItemCategory, isPowerSubItem, splitPowerId };
