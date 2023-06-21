@@ -1,5 +1,7 @@
 # Version 3.0.0-alpha
 - FoundryVTT version 11 support
+- Knockback fixes
+- Attack OcvMod [#137](https://github.com/dmdorman/hero6e-foundryvtt/issues/137)
 
 # Version 2.2.0-alpha
 - Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.
