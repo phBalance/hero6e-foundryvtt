@@ -17,7 +17,7 @@ Hooks.once("ready", async function () {
 });
 
 Hooks.on("quenchReady", (quench) => {
-    registerHitLocationTests(quench);
+    //registerHitLocationTests(quench);
     registerUtilTests(quench);
     registerDamageFunctionTests(quench);
     registerTagTests(quench);

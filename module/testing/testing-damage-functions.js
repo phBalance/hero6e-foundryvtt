@@ -5,7 +5,7 @@ import { determineStrengthDamage, determineExtraDiceDamage, simplifyDamageRoll }
 
 export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
-        "quench.examples.damageFunctions",
+        "quench.damageFunctions",
         (context) => {
             const { describe, it, assert } = context
 
