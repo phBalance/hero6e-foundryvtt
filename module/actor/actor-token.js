@@ -2,67 +2,69 @@
 // Possible reference: https://gitlab.com/woodentavern/foundryvtt-bar-brawl
 
 import { getBarExtendedAttribute } from "../bar3/extendTokenConfig.js"
+import { HEROSYS } from "../herosystem6e.js"
 
 export class HeroSystem6eTokenDocument extends TokenDocument {
     constructor(data, context) {
         super(data, context)
+        //data.bars.bar3 = bars.addChild(new PIXI.Graphics());
     }
 
-    // getBarAttribute(barName, alternative) {
-    //     //HEROSYS.log(false, "getBarAttribute")
-    //     let data = super.getBarAttribute(barName, alternative)
+    getBarAttribute(barName, alternative) {
+        //HEROSYS.log(false, "getBarAttribute")
+        let data = super.getBarAttribute(barName, alternative)
 
-    //     if (barName == "bar3") {
-    //         const attr = alternative || this.flags.bar3?.attribute; //this[barName]?.attribute;
-    //         if (!attr || !this.actor) return null;
-    //         let data = foundry.utils.getProperty(this.actor.system, attr);
-    //         if ((data === null) || (data === undefined)) return null;
-    //         const model = game.model.Actor[this.actor.type];
+        if (barName == "bar3") {
+            const attr = alternative || this.flags.bar3?.attribute; //this[barName]?.attribute;
+            if (!attr || !this.actor) return null;
+            let data = foundry.utils.getProperty(this.actor.system, attr);
+            if ((data === null) || (data === undefined)) return null;
+            const model = game.model.Actor[this.actor.type];
 
-    //         // Single values
-    //         if (Number.isNumeric(data)) {
-    //             return {
-    //                 type: "value",
-    //                 attribute: attr,
-    //                 value: Number(data),
-    //                 editable: foundry.utils.hasProperty(model, attr),
-    //             };
-    //         }
+            // Single values
+            if (Number.isNumeric(data)) {
+                return {
+                    type: "value",
+                    attribute: attr,
+                    value: Number(data),
+                    editable: foundry.utils.hasProperty(model, attr),
+                };
+            }
 
-    //         // Attribute objects
-    //         else if (("value" in data) && ("max" in data)) {
-    //             return {
-    //                 type: "bar",
-    //                 attribute: attr,
-    //                 value: parseInt(data.value || 0),
-    //                 max: parseInt(data.max || 0),
-    //                 editable: foundry.utils.hasProperty(model, `${attr}.value`),
-    //                 label: attr.split('.').pop()
-    //             };
-    //         }
+            // Attribute objects
+            else if (("value" in data) && ("max" in data)) {
+                return {
+                    type: "bar",
+                    attribute: attr,
+                    value: parseInt(data.value || 0),
+                    max: parseInt(data.max || 0),
+                    editable: foundry.utils.hasProperty(model, `${attr}.value`),
+                    label: attr.split('.').pop()
+                };
+            }
 
-    //         // Otherwise null
-    //         return null;
-    //     }
+            // Otherwise null
+            return null;
+        }
 
-    //     // Add label
-    //     let attr = alternative?.alternative || this[barName]?.attribute;
-    //     if(attr && attr.indexOf(".")>-1) attr = attr.split('.').pop();
-    //     if (attr) return { ...data, label: attr};
-    //     return data;
-    // }
+        // Add label
+        let attr = alternative?.alternative || this[barName]?.attribute;
+        if(attr && attr.indexOf(".")>-1) attr = attr.split('.').pop();
+        if (attr) return { ...data, label: attr};
+        return data;
+    }
 
-    // static defineSchema() {
-    //     //HEROSYS.log(false, "defineSchema")
-    //     let schema = super.defineSchema()
-    //     schema.bar3 = new foundry.data.fields.SchemaField({
-    //         attribute: new foundry.data.fields.StringField({
-    //             required: true, nullable: true, blank: false,
-    //             initial: () => "characteristics.end"
-    //         })
-    //     });
-    //     return schema;
-    // }
+    static defineSchema() {
+        //HEROSYS.log(false, "defineSchema")
+        let schema = super.defineSchema()
+        schema.bar3 = new foundry.data.fields.SchemaField({
+            attribute: new foundry.data.fields.StringField({
+                required: true, nullable: true, blank: false,
+                initial: () => "characteristics.end"
+            })
+        });
+        return schema;
+    }
 }
 
 export class HeroSystem6eToken extends Token {
@@ -79,12 +81,12 @@ export class HeroSystem6eToken extends Token {
         return data
     }
 
-    _drawAttributeBars() {
-        //HEROSYS.log(false, "_drawAttributeBars")
-        let bars = super._drawAttributeBars()
-        bars.bar3 = bars.addChild(new PIXI.Graphics());
-        return bars;
-    }
+    // _drawAttributeBars() {
+    //     //HEROSYS.log(false, "_drawAttributeBars")
+    //     let bars = super._drawAttributeBars()
+    //     bars.bar3 = bars.addChild(new PIXI.Graphics());
+    //     return bars;
+    // }
 
     _drawBar(number, bar, data) {
         const val = Number(data.value);
@@ -99,13 +101,13 @@ export class HeroSystem6eToken extends Token {
         // Determine the color to use
         const blk = 0x000000;
         let color;
-        if (number === 0) color = PIXI.utils.rgb2hex([(1 - (pct / 2)), pct, 0]);
-        else color = PIXI.utils.rgb2hex([(0.5 * pct), (0.7 * pct), 0.5 + (pct / 2)]);
+        if (number === 0) color = this.HeroColor([(1 - (pct / 2)), pct, 0]);
+        else color = this.HeroColor([(0.5 * pct), (0.7 * pct), 0.5 + (pct / 2)]);
 
         // Override for Hero
-        if (number === 0) color = PIXI.utils.rgb2hex([1, 0, 0]); // Body
-        if (number === 1) color = PIXI.utils.rgb2hex([0, 1, 0]); // Stun
-        if (number === 2) color = PIXI.utils.rgb2hex([0.5, 0.5, 1]); // Endurance
+        if (number === 0) color = this.HeroColor([1, 0, 0]); // Body
+        if (number === 1) color = this.HeroColor([0, 1, 0]); // Stun
+        if (number === 2) color = this.HeroColor([0.5, 0.5, 1]); // Endurance
 
 
         if (!bar) {
@@ -134,6 +136,18 @@ export class HeroSystem6eToken extends Token {
 
 
     }
+
+    HeroColor(ary) {
+        // v11
+        if (PIXI.Color) {
+            return new PIXI.Color(ary).toNumber()
+        }
+
+        // v10
+        return PIXI.utils.rgb2hex(ary)
+    }
+
+    
 
     drawBarLabel(bar, data, value, max) {
         // remove any existing children (may want save the previous one, not sure yet)
@@ -187,20 +201,19 @@ export class HeroSystem6eToken extends Token {
         if (!this.actor || (this.document.displayBars === CONST.TOKEN_DISPLAY_MODES.NONE)) {
             return this.bars.visible = false;
         }
+
+        // Custom bar 3
+        this.bars.bar3 = this.bars.addChild(new PIXI.Graphics());
+
         ["bar1", "bar2", "bar3"].forEach((b, i) => {
-            const bar = this.bars[b];
-            if (!bar) {
-                HEROSYS.log(false, "bar is undefined")
-                return
-            }
+            let bar = this.bars[b];
             const attr = getBarExtendedAttribute.bind(this.document)(b)// : this.document.getBarAttribute(b);
             if (!attr || (attr.type !== "bar")) return bar.visible = false;
             this._drawBar(i, bar, attr);
             bar.visible = true;
         });
 
-        if (!this._canViewMode)
-        {
+        if (!this._canViewMode) {
             HEROSYS.log(false, "this._canViewMode is undefined")
             return
         }

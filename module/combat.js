@@ -233,12 +233,12 @@ export class HeroSystem6eCombat extends Combat {
 
         const segementIndexes = this.segments.reduce((accumulator, currentValue, currentIndex) => {
             if (currentValue.length > 0) {
-            accumulator.push(currentIndex);
+                accumulator.push(currentIndex);
             }
             return accumulator;
         }, []);
 
-        
+
         if (Number(segement) === 12) {
             nextSegment = segementIndexes[0]
         }
@@ -398,9 +398,9 @@ export class HeroSystem6eCombat extends Combat {
             // const allInitiatives = [[name, initativeValue]]
             const allInitiatives = []
             for (const item of combatant.actor.items) {
-                if (! item.system.hasOwnProperty('id')) { continue; }
+                if (!item.system.hasOwnProperty('id')) { continue; }
 
-                switch(item.system.id) {
+                switch (item.system.id) {
                     case ('LIGHTNING_REFLEXES_ALL'): {
                         const levels = item.system.LEVELS || item.system.other.levels || 0
                         const lightning_reflex_initiative = (parseInt(dexValue || 0 ) + parseInt(levels)) + (parseInt(initativeValue || 0) / 100)
@@ -514,8 +514,8 @@ export class HeroSystem6eCombat extends Combat {
                 }
             }
 
-            segments[i].sort(function(a, b) {
-                return  b.initiative - a.initiative
+            segments[i].sort(function (a, b) {
+                return b.initiative - a.initiative
             });
         }
 
@@ -733,7 +733,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
         const relevantCombat = game.combats.combats.find(e => e.active === true);
 
-        switch(control) {
+        switch (control) {
             case 'startCombat': {
                 relevantCombat.startCombat()
                 this.render();
@@ -837,7 +837,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                         initiative: combatant.initiative,
                         hasResource: resource !== null,
                         resource: resource,
-                        actorData: combatant.token._actor.system,
+                        actorData: combatant.token?.actor?.system || combatant.token._actor.system,
                         isFake: combatant.isFake || false
                     };
 
