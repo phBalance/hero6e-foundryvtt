@@ -3,8 +3,6 @@ import { HEROSYS } from "../herosystem6e.js";
 import { modifyRollEquation } from "../utility/util.js"
 
 export function registerUtilTests(quench) {
-    HEROSYS.log(false, 'register utils')
-
     quench.registerBatch(
         "quench.utils.modifyRollEquation",
         (context) => {

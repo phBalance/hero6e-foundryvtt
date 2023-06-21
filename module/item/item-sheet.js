@@ -1,5 +1,5 @@
 import { HeroSystem6eItem, getItem } from './item.js'
-import { editSubItem, deleteSubItem, isPowerSubItem, subItemUpdate } from '../powers/powers.js'
+import { editSubItem, deleteSubItem, isPowerSubItem } from '../powers/powers.js'
 import { HEROSYS } from '../herosystem6e.js'
 import { onManageActiveEffect } from '../utility/effects.js'
 
@@ -185,17 +185,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     const clickedElement = $(event.currentTarget);
     const form = clickedElement.closest('form[data-id][data-realId]')
     const id = form.data()?.id
-    const realId = form.data()?.realid
 
     if (!id) { return; }
 
-    if (realId) {
-      subItemUpdate(realId, formData)
-    } else {
-      await this.item.update(expandedData)
-    }
-
-    // const type = clickedElement.parents('[data-type]')?.data().type
+    await this.item.update(expandedData)
 
     return
   }

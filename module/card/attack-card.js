@@ -106,18 +106,6 @@ export class HeroSystem6eAttackCard extends HeroSystem6eCard {
         }
 
         await HeroSystem6eToHitCard2.createFromAttackCard(item, data, actor, game.user.targets)
-        // One for each target
-        // for(const targetToken of game.user.targets)
-        // {
-        //     await HeroSystem6eToHitCard2.createFromAttackCard(item, data, actor, targetToken)
-        // }
-
-        // Or a single attack when no target is selected
-        //if (game.user.targets.size == 0)
-        //{
-        //    await HeroSystem6eToHitCard2.createFromAttackCard(item, data, actor, game.user.targets)
-        //}
-
     }
 
     static async _renderInternal(item, actor, stateData, itemId) {
@@ -188,19 +176,6 @@ export class HeroSystem6eAttackCard extends HeroSystem6eCard {
                 default: "rollToHit",
                 close: () => resolve({})
             }
-
-            /*
-            if (game.settings.get("hero6efoundryvttv2", "hit locations")) {
-                data['buttons'] = Object.assign({}, 
-                    {
-                        hitLoc : {
-                            label: "Reference Hit Location Table?",
-                            callback: html => resolve(HeroSystem6eHitLocCard.createFromAttackCard()),
-                        }
-                    }, 
-                    data['buttons']);
-            }
-            */
 
             new Dialog(data, options).render(true);;
         });
