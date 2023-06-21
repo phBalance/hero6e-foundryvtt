@@ -715,6 +715,7 @@ div.fifthEd {
   top: 120px;
   left: 15px;
   width: 200px;
+  pointer-events: none;
 }
 
 .radio {
@@ -733,6 +734,7 @@ div.fifthEd {
 .radio input[type="radio"] {
   position: absolute;
   opacity: 0;
+
 }
 
 .radio input[type="radio"] + .radio-label:before {
@@ -750,6 +752,7 @@ div.fifthEd {
   cursor: pointer;
   text-align: center;
   transition: all 250ms ease;
+  pointer-events: auto;
 }
 
 .radio input[type="radio"]:checked + .radio-label:before {
