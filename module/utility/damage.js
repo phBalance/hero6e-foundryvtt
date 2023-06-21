@@ -43,11 +43,12 @@ export function determineExtraDiceDamage(item) {
     }
 }
 
-export function simplifyDamageRoll(damageRoll) {
-    // Extract all occurrences of <NUMBER>d6 and <NUMBER>d3
-    const matches = damageRoll.match(/\d+d6|\d+d3/g) || null;
+export function getNumberOfEachDice(roll) {
+    const matches = roll.match(/\d+d6|\d+d3/g) || null;
 
-    if (!matches) { return ""; }
+    const constant = parseInt(roll.match(/(?<![a-zA-Z])\b\d+\b(?![a-zA-Z])/g)) || 0;
+
+    if (!matches) { return [0, 0, constant]; }
 
     let d6Count = 0;
     let d3Count = 0;
@@ -65,13 +66,59 @@ export function simplifyDamageRoll(damageRoll) {
     d6Count += Math.floor(d3Count / 2)
     d3Count = d3Count % 2
 
-    if (d3Count === 0) {
-        return d6Count.toString()  + "d6";
-    }
+    return [d6Count, d3Count, constant]
+}
 
-    if (d6Count === 0) {
-        return  d3Count.toString() + "d3";
-    }
+export function simplifyDamageRoll(damageRoll) {
+    const [d6Count, d3Count, constant] = getNumberOfEachDice(damageRoll)
+ 
+    let output = "";
 
-    return d6Count.toString() + "d6 + " + d3Count.toString() + "d3";
+    if (d6Count !== 0) { output = addTerms(output, d6Count.toString()  + "d6"); }
+
+    if (d3Count !== 0) { output = addTerms(output, d3Count.toString() + "d3"); }
+
+    if (constant !== 0) { output = addTerms(output, constant); }
+
+    return output;
+}
+
+export function convertToDC(item, formula) {
+    const [d6Count, d3Count, constant] = getNumberOfEachDice(formula);
+
+    if (!item.system.killing) { return d6Count; }
+
+    const pip = (constant > 0)? 1 : 0
+
+    return parseInt(3 * d6Count + 2 * d3Count + pip || 0)
+}
+
+export function convertFromDC(item, DC) {
+    if (DC === 0) { return ""; }
+
+    if (!item.system.killing) { return DC.toString() + "d6"; }
+
+    const d6Count = Math.floor(DC / 3)
+    const d3Count = Math.floor(DC % 3 / 2)
+    const constant = Math.floor(DC % 3 % 2)
+
+    let output = "";
+
+    if (d6Count !== 0) { output = addTerms(output, d6Count.toString()  + "d6"); }
+
+    if (d3Count !== 0) { output = addTerms(output, d3Count.toString() + "d3"); }
+
+    if (constant !== 0) { output = addTerms(output, constant); }
+
+    return output;
+}
+
+function addTerms(term1, term2) {
+    let output = (term1 !== "")? term1 : "";
+
+    if (term1 !== "" && term2 !== "") { output += " + "; }
+
+    if (term2 !== "") { output += term2; }
+
+    return output;
 }

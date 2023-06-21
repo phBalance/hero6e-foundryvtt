@@ -3,7 +3,7 @@ import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { HEROSYS } from "../herosystem6e.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
-import { determineStrengthDamage, determineExtraDiceDamage, simplifyDamageRoll } from "../utility/damage.js";
+import { determineStrengthDamage, determineExtraDiceDamage, simplifyDamageRoll, convertToDC } from "../utility/damage.js";
 import { damageRollToTag } from "../utility/tag.js";
 
 export async function chatListeners(html) {
@@ -304,6 +304,8 @@ export async function _onRollDamage(event) {
         damageRoll += extraDiceDamage
     }
 
+    HEROSYS.log(false, damageRoll)
+
     damageRoll = simplifyDamageRoll(damageRoll)
 
     let roll = new Roll(damageRoll, actor.getRollData());
@@ -571,6 +573,8 @@ async function _calcDamage(damageResult, item, options) {
     let countedBody = 0;
 
     let pip = 0
+
+    let DC = convertToDC(item, damageResult._formula)
 
     // Damage Negation
     if (options?.damageNegationValue > 0) {
