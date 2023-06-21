@@ -107,11 +107,12 @@ export async function AttackToHit(item, options) {
     let rollEquation = "11 + " + hitCharacteristic;
     tags.push({ value: hitCharacteristic, name: itemData.uses })
 
-    item.system.ocv = parseInt(item.system.ocv) || 0
-    if (parseInt(item.system.ocv) != 0) {
+    const ocvMod = parseInt(options.ocvMod) || 0
+    const dcvMod = parseInt(options.dcvMod) || 0
+    if (parseInt(ocvMod) != 0) {
 
-        rollEquation = modifyRollEquation(rollEquation, item.system.ocv);
-        tags.push({ value: item.system.ocv, name: item.name })
+        rollEquation = modifyRollEquation(rollEquation, ocvMod);
+        tags.push({ value: ocvMod, name: item.name })
     }
 
     // if (parseInt(options.toHitMod) > 0) {
