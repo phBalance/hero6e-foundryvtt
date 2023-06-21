@@ -80,7 +80,7 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
         const bar = input.dataset.bar;
         const actor = this.object?.actor;
         if (bar && actor) {
-            const attr = getBarExtendedAttribute.bind(this.object.document)("bar3"); //this.object.document.getBarAttribute(bar);
+            const attr = getBarExtendedAttribute.bind(this.object.document)(bar); //this.object.document.getBarAttribute(bar);
             if (isDelta || (attr.attribute !== value)) {
                 actor.modifyTokenAttribute(attr.attribute, value, isDelta, attr.type === "bar");
             }
