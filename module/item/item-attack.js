@@ -107,11 +107,12 @@ export async function AttackToHit(item, options) {
     let rollEquation = "11 + " + hitCharacteristic;
     tags.push({ value: hitCharacteristic, name: itemData.uses })
 
-    item.system.ocv = parseInt(item.system.ocv) || 0
-    if (parseInt(item.system.ocv) != 0) {
+    const ocvMod = parseInt(options.ocvMod) || 0
+    const dcvMod = parseInt(options.dcvMod) || 0
+    if (parseInt(ocvMod) != 0) {
 
-        rollEquation = modifyRollEquation(rollEquation, item.system.ocv);
-        tags.push({ value: item.system.ocv, name: item.name })
+        rollEquation = modifyRollEquation(rollEquation, ocvMod);
+        tags.push({ value: ocvMod, name: item.name })
     }
 
     // if (parseInt(options.toHitMod) > 0) {
@@ -769,7 +770,7 @@ async function _calcDamage(damageResult, item, options) {
 
     // get hit location
     let hitLocationModifiers = [1, 1, 1, 0];
-    let hitLocation =  "None";
+    let hitLocation = "None";
     let useHitLoc = false;
     //let noHitLocationsPower = false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
@@ -799,7 +800,7 @@ async function _calcDamage(damageResult, item, options) {
             }
         }
     }
-    
+
 
     if (itemData.killing) {
         // Killing Attack
@@ -877,10 +878,10 @@ async function _calcDamage(damageResult, item, options) {
         body = body - (options.defenseValue || 0) - (options.resistantValue || 0);
     }
 
-    stun = stun < 0 ? 0 : stun;
-    body = body < 0 ? 0 : body;
+    stun = RoundFavorPlayerDown(stun < 0 ? 0 : stun);
+    body = RoundFavorPlayerDown(body < 0 ? 0 : body);
 
-    
+
 
     let hitLocText = "";
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !noHitLocationsPower) {
@@ -892,8 +893,8 @@ async function _calcDamage(damageResult, item, options) {
             hitLocText = "Hit " + hitLocation + " (x" + hitLocationModifiers[0] + " STUN x" + hitLocationModifiers[2] + " BODY)";
         } else {
             // stun attacks apply N STUN hit location multiplier after defenses
-            stun = stun * hitLocationModifiers[1];
-            body = body * hitLocationModifiers[2];
+            stun = RoundFavorPlayerDown(stun * hitLocationModifiers[1]);
+            body = RoundFavorPlayerDown(body * hitLocationModifiers[2]);
 
             hitLocText = "Hit " + hitLocation + " (x" + hitLocationModifiers[1] + " STUN x" + hitLocationModifiers[2] + " BODY)";
         }
@@ -912,11 +913,15 @@ async function _calcDamage(damageResult, item, options) {
 
         let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + " - 2D6"
         // knockback modifier added on an attack by attack basis
-        if (options.knockbackMod != 0) {
-            knockBackEquation = modifyRollEquation(knockBackEquation, (options.knockbackMod || 0) + "D6");
+        const knockbackMod = parseInt(options.knockbackMod || options.knockbadmod || 0)
+        if (knockbackMod != 0) {
+            knockBackEquation = modifyRollEquation(knockBackEquation, (knockbackMod || 0) + "D6");
         }
         // knockback resistance effect
-        knockBackEquation = modifyRollEquation(knockBackEquation, " -" + (options.knockbackResistance || 0));
+        const knockbackResistance = parseInt(options.knockbackResistance || 0)
+        if (knockbackResistance != 0) {
+            knockBackEquation = modifyRollEquation(knockBackEquation, " -" + (knockbackResistance || 0));
+        }
 
         let knockbackRoll = new Roll(knockBackEquation);
         let knockbackResult = await knockbackRoll.roll({ async: true });
@@ -937,8 +942,8 @@ async function _calcDamage(damageResult, item, options) {
     // apply damage reduction
     if (options.damageReductionValue > 0) {
         //defense += "; damage reduction " + options.damageReductionValue + "%";
-        stun = Math.round(stun * (1 - (options.damageReductionValue / 100)));
-        body = Math.round(body * (1 - (options.damageReductionValue / 100)));
+        stun = RoundFavorPlayerDown(stun * (1 - (options.damageReductionValue / 100)));
+        body = RoundFavorPlayerDown(body * (1 - (options.damageReductionValue / 100)));
     }
 
     // minimum damage rule

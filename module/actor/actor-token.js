@@ -10,61 +10,61 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
         //data.bars.bar3 = bars.addChild(new PIXI.Graphics());
     }
 
-    // getBarAttribute(barName, alternative) {
-    //     //HEROSYS.log(false, "getBarAttribute")
-    //     let data = super.getBarAttribute(barName, alternative)
+    getBarAttribute(barName, alternative) {
+        //HEROSYS.log(false, "getBarAttribute")
+        let data = super.getBarAttribute(barName, alternative)
 
-    //     if (barName == "bar3") {
-    //         const attr = alternative || this.flags.bar3?.attribute; //this[barName]?.attribute;
-    //         if (!attr || !this.actor) return null;
-    //         let data = foundry.utils.getProperty(this.actor.system, attr);
-    //         if ((data === null) || (data === undefined)) return null;
-    //         const model = game.model.Actor[this.actor.type];
+        if (barName == "bar3") {
+            const attr = alternative || this.flags.bar3?.attribute; //this[barName]?.attribute;
+            if (!attr || !this.actor) return null;
+            let data = foundry.utils.getProperty(this.actor.system, attr);
+            if ((data === null) || (data === undefined)) return null;
+            const model = game.model.Actor[this.actor.type];
 
-    //         // Single values
-    //         if (Number.isNumeric(data)) {
-    //             return {
-    //                 type: "value",
-    //                 attribute: attr,
-    //                 value: Number(data),
-    //                 editable: foundry.utils.hasProperty(model, attr),
-    //             };
-    //         }
+            // Single values
+            if (Number.isNumeric(data)) {
+                return {
+                    type: "value",
+                    attribute: attr,
+                    value: Number(data),
+                    editable: foundry.utils.hasProperty(model, attr),
+                };
+            }
 
-    //         // Attribute objects
-    //         else if (("value" in data) && ("max" in data)) {
-    //             return {
-    //                 type: "bar",
-    //                 attribute: attr,
-    //                 value: parseInt(data.value || 0),
-    //                 max: parseInt(data.max || 0),
-    //                 editable: foundry.utils.hasProperty(model, `${attr}.value`),
-    //                 label: attr.split('.').pop()
-    //             };
-    //         }
+            // Attribute objects
+            else if (("value" in data) && ("max" in data)) {
+                return {
+                    type: "bar",
+                    attribute: attr,
+                    value: parseInt(data.value || 0),
+                    max: parseInt(data.max || 0),
+                    editable: foundry.utils.hasProperty(model, `${attr}.value`),
+                    label: attr.split('.').pop()
+                };
+            }
 
-    //         // Otherwise null
-    //         return null;
-    //     }
+            // Otherwise null
+            return null;
+        }
 
-    //     // Add label
-    //     let attr = alternative?.alternative || this[barName]?.attribute;
-    //     if(attr && attr.indexOf(".")>-1) attr = attr.split('.').pop();
-    //     if (attr) return { ...data, label: attr};
-    //     return data;
-    // }
+        // Add label
+        let attr = alternative?.alternative || this[barName]?.attribute;
+        if(attr && attr.indexOf(".")>-1) attr = attr.split('.').pop();
+        if (attr) return { ...data, label: attr};
+        return data;
+    }
 
-    // static defineSchema() {
-    //     //HEROSYS.log(false, "defineSchema")
-    //     let schema = super.defineSchema()
-    //     schema.bar3 = new foundry.data.fields.SchemaField({
-    //         attribute: new foundry.data.fields.StringField({
-    //             required: true, nullable: true, blank: false,
-    //             initial: () => "characteristics.end"
-    //         })
-    //     });
-    //     return schema;
-    // }
+    static defineSchema() {
+        //HEROSYS.log(false, "defineSchema")
+        let schema = super.defineSchema()
+        schema.bar3 = new foundry.data.fields.SchemaField({
+            attribute: new foundry.data.fields.StringField({
+                required: true, nullable: true, blank: false,
+                initial: () => "characteristics.end"
+            })
+        });
+        return schema;
+    }
 }
 
 export class HeroSystem6eToken extends Token {
@@ -146,6 +146,8 @@ export class HeroSystem6eToken extends Token {
         // v10
         return PIXI.utils.rgb2hex(ary)
     }
+
+    
 
     drawBarLabel(bar, data, value, max) {
         // remove any existing children (may want save the previous one, not sure yet)
