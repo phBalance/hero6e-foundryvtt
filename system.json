@@ -5,8 +5,8 @@
     "description": "The Hero System 6e for FoundryVTT!",
     "version": "3.0.0-alpha",
     "compatibility": {
-        "minimum": 10,
-        "verified": "10.291",
+        "minimum": 11,
+        "verified": "11.302",
         "maximum": 11
     },
     "authors": [
