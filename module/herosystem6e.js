@@ -18,7 +18,7 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
-import { createEffects } from "./utility/upload_hdc.js"
+import { createEffects, updateItemSubTypes } from "./utility/upload_hdc.js"
 
 Hooks.once('init', async function () {
 
@@ -108,7 +108,7 @@ Hooks.once('init', async function () {
     loadTemplates([
         `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
         `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
-
+        `systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs`,
     ]);
 
 });
@@ -265,6 +265,18 @@ Hooks.once("ready", async function () {
             migrateActorTypes()
             migrateKnockback()
             migrateRemoveDuplicateDefenseMovementItems()
+
+
+
+        }
+
+        // if lastMigration < 3.0.0-alpha
+        if (foundry.utils.isNewerVersion('3.0.0', lastMigration)) {
+            ui.notifications.info(`Migragrating actor data.`)
+            for (let actor of game.actors.contents) {
+                await updateItemSubTypes(actor)
+            }
+            ui.notifications.info(`Migragtion complete.`)
         }
     }
 

@@ -57,18 +57,18 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 //HEROSYS.log(item.system.active)
             }
 
-            // Is this a defense power?
-            const configPowerInfo = getPowerInfo({ item: item })
-            if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-                item.subType = 'defense'
-                item.system.showToggle = true
-            }
+            // // Is this a defense power?
+            // const configPowerInfo = getPowerInfo({ item: item })
+            // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+            //     item.subType = 'defense'
+            //     item.system.showToggle = true
+            // }
 
-            // Is theis a movement power?
-            if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
-                item.subType = 'movement'
-                item.system.showToggle = true
-            }
+            // // Is theis a movement power?
+            // if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+            //     item.subType = 'movement'
+            //     item.system.showToggle = true
+            // }
 
             // Framework?
             if (item.system.PARENTID) {
@@ -88,7 +88,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             item.system.endEstimate = item.system.end || 0
 
             // Damage
-            if (item.type == 'attack') {
+            if (item.type == 'attack' || item.system.subType == 'attack') {
 
                 // Convert dice to pips
                 let pips = item.system.dice * 3;
@@ -113,7 +113,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                     // Endurance
                     let strEnd = Math.max(1, Math.round(str / 10))
-                    item.system.endEstimate += strEnd
+
+                    if (Number.isInteger(item.system.endEstimate))
+                    {
+                        item.system.endEstimate += strEnd   
+                    }
+                    
                 }
 
                 // Add in TK

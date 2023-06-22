@@ -124,7 +124,7 @@ export class HeroSystem6eItem extends Item {
     async roll() {
         //if (!this.isRollable()) return;
 
-        switch (this.type) {
+        switch (this.system.subType || this.type) {
             case "attack":
                 return await Attack.AttackOptions(this)
             case "defense":

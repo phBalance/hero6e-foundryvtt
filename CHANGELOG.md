@@ -1,5 +1,5 @@
 # Version 3.0.0-alpha
-- FoundryVTT version 11 support
+- FoundryVTT version 11 (v10 no longer supported)
 - Knockback fixes
 - Attack OcvMod [#137](https://github.com/dmdorman/hero6e-foundryvtt/issues/137)
 
