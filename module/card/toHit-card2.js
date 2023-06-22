@@ -8,8 +8,6 @@ import { getItem } from "../item/item.js";
 export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
     static async chatListeners(html) {
         // NOTE: Make sure we are listed in card-helpers.js
-        // Click roll damage button click
-        //html.on('click', '.roll-damage', this._onChatCardAction.bind(this));
 
         html.on('click', '.area-effect-tag', this._spawnAreaOfEffect.bind(this))
     }
@@ -28,60 +26,6 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
         if (!actor.isOwner) {
             button.setAttribute("disabled", true);
         }
-    }
-
-    /**
-   * Handle execution of a chat card action via a click event on one of the card buttons
-   * @param {Event} event       The originating click event
-   * @returns {Promise}         A promise which resolves once the handler workflow is complete
-   * @private
-   */
-    static async _onChatCardAction(event) {
-        //event.preventDefault();
-        
-
-        // Extract card data
-        const button = event.currentTarget;
-
-        //const action = button.dataset.action;
-        //button.disabled = true;
-
-        
-
-        let itemId = event.currentTarget.attributes["data-itemid"].value;
-
-        const card = button.closest(".chat-card");
-        const cardObject = new HeroSystem6eToHitCard2();
-        await cardObject.init(card);
-
-        //cardObject.message.data.flags["state"] = {};
-        cardObject.message.flags.state = {};
-
-        // let toHitData = {
-        //     aim: event.currentTarget.attributes["data-aim"].value,
-        //     knockbackMod: event.currentTarget.attributes["data-knockbackmod"].value,
-        //     damageMod: event.currentTarget.attributes["data-damagemod"].value,
-        //     hitRollData: event.currentTarget.attributes["data-hitrolldata"].value,
-        //     effectiveStr: event.currentTarget.attributes["data-effectiveStr"].value
-        // };
-        const toHitData = {...button.dataset}
-
-        // Validate permission to proceed with the roll
-        //const isValid = action === "apply-defenses";
-        //if (!(isValid || game.user.isGM || cardObject.message.isAuthor)) return;
-
-        // const targets = HeroSystem6eCard._getChatCardTargets();
-
-        // if (targets.length === 0) return;
-
-        // for (let token of targets) {
-        //     await HeroSystem6eDamageCard2.createFromToHitCard(cardObject, token, toHitData, itemId);
-        // }
-
-        //await HeroSystem6eDamageCard2.createFromToHitCard(cardObject, null, toHitData, itemId);
-
-        // Re-enable the button
-        //button.disabled = false;
     }
 
     static async _renderInternal(item, actor, stateData) {

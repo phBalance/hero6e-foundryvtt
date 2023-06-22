@@ -1,9 +1,10 @@
-// import { HeroSystem6eCard } from "./card.js";
-import { modifyRollEquation, getTokenChar } from "../utility/util.js"
+import { modifyRollEquation, getTokenChar } from "../utility/util.js";
 import { determineDefense } from "../utility/defense.js";
-import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js"
+import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { HEROSYS } from "../herosystem6e.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
+import { determineStrengthDamage, determineExtraDiceDamage, simplifyDamageRoll } from "../utility/damage.js";
+import { damageRollToTag } from "../utility/tag.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -97,7 +98,6 @@ export async function AttackToHit(item, options) {
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
     let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
-
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
@@ -284,102 +284,27 @@ export async function _onRollDamage(event) {
     const item = fromUuidSync(toHitData.itemid);
     const template = "systems/hero6efoundryvttv2/templates/chat/item-damage-card.hbs"
     const actor = item.actor
-    const itemId = item._id
-    const itemData = item.system;
 
-    let damageRoll = itemData.dice;
-
-    // let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
-
-    // let automation = game.settings.get("hero6efoundryvttv2", "automation");
+    let damageRoll = (item.system.dice === 0)? "" : item.system.dice + "d6";
 
     let tags = []
-    if (parseInt(itemData.dice) > 0) {
-        tags.push({ value: itemData.dice + "d6", name: "base" })
+    if (parseInt(item.system.dice) > 0) {
+        tags.push({ value: item.system.dice + "d6", name: "base" })
     }
 
-    let pip = 0;
-
-    if (itemData.usesStrength || itemData.usesTk) {
-
-        let strDamage = 0;
-        strDamage += Math.floor(Math.max(0, parseInt(toHitData.effectivestr)) / 5)
-        if (strDamage > 0) {
-            if (itemData.killing) {
-                let strDice = Math.floor(strDamage / 3)
-                pip = strDamage % 3
-                damageRoll = parseInt(damageRoll) + parseInt(strDice)
-                let strTag = "";
-                if (strDice > 0) {
-                    strTag = strDice + "d6"
-                }
-
-                switch (pip) {
-                    case 1:
-                        strTag += "+1"
-                        break
-                    case 2:
-                        strTag += "+½"
-                        break
-                }
-                if (strTag != "") {
-                    tags.push({ value: strTag.replace(/^\+/, ""), name: "strength" })
-                }
-
-            } else {
-                damageRoll = parseInt(damageRoll) + parseInt(strDamage)
-                tags.push({ value: strDamage + "d6", name: "strength" })
-            }
-
-        }
+    const strDamage = determineStrengthDamage(item, toHitData.effectivestr)
+    if (strDamage) {
+        tags.push({ value: damageRollToTag(strDamage), name: "strength" })
+        damageRoll += strDamage
     }
 
-
-    damageRoll = damageRoll < 0 ? 0 : damageRoll;
-
-    // needed to split this into two parts for damage negation
-    switch (itemData.extraDice) {
-        case 'zero':
-            pip += 0;
-            break;
-        case 'pip':
-            pip += 1;
-            tags.push({ value: "1", name: "extraDice" })
-            break;
-        case 'half':
-            pip += 2;
-            tags.push({ value: "1d6", name: "extraDice" })
-            break;
+    const extraDiceDamage = determineExtraDiceDamage(item)
+    if (extraDiceDamage !== "") {
+        tags.push({ value: extraDiceDamage, name: "extraDice" })
+        damageRoll += extraDiceDamage
     }
 
-    // There is a killing attack edge case where Strengh pips + extraDice pips can
-    // sum up to be a full dice.
-    if (pip > 2) {
-        damageRoll++
-        pip -= 3
-    }
-
-    if (pip < 0) {
-        damageRoll = "0D6";
-    } else {
-        switch (pip) {
-            case 0:
-                damageRoll += "D6";
-                break;
-            case 1:
-                damageRoll += "D6+1";
-                break;
-            case 2:
-                damageRoll += "D6+1D3"
-                break;
-        }
-    }
-
-    // damageRoll = modifyRollEquation(damageRoll, toHitData.damagemod);
-    // if (parseInt(toHitData.damagemod) !=0)
-    // {
-    //   tags.push({value: toHitData.damagemod, name: "misc" })
-    // }
+    damageRoll = simplifyDamageRoll(damageRoll)
 
     let roll = new Roll(damageRoll, actor.getRollData());
     let damageResult = await roll.roll({ async: true });
@@ -400,7 +325,6 @@ export async function _onRollDamage(event) {
     if (targetTokens.length <= 1) {
         delete toHitData.targetids;
     }
-
 
     let cardData = {
         item: item,
@@ -431,15 +355,12 @@ export async function _onRollDamage(event) {
         tags: tags,
         targetTokens: targetTokens,
         user: game.user,
-
-
     };
 
     // render card
     let cardHtml = await renderTemplate(template, cardData) //await HeroSystem6eDamageCard2._renderInternal(actor, item, null, cardData);
 
     let speaker = ChatMessage.getSpeaker({ actor: item.actor })
-
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
@@ -492,20 +413,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const damageData = { ...button.dataset }
     const item = fromUuidSync(damageData.itemid)
     const template = "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs"
-    const actor = item.actor
-    const itemId = item._id
-    const itemData = item.system;
 
     const token = canvas.tokens.get(tokenId)
 
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
-
-
-
-    //let tags = []
-    //let dice = damageData.dice.split(",")
 
     // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
     let newTerms = JSON.parse(damageData.terms);
