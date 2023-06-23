@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sidebar-sheet' this}} --}}
+{{log 'actor-sidebar-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off">
 
     <aside>
@@ -437,6 +437,13 @@
             <div class="tab tab-body" data-group="primary" data-tab="powers">
                 <table>
                     <tr class="sticky">
+                        <th colspan="4" class="right">Filter:</th>
+                        <th>
+                            <input class="left" name="itemFilters.power" type="text"
+                                value="{{options.itemFilters.power}}">
+                        </th>
+                    </tr>
+                    <tr class="sticky2">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
@@ -446,7 +453,7 @@
                         <th></th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "power") }}
+                    {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"

@@ -4,6 +4,9 @@
 - Attack OcvMod [#137](https://github.com/dmdorman/hero6e-foundryvtt/issues/137)
 - Attack powers are used directly.  No longer need to have separate attack items.
 - All attack powers are shown in Attack tab, even those not fully implemented.  A small step toward implementing additional attack types and charges.
+- Stunned now halves DCV
+- Added additional non-functional status effects.  This needs further improvments to more closely match herosystem status effects.
+- Character sheet can filter on some items. [#90](https://github.com/dmdorman/hero6e-foundryvtt/issues/90)
 
 # Version 2.2.0-alpha
 - Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.
