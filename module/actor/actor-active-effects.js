@@ -5,16 +5,18 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             HeroSystem6eActorActiveEffects.bleedingEffect,
             HeroSystem6eActorActiveEffects.unconsciousEffect,
             HeroSystem6eActorActiveEffects.deadEffect,
+            HeroSystem6eActorActiveEffects.blindEffect,
         ];
     }
 
+    // A Stunned character’s DCV and DMCV are instantly halved.
     static stunEffect = {
         label: "EFFECT.StatusStunned",
         id: "stunned",
         icon: 'icons/svg/daze.svg',
         changes: [
-            { key: "system.characteristics.ocv.modifier", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
-            { key: "system.characteristics.dcv.modifier", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+            { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+            { key: "system.characteristics.dmcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
         ]
     };
 
@@ -29,8 +31,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         id: "unconscious",
         icon: 'icons/svg/unconscious.svg',
         changes: [
-            { key: "system.characteristics.ocv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
-            { key: "system.characteristics.dcv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+            { key: "system.characteristics.dcv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.dmcv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
         ]
     };
 
@@ -39,8 +41,28 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         id: "dead",
         icon: 'icons/svg/skull.svg',
         changes: [
-            { key: "system.characteristics.ocv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
-            { key: "system.characteristics.dcv.modifier", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+            { key: "system.characteristics.ocv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.dcv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+        ]
+    };
+
+    // Temporary BLIND status/effect until enhanced senses can be fully implemented.
+    // When a character cannot perceive his opponent with any
+    // Targeting Sense, he is at ½ DCV. He’s also at ½ OCV in HTH
+    // Combat and 0 OCV in Ranged Combat.
+    // As a Half Phase Action, a character can attempt a PER Roll
+    // to perceive a particular target with a Nontargeting Sense (at -5 if
+    // the Nontargeting Sense is Smell). If successful, then the penalties
+    // above are reduced (against that target only) to ½ OCV in HTH or
+    // Ranged Combat, and -1 DCV in HTH Combat (full DCV at Range).
+    // These effects last until the beginning of the character’s next Phase.
+    static blindEffect = {
+        label: "EFFECT.StatusBlind",
+        id: "blind",
+        icon: 'icons/svg/blind.svg',
+        changes: [
+            { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+            { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
         ]
     };
 
