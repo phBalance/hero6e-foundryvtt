@@ -2316,25 +2316,43 @@ export async function createEffects(itemData, actor) {
 
 }
 
-export async function updateItemSubTypes(actor) {
+export async function updateItemSubTypes(actor, removeDups) {
 
     // Update Item SubType
     for (const item of actor.items) {
         const configPowerInfo = getPowerInfo({ item: item })
+
 
         // Defenses
         if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
             await item.update({ 'system.subType': 'defense', 'system.showToggle': true })
         }
 
-        // Is theis a movement power?
+        // Is this a movement power?
         if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
             await item.update({ 'system.subType': 'movement', 'system.showToggle': true })
         }
 
-        // Is theis an attack power?
+        // Is this an attack power?
         if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
-            await item.update({ 'system.subType': 'attack', 'system.showToggle': true })
+            if (item.system.subType != 'attack' || !item.system.dice)
+            {
+                await makeAttack(item)
+                await item.update({ 'system.subType': 'attack', 'system.showToggle': true })
+            }
         }
+
+        // Remove duplicate attacks
+        if(removeDups && item.type == 'attack')
+        {
+            const power = actor.items.find(o => o.name == item.name && o.system.subType == 'attack')
+            if (power)
+            {
+                await item.delete()
+            }
+        }
+        
     }
+
+
 }
