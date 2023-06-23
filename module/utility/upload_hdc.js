@@ -373,7 +373,9 @@ export async function applyCharacterSheet(xmlDoc) {
             //xmlid: "HANDTOHANDATTACK",
             knockbackMultiplier: 1,
             usesStrength: true,
-            rules: "This is the basic attack maneuver"
+            rules: "This is the basic attack maneuver",
+            XMLID: "HANDTOHANDATTACK",
+            NAME: "Strike",
         }
 
     }
@@ -1917,6 +1919,20 @@ export async function makeAttack(item) {
         changes[`system.class`] = 'drain'
     }
     
+    // TRANSFER (not implemented)
+    if (xmlid == "TRANSFER") {
+        changes[`system.class`] = 'transfer'
+    }
+
+    // TRANSFER (not implemented)
+    if (xmlid == "MINDSCAN") {
+        changes[`system.class`] = 'mindscan'
+    }
+
+    // DISPEL (not implemented)
+    if (xmlid == "DISPEL") {
+        changes[`system.class`] = 'dispel'
+    }
     
 
     // Armor Piercing

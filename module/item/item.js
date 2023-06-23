@@ -126,7 +126,19 @@ export class HeroSystem6eItem extends Item {
 
         switch (this.system.subType || this.type) {
             case "attack":
-                return await Attack.AttackOptions(this)
+                switch (this.system.XMLID) {
+                    case "HKA":
+                    case "RKA":
+                    case "ENERGYBLAST":
+                    case "HANDTOHANDATTACK":
+                    case "TELEKINESIS":
+                    case undefined:
+                        return await Attack.AttackOptions(this)
+
+                    default:
+                        return ui.notifications.warn(`${this.system.XMLID} roll is not supported`)
+                }
+
             case "defense":
                 return this.toggle()
             case "skill":
@@ -140,12 +152,11 @@ export class HeroSystem6eItem extends Item {
     async chat() {
 
         let content = `<div class="item-chat">`
-        
+
         // Part of a framework (is there a PARENTID?)
-        if (this.system.PARENTID)
-        {
-            const parent = this.actor.items.find(o=> o.system.ID == this.system.PARENTID)
-            content += `<p><b>${parent.name}</b>` 
+        if (this.system.PARENTID) {
+            const parent = this.actor.items.find(o => o.system.ID == this.system.PARENTID)
+            content += `<p><b>${parent.name}</b>`
             if (parent.system.description && parent.system.description != parent.name) {
                 content += ` ${parent.system.description}`
             }
