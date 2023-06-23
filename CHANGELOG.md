@@ -1,5 +1,9 @@
 # Version 3.0.0-alpha
-- FoundryVTT version 11 support
+- FoundryVTT version 11 (v10 no longer supported)
+- Knockback fixes
+- Attack OcvMod [#137](https://github.com/dmdorman/hero6e-foundryvtt/issues/137)
+- Attack powers are used directly.  No longer need to have separate attack items.
+- All attack powers are shown in Attack tab, even those not fully implemented.  A small step toward implementing additional attack types and charges.
 
 # Version 2.2.0-alpha
 - Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.

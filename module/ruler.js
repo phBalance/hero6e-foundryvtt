@@ -144,7 +144,7 @@ export class HeroRuler {
                 const radioOptions = movementItems.map((item, index) => `
                     <div class="radio" data-tool="${item._id}">
                         <input id="radio-${index}" name="radio" type="radio" ${activeMovement === item._id ? 'checked' : ''}>
-                        <label for="radio-${index}" class="radio-label" style="text-shadow: 0 0 8px white;">${item.name} (${item.value}m)</label>
+                        <label for="radio-${index}" class="radio-label">${item.name} (${item.value}m)</label>
                     </div>
                 `).join('');
 

@@ -53,7 +53,7 @@ export async function onActiveEffectToggle(effect, newState) {
     const item = origin instanceof HeroSystem6eItem ? origin : null
     const actor = item?.actor || (origin instanceof HeroSystem6eActor ? origin : null)
     if (item) {
-        await item.update([{ 'system.active': newState }])
+        await item.update({ 'system.active': newState })
     }
 
     // Characteristic VALUE should be increased when toggled on

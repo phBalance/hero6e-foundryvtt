@@ -71,9 +71,9 @@ function determineDefense(targetActor, attackItem) {
         for (let i of targetActor.items) {
 
             const configPowerInfo = getPowerInfo({ item: i })
-            if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-                i.subType = 'defense'
-            }
+            // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+            //     i.subType = 'defense'
+            // }
 
             if ((i.subType || i.type) === "defense" && i.system.active) {
                 let value = parseInt(i.system.value) || 0;

@@ -62,7 +62,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // 6e vs 5e
     if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
-        this.actor.update({ 'system.is5e': true }, {render: false})
+        this.actor.update({ 'system.is5e': true }, { render: false })
     }
     const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
@@ -150,8 +150,8 @@ export async function applyCharacterSheet(xmlDoc) {
         //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
         // }
     }
-   
-    await this.actor.update(changes, {render: false})
+
+    await this.actor.update(changes, { render: false })
     changes = {}
 
     // Initial 5e support
@@ -246,7 +246,7 @@ export async function applyCharacterSheet(xmlDoc) {
         figuredChanges[`system.characteristics.omcv.realCost`] = 0
         figuredChanges[`system.characteristics.dmcv.realCost`] = 0
 
-        await this.actor.update(figuredChanges, {render: false})
+        await this.actor.update(figuredChanges, { render: false })
     }
     else {
         // Confirm 6E
@@ -255,7 +255,7 @@ export async function applyCharacterSheet(xmlDoc) {
                 ui.notifications.warn(`Actor was incorrectly flagged as 5e.`)
                 console.log(`Actor was incorrectly flagged as 5e.`)
             }
-            await this.actor.update({ 'system.is5e': false }, {render: false})
+            await this.actor.update({ 'system.is5e': false }, { render: false })
         }
     }
 
@@ -360,7 +360,7 @@ export async function applyCharacterSheet(xmlDoc) {
         let path = "worlds/" + game.world.id
         if (this.actor.img.indexOf(filename) == -1) {
             await ImageHelper.uploadBase64(base64, filename, path)
-            await this.actor.update({ [`img`]: path + '/' + filename }, {render: false})
+            await this.actor.update({ [`img`]: path + '/' + filename }, { render: false })
         }
     }
 
@@ -379,12 +379,14 @@ export async function applyCharacterSheet(xmlDoc) {
     }
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
+    await updateItemSubTypes(this.actor)
+
 
     // Make sure VALUE = MAX.
     // We may have applied ActiveEffectcs to MAX.
     for (let char of Object.keys(this.actor.system.characteristics)) {
         if (this.actor.system.characteristics[char].value != this.actor.system.characteristics[char].max) {
-            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, {render: false})
+            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, { render: false })
         }
 
     }
@@ -431,7 +433,7 @@ async function CalcRealAndActivePoints(actor) {
         _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
     }
     //HEROSYS.log(false, _splitCost)
-    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, {render: false})
+    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false })
 }
 
 
@@ -632,12 +634,18 @@ export async function uploadBasic(xml, type) {
     if (itemData.system.XMLID == "COMBAT_LUCK") {
         itemData.system.active = true
     }
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    const item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
-    // Some items should be copied and created as an attack
+    // // Some items should be copied and created as an attack
+    // const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
+    // if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
+    //     await uploadAttack.call(this, xml)
+    // }
+
+    // Some items are attacks
     const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
     if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
-        await uploadAttack.call(this, xml)
+        await makeAttack(item)
     }
 }
 
@@ -1316,10 +1324,11 @@ export async function uploadPower(power, type) {
         }
 
         // Detect attacks
-        //let configPowerInfo = CONFIG.HERO.powers[power.system.rules]
         if (configPowerInfo.powerType.includes("attack")) {
-            await uploadAttack.call(this, power, true)
+            //await uploadAttack.call(this, power, true)
+            await makeAttack(item)
         }
+
 
     }
     else {
@@ -1853,6 +1862,186 @@ function createPowerDescriptionModifier(modifier, powerName) {
     return result;
 }
 
+export async function makeAttack(item) {
+    const xmlid = item.system.XMLID || item.system.xmlid || item.system.rules
+
+    // Confirm this is an attack
+    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: item.actor })
+    if (!configPowerInfo || !configPowerInfo.powerType.includes("attack")) return
+
+    let changes = {}
+    //changes[`img`] = "icons/svg/sword.svg"
+
+
+    // Name
+    let description = item.system.ALIAS
+    let name = item.system.NAME || description || configPowerInfo.xmlid
+    changes[`name`] = name
+
+    const levels = parseInt(item.system.LEVELS)
+    const input = item.system.INPUT
+
+
+    // Active cost is required for endurance calculation.
+    // It should include all advantages (which we don't handle very well at the moment)
+    // However this should be calculated during power upload (not here)
+    // let activeCost = (levels * 5)
+    // let end = Math.round(activeCost / 10 - 0.01);
+    //changes[`system.activeCost`] = activeCost
+
+    changes[`system.subType`] = 'attack'
+    changes[`system.class`] = input === "ED" ? "energy" : "physical"
+    changes[`system.dice`] = levels
+    changes[`system.extraDice`] = "zero"
+    changes[`system.killing`] = false
+    changes[`system.knockbackMultiplier`] = 1
+    changes[`system.targets`] = "dcv"
+    changes[`system.uses`] = "ocv"
+    changes[`system.usesStrength`] = true
+    changes[`system.areaOfEffect`] = { type: 'none', value: 0 }
+    changes[`system.piercing`] = 0
+    changes[`system.penetrating`] = 0
+
+    // ENTANGLE (not implemented)
+    if (xmlid == "ENTANGLE") {
+        changes[`system.class`] = 'entangle'
+    }
+
+    // DARKNESS (not implemented)
+    if (xmlid == "DARKNESS") {
+        changes[`system.class`] = 'darkness'
+    }
+
+    // DRAIN (not implemented)
+    if (xmlid == "DRAIN") {
+        changes[`system.class`] = 'drain'
+    }
+    
+    
+
+    // Armor Piercing
+    let ARMORPIERCING = item.system.modifiers.find(o => o.XMLID == "ARMORPIERCING")
+    if (ARMORPIERCING) {
+        changes[`system.piercing`] = parseInt(ARMORPIERCING.LEVELS)
+    }
+
+    // Penetrating
+    let PENETRATING = item.system.modifiers.find(o => o.XMLID == "PENETRATING")
+    if (PENETRATING) {
+        changes[`system.penetrating`] = parseInt(PENETRATING.LEVELS)
+    }
+
+    // No Knockback
+    let NOKB = item.system.modifiers.find(o => o.XMLID == "NOKB")
+    if (NOKB) {
+        changes[`system.knockbackMultiplier`] = 0
+    }
+
+    // Double Knockback
+    let DOUBLEKB = item.system.modifiers.find(o => o.XMLID == "DOUBLEKB")
+    if (DOUBLEKB) {
+        changes[`system.knockbackMultiplier`] = 2
+    }
+
+    // Explosion
+    let EXPLOSION = item.system.modifiers.find(o => o.XMLID == "EXPLOSION")
+    if (EXPLOSION) {
+        if (game.settings.get(game.system.id, 'alphaTesting')) {
+            ui.notifications.warn(`EXPLOSION not implemented during HDC upload of ${item.actor.name}`)
+        }
+    }
+
+    // Alternate Combat Value (uses OMCV against DCV)
+    let ACV = item.system.modifiers.find(o => o.XMLID == "ACV")
+    if (ACV) {
+        if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            changes[`system.uses`] = 'omcv'
+            changes[`system.targets`] = 'dcv'
+        }
+        if (ACV.OPTION_ALIAS === "uses OCV against DMCV") {
+            changes[`system.uses`] = 'ocv'
+            changes[`system.targets`] = 'dmcv'
+        }
+        if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            changes[`system.uses`] = 'omcv'
+            changes[`system.targets`] = 'dcv'
+        }
+    }
+
+
+    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEPIP")) {
+        changes[`system.extraDice`] = "pip"
+    }
+
+    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEHALFDIE")) {
+        changes[`system.extraDice`] = "half"
+    }
+
+    if (item.system.modifiers.find(o => o.XMLID == "MINUSONEPIP")) {
+        // Typically only allowed for killing attacks.
+        //  Appears that +1d6-1 is roughly equal to +1/2 d6
+        changes[`system.extraDice`] = "half"
+    }
+
+    const aoe = item.system.modifiers.find(o => o.XMLID == "AOE")
+    if (aoe) {
+        changes[`system.areaOfEffect`] = {
+            type: aoe.OPTION_ALIAS.toLowerCase(),
+            value: parseInt(aoe.LEVELS)
+        }
+    }
+
+    // if (xmlid === "HANDTOHANDATTACK") {
+    //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    //     return
+    // }
+
+    if (xmlid === "HKA") {
+        // itemData.system.killing = true
+        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // return
+        changes[`system.killing`] = true
+    }
+
+
+    if (xmlid === "TELEKINESIS") {
+        // levels is the equivalent strength
+        changes[`system.extraDice`] = "zero"
+        changes[`system.dice`] = Math.floor(levels / 5)
+        if (levels % 5 >= 3) {
+            changes[`system.extraDice`] = "half"
+        }
+        changes[`name`] = name + " (TK strike)"
+        changes[`system.usesStrength`] = false
+        changes[`system.usesTk`] = true
+    }
+
+    if (xmlid === "ENERGYBLAST") {
+        // itemData.system.usesStrength = false
+        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // return
+        changes[`system.usesStrength`] = false
+    }
+
+    if (xmlid === "RKA") {
+        // itemData.system.killing = true
+        // itemData.system.usesStrength = false
+        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // return
+        changes[`system.killing`] = true
+        changes[`system.usesStrength`] = false
+    }
+
+
+    // if (game.settings.get(game.system.id, 'alphaTesting')) {
+    //     ui.notifications.warn(`${xmlid} ATTACK not implemented during HDC upload of ${this.actor.name}`)
+    // }
+
+
+
+    await item.update(changes)
+}
+
 export async function uploadAttack(power) {
     const xmlid = power.getAttribute('XMLID')
 
@@ -2124,5 +2313,46 @@ export async function createEffects(itemData, actor) {
         itemData.effects = [activeEffect]
         return
     }
+
+}
+
+export async function updateItemSubTypes(actor, removeDups) {
+
+    // Update Item SubType
+    for (const item of actor.items) {
+        const configPowerInfo = getPowerInfo({ item: item })
+
+
+        // Defenses
+        if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+            await item.update({ 'system.subType': 'defense', 'system.showToggle': true })
+        }
+
+        // Is this a movement power?
+        if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+            await item.update({ 'system.subType': 'movement', 'system.showToggle': true })
+        }
+
+        // Is this an attack power?
+        if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
+            if (item.system.subType != 'attack' || !item.system.dice)
+            {
+                await makeAttack(item)
+                await item.update({ 'system.subType': 'attack', 'system.showToggle': true })
+            }
+        }
+
+        // Remove duplicate attacks
+        if(removeDups && item.type == 'attack')
+        {
+            const power = actor.items.find(o => o.name == item.name && o.system.subType == 'attack')
+            if (power)
+            {
+                await item.delete()
+            }
+        }
+        
+    }
+
 
 }

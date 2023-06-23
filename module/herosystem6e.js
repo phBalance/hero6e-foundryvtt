@@ -18,7 +18,7 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
-import { createEffects } from "./utility/upload_hdc.js"
+import { createEffects, updateItemSubTypes } from "./utility/upload_hdc.js"
 
 Hooks.once('init', async function () {
 
@@ -108,7 +108,7 @@ Hooks.once('init', async function () {
     loadTemplates([
         `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
         `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
-
+        `systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs`,
     ]);
 
 });
@@ -214,8 +214,10 @@ function rollItemMacro(itemName, itemType) {
     let actor;
     if (speaker.token) actor = game.actors.tokens[speaker.token];
     if (!actor) actor = game.actors.get(speaker.actor);
-    let item = actor ? actor.items.find(i => i.name === itemName && (!itemType || i.type == itemType)) : null;
-    HEROSYS.log(false, "rollItemMacro", item)
+    let item = actor ? actor.items.find(i =>
+        i.name === itemName &&
+        (!itemType || i.type == itemType || i.system.subType == itemType)
+    ) : null;
 
     // The selected actor does not have an item with this name.
     if (!item) {
@@ -223,7 +225,10 @@ function rollItemMacro(itemName, itemType) {
         // Search all owned tokens for this item
         for (let token of canvas.tokens.ownedTokens) {
             actor = token.actor
-            item = actor.items.find(i => i.name === itemName && (!itemType || i.type == itemType))
+            item = actor.items.find(i =>
+                i.name === itemName &&
+                (!itemType || i.type == itemType || i.system.subType == itemType)
+            )
             if (item) {
                 break;
             }
@@ -265,6 +270,15 @@ Hooks.once("ready", async function () {
             migrateActorTypes()
             migrateKnockback()
             migrateRemoveDuplicateDefenseMovementItems()
+        }
+
+        // if lastMigration < 3.0.0-alpha
+        if (foundry.utils.isNewerVersion('3.0.0', lastMigration)) {
+            ui.notifications.info(`Migragrating actor data.`)
+            for (let actor of game.actors.contents) {
+                await updateItemSubTypes(actor, true)
+            }
+            ui.notifications.info(`Migragtion complete.`)
         }
     }
 
