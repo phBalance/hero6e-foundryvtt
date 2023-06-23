@@ -3,7 +3,8 @@ import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { HEROSYS } from "../herosystem6e.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
-import { determineStrengthDamage, determineExtraDiceDamage, simplifyDamageRoll, convertToDC } from "../utility/damage.js";
+import { determineStrengthDamage, determineExtraDiceDamage, 
+    simplifyDamageRoll, convertToDC, handleDamageNegation } from "../utility/damage.js";
 import { damageRollToTag } from "../utility/tag.js";
 
 export async function chatListeners(html) {
@@ -304,8 +305,6 @@ export async function _onRollDamage(event) {
         damageRoll += extraDiceDamage
     }
 
-    HEROSYS.log(false, damageRoll)
-
     damageRoll = simplifyDamageRoll(damageRoll)
 
     let roll = new Roll(damageRoll, actor.getRollData());
@@ -574,55 +573,7 @@ async function _calcDamage(damageResult, item, options) {
 
     let pip = 0
 
-    let DC = convertToDC(item, damageResult._formula)
-
-    // Damage Negation
-    if (options?.damageNegationValue > 0) {
-        let fullDiceDr = options.damageNegationValue
-        let pipDr = 0
-        if (itemData.killing) {
-            fullDiceDr = Math.floor(options.damageNegationValue / 3)
-            pipDr = options.damageNegationValue % 3
-        }
-
-        // Remove full dice
-        for (let i = 0; i < fullDiceDr; i++) {
-            // terms[0] are the full d6 dice
-            if (damageResult.terms[0].results.length > 0) {
-                // remove 1st dice
-                damageResult.terms[0].results = damageResult.terms[0].results.slice(1)
-            }
-            else {
-                pipDr += 3
-            }
-        }
-
-        // Remove pipDr
-        for (let i = 0; i < pipDr; i++) {
-            // full dice are at terms[0]
-            // plus operator is terms[1]
-            // pips are at terms [2]
-
-            // Convert full dice to a pip
-            if (damageResult.terms[0].results.length > 0 && damageResult.terms.length == 1) {
-                let _fullDice = damageResult.terms[0].results[0]
-                _fullDice.results = Math.ceil(_fullDice.result / 2) // convert to half dice (2 pips)
-                damageResult.terms[0].results = damageResult.terms[0].results.slice(1)
-                damageResult.terms.push(new OperatorTerm({ operator: "+" }));
-                let _halfDie = new Die({ number: _fullDice.results, faces: 3 })
-                damageResult.terms.push(_halfDie)
-                continue
-            }
-
-            // Convert half dice to +1
-            if (damageResult.terms.length == 3 && damageResult.terms[2] instanceof Die) {
-                damageResult.terms[2] = new NumericTerm({ number: 1 });
-                continue
-            }
-
-            console.warn("Uhandled Damage Negation")
-        }
-    }
+    damageResult = await handleDamageNegation(item, damageResult, options)
 
     // We may have spoofed a roll, so total is missing.
     if (!damageResult.total) {

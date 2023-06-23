@@ -1,3 +1,4 @@
+import { HERO } from "../config.js";
 import { HEROSYS } from "../herosystem6e.js";
 
 export function determineStrengthDamage(item, effectiveStr) {
@@ -113,12 +114,66 @@ export function convertFromDC(item, DC) {
     return output;
 }
 
-function addTerms(term1, term2) {
-    let output = (term1 !== "")? term1 : "";
+export function addTerms(term1, term2) {
+    function isValid(term) {
+        return (term !== "") && (term !== null)
+    }
 
-    if (term1 !== "" && term2 !== "") { output += " + "; }
+    let output = (isValid(term1))? term1 : "";
 
-    if (term2 !== "") { output += term2; }
+    if (isValid(term1) && isValid(term2)) { output += " + "; }
+
+    if (isValid(term2)) { output += term2; }
 
     return output;
+}
+
+
+export async function handleDamageNegation(item, damageResult, options) {
+    if (!options?.damageNegationValue) { return damageResult; }
+
+    let fullDiceDr = (item.system.killing)? Math.floor(options.damageNegationValue / 3) :
+        options.damageNegationValue
+
+    let pipDr = (item.system.killing)? options.damageNegationValue % 3 : 0
+
+    // Remove full dice
+    for (let i = 0; i < fullDiceDr; i++) {
+        // terms[0] are the full d6 dice
+        if (damageResult.terms[0].results.length > 0) {
+            // remove 1st dice
+            damageResult.terms[0].results = damageResult.terms[0].results.slice(1)
+        }
+        else {
+            pipDr += 3
+        }
+    }
+
+    // Remove pipDr
+    for (let i = 0; i < pipDr; i++) {
+        // full dice are at terms[0]
+        // plus operator is terms[1]
+        // pips are at terms [2]
+
+        // Convert full dice to a pip
+        if (damageResult.terms[0].results.length > 0 && damageResult.terms.length == 1) {
+            let _fullDice = damageResult.terms[0].results[0]
+            _fullDice.results = Math.ceil(_fullDice.result / 2) // convert to half dice (2 pips)
+            damageResult.terms[0].results = damageResult.terms[0].results.slice(1)
+            damageResult.terms.push(new OperatorTerm({ operator: "+" }));
+            let _halfDie = new Die({ number: _fullDice.results, faces: 3 })
+            damageResult.terms.push(_halfDie)
+            continue
+        }
+
+        // Convert half dice to +1
+        if (damageResult.terms.length == 3 && damageResult.terms[2] instanceof Die) {
+            damageResult.terms[2] = new NumericTerm({ number: 1 });
+            continue
+        }
+
+        console.warn("Uhandled Damage Negation")
+    }
+
+    return damageResult
 }

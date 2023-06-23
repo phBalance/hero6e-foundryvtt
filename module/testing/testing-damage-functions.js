@@ -3,7 +3,8 @@ import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { 
     determineStrengthDamage, determineExtraDiceDamage, 
-    simplifyDamageRoll, getNumberOfEachDice, convertToDC, convertFromDC 
+    simplifyDamageRoll, getNumberOfEachDice, convertToDC, 
+    convertFromDC, addTerms, handleDamageNegation
 } from "../utility/damage.js"
 
 export function registerDamageFunctionTests(quench) {
@@ -339,6 +340,99 @@ export function registerDamageFunctionTests(quench) {
 
                 it("(Non-Killing) 20", function () {
                     assert.equal(convertFromDC(item_nk, 20), "20d6");
+                });
+            });
+
+            describe("Add Terms", function () {
+                it("'' ''", function () {
+                    assert.equal(addTerms("", ""), "");
+                });
+
+                it("null null", function () {
+                    assert.equal(addTerms(null, null), "");
+                });
+
+                it("1d6 null", function () {
+                    assert.equal(addTerms("1d6", null), "1d6");
+                });
+
+                it("null 1d6", function () {
+                    assert.equal(addTerms(null, "1d6"), "1d6");
+                });
+
+                it("1d6 1d6", function () {
+                    assert.equal(addTerms("1d6", "1d6"), "1d6 + 1d6");
+                });
+
+                it("1d6 ''", function () {
+                    assert.equal(addTerms("1d6", ""), "1d6");
+                });
+
+                it("'' 1d6", function () {
+                    assert.equal(addTerms("", "1d6"), "1d6");
+                });
+
+                it("1d6 1d6", function () {
+                    assert.equal(addTerms("1d6", "1d6"), "1d6 + 1d6");
+                });
+            });
+
+            describe("handleDamageNegation", function () {
+                const fakeItem_k = {
+                    "system": {
+                        "killing": true
+                    }
+                }
+                
+                const die = {
+                    "results": [
+                        { "result": 1, "active": true },
+                        { "result": 2, "active": true },
+                        { "result": 3, "active": true },
+                        { "result": 4, "active": true },
+                        { "result": 5, "active": true }
+                    ]
+                }
+
+                const damageResult = {
+                    "terms": [
+                        die
+                    ],
+                    "dice": [
+                        die
+                    ]
+                }
+
+                const options = { "damageNegationValue": 0 }
+
+                it("No Damage Negation", async function () {
+                    assert.equal(await handleDamageNegation(fakeItem_k, damageResult, {}), damageResult);
+                });
+
+                it("(Killing) Damage Negation is 0", async function () {
+                    assert.equal(await handleDamageNegation(fakeItem_k, damageResult, options), damageResult);
+                });
+
+                it("(Killing) Damage Negation is 1", async function () {
+                    const newDie = {
+                        "results": [
+                            { "result": 1, "active": true },
+                            { "result": 2, "active": true },
+                            { "result": 3, "active": true },
+                            { "result": 4, "active": true }
+                        ]
+                    }
+                    
+                    const newDamageResult = {
+                        "terms": [
+                            newDie
+                        ],
+                        "dice": [
+                            newDie
+                        ]
+                    }
+
+                    assert.equal(await handleDamageNegation(fakeItem_k, damageResult, { "damageNegationValue": 1 }), newDamageResult);
                 });
             });
         },
