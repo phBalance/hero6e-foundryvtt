@@ -5,7 +5,7 @@ import * as Dice from "../dice.js"
 import * as Attack from "../item/item-attack.js"
 import { createSkillPopOutFromItem } from '../item/skill.js'
 import { enforceManeuverLimits } from '../item/manuever.js'
-import { SkillRollUpdateValue } from '../utility/upload_hdc.js'
+import { SkillRollUpdateValue, updateItem } from '../utility/upload_hdc.js'
 import { onActiveEffectToggle } from '../utility/effects.js'
 import { getPowerInfo } from '../utility/util.js'
 
@@ -56,6 +56,7 @@ export class HeroSystem6eItem extends Item {
     prepareData() {
         super.prepareData();
 
+        updateItem(this)
 
 
         // Get the Item's data
@@ -67,49 +68,49 @@ export class HeroSystem6eItem extends Item {
 
     }
 
-    _prepareSkillData(actorData, itemData) {
-        return
+    // _prepareSkillData(actorData, itemData) {
+    //     return
 
-        const data = itemData.data;
+    //     const data = itemData.data;
 
-        let roll = 6;
+    //     let roll = 6;
 
-        switch (data.state) {
-            case "trained":
-                let levels = data.levels;
+    //     switch (data.state) {
+    //         case "trained":
+    //             let levels = data.levels;
 
-                if (!data.characteristic) {
-                    roll = undefined;
-                } else if (data.characteristic != "general") {
-                    if (actorData) {
-                        levels += actorData.data.characteristics[data.characteristic].value / 5;
-                    }
-                }
-                else {
-                    roll = 11 + levels;
-                }
-                roll = Math.round(9 + levels);
-                break;
-            case "proficient":
-                roll = 10;
-                break;
-            case "familiar":
-                roll = 8;
-                break;
-            case "everyman":
-                if (data.ps) {
-                    roll = 11;
-                } else {
-                    roll = 8;
-                }
-                break;
-            case "noroll":
-                roll = undefined;
-                break;
-        }
+    //             if (!data.characteristic) {
+    //                 roll = undefined;
+    //             } else if (data.characteristic != "general") {
+    //                 if (actorData) {
+    //                     levels += actorData.data.characteristics[data.characteristic].value / 5;
+    //                 }
+    //             }
+    //             else {
+    //                 roll = 11 + levels;
+    //             }
+    //             roll = Math.round(9 + levels);
+    //             break;
+    //         case "proficient":
+    //             roll = 10;
+    //             break;
+    //         case "familiar":
+    //             roll = 8;
+    //             break;
+    //         case "everyman":
+    //             if (data.ps) {
+    //                 roll = 11;
+    //             } else {
+    //                 roll = 8;
+    //             }
+    //             break;
+    //         case "noroll":
+    //             roll = undefined;
+    //             break;
+    //     }
 
-        data.roll = Math.round(roll);
-    }
+    //     data.roll = Math.round(roll);
+    // }
 
     // Largely used to determine if we can drag to hotbar
     isRollable() {

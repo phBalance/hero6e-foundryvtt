@@ -3,6 +3,8 @@ import { registerHitLocationTests } from "./testing-hit-locations.js";
 import { registerUtilTests } from "./testing-util.js";
 import { registerDamageFunctionTests } from "./testing-damage-functions.js";
 import { registerTagTests } from "./testing-tag.js";
+import { registerUploadTests } from "./testing-upload.js";
+
 
 Hooks.once("ready", async function () {
     if (!game.modules.get('_dev-mode')?.active ) { return; }
@@ -21,4 +23,5 @@ Hooks.on("quenchReady", (quench) => {
     registerUtilTests(quench);
     registerDamageFunctionTests(quench);
     registerTagTests(quench);
+    registerUploadTests(quench);
 });

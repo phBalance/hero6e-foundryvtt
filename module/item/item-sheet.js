@@ -79,12 +79,24 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         }
 
         // DRAIN
-        data.drains = {
-            "none": "none",
-            "STR": "STR",
-            ... CONFIG.HERO.characteristics
+        // A select list of possible DRAIN from sources
+        if (item.system.XMLID == "DRAIN") {
+            let drains = []
+            for (const key in this.actor.system.characteristics) {
+                if (this.actor.system.characteristics[key].hasOwnProperty('value')) {
+                    drains.push(key.toUpperCase())
+                }
+            }
+            drains.sort()
+            drains = [ "none", ...drains]
+            data.drains = {}
+            for (let key of drains)
+            {
+                data.drains[key] = key
+            }
+            
         }
-        
+
 
         return data
     }

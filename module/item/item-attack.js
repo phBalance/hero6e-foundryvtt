@@ -35,7 +35,7 @@ export async function AttackOptions(item) {
     let tkItems = item.actor.items.filter(o => o.system.rules == "TELEKINESIS");
     let tkStr = 0
     for (const item of tkItems) {
-        tkStr += parseInt(item.system.LEVELS) || 0
+        tkStr += parseInt(item.system.LEVELS.value) || 0
     }
     if (item.system.usesTk) {
         if (item.system.usesStrength) {

@@ -402,7 +402,7 @@ export class HeroSystem6eCombat extends Combat {
 
                 switch (item.system.id) {
                     case ('LIGHTNING_REFLEXES_ALL'): {
-                        const levels = item.system.LEVELS || item.system.other.levels || 0
+                        const levels = item.system.LEVELS.value || item.system.other.levels || 0
                         const lightning_reflex_initiative = (parseInt(dexValue || 0 ) + parseInt(levels)) + (parseInt(initativeValue || 0) / 100)
                         
                         const alias = item.system.OPTION_ALIAS || item.system.other.option_alias || 'None'

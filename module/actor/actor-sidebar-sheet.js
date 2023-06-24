@@ -130,7 +130,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     let tkItems = data.actor.items.filter(o => o.system.rules == "TELEKINESIS");
                     let str = 0
                     for (const item of tkItems) {
-                        str += parseInt(item.system.LEVELS) || 0
+                        str += parseInt(item.system.LEVELS.value) || 0
                     }
                     let str5 = Math.floor(str / 5)
                     if (item.system.killing) {
