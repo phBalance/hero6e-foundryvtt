@@ -1898,7 +1898,7 @@ export async function makeAttack(item) {
     let name = item.system.NAME || description || configPowerInfo.xmlid
     changes[`name`] = name
 
-    const levels = parseInt(item.system.LEVELS?.value)
+    const levels = parseInt(item.system.LEVELS?.value || 0)
     const input = item.system.INPUT
 
 
@@ -1937,12 +1937,17 @@ export async function makeAttack(item) {
         changes[`system.class`] = 'drain'
     }
 
+    // AID (not implemented)
+    if (xmlid == "AID") {
+        changes[`system.class`] = 'aid'
+    }
+
     // TRANSFER (not implemented)
     if (xmlid == "TRANSFER") {
         changes[`system.class`] = 'transfer'
     }
 
-    // TRANSFER (not implemented)
+    // MINDSCAN (not implemented)
     if (xmlid == "MINDSCAN") {
         changes[`system.class`] = 'mindscan'
     }
@@ -2390,6 +2395,8 @@ export async function updateItemSubTypes(actor, removeDups) {
 
 export async function updateItem(item) {
 
+    let changed = false;
+
     // LEVELS are now a value/max to account for Aid/Drain
     if (item.system.LEVELS) {
         if (item.system.LEVELS.value == undefined) {
@@ -2399,8 +2406,48 @@ export async function updateItem(item) {
                 value: levels,
                 max: levels
             }
+            changed = true;
+            await item.update({ 'system.LEVELS.value': levels, 'system.LEVELS.max': levels })
+        }
+
+        // Default values = max
+        if (item.system.LEVELS.value != item.system.LEVELS.max) {
+            item.system.LEVELS.value = parseInt(item.system.LEVELS.max)
+            changed = true
+        }
+
+        // Look for active effects
+        for (const effect of item.actor.effects.filter(o => o.origin == item.actor.uuid && !o.disabled)) {
+            for (const change of effect.changes) {
+                if (change.key == item.id) {
+                    console.log(effect)
+                    switch (change.mode) {
+                        case CONST.ACTIVE_EFFECT_MODES.ADD:
+                            const ActivePointsPerLevel = parseInt(item.system.activePoints) / parseFloat(item.system.LEVELS.value)
+                            item.system.LEVELS.value += parseFloat(change.value / ActivePointsPerLevel) || 0
+                            break;
+                        default:
+                            HEROSYS.log(false, "unknown mode")
+                    }
+                }
+            }
+        }
+
+        // Save effect changes
+
+        if (item.system.LEVELS.value != item.system.LEVELS.max) {
+            await item.update({ 'system.LEVELS.value': item.system.LEVELS.value })
+            changed = true;
+        }
+
+        // Update dice on attack
+        if (changed && (item.system.subType || item.type == 'attack')) {
+            makeAttack(item)
         }
     }
+
+
+
 
     let _basePointsPlusAdders = calcBasePointsPlusAdders.call(item, item.system)
     let _activePoints = calcActivePoints(_basePointsPlusAdders, item.system)
@@ -2427,7 +2474,11 @@ export async function updateItem(item) {
         if (item.system.description.includes("undefined")) {
             console.log(item.actor.name, item.system.description)
         } else {
-            await item.update({ 'system.description': item.system.description })
+            if (!item.id) {
+                HEROSYS.log(false, "missing id")
+            } else {
+                await item.update({ 'system.description': item.system.description })
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 import { HeroSystem6eItemSheet } from '../item/item-sheet.js'
 import { HeroSystem6eItem } from '../item/item.js'
+import { HeroSystem6eActor } from '../actor/actor.js'
 
 export async function onManageActiveEffect(event, owner) {
     event.preventDefault();

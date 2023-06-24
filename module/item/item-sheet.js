@@ -26,7 +26,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         // Alternatively, you could use the following return statement to do a
         // unique item sheet by type, like `weapon-sheet.hbs`.
-        if (["DRAIN"].includes(this.item.system.XMLID)) {
+        if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
         }
         return `${path}/item-${this.item.type}-sheet.hbs`
@@ -93,6 +93,25 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             for (let key of drains)
             {
                 data.drains[key] = key
+            }
+            
+        }
+
+        // AID
+        // A select list of possible AID from sources
+        if (item.system.XMLID == "AID") {
+            let aidSources = []
+            for (const key in this.actor.system.characteristics) {
+                if (this.actor.system.characteristics[key].hasOwnProperty('value')) {
+                    aidSources.push(key.toUpperCase())
+                }
+            }
+            aidSources.sort()
+            aidSources = [ "none", ...aidSources]
+            data.aidSources = {}
+            for (let key of aidSources)
+            {
+                data.aidSources[key] = key
             }
             
         }

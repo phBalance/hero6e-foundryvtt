@@ -433,7 +433,7 @@ HERO.powers = {
     },
     "AID": {
         name: "Aid",
-        powerType: ["adjustment"],
+        powerType: ["adjustment", "attack"], // not really an attack, but it behaves like one
         percievability: "obvious",
         duration: "Instant",
         target: "target’s DCV",
@@ -789,7 +789,7 @@ HERO.powers5e = {
     ...HERO.powers,
     "AID": {
         name: "Aid",
-        powerType: ["adjustment"],
+        powerType: ["adjustment", "attack"], // not really an attack, but it behaves like one
         percievability: "obvious",
         duration: "Instant",
         target: "target’s DCV",
