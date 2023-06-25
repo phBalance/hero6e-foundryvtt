@@ -572,7 +572,7 @@ HERO.powers = {
         costPerLevel: 3 / 2
     },
     "RKA": { powerType: ["attack"], costPerLevel: 15 },
-    "ENERGYBLAST": { powerType: ["attack"], costPerLevel: 5 },
+    "ENERGYBLAST": { powerType: ["attack"], costPerLevel: 5, costEnd: true },
     "DARKNESS": { powerType: ["sense-affecting", "attack", "standard"] },
     "DISPEL": { powerType: ["attack", "standard"], costPerLevel: 3 },
     "ENTANGLE": { powerType: ["attack", "standard"] },

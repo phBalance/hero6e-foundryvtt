@@ -1759,7 +1759,7 @@ function updateItemDescription(system, type) {
     // }
 
     // Endurance
-    system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10))
+    system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
     const costsEnd = system.modifiers.find(o => o.XMLID == "COSTSEND")
     const increasedEnd = system.modifiers.find(o => o.XMLID == "INCREASEDEND")
     if (increasedEnd) {
@@ -2304,16 +2304,17 @@ export async function createEffects(itemData, actor) {
     // Characteristics (via ActiveEffects)
     if (configPowerInfo?.powerType.includes("characteristic")) {
 
+        let levels = itemData.system.LEVELS?.value
         // Add LEVELS to MAX
         let activeEffect =
         {
-            label: itemData.name,
+            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
             //id: newPower.system.rules,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {
                     key: "system.characteristics." + key + ".max",
-                    value: parseInt(itemData.system.LEVELS?.value),
+                    value: parseInt(levels),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
             ]
@@ -2328,10 +2329,11 @@ export async function createEffects(itemData, actor) {
     // Movement Powers
     if (configPowerInfo?.powerType.includes("movement")) {
         const key = itemData.system.XMLID.toLowerCase()
+        let levels = itemData.system.LEVELS?.value
 
         let activeEffect =
         {
-            label: itemData.name,
+            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {

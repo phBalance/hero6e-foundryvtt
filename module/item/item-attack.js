@@ -50,7 +50,7 @@ export async function AttackOptions(item) {
         data.hitLoc = CONFIG.HERO.hitLocations;
     }
 
-    const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card2.hbs"
+    const template = ["AID"].includes(item.system.XMLID) ? "systems/hero6efoundryvttv2/templates/attack/item-attack-aid-card.hbs" : "systems/hero6efoundryvttv2/templates/attack/item-attack-card2.hbs"
     const html = await renderTemplate(template, data)
     return new Promise(resolve => {
         const data = {
@@ -122,7 +122,7 @@ export async function AttackToHit(item, options) {
 
     // [x Stun, x N Stun, x Body, OCV modifier]
     let noHitLocationsPower = item.system.noHitLocations || false;
-    if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim !== "none" && !noHitLocationsPower) {
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim && options.aim !== "none" && !noHitLocationsPower) {
         rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[options.aim][3]);
         tags.push({ value: CONFIG.HERO.hitLocations[options.aim][3], name: options.aim, hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0 })
     }
@@ -150,6 +150,7 @@ export async function AttackToHit(item, options) {
         let itemEnd = item.system.end;
         let newEnd = valueEnd - itemEnd;
         let spentEnd = itemEnd;
+        options.effectiveStr = options.effectiveStr || 0;
 
         if (itemData.usesStrength || itemData.usesTk) {
             // let strEnd = Math.max(1, Math.round(actor.system.characteristics.str.value / 10))

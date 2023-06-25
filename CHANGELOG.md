@@ -1,5 +1,4 @@
 # Version 3.0.1-alpha
-- Fixed issue where defense powers were not included in PD/ED/MD totals.
 - Mental Blast Improvements [#157](https://github.com/dmdorman/hero6e-foundryvtt/issues/157)
 - System version added to Actor and Item sheets [#158](https://github.com/dmdorman/hero6e-foundryvtt/issues/158)
 

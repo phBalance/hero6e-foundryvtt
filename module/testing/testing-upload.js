@@ -128,6 +128,46 @@ export function registerUploadTests(quench) {
                 });
             });
 
+            describe("ENERGYBLAST", function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc'
+                });
+
+                const contents = `
+                <POWER XMLID="ENERGYBLAST" ID="1686774389914" BASECOST="0.0" LEVELS="1" ALIAS="Fire Blast" POSITION="5" MULTIPLIER="1.0" GRAPHIC="zap" COLOR="255 0 0 " SFX="Fire/Heat" USE_END_RESERVE="Yes" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES />
+                </POWER>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                item.actor = actor;
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Fire Blast 1d6");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 5);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 5);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 1);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 1);
+                });
+
+            });
+
+
+
         },
         { displayName: "HERO: Upload" }
     );
