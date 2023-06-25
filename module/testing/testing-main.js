@@ -24,5 +24,6 @@ Hooks.on("quenchReady", (quench) => {
     registerUtilTests(quench);
     registerDamageFunctionTests(quench);
     registerTagTests(quench);
+    registerDefenseTests(quench);
     registerUploadTests(quench);
 });

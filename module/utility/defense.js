@@ -11,9 +11,11 @@ function determineDefense(targetActor, attackItem) {
     let PD = parseInt(targetActor.system.characteristics.pd.value);
     let ED = parseInt(targetActor.system.characteristics.ed.value);
     let MD = 0;
+    let POWD = 0;
+    let rPOWD = 0;
     let rPD = 0; // resistant physical defense
     let rED = 0; // resistant energy defense
-    let rMD = 0; // resistant mental defense
+    let rMD = 0; // resistant mental defense (not sure rMD is a real thing)
     let DRP = 0; // damage reduction physical
     let DRE = 0; // damage reduction energy
     let DRM = 0; // damage reduction mental
@@ -67,7 +69,7 @@ function determineDefense(targetActor, attackItem) {
     }
 
 
-    if (targetActor.items.size > 0) {
+    if ((targetActor.items.size || targetActor.items.length) > 0) {
         for (let i of targetActor.items) {
 
             const configPowerInfo = getPowerInfo({ item: i })
@@ -75,7 +77,7 @@ function determineDefense(targetActor, attackItem) {
             //     i.subType = 'defense'
             // }
 
-            if ((i.subType || i.type) === "defense" && i.system.active) {
+            if ((i.system.subType || i.type) === "defense" && i.system.active) {
                 let value = parseInt(i.system.value) || 0;
 
                 const xmlid = i.system.XMLID
@@ -96,6 +98,11 @@ function determineDefense(targetActor, attackItem) {
                         case 'mental':
                             i.system.defenseType = "md"
                             value = parseInt(i.system.MDLEVELS) || 0
+                            i.system.resistant = true
+                            break;
+                        case 'drain':
+                            i.system.defenseType = "powd"
+                            value = parseInt(i.system.POWDLEVELS) || 0
                             i.system.resistant = true
                             break;
                     }
@@ -198,6 +205,13 @@ function determineDefense(targetActor, attackItem) {
                             impenetrableValue += valueImp
                         }
                         break;
+                    case "powd": // Power Defense
+                        POWD += valueAp
+                        if (attackType === 'drain') {
+                            defenseTags.push({ name: 'POWD', value: valueAp, resistant: false, title: i.name })
+                            impenetrableValue += valueImp
+                        }
+                        break;
                     case "rpd": // Resistant PD
                         rPD += valueAp
                         if (attackType === 'physical') {
@@ -216,6 +230,13 @@ function determineDefense(targetActor, attackItem) {
                         rMD += valueAp
                         if (attackType === 'mental') {
                             defenseTags.push({ name: 'rMD', value: valueAp, resistant: true, title: i.name })
+                            impenetrableValue += valueImp
+                        }
+                        break;
+                    case "rpowd": // Resistant Power Defense
+                        rPOWD += valueAp
+                        if (attackType === 'drain') {
+                            defenseTags.push({ name: 'rPOWD', value: valueAp, resistant: true, title: i.name })
                             impenetrableValue += valueImp
                         }
                         break;
@@ -279,6 +300,14 @@ function determineDefense(targetActor, attackItem) {
             defenseValue = MD;
             resistantValue = rMD;
             impenetrableValue = Math.max(MD, rMD);
+            damageReductionValue = DRM;
+            damageNegationValue = DNM;
+            break;
+
+        case 'drain':
+            defenseValue = POWD;
+            resistantValue = rPOWD;
+            impenetrableValue = Math.max(POWD, rPOWD);
             damageReductionValue = DRM;
             damageNegationValue = DNM;
             break;
