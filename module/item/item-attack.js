@@ -412,6 +412,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const button = event.currentTarget;
     const damageData = { ...button.dataset }
     const item = fromUuidSync(damageData.itemid)
+    if (!item) {
+        // This typically happens when the attack id stored in the damage card no longer exists on the actor.
+        // For example if the attack item was deleted or the HDC was uploaded again.
+        console.log(damageData.itemid)
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
     const template = "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs"
 
     const token = canvas.tokens.get(tokenId)

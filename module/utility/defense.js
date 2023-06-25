@@ -108,6 +108,16 @@ function determineDefense(targetActor, attackItem) {
                     }
                 }
 
+                if (!value && ["MENTALDEFENSE"].includes(xmlid)) {
+                    switch (attackType) {
+                        case 'mental':
+                        i.system.defenseType = "md"
+                        value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                        break;
+                    }
+                }
+
+
                 if (!value && ["DAMAGEREDUCTION"].includes(xmlid) && i.system.INPUT.toLowerCase() == attackType) {
                     value = parseInt(i.system.OPTIONID.match(/\d+/)) || 0
                     i.system.resistant = i.system.OPTIONID.match(/RESISTANT/) ? true : false
