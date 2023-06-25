@@ -169,9 +169,9 @@ export class HeroSystem6eItem extends Item {
         if (this.system.description && this.system.description != this.name) {
             content += ` ${this.system.description}`
         }
-        if (this.system.roll) {
-            content += ` (${this.system.roll})`
-        }
+        // if (this.system.roll) {
+        //     content += ` (${this.system.roll})`
+        // }
         content += "."
 
         if (this.system.end) {

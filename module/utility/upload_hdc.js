@@ -268,6 +268,7 @@ export async function applyCharacterSheet(xmlDoc) {
         name: 'Perception',
         type: 'skill',
         system: {
+            ALIAS: "Perception",
             characteristic: "int",
             state: 'trained',
             levels: "0"
@@ -1542,6 +1543,7 @@ export async function uploadPower(power, type) {
     // }
 }
 
+// TODO: Can this be reworked to take only ITEM as a property?
 function updateItemDescription(system, type) {
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
@@ -1644,6 +1646,7 @@ function updateItemDescription(system, type) {
 
             break;
 
+        case "MENTAL_COMBAT_LEVELS":
         case "PENALTY_SKILL_LEVELS":
             system.description = system.NAME + ": +" + system.LEVELS?.value + " " + system.OPTION_ALIAS
             break;
@@ -1679,6 +1682,19 @@ function updateItemDescription(system, type) {
                 break;
             }
             system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS || "")
+
+            // Skill Roll?
+            if (type == 'skill') {
+                let item = {
+                    actor: this?.actor || this,
+                    system: system
+                }
+                SkillRollUpdateValue(item)
+                if (system.roll) {
+                    system.description += ` ${system.roll}`
+                }
+            }
+
     }
 
     // ADDRS
@@ -2262,7 +2278,7 @@ export function SkillRollUpdateValue(item) {
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
-        const rollVal = 9 + Math.round(charValue / 5) + parseInt(skillData.LEVELS || skillData.levels)
+        const rollVal = 9 + Math.round(charValue / 5) + parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels)
         skillData.roll = rollVal.toString() + '-'
     } else {
         // This is likely a Skill Enhancer.

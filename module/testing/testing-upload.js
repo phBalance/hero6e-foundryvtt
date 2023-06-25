@@ -1,5 +1,6 @@
+import { HeroSystem6eActor } from "../actor/actor.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { XmlToItemData } from "../utility/upload_hdc.js";
+import { XmlToItemData, SkillRollUpdateValue } from "../utility/upload_hdc.js";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
@@ -45,6 +46,88 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, "35");
                 });
             });
+
+            // https://discord.com/channels/609528652878839828/770825017729482772/1122607244035493888
+            describe("MENTAL_COMBAT_LEVELS", function () {
+
+
+                const contents = `
+                <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1687721775906" BASECOST="0.0" LEVELS="2" ALIAS="Mental Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with a group of Mental Powers" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Mind Empowered" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                <NOTES />
+                </SKILL>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData(xmlDoc.children[0], "skill")
+                
+                it("description", function () {
+                    assert.equal(item.system.description, "Mind Empowered: +2 with a group of Mental Powers");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 6);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 6);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 2);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+                it("roll", function () {
+                    SkillRollUpdateValue(item)
+                    assert.equal(item.system.roll, "11-");
+                });
+            });
+
+            describe("CLIMBING", function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc'
+                });
+                actor.system.characteristics.dex.value = 15
+
+                const contents = `
+                <SKILL XMLID="CLIMBING" ID="1687723638849" BASECOST="3.0" LEVELS="0" ALIAS="Climbing" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                <NOTES />
+                </SKILL>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "skill")
+                item.actor = actor;
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Climbing 12-");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 3);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 3);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 0);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+                it("roll", function () {
+                    SkillRollUpdateValue(item)
+                    assert.equal(item.system.roll, "12-");
+                });
+            });
+
         },
         { displayName: "HERO: Upload" }
     );
