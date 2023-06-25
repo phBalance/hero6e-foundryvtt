@@ -378,42 +378,167 @@ export function registerDamageFunctionTests(quench) {
             });
 
             describe("handleDamageNegation", function () {
+                const fakeItem_nk = {
+                    "system": {
+                        "killing": false
+                    }
+                }
+
                 const fakeItem_k = {
                     "system": {
                         "killing": true
                     }
                 }
+
+                const plus = {
+                    "_evaluated": true,
+                    "isIntermediate": false,
+                    "operator": "+",
+                    "options": {}
+                }
+
+                const minus = {
+                    "_evaluated": true,
+                    "isIntermediate": false,
+                    "operator": "+",
+                    "options": {}
+                }
+
+                const numbericTerm = {
+                    "_evaluated": false,
+                    "isIntermediate": false,
+                    "number": 1,
+                    "options": {}
+                  }
                 
-                const die = {
-                    "results": [
-                        { "result": 1, "active": true },
-                        { "result": 2, "active": true },
-                        { "result": 3, "active": true },
-                        { "result": 4, "active": true },
-                        { "result": 5, "active": true }
-                    ]
-                }
+                let die, damageResult, die_small, damageResult_small;
 
-                const damageResult = {
-                    "terms": [
-                        die
-                    ],
-                    "dice": [
-                        die
-                    ]
-                }
+                beforeEach(function () {
+                    die = {
+                        "results": [
+                            { "result": 1, "active": true },
+                            { "result": 2, "active": true },
+                            { "result": 3, "active": true },
+                            { "result": 4, "active": true },
+                            { "result": 5, "active": true }
+                        ]
+                    }
+    
+                    damageResult = {
+                        "terms": [
+                            die
+                        ],
+                        "dice": [
+                            die
+                        ]
+                    }
 
-                const options = { "damageNegationValue": 0 }
+                    die_small = {
+                        "results": [
+                            { "result": 1, "active": true },
+                            { "result": 2, "active": true }
+                        ]
+                    }
 
-                it("No Damage Negation", async function () {
-                    assert.equal(await handleDamageNegation(fakeItem_k, damageResult, {}), damageResult);
+                    damageResult_small = {
+                        "terms": [
+                            die_small
+                        ],
+                        "dice": [
+                            die_small
+                        ]
+                    }
                 });
 
-                it("(Killing) Damage Negation is 0", async function () {
-                    assert.equal(await handleDamageNegation(fakeItem_k, damageResult, options), damageResult);
+                it("No Damage Negation", async function () {
+                    assert.equal(await handleDamageNegation(fakeItem_nk, damageResult, {}), damageResult);
+                });
+
+                it("(Non-Killing) Damage Negation is 0", async function () {
+                    assert.equal(await handleDamageNegation(fakeItem_nk, damageResult, { "damageNegationValue": 0 }), damageResult);
+                });
+
+                it("(Non-Killing) Damage Negation is 1", async function () {
+                    const newDie = {
+                        "results": [
+                            { "result": 1, "active": true },
+                            { "result": 2, "active": true },
+                            { "result": 3, "active": true },
+                            { "result": 4, "active": true }
+                        ]
+                    }
+
+                    const newDamageResult = await handleDamageNegation(fakeItem_nk, damageResult, { "damageNegationValue": 1 });
+
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results);
+                });
+
+                it("(Non-Killing) Damage Negation is 2", async function () {
+                    const newDie = {
+                        "results": [
+                            { "result": 1, "active": true },
+                            { "result": 2, "active": true },
+                            { "result": 3, "active": true }
+                        ]
+                    }
+                 
+                    const newDamageResult = await handleDamageNegation(fakeItem_nk, damageResult, { "damageNegationValue": 2 });
+
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results);
+                });
+
+                it("(Non-Killing) Damage Negation is 5", async function () {
+                    const newDie = {
+                        "results": []
+                    }
+
+                    const newDamageResult = await handleDamageNegation(fakeItem_nk, damageResult, { "damageNegationValue": 5 });
+
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results);
+                });
+
+                it("(Non-Killing) Damage Negation is 6", async function () {
+                    const newDie = {
+                        "results": []
+                    }
+                    
+                    const newDamageResult = await handleDamageNegation(fakeItem_nk, damageResult, { "damageNegationValue": 6 });
+
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results);
                 });
 
                 it("(Killing) Damage Negation is 1", async function () {
+                    const newDie = {
+                        "results": [
+                            { "result": 1, "active": true },
+                            { "result": 2, "active": true },
+                            { "result": 3, "active": true },
+                            { "result": 4, "active": true },
+                            { "result": 5, "active": true }
+                        ]
+                    }
+                    
+                    const expectedDamageResult = {
+                        "terms": [
+                            newDie,
+                            minus,
+                            numbericTerm
+                        ],
+                        "dice": [
+                            newDie
+                        ],
+                        "total": 14
+                    }
+
+                    const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult, { "damageNegationValue": 1 });
+
+                    assert.equal(newDamageResult.total, expectedDamageResult.total)
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
+                    assert.equal(newDamageResult.terms[1].operator, "-")
+                    assert.equal(newDamageResult.terms[2].number, 1)
+                });
+
+                it("(Killing) Damage Negation is 2", async function () {
                     const newDie = {
                         "results": [
                             { "result": 1, "active": true },
@@ -423,16 +548,101 @@ export function registerDamageFunctionTests(quench) {
                         ]
                     }
                     
-                    const newDamageResult = {
-                        "terms": [
-                            newDie
-                        ],
-                        "dice": [
-                            newDie
+                    const expectedDamageResult = {
+                        "total": 11
+                    }
+    
+                    const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult, { "damageNegationValue": 2 });
+    
+                    assert.equal(newDamageResult.total, expectedDamageResult.total)
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
+                    assert.equal(newDamageResult.terms[1].operator, "+")
+                    assert.equal(newDamageResult.terms[2].number, 1)
+                });
+
+                it("(Killing) Damage Negation is 3", async function () {
+                    const newDie = {
+                        "results": [
+                            { "result": 1, "active": true },
+                            { "result": 2, "active": true },
+                            { "result": 3, "active": true },
+                            { "result": 4, "active": true }
                         ]
                     }
+                    
+                    const expectedDamageResult = {
+                        "total": 10
+                    }
+    
+                    const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult, { "damageNegationValue": 3 });
+    
+                    assert.equal(newDamageResult.total, expectedDamageResult.total)
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
+                });
 
-                    assert.equal(await handleDamageNegation(fakeItem_k, damageResult, { "damageNegationValue": 1 }), newDamageResult);
+                it("(Killing) DC Negated to 0", async function () {
+                    const newDie = {
+                        "results": []
+                    }
+                    
+                    const expectedDamageResult = {
+                        "total": 0
+                    }
+    
+                    const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 6 });
+    
+                    assert.equal(newDamageResult.total, expectedDamageResult.total)
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
+                });
+
+                it("(Killing) DC Negated to 1", async function () {
+                    const newDie = {
+                        "results": []
+                    }
+                    
+                    const expectedDamageResult = {
+                        "total": 1
+                    }
+    
+                    const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 5 });
+    
+                    assert.equal(newDamageResult.total, expectedDamageResult.total)
+                });
+
+                it("(Killing) DC Negated to 2", async function () {
+                    const newDie = {
+                        "results": [
+                            { "result": 1, "active": true }
+                        ]
+                    }
+                    
+                    const expectedDamageResult = {
+                        "total": 0
+                    }
+    
+                    const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 4 });
+    
+                    assert.equal(newDamageResult.total, expectedDamageResult.total)
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
+                    assert.equal(newDamageResult.terms[1].operator, "-")
+                    assert.equal(newDamageResult.terms[2].number, 1)
+                });
+
+                it("(Killing) DC Negated to 3", async function () {
+                    const newDie = {
+                        "results": [
+                            { "result": 1, "active": true }
+                        ]
+                    }
+                    
+                    const expectedDamageResult = {
+                        "total": 1
+                    }
+    
+                    const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 3 });
+    
+                    assert.equal(newDamageResult.total, expectedDamageResult.total)
+                    assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
                 });
             });
         },

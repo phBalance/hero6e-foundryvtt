@@ -437,7 +437,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 break
         }
     }
-    const newRoll = Roll.fromTerms(newTerms)
+    let newRoll = Roll.fromTerms(newTerms)
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
@@ -463,10 +463,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     damageData.damageNegationValue = damageNegationValue
     damageData.knockbackResistance = knockbackResistance
 
+    newRoll = await handleDamageNegation(item, newRoll, damageData)
 
     // We need to recalcuate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(newRoll, item, damageData)
-
 
     // check if target is stunned
     if (game.settings.get("hero6efoundryvttv2", "stunned")) {
@@ -485,7 +485,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
-
     let damageRenderedResult = await newRoll.render()
 
     // Attack may have additional effects, such as those from martial arts
@@ -499,7 +498,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             }
         }
     }
-
 
     let cardData = {
         item: item,
@@ -572,8 +570,6 @@ async function _calcDamage(damageResult, item, options) {
     let countedBody = 0;
 
     let pip = 0
-
-    damageResult = await handleDamageNegation(item, damageResult, options)
 
     // We may have spoofed a roll, so total is missing.
     if (!damageResult.total) {

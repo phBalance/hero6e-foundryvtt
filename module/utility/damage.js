@@ -132,48 +132,95 @@ export function addTerms(term1, term2) {
 export async function handleDamageNegation(item, damageResult, options) {
     if (!options?.damageNegationValue) { return damageResult; }
 
-    let fullDiceDr = (item.system.killing)? Math.floor(options.damageNegationValue / 3) :
-        options.damageNegationValue
+    async function newDamageRoll(formula, oldDamageResult) {
+        let newRoll = new HeroRoll(formula);
+        await newRoll.evaluate({ async: true });
 
-    let pipDr = (item.system.killing)? options.damageNegationValue % 3 : 0
+        const difference = formula.split('d')[0] - oldDamageResult.terms[0].results.length
 
-    // Remove full dice
-    for (let i = 0; i < fullDiceDr; i++) {
-        // terms[0] are the full d6 dice
-        if (damageResult.terms[0].results.length > 0) {
-            // remove 1st dice
-            damageResult.terms[0].results = damageResult.terms[0].results.slice(1)
+        newRoll.terms[0].results = oldDamageResult.terms[0].results
+
+        if (difference !== 0) {
+            newRoll.terms[0].results = newRoll.terms[0].results.slice(0, difference);
         }
-        else {
-            pipDr += 3
+
+        let newTotal = 0
+        let nextSign = "+"
+        for (let term of newRoll.terms) {
+            if (term instanceof OperatorTerm) {
+                nextSign = term.operator
+            }
+            else if (term instanceof NumericTerm) {
+                switch (nextSign) {
+                    case ("+") : {
+                        newTotal += term.number
+                        break;
+                    }
+
+                    case ("-"): {
+                        newTotal -= term.number
+                        break;
+                    }
+
+                    default: {
+                        console.warn("Uhandled Damage Negation");
+                        break;
+                    }
+                }
+            }
+            else {
+                // Quench tests don't necessarily specify DiceTerms
+                for (let result of term.results) {
+                    newTotal += result.result
+                }
+            }
         }
+
+        newRoll.setTotal(newTotal);
+
+        return newRoll;
     }
 
-    // Remove pipDr
-    for (let i = 0; i < pipDr; i++) {
-        // full dice are at terms[0]
-        // plus operator is terms[1]
-        // pips are at terms [2]
+    if (!item.system.killing) {
+        const formula = (damageResult.terms[0].results.length - options.damageNegationValue) + "d6"
 
-        // Convert full dice to a pip
-        if (damageResult.terms[0].results.length > 0 && damageResult.terms.length == 1) {
-            let _fullDice = damageResult.terms[0].results[0]
-            _fullDice.results = Math.ceil(_fullDice.result / 2) // convert to half dice (2 pips)
-            damageResult.terms[0].results = damageResult.terms[0].results.slice(1)
-            damageResult.terms.push(new OperatorTerm({ operator: "+" }));
-            let _halfDie = new Die({ number: _fullDice.results, faces: 3 })
-            damageResult.terms.push(_halfDie)
-            continue
-        }
-
-        // Convert half dice to +1
-        if (damageResult.terms.length == 3 && damageResult.terms[2] instanceof Die) {
-            damageResult.terms[2] = new NumericTerm({ number: 1 });
-            continue
-        }
-
-        console.warn("Uhandled Damage Negation")
+        return await newDamageRoll(formula, damageResult)
     }
 
-    return damageResult
+    if (options.damageNegationValue >= 3) {
+        damageResult.terms[0].results = damageResult.terms[0].results.slice(0, -Math.floor(options.damageNegationValue /3));
+    }
+
+    const remainder = options.damageNegationValue % 3
+
+    switch(remainder) {
+        case (2): {
+            const formula = damageResult.terms[0].results.length - 1 + "d6 + 1"
+            return await newDamageRoll(formula, damageResult)
+        }
+
+        case (1): {
+            const formula = damageResult.terms[0].results.length + "d6 - 1"
+            return await newDamageRoll(formula, damageResult)
+        }
+
+        case (0): {
+            return await newDamageRoll(damageResult.terms[0].results.length + "d6", damageResult)
+        }
+        
+        default: {
+            console.warn("Uhandled Damage Negation");
+            return damageResult;
+        }
+    }
+}
+
+export class HeroRoll extends Roll {
+    setFormula(newFormula) {
+        this._formula = newFormula;
+    }
+
+    setTotal(newTotal) {
+        this._total = newTotal;
+    }
 }
