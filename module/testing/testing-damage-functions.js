@@ -237,7 +237,7 @@ export function registerDamageFunctionTests(quench) {
                     parent: actor
                 });
 
-                it("", function () {
+                it("\"\"", function () {
                     assert.equal(convertToDC(item, ""), 0);
                 });
 
@@ -298,7 +298,7 @@ export function registerDamageFunctionTests(quench) {
                     parent: actor
                 });
 
-                it("", function () {
+                it("\"\"", function () {
                     assert.equal(convertFromDC(item, 0), "");
                 });
 
