@@ -14,7 +14,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             classes: ['herosystem6e', 'sheet', 'item'],
             width: 520,
             height: 660,
-            tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'description' }]
+            //tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'description' }],
+            scrollY: [".sheet-body"],
         })
     }
 

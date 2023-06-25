@@ -4,6 +4,7 @@ import { registerUtilTests } from "./testing-util.js";
 import { registerDamageFunctionTests } from "./testing-damage-functions.js";
 import { registerTagTests } from "./testing-tag.js";
 import { registerUploadTests } from "./testing-upload.js";
+import { registerDefenseTests } from "./testing-defense.js";
 
 
 Hooks.once("ready", async function () {

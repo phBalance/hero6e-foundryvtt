@@ -1650,6 +1650,7 @@ function updateItemDescription(system, type) {
 
         case "RKA":
         case "ENERGYBLAST": //Energy Blast 1d6
+        case "EGOATTACK":
             system.description = `${system.ALIAS} ${system.LEVELS?.value}d6`
             break;
 
@@ -1955,6 +1956,17 @@ export async function makeAttack(item) {
     // DISPEL (not implemented)
     if (xmlid == "DISPEL") {
         changes[`system.class`] = 'dispel'
+    }
+
+    // MENTALBLAST (not implemented)
+    if (xmlid == "EGOATTACK") {
+        changes[`system.class`] = 'mental'
+        changes[`system.targets`] = "dmcv"
+        changes[`system.uses`] = "omcv"
+        changes[`system.knockbackMultiplier`] = 0
+        changes[`system.usesStrength`] = false
+        changes['system.stunBodyDamage'] = "stunonly"
+        changes['system.noHitLocations'] = true
     }
 
 

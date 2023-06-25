@@ -60,19 +60,19 @@
   /* background-color: lightcyan; */
 }
 
-.actor-sidebar-sheet .sheet-body {
+.actor-sidebar-sheet .sheet-body, .sheet.item .sheet-body {
   grid-area: content;
   position: relative;
   overflow: hidden scroll;
   /* background-color: steelblue; */
 }
 
-.actor-sidebar-sheet .sheet-content {
+.actor-sidebar-sheet .sheet-content, .sheet.item .sheet-content {
   display: flex;
   flex-direction: column;
   position: absolute;
   width: 100%;
-  /* background-color: wheat; */
+  /* background-color: red; */
 }
 
 

@@ -31,7 +31,6 @@ export function registerUploadTests(quench) {
                 const parser = new DOMParser()
                 const xmlDoc = parser.parseFromString(contents, 'text/xml')
                 const item = XmlToItemData(xmlDoc.children[0], "power")
-                console.log(item)
 
                 // Naked Advantage: Reduced Endurance (0 END; +1/2) for up to 70 Active Points (35 Active Points); Gestures (Requires both hands; -1/2), Linked to Opening of the Blind, Third Eye (Opening of the Blind, Third Eye; -1/4), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)
                 // Naked Advantage for up to 70 Active points (35 Active Points); Reduced Endurance (0 END; +1/2); Linked to Opening of the Blind, Third Eye (-1/4); Gestures (Requires both hands; -1/2); Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)

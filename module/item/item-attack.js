@@ -45,7 +45,7 @@ export async function AttackOptions(item) {
         }
     }
 
-    if (game.settings.get("hero6efoundryvttv2", "hit locations")) {
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
     }
@@ -121,7 +121,7 @@ export async function AttackToHit(item, options) {
     // }
 
     // [x Stun, x N Stun, x Body, OCV modifier]
-    let noHitLocationsPower = false;
+    let noHitLocationsPower = item.system.noHitLocations || false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim !== "none" && !noHitLocationsPower) {
         rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[options.aim][3]);
         tags.push({ value: CONFIG.HERO.hitLocations[options.aim][3], name: options.aim, hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0 })
@@ -659,7 +659,7 @@ async function _calcDamage(damageResult, item, options) {
     let hasStunMultiplierRoll = false;
     //let renderedStunMultiplierRoll = null;
     let stunMultiplier = 1;
-    let noHitLocationsPower = false
+    let noHitLocationsPower = item.system.noHitLocations || false;
 
 
     // Penetrating

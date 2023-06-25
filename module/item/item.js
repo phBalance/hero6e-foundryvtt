@@ -133,6 +133,7 @@ export class HeroSystem6eItem extends Item {
                     case "ENERGYBLAST":
                     case "HANDTOHANDATTACK":
                     case "TELEKINESIS":
+                    case "EGOATTACK":
                     case undefined:
                         return await Attack.AttackOptions(this)
 
