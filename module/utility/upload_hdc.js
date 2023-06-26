@@ -459,7 +459,7 @@ export function XmlToItemData(xml, type) {
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-        "BODYLEVELS", "ID", "PARENTID", "POSITION"
+        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -2317,8 +2317,8 @@ export async function createEffects(itemData, actor) {
                     value: parseInt(levels),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
-            ]
-
+            ],
+            disabled: itemData.system.AFFECTS_TOTAL == 'No'
         }
 
         itemData.effects = [activeEffect]
