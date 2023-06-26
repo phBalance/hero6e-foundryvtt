@@ -1637,13 +1637,26 @@ function updateItemDescription(system, type) {
             break;
 
         case "KNOWLEDGE_SKILL":
+
             // 6e HDC
-            if (system.ALIAS == "KS") {
-                system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
-            } else {
-                system.description = system.NAME
+            //if (system.ALIAS == "KS") {
+            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
+            // } else {
+            //     system.description = system.NAME
+            // }
+            let item = {
+                actor: this?.actor || this,
+                system: system
+            }
+            SkillRollUpdateValue(item)
+            if (system.roll) {
+                system.description += ` ${system.roll}`
             }
 
+            break;
+        case "TRANSPORT_FAMILIARITY":
+            //TF:  Custom Adder, Small Motorized Ground Vehicles
+            system.description = system.ALIAS + ": "
             break;
 
         case "MENTAL_COMBAT_LEVELS":
@@ -1732,7 +1745,12 @@ function updateItemDescription(system, type) {
 
         }
         if (_adderArray.length > 0) {
-            system.description += "(" + _adderArray.join("; ") + ")"
+            if (system.XMLID == "TRANSPORT_FAMILIARITY") {
+                system.description += _adderArray.join("; ")
+            } else {
+                system.description += "(" + _adderArray.join("; ") + ")"
+            }
+
         }
     }
 
