@@ -2,6 +2,7 @@
 - Mental Blast Improvements [#157](https://github.com/dmdorman/hero6e-foundryvtt/issues/157)
 - System version added to Actor and Item sheets [#158](https://github.com/dmdorman/hero6e-foundryvtt/issues/158)
 - Fixed glitchy power toggles [#162](https://github.com/dmdorman/hero6e-foundryvtt/issues/162)
+- Fixed PD/ED bought as resistant, showing as non-resistant. [#163](https://github.com/dmdorman/hero6e-foundryvtt/issues/163)
 
 # Version 3.0.0-alpha
 - FoundryVTT version 11 (v10 no longer supported)
