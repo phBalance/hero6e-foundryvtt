@@ -196,7 +196,7 @@ export class HeroSystem6eItem extends Item {
     async toggle() {
         let item = this
         const attr = 'system.active'
-        const newValue = getProperty(item, attr)
+        const newValue = !getProperty(item, attr)
         // await item.update({ [attr]: newValue })
 
         const firstAE = item.actor.effects.find(o => o.origin === item.uuid)
@@ -216,7 +216,7 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 if (firstAE) {
-                    const newState = !firstAE.disabled
+                    const newState = !newValue
                     await item.update({ [attr]: newState })
                     for (const activeEffect of item.actor.effects.filter(o => o.origin === item.uuid)) {
                         await onActiveEffectToggle(activeEffect, newState)

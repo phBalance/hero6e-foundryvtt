@@ -43,6 +43,27 @@ function determineDefense(targetActor, attackItem) {
         // Resistant.: 
     }
 
+    // PD bought as resistant
+    for (const item of targetActor.items.filter(o => o.system.XMLID == "PD" && o.system.active)) {
+        if (item.system.modifiers.find(o=> o.XMLID == 'RESISTANT'))
+        {
+            const levels = parseInt(item.system.LEVELS.value) || 0
+            PD -= levels
+            rPD += levels
+        }
+    }
+
+    // ED bought as resistant
+    for (const item of targetActor.items.filter(o => o.system.XMLID == "ED" && o.system.active)) {
+        if (item.system.modifiers.find(o=> o.XMLID == 'RESISTANT'))
+        {
+            const levels = parseInt(item.system.LEVELS.value) || 0
+            ED -= levels
+            rED += levels
+        }
+    }
+
+
     // Armor Piericng of natural PD and ED
     if (piericng) {
         PD = Math.round(PD / 2)
