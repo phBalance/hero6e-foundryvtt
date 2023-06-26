@@ -93,10 +93,10 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
   - Lack of Weakness (no automation)
 
 ## Frequently Asked Questions
-1 The Actor Sheet doesn't match HD.
-  - Try uploading the HDC file again.
-2 All the toggles are on by default after HDC upload.
-  - In HD set Totaling Options to Do not add to Totals.
+1. The Actor Sheet doesn't match HD.
+   - Try uploading the HDC file again.
+2. All the toggles are on by default after HDC upload.
+   - In HD set Totaling Options to Do not add to Totals.
 
 ## Screenshots
 
