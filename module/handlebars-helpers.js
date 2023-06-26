@@ -15,4 +15,10 @@ export function initializeHandlebarsHelpers() {
             return item
         }
     });
+
+    Handlebars.registerHelper('indexOf', function (string, searchTerm) {
+        return string.indexOf(searchTerm)
+    });
+    
+
 }

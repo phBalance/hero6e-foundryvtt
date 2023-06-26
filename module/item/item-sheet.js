@@ -89,13 +89,12 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 }
             }
             drains.sort()
-            drains = [ "none", ...drains]
+            drains = ["none", ...drains]
             data.drains = {}
-            for (let key of drains)
-            {
+            for (let key of drains) {
                 data.drains[key] = key
             }
-            
+
         }
 
         // AID
@@ -108,13 +107,12 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 }
             }
             aidSources.sort()
-            aidSources = [ "none", ...aidSources]
+            aidSources = ["none", ...aidSources]
             data.aidSources = {}
-            for (let key of aidSources)
-            {
+            for (let key of aidSources) {
                 data.aidSources[key] = key
             }
-            
+
         }
 
 
@@ -231,6 +229,16 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (!id) { return; }
 
         await this.item.update(expandedData)
+
+        if (expandedData.actor) {
+            const effectId = Object.keys(expandedData.actor.effects)[0]
+
+            //await this.actor.update(expandedData.actor)
+            await this.actor.effects.get(effectId).update({ disabled: !expandedData.actor.effects[effectId].disabled })
+
+            //this.actor.effects.get("expandedData.effectId").disabled = 
+
+        }
 
         return
     }

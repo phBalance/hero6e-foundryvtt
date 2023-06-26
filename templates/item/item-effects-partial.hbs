@@ -9,7 +9,16 @@
                 <i class="fas fa-plus"></i> Add ActiveEffect</a> --}}
         </th>
     </tr>
-    {{#each effects as |effect|}}
+
+    <!-- 
+        Only show EFFECTS from the ACTOR.
+        The EFFECTS on the ITEM are transfered to the ACTOR when the ITEM is added to the ACTOR.
+        The EFFECTS on the ITEM are otherwise ignored.
+        Can get confusing.
+    -->
+    {{#each item.actor.effects as |effect|}}
+    {{#if (eq effect.origin ../item.uuid)}}
+
     <tr class="item" data-effect-id="{{effect._id}}">
         <td style="min-width: 24px">
             <div class="item-image"><img src="{{effect.icon}}" title="{{effect.name}}" width="24" height="24" />
@@ -17,8 +26,8 @@
         </td>
         <td class="left">{{effect.name}}</td>
         <td>
-            <input class="effect-toggle" type="checkbox" {{checked (not effect.disabled)}} data-dtype="Boolean"
-                data-action="toggle" />
+            <input class="effect-toggle_" name="actor.effects.{{effect.id}}.disabled" type="checkbox" {{checked (not effect.disabled)}} data-dtype="Boolean"
+                data-action="toggle_" />
             {{!-- {{#if effect.disabled}}N{{else}}Y{{/if}} --}}
         </td>
         <td class="right">
@@ -28,6 +37,8 @@
             </a>
         </td>
     </tr>
+    {{/if}}
+
     {{/each}}
 </table>
 {{/if}}

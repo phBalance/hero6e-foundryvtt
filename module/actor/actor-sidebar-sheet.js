@@ -52,8 +52,10 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         for (let item of data.actor.items) {
 
             // showToggle
-            if (data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)) {
+            const itemEfffects = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)
+            if (itemEfffects) {
                 item.system.showToggle = true
+                item.system.active = !itemEfffects.disabled
 
                 // Active (reverse of disabled)
                 //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
