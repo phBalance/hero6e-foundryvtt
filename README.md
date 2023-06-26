@@ -92,11 +92,17 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
   - Growth
   - Lack of Weakness (no automation)
 
-## Frequently Asked Questions
+## Frequently Asked Questions and GM suggestions
 1. The Actor Sheet doesn't match HD.
    - Try uploading the HDC file again.
-2. All the toggles are on by default after HDC upload.
-   - In HD set Totaling Options to Do not add to Totals.
+2. How do you set a toggle power to default to off after HDC upload?
+   - In HD set "Totaling Options" to "Do not add to Totals".
+3. How do you get automation to destermine hit or miss?
+   - Click the target of your attack.  Press 't' to select target.  Open attacker's character sheet.  Click dice icon next to attack.  The chat cards should show a hit/miss.  If it is a hit then the damage card will have a button to apply damage to your target.
+   - You can select multiple targets with shift-t.
+4. I'm unable to change a Characteristics Max number.
+   - You likely have a power that is modifying the Max number.  Turn that power off, make the change to Max, then turn power back on.
+   - You can find a list of all characteristic modifications (called Active Effects) on the others tab.
 
 ## Screenshots
 
