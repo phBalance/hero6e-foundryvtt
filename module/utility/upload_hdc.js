@@ -2497,16 +2497,18 @@ export async function updateItem(item) {
 
 
 
-    let _basePointsPlusAdders = calcBasePointsPlusAdders.call(item, item.system)
-    let _activePoints = calcActivePoints(_basePointsPlusAdders, item.system)
+    //let _basePointsPlusAdders = calcBasePointsPlusAdders.call(item, item.system)
+    //let _activePoints = calcActivePoints(_basePointsPlusAdders, item.system)
+
+    //_basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
     // let _realCost = calcRealCost(_activePoints, item.system)
 
-    // _activePoints = RoundFavorPlayerDown(_activePoints)
+    //_activePoints = RoundFavorPlayerDown(_activePoints)
     // _realCost = RoundFavorPlayerDown(_realCost)
 
-    if (item.system.basePointsPlusAdders != _basePointsPlusAdders && _basePointsPlusAdders) {
-        await item.update({ 'system.basePointsPlusAdders': _basePointsPlusAdders })
-    }
+    // if (item.system.basePointsPlusAdders != _basePointsPlusAdders && _basePointsPlusAdders) {
+    //     await item.update({ 'system.basePointsPlusAdders': _basePointsPlusAdders })
+    // }
     // if (item.system.activePoints != _activePoints)
     // {
     //     await item.update({'system.activePoints': _activePoints})
