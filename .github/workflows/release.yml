@@ -34,10 +34,10 @@ jobs:
     - name: Update release version in a file
       run: |
         sed -i 's/\("version":\s*"\)[^"]*"/\1'"${{ needs.check_release.outputs.release }}"'"/' system.json
-        sed -i 's/\("/download/\)[^"]*/\1'"${{ needs.check_release.outputs.release }}"'/g' system.json
-        sed -i 's/\("/foundryvtt/\)[^"]*/\1'"${{ needs.check_release.outputs.release }}"'/g' system.json
-        sed -i 's/\("/foundryvtt/releases/download/\)[^"]*/\1'"${{ needs.check_release.outputs.release }}"'/g' system.json
-      
+        sed -i 's/\/download\/[^"]*/\/download\/${{ needs.check_release.outputs.release }}/g' system.json
+        sed -i 's/\/foundryvtt\/[^"]*/\/foundryvtt\/${{ needs.check_release.outputs.release }}/g' system.json
+        sed -i 's/\/foundryvtt\/releases\/download\/[^"]*/\/foundryvtt\/releases\/download\/${{ needs.check_release.outputs.release }}/g' system.json
+    
     - name: Archive code
       run: |
         zip -r hero6efoundryvtt2.zip .
