@@ -103,6 +103,8 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
 4. I'm unable to change a Characteristics Max number.
    - You likely have a power that is modifying the Max number.  Turn that power off, make the change to Max, then turn power back on.
    - You can find a list of all characteristic modifications (called Active Effects) on the others tab.
+5. Is there a way to change measuring distance to 1m?
+   - You can change it scene by scene by opening the scene settings -> grid then edit 'Grid Scale'
 
 ## Screenshots
 

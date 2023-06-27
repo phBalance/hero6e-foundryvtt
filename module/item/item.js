@@ -134,12 +134,13 @@ export class HeroSystem6eItem extends Item {
                     case "HANDTOHANDATTACK":
                     case "TELEKINESIS":
                     case "EGOATTACK":
-                    case "AID":
+                    //case "AID":
                     case undefined:
                         return await Attack.AttackOptions(this)
 
                     default:
-                        return ui.notifications.warn(`${this.system.XMLID} roll is not supported`)
+                        ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`)
+                        return await Attack.AttackOptions(this)
                 }
 
             case "defense":

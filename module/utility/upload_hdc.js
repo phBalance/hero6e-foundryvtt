@@ -1665,6 +1665,7 @@ function updateItemDescription(system, type) {
             break;
 
         case "RKA":
+        case "HKA":
         case "ENERGYBLAST": //Energy Blast 1d6
         case "EGOATTACK":
             system.description = `${system.ALIAS} ${system.LEVELS?.value}d6`
