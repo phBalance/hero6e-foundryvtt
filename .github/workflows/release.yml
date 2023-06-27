@@ -33,9 +33,9 @@ jobs:
 
     - name: Update release version in a file
       run: |
-        sed -i 's/\("version":\s*"\)[^"]*"/\1'"$VERSION"'"/' system.json
-        sed -i 's|/download/[^/]*/|/download/'"$VERSION"'/|g' system.json
-        sed -i 's|hero6e-foundryvtt/[^/]*/|hero6e-foundryvtt/'"$VERSION"'/|g' system.json
+        sed -i 's/\("version":\s*"\)[^"]*"/\1'"${{ needs.check_release.outputs.release }}"'"/' system.json
+        sed -i 's|/download/[^/]*/|/download/'"${{ needs.check_release.outputs.release }}"'/|g' system.json
+        sed -i 's|hero6e-foundryvtt/[^/]*/|hero6e-foundryvtt/'"${{ needs.check_release.outputs.release }}"'/|g' system.json
       
     - name: Archive code
       run: |
