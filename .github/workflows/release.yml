@@ -23,7 +23,7 @@ jobs:
           echo "::set-output name=RELEASE::$RELEASE"
         fi  
 
-  prepare_files:
+  prepare_release:
     needs: check_release
     if: needs.check_release.outputs.release != ''
     runs-on: ubuntu-latest
@@ -46,19 +46,6 @@ jobs:
       with:
         name: hero6efoundryvtt2.zip
         path: hero6efoundryvtt2.zip
-
-  release:
-    needs: prepare_files
-    if: needs.check_release.outputs.release != ''
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Download Artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: hero6efoundryvtt2.zip
 
     - name: Create and push tag
       run: |
