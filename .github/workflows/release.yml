@@ -6,26 +6,26 @@ on:
       - main
 
 jobs:
-  check_version:
+  check_release:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.extract_version.outputs.VERSION }}
+      release: ${{ steps.extract_release.outputs.RELEASE }}
     
     steps:
     - uses: actions/checkout@v2
 
-    - name: Extract version number from commit message
-      id: extract_version
+    - name: Extract release number from commit message
+      id: extract_release
       run: |
         COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.sha }})
-        if [[ $COMMIT_MSG == version* ]]; then
-          VERSION=${COMMIT_MSG#version v}
-          echo "::set-output name=VERSION::$VERSION"
+        if [[ $COMMIT_MSG == release* ]]; then
+          RELEASE=${COMMIT_MSG#release}
+          echo "::set-output name=RELEASE::$RELEASE"
         fi  
 
   build:
-    needs: check_version
-    if: needs.check_version.outputs.version != ''
+    needs: check_release
+    if: needs.check_release.outputs.release != ''
     runs-on: ubuntu-latest
 
     steps:
@@ -45,9 +45,9 @@ jobs:
     - name: Build
       run: npm run build
 
-    - name: Update version in a file
+    - name: Update release version in a file
       run: |
-        sed -i "s/<old_version>/${{ env.VERSION }}/g" <your_filename_here>
+        sed -i "s/<old_release>/${{ env.RELEASE }}/g" <your_filename_here>
       
     - name: Archive code
       run: |
@@ -61,7 +61,7 @@ jobs:
 
   release:
     needs: build
-    if: needs.check_version.outputs.version != ''
+    if: needs.check_release.outputs.release != ''
     runs-on: ubuntu-latest
 
     steps:
@@ -76,8 +76,8 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git tag ${{ env.VERSION }}
-        git push origin ${{ env.VERSION }}
+        git tag ${{ env.RELEASE }}
+        git push origin ${{ env.RELEASE }}
 
     - name: Create Release
       id: create_release
@@ -85,8 +85,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
+        tag_name: ${{ env.RELEASE }}
+        release_name: Release ${{ env.RELEASE }}
         draft: false
         prerelease: false
 
