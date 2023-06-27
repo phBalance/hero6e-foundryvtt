@@ -33,7 +33,9 @@ jobs:
 
     - name: Update release version in a file
       run: |
-        sed -i "s/<old_release>/${{ env.RELEASE }}/g" <your_filename_here>
+        sed -i 's/\("version":\s*"\)[^"]*"/\1'"$VERSION"'"/' system.json
+        sed -i 's|/download/[^/]*/|/download/'"$VERSION"'/|g' system.json
+        sed -i 's|hero6e-foundryvtt/[^/]*/|hero6e-foundryvtt/'"$VERSION"'/|g' system.json
       
     - name: Archive code
       run: |
