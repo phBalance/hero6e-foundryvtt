@@ -18,8 +18,8 @@ jobs:
       id: extract_release
       run: |
         COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.sha }})
-        if [[ $COMMIT_MSG == release * ]]; then
-          RELEASE=${COMMIT_MSG#release}
+        if [[ $COMMIT_MSG == release* ]]; then
+          RELEASE=$(echo ${COMMIT_MSG#release} | xargs)
           echo "::set-output name=RELEASE::$RELEASE"
         fi  
 
