@@ -64,8 +64,8 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git tag ${{ env.RELEASE }}
-        git push origin ${{ env.RELEASE }}
+        git tag ${{ needs.check_release.outputs.release }}
+        git push origin ${{ needs.check_release.outputs.release }}
 
     - name: Create Release
       id: create_release
@@ -73,8 +73,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.RELEASE }}
-        release_name: Release ${{ env.RELEASE }}
+        tag_name: ${{ needs.check_release.outputs.release }}
+        release_name: Release ${{ needs.check_release.outputs.release }}
         draft: false
         prerelease: false
 
