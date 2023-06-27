@@ -23,7 +23,7 @@ jobs:
           echo "::set-output name=RELEASE::$RELEASE"
         fi  
 
-  build:
+  prepare_files:
     needs: check_release
     if: needs.check_release.outputs.release != ''
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
         path: hero6efoundryvtt2.zip
 
   release:
-    needs: build
+    needs: prepare_files
     if: needs.check_release.outputs.release != ''
     runs-on: ubuntu-latest
 
