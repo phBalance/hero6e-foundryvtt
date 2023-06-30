@@ -23,7 +23,8 @@
                 </span>
                 <br />
                 <span>
-                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span> by <span class="resultBy">{{target.result.by}}</span>
+                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span> by <span
+                        class="resultBy">{{target.result.by}}</span>
                 </span>
             </div>
             {{/each}}
@@ -95,7 +96,13 @@
 
         <button class="roll-damage" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-knockbackMod="{{knockbackMod}}"
             data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}" data-effectiveStr="{{effectiveStr}}"
-            data-targetIds="{{targetIds}}">Roll Damage</button>
+            data-targetIds="{{targetIds}}">
+            {{#if (eq item.system.XMLID "AID")}}
+            Roll AID
+            {{else}}
+            Roll Damage
+            {{/if}}
+        </button>
 
 
     </div>

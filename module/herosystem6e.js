@@ -411,6 +411,14 @@ Hooks.on("renderDialog", (dialog, html, data) => {
     if (option) option.remove()
 })
 
+Hooks.on("renderActorSheet", (dialog, html, data) => {
+    html.find('header h4').append(`<span>${game.system.version}<span>`)
+})
+
+Hooks.on("renderItemSheet", (dialog, html, data) => {
+    html.find('header h4').append(`<span>${game.system.version}<span>`)
+})
+
 
 //Modify TokenHUD (need 3 bars: end, stun, body)
 Hooks.on("renderTokenHUD", HeroSystem6eTokenHud);

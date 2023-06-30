@@ -1,9 +1,16 @@
+# Version 3.0.1-alpha
+- Mental Blast Improvements [#157](https://github.com/dmdorman/hero6e-foundryvtt/issues/157)
+- System version added to Actor and Item sheets [#158](https://github.com/dmdorman/hero6e-foundryvtt/issues/158)
+- Fixed glitchy power toggles [#162](https://github.com/dmdorman/hero6e-foundryvtt/issues/162)
+- Fixed PD/ED bought as resistant, showing as non-resistant. [#163](https://github.com/dmdorman/hero6e-foundryvtt/issues/163)
+
 # Version 3.0.0-alpha
 - FoundryVTT version 11 (v10 no longer supported)
 - Knockback fixes
 - Attack OcvMod [#137](https://github.com/dmdorman/hero6e-foundryvtt/issues/137)
 - Attack powers are used directly.  No longer need to have separate attack items.
 - All attack powers are shown in Attack tab, even those not fully implemented.  A small step toward implementing additional attack types and charges.
+aracter sheet can filter on some items. [#90](https://github.com/dmdorman/hero6e-foundryvtt/issues/90)
 
 # Version 2.2.0-alpha
 - Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.

@@ -1,0 +1,51 @@
+{{ log 'HEROSYS POWER DRAIN SHEET' this }}
+<form class="hero {{cssClass}} flexcol actor-sheet" autocomplete="off" data-id="{{item._id}}"
+    data-realId="{{item.system.realId}}">
+    <header class="sheet-header flexrow">
+        <img class="profile" name="img" src="{{item.img}}" title="{{item.name}}" data-edit="img" />
+
+        <div class="header-details flexrow">
+            <h1 class="charname">
+                <input name="name" type="text" value="{{item.name}}" placeholder="Power Name" />
+            </h1>
+        </div>
+    </header>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        <div class="form-group">
+            <label>Power</label>
+            <input type="text" name="system.rules" value="{{system.rules}}" data-dtype="Text" disabled />
+        </div>
+
+        <!-- Drain Dice (Active Points) -->
+        <div class="form-group">
+            <label>{{localize "Items.Attack.Value"}}</label>
+            <input type="text" name="system.dice" value="{{system.dice}}" data-dtype="Number" />
+            D6
+            <select name="system.extraDice" data-dtype="text">
+                {{selectOptions config.extraDice selected=system.extraDice}}
+
+            </select>
+        </div>
+
+        <!-- Drains (possibly up to 4 depending on modifiers) -->
+        <div class="form-group">
+            <label>Drains</label>
+            
+            <select name="system.INPUT" data-dtype="text" {{#if system.INPUT}}_disabled{{/if}}>
+                {{selectOptions drains selected=system.INPUT}}
+                
+            </select>
+        </div>
+
+
+        <hr>
+
+        {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
+        {{> systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs item=item alphaTesting=alphaTesting}}
+
+    </section>
+
+
+</form>

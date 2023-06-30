@@ -106,7 +106,7 @@ export class HeroSystem6eActor extends Actor {
                 // Add LEVELS to MAX
                 let activeEffect =
                 {
-                    label: power.name + " (" + power.system.LEVELS + ")",
+                    label: power.name + " (" + power.system.LEVELS.value + ")",
                     //id: newPower.system.rules,
                     icon: 'icons/svg/upgrade.svg',
                     origin: power.uuid,
@@ -146,7 +146,7 @@ export class HeroSystem6eActor extends Actor {
             }
 
             if (power.system.rules === "DENSITYINCREASE") {
-                const levels = parseInt(parseInt(power.system.LEVELS))
+                const levels = parseInt(parseInt(power.system.LEVELS.value))
 
                 const strAdd = Math.floor(levels) * 5
                 const pdAdd = Math.floor(levels)
@@ -154,7 +154,7 @@ export class HeroSystem6eActor extends Actor {
 
                 let activeEffect =
                 {
-                    label: power.name + " (" + power.system.LEVELS + ")",
+                    label: power.name + " (" + power.system.LEVELS.value + ")",
                     //id: newPower.system.rules,
                     icon: 'icons/svg/upgrade.svg',
                     origin: power.uuid,
@@ -191,7 +191,7 @@ export class HeroSystem6eActor extends Actor {
             }
 
             if (power.system.rules === "GROWTH" && this.system.is5e) {
-                const levels = parseInt(parseInt(power.system.LEVELS))
+                const levels = parseInt(parseInt(power.system.LEVELS.value))
 
                 const strAdd = Math.floor(levels) * 5
                 const bodyAdd = Math.floor(levels)
@@ -200,7 +200,7 @@ export class HeroSystem6eActor extends Actor {
 
                 let activeEffect =
                 {
-                    label: power.name + " (" + power.system.LEVELS + ")",
+                    label: power.name + " (" + power.system.LEVELS.value + ")",
                     //id: newPower.system.rules,
                     icon: 'icons/svg/upgrade.svg',
                     origin: power.uuid,
@@ -293,7 +293,7 @@ export class HeroSystem6eActor extends Actor {
                 if (power.system.rules == "FLASHDEFENSE" && !addedDefense) {
                     itemData.system.defenseType = 'fd'
                     itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.value = parseInt(power.system.LEVELS)
+                    itemData.system.value = parseInt(power.system.LEVELS.value)
                     await HeroSystem6eItem.create(itemData, { parent: this })
                     addedDefense = true
                 }
@@ -301,7 +301,7 @@ export class HeroSystem6eActor extends Actor {
                 if (power.system.rules == "MENTALDEFENSE" && !addedDefense) {
                     itemData.system.defenseType = 'md'
                     itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.value = parseInt(power.system.LEVELS)
+                    itemData.system.value = parseInt(power.system.LEVELS.value)
                     await HeroSystem6eItem.create(itemData, { parent: this })
                     addedDefense = true
                 }
@@ -309,7 +309,7 @@ export class HeroSystem6eActor extends Actor {
                 if (power.system.rules == "POWERDEFENSE" && !addedDefense) {
                     itemData.system.defenseType = 'powd'
                     itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.value = parseInt(power.system.LEVELS)
+                    itemData.system.value = parseInt(power.system.LEVELS.value)
                     await HeroSystem6eItem.create(itemData, { parent: this })
                     addedDefense = true
                 }
@@ -376,7 +376,7 @@ export class HeroSystem6eActor extends Actor {
                 //KBRESISTANCE  
                 if (power.system.rules == "KBRESISTANCE" && !addedDefense) {
                     itemData.system.defenseType = 'kbr'
-                    itemData.system.value = parseInt(power.system.LEVELS)
+                    itemData.system.value = parseInt(power.system.LEVELS.value)
                     await HeroSystem6eItem.create(itemData, { parent: this })
                     addedDefense = true
                 }
@@ -384,7 +384,7 @@ export class HeroSystem6eActor extends Actor {
                 //LACKOFWEAKNESS  
                 if (power.system.rules == "LACKOFWEAKNESS" && !addedDefense) {
                     itemData.system.defenseType = 'low'
-                    itemData.system.value = parseInt(power.system.LEVELS)
+                    itemData.system.value = parseInt(power.system.LEVELS.value)
                     await HeroSystem6eItem.create(itemData, { parent: this })
                     addedDefense = true
                 }
@@ -413,7 +413,7 @@ export class HeroSystem6eActor extends Actor {
                 system: {
                     rules: combatLuck.system.rules,
                     resistant: true,
-                    value: parseInt(combatLuck.system.levels * 3)
+                    value: parseInt(combatLuck.system.levels.value)  * 3
                 }
             }
             itemData.system.defenseType = 'pd'

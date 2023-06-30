@@ -390,8 +390,8 @@ HERO.powers = {
     "OMCV": { powerType: ["characteristic"] },
     "DMCV": { powerType: ["characteristic"] },
     "SPD": { powerType: ["characteristic"] },
-    "PD": { powerType: ["characteristic"] },
-    "ED": { powerType: ["characteristic"] },
+    "PD": { powerType: ["characteristic", "defense"] },
+    "ED": { powerType: ["characteristic", "defense"] },
     "REC": { powerType: ["characteristic"] },
     "END": { powerType: ["characteristic"] },
     "BODY": { powerType: ["characteristic"] },
@@ -433,7 +433,7 @@ HERO.powers = {
     },
     "AID": {
         name: "Aid",
-        powerType: ["adjustment"],
+        powerType: ["adjustment", "attack"], // not really an attack, but it behaves like one
         percievability: "obvious",
         duration: "Instant",
         target: "target’s DCV",
@@ -572,7 +572,7 @@ HERO.powers = {
         costPerLevel: 3 / 2
     },
     "RKA": { powerType: ["attack"], costPerLevel: 15 },
-    "ENERGYBLAST": { powerType: ["attack"], costPerLevel: 5 },
+    "ENERGYBLAST": { powerType: ["attack"], costPerLevel: 5, costEnd: true },
     "DARKNESS": { powerType: ["sense-affecting", "attack", "standard"] },
     "DISPEL": { powerType: ["attack", "standard"], costPerLevel: 3 },
     "ENTANGLE": { powerType: ["attack", "standard"] },
@@ -789,7 +789,7 @@ HERO.powers5e = {
     ...HERO.powers,
     "AID": {
         name: "Aid",
-        powerType: ["adjustment"],
+        powerType: ["adjustment", "attack"], // not really an attack, but it behaves like one
         percievability: "obvious",
         duration: "Instant",
         target: "target’s DCV",

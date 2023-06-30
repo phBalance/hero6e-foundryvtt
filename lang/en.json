@@ -25,7 +25,8 @@
             "OcvMod": "OCV Modifier",
             "DcvMod": "DCV Modifier",
             "Piercing": "Armor Piercing Levels",
-            "Penetrating": "Penetrating Levels"
+            "Penetrating": "Penetrating Levels",
+            "NoHitLocations": "No Hit Locations"
         }
     },
     "ActorSheet": {

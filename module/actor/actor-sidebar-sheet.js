@@ -23,13 +23,16 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             submitOnChange: true, // submit when any input changes
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
+            itemFilters: {}, // used to track item search filters on some tabs
         });
     }
+
+
 
     /** @override */
     getData() {
         const data = super.getData()
-
+          
         // Alpha Testing (use to show/hide effects)
         data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
@@ -49,8 +52,10 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         for (let item of data.actor.items) {
 
             // showToggle
-            if (data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)) {
+            const itemEfffects = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)
+            if (itemEfffects) {
                 item.system.showToggle = true
+                item.system.active = !itemEfffects.disabled
 
                 // Active (reverse of disabled)
                 //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
@@ -127,7 +132,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     let tkItems = data.actor.items.filter(o => o.system.rules == "TELEKINESIS");
                     let str = 0
                     for (const item of tkItems) {
-                        str += parseInt(item.system.LEVELS) || 0
+                        str += parseInt(item.system.LEVELS.value) || 0
                     }
                     let str5 = Math.floor(str / 5)
                     if (item.system.killing) {
@@ -522,6 +527,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 expandedData.system.characteristics[characteristic].value = expandedData.Xsystem.characteristics[characteristic].value;
             }
         }
+
+        this.options.itemFilters.power = expandedData.itemFilters.power
 
         await this.actor.update(expandedData)
 

@@ -35,7 +35,7 @@ export async function AttackOptions(item) {
     let tkItems = item.actor.items.filter(o => o.system.rules == "TELEKINESIS");
     let tkStr = 0
     for (const item of tkItems) {
-        tkStr += parseInt(item.system.LEVELS) || 0
+        tkStr += parseInt(item.system.LEVELS.value) || 0
     }
     if (item.system.usesTk) {
         if (item.system.usesStrength) {
@@ -45,12 +45,12 @@ export async function AttackOptions(item) {
         }
     }
 
-    if (game.settings.get("hero6efoundryvttv2", "hit locations")) {
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
     }
 
-    const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card2.hbs"
+    const template = ["AID"].includes(item.system.XMLID) ? "systems/hero6efoundryvttv2/templates/attack/item-attack-aid-card.hbs" : "systems/hero6efoundryvttv2/templates/attack/item-attack-card2.hbs"
     const html = await renderTemplate(template, data)
     return new Promise(resolve => {
         const data = {
@@ -121,8 +121,8 @@ export async function AttackToHit(item, options) {
     // }
 
     // [x Stun, x N Stun, x Body, OCV modifier]
-    let noHitLocationsPower = false;
-    if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim !== "none" && !noHitLocationsPower) {
+    let noHitLocationsPower = item.system.noHitLocations || false;
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim && options.aim !== "none" && !noHitLocationsPower) {
         rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[options.aim][3]);
         tags.push({ value: CONFIG.HERO.hitLocations[options.aim][3], name: options.aim, hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0 })
     }
@@ -150,6 +150,7 @@ export async function AttackToHit(item, options) {
         let itemEnd = item.system.end;
         let newEnd = valueEnd - itemEnd;
         let spentEnd = itemEnd;
+        options.effectiveStr = options.effectiveStr || 0;
 
         if (itemData.usesStrength || itemData.usesTk) {
             // let strEnd = Math.max(1, Math.round(actor.system.characteristics.str.value / 10))
@@ -412,6 +413,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const button = event.currentTarget;
     const damageData = { ...button.dataset }
     const item = fromUuidSync(damageData.itemid)
+    if (!item) {
+        // This typically happens when the attack id stored in the damage card no longer exists on the actor.
+        // For example if the attack item was deleted or the HDC was uploaded again.
+        console.log(damageData.itemid)
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
     const template = "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs"
 
     const token = canvas.tokens.get(tokenId)
@@ -659,7 +666,7 @@ async function _calcDamage(damageResult, item, options) {
     let hasStunMultiplierRoll = false;
     //let renderedStunMultiplierRoll = null;
     let stunMultiplier = 1;
-    let noHitLocationsPower = false
+    let noHitLocationsPower = item.system.noHitLocations || false;
 
 
     // Penetrating
