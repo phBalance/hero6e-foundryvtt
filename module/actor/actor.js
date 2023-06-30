@@ -80,349 +80,349 @@ export class HeroSystem6eActor extends Actor {
     }
 
     // Create & Apply ActiveEffects based on item powers
-    async applyPowerEffects() {
+    // async applyPowerEffects() {
 
-        //TODO: Alll the ActiveEffects will bubble up to UI
-        // showing all deletes and create.
-        // Would be nice if there was a {render:false} option.
+    //     //TODO: Alll the ActiveEffects will bubble up to UI
+    //     // showing all deletes and create.
+    //     // Would be nice if there was a {render:false} option.
 
-        // Remove existing effects
-        const ids = this.effects.map(o => o.id)
-        await this.deleteEmbeddedDocuments("ActiveEffect", ids)
+    //     // Remove existing effects
+    //     const ids = this.effects.map(o => o.id)
+    //     await this.deleteEmbeddedDocuments("ActiveEffect", ids)
 
-        for (const power of this.items.filter(o => o.type === 'power' || o.type === 'equipment')) {
+    //     for (const power of this.items.filter(o => o.type === 'power' || o.type === 'equipment')) {
             
-            // Rebrand?
-            let xmlid = power.system.XMLID || power.system.id || power.system.rules
-            xmlid = CONFIG.HERO.powersRebrand[xmlid] || xmlid;
+    //         // Rebrand?
+    //         let xmlid = power.system.XMLID || power.system.id || power.system.rules
+    //         xmlid = CONFIG.HERO.powersRebrand[xmlid] || xmlid;
 
-            let configPowerInfo = CONFIG.HERO.powers[xmlid]
+    //         let configPowerInfo = CONFIG.HERO.powers[xmlid]
 
-            // Characteristics (via ActiveEffects)
-            if (configPowerInfo && (configPowerInfo?.powerType || "").includes("characteristic")) {
+    //         // Characteristics (via ActiveEffects)
+    //         if (configPowerInfo && (configPowerInfo?.powerType || "").includes("characteristic")) {
 
-                const key = power.system.rules.toLowerCase()
+    //             const key = power.system.rules.toLowerCase()
 
-                // Add LEVELS to MAX
-                let activeEffect =
-                {
-                    label: power.name + " (" + power.system.LEVELS.value + ")",
-                    //id: newPower.system.rules,
-                    icon: 'icons/svg/upgrade.svg',
-                    origin: power.uuid,
-                    changes: [
-                        {
-                            key: "system.characteristics." + key + ".max",
-                            value: parseInt(power.system.LEVELS),
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        }
-                    ]
-                }
+    //             // Add LEVELS to MAX
+    //             let activeEffect =
+    //             {
+    //                 label: power.name + " (" + power.system.LEVELS.value + ")",
+    //                 //id: newPower.system.rules,
+    //                 icon: 'icons/svg/upgrade.svg',
+    //                 origin: power.uuid,
+    //                 changes: [
+    //                     {
+    //                         key: "system.characteristics." + key + ".max",
+    //                         value: parseInt(power.system.LEVELS),
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     }
+    //                 ]
+    //             }
 
-                // Add AE to Item (which is not tranferered to actor)
-                // await power.update({
-                //     effects:
-                //         [
-                //             activeEffect
-                //         ]
-                // })
+    //             // Add AE to Item (which is not tranferered to actor)
+    //             // await power.update({
+    //             //     effects:
+    //             //         [
+    //             //             activeEffect
+    //             //         ]
+    //             // })
 
-                // Add Active Effect to Actor (because it wasn't tranferred from item)
-                await this.addActiveEffect(activeEffect)
-
-
-
-                // TODO: Add ActiveEffect to item.
-                // The probme is v10 doesn't allow you to createEmbeddedDocuments on items embedded in actor
+    //             // Add Active Effect to Actor (because it wasn't tranferred from item)
+    //             await this.addActiveEffect(activeEffect)
 
 
-                // Set VALUE to new MAX
-                const max = this.system.characteristics[key].max
-                let changes = []
-                changes["system.characteristics." + key + '.value'] = max
-                changes["system.active"] = true
-                await this.update(changes)
 
-            }
-
-            if (power.system.rules === "DENSITYINCREASE") {
-                const levels = parseInt(parseInt(power.system.LEVELS.value))
-
-                const strAdd = Math.floor(levels) * 5
-                const pdAdd = Math.floor(levels)
-                const edAdd = Math.floor(levels)
-
-                let activeEffect =
-                {
-                    label: power.name + " (" + power.system.LEVELS.value + ")",
-                    //id: newPower.system.rules,
-                    icon: 'icons/svg/upgrade.svg',
-                    origin: power.uuid,
-                    disabled: false,
-                    changes: [
-                        {
-                            key: "system.characteristics.str.max",
-                            value: strAdd,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        },
-                        {
-                            key: "system.characteristics.pd.max",
-                            value: pdAdd,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        },
-                        {
-                            key: "system.characteristics.ed.max",
-                            value: edAdd,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        }
-                    ]
-                }
-
-                // Add Active Effect to Actor (because it wasn't tranferred from item)
-                await this.addActiveEffect(activeEffect)
-
-                // Set VALUE to new MAX
-                let changes = []
-                changes["system.characteristics.str.value"] = this.system.characteristics.str.max
-                changes["system.characteristics.pd.value"] = this.system.characteristics.pd.max
-                changes["system.characteristics.ed.value"] = this.system.characteristics.ed.max
-                changes["system.active"] = true
-                await this.update(changes)
-            }
-
-            if (power.system.rules === "GROWTH" && this.system.is5e) {
-                const levels = parseInt(parseInt(power.system.LEVELS.value))
-
-                const strAdd = Math.floor(levels) * 5
-                const bodyAdd = Math.floor(levels)
-                const stunAdd = Math.floor(levels)
-                const dcvAdd = -2 * Math.floor(levels / 3)
-
-                let activeEffect =
-                {
-                    label: power.name + " (" + power.system.LEVELS.value + ")",
-                    //id: newPower.system.rules,
-                    icon: 'icons/svg/upgrade.svg',
-                    origin: power.uuid,
-                    changes: [
-                        {
-                            key: "system.characteristics.str.max",
-                            value: strAdd,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        },
-                        {
-                            key: "system.characteristics.body.max",
-                            value: bodyAdd,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        },
-                        {
-                            key: "system.characteristics.stun.max",
-                            value: stunAdd,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        },
-                        {
-                            key: "system.characteristics.dcv.max",
-                            value: dcvAdd,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                        }
-                    ]
-                }
-
-                // Add Active Effect to Actor (because it wasn't tranferred from item)
-                await this.addActiveEffect(activeEffect)
-
-                // Set VALUE to new MAX
-                let changes = []
-                changes["system.characteristics.str.value"] = this.system.characteristics.str.max
-                changes["system.characteristics.body.value"] = this.system.characteristics.body.max
-                changes["system.characteristics.stun.value"] = this.system.characteristics.stun.max
-                changes["system.characteristics.dcv.value"] = this.system.characteristics.dcv.max
-                changes["system.active"] = true
-                await this.update(changes)
+    //             // TODO: Add ActiveEffect to item.
+    //             // The probme is v10 doesn't allow you to createEmbeddedDocuments on items embedded in actor
 
 
-            }
+    //             // Set VALUE to new MAX
+    //             const max = this.system.characteristics[key].max
+    //             let changes = []
+    //             changes["system.characteristics." + key + '.value'] = max
+    //             changes["system.active"] = true
+    //             await this.update(changes)
 
-            // Defenses (create new defense item)
-            if (configPowerInfo && (configPowerInfo?.powerType || "").includes("defense")) {
+    //         }
 
-                // Prepare the item object.
-                const itemData = {
-                    name: power.name,
-                    type: 'defense',
-                    system: { ...deepClone(power.system),
-                        resistant: false
-                    }
-                }
+    //         if (power.system.rules === "DENSITYINCREASE") {
+    //             const levels = parseInt(parseInt(power.system.LEVELS.value))
 
-                let hardened = parseInt(power.system.modifiers.find(o => o.xmlid === 'HARDENED')?.LEVELS)
-                if (hardened) {
-                    itemData.system.hardened = hardened
-                }
+    //             const strAdd = Math.floor(levels) * 5
+    //             const pdAdd = Math.floor(levels)
+    //             const edAdd = Math.floor(levels)
 
-                let impenetrable = parseInt(power.system.modifiers.find(o => o.xmlid === "IMPENETRABLE")?.LEVELS)
-                if (impenetrable) {
-                    itemData.system.impenetrable = impenetrable
-                }
+    //             let activeEffect =
+    //             {
+    //                 label: power.name + " (" + power.system.LEVELS.value + ")",
+    //                 //id: newPower.system.rules,
+    //                 icon: 'icons/svg/upgrade.svg',
+    //                 origin: power.uuid,
+    //                 disabled: false,
+    //                 changes: [
+    //                     {
+    //                         key: "system.characteristics.str.max",
+    //                         value: strAdd,
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     },
+    //                     {
+    //                         key: "system.characteristics.pd.max",
+    //                         value: pdAdd,
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     },
+    //                     {
+    //                         key: "system.characteristics.ed.max",
+    //                         value: edAdd,
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     }
+    //                 ]
+    //             }
 
-                let addedDefense = false
+    //             // Add Active Effect to Actor (because it wasn't tranferred from item)
+    //             await this.addActiveEffect(activeEffect)
 
-                for (let key of ['pd', 'ed', 'md']) {
-                    let levels = parseInt(power.system[key.toUpperCase() + "LEVELS"])
-                    if (levels) {
-                        itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                        itemData.system.value = levels
-                        itemData.system.defenseType = key
+    //             // Set VALUE to new MAX
+    //             let changes = []
+    //             changes["system.characteristics.str.value"] = this.system.characteristics.str.max
+    //             changes["system.characteristics.pd.value"] = this.system.characteristics.pd.max
+    //             changes["system.characteristics.ed.value"] = this.system.characteristics.ed.max
+    //             changes["system.active"] = true
+    //             await this.update(changes)
+    //         }
 
-                        // FORCEFIELD/Resistant Protection
-                        if (power.system.rules == "FORCEFIELD") {
-                            itemData.system.resistant = true
-                        }
+    //         if (power.system.rules === "GROWTH" && this.system.is5e) {
+    //             const levels = parseInt(parseInt(power.system.LEVELS.value))
 
+    //             const strAdd = Math.floor(levels) * 5
+    //             const bodyAdd = Math.floor(levels)
+    //             const stunAdd = Math.floor(levels)
+    //             const dcvAdd = -2 * Math.floor(levels / 3)
 
-                        // Forcewall / barrier 
-                        if (power.system.rules == "FORCEWALL") {
-                            itemData.system.active = false
-                            itemData.system.resistant = true
-                        }
-                        await HeroSystem6eItem.create(itemData, { parent: this })
-                        addedDefense = true
-                    }
-                }
+    //             let activeEffect =
+    //             {
+    //                 label: power.name + " (" + power.system.LEVELS.value + ")",
+    //                 //id: newPower.system.rules,
+    //                 icon: 'icons/svg/upgrade.svg',
+    //                 origin: power.uuid,
+    //                 changes: [
+    //                     {
+    //                         key: "system.characteristics.str.max",
+    //                         value: strAdd,
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     },
+    //                     {
+    //                         key: "system.characteristics.body.max",
+    //                         value: bodyAdd,
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     },
+    //                     {
+    //                         key: "system.characteristics.stun.max",
+    //                         value: stunAdd,
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     },
+    //                     {
+    //                         key: "system.characteristics.dcv.max",
+    //                         value: dcvAdd,
+    //                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
+    //                     }
+    //                 ]
+    //             }
 
-                if (power.system.rules == "FLASHDEFENSE" && !addedDefense) {
-                    itemData.system.defenseType = 'fd'
-                    itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.value = parseInt(power.system.LEVELS.value)
-                    await HeroSystem6eItem.create(itemData, { parent: this })
-                    addedDefense = true
-                }
+    //             // Add Active Effect to Actor (because it wasn't tranferred from item)
+    //             await this.addActiveEffect(activeEffect)
 
-                if (power.system.rules == "MENTALDEFENSE" && !addedDefense) {
-                    itemData.system.defenseType = 'md'
-                    itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.value = parseInt(power.system.LEVELS.value)
-                    await HeroSystem6eItem.create(itemData, { parent: this })
-                    addedDefense = true
-                }
-
-                if (power.system.rules == "POWERDEFENSE" && !addedDefense) {
-                    itemData.system.defenseType = 'powd'
-                    itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.value = parseInt(power.system.LEVELS.value)
-                    await HeroSystem6eItem.create(itemData, { parent: this })
-                    addedDefense = true
-                }
-
-                // Damage negation PD/ED/MD values are strangely in the modifiers
-                if (power.system.rules == "DAMAGENEGATION" && !addedDefense) {
-                    itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.defenseType = 'dnp'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'PHYSICAL')?.LEVELS)
-                    if (itemData.system.value > 0) {
-                        await HeroSystem6eItem.create(itemData, { parent: this })
-                    }
-
-                    itemData.system.defenseType = 'dne'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'ENERGY')?.LEVELS)
-                    if (itemData.system.value > 0) {
-                        await HeroSystem6eItem.create(itemData, { parent: this })
-                    }
-
-                    itemData.system.defenseType = 'dnm'
-                    itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'MENTAL')?.LEVELS)
-                    if (itemData.system.value > 0) {
-                        await HeroSystem6eItem.create(itemData, { parent: this })
-                    }
-
-                    addedDefense = true
-                }
-
-                //DAMAGEREDUCTION 
-                if (power.system.rules == "DAMAGEREDUCTION" && !addedDefense) {
-                    itemData.name = power.name// + " ("  + (configPowerInfo.name || power.system.rules) + ")"
-                    itemData.system.value = 0
-                    if (power.system.OPTIONID.indexOf("25") > -1) {
-                        itemData.system.value = 25
-                    }
-                    if (power.system.OPTIONID.indexOf("50") > -1) {
-                        itemData.system.value = 50
-                    }
-                    if (power.system.OPTIONID.indexOf("75") > -1) {
-                        itemData.system.value = 75
-                    }
-                    if (power.system.OPTIONID.indexOf("RESISTANT") > -1) {
-                        itemData.system.resistant = true
-                    }
-                    switch (power.system.INPUT) {
-                        case "Physical":
-                            itemData.system.defenseType = 'drp'
-                            await HeroSystem6eItem.create(itemData, { parent: this })
-                            addedDefense = true
-                            break
-                        case "Energy":
-                            itemData.system.defenseType = 'dre'
-                            await HeroSystem6eItem.create(itemData, { parent: this })
-                            addedDefense = true
-                            break
-                        case "Mental":
-                            itemData.system.defenseType = 'drm'
-                            await HeroSystem6eItem.create(itemData, { parent: this })
-                            addedDefense = true
-                            break
-                    }
-                }
-
-                //KBRESISTANCE  
-                if (power.system.rules == "KBRESISTANCE" && !addedDefense) {
-                    itemData.system.defenseType = 'kbr'
-                    itemData.system.value = parseInt(power.system.LEVELS.value)
-                    await HeroSystem6eItem.create(itemData, { parent: this })
-                    addedDefense = true
-                }
-
-                //LACKOFWEAKNESS  
-                if (power.system.rules == "LACKOFWEAKNESS" && !addedDefense) {
-                    itemData.system.defenseType = 'low'
-                    itemData.system.value = parseInt(power.system.LEVELS.value)
-                    await HeroSystem6eItem.create(itemData, { parent: this })
-                    addedDefense = true
-                }
+    //             // Set VALUE to new MAX
+    //             let changes = []
+    //             changes["system.characteristics.str.value"] = this.system.characteristics.str.max
+    //             changes["system.characteristics.body.value"] = this.system.characteristics.body.max
+    //             changes["system.characteristics.stun.value"] = this.system.characteristics.stun.max
+    //             changes["system.characteristics.dcv.value"] = this.system.characteristics.dcv.max
+    //             changes["system.active"] = true
+    //             await this.update(changes)
 
 
-                if (!addedDefense) {
-                    if (game.settings.get(game.system.id, 'alphaTesting')) {
-                        ui.notifications.warn(`${power.system.rules} not implemented during defense item creation`)
-                        HEROSYS.log(false, power)
-                    }
-                }
+    //         }
+
+    //         // Defenses (create new defense item)
+    //         if (configPowerInfo && (configPowerInfo?.powerType || "").includes("defense")) {
+
+    //             // Prepare the item object.
+    //             const itemData = {
+    //                 name: power.name,
+    //                 type: 'defense',
+    //                 system: { ...deepClone(power.system),
+    //                     resistant: false
+    //                 }
+    //             }
+
+    //             let hardened = parseInt(power.system.modifiers.find(o => o.xmlid === 'HARDENED')?.LEVELS)
+    //             if (hardened) {
+    //                 itemData.system.hardened = hardened
+    //             }
+
+    //             let impenetrable = parseInt(power.system.modifiers.find(o => o.xmlid === "IMPENETRABLE")?.LEVELS)
+    //             if (impenetrable) {
+    //                 itemData.system.impenetrable = impenetrable
+    //             }
+
+    //             let addedDefense = false
+
+    //             for (let key of ['pd', 'ed', 'md']) {
+    //                 let levels = parseInt(power.system[key.toUpperCase() + "LEVELS"])
+    //                 if (levels) {
+    //                     itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
+    //                     itemData.system.value = levels
+    //                     itemData.system.defenseType = key
+
+    //                     // FORCEFIELD/Resistant Protection
+    //                     if (power.system.rules == "FORCEFIELD") {
+    //                         itemData.system.resistant = true
+    //                     }
 
 
-            }
-        }
+    //                     // Forcewall / barrier 
+    //                     if (power.system.rules == "FORCEWALL") {
+    //                         itemData.system.active = false
+    //                         itemData.system.resistant = true
+    //                     }
+    //                     await HeroSystem6eItem.create(itemData, { parent: this })
+    //                     addedDefense = true
+    //                 }
+    //             }
 
-        // Combat Luck (is a TALENT with defense effects)
-        let combatLuck = this.items.find(o => o.system.id === "COMBAT_LUCK" || o.system.rules === "COMBAT_LUCK")
-        if (combatLuck) {
+    //             if (power.system.rules == "FLASHDEFENSE" && !addedDefense) {
+    //                 itemData.system.defenseType = 'fd'
+    //                 itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
+    //                 itemData.system.value = parseInt(power.system.LEVELS.value)
+    //                 await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 addedDefense = true
+    //             }
 
-            // Prepare the item object.
-            const itemData = {
-                name: combatLuck.name,
-                type: 'defense',
+    //             if (power.system.rules == "MENTALDEFENSE" && !addedDefense) {
+    //                 itemData.system.defenseType = 'md'
+    //                 itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
+    //                 itemData.system.value = parseInt(power.system.LEVELS.value)
+    //                 await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 addedDefense = true
+    //             }
 
-                system: {
-                    rules: combatLuck.system.rules,
-                    resistant: true,
-                    value: parseInt(combatLuck.system.levels.value)  * 3
-                }
-            }
-            itemData.system.defenseType = 'pd'
-            await HeroSystem6eItem.create(itemData, { parent: this })
-            itemData.system.defenseType = 'ed'
-            await HeroSystem6eItem.create(itemData, { parent: this })
-        }
+    //             if (power.system.rules == "POWERDEFENSE" && !addedDefense) {
+    //                 itemData.system.defenseType = 'powd'
+    //                 itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
+    //                 itemData.system.value = parseInt(power.system.LEVELS.value)
+    //                 await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 addedDefense = true
+    //             }
 
-    }
+    //             // Damage negation PD/ED/MD values are strangely in the modifiers
+    //             if (power.system.rules == "DAMAGENEGATION" && !addedDefense) {
+    //                 itemData.name = power.name + " (" + (configPowerInfo.name || power.system.rules) + ")"
+    //                 itemData.system.defenseType = 'dnp'
+    //                 itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'PHYSICAL')?.LEVELS)
+    //                 if (itemData.system.value > 0) {
+    //                     await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 }
+
+    //                 itemData.system.defenseType = 'dne'
+    //                 itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'ENERGY')?.LEVELS)
+    //                 if (itemData.system.value > 0) {
+    //                     await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 }
+
+    //                 itemData.system.defenseType = 'dnm'
+    //                 itemData.system.value = parseInt(power.system.modifiers.find(o => o.XMLID === 'MENTAL')?.LEVELS)
+    //                 if (itemData.system.value > 0) {
+    //                     await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 }
+
+    //                 addedDefense = true
+    //             }
+
+    //             //DAMAGEREDUCTION 
+    //             if (power.system.rules == "DAMAGEREDUCTION" && !addedDefense) {
+    //                 itemData.name = power.name// + " ("  + (configPowerInfo.name || power.system.rules) + ")"
+    //                 itemData.system.value = 0
+    //                 if (power.system.OPTIONID.indexOf("25") > -1) {
+    //                     itemData.system.value = 25
+    //                 }
+    //                 if (power.system.OPTIONID.indexOf("50") > -1) {
+    //                     itemData.system.value = 50
+    //                 }
+    //                 if (power.system.OPTIONID.indexOf("75") > -1) {
+    //                     itemData.system.value = 75
+    //                 }
+    //                 if (power.system.OPTIONID.indexOf("RESISTANT") > -1) {
+    //                     itemData.system.resistant = true
+    //                 }
+    //                 switch (power.system.INPUT) {
+    //                     case "Physical":
+    //                         itemData.system.defenseType = 'drp'
+    //                         await HeroSystem6eItem.create(itemData, { parent: this })
+    //                         addedDefense = true
+    //                         break
+    //                     case "Energy":
+    //                         itemData.system.defenseType = 'dre'
+    //                         await HeroSystem6eItem.create(itemData, { parent: this })
+    //                         addedDefense = true
+    //                         break
+    //                     case "Mental":
+    //                         itemData.system.defenseType = 'drm'
+    //                         await HeroSystem6eItem.create(itemData, { parent: this })
+    //                         addedDefense = true
+    //                         break
+    //                 }
+    //             }
+
+    //             //KBRESISTANCE  
+    //             if (power.system.rules == "KBRESISTANCE" && !addedDefense) {
+    //                 itemData.system.defenseType = 'kbr'
+    //                 itemData.system.value = parseInt(power.system.LEVELS.value)
+    //                 await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 addedDefense = true
+    //             }
+
+    //             //LACKOFWEAKNESS  
+    //             if (power.system.rules == "LACKOFWEAKNESS" && !addedDefense) {
+    //                 itemData.system.defenseType = 'low'
+    //                 itemData.system.value = parseInt(power.system.LEVELS.value)
+    //                 await HeroSystem6eItem.create(itemData, { parent: this })
+    //                 addedDefense = true
+    //             }
+
+
+    //             if (!addedDefense) {
+    //                 if (game.settings.get(game.system.id, 'alphaTesting')) {
+    //                     ui.notifications.warn(`${power.system.rules} not implemented during defense item creation`)
+    //                     HEROSYS.log(false, power)
+    //                 }
+    //             }
+
+
+    //         }
+    //     }
+
+    //     // Combat Luck (is a TALENT with defense effects)
+    //     let combatLuck = this.items.find(o => o.system.id === "COMBAT_LUCK" || o.system.rules === "COMBAT_LUCK")
+    //     if (combatLuck) {
+
+    //         // Prepare the item object.
+    //         const itemData = {
+    //             name: combatLuck.name,
+    //             type: 'defense',
+
+    //             system: {
+    //                 rules: combatLuck.system.rules,
+    //                 resistant: true,
+    //                 value: parseInt(combatLuck.system.levels.value)  * 3
+    //             }
+    //         }
+    //         itemData.system.defenseType = 'pd'
+    //         await HeroSystem6eItem.create(itemData, { parent: this })
+    //         itemData.system.defenseType = 'ed'
+    //         await HeroSystem6eItem.create(itemData, { parent: this })
+    //     }
+
+    // }
 
 
     /**
