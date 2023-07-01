@@ -54,13 +54,13 @@ jobs:
 
     - name: Archive code
       run: |
-        zip -r hero6efoundryvtt2.zip .
+        zip -r hero6efoundryvttv2.zip .
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: hero6efoundryvtt2.zip
-        path: hero6efoundryvtt2.zip
+        name: hero6efoundryvttv2.zip
+        path: hero6efoundryvttv2.zip
 
     - name: Create and push tag
       run: |
@@ -87,8 +87,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./hero6efoundryvtt2.zip
-        asset_name: hero6efoundryvtt2.zip
+        asset_path: ./hero6efoundryvttv2.zip
+        asset_name: hero6efoundryvttv2.zip
         asset_content_type: application/zip
 
     - name: Upload system.json
