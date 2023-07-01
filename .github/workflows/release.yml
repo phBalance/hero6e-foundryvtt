@@ -14,12 +14,28 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Extract release number from commit message
+    - name: Install jq
+      run: sudo apt-get install jq
+
+    - name: Extract version number from system.json
+      id: extract_version
+      run: |
+        VERSION=$(jq -r .version system.json)
+        echo "System version: $VERSION"
+        echo "::set-output name=VERSION::$VERSION"
+
+    - name: Get the latest release
+      id: latest_release
+      run: |
+        LATEST_RELEASE=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+        echo "Latest release: $LATEST_RELEASE"
+        echo "::set-output name=LATEST_RELEASE::$LATEST_RELEASE"
+
+    - name: Compare version and release
       id: extract_release
       run: |
-        COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.sha }})
-        if [[ $COMMIT_MSG == release* ]]; then
-          RELEASE=$(echo ${COMMIT_MSG#release} | xargs | cut -d" " -f1)
+        if [[ "${{ steps.extract_version.outputs.VERSION }}" != "${{ steps.latest_release.outputs.LATEST_RELEASE }}" ]]; then
+          RELEASE="${{ steps.extract_version.outputs.VERSION }}"
           echo "::set-output name=RELEASE::$RELEASE"
         fi  
 
@@ -33,7 +49,6 @@ jobs:
 
     - name: Update release version in a file
       run: |
-        sed -i 's/\("version":\s*"\)[^"]*"/\1'"${{ needs.check_release.outputs.release }}"'"/' system.json
         sed -i 's/\/download\/[^"]*/\/download\/${{ needs.check_release.outputs.release }}/g' system.json
         sed -i 's/\/foundryvtt\/[^"]*/\/foundryvtt\/${{ needs.check_release.outputs.release }}/g' system.json
         sed -i 's/\/foundryvtt\/releases\/download\/[^"]*/\/foundryvtt\/releases\/download\/${{ needs.check_release.outputs.release }}/g' system.json
