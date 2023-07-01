@@ -49,8 +49,8 @@ jobs:
 
     - name: Update release version in system.json
       run: |
-        sed -i 's/"manifest": "[^"]*",/"manifest": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/system.json",/' system.json
-        sed -i 's/"download": "[^"]*",/"download": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/hero6efoundryvttv2.zip",/' system.json
+        sed -i 's|"manifest": "[^"]*",|"manifest": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/system.json",|' system.json
+        sed -i 's|"download": "[^"]*",|"download": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/hero6efoundryvttv2.zip",|' system.json
 
     - name: Archive code
       run: |
