@@ -25,7 +25,7 @@ export async function onManageActiveEffect(event, owner) {
         case "delete":
             if (!effect) return
             const confirmed = await Dialog.confirm({
-                title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title") + " [" + effect.label + "]",
+                title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title") + " [" + effect.name + "]",
                 content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
             });
 

@@ -286,7 +286,7 @@ export async function _onRollDamage(event) {
     const template = "systems/hero6efoundryvttv2/templates/chat/item-damage-card.hbs"
     const actor = item.actor
 
-    let damageRoll = (item.system.dice === 0)? "" : item.system.dice + "d6";
+    let damageRoll = (item.system.dice === 0) ? "" : item.system.dice + "d6";
 
     let tags = []
     if (parseInt(item.system.dice) > 0) {
