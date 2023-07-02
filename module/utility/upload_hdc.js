@@ -2523,10 +2523,14 @@ export async function updateItem(item) {
     await updateItemDescription.call(item, item.system, item.type)
     if (item.system.description != oldDesc) {
         if (item.system.description.includes("undefined")) {
-            console.log(item.actor.name, item.system.description)
+            if (game.settings.get(game.system.id, 'alphaTesting')) {
+                ui.notifications.warn(`${item.actor.name} ${item.system.description}`)
+            }
         } else {
             if (!item.id) {
-                HEROSYS.log(false, "missing id")
+                if (game.settings.get(game.system.id, 'alphaTesting')) {
+                    ui.notifications.warn(`${item.actor.name} $missing id`)
+                }
             } else {
                 await item.update({ 'system.description': item.system.description })
             }

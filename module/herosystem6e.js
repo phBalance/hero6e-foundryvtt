@@ -46,6 +46,7 @@ Hooks.once('init', async function () {
     CONFIG.POWERS = POWERS;
 
     CONFIG.Combat.documentClass = HeroSystem6eCombat;
+    CONFIG.Combat.defeatedStatusId = "dead";
 
     /**
     * Set an initiative formula for the system
@@ -280,6 +281,23 @@ Hooks.once("ready", async function () {
             }
             ui.notifications.info(`Migragtion complete.`)
         }
+
+        // if lastMigration < 3.0.4-alpha
+        // if (foundry.utils.isNewerVersion('3.0.4', lastMigration)) {
+        //     ui.notifications.info(`Migragrating actor data.`)
+        //     for (let actor of game.actors.contents) {
+        //         for (let actor of game.actors) {
+        //             if (actor.statuses.has("dead")) {
+        //                 let statuses = actor.statuses
+        //                 statuses.delete("dead")
+        //                 statuses.add("defeated")
+        //                 await actor.update({ statuses: statuses })
+        //             }
+        //         }
+        //     }
+        //     ui.notifications.info(`Migragtion complete.`)
+        // }
+
     }
 
 

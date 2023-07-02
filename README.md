@@ -24,10 +24,10 @@ This system is a work in progress. The following features are supported
 ### Character Sheet
 
 - The character sheet in this system supports automation for characteristic and skill rolls.
-- .HDC files created in the Hero Designer can be uploaded to it, and currently supports automatically populating information for a character's characteristics and skills.
-- Most attack powers are copied from powers to attacks tab.  Most defense powers are copied from powers to defenses tab.
+- .HDC files created in the Hero Designer can be uploaded to it, and currently supports automatically populating information for a character's characteristics, skills, powers, etc.
+- Most attack powers are displayed in attacks tab.  Most defense powers are displayed in defenses tab.
 - Attacks and defense can be manually added by users.
-- Defenses can be toggled on and off.
+- Defenses and most powers can be toggled on and off.
 - The character sheet can be used to take a Recovery.
 - Character image stored in .HDC file is used for token.
 
