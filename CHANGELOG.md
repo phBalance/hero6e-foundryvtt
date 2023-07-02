@@ -1,4 +1,4 @@
-# Version 3.0.3-alpha
+# Version 3.0.3
 - FoundryVTT 304 verified compatibility.
 - Fixed combat tracker reference to LEVELS.value. [#167](https://github.com/dmdorman/hero6e-foundryvtt/issues/167)
 
