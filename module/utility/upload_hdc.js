@@ -2327,7 +2327,7 @@ export async function createEffects(itemData, actor) {
         // Add LEVELS to MAX
         let activeEffect =
         {
-            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
+            name: `${key.toUpperCase()}+${levels}`,
             //id: newPower.system.rules,
             icon: 'icons/svg/upgrade.svg',
             changes: [
@@ -2337,7 +2337,11 @@ export async function createEffects(itemData, actor) {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
             ],
-            disabled: itemData.system.AFFECTS_TOTAL == 'No'
+            disabled: itemData.system.AFFECTS_TOTAL == 'No',
+            transfer: true,
+        }
+        if (activeEffect.name.toLowerCase().indexOf(itemData.name.toLowerCase()) == -1) {
+            activeEffect.name = itemData.name + " " + activeEffect.name;
         }
 
         itemData.effects = [activeEffect]
@@ -2352,7 +2356,7 @@ export async function createEffects(itemData, actor) {
 
         let activeEffect =
         {
-            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
+            name: `${key.toUpperCase()}+${levels}`,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {
@@ -2360,7 +2364,11 @@ export async function createEffects(itemData, actor) {
                     value: parseInt(itemData.system.LEVELS?.value),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 },
-            ]
+            ],
+            transfer: true,
+        }
+        if (activeEffect.name.toLowerCase().indexOf(itemData.name.toLowerCase()) == -1) {
+            activeEffect.name = itemData.name + " " + activeEffect.name;
         }
 
         itemData.effects = [activeEffect]
@@ -2377,7 +2385,7 @@ export async function createEffects(itemData, actor) {
 
         let activeEffect =
         {
-            label: itemData.name,
+            name: itemData.name,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {
@@ -2395,7 +2403,8 @@ export async function createEffects(itemData, actor) {
                     value: edAdd,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
-            ]
+            ],
+            transfer: true,
         }
 
         itemData.effects = [activeEffect]
@@ -2443,6 +2452,10 @@ export async function updateItemSubTypes(actor, removeDups) {
 }
 
 export async function updateItem(item) {
+
+    // Guards
+    if (!item) return;
+
 
     let changed = false;
 
@@ -2521,19 +2534,19 @@ export async function updateItem(item) {
 
     const oldDesc = item.system.description;
     await updateItemDescription.call(item, item.system, item.type)
-    if (item.system.description != oldDesc) {
+    if (item.system.description != oldDesc && item.id) {
         if (item.system.description.includes("undefined")) {
             if (game.settings.get(game.system.id, 'alphaTesting')) {
                 ui.notifications.warn(`${item.actor.name} ${item.system.description}`)
             }
         } else {
-            if (!item.id) {
-                if (game.settings.get(game.system.id, 'alphaTesting')) {
-                    ui.notifications.warn(`${item.actor.name} $missing id`)
-                }
-            } else {
-                await item.update({ 'system.description': item.system.description })
-            }
+            // if (!item.id) {
+            //     if (game.settings.get(game.system.id, 'alphaTesting')) {
+            //         ui.notifications.warn(`${item.actor.name} missing id`)
+            //     }
+            // } else {
+            await item.update({ 'system.description': item.system.description })
+            //}
         }
     }
 

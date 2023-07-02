@@ -32,7 +32,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     /** @override */
     getData() {
         const data = super.getData()
-          
+
         // Alpha Testing (use to show/hide effects)
         data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
@@ -52,14 +52,18 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         for (let item of data.actor.items) {
 
             // showToggle
-            const itemEfffects = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)
+            const itemEfffects = item.effects.find(o => true)
             if (itemEfffects) {
                 item.system.showToggle = true
                 item.system.active = !itemEfffects.disabled
+            }
 
-                // Active (reverse of disabled)
-                //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
-                //HEROSYS.log(item.system.active)
+            const actorEffects = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)
+            {
+                if (actorEffects) {
+                    item.system.showToggle = true
+                    item.system.active = !actorEffects.disabled
+                }
             }
 
             // // Is this a defense power?
@@ -119,11 +123,10 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     // Endurance
                     let strEnd = Math.max(1, Math.round(str / 10))
 
-                    if (Number.isInteger(item.system.endEstimate))
-                    {
-                        item.system.endEstimate += strEnd   
+                    if (Number.isInteger(item.system.endEstimate)) {
+                        item.system.endEstimate += strEnd
                     }
-                    
+
                 }
 
                 // Add in TK
@@ -213,6 +216,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             if (item.type == 'skill') {
                 SkillRollUpdateValue(item)
+            }
+
+            if (!item.system.endEstimate && item.name == "Mental Blast")
+            {
+                console.log(item)
             }
 
             items.push(item)
@@ -465,6 +473,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         defense.dnmtags = "Damage Negation (mental)"
 
         data.defense = defense
+
+        // Get all applicable effects (from actor and all items)
+        data.allApplicableEffects = Array.from(this.actor.allApplicableEffects()).sort( (a, b) => a.name.localeCompare(b.name))
 
         return data
     }

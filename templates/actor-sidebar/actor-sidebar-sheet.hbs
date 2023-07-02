@@ -99,11 +99,11 @@
                 <input type="file" accept=".hdc" />
             </label>
 
-            {{#if isGM}}
+            {{!-- {{#if isGM}}
             <select name="type" data-dtype="text">
                 {{selectOptions actorTypeChoices selected=actor.type localize=true}}
             </select>
-            {{/if}}
+            {{/if}} --}}
         </div>
     </header>
 
@@ -714,7 +714,7 @@
                                 <i class="fas fa-plus"></i> Add ActiveEffect</a>
                         </th>
                     </tr>
-                    {{#each actor.effects as |effect key|}}
+                    {{#each allApplicableEffects as |effect key|}}
                     <tr class="item" data-effect-id="{{effect._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{effect.icon}}" title="{{effect.name}}" width="24"

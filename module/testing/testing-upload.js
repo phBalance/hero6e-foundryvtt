@@ -166,6 +166,44 @@ export function registerUploadTests(quench) {
 
             });
 
+            describe("Characteristics INT", function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc'
+                });
+
+                const contents = `
+                <INT XMLID="INT" ID="1688339311497" BASECOST="0.0" LEVELS="3" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                <NOTES />
+                </INT>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                item.actor = actor;
+
+                it("description", function () {
+                    assert.equal(item.system.description, "+3 INT");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 3);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 3);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 3);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+            });
+
 
 
         },
