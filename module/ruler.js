@@ -118,6 +118,10 @@ export class HeroRuler {
 
             const relevantToken = canvas.tokens.controlled[0];
 
+            // guard
+            if (!relevantToken) return;
+            if (!relevantToken.actor) return;
+
             // const movementKeys = Object.keys(relevantToken.actor.system.characteristics)
             // .filter(o=> CONFIG.HERO.movementPowers[o] )
             //const movementItems = relevantToken.actor.items.filter((e) => e.type === "movement");
@@ -180,6 +184,10 @@ function setHeroRulerLabel() {
 
         if (game.modules.get("drag-ruler")?.active && canvas.tokens.controlled.length > 0) {
             const relevantToken = canvas.tokens.controlled[0];
+
+            // guard
+            if (!relevantToken) return;
+            if (!relevantToken.actor) return;
 
             //const movementItems = relevantToken.actor.items.filter((e) => e.type === "movement");
             let movementItems = []
