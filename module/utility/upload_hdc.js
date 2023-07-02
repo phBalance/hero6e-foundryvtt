@@ -1640,7 +1640,7 @@ function updateItemDescription(system, type) {
 
             // 6e HDC
             //if (system.ALIAS == "KS") {
-            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
+            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
             // } else {
             //     system.description = system.NAME
             // }
@@ -1648,10 +1648,10 @@ function updateItemDescription(system, type) {
                 actor: this?.actor || this,
                 system: system
             }
-            SkillRollUpdateValue(item)
-            if (system.roll) {
-                system.description += ` ${system.roll}`
-            }
+            // SkillRollUpdateValue(item)
+            // if (system.roll) {
+            //     system.description += ` ${system.roll}`
+            // }
 
             break;
         case "TRANSPORT_FAMILIARITY":
@@ -1703,10 +1703,10 @@ function updateItemDescription(system, type) {
                     actor: this?.actor || this,
                     system: system
                 }
-                SkillRollUpdateValue(item)
-                if (system.roll) {
-                    system.description += ` ${system.roll}`
-                }
+                // SkillRollUpdateValue(item)
+                // if (system.roll) {
+                //     system.description += ` ${system.roll}`
+                // }
             }
 
     }

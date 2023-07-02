@@ -104,7 +104,7 @@ export function registerUploadTests(quench) {
                 item.actor = actor;
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Climbing 12-");
+                    assert.equal(item.system.description, "Climbing");
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 3);
