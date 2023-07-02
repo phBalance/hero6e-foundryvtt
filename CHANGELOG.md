@@ -1,3 +1,7 @@
+# Version 3.0.3
+- FoundryVTT 304 verified compatibility.
+- Fixed combat tracker reference to LEVELS.value. [#167](https://github.com/dmdorman/hero6e-foundryvtt/issues/167)
+
 # Version 3.0.1-alpha
 - Mental Blast Improvements [#157](https://github.com/dmdorman/hero6e-foundryvtt/issues/157)
 - System version added to Actor and Item sheets [#158](https://github.com/dmdorman/hero6e-foundryvtt/issues/158)
