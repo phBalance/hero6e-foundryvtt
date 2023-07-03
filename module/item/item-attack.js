@@ -159,7 +159,7 @@ export async function AttackToHit(item, options) {
     if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
         useEnd = true;
         let valueEnd = actor.system.characteristics.end.value
-        let itemEnd = item.system.end;
+        let itemEnd = parseInt(item.system.end) || 0
         let newEnd = valueEnd - itemEnd;
         let spentEnd = itemEnd;
         options.effectiveStr = options.effectiveStr || 0;
