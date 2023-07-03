@@ -585,6 +585,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
 }
 
+function AdjustmentMultiplier(XMLID) {
+    if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
+    return 1;
+}
+
 async function _onApplyAideToSpecificToken(event, tokenId) {
     const button = event.currentTarget;
     const damageData = { ...button.dataset }
@@ -606,7 +611,8 @@ async function _onApplyAideToSpecificToken(event, tokenId) {
     if (token.actor.system.characteristics[key]) {
         const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
         let ActivePoints = parseInt(damageData.stundamage)
-        levels = parseInt(ActivePoints / parseInt(characteristicCosts[key]))
+        let costPerPoint = parseInt(characteristicCosts[key]) * AdjustmentMultiplier(key.toUpperCase());
+        levels = parseInt(ActivePoints / costPerPoint)
 
         // Check for previous AID from same source
         let prevEffect = token.actor.effects.find(o => o.origin == item.actor.uuid)
@@ -617,7 +623,7 @@ async function _onApplyAideToSpecificToken(event, tokenId) {
             for (let term of JSON.parse(damageData.terms)) {
                 maxEffect += (parseInt(term.faces) * parseInt(term.number) || 0)
             }
-            maxEffect = parseInt(maxEffect / parseInt(characteristicCosts[key]));
+            maxEffect = parseInt(maxEffect / costPerPoint);
 
             let newLevels = levels + parseInt(prevEffect.changes[0].value)
             if (newLevels > maxEffect) {
