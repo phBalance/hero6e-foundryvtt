@@ -299,24 +299,36 @@ export async function applyCharacterSheet(xmlDoc) {
     }
 
     // EXTRA DC's from martial arts
-    let extraDc = 0
-    const _extraDc = martialarts.getElementsByTagName('EXTRADC')[0]
-    if (_extraDc) {
-        extraDc = parseInt(_extraDc.getAttribute("LEVELS"))
-    }
+    // let extraDc = 0
+    // const _extraDc = martialarts.getElementsByTagName('EXTRADC')[0]
+    // if (_extraDc) {
+    //     extraDc = parseInt(_extraDc.getAttribute("LEVELS"))
+    // }
 
     // Possible TK martiarts (very rare with GM approval; requires BAREHAND weapon element with telekinesis/Psychokinesis in notes)
-    let usesTk = false
-    const _weaponElement = martialarts.getElementsByTagName('WEAPON_ELEMENT')[0]
-    if (_weaponElement && $(_weaponElement).find('[XMLID="BAREHAND"]')[0] && $(powers).find('[XMLID="TELEKINESIS"]')[0]) {
+    // let usesTk = false
+    // const _weaponElement = martialarts.getElementsByTagName('WEAPON_ELEMENT')[0]
+    // if (_weaponElement && $(_weaponElement).find('[XMLID="BAREHAND"]')[0] && $(powers).find('[XMLID="TELEKINESIS"]')[0]) {
 
-        const notes = _weaponElement.getElementsByTagName("NOTES")[0] || ""
-        if (notes.textContent.match(/kinesis/i)) {
-            usesTk = true
-        }
+    //     const notes = _weaponElement.getElementsByTagName("NOTES")[0] || ""
+    //     if (notes.textContent.match(/kinesis/i)) {
+    //         usesTk = true
+    //     }
+    // }
+
+    // EXTRADC goes first (so we can more easily add these DC's to MANEUVER's)
+    for (const martialart of martialarts.querySelectorAll("EXTRADC")) {
+        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
     }
-    for (const martialart of martialarts.children) {
-        await uploadMartial.call(this, martialart, 'martialart', extraDc, usesTk)
+
+    // WEAPON_ELEMENT next
+    for (const martialart of martialarts.querySelectorAll("WEAPON_ELEMENT")) {
+        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+    }
+
+    // MANEUVER next
+    for (const martialart of martialarts.querySelectorAll("MANEUVER")) {
+        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
     }
 
 
@@ -459,7 +471,8 @@ export function XmlToItemData(xml, type) {
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL"
+        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
+        "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -672,85 +685,59 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
         power.setAttribute('XMLID', power.tagName)
     }
 
-    // let name = power.getAttribute('NAME')
-    // name = (name === '') ? power.getAttribute('ALIAS') : name
+    let itemData = XmlToItemData.call(this, power, type)
+    let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    makeAttack(item)
 
-    // const xmlid = power.getAttribute('XMLID')
+    // // Make attack out of the martial art
+    // itemData.type = 'attack'
+    // itemData.img = "icons/svg/downgrade.svg";
 
-    // if (xmlid === 'GENERIC_OBJECT') { return; }
+    // // Strike like?
+    // if (itemData['system.effect']) {
+    //     let dc = itemData['system.dc'] + extraDc
+    //     if (itemData['system.effect'].match(/NORMALDC/)) {
+    //         itemData['system.knockbackMultiplier'] = 1
+    //         if (usesTk) {
+    //             itemData['system.usesTk'] = true
+    //         } else {
+    //             itemData['system.usesStrength'] = true
+    //         }
+    //         itemData['system.dice'] = dc
+    //     }
 
-    // let itemData = {
-    //     'type': type,
-    //     'name': name,
-    //     'system.id': xmlid,
-    //     'system.rules': power.getAttribute('ALIAS')
+    //     if (itemData['system.effect'].match(/KILLINGDC/)) {
+    //         let dice = Math.floor(dc / 3);
+    //         let pips = dc - (dice * 3);
+    //         let extraDice = 'zero'
+    //         if (pips == 1) extraDice = 'pip'
+    //         if (pips == 2) extraDice = 'half'
+    //         itemData['system.knockbackMultiplier'] = 1
+    //         if (usesTk) {
+    //             itemData['system.usesTk'] = true
+    //         } else {
+    //             itemData['system.usesStrength'] = true
+    //         }
+    //         itemData['system.killing'] = true
+    //         itemData['system.dice'] = dice
+    //         itemData['system.extraDice'] = extraDice
+    //     }
     // }
 
-    // // Marital Arts
-    // if (power.getAttribute('BASECOST')) itemData['system.baseCost'] = power.getAttribute('BASECOST')
-    // if (power.getAttribute('OCV')) itemData['system.ocv'] = parseInt(power.getAttribute('OCV'))
-    // if (power.getAttribute('DCV')) itemData['system.dcv'] = parseInt(power.getAttribute('DCV'))
-    // if (power.getAttribute('DC')) itemData['system.dc'] = parseInt(power.getAttribute('DC'))
-    // if (power.getAttribute('PHASE')) itemData['system.phase'] = power.getAttribute('PHASE')
-    // if (power.getAttribute('ACTIVECOST')) itemData['system.activeCost'] = power.getAttribute('ACTIVECOST')
-    // if (power.getAttribute('DISPLAY')) itemData['system.description'] = power.getAttribute('DISPLAY')
-    // if (power.getAttribute('EFFECT')) itemData['system.effect'] = power.getAttribute('EFFECT')
-
-    // itemData['system.realCost'] = parseInt(itemData['system.baseCost'])
-    // itemData['system.activePoints'] = parseInt(itemData['system.baseCost'])
-
-    let itemData = XmlToItemData.call(this, power, type)
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
-
-    // Make attack out of the martial art
-    itemData.type = 'attack'
-    itemData.img = "icons/svg/downgrade.svg";
-
-    // Strike like?
-    if (itemData['system.effect']) {
-        let dc = itemData['system.dc'] + extraDc
-        if (itemData['system.effect'].match(/NORMALDC/)) {
-            itemData['system.knockbackMultiplier'] = 1
-            if (usesTk) {
-                itemData['system.usesTk'] = true
-            } else {
-                itemData['system.usesStrength'] = true
-            }
-            itemData['system.dice'] = dc
-        }
-
-        if (itemData['system.effect'].match(/KILLINGDC/)) {
-            let dice = Math.floor(dc / 3);
-            let pips = dc - (dice * 3);
-            let extraDice = 'zero'
-            if (pips == 1) extraDice = 'pip'
-            if (pips == 2) extraDice = 'half'
-            itemData['system.knockbackMultiplier'] = 1
-            if (usesTk) {
-                itemData['system.usesTk'] = true
-            } else {
-                itemData['system.usesStrength'] = true
-            }
-            itemData['system.killing'] = true
-            itemData['system.dice'] = dice
-            itemData['system.extraDice'] = extraDice
-        }
-    }
-
-    // If this isn't an attack where we roll dice, so ignore it for now
-    if (!itemData['system.dice']) {
-        return;
-    }
+    // // If this isn't an attack where we roll dice, so ignore it for now
+    // if (!itemData['system.dice']) {
+    //     return;
+    // }
 
 
-    // Extra DC's is not an attack (ignore for now)
-    if (xmlid === "EXTRADC") return;
+    // // Extra DC's is not an attack (ignore for now)
+    // if (xmlid === "EXTRADC") return;
 
-    // WEAPON_ELEMENT is not an attack (ignore for now)
-    if (xmlid === "WEAPON_ELEMENT") return;
+    // // WEAPON_ELEMENT is not an attack (ignore for now)
+    // if (xmlid === "WEAPON_ELEMENT") return;
 
 
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+
 }
 
 // export async function uploadTalent(xml, type) {
@@ -1690,6 +1677,16 @@ function updateItemDescription(system, type) {
             system.description = `${system.ALIAS} ${system.LEVELS?.value}m`
             break;
 
+        case "MANEUVER":
+            // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
+            system.description = `${system.ALIAS}:`
+            if (system.PHASE) system.description += ` ${system.PHASE} Phase`;
+            if (system.OCV) system.description += `, ${system.OCV} OCV, ${system.DCV} DCV`
+            if (system.EFFECT) {
+                system.description += `, ${system.EFFECT.replace("[NORMALDC]", system.dice + "d6")}`
+            }
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
@@ -1934,8 +1931,32 @@ export async function makeAttack(item) {
     let name = item.system.NAME || description || configPowerInfo.xmlid
     changes[`name`] = name
 
-    const levels = parseInt(item.system.LEVELS?.value || 0)
+    let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0
     const input = item.system.INPUT
+
+    const ocv = parseInt(item.system.OCV)
+    const dcv = parseInt(item.system.DCV)
+
+    // Check if this is a MARTIALA attack.  If so then EXTRA DC's may be present
+    if (item.system.XMLID == "MANEUVER") {
+
+        let EXTRADC = null;
+
+        // HTH
+        if (item.system.CATEGORY == "Hand To Hand") {
+            EXTRADC = item.actor.items.find(o => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1)
+        }
+        // Ranged is not implemented yet
+
+        // Extract +2 HTH Damage Class(es)
+        if (EXTRADC) {
+            let match = EXTRADC.system.ALIAS.match(/\+\d+/)
+            if (match) {
+                levels += parseInt(match[0])
+            }
+        }
+    }
+
 
 
     // Active cost is required for endurance calculation.
@@ -1957,6 +1978,9 @@ export async function makeAttack(item) {
     changes[`system.areaOfEffect`] = { type: 'none', value: 0 }
     changes[`system.piercing`] = 0
     changes[`system.penetrating`] = 0
+    changes[`system.ocv`] = ocv
+    changes[`system.dcv`] = dcv
+
 
     // ENTANGLE (not implemented)
     if (xmlid == "ENTANGLE") {

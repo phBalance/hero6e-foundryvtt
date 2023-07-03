@@ -291,14 +291,13 @@ Hooks.once("ready", async function () {
         if (foundry.utils.isNewerVersion('3.0.4', lastMigration)) {
             ui.notifications.info(`Migragrating actor data.`)
             for (let actor of game.actors.contents) {
-                for( let effect of actor.effects.filter(o=> o.origin))
-                {
+                for (let effect of actor.effects.filter(o => o.origin)) {
                     effect.delete();
                 }
             }
             ui.notifications.info(`Migragtion complete.`)
         }
-        
+
     }
 
 });
@@ -431,6 +430,19 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
 
 Hooks.on("renderItemSheet", (dialog, html, data) => {
     html.find('header h4').append(`<span>${game.system.version}<span>`)
+})
+
+Hooks.on("getActorDirectoryEntryContext", (dialog, html, data) => {
+
+    console.log("getActorDirectoryEntryContext")
+    const menu = {
+        "name": "Change Actor Type",
+        "icon": "<i class=\"fas fa-cog\"></i>",
+        "callback": async function (target) {
+            return ui.notifications.warn("Change Actor Type not implemented");
+        },
+    }
+    html.push(menu)
 })
 
 

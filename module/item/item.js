@@ -278,7 +278,7 @@ export function getItem(id) {
 }
 
 async function updateCombatAutoMod(actor, item) {
-    const changes = []
+    const changes = {}
 
     let ocvEq = 0
     let dcvEq = '+0'

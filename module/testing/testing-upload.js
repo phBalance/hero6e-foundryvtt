@@ -1,6 +1,7 @@
 import { HeroSystem6eActor } from "../actor/actor.js";
+import { HeroSystem6eItem } from "../item/item.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { XmlToItemData, SkillRollUpdateValue } from "../utility/upload_hdc.js";
+import { XmlToItemData, SkillRollUpdateValue, makeAttack } from "../utility/upload_hdc.js";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
@@ -59,7 +60,7 @@ export function registerUploadTests(quench) {
                 const parser = new DOMParser()
                 const xmlDoc = parser.parseFromString(contents, 'text/xml')
                 const item = XmlToItemData(xmlDoc.children[0], "skill")
-                
+
                 it("description", function () {
                     assert.equal(item.system.description, "Mind Empowered: +2 with a group of Mental Powers");
                 });
@@ -204,6 +205,44 @@ export function registerUploadTests(quench) {
 
             });
 
+
+            describe("Offensive Strike", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                });
+                
+                const contents = `<MANEUVER XMLID="MANEUVER" ID="1688340787607" BASECOST="5.0" LEVELS="0" ALIAS="Offensive Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Offensive Strike" OCV="-2" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                <NOTES />
+                </MANEUVER>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                item.actor = actor;
+                makeAttack(item)
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 5);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 5);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.dice, 8);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+            });
 
 
         },

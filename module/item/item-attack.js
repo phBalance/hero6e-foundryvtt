@@ -115,6 +115,18 @@ export async function AttackToHit(item, options) {
         tags.push({ value: ocvMod, name: item.name })
     }
 
+    const autoMod = parseInt(item.actor.system.characteristics.ocv.autoMod) || 0
+    if (autoMod != 0)
+    {
+        rollEquation = modifyRollEquation(rollEquation, autoMod);
+        const maneuvers = item.actor.items.filter(o => o.type == 'maneuver' && o.system.active)
+        for (const maneuver of maneuvers)
+        {
+            tags.push({ value: parseInt(maneuver.system.ocv), name: maneuver.name})
+            rollEquation = modifyRollEquation(rollEquation, parseInt(maneuver.system.ocv));
+        }
+    }
+
     // if (parseInt(options.toHitMod) > 0) {
     //     rollEquation = modifyRollEquation(rollEquation, options.toHitMod);
     //     tags.push({ value: options.toHitMod, name: "toHitMod" })

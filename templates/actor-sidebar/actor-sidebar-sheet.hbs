@@ -200,11 +200,12 @@
                     <tr class="sticky">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
+                        <th class="left">{{localize "ActorSheet.Description"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
                         <th>{{localize "ActorSheet.Phase"}}</th>
                         <th>{{localize "ActorSheet.OCV"}}</th>
                         <th>{{localize "ActorSheet.DCV"}}</th>
-                        <th>{{localize "ActorSheet.Effect"}}</th>
+                        
                         {{!-- <th>
                             <a class="item-control item-create" title="Create Martial Art" data-type="martialArt">
                                 <i class="fas fa-plus"></i> Add MartialArt</a>
@@ -218,11 +219,12 @@
                                     height="24" /></div>
                         </td>
                         <td class="left">{{item.name}}</td>
+                        <td class="left">{{item.system.description}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocv}}</td>
                         <td>{{item.system.dcv}}</td>
-                        <td>{{item.system.effect}}</td>
+                        
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>
