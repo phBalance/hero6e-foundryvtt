@@ -1,6 +1,7 @@
 # Version 3.0.4
 - Reworked Active Effects such that the effects on items remain with items.  They are no longered
 transferred from the item to the actor.  This is following [FoundryVtt v11 ActiveEffect Transferral](https://foundryvtt.com/article/v11-active-effects/) recommendations.
+- Fixed Custom martial attacks, they now show on attack tab.  Also fixed the Set & Brace martial manuevers.
 
 # Version 3.0.3
 - FoundryVTT 304 verified compatibility.
