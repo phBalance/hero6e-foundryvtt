@@ -1,9 +1,14 @@
-{{!-- {{ log 'HEROSYS item-damage-card' this }} --}}
+{{ log 'HEROSYS item-damage-card' this }}
 <div class="hero chat-card item-card damage-card2" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
     tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
     <div>
-        Damage Roll: <span class="item-name">{{item.name}}</span>
+        {{#if (eq item.system.XMLID "AID")}}
+        Aid
+        {{else}}
+        Damage
+        {{/if}}
+        Roll: <span class="item-name">{{item.name}}</span>
     </div>
 
     <div class="tags">
@@ -47,28 +52,45 @@
             <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
             {{/if}}
             <div class="description-tiny">
-                (Raw Damage) {{ bodyDamage }} BODY; {{ stunDamage }} STUN
+                (Raw Roll) {{ bodyDamage }} BODY; {{ stunDamage }} STUN
             </div>
         </div>
 
         <div data-visibility="gm">
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
                 data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-terms="{{terms}}"
-                data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">Apply Damage</button>
+                data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
+                {{#if (eq item.system.XMLID "AID")}}
+                Apply AID
+                {{else}}
+                Apply Damage
+                {{/if}}
+            </button>
 
 
             {{#each targetTokens as |target id|}}
             <button class="apply-damage" title="Apply damage to {{target.name}}." data-itemId="{{../item.uuid}}"
                 data-target-token-id="{{target.id}}" data-bodyDamage="{{../bodyDamage}}"
                 data-stunDamage="{{../stunDamage}}" data-terms="{{../terms}}"
-                data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">Apply Damage to
-                <b>{{target.name}}</b></button>
+                data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">
+                {{#if (eq ../item.system.XMLID "AID")}}
+                Apply Aid to <b>{{target.name}}</b>
+                {{else}}
+                Apply Damage to <b>{{target.name}}{{item.system.XMLID}}</b>
+                {{/if}}
+                </button>
             {{/each}}
 
             {{#if targetIds}}
             <button class="apply-damage" title="Apply damage to ALL tokens that were hit." data-itemId="{{item.uuid}}"
                 data-target-Ids="{{targetIds}}" data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}"
-                data-terms="{{terms}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">Apply Damage to <b>ALL</b></button>
+                data-terms="{{terms}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
+                {{#if (eq item.system.XMLID "AID")}}
+                Apply Aid to <b>ALL</b>
+                {{else}}
+                Apply Damage to <b>ALL</b>
+                {{/if}}
+            </button>
             {{/if}}
         </div>
 

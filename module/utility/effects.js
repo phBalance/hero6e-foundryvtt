@@ -34,7 +34,17 @@ export async function onManageActiveEffect(event, owner) {
             });
 
             if (confirmed) {
-                effect.delete()
+                await effect.delete()
+
+                let actor = effect.parent instanceof HeroSystem6eActor ? effect.parent : effect.parent.actor
+
+                // Characteristic VALUE should not exceed MAX
+                for (let char of Object.keys(actor.system.characteristics)) {
+                    if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
+                        await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
+                        //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
+                    }
+                }
             }
             return
         case "toggle":
@@ -56,7 +66,7 @@ export async function onActiveEffectToggle(effect, newState) {
     // If this is an item update active state
     const origin = await fromUuid(effect.origin);
     const item = origin instanceof HeroSystem6eItem ? origin : effect.parent
-    const actor = item?.actor || (origin instanceof HeroSystem6eActor ? origin : null)
+    const actor = item?.actor || (item instanceof HeroSystem6eActor ? item : null) //(origin instanceof HeroSystem6eActor ? origin : null)
     if (item) {
         await item.update({ 'system.active': newState })
     }

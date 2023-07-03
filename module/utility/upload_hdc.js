@@ -505,6 +505,12 @@ export function XmlToItemData(xml, type) {
     // Make sure we have a name
     systemData.NAME = systemData.NAME || systemData.ALIAS
 
+    switch (systemData.NAME) {
+        case "Aid":
+            systemData.NAME += " " + systemData.INPUT;
+            break;
+    }
+
     if (["MENTAL_COMBAT_LEVELS", "PENALTY_SKILL_LEVELS"].includes(systemData.XMLID)) {
         switch (systemData.OPTION) {
             case "SINGLE": systemData.costPerLevel = 1; break;
@@ -1696,7 +1702,7 @@ export function updateItemDescription(system, type) {
                     break
             }
 
-            if (this && (this.type == 'attack' || this.system.subType == 'attack')) {
+            if (this) {  // Make sure we have an actor
                 // Convert dice to pips
                 let pips = system.dice * 3;
                 switch (system.extraDice) {
@@ -2063,36 +2069,50 @@ export async function makeAttack(item) {
     // ENTANGLE (not implemented)
     if (xmlid == "ENTANGLE") {
         changes[`system.class`] = 'entangle'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // DARKNESS (not implemented)
     if (xmlid == "DARKNESS") {
         changes[`system.class`] = 'darkness'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // DRAIN (not implemented)
     if (xmlid == "DRAIN") {
         changes[`system.class`] = 'drain'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // AID (not implemented)
     if (xmlid == "AID") {
         changes[`system.class`] = 'aid'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // TRANSFER (not implemented)
     if (xmlid == "TRANSFER") {
         changes[`system.class`] = 'transfer'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // MINDSCAN (not implemented)
     if (xmlid == "MINDSCAN") {
         changes[`system.class`] = 'mindscan'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // DISPEL (not implemented)
     if (xmlid == "DISPEL") {
         changes[`system.class`] = 'dispel'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // MENTALBLAST (not implemented)
