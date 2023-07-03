@@ -4,6 +4,7 @@ transferred from the item to the actor.  This is following [FoundryVtt v11 Activ
 - Fixed Custom martial attacks, they now show on attack tab.  Also fixed the Set & Brace martial manuevers.
 - Fixed a bug where an attack using charges would set END=0.
 - Fixed a bug where some auto created attacks were missing half die.
+- Initial AID support.  Adjustment powers do not automatically fade yet.  One step closer to DRAIN/TRANSFER [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)
 
 # Version 3.0.3
 - FoundryVTT 304 verified compatibility.
