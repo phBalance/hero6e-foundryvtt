@@ -1,0 +1,103 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_release:
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.extract_release.outputs.RELEASE }}
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install jq
+      run: sudo apt-get install jq
+
+    - name: Extract version number from system.json
+      id: extract_version
+      run: |
+        VERSION=$(jq -r .version system.json)
+        echo "System version: $VERSION"
+        echo "::set-output name=VERSION::$VERSION"
+
+    - name: Get the latest release
+      id: latest_release
+      run: |
+        LATEST_RELEASE=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+        echo "Latest release: $LATEST_RELEASE"
+        echo "::set-output name=LATEST_RELEASE::$LATEST_RELEASE"
+
+    - name: Compare version and release
+      id: extract_release
+      run: |
+        if [[ "${{ steps.extract_version.outputs.VERSION }}" != "${{ steps.latest_release.outputs.LATEST_RELEASE }}" ]]; then
+          RELEASE="${{ steps.extract_version.outputs.VERSION }}"
+          echo "::set-output name=RELEASE::$RELEASE"
+        fi  
+
+  prepare_release:
+    needs: check_release
+    if: needs.check_release.outputs.release != ''
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Update release version in system.json
+      run: |
+        sed -i 's|"manifest": "[^"]*",|"manifest": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/system.json",|' system.json
+        sed -i 's|"download": "[^"]*",|"download": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/hero6efoundryvttv2.zip",|' system.json
+
+    - name: Archive code
+      run: |
+        zip -r hero6efoundryvttv2.zip .
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: hero6efoundryvttv2.zip
+        path: hero6efoundryvttv2.zip
+
+    - name: Create and push tag
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag ${{ needs.check_release.outputs.release }}
+        git push origin ${{ needs.check_release.outputs.release }}
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ needs.check_release.outputs.release }}
+        release_name: Release ${{ needs.check_release.outputs.release }}
+        draft: false
+        prerelease: false
+
+    - name: Upload system zip
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./hero6efoundryvttv2.zip
+        asset_name: hero6efoundryvttv2.zip
+        asset_content_type: application/zip
+
+    - name: Upload system.json
+      id: upload-system-json
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./system.json
+        asset_name: system.json
+        asset_content_type: application/json

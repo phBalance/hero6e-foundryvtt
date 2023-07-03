@@ -18,9 +18,15 @@
             <input type="text" name="system.rules" value="{{system.rules}}" data-dtype="Text" disabled />
         </div>
 
+        {{#if (eq item.system.subType 'attack') }}
+        {{> systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs item=item }}
+        {{/if}}
+
+        <hr>
+
         {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
         {{> systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs item=item alphaTesting=alphaTesting}}
-        
+
     </section>
 
     {{!-- <section class="sheet-body">

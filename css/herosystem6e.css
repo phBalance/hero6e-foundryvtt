@@ -1,10 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Martel:wght@400;800&family=Roboto:wght@300;400;500&display=swap");
+
 /* Global styles */
 .window-app {
   font-family: "Roboto", sans-serif;
 }
 
-.rollable:hover, .rollable:focus {
+.rollable:hover,
+.rollable:focus {
   color: #000;
   text-shadow: 0 0 10px red;
   cursor: pointer;
@@ -71,7 +73,7 @@
 }
 
 .grid.marginless {
-    margin:0px;
+  margin: 0px;
 }
 
 .flex-group-center,
@@ -89,8 +91,8 @@
 }
 
 .flex-group-center.borderless {
-    border:none;
-    padding:0px;
+  border: none;
+  padding: 0px;
 }
 
 .flex-group-left {
@@ -127,57 +129,57 @@
 /*  Flexbox                                  */
 /* ----------------------------------------- */
 .flexrow {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
-    .flexrow > * {
-        flex: 1;
-    }
+.flexrow>* {
+  flex: 1;
+}
 
-    .flexrow .flex1 {
-        flex: 1;
-    }
+.flexrow .flex1 {
+  flex: 1;
+}
 
-    .flexrow .flex2 {
-        flex: 2;
-    }
+.flexrow .flex2 {
+  flex: 2;
+}
 
-    .flexrow .flex3 {
-        flex: 3;
-    }
+.flexrow .flex3 {
+  flex: 3;
+}
 
-    .flexrow .flex4 {
-        flex: 4;
-    }
+.flexrow .flex4 {
+  flex: 4;
+}
 
 .flexcol {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
 }
 
-    .flexcol > * {
-        flex: 1;
-    }
+.flexcol>* {
+  flex: 1;
+}
 
-    .flexcol .flex1 {
-        flex: 1;
-    }
+.flexcol .flex1 {
+  flex: 1;
+}
 
-    .flexcol .flex2 {
-        flex: 2;
-    }
+.flexcol .flex2 {
+  flex: 2;
+}
 
-    .flexcol .flex3 {
-        flex: 3;
-    }
+.flexcol .flex3 {
+  flex: 3;
+}
 
-    .flexcol .flex4 {
-        flex: 4;
-    }
+.flexcol .flex4 {
+  flex: 4;
+}
 
 /* Styles limited to hero sheets */
 .hero .item-form {
@@ -185,30 +187,30 @@
 }
 
 .hero.actor-sheet {
-    overflow:auto;
+  overflow: auto;
 }
 
 .hero .sheet-mode {
-    flex:0;
+  flex: 0;
 }
 
 .hero .sheet-header {
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 130px;
-    flex: 0 0 130px;
-    overflow: hidden;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: row;
-    flex-direction: row;
-    -ms-flex-wrap: wrap;
-    flex-wrap: wrap;
-    -webkit-box-pack: start;
-    -ms-flex-pack: start;
-    justify-content: flex-start;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 130px;
+  flex: 0 0 130px;
+  overflow: hidden;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-box-pack: start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
 }
 
 .hero .sheet-header .profile-img {
@@ -221,7 +223,7 @@
 }
 
 .hero .sheet-header .profile-img.borderless {
-    border:none;
+  border: none;
 }
 
 .hero .sheet-header .header-fields {
@@ -244,7 +246,7 @@
 }
 
 .hero .sheet-header h1.charname a {
-    align-self: center;
+  align-self: center;
 }
 
 .hero .sheet-tabs {
@@ -254,17 +256,17 @@
 }
 
 .hero .characteristic {
-    border:none;
-    height:50px;
+  border: none;
+  height: 50px;
 }
 
 .hero .characteristic-roll {
-    border-radius:20px;
-    margin-left:4px;
+  border-radius: 20px;
+  margin-left: 4px;
 }
 
 .hero .characteristic-group {
-    border: 1px solid #999;
+  border: 1px solid #999;
 }
 
 .hero .sheet-body,
@@ -288,23 +290,23 @@
 }
 
 .hero .tab-body {
-    height: 100%;
-    overflow-y: auto;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .hero .tab-header {
-    position: sticky;
-    top: 0;
-    left: 0;
-    align-items: center;
-    padding: 0 5px;
-    background: #cfcdc2;
-    border: 1px solid #AAA;
-    border-radius: 2px;
-    text-align: left;
-    font-weight: bold;
-    height:26px;
-    z-index:1;
+  position: sticky;
+  top: 0;
+  left: 0;
+  align-items: center;
+  padding: 0 5px;
+  background: #cfcdc2;
+  border: 1px solid #AAA;
+  border-radius: 2px;
+  text-align: left;
+  font-weight: bold;
+  height: 26px;
+  z-index: 1;
 }
 
 .hero .tabs {
@@ -332,8 +334,8 @@
 
 .hero .items-list .item-header {
   font-weight: bold;
-  position:sticky;
-  top:0;
+  position: sticky;
+  top: 0;
 }
 
 .hero .items-list .item {
@@ -353,7 +355,8 @@
 
 .dark {
   color: #000;
-  /* filter: brightness(0); */ /* compatibility issue with Simple Calendar */
+  /* filter: brightness(0); */
+  /* compatibility issue with Simple Calendar */
 }
 
 .hero .items-list .item img {
@@ -365,215 +368,215 @@
 }
 
 .hero .item-value {
-    text-align: center;
+  text-align: center;
 }
 
 .hero .items-list .item-controls,
 .hero .tab-header .item-controls {
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 110px;
-    flex: 0 0 110px;
-    text-align: right;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 110px;
+  flex: 0 0 110px;
+  text-align: right;
 }
 
 /* ----------------------------------------- */
 /*  Chat Cards
 /* ----------------------------------------- */
 .hero.chat-card {
-    font-style: normal;
-    font-size: 12px;
+  font-style: normal;
+  font-size: 12px;
 }
 
-    .hero.chat-card .card-header {
-        padding: 3px 0;
-        border-top: 2px groove #FFF;
-        border-bottom: 2px groove #FFF;
-    }
+.hero.chat-card .card-header {
+  padding: 3px 0;
+  border-top: 2px groove #FFF;
+  border-bottom: 2px groove #FFF;
+}
 
-    .hero.chat-card .card-section {
-        padding: 3px 0;
-        border-bottom: 2px groove #FFF;
-    }
+.hero.chat-card .card-section {
+  padding: 3px 0;
+  border-bottom: 2px groove #FFF;
+}
 
-    .hero.chat-card .card-header img {
-        flex: 0 0 36px;
-        margin-right: 5px;
-    }
+.hero.chat-card .card-header img {
+  flex: 0 0 36px;
+  margin-right: 5px;
+}
 
-    .hero.chat-card .card-header h3 {
-        flex: 1;
-        margin: 0;
-        line-height: 36px;
-        font-size: 20px;
-        font-weight: 700;
-        color: #4b4a44;
-        display:inline-block;
-    }
+.hero.chat-card .card-header h3 {
+  flex: 1;
+  margin: 0;
+  line-height: 36px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4b4a44;
+  display: inline-block;
+}
 
-    .hero.chat-card .card-header.attack {
-      border-bottom: none;
-  }
+.hero.chat-card .card-header.attack {
+  border-bottom: none;
+}
 
-    .hero.chat-card .card-section .description {
-        flex: 1;
-        margin: 0;
-        line-height: 36px;
-        font-size: 20px;
-        font-weight: 700;
-        color: #4b4a44;
-        text-align: center;
-    }
+.hero.chat-card .card-section .description {
+  flex: 1;
+  margin: 0;
+  line-height: 36px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4b4a44;
+  text-align: center;
+}
 
-    .hero.chat-card .card-section .description-medium {
-      flex: 1;
-      margin: 0;
-      line-height: 30px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #4b4a44;
-      text-align: center;
-    }
+.hero.chat-card .card-section .description-medium {
+  flex: 1;
+  margin: 0;
+  line-height: 30px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #4b4a44;
+  text-align: center;
+}
 
-    .hero.chat-card .card-section .description-small {
-        flex: 1;
-        margin: 0;
-        line-height: 24px;
-        font-size: 16px;
-        font-weight: 500;
-        color: #4b4a44;
-        text-align: center;
-    }
+.hero.chat-card .card-section .description-small {
+  flex: 1;
+  margin: 0;
+  line-height: 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #4b4a44;
+  text-align: center;
+}
 
-    .hero.chat-card .card-section .description-tiny {
-      flex: 1;
-      margin: 0;
-      line-height: 20px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #4b4a44;
-      text-align: center;
-    }
+.hero.chat-card .card-section .description-tiny {
+  flex: 1;
+  margin: 0;
+  line-height: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b4a44;
+  text-align: center;
+}
 
-    /* Commented out to remove from item-toHit-card */
-    /* Not aware that this is needed elseware */
-    /* .hero.chat-card .card-header h3:hover {
+/* Commented out to remove from item-toHit-card */
+/* Not aware that this is needed elseware */
+/* .hero.chat-card .card-header h3:hover {
         color: #111;
         text-shadow: 0 0 10px red;
     } */
 
-    .hero.chat-card .card-content {
-        margin: 5px 0;
-    }
+.hero.chat-card .card-content {
+  margin: 5px 0;
+}
 
-    .hero.chat-card .card-content h3 {
-        font-size: 12px;
-        margin: 0;
-        font-weight: bold;
-    }
+.hero.chat-card .card-content h3 {
+  font-size: 12px;
+  margin: 0;
+  font-weight: bold;
+}
 
-    .hero.chat-card .card-content > * {
-        -webkit-user-select: text;
-        -moz-user-select: text;
-        -ms-user-select: text;
-        user-select: text;
-    }
+.hero.chat-card .card-content>* {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
 
-    .hero.chat-card .card-buttons {
-        margin: 5px 0;
-    }
+.hero.chat-card .card-buttons {
+  margin: 5px 0;
+}
 
-        .hero.chat-card .card-buttons span {
-            display: block;
-            line-height: 28px;
-            text-align: center;
-            border: 1px solid #CCC;
-        }
+.hero.chat-card .card-buttons span {
+  display: block;
+  line-height: 28px;
+  text-align: center;
+  border: 1px solid #CCC;
+}
 
-        .hero.chat-card .card-buttons button {
-            font-size: 12px;
-            height: 24px;
-            line-height: 20px;
-            margin: 2px 0;
-        }
+.hero.chat-card .card-buttons button {
+  font-size: 12px;
+  height: 24px;
+  line-height: 20px;
+  margin: 2px 0;
+}
 
-    .hero.chat-card .card-footer {
-        padding: 3px 0 0;
-        border-top: 2px groove #FFF;
-    }
+.hero.chat-card .card-footer {
+  padding: 3px 0 0;
+  border-top: 2px groove #FFF;
+}
 
-        .hero.chat-card .card-footer span {
-            border-right: 2px groove #FFF;
-            padding: 0 3px 0 0;
-            font-size: 10px;
-        }
+.hero.chat-card .card-footer span {
+  border-right: 2px groove #FFF;
+  padding: 0 3px 0 0;
+  font-size: 10px;
+}
 
-            .hero.chat-card .card-footer span:last-child {
-                border-right: none;
-                padding-right: 0;
-            }
+.hero.chat-card .card-footer span:last-child {
+  border-right: none;
+  padding-right: 0;
+}
 
 .dice-roll .dice-total.success {
-    color: inherit;
-    background: #c7d0c0;
-    border: 1px solid #006c00;
+  color: inherit;
+  background: #c7d0c0;
+  border: 1px solid #006c00;
 }
 
 .dice-roll .dice-total.failure {
-    color: inherit;
-    background: #ffdddd;
-    border: 1px solid #6e0000;
+  color: inherit;
+  background: #ffdddd;
+  border: 1px solid #6e0000;
 }
 
 .dice-roll .dice-total.critical {
-    color: green;
+  color: green;
 }
 
 .dice-roll .dice-total.fumble {
-    color: red;
+  color: red;
 }
 
 .segment-container {
-    margin: 4px 0;
-    border: 1px solid #888;
+  margin: 4px 0;
+  border: 1px solid #888;
 }
 
 .segment-inactive {
-    flex: 1;
-    margin: 0;
-    font-size: 16px;
-    color: #AAA;
-    text-align: center;
-    padding: 4px 0;
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  color: #AAA;
+  text-align: center;
+  padding: 4px 0;
 }
 
 .segment-active {
-    flex: 1;
-    margin: 0;
-    font-size: 16px;
-    text-align: center;
-    padding: 4px 0;
-    border-top: 2px groove #4b4a44;
-    border-bottom: 2px groove #BBB;
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  text-align: center;
+  padding: 4px 0;
+  border-top: 2px groove #4b4a44;
+  border-bottom: 2px groove #BBB;
 }
 
 .segment-header img {
-    flex: 0 0 36px;
-    margin-right: 5px;
+  flex: 0 0 36px;
+  margin-right: 5px;
 }
 
 .segment-header h3 {
-    flex: 1;
-    margin: 0;
-    line-height: 36px;
-    font-size: 20px;
-    font-weight: 700;
-    color: #4b4a44;
-    display: inline-block;
+  flex: 1;
+  margin: 0;
+  line-height: 36px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4b4a44;
+  display: inline-block;
 }
 
 .segment-header h3:hover {
-    color: #111;
-    text-shadow: 0 0 10px red;
+  color: #111;
+  text-shadow: 0 0 10px red;
 }
 
 .hero-combat-tracker-resource {
@@ -582,45 +585,45 @@
 }
 
 .hero input[type="file"] {
-    display: none;
+  display: none;
 }
 
 .upload-button {
-    height: 30px;
-    margin: 3px 5px;
-    background: rgba(255, 255, 240, 0.8);
-    border: 1px solid #b5b3a4;
-    border-radius: 3px;
-    font-size: 14px;
-    line-height: 28px;
-    font-family: "Signika", sans-serif;
-    align-content:center;
-    text-align:center;
+  height: 30px;
+  margin: 3px 5px;
+  background: rgba(255, 255, 240, 0.8);
+  border: 1px solid #b5b3a4;
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 28px;
+  font-family: "Signika", sans-serif;
+  align-content: center;
+  text-align: center;
 }
 
 .upload-button:hover,
 .upload-button:focus {
-    outline: none;
-    box-shadow: 0 0 5px red;
+  outline: none;
+  box-shadow: 0 0 5px red;
 }
 
 .upload-button:disabled {
-    color: #4b4a44;
-    box-shadow: none;
+  color: #4b4a44;
+  box-shadow: none;
 }
 
-.upload-button > i {
-    margin-right: 3px;
+.upload-button>i {
+  margin-right: 3px;
 }
 
 form .upload-button {
-    background: rgba(0, 0, 0, 0.1);
-    border: 2px groove #f0f0e0;
+  background: rgba(0, 0, 0, 0.1);
+  border: 2px groove #f0f0e0;
 }
 
 .hero .rollable-skill {
-    width: 40px;
-    line-height: normal;
+  width: 40px;
+  line-height: normal;
 }
 
 .hero .power-rollable-skill {
@@ -651,6 +654,7 @@ form .upload-button {
   flex-direction: column;
   justify-content: flex-start;
 }
+
 .power-card-power-item-list {
   align-self: left;
   list-style-type: none;
@@ -668,7 +672,7 @@ form .upload-button {
   background-color: transparent;
   border-radius: 4px;
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 30%);
-  color: rgb(75,74,68);
+  color: rgb(75, 74, 68);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.5;
@@ -689,7 +693,7 @@ div.fifthEd {
   border-radius: 8px;
   height: 24px;
   padding: 2px 4px;
-  font-size:14px;
+  font-size: 14px;
   /* margin-top: 2px; */
   margin: 5px 5px;
 }
@@ -727,8 +731,11 @@ div.fifthEd {
 }
 
 .radio label {
-  color: #000;
-  font-weight: bold;
+  color: #fff;
+  font-weight: 500;
+  /* text-shadow: 0 0 10px #494848; */
+  text-shadow: 1px 1px 2px black, 0 0 1em #494848, 0 0 0.2em #494848;
+
 }
 
 .radio input[type="radio"] {
@@ -737,7 +744,7 @@ div.fifthEd {
 
 }
 
-.radio input[type="radio"] + .radio-label:before {
+.radio input[type="radio"]+.radio-label:before {
   content: '';
   background: #494848;
   border-radius: 100%;
@@ -755,12 +762,12 @@ div.fifthEd {
   pointer-events: auto;
 }
 
-.radio input[type="radio"]:checked + .radio-label:before {
+.radio input[type="radio"]:checked+.radio-label:before {
   background-color: #ffffff;
   box-shadow: inset 0 0 0 4px #494848;
 }
 
-.radio input[type="radio"] + .radio-label:empty:before {
+.radio input[type="radio"]+.radio-label:empty:before {
   margin-right: 0;
 }
 

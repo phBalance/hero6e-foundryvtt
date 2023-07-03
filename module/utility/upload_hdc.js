@@ -62,7 +62,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // 6e vs 5e
     if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
-        this.actor.update({ 'system.is5e': true }, {render: false})
+        this.actor.update({ 'system.is5e': true }, { render: false })
     }
     const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
@@ -150,8 +150,8 @@ export async function applyCharacterSheet(xmlDoc) {
         //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
         // }
     }
-   
-    await this.actor.update(changes, {render: false})
+
+    await this.actor.update(changes, { render: false })
     changes = {}
 
     // Initial 5e support
@@ -246,7 +246,7 @@ export async function applyCharacterSheet(xmlDoc) {
         figuredChanges[`system.characteristics.omcv.realCost`] = 0
         figuredChanges[`system.characteristics.dmcv.realCost`] = 0
 
-        await this.actor.update(figuredChanges, {render: false})
+        await this.actor.update(figuredChanges, { render: false })
     }
     else {
         // Confirm 6E
@@ -255,7 +255,7 @@ export async function applyCharacterSheet(xmlDoc) {
                 ui.notifications.warn(`Actor was incorrectly flagged as 5e.`)
                 console.log(`Actor was incorrectly flagged as 5e.`)
             }
-            await this.actor.update({ 'system.is5e': false }, {render: false})
+            await this.actor.update({ 'system.is5e': false }, { render: false })
         }
     }
 
@@ -268,6 +268,7 @@ export async function applyCharacterSheet(xmlDoc) {
         name: 'Perception',
         type: 'skill',
         system: {
+            ALIAS: "Perception",
             characteristic: "int",
             state: 'trained',
             levels: "0"
@@ -360,7 +361,7 @@ export async function applyCharacterSheet(xmlDoc) {
         let path = "worlds/" + game.world.id
         if (this.actor.img.indexOf(filename) == -1) {
             await ImageHelper.uploadBase64(base64, filename, path)
-            await this.actor.update({ [`img`]: path + '/' + filename }, {render: false})
+            await this.actor.update({ [`img`]: path + '/' + filename }, { render: false })
         }
     }
 
@@ -373,18 +374,24 @@ export async function applyCharacterSheet(xmlDoc) {
             //xmlid: "HANDTOHANDATTACK",
             knockbackMultiplier: 1,
             usesStrength: true,
-            rules: "This is the basic attack maneuver"
+            rules: "This is the basic attack maneuver",
+            XMLID: "HANDTOHANDATTACK",
+            NAME: "Strike",
+            LEVELS: { value: 0, max: 0 },
+            ALIAS: "HANDTOHANDATTACK",
         }
 
     }
     await HeroSystem6eItem.create(itemData, { parent: this.actor })
+
+    await updateItemSubTypes(this.actor)
 
 
     // Make sure VALUE = MAX.
     // We may have applied ActiveEffectcs to MAX.
     for (let char of Object.keys(this.actor.system.characteristics)) {
         if (this.actor.system.characteristics[char].value != this.actor.system.characteristics[char].max) {
-            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, {render: false})
+            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, { render: false })
         }
 
     }
@@ -431,11 +438,11 @@ async function CalcRealAndActivePoints(actor) {
         _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
     }
     //HEROSYS.log(false, _splitCost)
-    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, {render: false})
+    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false })
 }
 
 
-function XmlToItemData(xml, type) {
+export function XmlToItemData(xml, type) {
 
     const xmlid = xml.getAttribute('XMLID')
 
@@ -452,7 +459,7 @@ function XmlToItemData(xml, type) {
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-        "BODYLEVELS", "ID", "PARENTID", "POSITION"
+        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -463,6 +470,16 @@ function XmlToItemData(xml, type) {
                 case "WEIGHT":
                     // Convert lbs to kg
                     systemData[attribute.name] = (parseFloat(attribute.value) / 2.20462).toFixed(2)
+                    break;
+                case "LEVELS":
+                    // case "PDLEVELS":
+                    // case "EDLEVELS":
+                    // case "MDLEVELS":
+                    // case "LENGTHLEVELS":
+                    // case "HEIGHTLEVELS":
+                    // case "WIDTHLEVELS":
+                    // case "BODYLEVELS":
+                    systemData[attribute.name] = { value: attribute.value, max: attribute.value }
                     break;
                 default:
                     systemData[attribute.name] = attribute.value
@@ -632,12 +649,18 @@ export async function uploadBasic(xml, type) {
     if (itemData.system.XMLID == "COMBAT_LUCK") {
         itemData.system.active = true
     }
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    const item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
-    // Some items should be copied and created as an attack
+    // // Some items should be copied and created as an attack
+    // const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
+    // if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
+    //     await uploadAttack.call(this, xml)
+    // }
+
+    // Some items are attacks
     const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
     if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
-        await uploadAttack.call(this, xml)
+        await makeAttack(item)
     }
 }
 
@@ -972,8 +995,8 @@ function calcBasePointsPlusAdders(system) {
     // const adders = system.adders || [] //xmlItem.getElementsByTagName("ADDER")
 
 
-    // if (system.XMLID == "COM")
-    //     HEROSYS.log(false, system.XMLID)
+    if (!system.XMLID)
+        return 0
 
     // if (system.NAME == "Sheet of Steel")
     //     HEROSYS.log(false, system.NAME)
@@ -990,7 +1013,7 @@ function calcBasePointsPlusAdders(system) {
     }
 
     // Check if we have CONFIG info about this power
-    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this?.actor })
 
 
     // Base Cost is typcailly extracted directly from HDC
@@ -1000,7 +1023,7 @@ function calcBasePointsPlusAdders(system) {
     // Cost per level is NOT included in the HDC file.
     // We will try to get cost per level via config.js
     // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
-    const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
+    const characteristicCosts = this?.actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
     let costPerLevel = parseFloat(
         configPowerInfo?.costPerLevel ||
         characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
@@ -1014,7 +1037,7 @@ function calcBasePointsPlusAdders(system) {
         costPerLevel = parseFloat(configPowerInfo?.costPerLevel)
     }
 
-    let levels = parseInt(system.LEVELS)
+    let levels = parseInt(system.LEVELS?.value)
 
     let subCost = costPerLevel * levels
 
@@ -1038,11 +1061,13 @@ function calcBasePointsPlusAdders(system) {
 
     // ADDERS
     let adderCost = 0
-    for (let adder of system.adders.filter(o => !o.SELECTED || o.SELECTED == "YES")) {
-        let adderBaseCost = parseInt(adder.BASECOST)
+    if (system.adders) {
+        for (let adder of system.adders.filter(o => !o.SELECTED || o.SELECTED == "YES")) {
+            let adderBaseCost = parseInt(adder.BASECOST)
 
-        let adderLevels = Math.max(1, parseInt(adder.LEVELS))
-        adderCost += adderBaseCost * adderLevels
+            let adderLevels = Math.max(1, parseInt(adder.LEVELS))
+            adderCost += adderBaseCost * adderLevels
+        }
     }
 
     // Categorized skills cost 2 per catory and +1 per each subcategory.
@@ -1316,10 +1341,11 @@ export async function uploadPower(power, type) {
         }
 
         // Detect attacks
-        //let configPowerInfo = CONFIG.HERO.powers[power.system.rules]
         if (configPowerInfo.powerType.includes("attack")) {
-            await uploadAttack.call(this, power, true)
+            //await uploadAttack.call(this, power, true)
+            await makeAttack(item)
         }
+
 
     }
     else {
@@ -1517,6 +1543,7 @@ export async function uploadPower(power, type) {
     // }
 }
 
+// TODO: Can this be reworked to take only ITEM as a property?
 function updateItemDescription(system, type) {
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
@@ -1524,7 +1551,7 @@ function updateItemDescription(system, type) {
     // description updates as well.
     // If in sheets code it may handle drains/suppresses nicely.
 
-    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this?.actor })
 
     switch (configPowerInfo?.xmlid || system.XMLID) {
 
@@ -1561,15 +1588,15 @@ function updateItemDescription(system, type) {
         case "DRAIN":
         case "AID":
             // Aid  STR 5d6 (standard effect: 15 points)
-            system.description = system.ALIAS + (system.INPUT ? " " + system.INPUT : "") + " " + system.LEVELS + "d6"
+            system.description = system.ALIAS + (system.INPUT ? " " + system.INPUT : "") + " " + system.LEVELS?.value + "d6"
             if (system.USESTANDARDEFFECT == "Yes") {
-                system.description += " (standard effect: " + (parseInt(system.LEVELS) * 3) + " points)"
+                system.description += " (standard effect: " + parseInt(system.LEVELS?.value * 3) + " points)"
             }
             //system.description = `${system.ALIAS} ${system.LEVELS}d6`
             break;
 
         case "STRETCHING":
-            system.description = system.ALIAS + " " + system.LEVELS + "m"
+            system.description = system.ALIAS + " " + system.LEVELS?.value + "m"
             break;
 
         case "RUNNING":
@@ -1577,19 +1604,23 @@ function updateItemDescription(system, type) {
         case "LEAPING":
         case "TELEPORTATION":
             // Running +25m (12m/37m total)
-            system.description = system.ALIAS + " +" + system.LEVELS + "m"
+            system.description = system.ALIAS + " +" + system.LEVELS?.value + "m"
             break;
 
         case "TUNNELING":
             // Tunneling 22m through 10 PD materials
             let defbonus = system.adders.find(o => o.XMLID == "DEFBONUS")
             let pd = 1 + parseInt(defbonus?.LEVELS || 0)
-            system.description = `${system.ALIAS} +${system.LEVELS}m through ${pd} PD materials`
+            system.description = `${system.ALIAS} +${system.LEVELS?.value}m through ${pd} PD materials`
             break;
 
         case "NAKEDMODIFIER":
             // Area Of Effect (8m Radius; +1/2) for up to 53 Active Points of STR
-            system.description = `${system.ALIAS} for up to ${system.LEVELS} Active points of ${system.INPUT}`
+            // Naked Advantage: Reduced Endurance (0 END; +1/2) for up to 70 Active Points (35 Active Points); Gestures (Requires both hands; -1/2), Linked to Opening of the Blind, Third Eye (Opening of the Blind, Third Eye; -1/4), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)
+            system.description = `${system.ALIAS} for up to ${system.LEVELS?.value} Active points`
+            if (system.INPUT) {
+                system.description += ` of ${system.INPUT}`
+            }
             break;
 
         case "DEFENSE_MANEUVER":
@@ -1606,31 +1637,47 @@ function updateItemDescription(system, type) {
             break;
 
         case "KNOWLEDGE_SKILL":
+
             // 6e HDC
-            if (system.ALIAS == "KS") {
-                system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
-            } else {
-                system.description = system.NAME
+            //if (system.ALIAS == "KS") {
+            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
+            // } else {
+            //     system.description = system.NAME
+            // }
+            let item = {
+                actor: this?.actor || this,
+                system: system
+            }
+            SkillRollUpdateValue(item)
+            if (system.roll) {
+                system.description += ` ${system.roll}`
             }
 
             break;
+        case "TRANSPORT_FAMILIARITY":
+            //TF:  Custom Adder, Small Motorized Ground Vehicles
+            system.description = system.ALIAS + ": "
+            break;
 
+        case "MENTAL_COMBAT_LEVELS":
         case "PENALTY_SKILL_LEVELS":
-            system.description = system.NAME + ": +" + system.LEVELS + " " + system.OPTION_ALIAS
+            system.description = system.NAME + ": +" + system.LEVELS?.value + " " + system.OPTION_ALIAS
             break;
 
         case "RKA":
+        case "HKA":
         case "ENERGYBLAST": //Energy Blast 1d6
-            system.description = `${system.ALIAS} ${system.LEVELS}d6`
+        case "EGOATTACK":
+            system.description = `${system.ALIAS} ${system.LEVELS?.value}d6`
             break;
 
         case "HANDTOHANDATTACK":
-            system.description = `${system.ALIAS} +${system.LEVELS}d6`
+            system.description = `${system.ALIAS} +${system.LEVELS?.value}d6`
             break;
 
         case "KBRESISTANCE":
             system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
-                + ` -${system.LEVELS}m`
+                + ` -${system.LEVELS?.value}m`
             break;
 
         case "ELEMENTAL_CONTROL":
@@ -1640,19 +1687,32 @@ function updateItemDescription(system, type) {
 
         case "FLIGHT":
             // Flight 5m
-            system.description = `${system.ALIAS} ${system.LEVELS}m`
+            system.description = `${system.ALIAS} ${system.LEVELS?.value}m`
             break;
 
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
-                system.description = "+" + system.LEVELS + " " + system.ALIAS;
+                system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
                 break;
             }
-            system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
+            system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS || "")
+
+            // Skill Roll?
+            if (type == 'skill') {
+                let item = {
+                    actor: this?.actor || this,
+                    system: system
+                }
+                SkillRollUpdateValue(item)
+                if (system.roll) {
+                    system.description += ` ${system.roll}`
+                }
+            }
+
     }
 
     // ADDRS
-    if (system.adders.length > 0) {
+    if (system?.adders?.length > 0) {
 
         let _adderArray = []
         for (let adder of system.adders) {
@@ -1686,7 +1746,12 @@ function updateItemDescription(system, type) {
 
         }
         if (_adderArray.length > 0) {
-            system.description += "(" + _adderArray.join("; ") + ")"
+            if (system.XMLID == "TRANSPORT_FAMILIARITY") {
+                system.description += _adderArray.join("; ")
+            } else {
+                system.description += "(" + _adderArray.join("; ") + ")"
+            }
+
         }
     }
 
@@ -1713,7 +1778,7 @@ function updateItemDescription(system, type) {
     // }
 
     // Endurance
-    system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10))
+    system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
     const costsEnd = system.modifiers.find(o => o.XMLID == "COSTSEND")
     const increasedEnd = system.modifiers.find(o => o.XMLID == "INCREASEDEND")
     if (increasedEnd) {
@@ -1851,6 +1916,216 @@ function createPowerDescriptionModifier(modifier, powerName) {
     }
     result += fraction.trim() + ")"
     return result;
+}
+
+export async function makeAttack(item) {
+    const xmlid = item.system.XMLID || item.system.xmlid || item.system.rules
+
+    // Confirm this is an attack
+    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: item.actor })
+    if (!configPowerInfo || !configPowerInfo.powerType.includes("attack")) return
+
+    let changes = {}
+    //changes[`img`] = "icons/svg/sword.svg"
+
+
+    // Name
+    let description = item.system.ALIAS
+    let name = item.system.NAME || description || configPowerInfo.xmlid
+    changes[`name`] = name
+
+    const levels = parseInt(item.system.LEVELS?.value || 0)
+    const input = item.system.INPUT
+
+
+    // Active cost is required for endurance calculation.
+    // It should include all advantages (which we don't handle very well at the moment)
+    // However this should be calculated during power upload (not here)
+    // let activeCost = (levels * 5)
+    // let end = Math.round(activeCost / 10 - 0.01);
+    //changes[`system.activeCost`] = activeCost
+
+    changes[`system.subType`] = 'attack'
+    changes[`system.class`] = input === "ED" ? "energy" : "physical"
+    changes[`system.dice`] = levels
+    changes[`system.extraDice`] = "zero"
+    changes[`system.killing`] = false
+    changes[`system.knockbackMultiplier`] = 1
+    changes[`system.targets`] = "dcv"
+    changes[`system.uses`] = "ocv"
+    changes[`system.usesStrength`] = true
+    changes[`system.areaOfEffect`] = { type: 'none', value: 0 }
+    changes[`system.piercing`] = 0
+    changes[`system.penetrating`] = 0
+
+    // ENTANGLE (not implemented)
+    if (xmlid == "ENTANGLE") {
+        changes[`system.class`] = 'entangle'
+    }
+
+    // DARKNESS (not implemented)
+    if (xmlid == "DARKNESS") {
+        changes[`system.class`] = 'darkness'
+    }
+
+    // DRAIN (not implemented)
+    if (xmlid == "DRAIN") {
+        changes[`system.class`] = 'drain'
+    }
+
+    // AID (not implemented)
+    if (xmlid == "AID") {
+        changes[`system.class`] = 'aid'
+    }
+
+    // TRANSFER (not implemented)
+    if (xmlid == "TRANSFER") {
+        changes[`system.class`] = 'transfer'
+    }
+
+    // MINDSCAN (not implemented)
+    if (xmlid == "MINDSCAN") {
+        changes[`system.class`] = 'mindscan'
+    }
+
+    // DISPEL (not implemented)
+    if (xmlid == "DISPEL") {
+        changes[`system.class`] = 'dispel'
+    }
+
+    // MENTALBLAST (not implemented)
+    if (xmlid == "EGOATTACK") {
+        changes[`system.class`] = 'mental'
+        changes[`system.targets`] = "dmcv"
+        changes[`system.uses`] = "omcv"
+        changes[`system.knockbackMultiplier`] = 0
+        changes[`system.usesStrength`] = false
+        changes['system.stunBodyDamage'] = "stunonly"
+        changes['system.noHitLocations'] = true
+    }
+
+
+    // Armor Piercing
+    let ARMORPIERCING = item.system.modifiers.find(o => o.XMLID == "ARMORPIERCING")
+    if (ARMORPIERCING) {
+        changes[`system.piercing`] = parseInt(ARMORPIERCING.LEVELS)
+    }
+
+    // Penetrating
+    let PENETRATING = item.system.modifiers.find(o => o.XMLID == "PENETRATING")
+    if (PENETRATING) {
+        changes[`system.penetrating`] = parseInt(PENETRATING.LEVELS)
+    }
+
+    // No Knockback
+    let NOKB = item.system.modifiers.find(o => o.XMLID == "NOKB")
+    if (NOKB) {
+        changes[`system.knockbackMultiplier`] = 0
+    }
+
+    // Double Knockback
+    let DOUBLEKB = item.system.modifiers.find(o => o.XMLID == "DOUBLEKB")
+    if (DOUBLEKB) {
+        changes[`system.knockbackMultiplier`] = 2
+    }
+
+    // Explosion
+    let EXPLOSION = item.system.modifiers.find(o => o.XMLID == "EXPLOSION")
+    if (EXPLOSION) {
+        if (game.settings.get(game.system.id, 'alphaTesting')) {
+            ui.notifications.warn(`EXPLOSION not implemented during HDC upload of ${item.actor.name}`)
+        }
+    }
+
+    // Alternate Combat Value (uses OMCV against DCV)
+    let ACV = item.system.modifiers.find(o => o.XMLID == "ACV")
+    if (ACV) {
+        if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            changes[`system.uses`] = 'omcv'
+            changes[`system.targets`] = 'dcv'
+        }
+        if (ACV.OPTION_ALIAS === "uses OCV against DMCV") {
+            changes[`system.uses`] = 'ocv'
+            changes[`system.targets`] = 'dmcv'
+        }
+        if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            changes[`system.uses`] = 'omcv'
+            changes[`system.targets`] = 'dcv'
+        }
+    }
+
+
+    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEPIP")) {
+        changes[`system.extraDice`] = "pip"
+    }
+
+    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEHALFDIE")) {
+        changes[`system.extraDice`] = "half"
+    }
+
+    if (item.system.modifiers.find(o => o.XMLID == "MINUSONEPIP")) {
+        // Typically only allowed for killing attacks.
+        //  Appears that +1d6-1 is roughly equal to +1/2 d6
+        changes[`system.extraDice`] = "half"
+    }
+
+    const aoe = item.system.modifiers.find(o => o.XMLID == "AOE")
+    if (aoe) {
+        changes[`system.areaOfEffect`] = {
+            type: aoe.OPTION_ALIAS.toLowerCase(),
+            value: parseInt(aoe.LEVELS)
+        }
+    }
+
+    // if (xmlid === "HANDTOHANDATTACK") {
+    //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    //     return
+    // }
+
+    if (xmlid === "HKA") {
+        // itemData.system.killing = true
+        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // return
+        changes[`system.killing`] = true
+    }
+
+
+    if (xmlid === "TELEKINESIS") {
+        // levels is the equivalent strength
+        changes[`system.extraDice`] = "zero"
+        changes[`system.dice`] = Math.floor(levels / 5)
+        if (levels % 5 >= 3) {
+            changes[`system.extraDice`] = "half"
+        }
+        changes[`name`] = name + " (TK strike)"
+        changes[`system.usesStrength`] = false
+        changes[`system.usesTk`] = true
+    }
+
+    if (xmlid === "ENERGYBLAST") {
+        // itemData.system.usesStrength = false
+        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // return
+        changes[`system.usesStrength`] = false
+    }
+
+    if (xmlid === "RKA") {
+        // itemData.system.killing = true
+        // itemData.system.usesStrength = false
+        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
+        // return
+        changes[`system.killing`] = true
+        changes[`system.usesStrength`] = false
+    }
+
+
+    // if (game.settings.get(game.system.id, 'alphaTesting')) {
+    //     ui.notifications.warn(`${xmlid} ATTACK not implemented during HDC upload of ${this.actor.name}`)
+    // }
+
+
+
+    await item.update(changes)
 }
 
 export async function uploadAttack(power) {
@@ -2022,7 +2297,7 @@ export function SkillRollUpdateValue(item) {
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
-        const rollVal = 9 + Math.round(charValue / 5) + parseInt(skillData.LEVELS || skillData.levels)
+        const rollVal = 9 + Math.round(charValue / 5) + parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels)
         skillData.roll = rollVal.toString() + '-'
     } else {
         // This is likely a Skill Enhancer.
@@ -2036,7 +2311,7 @@ export function SkillRollUpdateValue(item) {
 
 export async function createEffects(itemData, actor) {
 
-    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: actor || this.actor })
+    const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID || itemData.system.rules, actor: actor || this?.actor })
 
     // Not every powers will have effects
     if (!configPowerInfo) return
@@ -2048,20 +2323,21 @@ export async function createEffects(itemData, actor) {
     // Characteristics (via ActiveEffects)
     if (configPowerInfo?.powerType.includes("characteristic")) {
 
+        let levels = itemData.system.LEVELS?.value
         // Add LEVELS to MAX
         let activeEffect =
         {
-            label: itemData.name,
+            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
             //id: newPower.system.rules,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {
                     key: "system.characteristics." + key + ".max",
-                    value: parseInt(itemData.system.LEVELS),
+                    value: parseInt(levels),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
-            ]
-
+            ],
+            disabled: itemData.system.AFFECTS_TOTAL == 'No'
         }
 
         itemData.effects = [activeEffect]
@@ -2072,15 +2348,16 @@ export async function createEffects(itemData, actor) {
     // Movement Powers
     if (configPowerInfo?.powerType.includes("movement")) {
         const key = itemData.system.XMLID.toLowerCase()
+        let levels = itemData.system.LEVELS?.value
 
         let activeEffect =
         {
-            label: itemData.name,
+            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {
                     key: `system.characteristics.${key}.max`,
-                    value: parseInt(itemData.system.LEVELS),
+                    value: parseInt(itemData.system.LEVELS?.value),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 },
             ]
@@ -2092,7 +2369,7 @@ export async function createEffects(itemData, actor) {
 
 
     if (xmlid === "DENSITYINCREASE") {
-        const levels = parseInt(parseInt(itemData.system.LEVELS))
+        const levels = parseInt(parseInt(itemData.system.LEVELS?.value))
 
         const strAdd = Math.floor(levels) * 5
         const pdAdd = Math.floor(levels)
@@ -2123,6 +2400,137 @@ export async function createEffects(itemData, actor) {
 
         itemData.effects = [activeEffect]
         return
+    }
+
+}
+
+export async function updateItemSubTypes(actor, removeDups) {
+
+    // Update Item SubType
+    for (const item of actor.items) {
+        const configPowerInfo = getPowerInfo({ item: item })
+
+
+        // Defenses
+        if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+            await item.update({ 'system.subType': 'defense', 'system.showToggle': true })
+        }
+
+        // Is this a movement power?
+        if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+            await item.update({ 'system.subType': 'movement', 'system.showToggle': true })
+        }
+
+        // Is this an attack power?
+        if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
+            if (item.system.subType != 'attack' || !item.system.dice) {
+                await makeAttack(item)
+                await item.update({ 'system.subType': 'attack', 'system.showToggle': true })
+            }
+        }
+
+        // Remove duplicate attacks
+        if (removeDups && item.type == 'attack') {
+            const power = actor.items.find(o => o.name == item.name && o.system.subType == 'attack')
+            if (power) {
+                await item.delete()
+            }
+        }
+
+    }
+
+
+}
+
+export async function updateItem(item) {
+
+    let changed = false;
+
+    // LEVELS are now a value/max to account for Aid/Drain
+    if (item.system.LEVELS) {
+        if (item.system.LEVELS.value == undefined) {
+            let levels = item.system.LEVELS
+            delete item.system.LEVELS
+            item.system.LEVELS = {
+                value: levels,
+                max: levels
+            }
+            changed = true;
+            await item.update({ 'system.LEVELS.value': levels, 'system.LEVELS.max': levels })
+        }
+
+        // Default values = max
+        if (item.system.LEVELS.value != item.system.LEVELS.max) {
+            item.system.LEVELS.value = parseInt(item.system.LEVELS.max)
+            changed = true
+        }
+
+        // Look for active effects
+        for (const effect of item.actor.effects.filter(o => o.origin == item.actor.uuid && !o.disabled)) {
+            for (const change of effect.changes) {
+                if (change.key == item.id) {
+                    console.log(effect)
+                    switch (change.mode) {
+                        case CONST.ACTIVE_EFFECT_MODES.ADD:
+                            const ActivePointsPerLevel = parseInt(item.system.activePoints) / parseFloat(item.system.LEVELS.value)
+                            item.system.LEVELS.value += parseFloat(change.value / ActivePointsPerLevel) || 0
+                            break;
+                        default:
+                            HEROSYS.log(false, "unknown mode")
+                    }
+                }
+            }
+        }
+
+        // Save effect changes
+
+        if (item.system.LEVELS.value != item.system.LEVELS.max) {
+            await item.update({ 'system.LEVELS.value': item.system.LEVELS.value })
+            changed = true;
+        }
+
+        // Update dice on attack
+        if (changed && (item.system.subType || item.type == 'attack')) {
+            makeAttack(item)
+        }
+    }
+
+
+
+
+    //let _basePointsPlusAdders = calcBasePointsPlusAdders.call(item, item.system)
+    //let _activePoints = calcActivePoints(_basePointsPlusAdders, item.system)
+
+    //_basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
+    // let _realCost = calcRealCost(_activePoints, item.system)
+
+    //_activePoints = RoundFavorPlayerDown(_activePoints)
+    // _realCost = RoundFavorPlayerDown(_realCost)
+
+    // if (item.system.basePointsPlusAdders != _basePointsPlusAdders && _basePointsPlusAdders) {
+    //     await item.update({ 'system.basePointsPlusAdders': _basePointsPlusAdders })
+    // }
+    // if (item.system.activePoints != _activePoints)
+    // {
+    //     await item.update({'system.activePoints': _activePoints})
+    // }
+    // if (item.system.basePointsPlusAdders != _realCost)
+    // {
+    //     await item.update({'system.realCost': _realCost})
+    // }
+
+    const oldDesc = item.system.description;
+    await updateItemDescription.call(item, item.system, item.type)
+    if (item.system.description != oldDesc) {
+        if (item.system.description.includes("undefined")) {
+            console.log(item.actor.name, item.system.description)
+        } else {
+            if (!item.id) {
+                HEROSYS.log(false, "missing id")
+            } else {
+                await item.update({ 'system.description': item.system.description })
+            }
+        }
     }
 
 }

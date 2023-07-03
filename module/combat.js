@@ -402,12 +402,12 @@ export class HeroSystem6eCombat extends Combat {
 
                 switch (item.system.id) {
                     case ('LIGHTNING_REFLEXES_ALL'): {
-                        const levels = item.system.LEVELS || item.system.other.levels || 0
-                        const lightning_reflex_initiative = (parseInt(dexValue || 0 ) + parseInt(levels)) + (parseInt(initativeValue || 0) / 100)
-                        
+                        const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
+                        const lightning_reflex_initiative = (parseInt(dexValue || 0) + parseInt(levels)) + (parseInt(initativeValue || 0) / 100)
+
                         const alias = item.system.OPTION_ALIAS || item.system.other.option_alias || 'None'
                         const lightning_reflex_alias = '(' + alias + ')'
-                        
+
                         allInitiatives.push([name, lightning_reflex_alias, lightning_reflex_initiative])
                         break;
                     }
@@ -419,9 +419,9 @@ export class HeroSystem6eCombat extends Combat {
 
             allInitiatives.sort((a, b) => b[2] - a[2])
 
-            updates.push({ 
-                _id: id, 
-                initiative: initativeValue || 0, 
+            updates.push({
+                _id: id,
+                initiative: initativeValue || 0,
                 name: name,
                 'flags.initiatives': allInitiatives
             });
@@ -650,7 +650,7 @@ export class HeroSystem6eCombat extends Combat {
         if (current) {
             let heroTurn = Math.max(this.segments[this.segment].findIndex(t => t.id === current.id), 0);
 
-            if (game.user.id === userId) this.update({ heroTurn });            
+            if (game.user.id === userId) this.update({ heroTurn });
             else this.update({ heroTurn });
         }
 

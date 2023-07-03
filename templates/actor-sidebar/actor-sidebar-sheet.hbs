@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sidebar-sheet' this}} --}}
+{{log 'actor-sidebar-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off">
 
     <aside>
@@ -158,8 +158,8 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "attack") }}
-                    <tr class="item" data-item-id="{{item._id}}">
+                    {{#if (or (eq item.type "attack") (eq item.system.subType "attack")) }}
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -254,8 +254,8 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (or (eq item.type "defense") (eq item.subType "defense")) }}
-                    <tr class="item" data-item-id="{{item._id}}">
+                    {{#if (or (eq item.type "defense") (eq item.system.subType "defense")) }}
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -399,8 +399,8 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (or (eq item.type "movement")(eq item.subType "movement")) }}
-                    <tr class="item" data-item-id="{{item._id}}">
+                    {{#if (or (eq item.type "movement")(eq item.system.subType "movement")) }}
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -437,6 +437,13 @@
             <div class="tab tab-body" data-group="primary" data-tab="powers">
                 <table>
                     <tr class="sticky">
+                        <th colspan="4" class="right">Filter:</th>
+                        <th colspan="3">
+                            <input class="left" name="itemFilters.power" type="text"
+                                value="{{options.itemFilters.power}}">
+                        </th>
+                    </tr>
+                    <tr class="sticky2">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
@@ -446,8 +453,8 @@
                         <th></th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "power") }}
-                    <tr class="item" data-item-id="{{item._id}}">
+                    {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -459,7 +466,7 @@
                         <td class="left">{{item.system.description}}</td>
                         <td>
                             {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
-                                name="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
+                                Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
                                 data-action="toggle" />
                             {{/if}}
                         </td>
@@ -505,7 +512,7 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (eq item.type "equipment") }}
-                    <tr class="item" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -693,7 +700,7 @@
 
                 </table>
 
-                {{#if alphaTesting}}
+                {{!-- {{#if alphaTesting}} --}}
                 <br />
 
                 <table>
@@ -713,7 +720,7 @@
                             <div class="item-image"><img src="{{effect.icon}}" title="{{effect.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{effect.label}}</td>
+                        <td class="left">{{effect.name}}</td>
                         <td>
                             <input class="effect-toggle" data-action="toggle" type="checkbox" {{checked (not
                                 effect.disabled)}} data-dtype="Boolean" data-action="toggle" />
@@ -729,7 +736,7 @@
                     {{/each}}
 
                 </table>
-                {{/if}}
+                {{!-- {{/if}} --}}
 
                 <br />
 

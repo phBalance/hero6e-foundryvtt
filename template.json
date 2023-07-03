@@ -226,14 +226,7 @@
                 "type": "blast",
                 "effect": 0,
                 "levels": 0,
-                "end": 0,
-                "subItems": {
-                    "attack": {},
-                    "defense": {},
-                    "maneuver": {},
-                    "movement": {},
-                    "skill": {}
-                }
+                "end": 0
             }
         },
         "skill": {

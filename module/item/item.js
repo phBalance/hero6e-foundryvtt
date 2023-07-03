@@ -5,7 +5,7 @@ import * as Dice from "../dice.js"
 import * as Attack from "../item/item-attack.js"
 import { createSkillPopOutFromItem } from '../item/skill.js'
 import { enforceManeuverLimits } from '../item/manuever.js'
-import { SkillRollUpdateValue } from '../utility/upload_hdc.js'
+import { SkillRollUpdateValue, updateItem } from '../utility/upload_hdc.js'
 import { onActiveEffectToggle } from '../utility/effects.js'
 import { getPowerInfo } from '../utility/util.js'
 
@@ -56,6 +56,7 @@ export class HeroSystem6eItem extends Item {
     prepareData() {
         super.prepareData();
 
+        updateItem(this)
 
 
         // Get the Item's data
@@ -67,49 +68,49 @@ export class HeroSystem6eItem extends Item {
 
     }
 
-    _prepareSkillData(actorData, itemData) {
-        return
+    // _prepareSkillData(actorData, itemData) {
+    //     return
 
-        const data = itemData.data;
+    //     const data = itemData.data;
 
-        let roll = 6;
+    //     let roll = 6;
 
-        switch (data.state) {
-            case "trained":
-                let levels = data.levels;
+    //     switch (data.state) {
+    //         case "trained":
+    //             let levels = data.levels;
 
-                if (!data.characteristic) {
-                    roll = undefined;
-                } else if (data.characteristic != "general") {
-                    if (actorData) {
-                        levels += actorData.data.characteristics[data.characteristic].value / 5;
-                    }
-                }
-                else {
-                    roll = 11 + levels;
-                }
-                roll = Math.round(9 + levels);
-                break;
-            case "proficient":
-                roll = 10;
-                break;
-            case "familiar":
-                roll = 8;
-                break;
-            case "everyman":
-                if (data.ps) {
-                    roll = 11;
-                } else {
-                    roll = 8;
-                }
-                break;
-            case "noroll":
-                roll = undefined;
-                break;
-        }
+    //             if (!data.characteristic) {
+    //                 roll = undefined;
+    //             } else if (data.characteristic != "general") {
+    //                 if (actorData) {
+    //                     levels += actorData.data.characteristics[data.characteristic].value / 5;
+    //                 }
+    //             }
+    //             else {
+    //                 roll = 11 + levels;
+    //             }
+    //             roll = Math.round(9 + levels);
+    //             break;
+    //         case "proficient":
+    //             roll = 10;
+    //             break;
+    //         case "familiar":
+    //             roll = 8;
+    //             break;
+    //         case "everyman":
+    //             if (data.ps) {
+    //                 roll = 11;
+    //             } else {
+    //                 roll = 8;
+    //             }
+    //             break;
+    //         case "noroll":
+    //             roll = undefined;
+    //             break;
+    //     }
 
-        data.roll = Math.round(roll);
-    }
+    //     data.roll = Math.round(roll);
+    // }
 
     // Largely used to determine if we can drag to hotbar
     isRollable() {
@@ -124,9 +125,24 @@ export class HeroSystem6eItem extends Item {
     async roll() {
         //if (!this.isRollable()) return;
 
-        switch (this.type) {
+        switch (this.system.subType || this.type) {
             case "attack":
-                return await Attack.AttackOptions(this)
+                switch (this.system.XMLID) {
+                    case "HKA":
+                    case "RKA":
+                    case "ENERGYBLAST":
+                    case "HANDTOHANDATTACK":
+                    case "TELEKINESIS":
+                    case "EGOATTACK":
+                    //case "AID":
+                    case undefined:
+                        return await Attack.AttackOptions(this)
+
+                    default:
+                        ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`)
+                        return await Attack.AttackOptions(this)
+                }
+
             case "defense":
                 return this.toggle()
             case "skill":
@@ -140,12 +156,11 @@ export class HeroSystem6eItem extends Item {
     async chat() {
 
         let content = `<div class="item-chat">`
-        
+
         // Part of a framework (is there a PARENTID?)
-        if (this.system.PARENTID)
-        {
-            const parent = this.actor.items.find(o=> o.system.ID == this.system.PARENTID)
-            content += `<p><b>${parent.name}</b>` 
+        if (this.system.PARENTID) {
+            const parent = this.actor.items.find(o => o.system.ID == this.system.PARENTID)
+            content += `<p><b>${parent.name}</b>`
             if (parent.system.description && parent.system.description != parent.name) {
                 content += ` ${parent.system.description}`
             }
@@ -156,9 +171,9 @@ export class HeroSystem6eItem extends Item {
         if (this.system.description && this.system.description != this.name) {
             content += ` ${this.system.description}`
         }
-        if (this.system.roll) {
-            content += ` (${this.system.roll})`
-        }
+        // if (this.system.roll) {
+        //     content += ` (${this.system.roll})`
+        // }
         content += "."
 
         if (this.system.end) {
@@ -202,8 +217,8 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 if (firstAE) {
-                    const newState = !firstAE.disabled
-                    await item.update({ [attr]: !newState })
+                    const newState = !newValue
+                    await item.update({ [attr]: newState })
                     for (const activeEffect of item.actor.effects.filter(o => o.origin === item.uuid)) {
                         await onActiveEffectToggle(activeEffect, newState)
                         // for (let change of activeEffect.changes) {

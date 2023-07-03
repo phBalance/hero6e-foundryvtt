@@ -23,13 +23,16 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             submitOnChange: true, // submit when any input changes
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
+            itemFilters: {}, // used to track item search filters on some tabs
         });
     }
+
+
 
     /** @override */
     getData() {
         const data = super.getData()
-
+          
         // Alpha Testing (use to show/hide effects)
         data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
@@ -49,26 +52,28 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         for (let item of data.actor.items) {
 
             // showToggle
-            if (data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)) {
+            const itemEfffects = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)
+            if (itemEfffects) {
                 item.system.showToggle = true
+                item.system.active = !itemEfffects.disabled
 
                 // Active (reverse of disabled)
                 //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
                 //HEROSYS.log(item.system.active)
             }
 
-            // Is this a defense power?
-            const configPowerInfo = getPowerInfo({ item: item })
-            if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-                item.subType = 'defense'
-                item.system.showToggle = true
-            }
+            // // Is this a defense power?
+            // const configPowerInfo = getPowerInfo({ item: item })
+            // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+            //     item.subType = 'defense'
+            //     item.system.showToggle = true
+            // }
 
-            // Is theis a movement power?
-            if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
-                item.subType = 'movement'
-                item.system.showToggle = true
-            }
+            // // Is theis a movement power?
+            // if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
+            //     item.subType = 'movement'
+            //     item.system.showToggle = true
+            // }
 
             // Framework?
             if (item.system.PARENTID) {
@@ -88,7 +93,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             item.system.endEstimate = item.system.end || 0
 
             // Damage
-            if (item.type == 'attack') {
+            if (item.type == 'attack' || item.system.subType == 'attack') {
 
                 // Convert dice to pips
                 let pips = item.system.dice * 3;
@@ -113,7 +118,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                     // Endurance
                     let strEnd = Math.max(1, Math.round(str / 10))
-                    item.system.endEstimate += strEnd
+
+                    if (Number.isInteger(item.system.endEstimate))
+                    {
+                        item.system.endEstimate += strEnd   
+                    }
+                    
                 }
 
                 // Add in TK
@@ -122,7 +132,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     let tkItems = data.actor.items.filter(o => o.system.rules == "TELEKINESIS");
                     let str = 0
                     for (const item of tkItems) {
-                        str += parseInt(item.system.LEVELS) || 0
+                        str += parseInt(item.system.LEVELS.value) || 0
                     }
                     let str5 = Math.floor(str / 5)
                     if (item.system.killing) {
@@ -517,6 +527,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 expandedData.system.characteristics[characteristic].value = expandedData.Xsystem.characteristics[characteristic].value;
             }
         }
+
+        this.options.itemFilters.power = expandedData.itemFilters.power
 
         await this.actor.update(expandedData)
 

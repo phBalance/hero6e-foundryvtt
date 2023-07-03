@@ -24,9 +24,9 @@ export function getTokenChar(token, char, data) {
 
 export function getPowerInfo(options) {
     const xmlid = options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id
-    const actor = options?.item?.actor || options.actor
+    const actor = options?.item?.actor || options?.actor
     let powerInfo = CONFIG.HERO.powers[xmlid]
-    if (actor.system.is5e) {
+    if (actor?.system?.is5e) {
         powerInfo = CONFIG.HERO.powers5e[xmlid]
     }
     if (powerInfo) {

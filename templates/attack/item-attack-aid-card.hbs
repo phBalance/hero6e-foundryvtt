@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS ITEM ATTACK CARD2' this }} --}}
+{{ log 'HEROSYS ITEM ATTACK AID CARD' this }}
 <form>
     <div class="hero chat-card item-card attack-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
         tokenId}}data-token-id="{{tokenId}}" {{/if}}>
@@ -7,18 +7,6 @@
             <h3 class="item-name">{{item.name}}</h3>
         </header>
     </div>
-
-    {{#if useHitLoc}}
-    <div class="form-group">
-        <label>Aim</label>
-        <select name="aim" id="aim">
-            <option value="none">None</option>
-            {{#each hitLoc as |hitLoc key|}}
-            <option value={{key}}>{{key}}</option>
-            {{/each}}
-        </select>
-    </div>
-    {{/if}}
 
     <div class="form-group">
         <label>{{localize "Items.Attack.OcvMod"}}</label>
@@ -31,12 +19,5 @@
     </div>
 
 
-    {{#if (or item.system.usesStrength item.system.usesTk)}}
-    <div class="form-group">
-        <label>Effective Strength</label>
-        <input type="text" name="effectiveStr" value="{{str}}" />
-        <label>/ {{str}}</label>
-    </div>
-    {{/if}}
 
 </form>
