@@ -297,6 +297,55 @@ export function registerUploadTests(quench) {
 
             });
 
+            describe("Sniper Rifle", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                });
+                actor.system.characteristics.ego.value = 38
+                
+                const contents = `
+                <POWER XMLID="RKA" ID="1688357238677" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Ranged" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Sniper Rifle" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES />
+                <ADDER XMLID="PLUSONEHALFDIE" ID="1688357355014" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                  <NOTES />
+                </ADDER>
+                <MODIFIER XMLID="FOCUS" ID="1688357355044" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="CHARGES" ID="1688357368689" BASECOST="-0.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EIGHT" OPTIONID="EIGHT" OPTION_ALIAS="8" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+              </POWER>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                item.actor = actor;
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Sniper Rifle:  Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 16);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 40);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 2);
+                    assert.equal(item.system.extraDice, "half");
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, "[8]");
+                });
+
+            });
+
 
         },
         { displayName: "HERO: Upload" }

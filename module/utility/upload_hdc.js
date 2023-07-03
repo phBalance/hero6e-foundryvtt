@@ -2101,15 +2101,15 @@ export async function makeAttack(item) {
     }
 
 
-    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEPIP")) {
+    if (item.system.adders && item.system.adders.find(o => o.XMLID == "PLUSONEPIP")) {
         changes[`system.extraDice`] = "pip"
     }
 
-    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEHALFDIE")) {
+    if (item.system.adders && item.system.adders.find(o => o.XMLID == "PLUSONEHALFDIE")) {
         changes[`system.extraDice`] = "half"
     }
 
-    if (item.system.modifiers.find(o => o.XMLID == "MINUSONEPIP")) {
+    if (item.system.adders && item.system.adders.find(o => o.XMLID == "MINUSONEPIP")) {
         // Typically only allowed for killing attacks.
         //  Appears that +1d6-1 is roughly equal to +1/2 d6
         changes[`system.extraDice`] = "half"
