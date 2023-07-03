@@ -1,7 +1,7 @@
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { XmlToItemData, SkillRollUpdateValue, makeAttack } from "../utility/upload_hdc.js";
+import { XmlToItemData, SkillRollUpdateValue, makeAttack, updateItemDescription } from "../utility/upload_hdc.js";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
@@ -205,24 +205,28 @@ export function registerUploadTests(quench) {
 
             });
 
-            describe("Offensive Strike (broken)", async function () {
+            describe("Offensive Strike", async function () {
 
                 let actor = new HeroSystem6eActor({
                     name: 'Test Actor',
                     type: 'pc',
                 });
-                
+                actor.system.characteristics.str.value = 10
+
                 const contents = `<MANEUVER XMLID="MANEUVER" ID="1688340787607" BASECOST="5.0" LEVELS="0" ALIAS="Offensive Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Offensive Strike" OCV="-2" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
                 <NOTES />
                 </MANEUVER>
                 `;
                 const parser = new DOMParser()
                 const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                item.actor = actor;
+                const itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                itemData.actor = actor
+                let item = itemData; // await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+                makeAttack(item);
+                updateItemDescription.call(item, item.system, item.type)
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike");
+                    assert.equal(item.system.description, "Offensive Strike: 1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 5);
@@ -232,8 +236,8 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.activePoints, 5);
                 });
 
-                it("levels", function () {
-                    assert.equal(item.system.dice, 8);
+                it("dice", function () {
+                    assert.equal(item.system.dice, 4);  // There are 4 raw dice, STR is added later
                 });
 
                 it("end", function () {
@@ -250,7 +254,7 @@ export function registerUploadTests(quench) {
                     type: 'pc',
                 });
                 actor.system.characteristics.ego.value = 38
-                
+
                 const contents = `
                 <POWER XMLID="TELEKINESIS" ID="1589145928828" BASECOST="0.0" LEVELS="62" ALIAS="Telekinesis" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Psychokinesis" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                 <NOTES />
@@ -302,10 +306,10 @@ export function registerUploadTests(quench) {
                 let actor = new HeroSystem6eActor({
                     name: 'Test Actor',
                     type: 'pc',
-                });
-                actor.system.characteristics.ego.value = 38
-                
-                const contents = `
+                }, { temporary: true });
+            actor.system.characteristics.ego.value = 38
+
+            const contents = `
                 <POWER XMLID="RKA" ID="1688357238677" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Ranged" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Sniper Rifle" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                 <NOTES />
                 <ADDER XMLID="PLUSONEHALFDIE" ID="1688357355014" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
@@ -319,35 +323,39 @@ export function registerUploadTests(quench) {
                 </MODIFIER>
               </POWER>
                 `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                item.actor = actor;
+            let parser = new DOMParser()
+            let xmlDoc = parser.parseFromString(contents, 'text/xml')
+            let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+            let item = itemData; //await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+            makeAttack(item);
 
-                it("description", function () {
-                    assert.equal(item.system.description, "Sniper Rifle:  Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
-                });
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 16);
-                });
-
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 40);
-                });
-
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS.max, 2);
-                    assert.equal(item.system.extraDice, "half");
-                });
-
-                it("end", function () {
-                    assert.equal(item.system.end, "[8]");
-                });
-
+            it("description", function () {
+                assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
+            });
+            it("realCost", function () {
+                assert.equal(item.system.realCost, 16);
             });
 
+            it("activePoints", function () {
+                assert.equal(item.system.activePoints, 40);
+            });
 
-        },
-        { displayName: "HERO: Upload" }
+            it("dice", function () {
+                assert.equal(item.system.dice, 2);
+            });
+
+            it("extraDice", function () {
+                assert.equal(item.system.extraDice, "half");
+            });
+
+            it("end", function () {
+                assert.equal(item.system.end, "[8]");
+            });
+
+        });
+
+
+},
+{ displayName: "HERO: Upload" }
     );
 }

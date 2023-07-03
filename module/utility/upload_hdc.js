@@ -277,7 +277,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     await HeroSystem6eItem.create(itemDataPerception, { parent: this.actor })
 
-        // EXTRA DC's from martial arts
+    // EXTRA DC's from martial arts
     // let extraDc = 0
     // const _extraDc = martialarts.getElementsByTagName('EXTRADC')[0]
     // if (_extraDc) {
@@ -1533,7 +1533,7 @@ export async function uploadPower(power, type) {
 }
 
 // TODO: Can this be reworked to take only ITEM as a property?
-function updateItemDescription(system, type) {
+export function updateItemDescription(system, type) {
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
     // so when the power is modified in foundry, the power
@@ -1541,6 +1541,9 @@ function updateItemDescription(system, type) {
     // If in sheets code it may handle drains/suppresses nicely.
 
     const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this?.actor })
+
+
+
 
     switch (configPowerInfo?.xmlid || system.XMLID) {
 
@@ -1680,12 +1683,54 @@ function updateItemDescription(system, type) {
             break;
 
         case "MANEUVER":
+
+            // Martial attacks tyipcally add STR to description
+            let fullDice = system.dice;
+            let extraDice = 0;
+            switch (system.extraDice) {
+                case 'pip':
+                    extraDice += 1;
+                    break
+                case 'half':
+                    extraDice += 2;
+                    break
+            }
+
+            if (this && (this.type == 'attack' || this.system.subType == 'attack')) {
+                // Convert dice to pips
+                let pips = system.dice * 3;
+                switch (system.extraDice) {
+                    case 'pip':
+                        pips += 1;
+                        break
+                    case 'half':
+                        pips += 2;
+                        break
+                }
+
+                // Add in STR
+                if (system.usesStrength && this.actor) {
+                    let str = this.actor.system.characteristics.str.value
+                    let str5 = Math.floor(str / 5)
+                    if (system.killing) {
+                        pips += str5
+                    } else {
+                        pips += str5 * 3
+                    }
+                }
+
+                // Convert pips to DICE
+                fullDice = Math.floor(pips / 3)
+                extraDice = pips - fullDice * 3
+            }
+
+
             // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
             system.description = `${system.ALIAS}:`
             if (system.PHASE) system.description += ` ${system.PHASE} Phase`;
             if (system.OCV) system.description += `, ${system.OCV} OCV, ${system.DCV} DCV`
             if (system.EFFECT) {
-                system.description += `, ${system.EFFECT.replace("[NORMALDC]", system.dice + "d6")}`
+                system.description += `, ${system.EFFECT.replace("[NORMALDC]", fullDice + "d6")}`
             }
             break;
 
@@ -1745,6 +1790,9 @@ function updateItemDescription(system, type) {
                 case "MENTAL":
                     _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
                     break;
+                case "PLUSONEHALFDIE":
+                    system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
+                    break;
                 default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
             }
 
@@ -1764,7 +1812,7 @@ function updateItemDescription(system, type) {
 
     // Active Points
     if (system.realCost != system.activePoints) {
-        system.description += " (" + system.activePoints + " Active Points)"
+        system.description += " (" + system.activePoints + " Active Points); "
     }
 
     // Advantages sorted low to high
@@ -1777,7 +1825,7 @@ function updateItemDescription(system, type) {
         system.description += createPowerDescriptionModifier(modifier, name)
     }
 
-    system.description = system.description.trim()
+    system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
 
     // if (system.XMLID == "STR") {
     //     HEROSYS.log(false, system)
@@ -1835,7 +1883,7 @@ function createPowerDescriptionModifier(modifier, powerName) {
     switch (modifier.XMLID) {
         case "CHARGES":
             // 1 Recoverable Continuing Charge lasting 1 Minute
-            result += "; " + modifier.OPTION_ALIAS
+            result += ", " + modifier.OPTION_ALIAS
 
             let recoverable = modifier.adders.find(o => o.XMLID == "RECOVERABLE")
             if (recoverable) {
@@ -1854,7 +1902,9 @@ function createPowerDescriptionModifier(modifier, powerName) {
             }
 
             break;
-
+        case "FOCUS":
+            result += modifier.ALIAS
+            break;
         default:
             if (modifier.ALIAS) result += "; " + modifier.ALIAS || "?"
 
@@ -1921,6 +1971,12 @@ function createPowerDescriptionModifier(modifier, powerName) {
         default: fraction += BASECOST_total % 1;
     }
     result += fraction.trim() + ")"
+
+    // Highly summarized
+    if (["FOCUS"].includes(modifier.XMLID)) {
+        result = `, ${modifier.OPTION} (${fraction.trim()})`
+    }
+
     return result;
 }
 
@@ -1968,7 +2024,7 @@ export async function makeAttack(item) {
 
     // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
     if (item.system.XMLID == "TELEKINESIS") {
-        if (item.actor.items.find(o => o.system.XMLID == "WEAPON_ELEMENT" && o.system.adders.find(o => o.XMLID == "BAREHAND")) ) {
+        if (item.actor.items.find(o => o.system.XMLID == "WEAPON_ELEMENT" && o.system.adders.find(o => o.XMLID == "BAREHAND"))) {
             let EXTRADC = item.actor.items.find(o => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1)
             // Extract +2 HTH Damage Class(es)
             if (EXTRADC) {
@@ -2172,8 +2228,22 @@ export async function makeAttack(item) {
     // }
 
 
+    if (item._id) {
+        await item.update(changes)
+    } else {
+        // Likely a QUENCH test
+        for (let change of Object.keys(changes)) {
+            let target = item;
+            for (let key of change.split('.')) {
+                if (typeof target[key] == 'object') {
+                    target = target[key]
+                } else {
+                    target[key] = changes[change]
+                }
+            }
+        }
+    }
 
-    await item.update(changes)
 }
 
 export async function uploadAttack(power) {
@@ -2527,17 +2597,21 @@ export async function updateItem(item) {
         }
 
         // Look for active effects
-        for (const effect of item.actor.effects.filter(o => o.origin == item.actor.uuid && !o.disabled)) {
-            for (const change of effect.changes) {
-                if (change.key == item.id) {
-                    console.log(effect)
-                    switch (change.mode) {
-                        case CONST.ACTIVE_EFFECT_MODES.ADD:
-                            const ActivePointsPerLevel = parseInt(item.system.activePoints) / parseFloat(item.system.LEVELS.value)
-                            item.system.LEVELS.value += parseFloat(change.value / ActivePointsPerLevel) || 0
-                            break;
-                        default:
-                            HEROSYS.log(false, "unknown mode")
+        if (item.actor.effects) {
+
+
+            for (const effect of item.actor.effects.filter(o => o.origin == item.actor.uuid && !o.disabled)) {
+                for (const change of effect.changes) {
+                    if (change.key == item.id) {
+                        console.log(effect)
+                        switch (change.mode) {
+                            case CONST.ACTIVE_EFFECT_MODES.ADD:
+                                const ActivePointsPerLevel = parseInt(item.system.activePoints) / parseFloat(item.system.LEVELS.value)
+                                item.system.LEVELS.value += parseFloat(change.value / ActivePointsPerLevel) || 0
+                                break;
+                            default:
+                                HEROSYS.log(false, "unknown mode")
+                        }
                     }
                 }
             }
