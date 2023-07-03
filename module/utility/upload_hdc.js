@@ -277,28 +277,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     await HeroSystem6eItem.create(itemDataPerception, { parent: this.actor })
 
-
-    for (const power of powers.children) {
-        await uploadPower.call(this, power, 'power')
-    }
-
-    for (const perk of perks.children) {
-        await uploadBasic.call(this, perk, 'perk')
-    }
-
-    for (const talent of talents.children) {
-        await uploadBasic.call(this, talent, 'talent')
-    }
-
-    for (const complication of complications.children) {
-        await uploadBasic.call(this, complication, 'complication')
-    }
-
-    for (const equip of equipment.children) {
-        await uploadPower.call(this, equip, 'equipment')
-    }
-
-    // EXTRA DC's from martial arts
+        // EXTRA DC's from martial arts
     // let extraDc = 0
     // const _extraDc = martialarts.getElementsByTagName('EXTRADC')[0]
     // if (_extraDc) {
@@ -330,6 +309,29 @@ export async function applyCharacterSheet(xmlDoc) {
     for (const martialart of martialarts.querySelectorAll("MANEUVER")) {
         await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
     }
+
+
+
+    for (const power of powers.children) {
+        await uploadPower.call(this, power, 'power')
+    }
+
+    for (const perk of perks.children) {
+        await uploadBasic.call(this, perk, 'perk')
+    }
+
+    for (const talent of talents.children) {
+        await uploadBasic.call(this, talent, 'talent')
+    }
+
+    for (const complication of complications.children) {
+        await uploadBasic.call(this, complication, 'complication')
+    }
+
+    for (const equip of equipment.children) {
+        await uploadPower.call(this, equip, 'equipment')
+    }
+
 
 
     // combat maneuvers
@@ -1687,6 +1689,13 @@ function updateItemDescription(system, type) {
             }
             break;
 
+        case "TELEKINESIS":
+            //Psychokinesis:  Telekinesis (62 STR), Alternate Combat Value (uses OMCV against DCV; +0) 
+            // (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), 
+            // Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)
+            system.description = `${system.ALIAS} (${system.LEVELS.value} STR)`
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
@@ -1931,13 +1940,13 @@ export async function makeAttack(item) {
     let name = item.system.NAME || description || configPowerInfo.xmlid
     changes[`name`] = name
 
-    let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0
+    let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0;
     const input = item.system.INPUT
 
-    const ocv = parseInt(item.system.OCV)
-    const dcv = parseInt(item.system.DCV)
+    const ocv = parseInt(item.system.OCV) || 0;
+    const dcv = parseInt(item.system.DCV) || 0;
 
-    // Check if this is a MARTIALA attack.  If so then EXTRA DC's may be present
+    // Check if this is a MARTIAL attack.  If so then EXTRA DC's may be present
     if (item.system.XMLID == "MANEUVER") {
 
         let EXTRADC = null;
@@ -1957,6 +1966,19 @@ export async function makeAttack(item) {
         }
     }
 
+    // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
+    if (item.system.XMLID == "TELEKINESIS") {
+        if (item.actor.items.find(o => o.system.XMLID == "WEAPON_ELEMENT" && o.system.adders.find(o => o.XMLID == "BAREHAND")) ) {
+            let EXTRADC = item.actor.items.find(o => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1)
+            // Extract +2 HTH Damage Class(es)
+            if (EXTRADC) {
+                let match = EXTRADC.system.ALIAS.match(/\+\d+/)
+                if (match) {
+                    levels += parseInt(match[0]) * 5 // Below we take these levels (as STR) and determine dice
+                }
+            }
+        }
+    }
 
 
     // Active cost is required for endurance calculation.
@@ -2117,10 +2139,12 @@ export async function makeAttack(item) {
     if (xmlid === "TELEKINESIS") {
         // levels is the equivalent strength
         changes[`system.extraDice`] = "zero"
-        changes[`system.dice`] = Math.floor(levels / 5)
-        if (levels % 5 >= 3) {
-            changes[`system.extraDice`] = "half"
-        }
+        // changes[`system.dice`] = Math.floor(levels / 5)
+        // if (levels % 5 >= 3) {
+        //     changes[`system.extraDice`] = "half"
+        // }
+        changes[`system.dice`] = 0
+        changes[`system.extraDice`] = "zero";
         changes[`name`] = name + " (TK strike)"
         changes[`system.usesStrength`] = false
         changes[`system.usesTk`] = true

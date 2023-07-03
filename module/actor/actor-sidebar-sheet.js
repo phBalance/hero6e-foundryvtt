@@ -225,7 +225,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             items.push(item)
         }
-        data.items = items;
+        data.items = items.sort((a, b) => a.name.localeCompare(b.name));
 
         if (data.hasEquipment) {
             if (parseFloat(weightTotal).toFixed(1) > 0 || parseFloat(priceTotal).toFixed(2) > 0) {

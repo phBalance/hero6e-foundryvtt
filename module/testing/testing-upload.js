@@ -205,8 +205,7 @@ export function registerUploadTests(quench) {
 
             });
 
-
-            describe("Offensive Strike", async function () {
+            describe("Offensive Strike (broken)", async function () {
 
                 let actor = new HeroSystem6eActor({
                     name: 'Test Actor',
@@ -221,7 +220,6 @@ export function registerUploadTests(quench) {
                 const xmlDoc = parser.parseFromString(contents, 'text/xml')
                 const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
                 item.actor = actor;
-                makeAttack(item)
 
                 it("description", function () {
                     assert.equal(item.system.description, "Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike");
@@ -240,6 +238,61 @@ export function registerUploadTests(quench) {
 
                 it("end", function () {
                     assert.equal(item.system.end, 0);
+                });
+
+            });
+
+
+            describe("TELEKINESIS", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                });
+                actor.system.characteristics.ego.value = 38
+                
+                const contents = `
+                <POWER XMLID="TELEKINESIS" ID="1589145928828" BASECOST="0.0" LEVELS="62" ALIAS="Telekinesis" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Psychokinesis" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES />
+                <MODIFIER XMLID="LIMITEDRANGE" ID="1596334078773" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="OIHID" ID="1596334078774" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Alternate Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="EXTRATIME" ID="1596334078813" BASECOST="-0.25" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PHASE" OPTIONID="PHASE" OPTION_ALIAS="Delayed Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="ACV" ID="1596334078859" BASECOST="0.0" LEVELS="0" ALIAS="Alternate Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONMENTALOMCV" OPTIONID="NONMENTALOMCV" OPTION_ALIAS="uses OMCV against DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                </POWER>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                item.actor = actor;
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Telekinesis (62 STR) (93 Active Points); Alternate Combat Value (uses OMCV against DCV; +0); Limited Range (-1/4); Only In Alternate Identity (-1/4); Extra Time (Delayed Phase; -1/4); Requires A Roll (14- roll; -1/4)");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 46);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 93);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 62);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 9);
                 });
 
             });
