@@ -639,8 +639,8 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    _onCreateEmbeddedDocuments(type, documents, result, options, userId) {
-        super._onCreateEmbeddedDocuments(type, documents, result, options, userId);
+    _onCreateDescendantDocuments(type, documents, result, options, userId) {
+        super._onCreateDescendantDocuments(type, documents, result, options, userId);
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same
         const current = this.combatant;
@@ -675,7 +675,7 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    _onDeleteEmbeddedDocuments(embeddedName, documents, result, options, userId) {
+    _onDeleteDescendantDocuments(embeddedName, documents, result, options, userId) {
         this.render(false, { renderContext: `delete${embeddedName}` });
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
