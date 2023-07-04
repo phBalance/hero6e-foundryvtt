@@ -21,13 +21,13 @@ export class HeroSystem6eActor extends Actor {
             // sight: { enabled: true }, 
             displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
             displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
-            flags: {
-                [game.system.id]: {
-                    bar3: {
-                        attribute: "characteristics.end"
-                    }
-                }
-            }
+            // flags: {
+            //     [game.system.id]: {
+            //         bar3: {
+            //             attribute: "characteristics.end"
+            //         }
+            //     }
+            // }
 
         }
 

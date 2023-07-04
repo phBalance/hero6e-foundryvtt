@@ -2,6 +2,7 @@ import { HeroSystem6eItem, getItem } from './item.js'
 import { editSubItem, deleteSubItem, isPowerSubItem } from '../powers/powers.js'
 import { HEROSYS } from '../herosystem6e.js'
 import { onManageActiveEffect } from '../utility/effects.js'
+import { AdjustmentSources } from '../utility/adjustment.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -100,20 +101,23 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // AID
         // A select list of possible AID from sources
         if (item.system.XMLID == "AID") {
-            let aidSources = []
-            for (const key in this.actor.system.characteristics) {
-                if (this.actor.system.characteristics[key].hasOwnProperty('value')) {
-                    aidSources.push(key.toUpperCase())
-                }
-            }
-            aidSources.sort()
-            aidSources = ["none", ...aidSources]
-            data.aidSources = {}
-            for (let key of aidSources) {
-                data.aidSources[key] = key
-            }
-
+            data.aidSources = AdjustmentSources(this.actor)
         }
+        // if (item.system.XMLID == "AID") {
+        //     let aidSources = []
+        //     for (const key in this.actor.system.characteristics) {
+        //         if (this.actor.system.characteristics[key].hasOwnProperty('value')) {
+        //             aidSources.push(key.toUpperCase())
+        //         }
+        //     }
+        //     aidSources.sort()
+        //     aidSources = ["none", ...aidSources]
+        //     data.aidSources = {}
+        //     for (let key of aidSources) {
+        //         data.aidSources[key] = key
+        //     }
+
+        // }
 
 
         return data

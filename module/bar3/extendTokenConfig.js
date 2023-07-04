@@ -34,7 +34,8 @@ export const extendTokenConfig = async function (tokenConfig, html, data) {
         const bar3 = $(`select[name="bar3.attribute"]`).val();
 
         HEROSYS.log(false, "_onSubmit", bar3)
-        await this.token.setFlag(game.system.id, "bar3", { "attribute": bar3 } )
+        //await this.token.setFlag(game.system.id, "bar3", { "attribute": bar3 } )
+        await this.token.update({ bar3: { attribute: bar3 } })
     }
 
 
