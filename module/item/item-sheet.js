@@ -230,15 +230,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         await this.item.update(expandedData)
 
-        if (expandedData.actor) {
-            const effectId = Object.keys(expandedData.actor.effects)[0]
-
-            //await this.actor.update(expandedData.actor)
-            await this.actor.effects.get(effectId).update({ disabled: !expandedData.actor.effects[effectId].disabled })
-
-            //this.actor.effects.get("expandedData.effectId").disabled = 
-
-        }
+        // if (expandedData.effects) {
+        //     const effectId = Object.keys(expandedData.effects)[0]
+        //     let effect = this.item.effects.get(effectId) || this.actor.effects.get(effectId)
+        //     await effect.update({ disabled: !expandedData.effects[effectId].disabled })
+        // }
 
         return
     }

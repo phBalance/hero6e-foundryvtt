@@ -1,3 +1,4 @@
+{{ log 'HEROSYS ITEM MARTIALART SHEET' this }}
 <form class="hero {{cssClass}} flexcol actor-sheet" autocomplete="off" data-id="{{item._id}}"
     data-realId="{{item.system.realId}}">
     <header class="sheet-header flexrow">
@@ -15,6 +16,8 @@
     <section class="sheet-body">
         <textarea placeholder="Power Description" class="power-card-power-description textarea input"
             name="system.rules">{{item.system.rules}}</textarea>
+
+        {{> systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs item=item }}
 
         {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
     </section>

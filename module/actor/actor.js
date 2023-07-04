@@ -19,9 +19,6 @@ export class HeroSystem6eActor extends Actor {
             // Leaving sight disabled.
             // TODO: Implement various Enhanced Visions
             // sight: { enabled: true }, 
-            // bar1: { attribute: "characteristics.body" },
-            // bar2: { attribute: "characteristics.stun" },
-            // bar3: { attribute: "characteristics.end" },
             displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
             displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
             flags: {
@@ -59,18 +56,21 @@ export class HeroSystem6eActor extends Actor {
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
     async addActiveEffect(activeEffect) {
 
+
+
         const newEffect = deepClone(activeEffect)
         newEffect.label = `${game.i18n.localize(newEffect.label)}`
 
+
         // Check for standard StatusEffects
-        // flags.core.statusId appears to be necessary to associate with StatusEffects
+        // statuses appears to be necessary to associate with StatusEffects
         if (activeEffect.id) {
-            newEffect.flags = { core: { statusId: activeEffect.id } }
+            newEffect.statuses = [activeEffect.id]
 
             // Check if this ActiveEffect already exists
-            const existingEffect = this.effects.find(o => o.flags?.core?.statusId === activeEffect.id);
+            const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id) );
             if (existingEffect) {
-                //HEROSYS.log(false, activeEffect.id + " already exists")
+                HEROSYS.log(false, activeEffect.id + " already exists")
                 return
             }
         }
@@ -78,5 +78,5 @@ export class HeroSystem6eActor extends Actor {
         await this.createEmbeddedDocuments("ActiveEffect", [newEffect])
 
     }
-    
+
 }

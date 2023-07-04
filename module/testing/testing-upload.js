@@ -1,6 +1,7 @@
 import { HeroSystem6eActor } from "../actor/actor.js";
+import { HeroSystem6eItem } from "../item/item.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { XmlToItemData, SkillRollUpdateValue } from "../utility/upload_hdc.js";
+import { XmlToItemData, SkillRollUpdateValue, makeAttack, updateItemDescription } from "../utility/upload_hdc.js";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
@@ -59,7 +60,7 @@ export function registerUploadTests(quench) {
                 const parser = new DOMParser()
                 const xmlDoc = parser.parseFromString(contents, 'text/xml')
                 const item = XmlToItemData(xmlDoc.children[0], "skill")
-                
+
                 it("description", function () {
                     assert.equal(item.system.description, "Mind Empowered: +2 with a group of Mental Powers");
                 });
@@ -104,7 +105,7 @@ export function registerUploadTests(quench) {
                 item.actor = actor;
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Climbing 12-");
+                    assert.equal(item.system.description, "Climbing");
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 3);
@@ -166,9 +167,195 @@ export function registerUploadTests(quench) {
 
             });
 
+            describe("Characteristics INT", function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc'
+                });
+
+                const contents = `
+                <INT XMLID="INT" ID="1688339311497" BASECOST="0.0" LEVELS="3" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                <NOTES />
+                </INT>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                item.actor = actor;
+
+                it("description", function () {
+                    assert.equal(item.system.description, "+3 INT");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 3);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 3);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 3);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+            });
+
+            describe("Offensive Strike", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                });
+                actor.system.characteristics.str.value = 10
+
+                const contents = `<MANEUVER XMLID="MANEUVER" ID="1688340787607" BASECOST="5.0" LEVELS="0" ALIAS="Offensive Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Offensive Strike" OCV="-2" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                <NOTES />
+                </MANEUVER>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                itemData.actor = actor
+                let item = itemData; // await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+                makeAttack(item);
+                updateItemDescription.call(item, item.system, item.type)
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Offensive Strike: 1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 5);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 5);
+                });
+
+                it("dice", function () {
+                    assert.equal(item.system.dice, 4);  // There are 4 raw dice, STR is added later
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+            });
 
 
-        },
-        { displayName: "HERO: Upload" }
+            describe("TELEKINESIS", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                });
+                actor.system.characteristics.ego.value = 38
+
+                const contents = `
+                <POWER XMLID="TELEKINESIS" ID="1589145928828" BASECOST="0.0" LEVELS="62" ALIAS="Telekinesis" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Psychokinesis" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES />
+                <MODIFIER XMLID="LIMITEDRANGE" ID="1596334078773" BASECOST="-0.25" LEVELS="0" ALIAS="Limited Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="OIHID" ID="1596334078774" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Alternate Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="EXTRATIME" ID="1596334078813" BASECOST="-0.25" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PHASE" OPTIONID="PHASE" OPTION_ALIAS="Delayed Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="ACV" ID="1596334078859" BASECOST="0.0" LEVELS="0" ALIAS="Alternate Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NONMENTALOMCV" OPTIONID="NONMENTALOMCV" OPTION_ALIAS="uses OMCV against DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                    <NOTES />
+                </MODIFIER>
+                </POWER>
+                `;
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                item.actor = actor;
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Telekinesis (62 STR) (93 Active Points); Alternate Combat Value (uses OMCV against DCV; +0); Limited Range (-1/4); Only In Alternate Identity (-1/4); Extra Time (Delayed Phase; -1/4); Requires A Roll (14- roll; -1/4)");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 46);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 93);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.LEVELS.max, 62);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 9);
+                });
+
+            });
+
+            describe("Sniper Rifle", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                }, { temporary: true });
+            actor.system.characteristics.ego.value = 38
+
+            const contents = `
+                <POWER XMLID="RKA" ID="1688357238677" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Ranged" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Sniper Rifle" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES />
+                <ADDER XMLID="PLUSONEHALFDIE" ID="1688357355014" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                  <NOTES />
+                </ADDER>
+                <MODIFIER XMLID="FOCUS" ID="1688357355044" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="CHARGES" ID="1688357368689" BASECOST="-0.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EIGHT" OPTIONID="EIGHT" OPTION_ALIAS="8" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+              </POWER>
+                `;
+            let parser = new DOMParser()
+            let xmlDoc = parser.parseFromString(contents, 'text/xml')
+            let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+            let item = itemData; //await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+            makeAttack(item);
+
+            it("description", function () {
+                assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
+            });
+            it("realCost", function () {
+                assert.equal(item.system.realCost, 16);
+            });
+
+            it("activePoints", function () {
+                assert.equal(item.system.activePoints, 40);
+            });
+
+            it("dice", function () {
+                assert.equal(item.system.dice, 2);
+            });
+
+            it("extraDice", function () {
+                assert.equal(item.system.extraDice, "half");
+            });
+
+            it("end", function () {
+                assert.equal(item.system.end, "[8]");
+            });
+
+        });
+
+
+},
+{ displayName: "HERO: Upload" }
     );
 }
