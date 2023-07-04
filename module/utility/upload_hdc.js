@@ -277,6 +277,40 @@ export async function applyCharacterSheet(xmlDoc) {
 
     await HeroSystem6eItem.create(itemDataPerception, { parent: this.actor })
 
+    // EXTRA DC's from martial arts
+    // let extraDc = 0
+    // const _extraDc = martialarts.getElementsByTagName('EXTRADC')[0]
+    // if (_extraDc) {
+    //     extraDc = parseInt(_extraDc.getAttribute("LEVELS"))
+    // }
+
+    // Possible TK martiarts (very rare with GM approval; requires BAREHAND weapon element with telekinesis/Psychokinesis in notes)
+    // let usesTk = false
+    // const _weaponElement = martialarts.getElementsByTagName('WEAPON_ELEMENT')[0]
+    // if (_weaponElement && $(_weaponElement).find('[XMLID="BAREHAND"]')[0] && $(powers).find('[XMLID="TELEKINESIS"]')[0]) {
+
+    //     const notes = _weaponElement.getElementsByTagName("NOTES")[0] || ""
+    //     if (notes.textContent.match(/kinesis/i)) {
+    //         usesTk = true
+    //     }
+    // }
+
+    // EXTRADC goes first (so we can more easily add these DC's to MANEUVER's)
+    for (const martialart of martialarts.querySelectorAll("EXTRADC")) {
+        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+    }
+
+    // WEAPON_ELEMENT next
+    for (const martialart of martialarts.querySelectorAll("WEAPON_ELEMENT")) {
+        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+    }
+
+    // MANEUVER next
+    for (const martialart of martialarts.querySelectorAll("MANEUVER")) {
+        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+    }
+
+
 
     for (const power of powers.children) {
         await uploadPower.call(this, power, 'power')
@@ -298,26 +332,6 @@ export async function applyCharacterSheet(xmlDoc) {
         await uploadPower.call(this, equip, 'equipment')
     }
 
-    // EXTRA DC's from martial arts
-    let extraDc = 0
-    const _extraDc = martialarts.getElementsByTagName('EXTRADC')[0]
-    if (_extraDc) {
-        extraDc = parseInt(_extraDc.getAttribute("LEVELS"))
-    }
-
-    // Possible TK martiarts (very rare with GM approval; requires BAREHAND weapon element with telekinesis/Psychokinesis in notes)
-    let usesTk = false
-    const _weaponElement = martialarts.getElementsByTagName('WEAPON_ELEMENT')[0]
-    if (_weaponElement && $(_weaponElement).find('[XMLID="BAREHAND"]')[0] && $(powers).find('[XMLID="TELEKINESIS"]')[0]) {
-
-        const notes = _weaponElement.getElementsByTagName("NOTES")[0] || ""
-        if (notes.textContent.match(/kinesis/i)) {
-            usesTk = true
-        }
-    }
-    for (const martialart of martialarts.children) {
-        await uploadMartial.call(this, martialart, 'martialart', extraDc, usesTk)
-    }
 
 
     // combat maneuvers
@@ -459,7 +473,8 @@ export function XmlToItemData(xml, type) {
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL"
+        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
+        "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -489,6 +504,12 @@ export function XmlToItemData(xml, type) {
 
     // Make sure we have a name
     systemData.NAME = systemData.NAME || systemData.ALIAS
+
+    switch (systemData.NAME) {
+        case "Aid":
+            systemData.NAME += " " + systemData.INPUT;
+            break;
+    }
 
     if (["MENTAL_COMBAT_LEVELS", "PENALTY_SKILL_LEVELS"].includes(systemData.XMLID)) {
         switch (systemData.OPTION) {
@@ -672,85 +693,59 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
         power.setAttribute('XMLID', power.tagName)
     }
 
-    // let name = power.getAttribute('NAME')
-    // name = (name === '') ? power.getAttribute('ALIAS') : name
+    let itemData = XmlToItemData.call(this, power, type)
+    let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    makeAttack(item)
 
-    // const xmlid = power.getAttribute('XMLID')
+    // // Make attack out of the martial art
+    // itemData.type = 'attack'
+    // itemData.img = "icons/svg/downgrade.svg";
 
-    // if (xmlid === 'GENERIC_OBJECT') { return; }
+    // // Strike like?
+    // if (itemData['system.effect']) {
+    //     let dc = itemData['system.dc'] + extraDc
+    //     if (itemData['system.effect'].match(/NORMALDC/)) {
+    //         itemData['system.knockbackMultiplier'] = 1
+    //         if (usesTk) {
+    //             itemData['system.usesTk'] = true
+    //         } else {
+    //             itemData['system.usesStrength'] = true
+    //         }
+    //         itemData['system.dice'] = dc
+    //     }
 
-    // let itemData = {
-    //     'type': type,
-    //     'name': name,
-    //     'system.id': xmlid,
-    //     'system.rules': power.getAttribute('ALIAS')
+    //     if (itemData['system.effect'].match(/KILLINGDC/)) {
+    //         let dice = Math.floor(dc / 3);
+    //         let pips = dc - (dice * 3);
+    //         let extraDice = 'zero'
+    //         if (pips == 1) extraDice = 'pip'
+    //         if (pips == 2) extraDice = 'half'
+    //         itemData['system.knockbackMultiplier'] = 1
+    //         if (usesTk) {
+    //             itemData['system.usesTk'] = true
+    //         } else {
+    //             itemData['system.usesStrength'] = true
+    //         }
+    //         itemData['system.killing'] = true
+    //         itemData['system.dice'] = dice
+    //         itemData['system.extraDice'] = extraDice
+    //     }
     // }
 
-    // // Marital Arts
-    // if (power.getAttribute('BASECOST')) itemData['system.baseCost'] = power.getAttribute('BASECOST')
-    // if (power.getAttribute('OCV')) itemData['system.ocv'] = parseInt(power.getAttribute('OCV'))
-    // if (power.getAttribute('DCV')) itemData['system.dcv'] = parseInt(power.getAttribute('DCV'))
-    // if (power.getAttribute('DC')) itemData['system.dc'] = parseInt(power.getAttribute('DC'))
-    // if (power.getAttribute('PHASE')) itemData['system.phase'] = power.getAttribute('PHASE')
-    // if (power.getAttribute('ACTIVECOST')) itemData['system.activeCost'] = power.getAttribute('ACTIVECOST')
-    // if (power.getAttribute('DISPLAY')) itemData['system.description'] = power.getAttribute('DISPLAY')
-    // if (power.getAttribute('EFFECT')) itemData['system.effect'] = power.getAttribute('EFFECT')
-
-    // itemData['system.realCost'] = parseInt(itemData['system.baseCost'])
-    // itemData['system.activePoints'] = parseInt(itemData['system.baseCost'])
-
-    let itemData = XmlToItemData.call(this, power, type)
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
-
-    // Make attack out of the martial art
-    itemData.type = 'attack'
-    itemData.img = "icons/svg/downgrade.svg";
-
-    // Strike like?
-    if (itemData['system.effect']) {
-        let dc = itemData['system.dc'] + extraDc
-        if (itemData['system.effect'].match(/NORMALDC/)) {
-            itemData['system.knockbackMultiplier'] = 1
-            if (usesTk) {
-                itemData['system.usesTk'] = true
-            } else {
-                itemData['system.usesStrength'] = true
-            }
-            itemData['system.dice'] = dc
-        }
-
-        if (itemData['system.effect'].match(/KILLINGDC/)) {
-            let dice = Math.floor(dc / 3);
-            let pips = dc - (dice * 3);
-            let extraDice = 'zero'
-            if (pips == 1) extraDice = 'pip'
-            if (pips == 2) extraDice = 'half'
-            itemData['system.knockbackMultiplier'] = 1
-            if (usesTk) {
-                itemData['system.usesTk'] = true
-            } else {
-                itemData['system.usesStrength'] = true
-            }
-            itemData['system.killing'] = true
-            itemData['system.dice'] = dice
-            itemData['system.extraDice'] = extraDice
-        }
-    }
-
-    // If this isn't an attack where we roll dice, so ignore it for now
-    if (!itemData['system.dice']) {
-        return;
-    }
+    // // If this isn't an attack where we roll dice, so ignore it for now
+    // if (!itemData['system.dice']) {
+    //     return;
+    // }
 
 
-    // Extra DC's is not an attack (ignore for now)
-    if (xmlid === "EXTRADC") return;
+    // // Extra DC's is not an attack (ignore for now)
+    // if (xmlid === "EXTRADC") return;
 
-    // WEAPON_ELEMENT is not an attack (ignore for now)
-    if (xmlid === "WEAPON_ELEMENT") return;
+    // // WEAPON_ELEMENT is not an attack (ignore for now)
+    // if (xmlid === "WEAPON_ELEMENT") return;
 
 
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+
 }
 
 // export async function uploadTalent(xml, type) {
@@ -1544,7 +1539,7 @@ export async function uploadPower(power, type) {
 }
 
 // TODO: Can this be reworked to take only ITEM as a property?
-function updateItemDescription(system, type) {
+export function updateItemDescription(system, type) {
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
     // so when the power is modified in foundry, the power
@@ -1552,6 +1547,9 @@ function updateItemDescription(system, type) {
     // If in sheets code it may handle drains/suppresses nicely.
 
     const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this?.actor })
+
+
+
 
     switch (configPowerInfo?.xmlid || system.XMLID) {
 
@@ -1640,7 +1638,7 @@ function updateItemDescription(system, type) {
 
             // 6e HDC
             //if (system.ALIAS == "KS") {
-            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT)
+            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
             // } else {
             //     system.description = system.NAME
             // }
@@ -1648,10 +1646,10 @@ function updateItemDescription(system, type) {
                 actor: this?.actor || this,
                 system: system
             }
-            SkillRollUpdateValue(item)
-            if (system.roll) {
-                system.description += ` ${system.roll}`
-            }
+            // SkillRollUpdateValue(item)
+            // if (system.roll) {
+            //     system.description += ` ${system.roll}`
+            // }
 
             break;
         case "TRANSPORT_FAMILIARITY":
@@ -1690,6 +1688,65 @@ function updateItemDescription(system, type) {
             system.description = `${system.ALIAS} ${system.LEVELS?.value}m`
             break;
 
+        case "MANEUVER":
+
+            // Martial attacks tyipcally add STR to description
+            let fullDice = system.dice;
+            let extraDice = 0;
+            switch (system.extraDice) {
+                case 'pip':
+                    extraDice += 1;
+                    break
+                case 'half':
+                    extraDice += 2;
+                    break
+            }
+
+            if (this) {  // Make sure we have an actor
+                // Convert dice to pips
+                let pips = system.dice * 3;
+                switch (system.extraDice) {
+                    case 'pip':
+                        pips += 1;
+                        break
+                    case 'half':
+                        pips += 2;
+                        break
+                }
+
+                // Add in STR
+                if (system.usesStrength && this.actor) {
+                    let str = this.actor.system.characteristics.str.value
+                    let str5 = Math.floor(str / 5)
+                    if (system.killing) {
+                        pips += str5
+                    } else {
+                        pips += str5 * 3
+                    }
+                }
+
+                // Convert pips to DICE
+                fullDice = Math.floor(pips / 3)
+                extraDice = pips - fullDice * 3
+            }
+
+
+            // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
+            system.description = `${system.ALIAS}:`
+            if (system.PHASE) system.description += ` ${system.PHASE} Phase`;
+            if (system.OCV) system.description += `, ${system.OCV} OCV, ${system.DCV} DCV`
+            if (system.EFFECT) {
+                system.description += `, ${system.EFFECT.replace("[NORMALDC]", fullDice + "d6")}`
+            }
+            break;
+
+        case "TELEKINESIS":
+            //Psychokinesis:  Telekinesis (62 STR), Alternate Combat Value (uses OMCV against DCV; +0) 
+            // (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), 
+            // Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)
+            system.description = `${system.ALIAS} (${system.LEVELS.value} STR)`
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
@@ -1703,10 +1760,10 @@ function updateItemDescription(system, type) {
                     actor: this?.actor || this,
                     system: system
                 }
-                SkillRollUpdateValue(item)
-                if (system.roll) {
-                    system.description += ` ${system.roll}`
-                }
+                // SkillRollUpdateValue(item)
+                // if (system.roll) {
+                //     system.description += ` ${system.roll}`
+                // }
             }
 
     }
@@ -1739,6 +1796,9 @@ function updateItemDescription(system, type) {
                 case "MENTAL":
                     _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
                     break;
+                case "PLUSONEHALFDIE":
+                    system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
+                    break;
                 default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
             }
 
@@ -1758,7 +1818,7 @@ function updateItemDescription(system, type) {
 
     // Active Points
     if (system.realCost != system.activePoints) {
-        system.description += " (" + system.activePoints + " Active Points)"
+        system.description += " (" + system.activePoints + " Active Points); "
     }
 
     // Advantages sorted low to high
@@ -1771,7 +1831,7 @@ function updateItemDescription(system, type) {
         system.description += createPowerDescriptionModifier(modifier, name)
     }
 
-    system.description = system.description.trim()
+    system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
 
     // if (system.XMLID == "STR") {
     //     HEROSYS.log(false, system)
@@ -1829,7 +1889,7 @@ function createPowerDescriptionModifier(modifier, powerName) {
     switch (modifier.XMLID) {
         case "CHARGES":
             // 1 Recoverable Continuing Charge lasting 1 Minute
-            result += "; " + modifier.OPTION_ALIAS
+            result += ", " + modifier.OPTION_ALIAS
 
             let recoverable = modifier.adders.find(o => o.XMLID == "RECOVERABLE")
             if (recoverable) {
@@ -1848,7 +1908,9 @@ function createPowerDescriptionModifier(modifier, powerName) {
             }
 
             break;
-
+        case "FOCUS":
+            result += modifier.ALIAS
+            break;
         default:
             if (modifier.ALIAS) result += "; " + modifier.ALIAS || "?"
 
@@ -1915,6 +1977,12 @@ function createPowerDescriptionModifier(modifier, powerName) {
         default: fraction += BASECOST_total % 1;
     }
     result += fraction.trim() + ")"
+
+    // Highly summarized
+    if (["FOCUS"].includes(modifier.XMLID)) {
+        result = `, ${modifier.OPTION} (${fraction.trim()})`
+    }
+
     return result;
 }
 
@@ -1934,8 +2002,45 @@ export async function makeAttack(item) {
     let name = item.system.NAME || description || configPowerInfo.xmlid
     changes[`name`] = name
 
-    const levels = parseInt(item.system.LEVELS?.value || 0)
+    let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0;
     const input = item.system.INPUT
+
+    const ocv = parseInt(item.system.OCV) || 0;
+    const dcv = parseInt(item.system.DCV) || 0;
+
+    // Check if this is a MARTIAL attack.  If so then EXTRA DC's may be present
+    if (item.system.XMLID == "MANEUVER") {
+
+        let EXTRADC = null;
+
+        // HTH
+        if (item.system.CATEGORY == "Hand To Hand") {
+            EXTRADC = item.actor.items.find(o => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1)
+        }
+        // Ranged is not implemented yet
+
+        // Extract +2 HTH Damage Class(es)
+        if (EXTRADC) {
+            let match = EXTRADC.system.ALIAS.match(/\+\d+/)
+            if (match) {
+                levels += parseInt(match[0])
+            }
+        }
+    }
+
+    // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
+    if (item.system.XMLID == "TELEKINESIS") {
+        if (item.actor.items.find(o => o.system.XMLID == "WEAPON_ELEMENT" && o.system.adders.find(o => o.XMLID == "BAREHAND"))) {
+            let EXTRADC = item.actor.items.find(o => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1)
+            // Extract +2 HTH Damage Class(es)
+            if (EXTRADC) {
+                let match = EXTRADC.system.ALIAS.match(/\+\d+/)
+                if (match) {
+                    levels += parseInt(match[0]) * 5 // Below we take these levels (as STR) and determine dice
+                }
+            }
+        }
+    }
 
 
     // Active cost is required for endurance calculation.
@@ -1957,40 +2062,57 @@ export async function makeAttack(item) {
     changes[`system.areaOfEffect`] = { type: 'none', value: 0 }
     changes[`system.piercing`] = 0
     changes[`system.penetrating`] = 0
+    changes[`system.ocv`] = ocv
+    changes[`system.dcv`] = dcv
+
 
     // ENTANGLE (not implemented)
     if (xmlid == "ENTANGLE") {
         changes[`system.class`] = 'entangle'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // DARKNESS (not implemented)
     if (xmlid == "DARKNESS") {
         changes[`system.class`] = 'darkness'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // DRAIN (not implemented)
     if (xmlid == "DRAIN") {
         changes[`system.class`] = 'drain'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // AID (not implemented)
     if (xmlid == "AID") {
         changes[`system.class`] = 'aid'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // TRANSFER (not implemented)
     if (xmlid == "TRANSFER") {
         changes[`system.class`] = 'transfer'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // MINDSCAN (not implemented)
     if (xmlid == "MINDSCAN") {
         changes[`system.class`] = 'mindscan'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // DISPEL (not implemented)
     if (xmlid == "DISPEL") {
         changes[`system.class`] = 'dispel'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
     // MENTALBLAST (not implemented)
@@ -2055,15 +2177,15 @@ export async function makeAttack(item) {
     }
 
 
-    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEPIP")) {
+    if (item.system.adders && item.system.adders.find(o => o.XMLID == "PLUSONEPIP")) {
         changes[`system.extraDice`] = "pip"
     }
 
-    if (item.system.modifiers.find(o => o.XMLID == "PLUSONEHALFDIE")) {
+    if (item.system.adders && item.system.adders.find(o => o.XMLID == "PLUSONEHALFDIE")) {
         changes[`system.extraDice`] = "half"
     }
 
-    if (item.system.modifiers.find(o => o.XMLID == "MINUSONEPIP")) {
+    if (item.system.adders && item.system.adders.find(o => o.XMLID == "MINUSONEPIP")) {
         // Typically only allowed for killing attacks.
         //  Appears that +1d6-1 is roughly equal to +1/2 d6
         changes[`system.extraDice`] = "half"
@@ -2093,10 +2215,12 @@ export async function makeAttack(item) {
     if (xmlid === "TELEKINESIS") {
         // levels is the equivalent strength
         changes[`system.extraDice`] = "zero"
-        changes[`system.dice`] = Math.floor(levels / 5)
-        if (levels % 5 >= 3) {
-            changes[`system.extraDice`] = "half"
-        }
+        // changes[`system.dice`] = Math.floor(levels / 5)
+        // if (levels % 5 >= 3) {
+        //     changes[`system.extraDice`] = "half"
+        // }
+        changes[`system.dice`] = 0
+        changes[`system.extraDice`] = "zero";
         changes[`name`] = name + " (TK strike)"
         changes[`system.usesStrength`] = false
         changes[`system.usesTk`] = true
@@ -2124,8 +2248,22 @@ export async function makeAttack(item) {
     // }
 
 
+    if (item._id) {
+        await item.update(changes)
+    } else {
+        // Likely a QUENCH test
+        for (let change of Object.keys(changes)) {
+            let target = item;
+            for (let key of change.split('.')) {
+                if (typeof target[key] == 'object') {
+                    target = target[key]
+                } else {
+                    target[key] = changes[change]
+                }
+            }
+        }
+    }
 
-    await item.update(changes)
 }
 
 export async function uploadAttack(power) {
@@ -2327,7 +2465,7 @@ export async function createEffects(itemData, actor) {
         // Add LEVELS to MAX
         let activeEffect =
         {
-            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
+            name: `${key.toUpperCase()}+${levels}`,
             //id: newPower.system.rules,
             icon: 'icons/svg/upgrade.svg',
             changes: [
@@ -2337,7 +2475,11 @@ export async function createEffects(itemData, actor) {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
             ],
-            disabled: itemData.system.AFFECTS_TOTAL == 'No'
+            disabled: itemData.system.AFFECTS_TOTAL == 'No',
+            transfer: true,
+        }
+        if (activeEffect.name.toLowerCase().indexOf(itemData.name.toLowerCase()) == -1) {
+            activeEffect.name = itemData.name + " " + activeEffect.name;
         }
 
         itemData.effects = [activeEffect]
@@ -2352,7 +2494,7 @@ export async function createEffects(itemData, actor) {
 
         let activeEffect =
         {
-            label: `${itemData.name} ${key.toUpperCase()}+${levels}`,
+            name: `${key.toUpperCase()}+${levels}`,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {
@@ -2360,7 +2502,11 @@ export async function createEffects(itemData, actor) {
                     value: parseInt(itemData.system.LEVELS?.value),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 },
-            ]
+            ],
+            transfer: true,
+        }
+        if (activeEffect.name.toLowerCase().indexOf(itemData.name.toLowerCase()) == -1) {
+            activeEffect.name = itemData.name + " " + activeEffect.name;
         }
 
         itemData.effects = [activeEffect]
@@ -2377,7 +2523,7 @@ export async function createEffects(itemData, actor) {
 
         let activeEffect =
         {
-            label: itemData.name,
+            name: itemData.name,
             icon: 'icons/svg/upgrade.svg',
             changes: [
                 {
@@ -2395,7 +2541,8 @@ export async function createEffects(itemData, actor) {
                     value: edAdd,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
-            ]
+            ],
+            transfer: true,
         }
 
         itemData.effects = [activeEffect]
@@ -2444,6 +2591,10 @@ export async function updateItemSubTypes(actor, removeDups) {
 
 export async function updateItem(item) {
 
+    // Guards
+    if (!item) return;
+
+
     let changed = false;
 
     // LEVELS are now a value/max to account for Aid/Drain
@@ -2466,17 +2617,21 @@ export async function updateItem(item) {
         }
 
         // Look for active effects
-        for (const effect of item.actor.effects.filter(o => o.origin == item.actor.uuid && !o.disabled)) {
-            for (const change of effect.changes) {
-                if (change.key == item.id) {
-                    console.log(effect)
-                    switch (change.mode) {
-                        case CONST.ACTIVE_EFFECT_MODES.ADD:
-                            const ActivePointsPerLevel = parseInt(item.system.activePoints) / parseFloat(item.system.LEVELS.value)
-                            item.system.LEVELS.value += parseFloat(change.value / ActivePointsPerLevel) || 0
-                            break;
-                        default:
-                            HEROSYS.log(false, "unknown mode")
+        if (item.actor.effects) {
+
+
+            for (const effect of item.actor.effects.filter(o => o.origin == item.actor.uuid && !o.disabled)) {
+                for (const change of effect.changes) {
+                    if (change.key == item.id) {
+                        console.log(effect)
+                        switch (change.mode) {
+                            case CONST.ACTIVE_EFFECT_MODES.ADD:
+                                const ActivePointsPerLevel = parseInt(item.system.activePoints) / parseFloat(item.system.LEVELS.value)
+                                item.system.LEVELS.value += parseFloat(change.value / ActivePointsPerLevel) || 0
+                                break;
+                            default:
+                                HEROSYS.log(false, "unknown mode")
+                        }
                     }
                 }
             }
@@ -2521,15 +2676,19 @@ export async function updateItem(item) {
 
     const oldDesc = item.system.description;
     await updateItemDescription.call(item, item.system, item.type)
-    if (item.system.description != oldDesc) {
+    if (item.system.description != oldDesc && item.id) {
         if (item.system.description.includes("undefined")) {
-            console.log(item.actor.name, item.system.description)
-        } else {
-            if (!item.id) {
-                HEROSYS.log(false, "missing id")
-            } else {
-                await item.update({ 'system.description': item.system.description })
+            if (game.settings.get(game.system.id, 'alphaTesting')) {
+                ui.notifications.warn(`${item.actor.name} ${item.system.description}`)
             }
+        } else {
+            // if (!item.id) {
+            //     if (game.settings.get(game.system.id, 'alphaTesting')) {
+            //         ui.notifications.warn(`${item.actor.name} missing id`)
+            //     }
+            // } else {
+            await item.update({ 'system.description': item.system.description })
+            //}
         }
     }
 

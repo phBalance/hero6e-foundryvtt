@@ -46,6 +46,11 @@ Hooks.once('init', async function () {
     CONFIG.POWERS = POWERS;
 
     CONFIG.Combat.documentClass = HeroSystem6eCombat;
+    CONFIG.Combat.defeatedStatusId = "dead";
+
+    // V11 now support ActiveEffects on items without
+    // the need to transfer the effect to the actor.
+    CONFIG.ActiveEffect.legacyTransferral = false;
 
     /**
     * Set an initiative formula for the system
@@ -280,22 +285,27 @@ Hooks.once("ready", async function () {
             }
             ui.notifications.info(`Migragtion complete.`)
         }
+
+        // if lastMigration < 3.0.4
+        // Remove all tranferred effects
+        if (foundry.utils.isNewerVersion('3.0.4', lastMigration)) {
+            ui.notifications.info(`Migragrating actor data.`)
+            for (let actor of game.actors.contents) {
+                for (let effect of actor.effects.filter(o => o.origin)) {
+                    effect.delete();
+                }
+            }
+            ui.notifications.info(`Migragtion complete.`)
+        }
+
     }
-
-
-    //migrateWorld();
 
 });
 
-//const migrationTag = 20230611
 
 async function migrateRemoveDuplicateDefenseMovementItems() {
 
-    //if (game.actors.contents.find(o => o.system.migrationTag != migrationTag)) {
     ui.notifications.info(`Migragrating actor data.`)
-    // } else {
-    //     return;
-    // }
 
     let count = 0
     for (let actor of game.actors.contents) {
@@ -413,10 +423,26 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
     html.find('header h4').append(`<span>${game.system.version}<span>`)
+    // html.find('header h4').after(`<a class="header-button control configure-type">
+    // <i class="fal fa-user-robot"></i>Type 
+    // <a>`)
 })
 
 Hooks.on("renderItemSheet", (dialog, html, data) => {
     html.find('header h4').append(`<span>${game.system.version}<span>`)
+})
+
+Hooks.on("getActorDirectoryEntryContext", (dialog, html, data) => {
+
+    console.log("getActorDirectoryEntryContext")
+    const menu = {
+        "name": "Change Actor Type",
+        "icon": "<i class=\"fas fa-cog\"></i>",
+        "callback": async function (target) {
+            return ui.notifications.warn("Change Actor Type not implemented");
+        },
+    }
+    html.push(menu)
 })
 
 

@@ -155,7 +155,7 @@ export class HeroSystem6eCombat extends Combat {
             for (let i = 1; i <= 12 && !found; i++) {
                 for (let j = 0; j < this.segments[i].length && !found; j++) {
                     let t = this.segments[i][j];
-                    if (!(t.defeated || t.actor?.effects.find(e => e.getFlag("core", "statusId") === CONFIG.Combat.defeatedStatusId))) {
+                    if (!(t.defeated || t.actor?.effects.find(e => e.statuses.has(CONFIG.Combat.defeatedStatusId)))) {
                         segment = i;
                         heroTurn = j;
                         found = true;
@@ -196,7 +196,7 @@ export class HeroSystem6eCombat extends Combat {
                 if (i <= this.segment) continue;
                 nextTurn = (s.findIndex(t => {
                     return !(t.defeated ||
-                        t.actor?.effects.find(e => e.getFlag("core", "statusId") === CONFIG.Combat.defeatedStatusId));
+                        t.actor?.effects.find(e => e.statuses.has(CONFIG.Combat.defeatedStatusId)));
                 }));
                 if (nextTurn === -1) continue;
                 next = i;
@@ -273,7 +273,7 @@ export class HeroSystem6eCombat extends Combat {
             for (let [i, t] of this.segments[this.segment].entries()) {
                 if (i <= heroTurn) continue;
                 if (t.defeated) continue;
-                if (t.actor?.effects.find(e => e.getFlag("core", "statusId") === CONFIG.Combat.defeatedStatusId)) continue;
+                if (t.actor?.effects.find(e => e.statuses.has(CONFIG.Combat.defeatedStatusId))) continue;
                 next = i;
                 break;
             }
@@ -661,7 +661,7 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    _onUpdateEmbeddedDocuments(...args) {
+    _onUpdateDescendantDocuments(...args) {
         super._onUpdateEmbeddedDocuments(...args);
         this.setupTurns();
         if (this.active) this.collection.render();
@@ -861,7 +861,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                         if (combatant.token.overlayEffect) heroTurn.effects.add(combatant.token.overlayEffect);
                     }
                     if (combatant.actor) combatant.actor.temporaryEffects.forEach(e => {
-                        if (e.getFlag("core", "statusId") === CONFIG.Combat.defeatedStatusId) heroTurn.defeated = true;
+                        if (e.statuses.has(CONFIG.Combat.defeatedStatusId)) heroTurn.defeated = true;
                         else if (e.icon) heroTurn.effects.add(e.icon);
                     });
                     heroTurns.push(heroTurn);

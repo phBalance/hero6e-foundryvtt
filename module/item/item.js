@@ -200,7 +200,7 @@ export class HeroSystem6eItem extends Item {
         const newValue = !getProperty(item, attr)
         // await item.update({ [attr]: newValue })
 
-        const firstAE = item.actor.effects.find(o => o.origin === item.uuid)
+        const firstAE = item.effects.find(o => true) || item.actor.effects.find(o => o.origin === item.uuid)
 
         switch (this.type) {
             case "defense":
@@ -219,23 +219,9 @@ export class HeroSystem6eItem extends Item {
                 if (firstAE) {
                     const newState = !newValue
                     await item.update({ [attr]: newState })
-                    for (const activeEffect of item.actor.effects.filter(o => o.origin === item.uuid)) {
+                    let effects = item.effects.filter(o => true).concat(item.actor.effects.filter(o => o.origin === item.uuid))
+                    for (const activeEffect of effects) {
                         await onActiveEffectToggle(activeEffect, newState)
-                        // for (let change of activeEffect.changes) {
-                        //     const key = change.key.match(/characteristics\.(.*)\./)[1]
-                        //     const max = item.actor.system.characteristics[key].max
-                        //     if (item.system.active) {
-                        //         let value = parseInt(item.actor.system.characteristics[key].value)
-                        //         const levels = change?.value
-                        //         if (levels) {
-                        //             value += parseInt(levels)
-                        //             await item.actor.update({ [`system.characteristics.${key}.value`]: value })
-                        //         }
-                        //     }
-                        //     if (item.actor.system.characteristics[key].value > max) {
-                        //         await item.actor.update({ [`system.characteristics.${key}.value`]: max })
-                        //     }
-                        // }
                     }
                 }
                 break;
@@ -292,7 +278,7 @@ export function getItem(id) {
 }
 
 async function updateCombatAutoMod(actor, item) {
-    const changes = []
+    const changes = {}
 
     let ocvEq = 0
     let dcvEq = '+0'

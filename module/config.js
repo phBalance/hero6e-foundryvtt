@@ -586,6 +586,7 @@ HERO.powers = {
         costEnd: true
     },
     "EXTRADC": { powerType: ["martial"], costPerLevel: 4 },
+    "MANEUVER": { powerType: ["martial", "attack"]},
 
 
 

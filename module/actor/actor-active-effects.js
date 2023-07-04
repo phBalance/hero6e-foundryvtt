@@ -182,6 +182,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         icon: "icons/svg/holy-shield.svg"
     };
 
+    
+
     /** @override */
     // apply(actor, change) {
     //     // super.apply(actor, change)

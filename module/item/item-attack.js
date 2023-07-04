@@ -115,6 +115,16 @@ export async function AttackToHit(item, options) {
         tags.push({ value: ocvMod, name: item.name })
     }
 
+    const autoMod = parseInt(item.actor.system.characteristics.ocv.autoMod) || 0
+    if (autoMod != 0) {
+        rollEquation = modifyRollEquation(rollEquation, autoMod);
+        const maneuvers = item.actor.items.filter(o => o.type == 'maneuver' && o.system.active)
+        for (const maneuver of maneuvers) {
+            tags.push({ value: parseInt(maneuver.system.ocv), name: maneuver.name })
+            rollEquation = modifyRollEquation(rollEquation, parseInt(maneuver.system.ocv));
+        }
+    }
+
     // if (parseInt(options.toHitMod) > 0) {
     //     rollEquation = modifyRollEquation(rollEquation, options.toHitMod);
     //     tags.push({ value: options.toHitMod, name: "toHitMod" })
@@ -147,7 +157,7 @@ export async function AttackToHit(item, options) {
     if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
         useEnd = true;
         let valueEnd = actor.system.characteristics.end.value
-        let itemEnd = item.system.end;
+        let itemEnd = parseInt(item.system.end) || 0
         let newEnd = valueEnd - itemEnd;
         let spentEnd = itemEnd;
         options.effectiveStr = options.effectiveStr || 0;
@@ -224,7 +234,7 @@ export async function AttackToHit(item, options) {
         targetData.push({ id: target.id, name: target.name, toHitChar: toHitChar, value: value, result: { hit: hit, by: by.toString() } })
 
         // Keep track of which tokens were hit so we can apply damage later
-        if (hit === "Hit") {
+        if (hit === "Hit" || item.system.XMLID == "AID") {
             targetIds.push(target.id)
         }
 
@@ -286,7 +296,7 @@ export async function _onRollDamage(event) {
     const template = "systems/hero6efoundryvttv2/templates/chat/item-damage-card.hbs"
     const actor = item.actor
 
-    let damageRoll = (item.system.dice === 0)? "" : item.system.dice + "d6";
+    let damageRoll = (item.system.dice === 0) ? "" : item.system.dice + "d6";
 
     let tags = []
     if (parseInt(item.system.dice) > 0) {
@@ -445,6 +455,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
     const newRoll = Roll.fromTerms(newTerms)
 
+    // AID
+    if (item.system.XMLID == "AID") {
+        return _onApplyAideToSpecificToken(event, tokenId)
+    }
+
+
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
     // -------------------------------------------------
@@ -567,6 +583,114 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     return ChatMessage.create(chatData);
 
+}
+
+function AdjustmentMultiplier(XMLID) {
+    if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
+    return 1;
+}
+
+async function _onApplyAideToSpecificToken(event, tokenId) {
+    const button = event.currentTarget;
+    const damageData = { ...button.dataset }
+    const item = fromUuidSync(damageData.itemid)
+    if (!item) {
+        // This typically happens when the attack id stored in the damage card no longer exists on the actor.
+        // For example if the attack item was deleted or the HDC was uploaded again.
+        console.log(damageData.itemid)
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
+    const template = "systems/hero6efoundryvttv2/templates/chat/apply-aid-card.hbs"
+
+    const token = canvas.tokens.get(tokenId)
+
+    let levels = 0
+
+    // Apply the AID to a CHARACTERISTIC
+    let key = item.system.INPUT.toLowerCase()
+    if (token.actor.system.characteristics[key]) {
+        const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
+        let ActivePoints = parseInt(damageData.stundamage)
+        let costPerPoint = parseInt(characteristicCosts[key]) * AdjustmentMultiplier(key.toUpperCase());
+        levels = parseInt(ActivePoints / costPerPoint)
+
+        // Check for previous AID from same source
+        let prevEffect = token.actor.effects.find(o => o.origin == item.actor.uuid)
+        if (prevEffect) {
+
+            // Maximum Effect
+            let maxEffect = 0
+            for (let term of JSON.parse(damageData.terms)) {
+                maxEffect += (parseInt(term.faces) * parseInt(term.number) || 0)
+            }
+            maxEffect = parseInt(maxEffect / costPerPoint);
+
+            let newLevels = levels + parseInt(prevEffect.changes[0].value)
+            if (newLevels > maxEffect) {
+                levels = maxEffect - parseInt(prevEffect.changes[0].value);
+                newLevels = maxEffect;
+                //effectsFinal = `maximum effect`
+            }
+
+            prevEffect.changes[0].value = newLevels
+
+            prevEffect.name = `AID ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`,
+
+                prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
+
+        } else {
+            // Create new ActiveEffect
+            let activeEffect =
+            {
+                name: `AID ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                icon: item.img,
+                changes: [
+                    {
+                        key: "system.characteristics." + key + ".max",
+                        value: parseInt(levels),
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                    }
+                ],
+                origin: item.actor.uuid
+            }
+            token.actor.addActiveEffect(activeEffect);
+
+
+        }
+
+        // Add levels to value
+        let newValue = token.actor.system.characteristics[key].value + levels;
+        token.actor.update({ [`system.characteristics.${key}.value`]: newValue })
+
+    }
+
+
+    let cardData = {
+        item: item,
+        // dice rolls
+
+        // stun
+        stunDamage: damageData.stundamage,
+        levels: levels,
+
+        // effects
+        //effects: effectsFinal,
+
+        // misc
+        targetToken: token
+    };
+
+    // render card
+    let cardHtml = await renderTemplate(template, cardData)
+    let speaker = ChatMessage.getSpeaker({ actor: item.actor })
+
+    const chatData = {
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    }
+
+    return ChatMessage.create(chatData);
 }
 
 
