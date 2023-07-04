@@ -1,28 +1,49 @@
 import { HEROSYS } from "../herosystem6e.js";
 
 export function AdjustmentSources(actor) {
-    const characteristics = actor.system.is5e ? CONFIG.HERO.characteristics5e : CONFIG.HERO.characteristics
 
     let choices = {}
-    //let choices = {"Choice A": "a", "Choice B": "b"};
-
+    const characteristics = (!actor || actor.system.is5e) ? CONFIG.HERO.characteristics5e : CONFIG.HERO.characteristics
     for (const key in characteristics) {
         choices[key.toUpperCase()] = key.toUpperCase();
     }
 
-    // let aidSources = []
-    // for (const key in actor.system.characteristics) {
-    //     if (actor.system.characteristics[key].hasOwnProperty('value')) {
-    //         aidSources.push(key.toUpperCase())
-    //     }
-    // }
-    // aidSources.sort()
-    // aidSources = ["none", ...aidSources]
-    // data.aidSources = {}
-    // for (let key of aidSources) {
-    //     data.aidSources[key] = key
-    //     }
+    const powers = (!actor || actor.system.is5e)  ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    for (const key in powers) {
+        if (
+            !powers[key].powerType.includes("skill") &&
+            !powers[key].powerType.includes("talent") &&
+            !powers[key].powerType.includes("framework")
+        ) {
+            choices[key.toUpperCase()] = key.toUpperCase();
+        }
 
-    choices.sort( a, b => a.localcompare
+    }
+
+    // Add * to defensive powers
+    for(let key of Object.keys(choices))
+    {
+        if (AdjustmentMultiplier(key) > 1) {
+            choices[key] += "*"
+        }
+    }
+
+    choices[""] = "<none>"
+    choices = Object.keys(choices).sort().reduce(
+        (obj, key) => {
+            obj[key] = choices[key];
+            return obj;
+        },
+        {}
+    );
+
+    //choices = ["none", ...choices]
+
     return choices;
+}
+
+export function AdjustmentMultiplier(XMLID) {
+    if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
+    if (CONFIG.HERO.powers5e[XMLID].powerType.includes("defense")) return 2;
+    return 1;
 }

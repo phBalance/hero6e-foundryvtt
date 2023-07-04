@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
 import { getPowerInfo } from '../utility/util.js'
+import { AdjustmentSources } from '../utility/adjustment.js'
 
 
 export async function applyCharacterSheet(xmlDoc) {
@@ -544,6 +545,17 @@ export function XmlToItemData(xml, type) {
             case "ALLMOVEMENT": systemData.costPerLevel = 3; break;
             case "OVERALL": systemData.costPerLevel = 12; break;
             default: HEROSYS.log(false, systemData.OPTION)
+        }
+    }
+
+    // AID, DRAIN, TRANSFER (any adjustment power)
+    const configPowerInfo = getPowerInfo({ xmlid: systemData.XMLID })
+    if (configPowerInfo && configPowerInfo.powerType.includes("adjustment")){
+        // Make sure we have a valid INPUT
+        let choices = AdjustmentSources()
+        systemData.INPUT = (systemData.INPUT || "").toUpperCase().trim()
+        if (!choices[systemData.INPUT] || systemData.INPUT == "") {
+            ui.notifications.warn(`${systemData.XMLID} adjustment of source ${systemData.INPUT || "UNDEFINED"} not supported.`)
         }
     }
 

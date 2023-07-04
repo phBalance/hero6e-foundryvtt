@@ -6,6 +6,7 @@ import { RoundFavorPlayerDown } from "../utility/round.js";
 import { determineStrengthDamage, determineExtraDiceDamage, 
     simplifyDamageRoll, convertToDC, handleDamageNegation } from "../utility/damage.js";
 import { damageRollToTag } from "../utility/tag.js";
+import { AdjustmentMultiplier } from "../utility/adjustment.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -582,11 +583,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     return ChatMessage.create(chatData);
 
-}
-
-function AdjustmentMultiplier(XMLID) {
-    if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
-    return 1;
 }
 
 async function _onApplyAideToSpecificToken(event, tokenId) {
