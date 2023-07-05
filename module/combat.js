@@ -3,6 +3,7 @@ import { HEROSYS } from "./herosystem6e.js";
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
+
         super(data, context);
 
         this.segments = this.segments || {
@@ -19,10 +20,6 @@ export class HeroSystem6eCombat extends Combat {
             11: [],
             12: []
         };
-
-        this.segment = 12;
-
-        this.setSegment(12)
 
         this.current = this.current || {
             heroRound: null,
@@ -42,6 +39,11 @@ export class HeroSystem6eCombat extends Combat {
 
         if (!this.current.segment) this.current.segment = null;
         if (!this.previous.segment) this.previous.segment = null;
+    }
+
+    async _onCreate(data, context) {
+        super._onCreate(data, context);
+        this.segment = 12;
     }
 
     /**
@@ -73,15 +75,16 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     get segment() {
-        return Math.max(this.flags.world.segment, 1);
+        return Math.max(this.flags?.world?.segment, 1);
     }
 
     setSegment(value) {
         this.setFlag('world', 'segment', value)
     }
 
-    set segment(segment) {
-        this._segment = segment
+    set segment(value) {
+        //this._segment = value   // This appears to do absolutely nothing (_segment appears unused) so calling the setFlag version.  Can probably be simplified further.
+        this.setSegment(value)
     }
 
     get currentSegment() {
@@ -735,8 +738,12 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
         switch (control) {
             case 'startCombat': {
-                relevantCombat.startCombat()
-                this.render();
+                // AARON WAS HERE: 
+                // startCombat was being called twice.  
+                // It is already calledd by foundry _OnCombatControl.
+                // Shouldn't need to call it again.
+                //relevantCombat.startCombat()
+                //this.render();
                 break;
             }
 
@@ -809,6 +816,9 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         // Format information about each combatant in the encounter
         let hasDecimals = false;
         const segments = [];
+
+        // Guard
+        if (!combat.segments) return (data);
 
         for (let i = 1; i <= 12; i++) {
             let heroTurns = [];
