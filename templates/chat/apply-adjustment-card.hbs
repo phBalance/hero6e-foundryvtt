@@ -16,6 +16,11 @@
 
 
 
-  Aid {{stunDamage}} Active Points to {{item.system.INPUT}}.  {{item.system.INPUT}} increased by {{levels}} levels.
+  {{item.system.XMLID}} {{stunDamage}} Active Points to {{item.system.INPUT}}. {{item.system.INPUT}}
+  {{#if (eq item.system.XMLID "DRAIN")}}
+  decreased
+  {{else}}
+  increased
+  {{/if}} by {{levels}} levels.
 
 </div>

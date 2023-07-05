@@ -289,13 +289,13 @@ Hooks.once("ready", async function () {
         // if lastMigration < 3.0.4
         // Remove all tranferred effects
         if (foundry.utils.isNewerVersion('3.0.4', lastMigration)) {
-            ui.notifications.info(`Migragrating actor data.`)
+            await ui.notifications.info(`Migragrating actor data.`)
             for (let actor of game.actors.contents) {
                 for (let effect of actor.effects.filter(o => o.origin)) {
-                    effect.delete();
+                    await effect.delete();
                 }
             }
-            ui.notifications.info(`Migragtion complete.`)
+            await ui.notifications.info(`Migragtion complete.`)
         }
 
     }
@@ -422,10 +422,9 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 })
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
-    html.find('header h4').append(`<span>${game.system.version}<span>`)
-    // html.find('header h4').after(`<a class="header-button control configure-type">
-    // <i class="fal fa-user-robot"></i>Type 
-    // <a>`)
+    html.find('header h4').append(`<span>${data.actor.type.toUpperCase()}</span>`)
+    html.find('header h4').append(`<span>${game.system.version}</span>`)
+
 })
 
 Hooks.on("renderItemSheet", (dialog, html, data) => {
@@ -436,10 +435,12 @@ Hooks.on("getActorDirectoryEntryContext", (dialog, html, data) => {
 
     console.log("getActorDirectoryEntryContext")
     const menu = {
-        "name": "Change Actor Type",
+        "name": "Change Type",
         "icon": "<i class=\"fas fa-cog\"></i>",
         "callback": async function (target) {
-            return ui.notifications.warn("Change Actor Type not implemented");
+            const dataset = { ...target[0].dataset }
+            const actor = game.actors.get(dataset.entryId)
+            return actor.ChangeType()
         },
     }
     html.push(menu)

@@ -3,8 +3,8 @@
     tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
     <div>
-        {{#if (eq item.system.XMLID "AID")}}
-        Aid
+        {{#if adjustment}}
+        {{item.system.XMLID}}
         {{else}}
         Damage
         {{/if}}
@@ -60,8 +60,8 @@
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
                 data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-terms="{{terms}}"
                 data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
-                {{#if (eq item.system.XMLID "AID")}}
-                Apply AID
+                {{#if adjustment}}
+                Apply {{item.system.XMLID}}
                 {{else}}
                 Apply Damage
                 {{/if}}
@@ -73,8 +73,8 @@
                 data-target-token-id="{{target.id}}" data-bodyDamage="{{../bodyDamage}}"
                 data-stunDamage="{{../stunDamage}}" data-terms="{{../terms}}"
                 data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">
-                {{#if (eq ../item.system.XMLID "AID")}}
-                Apply Aid to <b>{{target.name}}</b>
+                {{#if ../adjustment}}
+                Apply {{../item.system.XMLID}} to <b>{{target.name}}</b>
                 {{else}}
                 Apply Damage to <b>{{target.name}}{{item.system.XMLID}}</b>
                 {{/if}}
@@ -85,8 +85,8 @@
             <button class="apply-damage" title="Apply damage to ALL tokens that were hit." data-itemId="{{item.uuid}}"
                 data-target-Ids="{{targetIds}}" data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}"
                 data-terms="{{terms}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
-                {{#if (eq item.system.XMLID "AID")}}
-                Apply Aid to <b>ALL</b>
+                {{#if adjustment}}
+                Apply {{item.system.XMLID}} to <b>ALL</b>
                 {{else}}
                 Apply Damage to <b>ALL</b>
                 {{/if}}

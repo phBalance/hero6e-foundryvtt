@@ -3,8 +3,10 @@ import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { HEROSYS } from "../herosystem6e.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
-import { determineStrengthDamage, determineExtraDiceDamage, 
-    simplifyDamageRoll, convertToDC, handleDamageNegation } from "../utility/damage.js";
+import {
+    determineStrengthDamage, determineExtraDiceDamage,
+    simplifyDamageRoll, convertToDC, handleDamageNegation
+} from "../utility/damage.js";
 import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
 
@@ -27,6 +29,8 @@ export async function onMessageRendered(html) {
 
 /// Dialog box for AttackOptions
 export async function AttackOptions(item) {
+    const actor = item.actor;
+
     const data = {
         item: item,
         state: null,
@@ -52,7 +56,7 @@ export async function AttackOptions(item) {
         data.hitLoc = CONFIG.HERO.hitLocations;
     }
 
-    const template = ["AID"].includes(item.system.XMLID) ? "systems/hero6efoundryvttv2/templates/attack/item-attack-aid-card.hbs" : "systems/hero6efoundryvttv2/templates/attack/item-attack-card2.hbs"
+    const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card2.hbs"
     const html = await renderTemplate(template, data)
     return new Promise(resolve => {
         const data = {
@@ -102,6 +106,9 @@ export async function AttackToHit(item, options) {
     let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
+
+    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = powers[item.system.XMLID].powerType.includes("adjustment")
 
     // -------------------------------------------------
     // attack roll
@@ -235,7 +242,8 @@ export async function AttackToHit(item, options) {
         }
         targetData.push({ id: target.id, name: target.name, toHitChar: toHitChar, value: value, result: { hit: hit, by: by.toString() } })
 
-        // Keep track of which tokens were hit so we can apply damage later
+        // Keep track of which tokens were hit so we can apply damage later,
+        // Assume "AID" always hits
         if (hit === "Hit" || item.system.XMLID == "AID") {
             targetIds.push(target.id)
         }
@@ -252,6 +260,7 @@ export async function AttackToHit(item, options) {
         // data for damage card
         actor,
         item,
+        adjustment,
         ...options,
         hitRollData: hitRollData,
         //effectivestr: options.effectivestr,
@@ -298,6 +307,9 @@ export async function _onRollDamage(event) {
     const template = "systems/hero6efoundryvttv2/templates/chat/item-damage-card.hbs"
     const actor = item.actor
 
+    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = powers[item.system.XMLID].powerType.includes("adjustment")
+
     let damageRoll = (item.system.dice === 0) ? "" : item.system.dice + "d6";
 
     let tags = []
@@ -341,6 +353,7 @@ export async function _onRollDamage(event) {
 
     let cardData = {
         item: item,
+        adjustment,
         // dice rolls
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
@@ -431,6 +444,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         console.log(damageData.itemid)
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
+    const actor = item.actor
     const template = "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs"
 
     const token = canvas.tokens.get(tokenId)
@@ -457,11 +471,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
     let newRoll = Roll.fromTerms(newTerms)
 
-    // AID
-    if (item.system.XMLID == "AID") {
-        return _onApplyAideToSpecificToken(event, tokenId)
+    // AID, DRAIN or any adjustmnet powers
+    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = powers[item.system.XMLID].powerType.includes("adjustment")
+    if (adjustment) {
+        return _onApplyAdjustmentToSpecificToken(event, tokenId)
     }
-
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
@@ -585,7 +600,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
 }
 
-async function _onApplyAideToSpecificToken(event, tokenId) {
+async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
     const button = event.currentTarget;
     const damageData = { ...button.dataset }
     const item = fromUuidSync(damageData.itemid)
@@ -595,13 +610,13 @@ async function _onApplyAideToSpecificToken(event, tokenId) {
         console.log(damageData.itemid)
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
-    const template = "systems/hero6efoundryvttv2/templates/chat/apply-aid-card.hbs"
+    const template = "systems/hero6efoundryvttv2/templates/chat/apply-adjustment-card.hbs"
 
     const token = canvas.tokens.get(tokenId)
 
     let levels = 0
 
-    // Apply the AID to a CHARACTERISTIC
+    // Apply the ADJUSTMENT to a CHARACTERISTIC
     let key = item.system.INPUT.toLowerCase()
     if (token.actor.system.characteristics[key]) {
         const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
@@ -609,7 +624,7 @@ async function _onApplyAideToSpecificToken(event, tokenId) {
         let costPerPoint = parseInt(characteristicCosts[key]) * AdjustmentMultiplier(key.toUpperCase());
         levels = parseInt(ActivePoints / costPerPoint)
 
-        // Check for previous AID from same source
+        // Check for previous ADJUSTMENT from same source
         let prevEffect = token.actor.effects.find(o => o.origin == item.actor.uuid)
         if (prevEffect) {
 
@@ -629,7 +644,7 @@ async function _onApplyAideToSpecificToken(event, tokenId) {
 
             prevEffect.changes[0].value = newLevels
 
-            prevEffect.name = `AID ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`,
+            prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`,
 
                 prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
 
@@ -637,12 +652,12 @@ async function _onApplyAideToSpecificToken(event, tokenId) {
             // Create new ActiveEffect
             let activeEffect =
             {
-                name: `AID ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                name: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
                 icon: item.img,
                 changes: [
                     {
                         key: "system.characteristics." + key + ".max",
-                        value: parseInt(levels),
+                        value: item.system.XMLID == "DRAIN" ? -parseInt(levels) : parseInt(levels),
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
                     }
                 ],
@@ -654,7 +669,7 @@ async function _onApplyAideToSpecificToken(event, tokenId) {
         }
 
         // Add levels to value
-        let newValue = token.actor.system.characteristics[key].value + levels;
+        let newValue = token.actor.system.characteristics[key].value + (item.system.XMLID == "DRAIN" ? -parseInt(levels) : parseInt(levels));
         token.actor.update({ [`system.characteristics.${key}.value`]: newValue })
 
     }

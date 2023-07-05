@@ -1,3 +1,7 @@
+# Version 3.0.5
+- Initial DRAIN support.
+- Changing PC/NPC actor type moved to context menu of actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).
+
 # Version 3.0.4
 - Reworked Active Effects such that the effects on items remain with items.  They are no longered
 transferred from the item to the actor.  This is following [FoundryVtt v11 ActiveEffect Transferral](https://foundryvtt.com/article/v11-active-effects/) recommendations.

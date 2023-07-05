@@ -34,17 +34,21 @@ export async function onManageActiveEffect(event, owner) {
             });
 
             if (confirmed) {
+
+                if (!effect.disabled) {
+                    await onActiveEffectToggle(effect)
+                }
                 await effect.delete()
 
                 let actor = effect.parent instanceof HeroSystem6eActor ? effect.parent : effect.parent.actor
 
                 // Characteristic VALUE should not exceed MAX
-                for (let char of Object.keys(actor.system.characteristics)) {
-                    if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
-                        await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
-                        //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
-                    }
-                }
+                // for (let char of Object.keys(actor.system.characteristics)) {
+                //     if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
+                //         await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
+                //         //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
+                //     }
+                // }
             }
             return
         case "toggle":
@@ -73,28 +77,28 @@ export async function onActiveEffectToggle(effect, newState) {
 
     let updates = [];
 
-    // Characteristic VALUE should be increased when toggled on
-    if (newState == false) { // disabled == false
-        for (let change of effect.changes) {
-            // system.characteristics.stun.max
-            const charMatch = change.key.match("characteristics\.(.+)\.max")
-            if (charMatch) {
-                const char = charMatch[1]
-                await actor.update({
-                    [`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].value) + parseInt(change.value)
-                })
-                //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].value) + parseInt(change.value)});
-            }
+    // Characteristic VALUE should change when toggled on
+    //if (newState == false) { // disabled == false
+    for (let change of effect.changes) {
+        // system.characteristics.stun.max
+        const charMatch = change.key.match("characteristics\.(.+)\.max")
+        if (charMatch) {
+            const char = charMatch[1]
+            const value = newState ? -parseInt(change.value) : parseInt(change.value)
+            await actor.update({
+                [`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].value) + value
+            })
         }
     }
+    //}
 
     // Characteristic VALUE should not exceed MAX
-    for (let char of Object.keys(actor.system.characteristics)) {
-        if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
-            await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
-            //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
-        }
-    }
+    // for (let char of Object.keys(actor.system.characteristics)) {
+    //     if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
+    //         await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
+    //         //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
+    //     }
+    // }
 
     //await actor.update(changes);
     //await actor.update(updates);
