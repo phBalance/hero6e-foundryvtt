@@ -161,6 +161,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         html.find('.effect-edit').click(this._onEffectEdit.bind(this))
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
+        // Type
+        html.find('.configure-type').click(this._onConfigureType.bind(this))
+
         // Item Description
         html.find('.textarea').each((id, inp) => {
             this.changeValue = async function (e) {

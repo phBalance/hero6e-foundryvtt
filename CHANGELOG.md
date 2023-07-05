@@ -1,6 +1,6 @@
 # Version 3.0.5
 - Initial DRAIN support.
-- Changing PC/NPC actor type moved to context menu of actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).
+- Changing PC/NPC actor type moved to sheet header.  Also can be changed in context menu of actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).
 
 # Version 3.0.4
 - Reworked Active Effects such that the effects on items remain with items.  They are no longered

@@ -422,8 +422,24 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 })
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
-    html.find('header h4').append(`<span>${data.actor.type.toUpperCase()}</span>`)
+    //html.find('header h4').append(`<span>${data.actor.type.toUpperCase()}</span>`)
     html.find('header h4').append(`<span>${game.system.version}</span>`)
+
+    let element = document.createElement("a");
+    element.setAttribute(`data-id`, data.actor.id)
+    element.title = data.actor.type.toUpperCase()
+    element.addEventListener('click', () => {
+        const actor = game.actors.get(event.target.dataset.id)
+        actor.ChangeType()
+      });
+
+    element.innerHTML = `<i class="fal fa-user-robot"></i>Type`
+
+
+    html.find('header h4').after(element);
+    // `<a class="header-button control configure-type" onclick=">
+    // <i class="fal fa-user-robot"></i>Type 
+    // </a>`)
 
 })
 

@@ -91,7 +91,7 @@ export class HeroSystem6eActor extends Actor {
         const html = await renderTemplate(template, cardData)
         return new Promise(resolve => {
             const data = {
-                title: "Change Type",
+                title: `Change ${this.name} Type`,
                 content: html,
                 buttons: {
                     normal: {
