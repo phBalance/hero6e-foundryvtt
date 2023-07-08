@@ -6,368 +6,14 @@ export class HeroSystem6eCombat extends Combat {
 
         super(data, context);
 
-        this.segments = this.segments || {
-            1: [],
-            2: [],
-            3: [],
-            4: [],
-            5: [],
-            6: [],
-            7: [],
-            8: [],
-            9: [],
-            10: [],
-            11: [],
-            12: []
-        };
-
-        this.current = this.current || {
-            heroRound: null,
-            segment: null,
-            heroTurn: null,
-            tokenId: null,
-            combatantId: null
-        };
+        this.segments = []
 
         this.previous = this.previous || {
-            heroRound: null,
-            segment: null,
-            heroTurn: null,
-            tokenId: null,
             combatantId: null
         };
 
-        if (!this.current.segment) this.current.segment = null;
-        if (!this.previous.segment) this.previous.segment = null;
     }
 
-    async _onCreate(data, context) {
-        super._onCreate(data, context);
-        this.segment = 12;
-    }
-
-    /**
-     * The configuration setting used to record Combat preferences
-     * @type {string}
-     */
-    static CONFIG_SETTING = "combatTrackerConfig";
-
-    /* -------------------------------------------- */
-    /*  Properties                                  */
-    /* -------------------------------------------- */
-
-    /**
-     * Get the Combatant who has the current heroTurn.
-     * @type {Combatant}
-     */
-    get combatant() {
-        return this.segment ? this.currentSegment[this.turn] : undefined;
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * The numeric heroRound of the Combat encounter
-     * @type {number}
-     */
-    get heroRound() {
-        return Math.max(this._heroRound, 0);
-    }
-
-    get segment() {
-        return Math.max(this.flags?.world?.segment, 1);
-    }
-
-    setSegment(value) {
-        this.setFlag('world', 'segment', value)
-    }
-
-    set segment(value) {
-        //this._segment = value   // This appears to do absolutely nothing (_segment appears unused) so calling the setFlag version.  Can probably be simplified further.
-        this.setSegment(value)
-    }
-
-    get currentSegment() {
-        return this.segments[this.segment];
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * A reference to the Scene document within which this Combat encounter occurs.
-     * If a specific Scene is not set in the Combat Data, the currently viewed scene is assumed instead.
-     * @type {Scene}
-     */
-    /* disabling for v10 compatibility
-    get scene() {
-        return game.scenes.get(this.scene) || game.scenes.current || undefined;
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Return the object of settings which modify the Combat Tracker behavior
-     * @return {object}
-     */
-    get settings() {
-        return CombatEncounters.settings;
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Has this combat encounter been started?
-     * @type {boolean}
-     */
-    get started() {
-        return (this.segments.length > 0) && (this.heroRound > 0);
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * The numeric heroTurn of the combat heroRound in the Combat encounter
-     * @type {number}
-     */
-    get heroTurn() {
-        return Math.max(this._heroTurn, 0) || 0;
-    }
-
-    set heroTurn(heroTurn) {
-        this._heroTurn = heroTurn
-    }
-
-    /* -------------------------------------------- */
-
-    /** @inheritdoc */
-    get visible() {
-        return true;
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Advance the combat to the next heroRound
-     * @return {Promise<Combat>}
-     */
-    async nextheroRound() {
-        let segment = 1;
-        let heroTurn = 0;
-        let found = false;
-        if (this.settings.skipDefeated) {
-            for (let i = 1; i <= 12 && !found; i++) {
-                for (let j = 0; j < this.segments[i].length && !found; j++) {
-                    let t = this.segments[i][j];
-                    if (!(t.defeated || t.actor?.effects.find(e => e.statuses.has(CONFIG.Combat.defeatedStatusId)))) {
-                        segment = i;
-                        heroTurn = j;
-                        found = true;
-                    }
-                }
-            }
-            if (heroTurn === -1) {
-                ui.notifications.warn("COMBAT.NoneRemaining", { localize: true });
-                heroTurn = 0;
-            }
-        } else {
-            for (let i = 1; i <= 12; i++) {
-                if (this.segments[i].length > 0) {
-                    segment = i;
-                    break;
-                }
-            }
-        }
-
-        //let advanceTime = Math.max(this.turns.length - this.heroTurn, 1) * CONFIG.time.turnTime;
-        let advanceTime = Math.max(this.segments.length - this.segment, 1) * CONFIG.time.segmentTime
-        advanceTime += CONFIG.time.heroRoundTime;
-
-        return await this.update({ round: this.round + 1, segment: segment, heroTurn: heroTurn }, { advanceTime });
-    }
-
-    async nextSegment() {
-        let segment = this.segment;
-
-        let skip = this.settings.skipDefeated;
-
-        // Determine the next heroTurn number
-        let next = null;
-        let nextTurn = null;
-
-        if (skip) {
-            for (let [i, s] of this.segments.entries()) {
-                if (i <= this.segment) continue;
-                nextTurn = (s.findIndex(t => {
-                    return !(t.defeated ||
-                        t.actor?.effects.find(e => e.statuses.has(CONFIG.Combat.defeatedStatusId)));
-                }));
-                if (nextTurn === -1) continue;
-                next = i;
-                break;
-            }
-        }
-        else {
-            for (let [i, s] of this.segments.entries()) {
-                if (i < this.segment) continue;
-                nextTurn = (s.findIndex(t => {
-                    return true;
-                }));
-                if (nextTurn === -1) continue;
-                next = i;
-                break;
-            }
-        }
-
-        nextTurn += 1
-        next = nextTurn
-
-        // Maybe advance to the next heroRound
-        let round = this.round;
-        if ((this.round === 0) || (next === null) || (next >= this.segments.length)) {
-            return this.nextheroRound();
-        }
-
-        // Update the encounter
-        const advanceTime = CONFIG.time.segmentTime;
-
-        let segement = this.segment
-
-        let nextSegment;
-
-        const segementIndexes = this.segments.reduce((accumulator, currentValue, currentIndex) => {
-            if (currentValue.length > 0) {
-                accumulator.push(currentIndex);
-            }
-            return accumulator;
-        }, []);
-
-
-        if (Number(segement) === 12) {
-            nextSegment = segementIndexes[0]
-        }
-
-        let nextIndex = segementIndexes.indexOf(segement) + 1
-
-        if (nextIndex > (segementIndexes.length - 1)) {
-            round += 1
-            nextIndex = 0
-        }
-
-        this.update({ round: round, turn: 0 });
-
-        this.setSegment(segementIndexes[nextIndex])
-
-        return
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Advance the combat to the next heroTurn
-     * @return {Promise<Combat>}
-     */
-    async nextTurn() {
-        let heroTurn = this.turn;
-        let skip = this.settings.skipDefeated;
-
-        // Determine the next heroTurn number
-        let next = null;
-        if (skip) {
-            for (let [i, t] of this.segments[this.segment].entries()) {
-                if (i <= heroTurn) continue;
-                if (t.defeated) continue;
-                if (t.actor?.effects.find(e => e.statuses.has(CONFIG.Combat.defeatedStatusId))) continue;
-                next = i;
-                break;
-            }
-        }
-        else next = heroTurn + 1;
-
-        // Maybe advance to the next heroRound
-        let heroRound = this.heroRound;
-        if ((this.heroRound === 0) || (next === null) || (next >= this.segments[this.segment].length)) {
-            return this.nextSegment();
-        }
-
-        // Update the encounter
-        const advanceTime = CONFIG.time.turnTime;
-
-        return this.update({ heroRound: heroRound, turn: next });
-    }
-
-    /* -------------------------------------------- */
-
-    /** @override */
-    prepareDerivedData() {
-        if (this.combatants.size && !this.segments?.length) this.setupTurns();
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Rewind the combat to the previous heroRound
-     * @return {Promise<Combat>}
-     */
-    async previousheroRound() {
-        let segment = (this.heroRound === 0) ? 0 : Math.max(this.segments.length - 1, 0);
-        if (this.heroRound === 1) segment = 12;
-        let heroTurn = (this.heroRound === 0) ? 0 : Math.max(this.segments[segment].length - 1, 0);
-        const heroRound = Math.max(this.heroRound - 1, 0);
-        let advanceTime = -1 * this.heroTurn * CONFIG.time.turnTime;
-        if (heroRound > 0) advanceTime -= CONFIG.time.heroRoundTime;
-
-        return this.update({ heroRound, segment, heroTurn }, { advanceTime });
-    }
-
-    async previousSegment() {
-        if (this.turn === 0 && this.heroRound === 0) return this;
-
-        let previousSegment = -1;
-
-        for (let i = this.segment - 1; i >= 1; i--) {
-            if (this.segments[i].length > 0) {
-                previousSegment = i;
-                break;
-            }
-        }
-
-        if (previousSegment < 1 || this.heroRound === 1) return this.previousheroRound();
-
-        const advanceTime = -1 * CONFIG.time.segmentTime;
-
-        await this.setSegment(previousSegment)
-
-        return this.update({ turn: this.segments[previousSegment].length - 1 }, { advanceTime });
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Rewind the combat to the previous heroTurn
-     * @return {Promise<Combat>}
-     */
-    async previousTurn() {
-        if (this.turn === 0 && this.heroRound === 0) return this;
-        else if (this.turn <= 0) return this.previousSegment();
-        const advanceTime = -1 * CONFIG.time.turnTime;
-        return this.update({ turn: this.turn - 1 }, { advanceTime });
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Reset all combatant initiative scores, setting the heroTurn back to zero
-     * @return {Promise<Combat>}
-     */
-    async resetAll() {
-        for (let c of this.combatants) {
-            c.update({ initiative: null });
-        }
-
-        return this.update({ heroTurn: 0, combatants: this.combatants.toJSON() }, { diff: false });
-    }
-
-    /* -------------------------------------------- */
 
     /**
      * Roll initiative for one or multiple Combatants within the Combat entity
@@ -390,43 +36,16 @@ export class HeroSystem6eCombat extends Combat {
             // Get Combatant data (non-strictly)
             const combatant = this.combatants.get(id);
             if (!combatant?.isOwner) return results;
+            //if (combatant.hasRolled) continue;
 
             // Produce an initiative roll for the Combatant
             let dexValue = combatant.actor.system.characteristics.dex.value
             let intValue = combatant.actor.system.characteristics.int.value
             let initativeValue = dexValue + (intValue / 100)
 
-            const name = combatant.actor.name
-
-            // const allInitiatives = [[name, initativeValue]]
-            const allInitiatives = []
-            for (const item of combatant.actor.items) {
-                if (!item.system.hasOwnProperty('id')) { continue; }
-
-                switch (item.system.id) {
-                    case ('LIGHTNING_REFLEXES_ALL'): {
-                        const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
-                        const lightning_reflex_initiative = (parseInt(dexValue || 0) + parseInt(levels)) + (parseInt(initativeValue || 0) / 100)
-
-                        const alias = item.system.OPTION_ALIAS || item.system.other.option_alias || 'None'
-                        const lightning_reflex_alias = '(' + alias + ')'
-
-                        allInitiatives.push([name, lightning_reflex_alias, lightning_reflex_initiative])
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }
-
-            allInitiatives.sort((a, b) => b[2] - a[2])
-
             updates.push({
                 _id: id,
                 initiative: initativeValue || 0,
-                name: name,
-                'flags.initiatives': allInitiatives
             });
         }
         if (!updates.length) return this;
@@ -434,42 +53,10 @@ export class HeroSystem6eCombat extends Combat {
         // Update multiple combatants
         await this.updateEmbeddedDocuments("Combatant", updates);
 
-        // Ensure the heroTurn order remains with the same combatant
-        /*
-        if (updateTurn) {
-            await this.update({ heroTurn: this.segments[this.segment].findIndex(t => t.id === currentId) });
-        }
-        */
 
-        // Create multiple chat messages
-        //await ChatMessage.implementation.create(messages);
         return this;
     }
 
-    async rollAll(options) {
-        const ids = this.combatants.reduce((ids, c) => {
-            if (c.isOwner && !c.initiative) ids.push(c.id);
-            return ids;
-        }, []);
-        return this.rollInitiative(ids, options);
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Assign initiative for a single Combatant within the Combat encounter.
-     * Update the Combat heroTurn order to maintain the same combatant as the current heroTurn.
-     * @param {string} id         The combatant ID for which to set initiative
-     * @param {number} value      A specific initiative value to set
-     */
-
-    async setInitiative(id, value) {
-        const currentId = this.combatant.id;
-        const combatant = this.combatants.get(id, { strict: true });
-
-        await combatant.update({ initiative: value });
-        await this.update({ heroTurn: this.segments[this.segment].findIndex(c => c.id === currentId) });
-    }
 
     /* -------------------------------------------- */
 
@@ -479,70 +66,78 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     setupTurns() {
-        // Determine the heroTurn order and the current heroTurn
-        const heroTurnSet = this.combatants.contents.sort(this._sortCombatants);
 
-        let segments = [];
-        for (let i = 1; i <= 12; i++) {
-            segments[i] = [];
+        // Roll Initiative everytime as DEX/INT/SPD may have changed
+        this.rollAll();
 
-            for (let j = 0; j < heroTurnSet.length; j++) {
-                if (HeroSystem6eCombat.hasPhase(heroTurnSet[j].actor.system.characteristics.spd.value, i)) {
-                    let allInitiatives = heroTurnSet[j].flags.initiatives
+        // Determine the turn order and the current turn
+        const turnsRaw = this.combatants.contents.sort(this._sortCombatants);
 
-                    if (typeof allInitiatives === 'undefined' || allInitiatives === null) { continue; }
+        for (let i = 0; i < this.combatants.contents.length; i++) {
+            let combatant = turnsRaw[i];
 
-                    for (let k = 0; k < allInitiatives.length; k++) {
-                        const fakeCombatantData = {
-                            'name': allInitiatives[k][0],
-                            'alias': allInitiatives[k][1],
-                            'initiative': allInitiatives[k][2],
-                            'img': heroTurnSet[j].img,
-                            'actorId': heroTurnSet[j].actorId,
-                            'tokenId': heroTurnSet[j].tokenId,
-                            'hidden': heroTurnSet[j].hidden,
-                            'defeated': heroTurnSet[j].defeated,
-                            'visible': heroTurnSet[j].visible,
-                            'token': heroTurnSet[j].token,
-                            'owner': heroTurnSet[j].owner,
-                            'resource': heroTurnSet[j].resource,
-                            'id': heroTurnSet[j].id,
-                            'isFake': true
-                        }
+            // Lightning Reflexes
+            const actor = game.actors.get(combatant.actorId);
+            const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL");
+            if (item) {
+                const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
+                const lightning_reflex_initiative = combatant.initiative + parseInt(levels);
+                const alias = item.system.OPTION_ALIAS || item.system.other.option_alias || 'None'
+                const lightning_reflex_alias = '(' + alias + ')'
 
-                        segments[i].push(fakeCombatantData)
-                    }
+                const combatantLR = new HeroCombatant(combatant)
+                combatantLR.initiative = lightning_reflex_initiative;
+                combatantLR.alias = lightning_reflex_alias;
+                combatantLR.isFake = true;
+                turnsRaw.push(combatantLR);
+            }
+        }
 
-                    segments[i].push(heroTurnSet[j]);
+        turnsRaw.sort(this._sortCombatants)
+
+
+
+        // this.turns is an array of combatants.  These combatants typically appear more than
+        // once in the array (1/SPEED).  Any change to one combatant for a specific token seems
+        // to update all combatant entries for that speicifc token.  So we can't store unique
+        // data in combatant (like segment number).  Using turnsExtra to store unique data (like segment).
+        //this.turnsExtra = []
+
+        // Assign Combatent copies to appopriate segements
+        // Notice segment[0] is unused
+        let turns = []
+        for (let s = 1; s <= 12; s++) {
+            this.segments[s] = []
+            for (let t = 0; t < turnsRaw.length; t++) {
+                if (HeroSystem6eCombat.hasPhase(turnsRaw[t].actor.system.characteristics.spd.value, s)) {
+                    let combatant = new HeroCombatant(turnsRaw[t])
+                    combatant.turn = turns.length;
+                    combatant.segment = s;
+                    this.segments[s].push(combatant);
+                    turns.push(combatant);
                 }
             }
 
-            segments[i].sort(function (a, b) {
-                return b.initiative - a.initiative
-            });
         }
 
-        this.segment = Math.clamped(this.segment, 1, 12) || 12;
-        this.heroTurn = Math.clamped(this.heroTurn, 0, segments[this.segment].length - 1);
+        if (this.turn !== null) this.turn = Math.clamped(this.turn, 0, turns.length - 1);
 
         // Update state tracking
-        let c = segments[this.segment][this.heroTurn];
+        let c = turns[this.turn];
         this.current = {
-            heroRound: this.heroRound,
-            segment: this.segment,
-            heroTurn: this.heroTurn,
+            round: this.round,
+            turn: this.turn,
             combatantId: c ? c.id : null,
             tokenId: c ? c.tokenId : null
         };
 
-        let success = this.segments = segments;
+        // One-time initialization of the previous state
+        if (!this.previous) this.previous = this.current;
 
-        if (success) {
-            this.rollAll();
-        }
-
-        return success;
+        // Return the array of prepared turns
+        return this.turns = turns;
     }
+
 
     _sortCombatants(a, b) {
         const initA = Number.isNumeric(a.initiative) ? a.initiative : -9999;
@@ -553,8 +148,8 @@ export class HeroSystem6eCombat extends Combat {
             return initDifference;
         }
 
-        const typeA = a.actor.hasPlayerOwner;
-        const typeB = b.actor.hasPlayerOwner;
+        const typeA = a.actor?.hasPlayerOwner || a.hasPlayerOwner;
+        const typeB = b.actor?.hasPlayerOwner || b.hasPlayerOwner;
 
         if (typeA != typeB) {
             if (typeA) {
@@ -566,8 +161,32 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
+    _sortSegments(a, b) {
+        const initA = Number.isNumeric(a.combatant.initiative) ? a.combatant.initiative : -9999;
+        const initB = Number.isNumeric(b.combatant.initiative) ? b.combatant.initiative : -9999;
+
+        let initDifference = initB - initA;
+        if (initDifference != 0) {
+            return initDifference;
+        }
+
+        const typeA = a.combatant.hasPlayerOwner;
+        const typeB = b.combatant.hasPlayerOwner;
+
+        if (typeA != typeB) {
+            if (typeA) {
+                return -1;
+            }
+            if (typeB) {
+                return 1;
+            }
+        }
+    }
+
+
+    // Standard HeroSystem rules per SPEED CHART
     static hasPhase(spd, segment) {
-        switch (spd) {
+        switch (parseInt(spd)) {
             case 1:
                 return [7].includes(segment);
             case 2:
@@ -593,7 +212,8 @@ export class HeroSystem6eCombat extends Combat {
             case 12:
                 return true;
             default:
-                return false;
+                if (spd < 1) return false;
+                return true;
         }
     }
 
@@ -603,58 +223,45 @@ export class HeroSystem6eCombat extends Combat {
      * Begin the combat encounter, advancing to heroRound 1 and heroTurn 1
      * @return {Promise<Combat>}
      */
-    async startCombat() {
-        this.setSegment(12)
-        return await this.update({ round: 1, turn: 0 });
-    }
+    // async startCombat() {
+    //     this.setSegment(12)
+    //     return await this.update({ round: 1, turn: 0 });
+    // }
 
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    _onUpdate(data, options, userId) {
+    async _onUpdate(data, options, userId) {
+        //console.log("_onUpdate")
         super._onUpdate(data, options, userId);
+        if (data.combatants) this.setupTurns();
 
-        if (data.hasOwnProperty("segment")) {
-            this.segment = data.segment;
-        }
-
-        // Set up heroTurn data
-        if (["combatants", "heroRound", "segment", "turn"].some(k => data.hasOwnProperty(k))) {
-            if (data.combatants) this.setupTurns();
-            else {
-                const c = this.combatant;
-                this.previous = this.current;
-                this.current = {
-                    heroRound: this.heroRound,
-                    segment: this.segment,
-                    heroTurn: this.heroTurn,
-                    combatantId: c ? c.id : null,
-                    tokenId: c ? c.tokenId : null
-                };
-            }
-
-            // Render the sidebar
-            if (data.active === true) ui.combat.initialize({ combat: this });
-            return ui.combat.scrollToTurn();
-        }
+        // Render the sidebar
+        if (data.active === true) ui.combat.initialize({ combat: this });
+        return ui.combat.scrollToTurn();
     }
+
 
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    _onCreateDescendantDocuments(type, documents, result, options, userId) {
-        super._onCreateDescendantDocuments(type, documents, result, options, userId);
+    async _onCreateDescendantDocuments(...args) {
+        //console.log("_onCreateDescendantDocuments");
 
-        // Update the heroTurn order and adjust the combat to keep the combatant the same
+        // Get current combatant
         const current = this.combatant;
+
+        // Super
+        await super._onCreateDescendantDocuments(...args);
+
+        // Setup turns in segment fashion
         this.setupTurns();
 
         // Keep the current Combatant the same after adding new Combatants to the Combat
         if (current) {
-            let heroTurn = Math.max(this.segments[this.segment].findIndex(t => t.id === current.id), 0);
-
-            if (game.user.id === userId) this.update({ heroTurn });
-            else this.update({ heroTurn });
+            let activeTurn = this.turns.find(o => o.tokenId === current.tokenId && o.segment === current.segment && o.initiative == current.initiative).turn;
+            activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
+            await this.update({ turn: activeTurn });
         }
 
         // Render the collection
@@ -664,242 +271,264 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    _onUpdateDescendantDocuments(...args) {
-        super._onUpdateEmbeddedDocuments(...args);
-        this.setupTurns();
-        if (this.active) this.collection.render();
-    }
-
-    _onActorDataUpdate() {
-        this.setupTurns();
-        if (this.active) this.collection.render();
-    }
-
-    /* -------------------------------------------- */
-
-    /** @inheritdoc */
-    _onDeleteDescendantDocuments(embeddedName, documents, result, options, userId) {
-        this.render(false, { renderContext: `delete${embeddedName}` });
+    async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        //console.log("_onDeleteDescendantDocuments")
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
-        const currId = result
 
-        if (currId === undefined) return;
 
-        const nextSurvivor = this.segments[this.segment].find((i, t) => {
-            return !result.includes(t.id) && (i >= this.heroTurn) && !t.defeated;
-        });
-        this.setupTurns();
+        // Get current (active) combatant
+        const current = this.combatant;
 
-        // If the current combatant was removed, update the heroTurn order to the next survivor
-        let heroTurn = this.heroTurn;
-        if (result.includes(currId)) {
-            if (nextSurvivor) heroTurn = this.segments[this.segment].findIndex(t => t.id === nextSurvivor.id);
+        // Assign new turn to combatants
+        let j = 0;
+        for (let _combatant of this.turns) {
+            if (!documents.map(o => o.tokenId).includes(_combatant.tokenId)) {
+                _combatant.turn = j++;
+            }
+            else {
+                _combatant.turn = null
+            }
         }
 
-        // Otherwise keep the combatant the same
-        else heroTurn = this.segments[this.segment].findIndex(t => t.id === currId);
+        // Find the expected new active turn
+        let activeTurn = this.turns.indexOf(current)
 
-        // Update database or perform a local override
-        heroTurn = Math.max(heroTurn, 0);
+        // Advance activeTurn if it has a null turn value (about to be deleted).
+        while (activeTurn < this.turns.length && this.turns[activeTurn].turn === null) {
+            activeTurn++;
+        }
+        activeTurn = this.turns[activeTurn]?.turn || activeTurn;
 
-        if (game.user.id === userId) this.update({ heroTurn });
-        else this.update({ heroTurn });
+        // Super
+        super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
+
+        // Setup turns in segment fashion
+        this.setupTurns();
+
+        // There is an edge case where the last combatant of the round is deleted.
+        activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
+        await this.update({ turn: activeTurn });
+
+        // Render the collection
+        if (this.active) this.collection.render();
+
+    }
+
+    /* -------------------------------------------- */
+
+    /** @inheritdoc */
+    async _onUpdateDescendantDocuments(...args) {
+        //console.log("_onUpdateDescendantDocuments")
+        super._onUpdateEmbeddedDocuments(...args);
+        this.setupTurns();
+
+        // // If the current combatant was removed, update the heroTurn order to the next survivor
+        // let heroTurn = this.heroTurn;
+        // if (result.includes(currId)) {
+        //     if (nextSurvivor) heroTurn = this.segments[this.segment].findIndex(t => t.id === nextSurvivor.id);
+        // }
+
+        // // Otherwise keep the combatant the same
+        // else heroTurn = this.segments[this.segment].findIndex(t => t.id === currId);
+
+        // // Update database or perform a local override
+        // heroTurn = Math.max(heroTurn, 0);
+
+        // if (game.user.id === userId) this.update({ heroTurn });
+        // else this.update({ heroTurn });
 
         // Render the collection
         if (this.active) this.collection.render();
     }
+
+    async _onActorDataUpdate(...args) {
+        console.log("_onActorDataUpdate")
+        super._onActorDataUpdate(...args)
+        this.setupTurns();
+        if (this.active) this.collection.render();
+    }
+
+    /* -------------------------------------------- */
+
+
+
+
+    /**
+   * Manage the execution of Combat lifecycle events.
+   * This method orchestrates the execution of four events in the following order, as applicable:
+   * 1. End Turn
+   * 2. End Round
+   * 3. Begin Round
+   * 4. Begin Turn
+   * Each lifecycle event is an async method, and each is awaited before proceeding.
+   * @param {number} [adjustedTurn]   Optionally, an adjusted turn to commit to the Combat.
+   * @returns {Promise<void>}
+   * @protected
+   */
+    async _manageTurnEvents(adjustedTurn) {
+        //console.log("_manageTurnEvents", adjustedTurn)
+        await super._manageTurnEvents(adjustedTurn);
+        return;
+
+        if (!game.users.activeGM?.isSelf) return;
+        const prior = this.combatants.get(this.previous.combatantId);
+
+        // Adjust the turn order before proceeding. Used for embedded document workflows
+        if (Number.isNumeric(adjustedTurn)) await this.update({ turn: adjustedTurn }, { turnEvents: false });
+        if (!this.started) return;
+
+        // Identify what progressed
+        const advanceRound = this.current.round > (this.previous.round ?? -1);
+        const advanceTurn = this.current.turn > (this.previous.turn ?? -1);
+        if (!(advanceTurn || advanceRound)) return;
+
+        // Conclude prior turn
+        if (prior) await this._onEndTurn(prior);
+
+        // Conclude prior round
+        if (advanceRound && (this.previous.round !== null)) await this._onEndRound();
+
+        // Begin new round
+        if (advanceRound) await this._onStartRound();
+
+        // Begin a new turn
+        await this._onStartTurn(this.combatant);
+    }
+
+    /**
+    * A workflow that occurs at the start of each Combat Turn.
+    * This workflow occurs after the Combat document update, new turn information exists in this.current.
+    * This can be overridden to implement system-specific combat tracking behaviors.
+    * This method only executes for one designated GM user. If no GM users are present this method will not be called.
+    * @param {Combatant} combatant     The Combatant whose turn just started
+    * @returns {Promise<void>}
+    * @protected
+    */
+    _onStartTurn(combatant) {
+        //console.log("_onStartTurn", combatant.name)
+        super._onStartTurn(combatant)
+
+    }
+
+    /**
+   * A workflow that occurs at the end of each Combat Round.
+   * This workflow occurs after the Combat document update, prior round information exists in this.previous.
+   * This can be overridden to implement system-specific combat tracking behaviors.
+   * This method only executes for one designated GM user. If no GM users are present this method will not be called.
+   * @returns {Promise<void>}
+   * @protected
+   */
+    async _onEndRound() {
+        //console.log("_onEndRound")
+        super._onEndRound();
+        return this.PostSegment12();
+
+    }
+
+    // TODO: Replace with PostSegment12 activities.
+    // Such as automatic recovery
+    async PostSegment12 () {
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: `Post-Segment 12`,
+        }
+
+        return ChatMessage.create(chatData)
+    }
+
+    /**
+   * Begin the combat encounter, advancing to round 1 and turn 1
+   * @returns {Promise<Combat>}
+   */
+    async startCombat() {
+        await super.startCombat();
+
+        // Find first TURN with segment 12
+        if (!this.segments[12].length) return;
+        let turn = this.segments[12][0]?.turn || 1
+
+        const updateData = { round: 1, turn: turn };
+        return this.update(updateData);
+    }
+
+    /**
+   * Rewind the combat to the previous turn
+   * @returns {Promise<Combat>}
+   */
+    async previousTurn() {
+        //console.log("previousTurn");
+        if ((this.turn === 0) && (this.round === 0)) return this;
+        else if ((this.turn <= 0) && (this.turn !== null)) return this.previousRound();
+
+        // Hero combats start with round 1 and segment 12.
+        // So anything less than segment 12 will call previousTurn
+        let segment12turn = this.segments[12][0]?.turn || -1;
+        if ((this.round <= 1) && (this.turn <= segment12turn)) {
+            return this.previousRound();
+        }
+
+        let advanceTime = -1 * CONFIG.time.turnTime;
+        let previousTurn = (this.turn ?? this.turns.length) - 1;
+
+        // Update the document, passing data through a hook first
+        const updateData = { round: this.round, turn: previousTurn };
+        const updateOptions = { advanceTime, direction: -1 };
+        Hooks.callAll("combatTurn", this, updateData, updateOptions);
+        return this.update(updateData, updateOptions);
+
+    }
+
+
+    /**
+   * Rewind the combat to the previous round
+   * @returns {Promise<Combat>}
+   */
+    async previousRound() {
+        //console.log("previousRound");
+        let turn = (this.round === 0) ? 0 : Math.max(this.turns.length - 1, 0);
+        if (this.turn === null) turn = null;
+        let round = Math.max(this.round - 1, 0);
+        let advanceTime = -1 * (this.turn || 0) * CONFIG.time.turnTime;
+        if (round > 0) advanceTime -= CONFIG.time.roundTime;
+
+        // Hero combats start with round 1 and segment 12.
+        // So anything less than segment 12 will call previousTurn
+        let segment12turn = this.segments[12][0]?.turn || -1;
+        if ((round <= 1) && (turn <= segment12turn)) {
+            round = 0;
+            turn = null
+        }
+        if (round == 0)
+        {
+            turn = null;
+        }
+
+
+        // Update the document, passing data through a hook first
+        const updateData = { round, turn };
+        const updateOptions = { advanceTime, direction: -1 };
+        Hooks.callAll("combatRound", this, updateData, updateOptions);
+        return this.update(updateData, updateOptions);
+    }
+
+
 }
 
-export class HeroSystem6eCombatTracker extends CombatTracker {
-    static get defaultOptions() {
-        var path = "systems/hero6efoundryvttv2/templates/combat/combat-tracker.hbs";
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            template: path,
-        });
+class HeroCombatant extends Combatant {
+    constructor(combatant) {
+        super();
+        Object.assign(this, combatant);
+        this.id = combatant.id;
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
-        html.find('.segment-active').click(ev => this._onSegmentToggleContent(ev));
-
-        html.on('click', "[data-control]", this._handleButtonClick.bind(this));
-
-        Hooks.on('updateToken', (token, data, diff, id) => {
-            this.render();
-        });
-    }
-
-    async _handleButtonClick(event) {
-        const clickedElement = $(event.currentTarget);
-        const control = clickedElement.data().control;
-
-        const relevantCombat = game.combats.combats.find(e => e.active === true);
-
-        switch (control) {
-            case 'startCombat': {
-                // AARON WAS HERE: 
-                // startCombat was being called twice.  
-                // It is already calledd by foundry _OnCombatControl.
-                // Shouldn't need to call it again.
-                //relevantCombat.startCombat()
-                //this.render();
-                break;
-            }
-
-            case 'endCombat': {
-                break;
-            }
-
-            case 'nextTurn': {
-                relevantCombat.nextTurn()
-                this.render()
-                break;
-            }
-
-            case 'nextRound': {
-                break;
-            }
-
-            case 'previousTurn': {
-                relevantCombat.previousTurn()
-                this.render()
-                break;
-            }
-
-            case 'previousRound': {
-                break;
-            }
-
-            default:
-                HEROSYS.log(true, 'Invalid action detected ' + control)
-                break;
-        }
-    }
-
-    _onSegmentToggleContent(event) {
-        event.preventDefault();
-        const header = event.currentTarget;
-        const segment = header.closest(".segment-container");
-        const content = segment.querySelector(".segment-content");
-        content.style.display = content.style.display === "none" ? "block" : "none";
-    }
-
-    async getData(options) {
-        // Get the combat encounters possible for the viewed 
-        const combat = this.viewed;
-
-        const hasCombat = combat !== null;
-        const combats = this.combats;
-        const currentIdx = combats.findIndex(c => c === combat);
-        const previousId = currentIdx > 0 ? combats[currentIdx - 1].id : null;
-        const nextId = currentIdx < combats.length - 1 ? combats[currentIdx + 1].id : null;
-        const settings = game.settings.get("core", Combat.CONFIG_SETTING);
-
-        // Prepare rendering data
-        const data = {
-            user: game.user,
-            combats: combats,
-            currentIndex: currentIdx + 1,
-            combatCount: combats.length,
-            hasCombat: hasCombat,
-            combat,
-            segments: [],
-            previousId,
-            nextId,
-            started: this.started,
-            control: false,
-            settings
-        };
-        if (!hasCombat) return data;
-
-        // Format information about each combatant in the encounter
-        let hasDecimals = false;
-        const segments = [];
-
-        // Guard
-        if (!combat.segments) return (data);
-
-        for (let i = 1; i <= 12; i++) {
-            let heroTurns = [];
-            if (combat.round != 1 || i == 12) {
-                for (let [j, combatant] of combat.segments[i].entries()) {
-                    //if (!combatant.isVisible) continue;
-
-                    if (!combatant.visible) continue;
-
-                    // Prepare heroTurn data
-                    //const resource = combatant.permission >= CONST.ENTITY_PERMISSIONS.OBSERVER ? combatant.resource : null
-                    //const resource = combatant.permission >= CONST.USER_PERMISSIONS.OBSERVER ? combatant.resource : null
-                    const observer_permissions = 3
-                    //const resource = combatant.permission >= observer_permissions ? combatant.resource : null
-                    const resource = combatant.permission
-
-                    const heroTurn = {
-                        id: combatant.id,
-                        name: combatant.name,
-                        alias: combatant.alias ? combatant.alias : "",
-                        img: combatant.img,
-                        active: combat.segment === i && combat.turn === j,
-                        owner: combatant.isOwner,
-                        defeated: combatant.defeated,
-                        hidden: combatant.hidden,
-                        initiative: combatant.initiative,
-                        hasResource: resource !== null,
-                        resource: resource,
-                        actorData: combatant.token?.actor?.system || combatant.token._actor.system,
-                        isFake: combatant.isFake || false
-                    };
-
-                    if (Number.isFinite(heroTurn.initiative) && !Number.isInteger(heroTurn.initiative)) hasDecimals = true;
-                    heroTurn.css = [
-                        heroTurn.active ? "active" : "",
-                        heroTurn.hidden ? "hidden" : "",
-                        heroTurn.defeated ? "defeated" : ""
-                    ].join(" ").trim();
-
-                    // Cached thumbnail image for video tokens
-                    if (VideoHelper.hasVideoExtension(heroTurn.img)) {
-                        if (combatant._thumb) heroTurn.img = combatant._thumb;
-                        else heroTurn.img = combatant._thumb = await game.video.createThumbnail(combatant.img, { width: 100, height: 100 });
-                    }
-
-                    // Actor and Token status effects
-                    heroTurn.effects = new Set();
-                    if (combatant.token) {
-                        combatant.token.effects.forEach(e => heroTurn.effects.add(e));
-                        if (combatant.token.overlayEffect) heroTurn.effects.add(combatant.token.overlayEffect);
-                    }
-                    if (combatant.actor) combatant.actor.temporaryEffects.forEach(e => {
-                        if (e.statuses.has(CONFIG.Combat.defeatedStatusId)) heroTurn.defeated = true;
-                        else if (e.icon) heroTurn.effects.add(e.icon);
-                    });
-                    heroTurns.push(heroTurn);
-                }
-            }
-            segments[i] = heroTurns;
-        }
-
-        // Format initiative numeric precision
-        // const precision = CONFIG.Combat.initiative.decimals;
-        // segments.forEach(s => s.forEach(t => {
-        //     if (t.initiative !== null) t.initiative = t.initiative.toFixed(hasDecimals ? precision : 0);
-        // }));
-
-        let activeSegments = [];
-
-        for (let i = 1; i <= 12; i++) {
-            activeSegments[i] = combat.segment === i;
-        }
-
-        // Merge update data for rendering
-        return foundry.utils.mergeObject(data, {
-            round: combat.round,
-            heroTurn: combat.turn,
-            segments: segments,
-            // segments:game.combats.combats.find(e => e.active === true).segments,
-            activeSegments: activeSegments,
-            control: combat.combatant?.players?.includes(game.user)
-        });
-    }
+    id = null;
+    initiative = null;  //Override
+    turn = null;
+    segment = null;
+    alias = null;
+    isFake = false;
+    //hasRolled = true; // Initiative is static, but actor DEX/INT/SPD might change
 }
+
