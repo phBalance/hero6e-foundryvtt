@@ -78,7 +78,7 @@ export class HeroSystem6eCombat extends Combat {
 
             // Lightning Reflexes
             const actor = game.actors.get(combatant.actorId);
-            const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL"  || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE");
+            const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE");
             if (item) {
                 const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
                 const lightning_reflex_initiative = combatant.initiative + parseInt(levels);
@@ -294,8 +294,11 @@ export class HeroSystem6eCombat extends Combat {
         // Find the expected new active turn
         let activeTurn = this.turns.indexOf(current)
 
+
+
+
         // Advance activeTurn if it has a null turn value (about to be deleted).
-        while (activeTurn < this.turns.length && this.turns[activeTurn].turn === null) {
+        while (activeTurn > -1 && activeTurn < this.turns.length && this.turns[activeTurn].turn === null) {
             activeTurn++;
         }
         activeTurn = this.turns[activeTurn]?.turn || activeTurn;
@@ -306,9 +309,13 @@ export class HeroSystem6eCombat extends Combat {
         // Setup turns in segment fashion
         this.setupTurns();
 
-        // There is an edge case where the last combatant of the round is deleted.
-        activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-        await this.update({ turn: activeTurn });
+        // If activeTurn == -1 then combat has not begun
+        if (activeTurn > -1) {
+            // There is an edge case where the last combatant of the round is deleted.
+            activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
+            await this.update({ turn: activeTurn });
+
+        }
 
         // Render the collection
         if (this.active) this.collection.render();
@@ -428,7 +435,7 @@ export class HeroSystem6eCombat extends Combat {
 
     // TODO: Replace with PostSegment12 activities.
     // Such as automatic recovery
-    async PostSegment12 () {
+    async PostSegment12() {
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
@@ -500,8 +507,7 @@ export class HeroSystem6eCombat extends Combat {
             round = 0;
             turn = null
         }
-        if (round == 0)
-        {
+        if (round == 0) {
             turn = null;
         }
 
