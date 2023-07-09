@@ -425,7 +425,9 @@ export class HeroSystem6eCombat extends Combat {
 
         if (combatant.actor.statuses.has('stunned')) {
             const effect = combatant.actor.effects.contents.find(o => o.statuses.has('stunned'))
-            console.log(effect);
+
+            // At beginning of combat if stunned effect is deleted a console error is generated.
+            // This would be extremetly unusual as characters typically don't start combat stunned.
             await effect.delete();
 
             let content = `${combatant.actor.name} recovers from being stunned.`
