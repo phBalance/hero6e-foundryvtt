@@ -888,6 +888,7 @@ HERO.ModifierOverride = {
     "PHYSICAL": { BASECOST: 5 }, // DAMAGENEGATION
     "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
     "MENTAL": { BASECOST: 5 }, // DAMAGENEGATION
+    "ARMORPIERCING": { BASECOST: 0.5 },
 }
 
 // Valid Power Options (found these in Custom Power)

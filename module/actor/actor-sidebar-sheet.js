@@ -227,7 +227,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
         
         // Sort attacks
-        data.items = items.sort((a, b) => ((a.system.subType === 'attack' || a.attack === 'attack') && (b.system.subType === 'attack' || b.attack === 'attack')) ? a.name.localeCompare(b.name) : 0);
+        // Sorting is tricky and not done at the moment.
+        // Sorting just the attacks may sort powers as well, which can mess up frameworks.
+        //data.items = items.filter(o=> o.system.subType === 'attack' || o.attack === 'attack');
+        //data.items.sort((a, b) => a.name.localeCompare(b.name) );
+        //data.items = [...data.items, ...items.filter(o=> !(o.system.subType === 'attack' || o.attack === 'attack') )]
+        //data.items = items.sort((a, b) => ((a.system.subType === 'attack' || a.attack === 'attack') && (b.system.subType === 'attack' || b.attack === 'attack')) ? a.name.localeCompare(b.name) : 0);
+        data.items = items;
 
         if (data.hasEquipment) {
             if (parseFloat(weightTotal).toFixed(1) > 0 || parseFloat(priceTotal).toFixed(2) > 0) {

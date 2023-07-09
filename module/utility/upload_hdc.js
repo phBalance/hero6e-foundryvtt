@@ -64,12 +64,10 @@ export async function applyCharacterSheet(xmlDoc) {
     // 6e vs 5e
     if (!characterTemplate) {
         // No template defined, so we will assume if COM-liness exists it is 5E.
-        if (characteristics.querySelector("COM"))
-        {
+        if (characteristics.querySelector("COM")) {
             ui.notifications.warn(`Import is missing Hero Designer character template.  Assuming 5E.`)
             this.actor.update({ 'system.is5e': true }, { render: false })
-        } else
-        {
+        } else {
             ui.notifications.warn(`Import is missing Hero Designer character template.  Assuming 6E.`)
             this.actor.update({ 'system.is5e': false }, { render: false })
         }
@@ -80,7 +78,7 @@ export async function applyCharacterSheet(xmlDoc) {
             this.actor.update({ 'system.is5e': false }, { render: false })
         }
     }
-    
+
     const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
     // Caracteristics for 6e
@@ -435,6 +433,9 @@ export async function applyCharacterSheet(xmlDoc) {
     // Now were all done so render.
     this.actor.render()
 
+    // Update actor sidebar (needed when name is changed)
+    ui.actors.render()
+
     ui.notifications.info(`${this.actor.name} upload complete`)
 
     Hooks.call('hdcUpload')
@@ -566,7 +567,7 @@ export function XmlToItemData(xml, type) {
 
     // AID, DRAIN, TRANSFER (any adjustment power)
     const configPowerInfo = getPowerInfo({ xmlid: systemData.XMLID })
-    if (configPowerInfo && configPowerInfo.powerType.includes("adjustment")){
+    if (configPowerInfo && configPowerInfo.powerType.includes("adjustment")) {
         // Make sure we have a valid INPUT
         let choices = AdjustmentSources()
         systemData.INPUT = (systemData.INPUT || "").toUpperCase().trim()
@@ -1219,8 +1220,8 @@ function calcActivePoints(_basePointsPlusAdders, system) {
     // const xmlid = system.rules || system.xmlid //xmlItem.getAttribute('XMLID')
     // const modifiers = system.modifiers || system.MODIFIER || [] //xmlItem.getElementsByTagName("ADDER")
 
-    // if (system.XMLID == "RKA")
-    //     HEROSYS.log(false, system.XMLID)
+    if (system.XMLID == "MINDCONTROL")
+        HEROSYS.log(false, system.XMLID)
 
     // NAKEDMODIFIER uses PRIVATE=="Yes" to indicate advantages
 
@@ -1231,11 +1232,19 @@ function calcActivePoints(_basePointsPlusAdders, system) {
     )) {
         let _myAdvantage = 0
         const modifierBaseCost = parseFloat(modifier.BASECOST || 0)
+        const costPerLevel = parseFloat(modifier.costPerLevel || 0)
         const levels = Math.max(1, parseFloat(modifier.LEVELS))
-        if (modifier.XMLID == "AOE") {
-            _myAdvantage += modifierBaseCost
-        } else {
-            _myAdvantage += modifierBaseCost * levels
+        switch (modifier.XMLID) {
+            case "AOE":
+                _myAdvantage += modifierBaseCost;
+                break;
+
+            case "CUMULATIVE":
+                _myAdvantage += modifierBaseCost + (levels * 0.25);
+                break;
+
+            default:
+                _myAdvantage += modifierBaseCost * levels;
         }
 
         // Some modifiers may have ADDERS
@@ -1254,9 +1263,17 @@ function calcActivePoints(_basePointsPlusAdders, system) {
         advantages += Math.max(0, _myAdvantage)
         modifier.BASECOST_total = _myAdvantage
 
+
+
     }
 
     const _activePoints = _basePointsPlusAdders * (1 + advantages)
+
+    // HALFEND is based on active points without the HALFEND modifier
+    if (system.modifiers.find(o => o.XMLID == "REDUCEDEND")) {
+        system._activePointsWithoutEndMods = _basePointsPlusAdders * (1 + advantages -  0.25);
+    }
+
 
     return RoundFavorPlayerDown(_activePoints)
 }
@@ -1586,6 +1603,9 @@ export function updateItemDescription(system, type) {
                 input + " class of minds)";
             break;
 
+
+
+
         case "FORCEFIELD":
         case "ARMOR":
         case "DAMAGERESISTANCE":
@@ -1694,6 +1714,7 @@ export function updateItemDescription(system, type) {
         case "HKA":
         case "ENERGYBLAST": //Energy Blast 1d6
         case "EGOATTACK":
+        case "MINDCONTROL":
             system.description = `${system.ALIAS} ${system.LEVELS?.value}d6`
             break;
 
@@ -1844,19 +1865,23 @@ export function updateItemDescription(system, type) {
     }
 
 
+
+    // if (system.XMLID === "MINDCONTROL")
+    //     HEROSYS.log(false, system.XMLID);
+
+    // Advantages sorted low to high
+    for (let modifier of system.modifiers.filter(o => o.BASECOST >= 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })) {
+        system.description += createPowerDescriptionModifier(modifier, system)
+    }
+
     // Active Points
     if (system.realCost != system.activePoints) {
         system.description += " (" + system.activePoints + " Active Points); "
     }
 
-    // Advantages sorted low to high
-    for (let modifier of system.modifiers.filter(o => o.BASECOST >= 0).sort((a, b) => { return a.BASECOST - b.BASECOST })) {
-        system.description += createPowerDescriptionModifier(modifier, name)
-    }
-
     // Disadvantages sorted low to high
-    for (let modifier of system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST - b.BASECOST })) {
-        system.description += createPowerDescriptionModifier(modifier, name)
+    for (let modifier of system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })) {
+        system.description += createPowerDescriptionModifier(modifier, system)
     }
 
     system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
@@ -1871,6 +1896,15 @@ export function updateItemDescription(system, type) {
     const increasedEnd = system.modifiers.find(o => o.XMLID == "INCREASEDEND")
     if (increasedEnd) {
         system.end *= parseInt(increasedEnd.OPTION.replace('x', ''))
+    }
+
+    const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND")
+    if (reducedEnd && reducedEnd.OPTION === 'HALFEND') {
+        system.end = RoundFavorPlayerDown(system._activePointsWithoutEndMods / 10)
+        system.end = RoundFavorPlayerDown(system.end / 2);
+    }
+    if (reducedEnd && reducedEnd.OPTION === 'ZERO') {
+        system.end = 0;
     }
 
     // Some powers do not use Endurance
@@ -1908,7 +1942,7 @@ export function updateItemDescription(system, type) {
     }
 }
 
-function createPowerDescriptionModifier(modifier, powerName) {
+function createPowerDescriptionModifier(modifier, system) {
 
 
 
@@ -1939,8 +1973,9 @@ function createPowerDescriptionModifier(modifier, powerName) {
         case "FOCUS":
             result += modifier.ALIAS
             break;
+
         default:
-            if (modifier.ALIAS) result += "; " + modifier.ALIAS || "?"
+            if (modifier.ALIAS) result += ", " + modifier.ALIAS || "?"
 
 
     }
@@ -1967,12 +2002,23 @@ function createPowerDescriptionModifier(modifier, powerName) {
         }
     }
 
+    if (modifier.XMLID == "CUMULATIVE" && (parseInt(modifier.LEVELS) > 0)) {
+        result += parseInt(system.LEVELS.value || system.LEVELS) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
+    }
 
-    if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) result += modifier.OPTION_ALIAS + "; "
+
+    if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) {
+        result += modifier.OPTION_ALIAS
+        if (["EXTRATIME"].includes(modifier.XMLID)) {
+            result += ", ";
+        } else {
+            result += "; ";
+        }
+    }
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
     for (let adder of modifier.adders) {
-        result += adder.ALIAS + "; "
+        result += adder.ALIAS + ", "
     }
 
     let fraction = ""
@@ -2146,6 +2192,17 @@ export async function makeAttack(item) {
     // MENTALBLAST
     if (xmlid == "EGOATTACK") {
         changes[`system.class`] = 'mental'
+        changes[`system.targets`] = "dmcv"
+        changes[`system.uses`] = "omcv"
+        changes[`system.knockbackMultiplier`] = 0
+        changes[`system.usesStrength`] = false
+        changes['system.stunBodyDamage'] = "stunonly"
+        changes['system.noHitLocations'] = true
+    }
+
+    // MINDCONTROL
+    if (xmlid == "MINDCONTROL") {
+        changes[`system.class`] = 'mindcontrol'
         changes[`system.targets`] = "dmcv"
         changes[`system.uses`] = "omcv"
         changes[`system.knockbackMultiplier`] = 0
