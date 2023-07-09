@@ -8,6 +8,7 @@ on:
 jobs:
   check_release:
     runs-on: ubuntu-latest
+    if: github.repository == 'dmdorman/hero6e-foundryvtt'
     outputs:
       release: ${{ steps.extract_release.outputs.RELEASE }}
     
@@ -41,7 +42,7 @@ jobs:
 
   prepare_release:
     needs: check_release
-    if: needs.check_release.outputs.release != ''
+    if: (needs.check_release.outputs.release != '') && (github.repository == 'dmdorman/hero6e-foundryvtt')
     runs-on: ubuntu-latest
 
     steps:
