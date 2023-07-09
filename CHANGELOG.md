@@ -1,3 +1,5 @@
+# Version 3.0.6
+
 # Version 3.0.5
 - Initial DRAIN support.
 - Changing PC/NPC actor type moved to sheet header.  Also can be changed in the context menu of the actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).

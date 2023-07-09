@@ -78,11 +78,11 @@ export class HeroSystem6eCombat extends Combat {
 
             // Lightning Reflexes
             const actor = game.actors.get(combatant.actorId);
-            const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL");
+            const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL"  || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE");
             if (item) {
                 const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
                 const lightning_reflex_initiative = combatant.initiative + parseInt(levels);
-                const alias = item.system.OPTION_ALIAS || item.system.other.option_alias || 'None'
+                const alias = item.system.OPTION_ALIAS || item.system.INPUT || 'All Actions'
                 const lightning_reflex_alias = '(' + alias + ')'
 
                 const combatantLR = new HeroCombatant(combatant)
