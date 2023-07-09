@@ -315,3 +315,8 @@ input.left {
 .actor-sidebar-sheet table tr td.item-framework-child-name {
   padding-left: 10px;
 }
+
+.actor-sidebar-sheet header span {
+  margin-left: 2px;
+  margin-right: 2px;
+}

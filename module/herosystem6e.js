@@ -11,7 +11,8 @@ import * as macros from "./macros.js";
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.js";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.js";
 import HeroSystem6eTemplate from "./template.js";
-import { HeroSystem6eCombat, HeroSystem6eCombatTracker } from "./combat.js";
+import { HeroSystem6eCombat } from "./combat.js";
+import { HeroSystem6eCombatTracker } from "./combatTracker.js"
 import SettingsHelpers from "./settings/settings-helpers.js";
 import { HeroSystem6eTokenHud } from "./bar3/tokenHud.js";
 import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
@@ -69,10 +70,8 @@ Hooks.once('init', async function () {
     CONFIG.Item.documentClass = HeroSystem6eItem;
     CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
     CONFIG.Token.objectClass = HeroSystem6eToken;
-    //CONFIG.Token.prototypeSheetClass = HeroSystem6eTokenConfig
     CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects();
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-    //CONFIG.MeasuredTemplate.objectClass = HeroSystem6eTemplate;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     HeroRuler.initialize()
@@ -130,11 +129,13 @@ Hooks.on("renderChatMessage", (app, html, data) => {
 });
 Hooks.on("renderChatLog", (app, html, data) => HeroSystem6eCardHelpers.chatListeners(html));
 Hooks.on("renderChatPopout", (app, html, data) => HeroSystem6eCardHelpers.chatListeners(html));
+
+// When actor SPD is changed we need to setupTurns again
 Hooks.on("updateActor", (app, html, data) => {
-    app.sheet._render()
+    //app.sheet._render()
 
     for (let combat of game.combats) {
-        combat._onActorDataUpdate();
+        combat.setupTurns(); //_onActorDataUpdate();
     }
 });
 
@@ -289,13 +290,13 @@ Hooks.once("ready", async function () {
         // if lastMigration < 3.0.4
         // Remove all tranferred effects
         if (foundry.utils.isNewerVersion('3.0.4', lastMigration)) {
-            ui.notifications.info(`Migragrating actor data.`)
+            await ui.notifications.info(`Migragrating actor data.`)
             for (let actor of game.actors.contents) {
                 for (let effect of actor.effects.filter(o => o.origin)) {
-                    effect.delete();
+                    await effect.delete();
                 }
             }
-            ui.notifications.info(`Migragtion complete.`)
+            await ui.notifications.info(`Migragtion complete.`)
         }
 
     }
@@ -422,10 +423,25 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 })
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
-    html.find('header h4').append(`<span>${game.system.version}<span>`)
-    // html.find('header h4').after(`<a class="header-button control configure-type">
+    //html.find('header h4').append(`<span>${data.actor.type.toUpperCase()}</span>`)
+    html.find('header h4').append(`<span>${game.system.version}</span>`)
+
+    let element = document.createElement("a");
+    element.setAttribute(`data-id`, data.actor.id)
+    element.title = data.actor.type.toUpperCase()
+    element.addEventListener('click', () => {
+        const actor = game.actors.get(event.target.dataset.id)
+        actor.ChangeType()
+    });
+
+    element.innerHTML = `<i class="fal fa-user-robot"></i>Type`
+
+
+    html.find('header h4').after(element);
+    // `<a class="header-button control configure-type" onclick=">
     // <i class="fal fa-user-robot"></i>Type 
-    // <a>`)
+    // </a>`)
+
 })
 
 Hooks.on("renderItemSheet", (dialog, html, data) => {
@@ -436,10 +452,12 @@ Hooks.on("getActorDirectoryEntryContext", (dialog, html, data) => {
 
     console.log("getActorDirectoryEntryContext")
     const menu = {
-        "name": "Change Actor Type",
+        "name": "Change Type",
         "icon": "<i class=\"fas fa-cog\"></i>",
         "callback": async function (target) {
-            return ui.notifications.warn("Change Actor Type not implemented");
+            const dataset = { ...target[0].dataset }
+            const actor = game.actors.get(dataset.entryId)
+            return actor.ChangeType()
         },
     }
     html.push(menu)

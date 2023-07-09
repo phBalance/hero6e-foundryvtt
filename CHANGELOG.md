@@ -1,3 +1,10 @@
+# Version 3.0.5
+- Initial DRAIN support.
+- Changing PC/NPC actor type moved to sheet header.  Also can be changed in the context menu of the actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).
+- Combat Tracker Improvments. Reworked underlying code so that _onEndRound and _onStartTurn are called as expected.  This should lead to future automation improvments.  For example Post-Segment-12 activities and Endurance use at the beginning of turn for continuous powers. Also changed tooltips for PREV/NEXT to align with Hero terminology. [#175](https://github.com/dmdorman/hero6e-foundryvtt/issues/175)
+- Minor improvements to framework support.
+- Fixed issue where Reduced Endurance was not included in END calculations. [#132](https://github.com/dmdorman/hero6e-foundryvtt/issues/132)
+
 # Version 3.0.4
 - Reworked Active Effects such that the effects on items remain with items.  They are no longered
 transferred from the item to the actor.  This is following [FoundryVtt v11 ActiveEffect Transferral](https://foundryvtt.com/article/v11-active-effects/) recommendations.

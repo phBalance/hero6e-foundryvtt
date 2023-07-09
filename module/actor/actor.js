@@ -21,13 +21,13 @@ export class HeroSystem6eActor extends Actor {
             // sight: { enabled: true }, 
             displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
             displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
-            flags: {
-                [game.system.id]: {
-                    bar3: {
-                        attribute: "characteristics.end"
-                    }
-                }
-            }
+            // flags: {
+            //     [game.system.id]: {
+            //         bar3: {
+            //             attribute: "characteristics.end"
+            //         }
+            //     }
+            // }
 
         }
 
@@ -68,7 +68,7 @@ export class HeroSystem6eActor extends Actor {
             newEffect.statuses = [activeEffect.id]
 
             // Check if this ActiveEffect already exists
-            const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id) );
+            const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id));
             if (existingEffect) {
                 HEROSYS.log(false, activeEffect.id + " already exists")
                 return
@@ -78,5 +78,44 @@ export class HeroSystem6eActor extends Actor {
         await this.createEmbeddedDocuments("ActiveEffect", [newEffect])
 
     }
+
+    async ChangeType() {
+        const template = "systems/hero6efoundryvttv2/templates/chat/actor-change-type-dialog.hbs"
+        const actor = this
+        let cardData = {
+            actor,
+            groupName: "typeChoice",
+            choices:{ pc: "PC", npc: "NPC" },
+            chosen: actor.type,
+        }
+        const html = await renderTemplate(template, cardData)
+        return new Promise(resolve => {
+            const data = {
+                title: `Change ${this.name} Type`,
+                content: html,
+                buttons: {
+                    normal: {
+                        label: "Apply",
+                        callback: html => resolve(
+                            _processChangeType(html)
+                        )
+                    },
+                    // cancel: {
+                    //   label: "cancel",
+                    //   callback: html => resolve({canclled: true})
+                    // }
+                },
+                default: "normal",
+                close: () => resolve({ cancelled: true })
+            }
+            new Dialog(data, null).render(true)
+
+            async function _processChangeType(html) {
+                await actor.update({ type: html.find('input:checked')[0].value})
+            }
+        });
+    }
+
+
 
 }
