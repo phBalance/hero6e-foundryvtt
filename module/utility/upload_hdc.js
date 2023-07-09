@@ -2122,28 +2122,28 @@ export async function makeAttack(item) {
         changes[`system.noHitLocations`] = true
     }
 
-    // TRANSFER (not implemented)
+    // TRANSFER
     if (xmlid == "TRANSFER") {
         changes[`system.class`] = 'transfer'
         changes[`system.usesStrength`] = false
         changes[`system.noHitLocations`] = true
     }
 
-    // MINDSCAN (not implemented)
+    // MINDSCAN
     if (xmlid == "MINDSCAN") {
         changes[`system.class`] = 'mindscan'
         changes[`system.usesStrength`] = false
         changes[`system.noHitLocations`] = true
     }
 
-    // DISPEL (not implemented)
+    // DISPEL
     if (xmlid == "DISPEL") {
         changes[`system.class`] = 'dispel'
         changes[`system.usesStrength`] = false
         changes[`system.noHitLocations`] = true
     }
 
-    // MENTALBLAST (not implemented)
+    // MENTALBLAST
     if (xmlid == "EGOATTACK") {
         changes[`system.class`] = 'mental'
         changes[`system.targets`] = "dmcv"
@@ -2152,6 +2152,20 @@ export async function makeAttack(item) {
         changes[`system.usesStrength`] = false
         changes['system.stunBodyDamage'] = "stunonly"
         changes['system.noHitLocations'] = true
+    }
+
+    // CHANGEENVIRONMENT
+    if (xmlid == "CHANGEENVIRONMENT") {
+        changes[`system.class`] = 'change enviro'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
+    }
+
+    // FLASH
+    if (xmlid == "FLASH") {
+        changes[`system.class`] = 'flash'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
     }
 
 

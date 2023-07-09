@@ -495,7 +495,16 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 5,
     },
-
+    "LUCK": {
+        name: "Luck",
+        powerType: ["special"],
+        percievability: "imperceptible",
+        duration: "ersistent",
+        target: "self only",
+        range: "self",
+        costEnd: false,
+        costPerLevel: 5,
+    },
 
 
 
@@ -549,6 +558,16 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 5,
     },
+    "MINDLINK": {
+        name: "Mind Link",
+        powerType: ["mental"],
+        percievability: "imperceptible",
+        duration: "persistent",
+        target: "dmcv",
+        range: "los",
+        costEnd: false,
+        costPerLevel: 5,
+    },
 
 
     // Senses
@@ -586,9 +605,17 @@ HERO.powers = {
         costEnd: true
     },
     "EXTRADC": { powerType: ["martial"], costPerLevel: 4 },
-    "MANEUVER": { powerType: ["martial", "attack"]},
-
-
+    "MANEUVER": { powerType: ["martial", "attack"] },
+    "CHANGEENVIRONMENT": {
+        name: "Change Environment",
+        powerType: ["attack"],
+        percievability: "Obvious",
+        duration: "Constant",
+        target: "Target’s DCV",
+        range: "Standard",
+        costEnd: true,
+        costPerLevel: 1,
+    },
 
 
     // Defense
@@ -676,6 +703,16 @@ HERO.powers = {
     "SWINGING": { powerType: ["movement"], costEnd: true, costPerLevel: 0.5, },
     "TUNNELING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
     "RUNNING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
+    "EXTRADIMENSIONALMOVEMENT": {
+        powerType: ["movement"],
+        name: "Extra-Dimensional movement",
+        percievability: "Inobvious",
+        duration: "instant",
+        target: "Self Only",
+        range: "Self",
+        costEnd: true,
+        costPerLevel: 20,
+    },
 
     // PERKS
     "REPUTATION": {
@@ -771,6 +808,8 @@ HERO.powers = {
     "LIST": { powerType: ["framework"] },
     "VPP": { powerType: ["framework"] },
     "ELEMENTAL_CONTROL": { powerType: ["framework"] },
+    "MULTIPOWER": { powerType: ["framework"] },
+    "COMPOUNDPOWER": { powerType: ["compound"] },
 
     // Misc
     "DUPLICATION": {
@@ -828,7 +867,7 @@ HERO.powers5e = {
         name: "Resistant Protection",
         costEnd: true,
         costPerLevel: 3 / 2
-    }, 
+    },
 }
 
 // These (mostly 5e) powers are rebranded as 6e powers
