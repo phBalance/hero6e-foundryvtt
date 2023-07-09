@@ -62,9 +62,25 @@ export async function applyCharacterSheet(xmlDoc) {
     await this.actor.deleteEmbeddedDocuments("ActiveEffect", this.actor.effects.map(o => o.id))
 
     // 6e vs 5e
-    if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
-        this.actor.update({ 'system.is5e': true }, { render: false })
+    if (!characterTemplate) {
+        // No template defined, so we will assume if COM-liness exists it is 5E.
+        if (characteristics.querySelector("COM"))
+        {
+            ui.notifications.warn(`Import is missing Hero Designer character template.  Assuming 5E.`)
+            this.actor.update({ 'system.is5e': true }, { render: false })
+        } else
+        {
+            ui.notifications.warn(`Import is missing Hero Designer character template.  Assuming 6E.`)
+            this.actor.update({ 'system.is5e': false }, { render: false })
+        }
+    } else {
+        if (characterTemplate && characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
+            this.actor.update({ 'system.is5e': true }, { render: false })
+        } else {
+            this.actor.update({ 'system.is5e': false }, { render: false })
+        }
     }
+    
     const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
     // Caracteristics for 6e
@@ -158,7 +174,7 @@ export async function applyCharacterSheet(xmlDoc) {
     // Initial 5e support
     // 5th edition has no edition designator, so assuming if there is no 6E then it is 5E.
     // "builtIn.Superheroic6E.hdt"
-    if (characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
+    if (this.actor.system.is5e) {
         const figuredChanges = {}
         figuredChanges[`system.is5e`] = true  // used in item-attack.js to modify killing attack stun multiplier
 
