@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS item-toHit-card' this }} --}}
+{{ log 'HEROSYS item-toHit-card' this }}
 <div class="hero chat-card item-card toHit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
     tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
@@ -97,8 +97,8 @@
         <button class="roll-damage" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-knockbackMod="{{knockbackMod}}"
             data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}" data-effectiveStr="{{effectiveStr}}"
             data-targetIds="{{targetIds}}">
-            {{#if (eq item.system.XMLID "AID")}}
-            Roll AID
+            {{#if adjustment}}
+            Roll {{item.system.XMLID}}
             {{else}}
             Roll Damage
             {{/if}}

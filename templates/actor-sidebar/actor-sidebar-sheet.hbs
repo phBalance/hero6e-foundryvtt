@@ -1,4 +1,4 @@
-{{log 'actor-sidebar-sheet' this}}
+{{!-- {{log 'actor-sidebar-sheet' this}} --}}
 <form class="{{cssClass}}" autocomplete="off">
 
     <aside>
@@ -99,11 +99,11 @@
                 <input type="file" accept=".hdc" />
             </label>
 
-            {{#if isGM}}
+            {{!-- {{#if isGM}}
             <select name="type" data-dtype="text">
                 {{selectOptions actorTypeChoices selected=actor.type localize=true}}
             </select>
-            {{/if}}
+            {{/if}} --}}
         </div>
     </header>
 
@@ -439,18 +439,18 @@
             <div class="tab tab-body" data-group="primary" data-tab="powers">
                 <table>
                     <tr class="sticky">
-                        <th colspan="4" class="right">Filter:</th>
-                        <th colspan="3">
+                        <th colspan="2" class="right">Filter:</th>
+                        <th colspan="1">
                             <input class="left" name="itemFilters.power" type="text"
                                 value="{{options.itemFilters.power}}">
                         </th>
                     </tr>
                     <tr class="sticky2">
                         <th></th>
-                        <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
-                        <th>{{localize "ActorSheet.End"}}</th>
+                        {{!-- <th class="left">{{localize "ActorSheet.Name"}}</th> --}}
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
+                        <th>{{localize "ActorSheet.End"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th></th>
                     </tr>
@@ -461,11 +461,12 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">{{#if
-                            item.system.childIdx}}{{item.system.childIdx}}) {{/if}}{{item.name}}</td>
                         <td>{{item.system.realCost}}</td>
+                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">{{#if
+                            item.system.childIdx}}{{item.system.childIdx}}) {{/if}}<i>{{item.name}}:</i>
+                            {{item.system.description}}</td>
                         <td>{{item.system.endEstimate}}</td>
-                        <td class="left">{{item.system.description}}</td>
+                        
                         <td>
                             {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
                                 Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
