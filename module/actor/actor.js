@@ -85,7 +85,7 @@ export class HeroSystem6eActor extends Actor {
         let cardData = {
             actor,
             groupName: "typeChoice",
-            choices:{ pc: "PC", npc: "NPC" },
+            choices: { pc: "PC", npc: "NPC" },
             chosen: actor.type,
         }
         const html = await renderTemplate(template, cardData)
@@ -111,11 +111,93 @@ export class HeroSystem6eActor extends Actor {
             new Dialog(data, null).render(true)
 
             async function _processChangeType(html) {
-                await actor.update({ type: html.find('input:checked')[0].value})
+                await actor.update({ type: html.find('input:checked')[0].value })
             }
         });
     }
 
 
+    async TakeRecovery(asAction) {
+
+        // RECOVERING
+        // Characters use REC to regain lost STUN and expended END.
+        // This is known as “Recovering” or “taking a Recovery.”
+        // When a character Recovers, add his REC to his current
+        // STUN and END totals (to a maximum of their full values, of
+        // course). Characters get to Recover in two situations: Post-
+        // Segment and when they choose to Recover as a Full Phase
+        // Action.
+
+        // RECOVERING AS AN ACTION
+        // Recovering is a Full Phase Action and occurs at the end of
+        // the Segment (after all other characters who have a Phase that
+        // Segment have acted). A character who Recovers during a Phase
+        // may do nothing else. He cannot even maintain a Constant Power
+        // or perform Actions that cost no END or take no time. However,
+        // he may take Zero Phase Actions at the beginning of his Phase
+        // to turn off Powers, and Persistent Powers that don’t cost END
+        // remain in effect.
+
+
+        const chars = this.system.characteristics
+
+        // Shouldn't happen, but you never know
+        if (isNaN(parseInt(chars.stun.value))) {
+            chars.stun.value = 0
+        }
+        if (isNaN(parseInt(chars.end.value))) {
+            chars.end.value = 0
+        }
+
+        let newStun = parseInt(chars.stun.value) + parseInt(chars.rec.value)
+        let newEnd = parseInt(chars.end.value) + parseInt(chars.rec.value)
+
+        if (newStun > chars.stun.max) {
+            newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)) // possible > MAX (which is OKish)
+        }
+        let deltaStun = newStun - parseInt(chars.stun.value)
+
+        if (newEnd > chars.end.max) {
+            newEnd = Math.max(chars.end.max, parseInt(chars.end.value)) // possible > MAX (which is OKish)
+        }
+        let deltaEnd = newEnd - parseInt(chars.end.value)
+
+        await this.update({
+            'system.characteristics.stun.value': newStun,
+            'system.characteristics.end.value': newEnd
+        })
+
+        let token = this.token
+        let speaker = ChatMessage.getSpeaker({ actor: this, token })
+        speaker["alias"] = this.name
+
+        let content = this.name + ` <span title="
+        Recovering is a Full Phase Action and occurs at the end of
+        the Segment (after all other characters who have a Phase that
+        Segment have acted). A character who Recovers during a Phase
+        may do nothing else. He cannot even maintain a Constant Power
+        or perform Actions that cost no END or take no time. However,
+        he may take Zero Phase Actions at the beginning of his Phase
+        to turn off Powers, and Persistent Powers that don't cost END
+        remain in effect."><i>Takes a Recovery</i></span>`;
+        if (deltaEnd || deltaStun) {
+            content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
+        } else {
+            content += ".";
+        }
+
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: content,
+            speaker: speaker
+        }
+
+        if (asAction) {
+            await ChatMessage.create(chatData)
+        }
+
+        return content;
+    }
 
 }

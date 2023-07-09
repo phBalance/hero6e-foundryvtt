@@ -691,56 +691,57 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
     async _onRecovery(event) {
-        const chars = this.actor.system.characteristics
+        this.actor.TakeRecovery(true)
+//         const chars = this.actor.system.characteristics
 
-        // Shouldn't happen, but you never know
-        if (isNaN(parseInt(chars.stun.value))) {
-            chars.stun.value = 0
-        }
-        if (isNaN(parseInt(chars.end.value))) {
-            chars.end.value = 0
-        }
+//         // Shouldn't happen, but you never know
+//         if (isNaN(parseInt(chars.stun.value))) {
+//             chars.stun.value = 0
+//         }
+//         if (isNaN(parseInt(chars.end.value))) {
+//             chars.end.value = 0
+//         }
 
-        let newStun = parseInt(chars.stun.value) + parseInt(chars.rec.value)
-        let newEnd = parseInt(chars.end.value) + parseInt(chars.rec.value)
+//         let newStun = parseInt(chars.stun.value) + parseInt(chars.rec.value)
+//         let newEnd = parseInt(chars.end.value) + parseInt(chars.rec.value)
 
 
 
-        if (newStun > chars.stun.max) {
-            newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)) // possible > MAX (which is OKish)
-        }
-        let deltaStun = newStun - parseInt(chars.stun.value)
+//         if (newStun > chars.stun.max) {
+//             newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)) // possible > MAX (which is OKish)
+//         }
+//         let deltaStun = newStun - parseInt(chars.stun.value)
 
-        if (newEnd > chars.end.max) {
-            newEnd = Math.max(chars.end.max, parseInt(chars.end.value)) // possible > MAX (which is OKish)
-        }
-        let deltaEnd = newEnd - parseInt(chars.end.value)
+//         if (newEnd > chars.end.max) {
+//             newEnd = Math.max(chars.end.max, parseInt(chars.end.value)) // possible > MAX (which is OKish)
+//         }
+//         let deltaEnd = newEnd - parseInt(chars.end.value)
 
-        await this.actor.update({
-            'system.characteristics.stun.value': newStun,
-            'system.characteristics.end.value': newEnd
-        })
+//         await this.actor.update({
+//             'system.characteristics.stun.value': newStun,
+//             'system.characteristics.end.value': newEnd
+//         })
 
-        let token = this.actor.token
-        let speaker = ChatMessage.getSpeaker({ actor: this.actor, token })
-        speaker["alias"] = this.actor.name
+//         let token = this.actor.token
+//         let speaker = ChatMessage.getSpeaker({ actor: this.actor, token })
+//         speaker["alias"] = this.actor.name
 
-        const chatData = {
-            user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: this.actor.name + ` <span title="
-Recovering is a Full Phase Action and occurs at the end of
-the Segment (after all other characters who have a Phase that
-Segment have acted). A character who Recovers during a Phase
-may do nothing else. He cannot even maintain a Constant Power
-or perform Actions that cost no END or take no time. However,
-he may take Zero Phase Actions at the beginning of his Phase
-to turn off Powers, and Persistent Powers that don't cost END
-remain in effect."><i>Takes a Recovery</i></span>, gaining ${deltaEnd} endurance and ${deltaStun} stun.`,
-            speaker: speaker
-        }
+//         const chatData = {
+//             user: game.user._id,
+//             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+//             content: this.actor.name + ` <span title="
+// Recovering is a Full Phase Action and occurs at the end of
+// the Segment (after all other characters who have a Phase that
+// Segment have acted). A character who Recovers during a Phase
+// may do nothing else. He cannot even maintain a Constant Power
+// or perform Actions that cost no END or take no time. However,
+// he may take Zero Phase Actions at the beginning of his Phase
+// to turn off Powers, and Persistent Powers that don't cost END
+// remain in effect."><i>Takes a Recovery</i></span>, gaining ${deltaEnd} endurance and ${deltaStun} stun.`,
+//             speaker: speaker
+//         }
 
-        return ChatMessage.create(chatData)
+//         return ChatMessage.create(chatData)
     }
 
     _onPresenseAttack(event) {

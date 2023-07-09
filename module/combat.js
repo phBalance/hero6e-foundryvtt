@@ -436,10 +436,31 @@ export class HeroSystem6eCombat extends Combat {
     // TODO: Replace with PostSegment12 activities.
     // Such as automatic recovery
     async PostSegment12() {
+
+
+        // POST-SEGMENT 12 RECOVERY
+        // After Segment 12 each Turn, all characters (except those deeply
+        // unconscious or holding their breath) get a free Post-Segment 12
+        // Recovery. This includes Stunned characters, although the Post-
+        // Segment 12 Recovery does not eliminate the Stunned condition.
+
+        const automation = game.settings.get("hero6efoundryvttv2", "automation");
+
+        let content = `Post-Segment 12 (Turn ${this.round - 1})`;
+        content += '<ul>'
+        for (let combatant of this.combatants.filter(o => !o.defeated)) {
+            const actor = combatant.actor;
+
+            // Make sure we have automation enabled
+            if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
+                content += '<li>' + await combatant.actor.TakeRecovery(false) + '</li>'
+            }
+        }
+        content += '</ul>'
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: `Post-Segment 12`,
+            content: content,
         }
 
         return ChatMessage.create(chatData)
