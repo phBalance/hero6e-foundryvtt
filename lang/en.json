@@ -86,5 +86,14 @@
         "Half": "Half Move",
         "Full": "Full Move",
         "Noncombat": "Noncombat Move"
+    },
+
+    "COMBAT": {
+        "TurnPrev": "Previous Combatant",
+        "TurnNext": "Next Combatant",
+
+        "RoundPrev": "Previous Turn",
+        "RoundNext": "Next Turn"
+        
     }
 }
