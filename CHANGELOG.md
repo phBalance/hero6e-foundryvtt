@@ -1,6 +1,7 @@
 # Version 3.0.6
 - Fixed issue when deleteting combatant in Combat Traker before combatant begins.
 - At Post-Segment-12 all active combatants Take a Recovery.
+- Stun status is cleared at the beginning of phase.
 
 # Version 3.0.5
 - Initial DRAIN support.

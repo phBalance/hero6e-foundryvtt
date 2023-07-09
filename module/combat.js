@@ -1,5 +1,6 @@
 import { HERO } from "./config.js";
 import { HEROSYS } from "./herosystem6e.js";
+import { onActiveEffectToggle } from "./utility/effects.js"
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
@@ -412,9 +413,51 @@ export class HeroSystem6eCombat extends Combat {
     * @returns {Promise<void>}
     * @protected
     */
-    _onStartTurn(combatant) {
+    async _onStartTurn(combatant) {
         //console.log("_onStartTurn", combatant.name)
-        super._onStartTurn(combatant)
+        await super._onStartTurn(combatant)
+
+        // STUNNING
+        // The character remains Stunned and can take no
+        // Actions (not even Aborting to a defensive action) until his next
+        // Phase.
+
+
+        if (combatant.actor.statuses.has('stunned')) {
+            const effect = combatant.actor.effects.contents.find(o => o.statuses.has('stunned'))
+            console.log(effect);
+            await effect.delete();
+
+            let content = `${combatant.actor.name} recovers from being stunned.`
+            const token = combatant.token
+            const speaker = ChatMessage.getSpeaker({ actor: combatant.actor, token })
+            speaker["alias"] = combatant.actor.name
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: content,
+                //speaker: speaker
+            }
+
+            await ChatMessage.create(chatData)
+
+
+        }
+
+    }
+
+    /**
+     * A workflow that occurs at the end of each Combat Turn.
+     * This workflow occurs after the Combat document update, prior round information exists in this.previous.
+     * This can be overridden to implement system-specific combat tracking behaviors.
+     * This method only executes for one designated GM user. If no GM users are present this method will not be called.
+     * @param {Combatant} combatant     The Combatant whose turn just ended
+     * @returns {Promise<void>}
+     * @protected
+     */
+    async _onEndTurn(combatant) {
+        //console.log("_onStartTurn", combatant.name)
+        super._onEndTurn(combatant)
 
     }
 
