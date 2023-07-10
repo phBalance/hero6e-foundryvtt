@@ -1,0 +1,37 @@
+{{ log 'HEROSYS item-skill-combat-levelssheet' this }}
+<form class="{{cssClass}}" autocomplete="off" data-id="{{item._id}}" data-realId="{{item.system.realId}}">
+    <header class="sheet-header">
+        <img class="profile-img" name="img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name" /></h1>
+        </div>
+    </header>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+
+        <div class="form-group">
+            <label>Levels</label>
+            <input type="text" name="system.levels.valuetemplates/item/item-skill-sheet.hbs"
+                value="{{system.levels.value}}" data-dtype="Number" />
+        </div>
+
+
+        {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
+
+
+        <div class="form-group">
+            <label>LEVELS</label>
+            <div class="form-fields">
+                <ol>
+                    {{#each csl}}
+                    <li>
+                        {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+                    </li>
+                    {{/each}}
+                </ol>
+                
+            </div>
+        </div>
+    </section>
+</form>

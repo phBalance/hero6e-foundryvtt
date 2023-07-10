@@ -290,10 +290,16 @@
             <div class="tab tab-body" data-group="primary" data-tab="skills">
                 <table>
                     <tr class="sticky">
+                        <th colspan="1" class="right">Filter:</th>
+                        <th colspan="4">
+                            <input class="left" name="itemFilters.skill" type="text"
+                                value="{{options.itemFilters.skill}}">
+                        </th>
+                    </tr>
+                    <tr class="sticky2">
                         <th></th>
-                        <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
-                        <th>{{localize "ActorSheet.Characteristic"}}</th>
+                        <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create skill" data-type="skill">
@@ -301,18 +307,17 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "skill") }}
+                    {{#if (and (eq item.type "skill") (filterItem item ../options.itemFilters.skill))}}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
+                        <td>{{item.system.realCost}}</td>
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
                             {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
                             {{#if item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}
                         </td>
-                        <td>{{item.system.realCost}}</td>
-                        <td>{{item.system.characteristic}}</td>
                         <td>
                             {{#if item.system.roll}}
                             <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"

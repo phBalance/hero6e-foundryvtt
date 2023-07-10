@@ -31,6 +31,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
         }
+
+        if (this.item.system.XMLID === "COMBAT_LEVELS") {
+            return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`
+        }
         return `${path}/item-${this.item.type}-sheet.hbs`
     }
 
@@ -103,21 +107,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (item.system.XMLID == "AID") {
             data.aidSources = AdjustmentSources(this.actor)
         }
-        // if (item.system.XMLID == "AID") {
-        //     let aidSources = []
-        //     for (const key in this.actor.system.characteristics) {
-        //         if (this.actor.system.characteristics[key].hasOwnProperty('value')) {
-        //             aidSources.push(key.toUpperCase())
-        //         }
-        //     }
-        //     aidSources.sort()
-        //     aidSources = ["none", ...aidSources]
-        //     data.aidSources = {}
-        //     for (let key of aidSources) {
-        //         data.aidSources[key] = key
-        //     }
 
-        // }
+        // Combat Skill Levels
+        if (item.system.XMLID === "COMBAT_LEVELS") {
+            data.cslChoices = { ocv: "ocv", dcv: "dcv", dc: "dc" }
+            data.csl = []
+            for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
+                data.csl.push({ name: `csl[${c}]`, value: "ocv" });
+            }
+        }
 
 
         return data
@@ -162,7 +160,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
         // Type
-        html.find('.configure-type').click(this._onConfigureType.bind(this))
+        //html.find('.configure-type').click(this._onConfigureType.bind(this))
 
         // Item Description
         html.find('.textarea').each((id, inp) => {

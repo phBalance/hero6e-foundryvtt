@@ -371,7 +371,7 @@ export function registerUploadTests(quench) {
                 let parser = new DOMParser()
                 let xmlDoc = parser.parseFromString(contents, 'text/xml')
                 let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                let item = itemData; //await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+                let item = itemData;
                 makeAttack(item);
 
                 it("description", function () {
@@ -433,7 +433,7 @@ export function registerUploadTests(quench) {
                 let parser = new DOMParser()
                 let xmlDoc = parser.parseFromString(contents, 'text/xml')
                 let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                let item = itemData; //await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+                let item = itemData;
                 makeAttack(item);
 
                 it("description", function () {
@@ -461,7 +461,49 @@ export function registerUploadTests(quench) {
             });
 
 
+            describe("COMBAT_LEVELS", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                }, { temporary: true });
+                actor.system.characteristics.ego.value = 38
+
+                const contents = `
+                <SKILL XMLID="COMBAT_LEVELS" ID="1688944834273" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                <NOTES />
+                </SKILL>
+                    `;
+                let parser = new DOMParser()
+                let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                let item = itemData; 
+
+                it("description", function () {
+                    assert.equal(item.system.description, "+1 with any single attack");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 2);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 2);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, "0");
+                });
+            });
+
+
+
+
+
         },
         { displayName: "HERO: Upload" }
     );
+
+
+
+
 }

@@ -548,6 +548,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
         this.options.itemFilters.power = expandedData.itemFilters.power
+        this.options.itemFilters.skill = expandedData.itemFilters.skill
 
         await this.actor.update(expandedData)
 

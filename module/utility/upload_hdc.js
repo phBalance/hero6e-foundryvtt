@@ -1271,7 +1271,7 @@ function calcActivePoints(_basePointsPlusAdders, system) {
 
     // HALFEND is based on active points without the HALFEND modifier
     if (system.modifiers.find(o => o.XMLID == "REDUCEDEND")) {
-        system._activePointsWithoutEndMods = _basePointsPlusAdders * (1 + advantages -  0.25);
+        system._activePointsWithoutEndMods = _basePointsPlusAdders * (1 + advantages - 0.25);
     }
 
 
@@ -1794,6 +1794,12 @@ export function updateItemDescription(system, type) {
             // (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), 
             // Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)
             system.description = `${system.ALIAS} (${system.LEVELS.value} STR)`
+            break;
+
+        case "MENTAL_COMBAT_LEVELS":
+        case "COMBAT_LEVELS":
+            // +1 with any single attack
+            system.description = `+${system.LEVELS.value} ${system.OPTION_ALIAS}`;
             break;
 
         default:
