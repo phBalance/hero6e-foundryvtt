@@ -134,6 +134,23 @@ export async function AttackToHit(item, options) {
         }
     }
 
+    // Combat Skill Levels
+    let csl = item.actor.items.find(o=> o.system.XMLID === "COMBAT_LEVELS" && o.system.attacks && o.system.attacks[item.id])
+    if (csl)
+    {
+        let cslOcv = 0
+        for (let i = 0; i < parseInt(csl.system.LEVELS.value); i++)
+        {
+            if (csl.system.csl[i] === 'ocv') cslOcv ++;
+        }
+        if (cslOcv > 0)
+        {
+            rollEquation = modifyRollEquation(rollEquation, cslOcv);
+            tags.push({ value: cslOcv, name: csl.name })
+        }
+    }
+
+
     // if (parseInt(options.toHitMod) > 0) {
     //     rollEquation = modifyRollEquation(rollEquation, options.toHitMod);
     //     tags.push({ value: options.toHitMod, name: "toHitMod" })

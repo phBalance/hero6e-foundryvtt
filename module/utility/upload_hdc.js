@@ -416,6 +416,49 @@ export async function applyCharacterSheet(xmlDoc) {
     await updateItemSubTypes(this.actor)
 
 
+    // Combat Skill Levels - Enumerate attacks that use OCV
+    for (let cslItem of this.actor.items.filter(o=> o.system.XMLID === "COMBAT_LEVELS"))
+    {
+        let attacks = {}
+        for (let attack of this.actor.items.filter(o => 
+            (o.type == 'attack' || o.system.subType == 'attack') &&
+            o.system.uses === 'ocv'
+        )) {
+            let checked = false;
+
+            // Attempt to determine if attack should be checked
+            if (cslItem.system.OPTION_ALIAS.toLowerCase().indexOf(attack.name.toLowerCase()) > -1)
+            {
+                checked = true;
+            }
+
+            if (cslItem.system.OPTION === "HTH" && (
+                attack.system.XMLID === "HTH" || 
+                ttack.system.XMLID === "HKA" ||
+                attack.system.XMLID === "MANEUVER"
+                )
+             ) {
+                checked = true;
+            }
+
+            if (cslItem.system.OPTION === "RANGED" && (
+                attack.system.XMLID === "BLAST" || 
+                attack.system.XMLID === "RKA"
+                )
+             ) {
+                checked = true;
+            }
+
+            if (cslItem.system.OPTION === "ALL") {
+                checked = true;
+            }
+
+            attacks[attack.id] = checked;
+        }
+        await cslItem.update({'system.attacks': attacks});
+    }
+
+
     // Make sure VALUE = MAX.
     // We may have applied ActiveEffectcs to MAX.
     for (let char of Object.keys(this.actor.system.characteristics)) {
@@ -549,7 +592,14 @@ export function XmlToItemData(xml, type) {
 
             default: HEROSYS.log(false, systemData.OPTION)
         }
+
+        // Make sure CSL's are defined
+        systemData.csl = {}
+        for (let c = 0; c < parseInt(systemData.LEVELS.value); c++) {
+            systemData.csl[c] = 'ocv';
+        }
     }
+
 
     if (systemData.XMLID == "SKILL_LEVELS") {
         switch (systemData.OPTION) {

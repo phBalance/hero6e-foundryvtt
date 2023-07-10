@@ -944,6 +944,17 @@ HERO.areaOfEffect = {
     }
 }
 
+HERO.csl = {
+    options: {
+        SINGLE: "with any single attack",
+        TIGHT: "with a small group of attacks",
+        BROAD: "with a large group of attacks",
+        HTH: "with HTH Combat",
+        RANGED: "with Ranged Combat",
+        ALL: "with All Attacks"
+    }
+}
+
 HERO.stunBodyDamages = {
     "stunbody": "Stun and Body",
     "stunonly": "Stun only",

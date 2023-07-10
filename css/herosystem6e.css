@@ -775,3 +775,8 @@ div.item-chat {
   color: darkgreen;
   font-weight: 100;
 }
+
+div.csl-attack-list ul {
+  list-style-type: none;
+  padding: 0;
+}

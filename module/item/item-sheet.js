@@ -111,10 +111,30 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Combat Skill Levels
         if (item.system.XMLID === "COMBAT_LEVELS") {
             data.cslChoices = { ocv: "ocv", dcv: "dcv", dc: "dc" }
+
+            // Make sure CSL's are defined
+            if (!item.system.csl) {
+                item.system.csl = {}
+                for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
+                    item.system.csl[c] = 'ocv';
+                }
+                item.update({ "system.csl": item.system.csl })
+            }
+
+            // CSL radioBoxes names
             data.csl = []
             for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
-                data.csl.push({ name: `csl[${c}]`, value: "ocv" });
+                data.csl.push({ name: `system.csl.${c}`, value: item.system.csl[c] })
             }
+
+            // Enumerate attacks
+            data.attacks = []
+            if (!item.system.attacks)  item.system.attacks = {};
+            for (let attack of item.actor.items.filter(o => o.type == 'attack' || o.system.subType == 'attack')) {
+                if (!item.system.attacks[attack.id]) item.system.attacks[attack.id] = false;
+                data.attacks.push({name: attack.name, id: attack.id, checked: item.system.attacks[attack.id]})
+            }
+
         }
 
 
@@ -124,13 +144,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     /* -------------------------------------------- */
 
     /** @override */
-    setPosition(options = {}) {
-        const position = super.setPosition(options)
-        const sheetBody = this.element.find('.sheet-body')
-        const bodyHeight = position.height - 192
-        sheetBody.css('height', bodyHeight)
-        return position
-    }
+    // setPosition(options = {}) {
+    //     const position = super.setPosition(options)
+    //     const sheetBody = this.element.find('.sheet-body')
+    //     const bodyHeight = position.height - 192
+    //     sheetBody.css('height', bodyHeight)
+    //     return position
+    // }
 
     /* -------------------------------------------- */
 
