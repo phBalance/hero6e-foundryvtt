@@ -6,7 +6,7 @@
     "version": "3.0.6",
     "compatibility": {
         "minimum": 11,
-        "verified": "11.305",
+        "verified": "11.307",
         "maximum": 11
     },
     "authors": [

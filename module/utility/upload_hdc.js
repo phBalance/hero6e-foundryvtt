@@ -417,11 +417,17 @@ export async function applyCharacterSheet(xmlDoc) {
 
 
     // Combat Skill Levels - Enumerate attacks that use OCV
-    for (let cslItem of this.actor.items.filter(o => o.system.XMLID === "COMBAT_LEVELS")) {
+    for (let cslItem of this.actor.items.filter(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID))) {
+            let _ocv = 'ocv'
+            if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                _ocv = 'omcv'
+            }
+
         let attacks = {}
+        let checkedCount = 0;
         for (let attack of this.actor.items.filter(o =>
             (o.type == 'attack' || o.system.subType == 'attack') &&
-            o.system.uses === 'ocv'
+            o.system.uses === _ocv
         )) {
             let checked = false;
 
@@ -452,8 +458,22 @@ export async function applyCharacterSheet(xmlDoc) {
                 checked = true;
             }
 
+            if (cslItem.system.OPTION === "BROAD" && cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                checked = true;
+            }
+
             attacks[attack.id] = checked;
+
+            if (checked) checkedCount++;
+        
         }
+
+        // Make sure at least one attacked is checked
+        if (checkedCount === 0 && Object.keys(attacks).length > 0)
+        {
+            attacks[Object.keys(attacks)[0]] = true;
+        }
+
         await cslItem.update({ 'system.attacks': attacks });
     }
 

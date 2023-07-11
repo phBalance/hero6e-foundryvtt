@@ -137,9 +137,9 @@ export async function AttackToHit(item, options) {
 
     // Combat Skill Levels
     let csl = CombatSkillLevelsForAttack(item);
-    if (csl.ocv > 0) {
-        rollEquation = modifyRollEquation(rollEquation, csl.ocv);
-        tags.push({ value: csl.ocv, name: csl.item.name })
+    if (csl.ocv || csl.omcv > 0) {
+        rollEquation = modifyRollEquation(rollEquation, csl.ocv || csl.omcv);
+        tags.push({ value: csl.ocv || csl.omcv, name: csl.item.name })
     }
 
 
@@ -334,8 +334,7 @@ export async function _onRollDamage(event) {
     }
 
     const csl = CombatSkillLevelsForAttack(item)
-    if (csl && csl.dc > 0)
-    {
+    if (csl && csl.dc > 0) {
 
         let cslDamage = csl.dc + "d6"
         if (item.system.killing) {
@@ -346,7 +345,7 @@ export async function _onRollDamage(event) {
                 cslDamage += " + 1"
             }
         }
-        
+
         tags.push({ value: cslDamage, name: csl.item.name })
         damageRoll += cslDamage
     }

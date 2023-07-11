@@ -21,7 +21,11 @@
             <label>OPTIONS</label>
             <div class="form-fields">
                 <select name="system.OPTION" data-dtype="text">
+                    {{#if (eq system.XMLID "MENTAL_COMBAT_LEVELS")}}
+                    {{selectOptions config.mcsl.options selected=system.OPTION}}
+                    {{else}}
                     {{selectOptions config.csl.options selected=system.OPTION}}
+                    {{/if}}
                 </select>
             </div>
         </div>

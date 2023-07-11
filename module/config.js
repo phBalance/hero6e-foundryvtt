@@ -972,6 +972,14 @@ HERO.csl = {
     }
 }
 
+HERO.mcsl = {
+    options: {
+        SINGLE: "with a single Mental Power",
+        TIGHT: "with a group of Mental Powers",
+        BROAD: "with all Mental Powers"
+    }
+}
+
 HERO.stunBodyDamages = {
     "stunbody": "Stun and Body",
     "stunonly": "Stun only",

@@ -327,13 +327,14 @@ export class HeroRoll extends Roll {
 export function CombatSkillLevelsForAttack(item) {
     let result = {
         ocv: 0,
+        omcv: 0,
         dcv: 0,
         dmcv: 0,
         omcv: 0,
         dc: 0,
     }
 
-    let csl = item.actor.items.find(o => o.system.XMLID === "COMBAT_LEVELS" && o.system.attacks && o.system.attacks[item.id])
+    let csl = item.actor.items.find(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) && o.system.attacks && o.system.attacks[item.id])
     if (csl) {
         for (let i = 0; i < parseInt(csl.system.LEVELS.value); i++) {
             result[csl.system.csl[i]] = (result[csl.system.csl[i]] || 0) + 1;
