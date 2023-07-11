@@ -34,3 +34,11 @@ export function getPowerInfo(options) {
     }
     return powerInfo
 }
+
+
+
+export function getModifierInfo(options) {
+    const xmlid = options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id
+    const actor = options?.item?.actor || options?.actor
+    return CONFIG.HERO.ModifierOverride[xmlid]
+}

@@ -1,5 +1,6 @@
 import { HERO } from "./config.js";
 import { HEROSYS } from "./herosystem6e.js";
+import { onActiveEffectToggle } from "./utility/effects.js"
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
@@ -78,11 +79,11 @@ export class HeroSystem6eCombat extends Combat {
 
             // Lightning Reflexes
             const actor = game.actors.get(combatant.actorId);
-            const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL");
+            const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE");
             if (item) {
                 const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
                 const lightning_reflex_initiative = combatant.initiative + parseInt(levels);
-                const alias = item.system.OPTION_ALIAS || item.system.other.option_alias || 'None'
+                const alias = item.system.OPTION_ALIAS || item.system.INPUT || 'All Actions'
                 const lightning_reflex_alias = '(' + alias + ')'
 
                 const combatantLR = new HeroCombatant(combatant)
@@ -294,8 +295,11 @@ export class HeroSystem6eCombat extends Combat {
         // Find the expected new active turn
         let activeTurn = this.turns.indexOf(current)
 
+
+
+
         // Advance activeTurn if it has a null turn value (about to be deleted).
-        while (activeTurn < this.turns.length && this.turns[activeTurn].turn === null) {
+        while (activeTurn > -1 && activeTurn < this.turns.length && this.turns[activeTurn].turn === null) {
             activeTurn++;
         }
         activeTurn = this.turns[activeTurn]?.turn || activeTurn;
@@ -306,9 +310,13 @@ export class HeroSystem6eCombat extends Combat {
         // Setup turns in segment fashion
         this.setupTurns();
 
-        // There is an edge case where the last combatant of the round is deleted.
-        activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-        await this.update({ turn: activeTurn });
+        // If activeTurn == -1 then combat has not begun
+        if (activeTurn > -1) {
+            // There is an edge case where the last combatant of the round is deleted.
+            activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
+            await this.update({ turn: activeTurn });
+
+        }
 
         // Render the collection
         if (this.active) this.collection.render();
@@ -405,9 +413,53 @@ export class HeroSystem6eCombat extends Combat {
     * @returns {Promise<void>}
     * @protected
     */
-    _onStartTurn(combatant) {
+    async _onStartTurn(combatant) {
         //console.log("_onStartTurn", combatant.name)
-        super._onStartTurn(combatant)
+        await super._onStartTurn(combatant)
+
+        // STUNNING
+        // The character remains Stunned and can take no
+        // Actions (not even Aborting to a defensive action) until his next
+        // Phase.
+
+
+        if (combatant.actor.statuses.has('stunned')) {
+            const effect = combatant.actor.effects.contents.find(o => o.statuses.has('stunned'))
+
+            // At beginning of combat if stunned effect is deleted a console error is generated.
+            // This would be extremetly unusual as characters typically don't start combat stunned.
+            await effect.delete();
+
+            let content = `${combatant.actor.name} recovers from being stunned.`
+            const token = combatant.token
+            const speaker = ChatMessage.getSpeaker({ actor: combatant.actor, token })
+            speaker["alias"] = combatant.actor.name
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: content,
+                //speaker: speaker
+            }
+
+            await ChatMessage.create(chatData)
+
+
+        }
+
+    }
+
+    /**
+     * A workflow that occurs at the end of each Combat Turn.
+     * This workflow occurs after the Combat document update, prior round information exists in this.previous.
+     * This can be overridden to implement system-specific combat tracking behaviors.
+     * This method only executes for one designated GM user. If no GM users are present this method will not be called.
+     * @param {Combatant} combatant     The Combatant whose turn just ended
+     * @returns {Promise<void>}
+     * @protected
+     */
+    async _onEndTurn(combatant) {
+        //console.log("_onStartTurn", combatant.name)
+        super._onEndTurn(combatant)
 
     }
 
@@ -428,11 +480,32 @@ export class HeroSystem6eCombat extends Combat {
 
     // TODO: Replace with PostSegment12 activities.
     // Such as automatic recovery
-    async PostSegment12 () {
+    async PostSegment12() {
+
+
+        // POST-SEGMENT 12 RECOVERY
+        // After Segment 12 each Turn, all characters (except those deeply
+        // unconscious or holding their breath) get a free Post-Segment 12
+        // Recovery. This includes Stunned characters, although the Post-
+        // Segment 12 Recovery does not eliminate the Stunned condition.
+
+        const automation = game.settings.get("hero6efoundryvttv2", "automation");
+
+        let content = `Post-Segment 12 (Turn ${this.round - 1})`;
+        content += '<ul>'
+        for (let combatant of this.combatants.filter(o => !o.defeated)) {
+            const actor = combatant.actor;
+
+            // Make sure we have automation enabled
+            if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
+                content += '<li>' + await combatant.actor.TakeRecovery(false) + '</li>'
+            }
+        }
+        content += '</ul>'
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: `Post-Segment 12`,
+            content: content,
         }
 
         return ChatMessage.create(chatData)
@@ -500,8 +573,7 @@ export class HeroSystem6eCombat extends Combat {
             round = 0;
             turn = null
         }
-        if (round == 0)
-        {
+        if (round == 0) {
             turn = null;
         }
 

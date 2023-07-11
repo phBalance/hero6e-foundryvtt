@@ -31,6 +31,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
         }
+
+        if (this.item.system.XMLID === "COMBAT_LEVELS") {
+            return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`
+        }
         return `${path}/item-${this.item.type}-sheet.hbs`
     }
 
@@ -103,21 +107,35 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (item.system.XMLID == "AID") {
             data.aidSources = AdjustmentSources(this.actor)
         }
-        // if (item.system.XMLID == "AID") {
-        //     let aidSources = []
-        //     for (const key in this.actor.system.characteristics) {
-        //         if (this.actor.system.characteristics[key].hasOwnProperty('value')) {
-        //             aidSources.push(key.toUpperCase())
-        //         }
-        //     }
-        //     aidSources.sort()
-        //     aidSources = ["none", ...aidSources]
-        //     data.aidSources = {}
-        //     for (let key of aidSources) {
-        //         data.aidSources[key] = key
-        //     }
 
-        // }
+        // Combat Skill Levels
+        if (item.system.XMLID === "COMBAT_LEVELS") {
+            data.cslChoices = { ocv: "ocv", dcv: "dcv", dc: "dc" }
+
+            // Make sure CSL's are defined
+            if (!item.system.csl) {
+                item.system.csl = {}
+                for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
+                    item.system.csl[c] = 'ocv';
+                }
+                item.update({ "system.csl": item.system.csl })
+            }
+
+            // CSL radioBoxes names
+            data.csl = []
+            for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
+                data.csl.push({ name: `system.csl.${c}`, value: item.system.csl[c] })
+            }
+
+            // Enumerate attacks
+            data.attacks = []
+            if (!item.system.attacks)  item.system.attacks = {};
+            for (let attack of item.actor.items.filter(o => o.type == 'attack' || o.system.subType == 'attack')) {
+                if (!item.system.attacks[attack.id]) item.system.attacks[attack.id] = false;
+                data.attacks.push({name: attack.name, id: attack.id, checked: item.system.attacks[attack.id]})
+            }
+
+        }
 
 
         return data
@@ -126,13 +144,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     /* -------------------------------------------- */
 
     /** @override */
-    setPosition(options = {}) {
-        const position = super.setPosition(options)
-        const sheetBody = this.element.find('.sheet-body')
-        const bodyHeight = position.height - 192
-        sheetBody.css('height', bodyHeight)
-        return position
-    }
+    // setPosition(options = {}) {
+    //     const position = super.setPosition(options)
+    //     const sheetBody = this.element.find('.sheet-body')
+    //     const bodyHeight = position.height - 192
+    //     sheetBody.css('height', bodyHeight)
+    //     return position
+    // }
 
     /* -------------------------------------------- */
 
@@ -162,7 +180,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
         // Type
-        html.find('.configure-type').click(this._onConfigureType.bind(this))
+        //html.find('.configure-type').click(this._onConfigureType.bind(this))
 
         // Item Description
         html.find('.textarea').each((id, inp) => {

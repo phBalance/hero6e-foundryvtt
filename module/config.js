@@ -877,18 +877,35 @@ HERO.powers5e = {
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
 HERO.ModifierOverride = {
-    "DIFFICULTTODISPEL": { BASECOST: 0.25 },
-    "IMPENETRABLE": { BASECOST: 0.25 },
-    "DIMENSIONS": { BASECOST: 5 },
-    "IMPROVEDNONCOMBAT": { BASECOST: 5 },
-    "DEFBONUS": { BASECOST: 2 },
-    "CONTINUOUSCONCENTRATION": { BASECOST: -0.25 },
     "ALWAYSOCCURS": { BASECOST: 0, MULTIPLIER: 2 },
-    "HARDENED": { BASECOST: 0.25 },
-    "PHYSICAL": { BASECOST: 5 }, // DAMAGENEGATION
-    "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
-    "MENTAL": { BASECOST: 5 }, // DAMAGENEGATION
+    "AOE": { dc: true },
     "ARMORPIERCING": { BASECOST: 0.5 },
+    "ARMORPIERCING": { dc: true },
+    "AUTOFIRE": { dc: true },
+    "AVAD": { dc: true },
+    "BOOSTABLE": { dc: true },
+    "CONTINUOUS": { dc: true },
+    "CONTINUOUSCONCENTRATION": { BASECOST: -0.25 },
+    "DAMAGEOVERTIME": { dc: true },
+    "DEFBONUS": { BASECOST: 2 },
+    "DIFFICULTTODISPEL": { BASECOST: 0.25 },
+    "DIMENSIONS": { BASECOST: 5 },
+    "DOESBODY": { dc: true },
+    "DOUBLEKB": { dc: true },
+    "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
+    "HARDENED": { BASECOST: 0.25 },
+    "IMPENETRABLE": { BASECOST: 0.25 },
+    "IMPROVEDNONCOMBAT": { BASECOST: 5 },
+    "MENTAL": { BASECOST: 5 }, // DAMAGENEGATION
+    "PENETRATING": { dc: true },
+    "PHYSICAL": { BASECOST: 5 }, // DAMAGENEGATION
+    "STICKY": { dc: true },
+    "TIMELIMIT": { dc: true },
+    "TRANSDIMENSIONAL": { dc: true },
+    "TRIGGER": { dc: true },
+    "UNCONTROLLED": { dc: true },
+    "VARIABLEADVANTAGE": { dc: true },
+    "VARIABLESFX": { dc: true },
 }
 
 // Valid Power Options (found these in Custom Power)
@@ -941,6 +958,17 @@ HERO.areaOfEffect = {
         line: "Line",
         surface: "Surface",
         any: "Any Area"
+    }
+}
+
+HERO.csl = {
+    options: {
+        SINGLE: "with any single attack",
+        TIGHT: "with a small group of attacks",
+        BROAD: "with a large group of attacks",
+        HTH: "with HTH Combat",
+        RANGED: "with Ranged Combat",
+        ALL: "with All Attacks"
     }
 }
 

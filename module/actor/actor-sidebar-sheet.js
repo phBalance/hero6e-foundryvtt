@@ -7,6 +7,7 @@ import { RoundFavorPlayerDown } from "../utility/round.js"
 import { HEROSYS } from '../herosystem6e.js';
 import { onManageActiveEffect } from '../utility/effects.js'
 import { getPowerInfo } from '../utility/util.js'
+import { CombatSkillLevelsForAttack, convertToDcFromItem, convertFromDC } from '../utility/damage.js';
 
 export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
@@ -96,65 +97,70 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // Endurance
             item.system.endEstimate = item.system.end || 0
 
+            // Combat Skill Levels
+            const csl = CombatSkillLevelsForAttack(item)
+
             // Damage
             if (item.type == 'attack' || item.system.subType == 'attack') {
 
-                // Convert dice to pips
-                let pips = item.system.dice * 3;
-                switch (item.system.extraDice) {
-                    case 'pip':
-                        pips += 1;
-                        break
-                    case 'half':
-                        pips += 2;
-                        break
-                }
+                let dc = convertToDcFromItem(item);
 
-                // Add in STR
-                if (item.system.usesStrength) {
-                    let str = data.actor.system.characteristics.str.value
-                    let str5 = Math.floor(str / 5)
-                    if (item.system.killing) {
-                        pips += str5
-                    } else {
-                        pips += str5 * 3
-                    }
+                // // Convert dice to pips
+                // let pips = item.system.dice * 3;
+                // switch (item.system.extraDice) {
+                //     case 'pip':
+                //         pips += 1;
+                //         break
+                //     case 'half':
+                //         pips += 2;
+                //         break
+                // }
 
-                    // Endurance
-                    let strEnd = Math.max(1, Math.round(str / 10))
+                // // Add in STR
+                // if (item.system.usesStrength) {
+                //     let str = data.actor.system.characteristics.str.value
+                //     let str5 = Math.floor(str / 5)
+                //     if (item.system.killing) {
+                //         pips += str5
+                //     } else {
+                //         pips += str5 * 3
+                //     }
 
-                    if (Number.isInteger(item.system.endEstimate)) {
-                        item.system.endEstimate += strEnd
-                    }
+                //     // Endurance
+                //     let strEnd = Math.max(1, Math.round(str / 10))
 
-                }
+                //     if (Number.isInteger(item.system.endEstimate)) {
+                //         item.system.endEstimate += strEnd
+                //     }
 
-                // Add in TK
-                if (item.system.usesTk) {
+                // }
 
-                    let tkItems = data.actor.items.filter(o => o.system.rules == "TELEKINESIS");
-                    let str = 0
-                    for (const item of tkItems) {
-                        str += parseInt(item.system.LEVELS.value) || 0
-                    }
-                    let str5 = Math.floor(str / 5)
-                    if (item.system.killing) {
-                        pips += str5
-                    } else {
-                        pips += str5 * 3
-                    }
+                // // Add in TK
+                // if (item.system.usesTk) {
 
-                    // Endurance
-                    let strEnd = Math.max(1, Math.round(str / 10))
-                    item.system.endEstimate += strEnd
-                }
+                //     let tkItems = data.actor.items.filter(o => o.system.rules == "TELEKINESIS");
+                //     let str = 0
+                //     for (const item of tkItems) {
+                //         str += parseInt(item.system.LEVELS.value) || 0
+                //     }
+                //     let str5 = Math.floor(str / 5)
+                //     if (item.system.killing) {
+                //         pips += str5
+                //     } else {
+                //         pips += str5 * 3
+                //     }
 
-                // Convert pips to DICE
-                let fullDice = Math.floor(pips / 3)
-                let extraDice = pips - fullDice * 3
+                //     // Endurance
+                //     let strEnd = Math.max(1, Math.round(str / 10))
+                //     item.system.endEstimate += strEnd
+                // }
+
+                // // Convert pips to DICE
+                // let fullDice = Math.floor(pips / 3)
+                // let extraDice = pips - fullDice * 3
 
                 // text descrdiption of damage
-                item.system.damage = fullDice
+                item.system.damage = convertFromDC(item, dc)  /*fullDice
                 switch (extraDice) {
                     case 0:
                         item.system.damage += 'D6'
@@ -165,19 +171,22 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     case 2:
                         item.system.damage += '.5D6'
                         break
-                }
+                }*/
                 if (item.system.killing) {
                     item.system.damage += 'K'
                 } else {
                     item.system.damage += 'N'
                 }
 
+
+
+
                 // Signed OCV and DCV
                 if (item.system.ocv != undefined) {
-                    item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-")
+                    item.system.ocv = ("+" + (parseInt(item.system.ocv) + parseInt(csl.ocv))).replace("+-", "-")
                 }
                 if (item.system.dcv != undefined) {
-                    item.system.dcv = ("+" + parseInt(item.system.dcv)).replace("+-", "-")
+                    item.system.dcv = ("+" + (parseInt(item.system.dcv) + parseInt(csl.dcv))).replace("+-", "-")
                 }
 
 
@@ -218,14 +227,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 SkillRollUpdateValue(item)
             }
 
-            if (!item.system.endEstimate && item.name == "Mental Blast")
-            {
+            if (!item.system.endEstimate && item.name == "Mental Blast") {
                 console.log(item)
             }
 
             items.push(item)
         }
-        
+
         // Sort attacks
         // Sorting is tricky and not done at the moment.
         // Sorting just the attacks may sort powers as well, which can mess up frameworks.
@@ -483,7 +491,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         data.defense = defense
 
         // Get all applicable effects (from actor and all items)
-        data.allApplicableEffects = Array.from(this.actor.allApplicableEffects()).sort( (a, b) => a.name.localeCompare(b.name))
+        data.allApplicableEffects = Array.from(this.actor.allApplicableEffects()).sort((a, b) => a.name.localeCompare(b.name))
 
         return data
     }
@@ -548,6 +556,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
         this.options.itemFilters.power = expandedData.itemFilters.power
+        this.options.itemFilters.skill = expandedData.itemFilters.skill
 
         await this.actor.update(expandedData)
 
@@ -691,56 +700,57 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
     async _onRecovery(event) {
-        const chars = this.actor.system.characteristics
+        this.actor.TakeRecovery(true)
+        //         const chars = this.actor.system.characteristics
 
-        // Shouldn't happen, but you never know
-        if (isNaN(parseInt(chars.stun.value))) {
-            chars.stun.value = 0
-        }
-        if (isNaN(parseInt(chars.end.value))) {
-            chars.end.value = 0
-        }
+        //         // Shouldn't happen, but you never know
+        //         if (isNaN(parseInt(chars.stun.value))) {
+        //             chars.stun.value = 0
+        //         }
+        //         if (isNaN(parseInt(chars.end.value))) {
+        //             chars.end.value = 0
+        //         }
 
-        let newStun = parseInt(chars.stun.value) + parseInt(chars.rec.value)
-        let newEnd = parseInt(chars.end.value) + parseInt(chars.rec.value)
+        //         let newStun = parseInt(chars.stun.value) + parseInt(chars.rec.value)
+        //         let newEnd = parseInt(chars.end.value) + parseInt(chars.rec.value)
 
 
 
-        if (newStun > chars.stun.max) {
-            newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)) // possible > MAX (which is OKish)
-        }
-        let deltaStun = newStun - parseInt(chars.stun.value)
+        //         if (newStun > chars.stun.max) {
+        //             newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)) // possible > MAX (which is OKish)
+        //         }
+        //         let deltaStun = newStun - parseInt(chars.stun.value)
 
-        if (newEnd > chars.end.max) {
-            newEnd = Math.max(chars.end.max, parseInt(chars.end.value)) // possible > MAX (which is OKish)
-        }
-        let deltaEnd = newEnd - parseInt(chars.end.value)
+        //         if (newEnd > chars.end.max) {
+        //             newEnd = Math.max(chars.end.max, parseInt(chars.end.value)) // possible > MAX (which is OKish)
+        //         }
+        //         let deltaEnd = newEnd - parseInt(chars.end.value)
 
-        await this.actor.update({
-            'system.characteristics.stun.value': newStun,
-            'system.characteristics.end.value': newEnd
-        })
+        //         await this.actor.update({
+        //             'system.characteristics.stun.value': newStun,
+        //             'system.characteristics.end.value': newEnd
+        //         })
 
-        let token = this.actor.token
-        let speaker = ChatMessage.getSpeaker({ actor: this.actor, token })
-        speaker["alias"] = this.actor.name
+        //         let token = this.actor.token
+        //         let speaker = ChatMessage.getSpeaker({ actor: this.actor, token })
+        //         speaker["alias"] = this.actor.name
 
-        const chatData = {
-            user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: this.actor.name + ` <span title="
-Recovering is a Full Phase Action and occurs at the end of
-the Segment (after all other characters who have a Phase that
-Segment have acted). A character who Recovers during a Phase
-may do nothing else. He cannot even maintain a Constant Power
-or perform Actions that cost no END or take no time. However,
-he may take Zero Phase Actions at the beginning of his Phase
-to turn off Powers, and Persistent Powers that don't cost END
-remain in effect."><i>Takes a Recovery</i></span>, gaining ${deltaEnd} endurance and ${deltaStun} stun.`,
-            speaker: speaker
-        }
+        //         const chatData = {
+        //             user: game.user._id,
+        //             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+        //             content: this.actor.name + ` <span title="
+        // Recovering is a Full Phase Action and occurs at the end of
+        // the Segment (after all other characters who have a Phase that
+        // Segment have acted). A character who Recovers during a Phase
+        // may do nothing else. He cannot even maintain a Constant Power
+        // or perform Actions that cost no END or take no time. However,
+        // he may take Zero Phase Actions at the beginning of his Phase
+        // to turn off Powers, and Persistent Powers that don't cost END
+        // remain in effect."><i>Takes a Recovery</i></span>, gaining ${deltaEnd} endurance and ${deltaStun} stun.`,
+        //             speaker: speaker
+        //         }
 
-        return ChatMessage.create(chatData)
+        //         return ChatMessage.create(chatData)
     }
 
     _onPresenseAttack(event) {

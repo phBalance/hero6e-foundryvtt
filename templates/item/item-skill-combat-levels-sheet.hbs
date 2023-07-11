@@ -1,0 +1,78 @@
+{{ log 'HEROSYS item-skill-combat-levelssheet' this }}
+<form class="{{cssClass}}" autocomplete="off" data-id="{{item._id}}" data-realId="{{item.system.realId}}">
+    <header class="sheet-header">
+        <img class="profile-img" name="img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name" /></h1>
+        </div>
+    </header>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+
+        <div class="form-group">
+            <label>Levels</label>
+            <input type="text" name="system.LEVELS.value" value="{{system.LEVELS.value}}" data-dtype="Number" />
+            /
+            <input type="text" name="system.LEVELS.max" value="{{system.LEVELS.max}}" data-dtype="Number" />
+        </div>
+
+        <div class="form-group">
+            <label>OPTIONS</label>
+            <div class="form-fields">
+                <select name="system.OPTION" data-dtype="text">
+                    {{selectOptions config.csl.options selected=system.OPTION}}
+                </select>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label>OPTION_ALIAS</label>
+            <div class="form-fields">
+                <input name="system.OPTION_ALIAS" type="text" value="{{system.OPTION_ALIAS}}" />
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label>Attacks Included:</label>
+            <div class="form-fields csl-attack-list">
+                <ul>
+                    {{#each attacks }}
+                    <li>
+                        <input type="checkbox" name="system.attacks.{{this.id}}" {{checked this.checked}}
+                            data-dtype="Boolean" />
+                        {{this.name}}
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+
+
+
+
+
+        <div class="form-group">
+            <label>LEVELS</label>
+            <div class="form-fields">
+                <ol>
+                    {{#each csl}}
+                    <li>
+                        {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+                    </li>
+                    {{/each}}
+                </ol>
+
+            </div>
+        </div>
+
+
+
+        {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
+
+
+
+    </section>
+</form>

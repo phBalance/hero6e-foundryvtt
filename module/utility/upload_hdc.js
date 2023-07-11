@@ -1,7 +1,7 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
-import { getPowerInfo } from '../utility/util.js'
+import { getPowerInfo, getModifierInfo } from '../utility/util.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
 
 
@@ -416,6 +416,48 @@ export async function applyCharacterSheet(xmlDoc) {
     await updateItemSubTypes(this.actor)
 
 
+    // Combat Skill Levels - Enumerate attacks that use OCV
+    for (let cslItem of this.actor.items.filter(o => o.system.XMLID === "COMBAT_LEVELS")) {
+        let attacks = {}
+        for (let attack of this.actor.items.filter(o =>
+            (o.type == 'attack' || o.system.subType == 'attack') &&
+            o.system.uses === 'ocv'
+        )) {
+            let checked = false;
+
+            // Attempt to determine if attack should be checked
+            if (cslItem.system.OPTION_ALIAS.toLowerCase().indexOf(attack.name.toLowerCase()) > -1) {
+                checked = true;
+            }
+
+            if (cslItem.system.OPTION === "HTH" && (
+                attack.system.XMLID === "HTH" ||
+                attack.system.XMLID === "HANDTOHANDATTACK" ||
+                attack.system.XMLID === "HKA" ||
+                attack.system.XMLID === "MANEUVER"
+            )
+            ) {
+                checked = true;
+            }
+
+            if (cslItem.system.OPTION === "RANGED" && (
+                attack.system.XMLID === "BLAST" ||
+                attack.system.XMLID === "RKA"
+            )
+            ) {
+                checked = true;
+            }
+
+            if (cslItem.system.OPTION === "ALL") {
+                checked = true;
+            }
+
+            attacks[attack.id] = checked;
+        }
+        await cslItem.update({ 'system.attacks': attacks });
+    }
+
+
     // Make sure VALUE = MAX.
     // We may have applied ActiveEffectcs to MAX.
     for (let char of Object.keys(this.actor.system.characteristics)) {
@@ -549,7 +591,14 @@ export function XmlToItemData(xml, type) {
 
             default: HEROSYS.log(false, systemData.OPTION)
         }
+
+        // Make sure CSL's are defined
+        systemData.csl = {}
+        for (let c = 0; c < parseInt(systemData.LEVELS.value); c++) {
+            systemData.csl[c] = 'ocv';
+        }
     }
+
 
     if (systemData.XMLID == "SKILL_LEVELS") {
         switch (systemData.OPTION) {
@@ -1225,7 +1274,9 @@ function calcActivePoints(_basePointsPlusAdders, system) {
 
     // NAKEDMODIFIER uses PRIVATE=="Yes" to indicate advantages
 
-    let advantages = 0
+    let advantages = 0;
+    let advantagesDC = 0;
+
     for (let modifier of system.modifiers.filter(o =>
         (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE == "Yes")
         && parseFloat(o.BASECOST) >= 0
@@ -1264,14 +1315,24 @@ function calcActivePoints(_basePointsPlusAdders, system) {
         modifier.BASECOST_total = _myAdvantage
 
 
-
+        // For attacks with Advantages, determine the DCs by
+        // making a special Active Point calculation that only counts
+        // Advantages that directly affect how the victim takes damage.
+        let powerInfo = getPowerInfo({ xmlid: system.XMLID })
+        let modifierInfo = getModifierInfo({ xmlid: modifier.XMLID })
+        if (powerInfo && powerInfo.powerType.includes("attack")) {
+            if (modifierInfo && modifierInfo.dc) {
+                advantagesDC += Math.max(0, _myAdvantage)
+            }
+        }
     }
 
     const _activePoints = _basePointsPlusAdders * (1 + advantages)
+    system.activePointsDc = RoundFavorPlayerDown(_basePointsPlusAdders * (1 + advantagesDC))
 
     // HALFEND is based on active points without the HALFEND modifier
     if (system.modifiers.find(o => o.XMLID == "REDUCEDEND")) {
-        system._activePointsWithoutEndMods = _basePointsPlusAdders * (1 + advantages -  0.25);
+        system._activePointsWithoutEndMods = _basePointsPlusAdders * (1 + advantages - 0.25);
     }
 
 
@@ -1794,6 +1855,12 @@ export function updateItemDescription(system, type) {
             // (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), 
             // Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)
             system.description = `${system.ALIAS} (${system.LEVELS.value} STR)`
+            break;
+
+        case "MENTAL_COMBAT_LEVELS":
+        case "COMBAT_LEVELS":
+            // +1 with any single attack
+            system.description = `+${system.LEVELS.value} ${system.OPTION_ALIAS}`;
             break;
 
         default:

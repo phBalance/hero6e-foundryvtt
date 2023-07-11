@@ -5,7 +5,8 @@ import { HEROSYS } from "../herosystem6e.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
 import {
     determineStrengthDamage, determineExtraDiceDamage,
-    simplifyDamageRoll, convertToDC, handleDamageNegation
+    simplifyDamageRoll, convertToDC, handleDamageNegation,
+    CombatSkillLevelsForAttack
 } from "../utility/damage.js";
 import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
@@ -134,10 +135,13 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    // if (parseInt(options.toHitMod) > 0) {
-    //     rollEquation = modifyRollEquation(rollEquation, options.toHitMod);
-    //     tags.push({ value: options.toHitMod, name: "toHitMod" })
-    // }
+    // Combat Skill Levels
+    let csl = CombatSkillLevelsForAttack(item);
+    if (csl.ocv > 0) {
+        rollEquation = modifyRollEquation(rollEquation, csl.ocv);
+        tags.push({ value: csl.ocv, name: csl.item.name })
+    }
+
 
     // [x Stun, x N Stun, x Body, OCV modifier]
     let noHitLocationsPower = item.system.noHitLocations || false;
@@ -327,6 +331,24 @@ export async function _onRollDamage(event) {
     if (extraDiceDamage !== "") {
         tags.push({ value: extraDiceDamage, name: "extraDice" })
         damageRoll += extraDiceDamage
+    }
+
+    const csl = CombatSkillLevelsForAttack(item)
+    if (csl && csl.dc > 0)
+    {
+
+        let cslDamage = csl.dc + "d6"
+        if (item.system.killing) {
+            cslDamage = Math.floor(csl.dc / 3) + "d6";
+            if (csl.dc % 3 >= 0.5) {
+                cslDamage += " + 1d3"
+            } else if (csl.dc % 3 >= 0.2) {
+                cslDamage += " + 1"
+            }
+        }
+        
+        tags.push({ value: cslDamage, name: csl.item.name })
+        damageRoll += cslDamage
     }
 
     damageRoll = simplifyDamageRoll(damageRoll)
