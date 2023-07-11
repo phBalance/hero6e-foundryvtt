@@ -2,7 +2,7 @@
 - Fixed issue when deleteting combatant in Combat Traker before combatant begins.
 - At Post-Segment-12 all active combatants Take a Recovery.
 - Stun status is cleared at the beginning of phase.
-- Initial Combat Skill Levels (CSL) support. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)
+- Initial Combat Skill Levels (CSL) support.  OCV is added to attacks.  Simple +1DC. DCV (like all DCV modifiers) is shown but not currently implemented. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)
 
 # Version 3.0.5
 - Initial DRAIN support.

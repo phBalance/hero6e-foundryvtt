@@ -1,7 +1,7 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
-import { getPowerInfo } from '../utility/util.js'
+import { getPowerInfo, getModifierInfo } from '../utility/util.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
 
 
@@ -417,35 +417,34 @@ export async function applyCharacterSheet(xmlDoc) {
 
 
     // Combat Skill Levels - Enumerate attacks that use OCV
-    for (let cslItem of this.actor.items.filter(o=> o.system.XMLID === "COMBAT_LEVELS"))
-    {
+    for (let cslItem of this.actor.items.filter(o => o.system.XMLID === "COMBAT_LEVELS")) {
         let attacks = {}
-        for (let attack of this.actor.items.filter(o => 
+        for (let attack of this.actor.items.filter(o =>
             (o.type == 'attack' || o.system.subType == 'attack') &&
             o.system.uses === 'ocv'
         )) {
             let checked = false;
 
             // Attempt to determine if attack should be checked
-            if (cslItem.system.OPTION_ALIAS.toLowerCase().indexOf(attack.name.toLowerCase()) > -1)
-            {
+            if (cslItem.system.OPTION_ALIAS.toLowerCase().indexOf(attack.name.toLowerCase()) > -1) {
                 checked = true;
             }
 
             if (cslItem.system.OPTION === "HTH" && (
-                attack.system.XMLID === "HTH" || 
-                ttack.system.XMLID === "HKA" ||
+                attack.system.XMLID === "HTH" ||
+                attack.system.XMLID === "HANDTOHANDATTACK" ||
+                attack.system.XMLID === "HKA" ||
                 attack.system.XMLID === "MANEUVER"
-                )
-             ) {
+            )
+            ) {
                 checked = true;
             }
 
             if (cslItem.system.OPTION === "RANGED" && (
-                attack.system.XMLID === "BLAST" || 
+                attack.system.XMLID === "BLAST" ||
                 attack.system.XMLID === "RKA"
-                )
-             ) {
+            )
+            ) {
                 checked = true;
             }
 
@@ -455,7 +454,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
             attacks[attack.id] = checked;
         }
-        await cslItem.update({'system.attacks': attacks});
+        await cslItem.update({ 'system.attacks': attacks });
     }
 
 
@@ -1275,7 +1274,9 @@ function calcActivePoints(_basePointsPlusAdders, system) {
 
     // NAKEDMODIFIER uses PRIVATE=="Yes" to indicate advantages
 
-    let advantages = 0
+    let advantages = 0;
+    let advantagesDC = 0;
+
     for (let modifier of system.modifiers.filter(o =>
         (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE == "Yes")
         && parseFloat(o.BASECOST) >= 0
@@ -1314,10 +1315,20 @@ function calcActivePoints(_basePointsPlusAdders, system) {
         modifier.BASECOST_total = _myAdvantage
 
 
-
+        // For attacks with Advantages, determine the DCs by
+        // making a special Active Point calculation that only counts
+        // Advantages that directly affect how the victim takes damage.
+        let powerInfo = getPowerInfo({ xmlid: system.XMLID })
+        let modifierInfo = getModifierInfo({ xmlid: modifier.XMLID })
+        if (powerInfo && powerInfo.powerType.includes("attack")) {
+            if (modifierInfo && modifierInfo.dc) {
+                advantagesDC += Math.max(0, _myAdvantage)
+            }
+        }
     }
 
     const _activePoints = _basePointsPlusAdders * (1 + advantages)
+    system.activePointsDc = RoundFavorPlayerDown(_basePointsPlusAdders * (1 + advantagesDC))
 
     // HALFEND is based on active points without the HALFEND modifier
     if (system.modifiers.find(o => o.XMLID == "REDUCEDEND")) {
