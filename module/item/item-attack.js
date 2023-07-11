@@ -142,6 +142,26 @@ export async function AttackToHit(item, options) {
         tags.push({ value: csl.ocv || csl.omcv, name: csl.item.name })
     }
 
+    let dcv = parseInt(item.system.dcv) + csl.dcv
+    if (dcv != 0) {
+
+        // Make sure we don't already have this activeEffect
+        let prevActiveEffect = item.actor.allApplicableEffects().find(o => o.origin === item.uuid);
+        if (!prevActiveEffect) {
+            let activeEffect = {
+                label: `${csl.item.name} ${dcv} DCV`,
+                icon: "icons/svg/downgrade.svg",
+                origin: item.uuid,
+                changes: [
+                    { key: "system.characteristics.dcv.value", value: dcv, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                ],
+                transfer: true,
+            }
+            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        }
+
+    }
+
 
     // [x Stun, x N Stun, x Body, OCV modifier]
     let noHitLocationsPower = item.system.noHitLocations || false;
