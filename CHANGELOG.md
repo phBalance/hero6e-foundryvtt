@@ -1,5 +1,6 @@
 # Version 3.0.7
 - Initial Mental Combat Skill Levels (MCSL) support. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)
+- Fixed issue with large worlds failing to load.
 
 
 # Version 3.0.6
