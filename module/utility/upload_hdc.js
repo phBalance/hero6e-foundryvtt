@@ -418,10 +418,10 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // Combat Skill Levels - Enumerate attacks that use OCV
     for (let cslItem of this.actor.items.filter(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID))) {
-            let _ocv = 'ocv'
-            if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
-                _ocv = 'omcv'
-            }
+        let _ocv = 'ocv'
+        if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+            _ocv = 'omcv'
+        }
 
         let attacks = {}
         let checkedCount = 0;
@@ -465,12 +465,11 @@ export async function applyCharacterSheet(xmlDoc) {
             attacks[attack.id] = checked;
 
             if (checked) checkedCount++;
-        
+
         }
 
         // Make sure at least one attacked is checked
-        if (checkedCount === 0 && Object.keys(attacks).length > 0)
-        {
+        if (checkedCount === 0 && Object.keys(attacks).length > 0) {
             attacks[Object.keys(attacks)[0]] = true;
         }
 
@@ -1289,9 +1288,9 @@ function calcActivePoints(_basePointsPlusAdders, system) {
     // const xmlid = system.rules || system.xmlid //xmlItem.getAttribute('XMLID')
     // const modifiers = system.modifiers || system.MODIFIER || [] //xmlItem.getElementsByTagName("ADDER")
 
-    if (system.XMLID == "MINDCONTROL")
-        HEROSYS.log(false, system.XMLID)
-
+    if (system.XMLID == "MINDCONTROL") {
+        // HEROSYS.log(false, system.XMLID)
+    }
     // NAKEDMODIFIER uses PRIVATE=="Yes" to indicate advantages
 
     let advantages = 0;
@@ -1472,7 +1471,7 @@ export async function uploadPower(power, type) {
     else {
         if (game.settings.get(game.system.id, 'alphaTesting')) {
             ui.notifications.warn(`${xmlid} not handled during HDC upload of ${this.actor.name}`)
-            HEROSYS.log(false, power)
+            // HEROSYS.log(false, power)
         }
 
     }
@@ -2787,20 +2786,23 @@ export async function updateItem(item) {
     if (item.system.LEVELS) {
         if (item.system.LEVELS.value == undefined) {
             let levels = item.system.LEVELS
-            delete item.system.LEVELS
-            item.system.LEVELS = {
+            //delete item.system.LEVELS
+            let _LEVELS = {
                 value: levels,
                 max: levels
             }
             changed = true;
-            await item.update({ 'system.LEVELS.value': levels, 'system.LEVELS.max': levels })
+            //await item.update({ 'system.LEVELS.value': levels, 'system.LEVELS.max': levels })
+            await item.update({ 'system.LEVELS': null })
+            let _item = await item.update({ ['system.LEVELS.value']: levels, ['system.LEVELS.max']: levels})
+            //console.log(_item.system.LEVELS)
         }
 
         // Default values = max
-        if (item.system.LEVELS.value != item.system.LEVELS.max) {
-            item.system.LEVELS.value = parseInt(item.system.LEVELS.max)
-            changed = true
-        }
+        // if (item.system.LEVELS.value != item.system.LEVELS.max) {
+        //     item.system.LEVELS.value = parseInt(item.system.LEVELS.max)
+        //     changed = true
+        // }
 
         // Look for active effects
         if (item.actor.effects) {
@@ -2816,7 +2818,7 @@ export async function updateItem(item) {
                                 item.system.LEVELS.value += parseFloat(change.value / ActivePointsPerLevel) || 0
                                 break;
                             default:
-                                HEROSYS.log(false, "unknown mode")
+                            // HEROSYS.log(false, "unknown mode")
                         }
                     }
                 }
@@ -2873,6 +2875,7 @@ export async function updateItem(item) {
             //         ui.notifications.warn(`${item.actor.name} missing id`)
             //     }
             // } else {
+            
             await item.update({ 'system.description': item.system.description })
             //}
         }

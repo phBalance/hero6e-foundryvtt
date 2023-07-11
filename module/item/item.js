@@ -56,7 +56,7 @@ export class HeroSystem6eItem extends Item {
     prepareData() {
         super.prepareData();
 
-        updateItem(this)
+        //updateItem(this)
 
 
         // Get the Item's data
