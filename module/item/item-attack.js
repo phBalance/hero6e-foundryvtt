@@ -109,7 +109,7 @@ export async function AttackToHit(item, options) {
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = powers[item.system.XMLID].powerType.includes("adjustment")
+    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
     // -------------------------------------------------
     // attack roll
@@ -146,10 +146,10 @@ export async function AttackToHit(item, options) {
     if (dcv != 0) {
 
         // Make sure we don't already have this activeEffect
-        let prevActiveEffect = item.actor.allApplicableEffects().find(o => o.origin === item.uuid);
+        let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find(o => o.origin === item.uuid);
         if (!prevActiveEffect) {
             let activeEffect = {
-                label: `${csl.item.name} ${dcv} DCV`,
+                label: `${item.name} ${dcv} DCV`,
                 icon: "icons/svg/downgrade.svg",
                 origin: item.uuid,
                 changes: [
@@ -157,7 +157,7 @@ export async function AttackToHit(item, options) {
                 ],
                 transfer: true,
             }
-            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            //await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
         }
 
     }
@@ -332,7 +332,7 @@ export async function _onRollDamage(event) {
     const actor = item.actor
 
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = powers[item.system.XMLID].powerType.includes("adjustment")
+    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
     let damageRoll = (item.system.dice === 0) ? "" : item.system.dice + "d6";
 
@@ -514,7 +514,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // AID, DRAIN or any adjustmnet powers
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = powers[item.system.XMLID].powerType.includes("adjustment")
+    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(event, tokenId)
     }
@@ -658,8 +658,8 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
     let levels = 0
 
     // Apply the ADJUSTMENT to a CHARACTERISTIC
-    let key = item.system.INPUT.toLowerCase()
-    if (token.actor.system.characteristics[key]) {
+    let key = (item.system.INPUT || "").toLowerCase()
+    if (key && token.actor.system.characteristics[key]) {
         const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
         let ActivePoints = parseInt(damageData.stundamage)
         let costPerPoint = parseInt(characteristicCosts[key]) * AdjustmentMultiplier(key.toUpperCase());
