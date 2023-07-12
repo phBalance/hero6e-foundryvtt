@@ -149,12 +149,15 @@ export async function AttackToHit(item, options) {
         let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find(o => o.origin === item.uuid);
         if (!prevActiveEffect) {
             let activeEffect = {
-                label: `${item.name} ${dcv} DCV`,
+                label: `${item.name} ${("+" + dcv).replace("+-", "-")} DCV`,
                 icon: "icons/svg/downgrade.svg",
                 origin: item.uuid,
                 changes: [
                     { key: "system.characteristics.dcv.value", value: dcv, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
                 ],
+                duration: {
+                    type: "nextPhase"
+                },
                 transfer: true,
             }
             //await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);

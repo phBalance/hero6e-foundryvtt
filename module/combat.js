@@ -446,6 +446,10 @@ export class HeroSystem6eCombat extends Combat {
 
         }
 
+        // for (let activeEffect of Array.from(combatant.actor.allApplicableEffects()).find(o => o.duration.type === "nextPhase")) {
+        //     await activeEffect.delete();
+        // }
+
     }
 
     /**
