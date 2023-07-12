@@ -51,6 +51,18 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         ]
     };
 
+    static knockedOutEffect = {
+        label: "EFFECT.StatusKnockedOut",
+        id: "knockedOut",
+        icon: 'icons/svg/stoned.svg',
+        changes: [
+            { key: "system.characteristics.ocv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.omcv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.dcv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE },
+            { key: "system.characteristics.dmcv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE }
+        ]
+    };
+
     static deadEffect = {
         label: "EFFECT.StatusDead",
         id: "dead",

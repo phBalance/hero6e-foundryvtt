@@ -95,5 +95,9 @@
         "RoundPrev": "Previous Turn",
         "RoundNext": "Next Turn"
         
+    },
+
+    "EFFECT": {
+        "StatusKnockedOut": "Knocked Out"
     }
 }

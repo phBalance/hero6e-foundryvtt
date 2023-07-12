@@ -56,7 +56,7 @@ export class HeroSystem6eItem extends Item {
     prepareData() {
         super.prepareData();
 
-        updateItem(this)
+        //updateItem(this)
 
 
         // Get the Item's data
@@ -160,12 +160,13 @@ export class HeroSystem6eItem extends Item {
         // Part of a framework (is there a PARENTID?)
         if (this.system.PARENTID) {
             const parent = this.actor.items.find(o => o.system.ID == this.system.PARENTID)
-            content += `<p><b>${parent.name}</b>`
-            if (parent.system.description && parent.system.description != parent.name) {
-                content += ` ${parent.system.description}`
+            if (parent) {
+                content += `<p><b>${parent.name}</b>`
+                if (parent.system.description && parent.system.description != parent.name) {
+                    content += ` ${parent.system.description}`
+                }
+                content += ".</p>"
             }
-            content += ".</p>"
-
         }
         content += `<b>${this.name}</b>`
         if (this.system.description && this.system.description != this.name) {

@@ -97,11 +97,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // Endurance
             item.system.endEstimate = item.system.end || 0
 
-            // Combat Skill Levels
-            const csl = CombatSkillLevelsForAttack(item)
+
 
             // Damage
             if (item.type == 'attack' || item.system.subType == 'attack') {
+
+                // Combat Skill Levels
+                const csl = CombatSkillLevelsForAttack(item)
 
                 let dc = convertToDcFromItem(item);
 
@@ -172,21 +174,26 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                         item.system.damage += '.5D6'
                         break
                 }*/
-                if (item.system.killing) {
-                    item.system.damage += 'K'
-                } else {
-                    item.system.damage += 'N'
+                if (dc > 0) {
+                    if (item.system.killing) {
+                        item.system.damage += 'K'
+                    } else {
+                        item.system.damage += 'N'
+                    }
                 }
+
 
 
 
 
                 // Signed OCV and DCV
                 if (item.system.ocv != undefined) {
-                    item.system.ocv = ("+" + (parseInt(item.system.ocv) + parseInt(csl.ocv))).replace("+-", "-")
+                    item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-")
+                    item.system.ocvEstimated = ("+" + (parseInt(item.system.ocv) + parseInt(csl.ocv || csl.omcv))).replace("+-", "-")
                 }
                 if (item.system.dcv != undefined) {
-                    item.system.dcv = ("+" + (parseInt(item.system.dcv) + parseInt(csl.dcv))).replace("+-", "-")
+                    item.system.dcv = ("+" + parseInt(item.system.dcv)).replace("+-", "-")
+                    item.system.dcvEstimated = ("+" + (parseInt(item.system.dcv) + parseInt(csl.dcv))).replace("+-", "-")
                 }
 
 

@@ -1,5 +1,12 @@
+# Version 3.0.7
+- Initial Mental Combat Skill Levels (MCSL) support. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)
+- Fixed issue with large worlds failing to load.
+- Minor bug fixes for attacks created with "add attack" instead of via HDC upload.
+- Knocked Out when 0 STUN.
+
+
 # Version 3.0.6
-- Fixed issue when deleteting combatant in Combat Traker before combatant begins.
+- Fixed issue when deleting combatant in Combat Tracker before combatant begins.
 - At Post-Segment-12 all active combatants Take a Recovery.
 - Stun status is cleared at the beginning of phase.
 - Initial Combat Skill Levels (CSL) support.  OCV is added to attacks.  Simple +1DC. DCV (like all DCV modifiers) is shown but not currently implemented. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)

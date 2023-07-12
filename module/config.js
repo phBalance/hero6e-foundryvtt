@@ -879,8 +879,7 @@ HERO.powers5e = {
 HERO.ModifierOverride = {
     "ALWAYSOCCURS": { BASECOST: 0, MULTIPLIER: 2 },
     "AOE": { dc: true },
-    "ARMORPIERCING": { BASECOST: 0.5 },
-    "ARMORPIERCING": { dc: true },
+    "ARMORPIERCING": { BASECOST: 0.5, dc: true },
     "AUTOFIRE": { dc: true },
     "AVAD": { dc: true },
     "BOOSTABLE": { dc: true },
@@ -969,6 +968,14 @@ HERO.csl = {
         HTH: "with HTH Combat",
         RANGED: "with Ranged Combat",
         ALL: "with All Attacks"
+    }
+}
+
+HERO.mcsl = {
+    options: {
+        SINGLE: "with a single Mental Power",
+        TIGHT: "with a group of Mental Powers",
+        BROAD: "with all Mental Powers"
     }
 }
 

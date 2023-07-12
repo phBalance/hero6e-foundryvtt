@@ -32,7 +32,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
         }
 
-        if (this.item.system.XMLID === "COMBAT_LEVELS") {
+        if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`
         }
         return `${path}/item-${this.item.type}-sheet.hbs`
@@ -108,15 +108,23 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             data.aidSources = AdjustmentSources(this.actor)
         }
 
-        // Combat Skill Levels
-        if (item.system.XMLID === "COMBAT_LEVELS") {
-            data.cslChoices = { ocv: "ocv", dcv: "dcv", dc: "dc" }
+        // Combat Skill Levels & Mental Combat Levels
+        if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
+            let _ocv = 'ocv'
+            if (this.item.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                _ocv = 'omcv'
+            }
+            data.cslChoices = { [_ocv]: _ocv};
+            if (this.item.system.OPTION != "SINGLE") {
+                data.cslChoices.dcv = "dcv";
+                data.cslChoices.dc = "dc";
+            }
 
             // Make sure CSL's are defined
             if (!item.system.csl) {
                 item.system.csl = {}
                 for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
-                    item.system.csl[c] = 'ocv';
+                    item.system.csl[c] = _ocv;
                 }
                 item.update({ "system.csl": item.system.csl })
             }
@@ -129,14 +137,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
             // Enumerate attacks
             data.attacks = []
-            if (!item.system.attacks)  item.system.attacks = {};
-            for (let attack of item.actor.items.filter(o => o.type == 'attack' || o.system.subType == 'attack')) {
+            if (!item.system.attacks) item.system.attacks = {};
+            for (let attack of item.actor.items.filter(o =>
+                (o.type == 'attack' || o.system.subType == 'attack') &&
+                o.system.uses === _ocv
+            )) {
                 if (!item.system.attacks[attack.id]) item.system.attacks[attack.id] = false;
-                data.attacks.push({name: attack.name, id: attack.id, checked: item.system.attacks[attack.id]})
+                data.attacks.push({ name: attack.name, id: attack.id, checked: item.system.attacks[attack.id] })
             }
-
         }
-
 
         return data
     }

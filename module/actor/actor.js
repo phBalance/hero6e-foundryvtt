@@ -50,6 +50,21 @@ export class HeroSystem6eActor extends Actor {
 
     }
 
+    async removeActiveEffect(activeEffect) {
+        const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id));
+        if (existingEffect) {
+
+            if (activeEffect.id == "knockedOut") {
+                //When he wakes up, his END equals his
+                //current STUN total.
+                let newEnd = Math.min(parseInt(this.system.characteristics.stun.value), parseInt(this.system.characteristics.end.max));
+                await this.update({ "system.characteristics.end.value": newEnd });
+            }
+
+            return existingEffect.delete();
+        }
+    }
+
     // Adding ActiveEffects seems complicated.
     // Make sure only one of the same ActiveEffect is added
     // Assumes ActiveEffect is a statusEffects.
@@ -76,6 +91,12 @@ export class HeroSystem6eActor extends Actor {
         }
 
         await this.createEmbeddedDocuments("ActiveEffect", [newEffect])
+
+        if (activeEffect.id == "knockedOut") {
+            // Knocked Out overrides Stunned
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+        }
+
 
     }
 
@@ -114,6 +135,52 @@ export class HeroSystem6eActor extends Actor {
                 await actor.update({ type: html.find('input:checked')[0].value })
             }
         });
+    }
+
+    /* -------------------------------------------- */
+
+    /**
+     * Handle how changes to a Token attribute bar are applied to the Actor.
+     * This allows for game systems to override this behavior and deploy special logic.
+     * @param {string} attribute    The attribute path
+     * @param {number} value        The target attribute value
+     * @param {boolean} isDelta     Whether the number represents a relative change (true) or an absolute change (false)
+     * @param {boolean} isBar       Whether the new value is part of an attribute bar, or just a direct value
+     * @returns {Promise<documents.Actor>}  The updated Actor document
+     */
+    async modifyTokenAttribute(attribute, value, isDelta = false, isBar = true) {
+        const current = foundry.utils.getProperty(this.system, attribute);
+
+        // Determine the updates to make to the actor data
+        let updates;
+        if (isBar) {
+            if (isDelta) value = Math.clamped(-99, Number(current.value) + value, current.max);  // a negative bar is typically acceptable
+            updates = { [`system.${attribute}.value`]: value };
+        } else {
+            if (isDelta) value = Number(current) + value;
+            updates = { [`system.${attribute}`]: value };
+        }
+        const allowed = Hooks.call("modifyTokenAttribute", { attribute, value, isDelta, isBar }, updates);
+        return allowed !== false ? this.update(updates) : this;
+    }
+
+
+
+    async _onUpdate(data, options, userId) {
+        super._onUpdate(data, options, userId);
+
+        if (data?.system?.characteristics?.stun) {
+
+            if (data.system.characteristics.stun.value <= 0) {
+                this.addActiveEffect(HeroSystem6eActorActiveEffects.knockedOutEffect);
+            }
+
+            if (data.system.characteristics.stun.value > 0) {
+                this.removeActiveEffect(HeroSystem6eActorActiveEffects.knockedOutEffect);
+            }
+
+        }
+
     }
 
 
