@@ -2240,6 +2240,13 @@ export async function makeAttack(item) {
         changes[`system.noHitLocations`] = true
     }
 
+    // IMAGES (not implemented)
+    if (xmlid == "IMAGES") {
+        changes[`system.class`] = 'images'
+        changes[`system.usesStrength`] = false
+        changes[`system.noHitLocations`] = true
+    }
+
     // DRAIN (not implemented)
     if (xmlid == "DRAIN") {
         changes[`system.class`] = 'drain'

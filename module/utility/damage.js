@@ -335,7 +335,7 @@ export function CombatSkillLevelsForAttack(item) {
     }
 
     let csl = item.actor.items.find(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) && o.system.attacks && o.system.attacks[item.id])
-    if (csl) {
+    if (csl && csl.system.csl) {
         for (let i = 0; i < parseInt(csl.system.LEVELS.value); i++) {
             result[csl.system.csl[i]] = (result[csl.system.csl[i]] || 0) + 1;
         }
@@ -344,6 +344,6 @@ export function CombatSkillLevelsForAttack(item) {
 
     // Takes 2 CLS for +1 DC
     result.dc = Math.floor(result.dc / 2);
-    
+
     return result;
 }

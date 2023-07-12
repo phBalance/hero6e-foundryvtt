@@ -174,11 +174,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                         item.system.damage += '.5D6'
                         break
                 }*/
-                if (item.system.killing) {
-                    item.system.damage += 'K'
-                } else {
-                    item.system.damage += 'N'
+                if (dc > 0) {
+                    if (item.system.killing) {
+                        item.system.damage += 'K'
+                    } else {
+                        item.system.damage += 'N'
+                    }
                 }
+
 
 
 
