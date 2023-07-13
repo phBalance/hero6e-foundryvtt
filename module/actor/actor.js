@@ -262,6 +262,11 @@ export class HeroSystem6eActor extends Actor {
 
         if (asAction) {
             await ChatMessage.create(chatData)
+
+            // Remove stunned condition.
+            // While not technically part of the rules, it is here as a convenience.
+            // For example when Combat Tracker isn't being used.
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
         }
 
         return content;

@@ -415,6 +415,32 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
             }
 
+            // Active Effects may be blocking updates
+            let ary = []
+            let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> o.changes.find(p=> p.key === `system.characteristics.${key}.value`));
+            for (let ae of activeEffects) {
+                ary.push(`<li>${ae.name}</li>`);
+            }
+            if (ary.length > 0)
+            {
+                characteristic.valueTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
+                characteristic.valueTitle += ary.join('\n ');
+                characteristic.valueTitle += "</ul>";
+            }
+
+            ary = []
+            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> o.changes.find(p=> p.key === `system.characteristics.${key}.max`));
+            for (let ae of activeEffects) {
+                ary.push(`<li>${ae.name}</li>`);
+            }
+            if (ary.length > 0)
+            {
+                characteristic.maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
+                characteristic.maxTitle += ary.join('\n ');
+                characteristic.maxTitle += "</ul>";
+            }
+            
+
             characteristicSet.push(characteristic)
         }
         data.characteristicSet = characteristicSet

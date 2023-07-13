@@ -566,14 +566,15 @@
                     </tr>
                     {{#each characteristicSet as |characteristic key|}}
                     <tr class="characteristic">
-                        <td>
+                        <td data-tooltip="{{{characteristic.valueTitle}}}">
                             <input name="system.characteristics.{{characteristic.key}}.value" type="text"
                                 value="{{characteristic.value}}" data-dtype="Number"
-                                class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}">
+                                class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
+                                 {{#if characteristic.valueTitle}}disabled{{/if}}>
                         </td>
-                        <td>
+                        <td data-tooltip="{{{characteristic.maxTitle}}}">
                             <input name="system.characteristics.{{characteristic.key}}.max" type="text"
-                                value="{{characteristic.max}}" data-dtype="Number">
+                                value="{{characteristic.max}}" data-dtype="Number" {{#if characteristic.maxTitle}}disabled{{/if}}>
                         </td>
                         <td>
                             {{characteristic.core}}

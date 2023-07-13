@@ -320,3 +320,7 @@ input.left {
   margin-left: 2px;
   margin-right: 2px;
 }
+
+ul.left li {
+  text-align: left;
+}

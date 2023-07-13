@@ -688,15 +688,15 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
 
             prevEffect.changes[0].value = newLevels
 
-            prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`,
+            prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
 
-                prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
+            prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
 
         } else {
             // Create new ActiveEffect
             let activeEffect =
             {
-                name: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                label: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
                 icon: item.img,
                 changes: [
                     {

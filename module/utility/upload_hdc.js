@@ -553,7 +553,7 @@ export function XmlToItemData(xml, type) {
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
         "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
-        "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT"
+        "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
