@@ -223,10 +223,10 @@ export function registerUploadTests(quench) {
                 itemData.actor = actor
                 let item = itemData; // await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
                 makeAttack(item);
-                updateItemDescription.call(item, item.system, item.type)
+                updateItemDescription(item)
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Offensive Strike: 1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
+                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 5);
@@ -545,6 +545,43 @@ export function registerUploadTests(quench) {
                 });
             });
 
+
+            describe("Killing Strike", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                }, { temporary: true });
+                actor.system.characteristics.ego.value = 38
+
+                const contents = `
+                <MANEUVER XMLID="MANEUVER" ID="1689357675658" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="2" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="10" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
+                <NOTES />
+                </MANEUVER>
+                    `;
+                let parser = new DOMParser()
+                let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                itemData.actor = actor
+                let item = itemData;
+                makeAttack(item);
+                updateItemDescription(item);
+
+                it("description", function () {
+                    assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 4);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 4);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, "0");
+                });
+            });
 
 
 

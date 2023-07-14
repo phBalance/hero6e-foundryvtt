@@ -105,7 +105,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 // Combat Skill Levels
                 const csl = CombatSkillLevelsForAttack(item)
 
-                let dc = convertToDcFromItem(item);
+                let {dc, end} = convertToDcFromItem(item);
+                item.system.endEstimate += end;
 
                 // // Convert dice to pips
                 // let pips = item.system.dice * 3;
@@ -162,7 +163,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 // let extraDice = pips - fullDice * 3
 
                 // text descrdiption of damage
-                item.system.damage = convertFromDC(item, dc)  /*fullDice
+                item.system.damage = convertFromDC(item, dc).replace(/ /g, "");  /*fullDice
                 switch (extraDice) {
                     case 0:
                         item.system.damage += 'D6'

@@ -6,10 +6,11 @@ import { RoundFavorPlayerDown } from "../utility/round.js";
 import {
     determineStrengthDamage, determineExtraDiceDamage,
     simplifyDamageRoll, convertToDC, handleDamageNegation,
-    CombatSkillLevelsForAttack
+    CombatSkillLevelsForAttack, convertToDcFromItem, convertFromDC
 } from "../utility/damage.js";
 import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
+import { isPowerSubItem } from "../powers/powers.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -337,41 +338,51 @@ export async function _onRollDamage(event) {
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
-    let damageRoll = (item.system.dice === 0) ? "" : item.system.dice + "d6";
+    let {dc, tags} = convertToDcFromItem(item);
 
-    let tags = []
-    if (parseInt(item.system.dice) > 0) {
-        tags.push({ value: item.system.dice + "d6", name: "base" })
-    }
 
-    const strDamage = determineStrengthDamage(item, toHitData.effectivestr)
-    if (strDamage) {
-        tags.push({ value: damageRollToTag(strDamage), name: "strength" })
-        damageRoll += strDamage
-    }
+    let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";
 
-    const extraDiceDamage = determineExtraDiceDamage(item)
-    if (extraDiceDamage !== "") {
-        tags.push({ value: extraDiceDamage, name: "extraDice" })
-        damageRoll += extraDiceDamage
-    }
+    //let tags = []
 
-    const csl = CombatSkillLevelsForAttack(item)
-    if (csl && csl.dc > 0) {
+    // BASE ATTACK
+    // let baseTag = ""
+    // if (parseInt(item.system.dice) > 0) {
+    //     //tags.push({ value: item.system.dice + "d6", name: "base" })
+    //     baseTag = item.system.dice + "d6";
+    // }
+    // const extraDiceDamage = determineExtraDiceDamage(item)
+    // if (extraDiceDamage !== "") {
+    //     //tags.push({ value: extraDiceDamage, name: "extraDice" })
+    //     damageRoll += extraDiceDamage
+    //     baseTag += extraDiceDamage;
+    // }
+    // tags.push({ value: baseTag || 0, name: item.name })
 
-        let cslDamage = csl.dc + "d6"
-        if (item.system.killing) {
-            cslDamage = Math.floor(csl.dc / 3) + "d6";
-            if (csl.dc % 3 >= 0.5) {
-                cslDamage += " + 1d3"
-            } else if (csl.dc % 3 >= 0.2) {
-                cslDamage += " + 1"
-            }
-        }
+    // const strDamage = determineStrengthDamage(item, toHitData.effectivestr)
+    // if (strDamage) {
+    //     tags.push({ value: damageRollToTag(strDamage), name: "strength" })
+    //     damageRoll += strDamage
+    // }
 
-        tags.push({ value: cslDamage, name: csl.item.name })
-        damageRoll += cslDamage
-    }
+
+
+    // const csl = CombatSkillLevelsForAttack(item)
+    // if (csl && csl.dc > 0) {
+
+    //     let cslDamage = csl.dc + "d6"
+    //     if (item.system.killing) {
+    //         cslDamage = Math.floor(csl.dc / 3) + "d6";
+    //         if (csl.dc % 3 >= 0.5) {
+    //             cslDamage += " + 1d3"
+    //         } else if (csl.dc % 3 >= 0.2) {
+    //             cslDamage += " + 1"
+    //         }
+    //     }
+
+    //     tags.push({ value: cslDamage, name: csl.item.name })
+    //     damageRoll += cslDamage
+    // }
 
     damageRoll = simplifyDamageRoll(damageRoll)
 
@@ -951,7 +962,7 @@ async function _calcDamage(damageResult, item, options) {
             knockbackMessage = "Knocked back " + (knockbackResultTotal * 2) + "m";
         }
     }
-    
+
 
     // -------------------------------------------------
     // determine effective damage
@@ -989,7 +1000,7 @@ async function _calcDamage(damageResult, item, options) {
         hasStunMultiplierRoll = false;
     }
 
-    
+
 
 
     // apply damage reduction
