@@ -660,6 +660,15 @@ form .upload-button {
   list-style-type: none;
 }
 
+div.tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tag {
+  margin-right: 4px;
+}
+
 .tags .tag {
   background-color: #5e0000;
   border-radius: 2px;

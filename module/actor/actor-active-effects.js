@@ -26,7 +26,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
     // A Stunned character’s DCV and DMCV are instantly halved.
     static stunEffect = {
-        label: "EFFECT.StatusStunned",
+        name: "EFFECT.StatusStunned",
         id: "stunned",
         icon: 'icons/svg/daze.svg',
         changes: [
@@ -36,13 +36,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     };
 
     static bleedingEffect = {
-        label: "EFFECT.StatusBleeding",
+        name: "EFFECT.StatusBleeding",
         id: "bleeding",
         icon: 'icons/svg/blood.svg',
     };
 
     static unconsciousEffect = {
-        label: "EFFECT.StatusUnconscious",
+        name: "EFFECT.StatusUnconscious",
         id: "unconscious",
         icon: 'icons/svg/unconscious.svg',
         changes: [
@@ -52,7 +52,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     };
 
     static knockedOutEffect = {
-        label: "EFFECT.StatusKnockedOut",
+        name: "EFFECT.StatusKnockedOut",
         id: "knockedOut",
         icon: 'icons/svg/stoned.svg',
         changes: [
@@ -64,7 +64,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     };
 
     static deadEffect = {
-        label: "EFFECT.StatusDead",
+        name: "EFFECT.StatusDead",
         id: "dead",
         icon: 'icons/svg/skull.svg',
         changes: [
@@ -84,7 +84,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     // Ranged Combat, and -1 DCV in HTH Combat (full DCV at Range).
     // These effects last until the beginning of the character’s next Phase.
     static blindEffect = {
-        label: "EFFECT.StatusBlind",
+        name: "EFFECT.StatusBlind",
         id: "blind",
         icon: 'icons/svg/blind.svg',
         // changes: [
@@ -94,7 +94,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     };
 
     static asleepEffect = {
-        label: "EFFECT.StatusAsleep",
+        name: "EFFECT.StatusAsleep",
         id: "asleep",
         icon: 'icons/svg/sleep.svg',
         // changes: [

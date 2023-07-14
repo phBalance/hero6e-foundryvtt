@@ -51,6 +51,12 @@ function determineDefense(targetActor, attackItem) {
             PD -= levels
             rPD += levels
         }
+
+        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes")
+        {
+            PD -= targetActor.system.characteristics.pd.core;
+            rPD += targetActor.system.characteristics.pd.core;
+        }
     }
 
     // ED bought as resistant
@@ -60,6 +66,12 @@ function determineDefense(targetActor, attackItem) {
             const levels = parseInt(item.system.LEVELS.value) || 0
             ED -= levels
             rED += levels
+        }
+
+        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes")
+        {
+            ED -= targetActor.system.characteristics.ed.core;
+            rED += targetActor.system.characteristics.ed.core;
         }
     }
 

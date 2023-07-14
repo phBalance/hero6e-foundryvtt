@@ -5,7 +5,7 @@ import * as Dice from "../dice.js"
 import * as Attack from "../item/item-attack.js"
 import { createSkillPopOutFromItem } from '../item/skill.js'
 import { enforceManeuverLimits } from '../item/manuever.js'
-import { SkillRollUpdateValue, updateItem } from '../utility/upload_hdc.js'
+import { SkillRollUpdateValue, updateItem, updateItemDescription } from '../utility/upload_hdc.js'
 import { onActiveEffectToggle } from '../utility/effects.js'
 import { getPowerInfo } from '../utility/util.js'
 
@@ -154,6 +154,8 @@ export class HeroSystem6eItem extends Item {
     }
 
     async chat() {
+
+        updateItemDescription(this);
 
         let content = `<div class="item-chat">`
 

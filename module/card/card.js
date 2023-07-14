@@ -116,7 +116,7 @@ export class HeroSystem6eCard {
         // Add a new effect
         else {
             const createData = foundry.utils.deepClone(effectData);
-            createData.label = game.i18n.localize(effectData.label);
+            createData.name = game.i18n.localize(effectData.name);
             createData["flags.core.statusId"] = effectData.id;
             delete createData.id;
             const cls = getDocumentClass("ActiveEffect");
@@ -152,7 +152,7 @@ export class HeroSystem6eCard {
         const existing = target.effects.find(e => e.getFlag("core", "statusId") === effectData.id);
         if (!existing) {
             const createData = foundry.utils.deepClone(effectData);
-            createData.label = game.i18n.localize(effectData.label);
+            createData.name = game.i18n.localize(effectData.name || effectData.label);
             createData["flags.core.statusId"] = effectData.id;
             delete createData.id;
             const cls = getDocumentClass("ActiveEffect");

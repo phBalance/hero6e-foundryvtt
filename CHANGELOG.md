@@ -1,3 +1,13 @@
+# Version 3.0.8
+- Take a Recovery now also removes the Stunned condition.
+- When characteristics are locked (due to Active Effects) they are now readonly and a tooltip shows what is preventing editing.
+- PD/ED bought as power with resistant modifier and ADD_MODIFIERS_TO_BASE is checked is now supported. [#182](https://github.com/dmdorman/hero6e-foundryvtt/issues/182)
+- Improved Invisibility power description. [#183](https://github.com/dmdorman/hero6e-foundryvtt/issues/183)
+- Fixed Knockback calculations [#188](https://github.com/dmdorman/hero6e-foundryvtt/issues/188)
+- Fixed Martial Killing attack uploads. [#187](https://github.com/dmdorman/hero6e-foundryvtt/issues/187)
+- Damage tags show Damage Classes (DC) [#139](https://github.com/dmdorman/hero6e-foundryvtt/issues/139) [#119](https://github.com/dmdorman/hero6e-foundryvtt/issues/119)
+
+
 # Version 3.0.7
 - Initial Mental Combat Skill Levels (MCSL) support. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)
 - Fixed issue with large worlds failing to load.

@@ -6,10 +6,11 @@ import { RoundFavorPlayerDown } from "../utility/round.js";
 import {
     determineStrengthDamage, determineExtraDiceDamage,
     simplifyDamageRoll, convertToDC, handleDamageNegation,
-    CombatSkillLevelsForAttack
+    CombatSkillLevelsForAttack, convertToDcFromItem, convertFromDC
 } from "../utility/damage.js";
 import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
+import { isPowerSubItem } from "../powers/powers.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -337,41 +338,51 @@ export async function _onRollDamage(event) {
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
-    let damageRoll = (item.system.dice === 0) ? "" : item.system.dice + "d6";
+    let {dc, tags} = convertToDcFromItem(item);
 
-    let tags = []
-    if (parseInt(item.system.dice) > 0) {
-        tags.push({ value: item.system.dice + "d6", name: "base" })
-    }
 
-    const strDamage = determineStrengthDamage(item, toHitData.effectivestr)
-    if (strDamage) {
-        tags.push({ value: damageRollToTag(strDamage), name: "strength" })
-        damageRoll += strDamage
-    }
+    let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";
 
-    const extraDiceDamage = determineExtraDiceDamage(item)
-    if (extraDiceDamage !== "") {
-        tags.push({ value: extraDiceDamage, name: "extraDice" })
-        damageRoll += extraDiceDamage
-    }
+    //let tags = []
 
-    const csl = CombatSkillLevelsForAttack(item)
-    if (csl && csl.dc > 0) {
+    // BASE ATTACK
+    // let baseTag = ""
+    // if (parseInt(item.system.dice) > 0) {
+    //     //tags.push({ value: item.system.dice + "d6", name: "base" })
+    //     baseTag = item.system.dice + "d6";
+    // }
+    // const extraDiceDamage = determineExtraDiceDamage(item)
+    // if (extraDiceDamage !== "") {
+    //     //tags.push({ value: extraDiceDamage, name: "extraDice" })
+    //     damageRoll += extraDiceDamage
+    //     baseTag += extraDiceDamage;
+    // }
+    // tags.push({ value: baseTag || 0, name: item.name })
 
-        let cslDamage = csl.dc + "d6"
-        if (item.system.killing) {
-            cslDamage = Math.floor(csl.dc / 3) + "d6";
-            if (csl.dc % 3 >= 0.5) {
-                cslDamage += " + 1d3"
-            } else if (csl.dc % 3 >= 0.2) {
-                cslDamage += " + 1"
-            }
-        }
+    // const strDamage = determineStrengthDamage(item, toHitData.effectivestr)
+    // if (strDamage) {
+    //     tags.push({ value: damageRollToTag(strDamage), name: "strength" })
+    //     damageRoll += strDamage
+    // }
 
-        tags.push({ value: cslDamage, name: csl.item.name })
-        damageRoll += cslDamage
-    }
+
+
+    // const csl = CombatSkillLevelsForAttack(item)
+    // if (csl && csl.dc > 0) {
+
+    //     let cslDamage = csl.dc + "d6"
+    //     if (item.system.killing) {
+    //         cslDamage = Math.floor(csl.dc / 3) + "d6";
+    //         if (csl.dc % 3 >= 0.5) {
+    //             cslDamage += " + 1d3"
+    //         } else if (csl.dc % 3 >= 0.2) {
+    //             cslDamage += " + 1"
+    //         }
+    //     }
+
+    //     tags.push({ value: cslDamage, name: csl.item.name })
+    //     damageRoll += cslDamage
+    // }
 
     damageRoll = simplifyDamageRoll(damageRoll)
 
@@ -688,15 +699,15 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
 
             prevEffect.changes[0].value = newLevels
 
-            prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`,
+            prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
 
-                prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
+            prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
 
         } else {
             // Create new ActiveEffect
             let activeEffect =
             {
-                name: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                label: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
                 icon: item.img,
                 changes: [
                     {
@@ -916,6 +927,43 @@ async function _calcDamage(damageResult, item, options) {
         effects = item.system.effects + ";"
     }
 
+    // determine knockback
+    let useKnockBack = false;
+    let knockbackMessage = "";
+    let knockbackRenderedResult = null;
+    let knockbackMultiplier = parseInt(itemData.knockbackMultiplier)
+    if (game.settings.get("hero6efoundryvttv2", "knockback") && knockbackMultiplier) {
+        useKnockBack = true;
+        // body - 2d6 m
+
+        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + " - 2D6"
+        // knockback modifier added on an attack by attack basis
+        const knockbackMod = parseInt(options.knockbackMod || options.knockbadmod || 0)
+        if (knockbackMod != 0) {
+            knockBackEquation = modifyRollEquation(knockBackEquation, (knockbackMod || 0) + "D6");
+        }
+        // knockback resistance effect
+        const knockbackResistance = parseInt(options.knockbackResistance || 0)
+        if (knockbackResistance != 0) {
+            knockBackEquation = modifyRollEquation(knockBackEquation, " -" + (knockbackResistance || 0));
+        }
+
+        let knockbackRoll = new Roll(knockBackEquation);
+        let knockbackResult = await knockbackRoll.roll({ async: true });
+        knockbackRenderedResult = await knockbackResult.render();
+        let knockbackResultTotal = Math.round(knockbackResult.total);
+
+        if (knockbackResultTotal < 0) {
+            knockbackMessage = "No knockback";
+        } else if (knockbackResultTotal == 0) {
+            knockbackMessage = "inflicts Knockdown";
+        } else {
+            // If the result is positive, the target is Knocked Back 2m times the result
+            knockbackMessage = "Knocked back " + (knockbackResultTotal * 2) + "m";
+        }
+    }
+
+
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
@@ -952,41 +1000,7 @@ async function _calcDamage(damageResult, item, options) {
         hasStunMultiplierRoll = false;
     }
 
-    // determine knockback
-    let useKnockBack = false;
-    let knockbackMessage = "";
-    let knockbackRenderedResult = null;
-    let knockbackMultiplier = parseInt(itemData.knockbackMultiplier)
-    if (game.settings.get("hero6efoundryvttv2", "knockback") && knockbackMultiplier) {
-        useKnockBack = true;
-        // body - 2d6 m
 
-        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + " - 2D6"
-        // knockback modifier added on an attack by attack basis
-        const knockbackMod = parseInt(options.knockbackMod || options.knockbadmod || 0)
-        if (knockbackMod != 0) {
-            knockBackEquation = modifyRollEquation(knockBackEquation, (knockbackMod || 0) + "D6");
-        }
-        // knockback resistance effect
-        const knockbackResistance = parseInt(options.knockbackResistance || 0)
-        if (knockbackResistance != 0) {
-            knockBackEquation = modifyRollEquation(knockBackEquation, " -" + (knockbackResistance || 0));
-        }
-
-        let knockbackRoll = new Roll(knockBackEquation);
-        let knockbackResult = await knockbackRoll.roll({ async: true });
-        knockbackRenderedResult = await knockbackResult.render();
-        let knockbackResultTotal = Math.round(knockbackResult.total);
-
-        if (knockbackResultTotal < 0) {
-            knockbackMessage = "No knockback";
-        } else if (knockbackResultTotal == 0) {
-            knockbackMessage = "inflicts Knockdown";
-        } else {
-            // If the result is positive, the target is Knocked Back 2m times the result
-            knockbackMessage = "Knocked back " + (knockbackResultTotal * 2) + "m";
-        }
-    }
 
 
     // apply damage reduction

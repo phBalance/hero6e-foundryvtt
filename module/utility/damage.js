@@ -1,5 +1,6 @@
 import { HERO } from "../config.js";
 import { HEROSYS } from "../herosystem6e.js";
+import { RoundFavorPlayerDown } from "./round.js";
 
 
 
@@ -127,6 +128,8 @@ export function convertToDcFromItem(item) {
 
     let actor = item.actor;
     let dc = 0;
+    let tags = [];
+    let end = 0;
 
     // Killing Attack
     if (item.system.killing) {
@@ -139,19 +142,24 @@ export function convertToDcFromItem(item) {
                 dc += 2;
                 break
         }
+        tags.push({ value: `${dc}DC`, name: item.name })
     } else
 
     // Normal Attack
     {
         dc += parseInt(item.system.dice);
+        let _tag = `${dc}DC`
         switch (item.system.extraDice) {
             case 'pip':
                 dc += 0.2;
+                _tag += " plus 1";
                 break
             case 'half':
                 dc += 0.5;
+                _tag += " plus 1d3";
                 break
         }
+        tags.push({ value: _tag, name: item.name })
     }
 
     // Combat Skill Levels
@@ -166,13 +174,19 @@ export function convertToDcFromItem(item) {
         // let ratio = (dcPerAp || 5) / 5;  // Typically 1 to 1 radio
         // dc += (csl.dc * dcPerAp);
         // console.log(dcPerAp, dc, csl.dc)
+
+        tags.push({ value: `${csl.dc}DC`, name: csl.item.name })
     }
+
 
     // Add in STR
     if (item.system.usesStrength) {
         let str = actor.system.characteristics.str.value
         let str5 = Math.floor(str / 5)
         dc += str5
+        end += Math.max(1, Math.round(str / 10))
+        tags.push({ value: `${str5}DC`, name: 'STR' })
+        
     }
 
     // Add in TK
@@ -185,24 +199,38 @@ export function convertToDcFromItem(item) {
         }
         let str5 = Math.floor(str / 5)
         dc += str5
+        end += Math.max(1, Math.round(str / 10))
+        tags.push({ value: `${str5}DC`, name: 'TK' })
     }
 
 
 
 
-    return dc;
+    return { dc: dc, tags: tags, end: end };
 }
 
 export function convertFromDC(item, DC) {
     if (DC === 0) { return ""; }
 
-    if (!item.system.killing) { return DC.toString() + "d6"; }
-
-    const d6Count = Math.floor(DC / 3)
-    const d3Count = Math.floor(DC % 3 / 2)
-    const constant = Math.floor(DC % 3 % 2)
-
     let output = "";
+    let d6Count = 0;
+    let d3Count = 0;
+    let constant = 0;
+
+    // Normal Attack
+    if (!item.system.killing) {
+        d6Count = Math.floor(DC)
+        d3Count = DC % 1 >= 0.5 ? 1 : 0
+        constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
+        //return DC.toString() + "d6"; 
+    } else
+
+    // Killing Attack
+    {
+        d6Count = Math.floor(DC / 3)
+        d3Count = Math.floor(DC % 3 / 2)
+        constant = Math.floor(DC % 3 % 2)
+    }
 
     if (d6Count !== 0) { output = addTerms(output, d6Count.toString() + "d6"); }
 
@@ -333,6 +361,9 @@ export function CombatSkillLevelsForAttack(item) {
         omcv: 0,
         dc: 0,
     }
+
+    // Guard
+    if (!item.actor) return result;
 
     let csl = item.actor.items.find(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) && o.system.attacks && o.system.attacks[item.id])
     if (csl && csl.system.csl) {

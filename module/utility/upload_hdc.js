@@ -3,6 +3,7 @@ import { HeroSystem6eItem } from "../item/item.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
 import { getPowerInfo, getModifierInfo } from '../utility/util.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
+import { convertToDcFromItem, convertFromDC } from "./damage.js";
 
 
 export async function applyCharacterSheet(xmlDoc) {
@@ -553,7 +554,7 @@ export function XmlToItemData(xml, type) {
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
         "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
-        "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT"
+        "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -741,7 +742,7 @@ export function XmlToItemData(xml, type) {
     systemData.realCost = RoundFavorPlayerDown(_realCost)
 
     // Update Item Description (to closely match Hero Designer)
-    updateItemDescription.call(this, systemData, type)
+    updateItemDescription({ system: systemData, type: type })
 
     // Item name
     let name = xml.getAttribute('NAME').trim() || xml.getAttribute('ALIAS').trim() || xml.tagName
@@ -1664,14 +1665,17 @@ export async function uploadPower(power, type) {
 }
 
 // TODO: Can this be reworked to take only ITEM as a property?
-export function updateItemDescription(system, type) {
+export function updateItemDescription(item) {
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
     // so when the power is modified in foundry, the power
     // description updates as well.
     // If in sheets code it may handle drains/suppresses nicely.
 
-    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this?.actor })
+    const system = item.system;
+    const type = item.type;
+
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: item?.actor })
 
 
 
@@ -1770,10 +1774,10 @@ export function updateItemDescription(system, type) {
             // } else {
             //     system.description = system.NAME
             // }
-            let item = {
-                actor: this?.actor || this,
-                system: system
-            }
+            // let item = {
+            //     actor: this?.actor || this,
+            //     system: system
+            // }
             // SkillRollUpdateValue(item)
             // if (system.roll) {
             //     system.description += ` ${system.roll}`
@@ -1831,7 +1835,7 @@ export function updateItemDescription(system, type) {
                     break
             }
 
-            if (this) {  // Make sure we have an actor
+            if (item.actor) {  // Make sure we have an actor
                 // Convert dice to pips
                 let pips = system.dice * 3;
                 switch (system.extraDice) {
@@ -1844,8 +1848,8 @@ export function updateItemDescription(system, type) {
                 }
 
                 // Add in STR
-                if (system.usesStrength && this.actor) {
-                    let str = this.actor.system.characteristics.str.value
+                if (system.usesStrength && item.actor) {
+                    let str = item.actor.system.characteristics.str.value
                     let str5 = Math.floor(str / 5)
                     if (system.killing) {
                         pips += str5
@@ -1861,11 +1865,23 @@ export function updateItemDescription(system, type) {
 
 
             // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
-            system.description = `${system.ALIAS}:`
-            if (system.PHASE) system.description += ` ${system.PHASE} Phase`;
+            // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
+            system.description = ""; //`${system.ALIAS}:`
+            if (system.PHASE) system.description += ` ${system.PHASE} Phase`
             if (system.OCV) system.description += `, ${system.OCV} OCV, ${system.DCV} DCV`
             if (system.EFFECT) {
-                system.description += `, ${system.EFFECT.replace("[NORMALDC]", fullDice + "d6")}`
+                let dc = convertToDcFromItem(item).dc;
+                if (dc) {
+                    let damageDice = convertFromDC(item, dc);
+                    if (damageDice) {
+                        system.description += `,`;
+
+                        if (system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLING") > -1) {
+                            system.description += " HKA";
+                        }
+                        system.description += ` ${system.EFFECT.replace("[NORMALDC]", damageDice).replace("[KILLINGDC]", damageDice.replace("+ 1", "+1"))}`
+                    }
+                }
             }
             break;
 
@@ -1882,6 +1898,11 @@ export function updateItemDescription(system, type) {
             system.description = `+${system.LEVELS.value} ${system.OPTION_ALIAS}`;
             break;
 
+        case "INVISIBILITY":
+            // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
+            system.description = `${system.ALIAS}`;
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
@@ -1891,10 +1912,10 @@ export function updateItemDescription(system, type) {
 
             // Skill Roll?
             if (type == 'skill') {
-                let item = {
-                    actor: this?.actor || this,
-                    system: system
-                }
+                // let item = {
+                //     actor: this?.actor || this,
+                //     system: system
+                // }
                 // SkillRollUpdateValue(item)
                 // if (system.roll) {
                 //     system.description += ` ${system.roll}`
@@ -1904,9 +1925,11 @@ export function updateItemDescription(system, type) {
     }
 
     // ADDRS
+    let _adderArray = []
+    if (system.XMLID === "INVISIBILITY") {
+        _adderArray.push(system.OPTION_ALIAS)
+    }
     if (system?.adders?.length > 0) {
-
-        let _adderArray = []
         for (let adder of system.adders) {
             switch (adder.XMLID) {
                 case "DIMENSIONS":
@@ -1936,17 +1959,42 @@ export function updateItemDescription(system, type) {
                     break;
                 default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
             }
-
-
-
         }
-        if (_adderArray.length > 0) {
-            if (system.XMLID == "TRANSPORT_FAMILIARITY") {
-                system.description += _adderArray.join("; ")
-            } else {
-                system.description += "(" + _adderArray.join("; ") + ")"
-            }
 
+        if (_adderArray.length > 0) {
+            switch (system.XMLID) {
+                case "TRANSPORT_FAMILIARITY":
+                    system.description += _adderArray.join("; ")
+                    break;
+                case "INVISIBILITY":
+                    system.description += " to ";
+                    // Groups
+                    let _groups = _adderArray.filter(o => o.indexOf("Group") > -1);
+                    if (_groups.length === 1) {
+                        system.description += _groups[0];
+                    } else {
+                        system.description += _groups.slice(0, -1).join(", ").replace(/ Group/g, "");
+                        system.description += " and " + _groups.slice(-1) + "s";
+                    }
+
+                    // spacing
+                    if (_groups.length > 0) {
+                        system.description += ", ";
+                    }
+
+                    // singles
+                    let _singles = _adderArray.filter(o => o.indexOf("Group") === -1);
+                    if (_singles.length === 1) {
+                        system.description += _singles[0];
+                    } else {
+                        system.description += _singles.slice(0, -1).join(", ");
+                        system.description += " and " + _singles.slice(-1);
+                    }
+
+                    break;
+                default:
+                    system.description += "(" + _adderArray.join("; ") + ")"
+            }
         }
     }
 
@@ -2079,7 +2127,12 @@ function createPowerDescriptionModifier(modifier, system) {
     // if (modifier.option) powerData.description += "; " + modifier.option
     // if (modifier.optionId) powerData.description += "; " + modifier.optionId
 
-    result += " ("
+    if (!["CONDITIONALPOWER"].includes(modifier.XMLID)) {
+        result += " ("
+    } else {
+        result += " ";
+    }
+
 
     // Multiple levels?
     if ((parseInt(modifier.LEVELS) || 0) > 1) {
@@ -2092,13 +2145,16 @@ function createPowerDescriptionModifier(modifier, system) {
         result += parseInt(system.LEVELS.value || system.LEVELS) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
     }
 
-
     if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) {
         result += modifier.OPTION_ALIAS
-        if (["EXTRATIME"].includes(modifier.XMLID)) {
-            result += ", ";
-        } else {
-            result += "; ";
+        switch (modifier.XMLID) {
+            case "EXTRATIME":
+                result += ", ";
+                break;
+            case "CONDITIONALPOWER":
+                break;
+            default:
+                result += "; ";
         }
     }
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
@@ -2136,6 +2192,11 @@ function createPowerDescriptionModifier(modifier, system) {
         case 0.75: fraction += "3/4"; break;
         default: fraction += BASECOST_total % 1;
     }
+
+    if (["CONDITIONALPOWER"].includes(modifier.XMLID)) {
+        result += " ("
+    }
+
     result += fraction.trim() + ")"
 
     // Highly summarized
@@ -2224,7 +2285,7 @@ export async function makeAttack(item) {
     changes[`system.penetrating`] = 0
     changes[`system.ocv`] = ocv
     changes[`system.dcv`] = dcv
-
+    changes['system.stunBodyDamage'] = "stunbody"
 
     // ENTANGLE (not implemented)
     if (xmlid == "ENTANGLE") {
@@ -2396,21 +2457,26 @@ export async function makeAttack(item) {
     //     return
     // }
 
-    if (xmlid === "HKA") {
-        // itemData.system.killing = true
-        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        // return
+    if (xmlid === "HKA" || item.system.EFFECT?.indexOf("KILLING") > -1) {
         changes[`system.killing`] = true
+
+        // Killing Strike uses DC=2 which is +1/2d6.
+        // For now just recalculate that, but ideally rework this function to use DC instead of dice.
+        let pips = parseInt(item.system.DC);
+        changes['system.dice'] = Math.floor(pips / 3);
+        if (pips % 3 == 1) {
+            changes['system.extraDice'] = "pip"
+        }
+        if (pips % 3 == 2) {
+            changes['system.extraDice'] = "half"
+        }
+
     }
 
 
     if (xmlid === "TELEKINESIS") {
         // levels is the equivalent strength
         changes[`system.extraDice`] = "zero"
-        // changes[`system.dice`] = Math.floor(levels / 5)
-        // if (levels % 5 >= 3) {
-        //     changes[`system.extraDice`] = "half"
-        // }
         changes[`system.dice`] = 0
         changes[`system.extraDice`] = "zero";
         changes[`name`] = name + " (TK strike)"
@@ -2419,26 +2485,13 @@ export async function makeAttack(item) {
     }
 
     if (xmlid === "ENERGYBLAST") {
-        // itemData.system.usesStrength = false
-        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        // return
         changes[`system.usesStrength`] = false
     }
 
     if (xmlid === "RKA") {
-        // itemData.system.killing = true
-        // itemData.system.usesStrength = false
-        // await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        // return
         changes[`system.killing`] = true
         changes[`system.usesStrength`] = false
     }
-
-
-    // if (game.settings.get(game.system.id, 'alphaTesting')) {
-    //     ui.notifications.warn(`${xmlid} ATTACK not implemented during HDC upload of ${this.actor.name}`)
-    // }
-
 
     if (item._id) {
         await item.update(changes)
@@ -2801,7 +2854,7 @@ export async function updateItem(item) {
             changed = true;
             //await item.update({ 'system.LEVELS.value': levels, 'system.LEVELS.max': levels })
             await item.update({ 'system.LEVELS': null })
-            let _item = await item.update({ ['system.LEVELS.value']: levels, ['system.LEVELS.max']: levels})
+            let _item = await item.update({ ['system.LEVELS.value']: levels, ['system.LEVELS.max']: levels })
             //console.log(_item.system.LEVELS)
         }
 
@@ -2870,7 +2923,7 @@ export async function updateItem(item) {
     // }
 
     const oldDesc = item.system.description;
-    await updateItemDescription.call(item, item.system, item.type)
+    await updateItemDescription(item)
     if (item.system.description != oldDesc && item.id) {
         if (item.system.description.includes("undefined")) {
             if (game.settings.get(game.system.id, 'alphaTesting')) {
@@ -2882,7 +2935,7 @@ export async function updateItem(item) {
             //         ui.notifications.warn(`${item.actor.name} missing id`)
             //     }
             // } else {
-            
+
             await item.update({ 'system.description': item.system.description })
             //}
         }

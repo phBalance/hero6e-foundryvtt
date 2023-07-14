@@ -105,7 +105,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 // Combat Skill Levels
                 const csl = CombatSkillLevelsForAttack(item)
 
-                let dc = convertToDcFromItem(item);
+                let {dc, end} = convertToDcFromItem(item);
+                item.system.endEstimate += end;
 
                 // // Convert dice to pips
                 // let pips = item.system.dice * 3;
@@ -162,7 +163,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 // let extraDice = pips - fullDice * 3
 
                 // text descrdiption of damage
-                item.system.damage = convertFromDC(item, dc)  /*fullDice
+                item.system.damage = convertFromDC(item, dc).replace(/ /g, "");  /*fullDice
                 switch (extraDice) {
                     case 0:
                         item.system.damage += 'D6'
@@ -414,6 +415,32 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     characteristic.notes = '5e figured EGO/3'
                 }
             }
+
+            // Active Effects may be blocking updates
+            let ary = []
+            let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> o.changes.find(p=> p.key === `system.characteristics.${key}.value`));
+            for (let ae of activeEffects) {
+                ary.push(`<li>${ae.name}</li>`);
+            }
+            if (ary.length > 0)
+            {
+                characteristic.valueTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
+                characteristic.valueTitle += ary.join('\n ');
+                characteristic.valueTitle += "</ul>";
+            }
+
+            ary = []
+            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> o.changes.find(p=> p.key === `system.characteristics.${key}.max`));
+            for (let ae of activeEffects) {
+                ary.push(`<li>${ae.name}</li>`);
+            }
+            if (ary.length > 0)
+            {
+                characteristic.maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
+                characteristic.maxTitle += ary.join('\n ');
+                characteristic.maxTitle += "</ul>";
+            }
+            
 
             characteristicSet.push(characteristic)
         }
