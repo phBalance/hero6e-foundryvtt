@@ -1882,6 +1882,11 @@ export function updateItemDescription(system, type) {
             system.description = `+${system.LEVELS.value} ${system.OPTION_ALIAS}`;
             break;
 
+        case "INVISIBILITY":
+            // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
+            system.description = `${system.ALIAS}`;
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
@@ -1904,9 +1909,11 @@ export function updateItemDescription(system, type) {
     }
 
     // ADDRS
+    let _adderArray = []
+    if (system.XMLID === "INVISIBILITY") {
+        _adderArray.push(system.OPTION_ALIAS)
+    }
     if (system?.adders?.length > 0) {
-
-        let _adderArray = []
         for (let adder of system.adders) {
             switch (adder.XMLID) {
                 case "DIMENSIONS":
@@ -1936,17 +1943,42 @@ export function updateItemDescription(system, type) {
                     break;
                 default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
             }
-
-
-
         }
-        if (_adderArray.length > 0) {
-            if (system.XMLID == "TRANSPORT_FAMILIARITY") {
-                system.description += _adderArray.join("; ")
-            } else {
-                system.description += "(" + _adderArray.join("; ") + ")"
-            }
 
+        if (_adderArray.length > 0) {
+            switch (system.XMLID) {
+                case "TRANSPORT_FAMILIARITY":
+                    system.description += _adderArray.join("; ")
+                    break;
+                case "INVISIBILITY":
+                    system.description += " to ";
+                    // Groups
+                    let _groups = _adderArray.filter(o => o.indexOf("Group") > -1);
+                    if (_groups.length === 1) {
+                        system.description += _groups[0];
+                    } else {
+                        system.description += _groups.slice(0, -1).join(", ").replace(/ Group/g, "");
+                        system.description += " and " + _groups.slice(-1) + "s";
+                    }
+
+                    // spacing
+                    if (_groups.length > 0) {
+                        system.description += ", ";
+                    }
+
+                    // singles
+                    let _singles = _adderArray.filter(o => o.indexOf("Group") === -1);
+                    if (_singles.length === 1) {
+                        system.description += _singles[0];
+                    } else {
+                        system.description += _singles.slice(0, -1).join(", ");
+                        system.description += " and " + _singles.slice(-1);
+                    }
+
+                    break;
+                default:
+                    system.description += "(" + _adderArray.join("; ") + ")"
+            }
         }
     }
 
@@ -2079,7 +2111,12 @@ function createPowerDescriptionModifier(modifier, system) {
     // if (modifier.option) powerData.description += "; " + modifier.option
     // if (modifier.optionId) powerData.description += "; " + modifier.optionId
 
-    result += " ("
+    if (!["CONDITIONALPOWER"].includes(modifier.XMLID)) {
+        result += " ("
+    } else {
+        result += " ";
+    }
+
 
     // Multiple levels?
     if ((parseInt(modifier.LEVELS) || 0) > 1) {
@@ -2092,13 +2129,16 @@ function createPowerDescriptionModifier(modifier, system) {
         result += parseInt(system.LEVELS.value || system.LEVELS) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
     }
 
-
     if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) {
         result += modifier.OPTION_ALIAS
-        if (["EXTRATIME"].includes(modifier.XMLID)) {
-            result += ", ";
-        } else {
-            result += "; ";
+        switch (modifier.XMLID) {
+            case "EXTRATIME":
+                result += ", ";
+                break;
+            case "CONDITIONALPOWER":
+                break;
+            default:
+                result += "; ";
         }
     }
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
@@ -2136,6 +2176,11 @@ function createPowerDescriptionModifier(modifier, system) {
         case 0.75: fraction += "3/4"; break;
         default: fraction += BASECOST_total % 1;
     }
+
+    if (["CONDITIONALPOWER"].includes(modifier.XMLID)) {
+        result += " ("
+    }
+
     result += fraction.trim() + ")"
 
     // Highly summarized
@@ -2801,7 +2846,7 @@ export async function updateItem(item) {
             changed = true;
             //await item.update({ 'system.LEVELS.value': levels, 'system.LEVELS.max': levels })
             await item.update({ 'system.LEVELS': null })
-            let _item = await item.update({ ['system.LEVELS.value']: levels, ['system.LEVELS.max']: levels})
+            let _item = await item.update({ ['system.LEVELS.value']: levels, ['system.LEVELS.max']: levels })
             //console.log(_item.system.LEVELS)
         }
 
@@ -2882,7 +2927,7 @@ export async function updateItem(item) {
             //         ui.notifications.warn(`${item.actor.name} missing id`)
             //     }
             // } else {
-            
+
             await item.update({ 'system.description': item.system.description })
             //}
         }

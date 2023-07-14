@@ -916,6 +916,43 @@ async function _calcDamage(damageResult, item, options) {
         effects = item.system.effects + ";"
     }
 
+    // determine knockback
+    let useKnockBack = false;
+    let knockbackMessage = "";
+    let knockbackRenderedResult = null;
+    let knockbackMultiplier = parseInt(itemData.knockbackMultiplier)
+    if (game.settings.get("hero6efoundryvttv2", "knockback") && knockbackMultiplier) {
+        useKnockBack = true;
+        // body - 2d6 m
+
+        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + " - 2D6"
+        // knockback modifier added on an attack by attack basis
+        const knockbackMod = parseInt(options.knockbackMod || options.knockbadmod || 0)
+        if (knockbackMod != 0) {
+            knockBackEquation = modifyRollEquation(knockBackEquation, (knockbackMod || 0) + "D6");
+        }
+        // knockback resistance effect
+        const knockbackResistance = parseInt(options.knockbackResistance || 0)
+        if (knockbackResistance != 0) {
+            knockBackEquation = modifyRollEquation(knockBackEquation, " -" + (knockbackResistance || 0));
+        }
+
+        let knockbackRoll = new Roll(knockBackEquation);
+        let knockbackResult = await knockbackRoll.roll({ async: true });
+        knockbackRenderedResult = await knockbackResult.render();
+        let knockbackResultTotal = Math.round(knockbackResult.total);
+
+        if (knockbackResultTotal < 0) {
+            knockbackMessage = "No knockback";
+        } else if (knockbackResultTotal == 0) {
+            knockbackMessage = "inflicts Knockdown";
+        } else {
+            // If the result is positive, the target is Knocked Back 2m times the result
+            knockbackMessage = "Knocked back " + (knockbackResultTotal * 2) + "m";
+        }
+    }
+    
+
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
@@ -952,41 +989,7 @@ async function _calcDamage(damageResult, item, options) {
         hasStunMultiplierRoll = false;
     }
 
-    // determine knockback
-    let useKnockBack = false;
-    let knockbackMessage = "";
-    let knockbackRenderedResult = null;
-    let knockbackMultiplier = parseInt(itemData.knockbackMultiplier)
-    if (game.settings.get("hero6efoundryvttv2", "knockback") && knockbackMultiplier) {
-        useKnockBack = true;
-        // body - 2d6 m
-
-        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + " - 2D6"
-        // knockback modifier added on an attack by attack basis
-        const knockbackMod = parseInt(options.knockbackMod || options.knockbadmod || 0)
-        if (knockbackMod != 0) {
-            knockBackEquation = modifyRollEquation(knockBackEquation, (knockbackMod || 0) + "D6");
-        }
-        // knockback resistance effect
-        const knockbackResistance = parseInt(options.knockbackResistance || 0)
-        if (knockbackResistance != 0) {
-            knockBackEquation = modifyRollEquation(knockBackEquation, " -" + (knockbackResistance || 0));
-        }
-
-        let knockbackRoll = new Roll(knockBackEquation);
-        let knockbackResult = await knockbackRoll.roll({ async: true });
-        knockbackRenderedResult = await knockbackResult.render();
-        let knockbackResultTotal = Math.round(knockbackResult.total);
-
-        if (knockbackResultTotal < 0) {
-            knockbackMessage = "No knockback";
-        } else if (knockbackResultTotal == 0) {
-            knockbackMessage = "inflicts Knockdown";
-        } else {
-            // If the result is positive, the target is Knocked Back 2m times the result
-            knockbackMessage = "Knocked back " + (knockbackResultTotal * 2) + "m";
-        }
-    }
+    
 
 
     // apply damage reduction

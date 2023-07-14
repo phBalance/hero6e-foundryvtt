@@ -616,7 +616,15 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 1,
     },
-
+    "INVISIBILITY": { 
+        name: "Invisibility",
+        powerType: ["sense-affecting"],
+        percievability: "Special",
+        duration: "Constant",
+        target: "Self Only",
+        range: "Self",
+        costEnd: true,
+    },
 
     // Defense
     "FORCEWALL": {

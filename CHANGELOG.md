@@ -2,6 +2,8 @@
 - Take a Recovery now also removes the Stunned condition.
 - When characteristics are locked (due to Active Effects) they are now readonly and a tooltip shows what is preventing editing.
 - PD/ED bought as power with resistant modifier and ADD_MODIFIERS_TO_BASE is checked is now supported. [#182](https://github.com/dmdorman/hero6e-foundryvtt/issues/182)
+- Improved Invisibility power description. [#183](https://github.com/dmdorman/hero6e-foundryvtt/issues/183)
+- Fixed Knockback calculations [#188](https://github.com/dmdorman/hero6e-foundryvtt/issues/188)
 
 
 # Version 3.0.7
