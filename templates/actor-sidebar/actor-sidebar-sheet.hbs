@@ -175,7 +175,7 @@
                         <td>-</td>
                         {{/if}}
                         {{#if (ne item.system.areaOfEffect.type "none")}}
-                        <td>{{item.system.areaOfEffect.type}} ({{item.system.areaOfEffect.value}})</td>
+                        <td>{{item.system.areaOfEffect.type}}{{#if (gt item.system.areaOfEffect.value 0)}} ({{item.system.areaOfEffect.value}}){{/if}}</td>
                         {{/if}}
                         <td><a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
                                     height="24"></i></a></td>

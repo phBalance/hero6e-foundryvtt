@@ -1,3 +1,6 @@
+# Version 3.0.9
+- Initial support for Charges [#191](https://github.com/dmdorman/hero6e-foundryvtt/issues/191) [#47](https://github.com/dmdorman/hero6e-foundryvtt/issues/47)
+
 # Version 3.0.8
 - Take a Recovery now also removes the Stunned condition.
 - When characteristics are locked (due to Active Effects) they are now readonly and a tooltip shows what is preventing editing.

@@ -299,6 +299,27 @@ Hooks.once("ready", async function () {
             await ui.notifications.info(`Migragtion complete.`)
         }
 
+        // if lastMigration < 3.0.9
+        // Charges
+        if (foundry.utils.isNewerVersion('3.0.9', lastMigration)) {
+            await ui.notifications.info(`Migragrating actor data.`)
+            for (let actor of game.actors.contents) {
+                for (let item of actor.items.filter(o => (o.system.end ||"").toString().indexOf("[") === 0)) {
+                    let _end = item.system.end;
+                    let _charges = parseInt(_end.match(/\d+/) || 0)
+                    if (_charges) {
+                        const charges = {
+                            value: _charges,
+                            max: _charges,
+                            recoverable: _end.indexOf("rc") > -1 ? true : false
+                        }
+                        await item.update({ 'system.end': 0, 'system.charges': charges})
+                    }
+                }
+            }
+            await ui.notifications.info(`Migragtion complete.`)
+        }
+
     }
 
 });

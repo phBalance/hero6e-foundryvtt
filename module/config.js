@@ -584,7 +584,7 @@ HERO.powers = {
 
     // Attack
     "HANDTOHANDATTACK": { powerType: ["attack"], costPerLevel: 5 },
-    "HKA": { powerType: ["attack"], costPerLevel: 15 },
+    "HKA": { powerType: ["attack"], costPerLevel: 15, costEnd: true },
     "TELEKINESIS": {
         powerType: ["attack"],
         costEnd: true,
@@ -904,7 +904,7 @@ HERO.ModifierOverride = {
     "IMPENETRABLE": { BASECOST: 0.25 },
     "IMPROVEDNONCOMBAT": { BASECOST: 5 },
     "MENTAL": { BASECOST: 5 }, // DAMAGENEGATION
-    "PENETRATING": { dc: true },
+    "PENETRATING": { BASECOST: 0.5, dc: true },
     "PHYSICAL": { BASECOST: 5 }, // DAMAGENEGATION
     "STICKY": { dc: true },
     "TIMELIMIT": { dc: true },

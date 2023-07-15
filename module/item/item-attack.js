@@ -229,6 +229,7 @@ export async function AttackToHit(item, options) {
                 expended. Yes, characters can Knock themselves out this way.` +
                 `"></i> `
             enduranceText += stunRenderedResult;
+            await ui.notifications.warn(`${actor.name} used STUN for ENDURANCE.`);
 
         } else {
             enduranceText = 'Spent ' + spentEnd + ' END';
@@ -254,6 +255,22 @@ export async function AttackToHit(item, options) {
             }
             await actor.update(changes);
         }
+    }
+
+    // Charges
+    let spentCharges = 0;
+    if (item.system.charges?.max > 0) {
+        let charges = parseInt(item.system.charges?.value || 0);
+        if (charges <= 0) {
+            return ui.notifications.error(`${item.name} has no more charges.`);
+        }
+        if (enduranceText === "") {
+            enduranceText = "Spent 1 charge";
+        } else {
+            enduranceText += " and 1 charge";
+        }
+        item.update({ "system.charges.value": charges - 1 })
+
     }
 
     let targetData = []
@@ -338,7 +355,7 @@ export async function _onRollDamage(event) {
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
-    let {dc, tags} = convertToDcFromItem(item);
+    let { dc, tags } = convertToDcFromItem(item);
 
 
     let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";

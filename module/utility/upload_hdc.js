@@ -370,18 +370,13 @@ export async function applyCharacterSheet(xmlDoc) {
         }
     }
 
+
+
     await loadCombatManeuvers(CONFIG.HERO.combatManeuvers, this.actor)
 
     if (game.settings.get('hero6efoundryvttv2', 'optionalManeuvers')) {
         await loadCombatManeuvers(CONFIG.HERO.combatManeuversOptional, this.actor)
     }
-
-    // ActiveEffects
-    // TODO: Creating ActiveEffects initially on the Item should
-    // allow easier implementation of power toggles and associated ActiveEffects.
-    //await this.actor.applyPowerEffects()
-    //await applyPowerEffects()
-
 
     // Actor Image
     if (image) {
@@ -476,6 +471,8 @@ export async function applyCharacterSheet(xmlDoc) {
 
         await cslItem.update({ 'system.attacks': attacks });
     }
+
+
 
 
     // Make sure VALUE = MAX.
@@ -732,6 +729,32 @@ export function XmlToItemData(xml, type) {
         }
         systemData.modifiers.push(_mod)
     }
+
+    // Charges do not typically use Endurance
+    const charges = systemData.modifiers.find(o => o.XMLID == "CHARGES")
+    {
+        const costsEnd = systemData.modifiers.find(o => o.XMLID == "COSTSEND")
+        if (charges && !costsEnd) {
+            systemData.end = 0;
+            systemData.charges = {
+                value: parseInt(charges.OPTION_ALIAS),
+                max: parseInt(charges.OPTION_ALIAS),
+                recoverable: charges.adders.find(o => o.XMLID == "RECOVERABLE") ? true : false,
+                continuing: charges.adders.find(o => o.XMLID == "CONTINUING")?.OPTIONID
+            }
+        }
+    }
+
+    // Make sure all defenses are enabled (if they don't have charges)
+    if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+        if (systemData.charges?.value > 0) {
+            systemData.active = false;
+        } else {
+            systemData.active = true;
+        }
+
+    }
+
 
     // Calculate RealCost, ActivePoints, and END
     let _basePointsPlusAdders = calcBasePointsPlusAdders.call(this, systemData)
@@ -2063,17 +2086,7 @@ export function updateItemDescription(item) {
         system.end = 0
     }
 
-    // Charges do not use Endurance
-    const charges = system.modifiers.find(o => o.XMLID == "CHARGES")
-    {
-        if (charges && !costsEnd) {
-            system.end = "[" + charges.OPTION_ALIAS
-            if (charges.adders.find(o => o.XMLID == "RECOVERABLE")) {
-                system.end += " rc"
-            }
-            system.end += "]"
-        }
-    }
+
 }
 
 function createPowerDescriptionModifier(modifier, system) {
@@ -2157,6 +2170,12 @@ function createPowerDescriptionModifier(modifier, system) {
                 result += "; ";
         }
     }
+
+    // if (modifier.COMMENTS)
+    // {
+    //     result += modifier.COMMENTS + "; ";
+    // }
+
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
     for (let adder of modifier.adders) {
@@ -2201,7 +2220,9 @@ function createPowerDescriptionModifier(modifier, system) {
 
     // Highly summarized
     if (["FOCUS"].includes(modifier.XMLID)) {
-        result = `, ${modifier.OPTION} (${fraction.trim()})`
+        //result = `, ${modifier.OPTION} (${fraction.trim()})`
+        // 'Focus (OAF; Pen-sized Device in pocket; -1)'
+        result = result.replace(`Focus (${modifier.OPTION}; `, `${modifier.OPTION} (`)
     }
 
     return result;
@@ -2462,7 +2483,7 @@ export async function makeAttack(item) {
 
         // Killing Strike uses DC=2 which is +1/2d6.
         // For now just recalculate that, but ideally rework this function to use DC instead of dice.
-        let pips = parseInt(item.system.DC);
+        let pips = parseInt(item.system.DC || item.system.LEVELS.value * 3);
         changes['system.dice'] = Math.floor(pips / 3);
         if (pips % 3 == 1) {
             changes['system.extraDice'] = "pip"
@@ -2491,6 +2512,11 @@ export async function makeAttack(item) {
     if (xmlid === "RKA") {
         changes[`system.killing`] = true
         changes[`system.usesStrength`] = false
+    }
+
+    const noStrBonus = item.system.modifiers.find(o => o.XMLID == "NOSTRBONUS")
+    if (noStrBonus) {
+        changes[`system.usesStrength`] = false;
     }
 
     if (item._id) {

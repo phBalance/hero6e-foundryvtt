@@ -67,19 +67,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
             }
 
-            // // Is this a defense power?
-            // const configPowerInfo = getPowerInfo({ item: item })
-            // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-            //     item.subType = 'defense'
-            //     item.system.showToggle = true
-            // }
-
-            // // Is theis a movement power?
-            // if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
-            //     item.subType = 'movement'
-            //     item.system.showToggle = true
-            // }
-
             // Framework?
             if (item.system.PARENTID) {
                 const parent = data.actor.items.find(o => o.system.ID === item.system.PARENTID)
@@ -90,13 +77,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
 
-            // Active (reverse of disabled)
-            //item.system.active = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid && !o.disabled) || false
-            //HEROSYS.log(item.system.active)
-
             // Endurance
-            item.system.endEstimate = item.system.end || 0
-
+            item.system.endEstimate = parseInt(item.system.end) || 0;
 
 
             // Damage
@@ -105,76 +87,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 // Combat Skill Levels
                 const csl = CombatSkillLevelsForAttack(item)
 
-                let {dc, end} = convertToDcFromItem(item);
-                item.system.endEstimate += end;
+                let { dc, end } = convertToDcFromItem(item);
+                item.system.endEstimate = Math.max(item.system.endEstimate, end);
 
-                // // Convert dice to pips
-                // let pips = item.system.dice * 3;
-                // switch (item.system.extraDice) {
-                //     case 'pip':
-                //         pips += 1;
-                //         break
-                //     case 'half':
-                //         pips += 2;
-                //         break
-                // }
 
-                // // Add in STR
-                // if (item.system.usesStrength) {
-                //     let str = data.actor.system.characteristics.str.value
-                //     let str5 = Math.floor(str / 5)
-                //     if (item.system.killing) {
-                //         pips += str5
-                //     } else {
-                //         pips += str5 * 3
-                //     }
-
-                //     // Endurance
-                //     let strEnd = Math.max(1, Math.round(str / 10))
-
-                //     if (Number.isInteger(item.system.endEstimate)) {
-                //         item.system.endEstimate += strEnd
-                //     }
-
-                // }
-
-                // // Add in TK
-                // if (item.system.usesTk) {
-
-                //     let tkItems = data.actor.items.filter(o => o.system.rules == "TELEKINESIS");
-                //     let str = 0
-                //     for (const item of tkItems) {
-                //         str += parseInt(item.system.LEVELS.value) || 0
-                //     }
-                //     let str5 = Math.floor(str / 5)
-                //     if (item.system.killing) {
-                //         pips += str5
-                //     } else {
-                //         pips += str5 * 3
-                //     }
-
-                //     // Endurance
-                //     let strEnd = Math.max(1, Math.round(str / 10))
-                //     item.system.endEstimate += strEnd
-                // }
-
-                // // Convert pips to DICE
-                // let fullDice = Math.floor(pips / 3)
-                // let extraDice = pips - fullDice * 3
 
                 // text descrdiption of damage
-                item.system.damage = convertFromDC(item, dc).replace(/ /g, "");  /*fullDice
-                switch (extraDice) {
-                    case 0:
-                        item.system.damage += 'D6'
-                        break
-                    case 1:
-                        item.system.damage += 'D6+1'
-                        break
-                    case 2:
-                        item.system.damage += '.5D6'
-                        break
-                }*/
+                item.system.damage = convertFromDC(item, dc).replace(/ /g, "");
                 if (dc > 0) {
                     if (item.system.killing) {
                         item.system.damage += 'K'
@@ -182,10 +101,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                         item.system.damage += 'N'
                     }
                 }
-
-
-
-
 
                 // Signed OCV and DCV
                 if (item.system.ocv != undefined) {
@@ -235,12 +150,18 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 SkillRollUpdateValue(item)
             }
 
-            if (!item.system.endEstimate && item.name == "Mental Blast") {
-                console.log(item)
+            // Charges
+            if (parseInt(item.system.charges?.max || 0) > 0) {
+                const costsEnd = item.system.modifiers.find(o => o.XMLID == "COSTSEND")
+                if (item.system.endEstimate  === 0 || !costsEnd) item.system.endEstimate = "";
+                item.system.endEstimate += ` [${parseInt(item.system.charges?.value || 0)}${item.system.charges?.recoverable ? "rc" : ""}]`;
+                item.system.endEstimate = item.system.endEstimate.trim();
             }
 
             items.push(item)
         }
+
+
 
         // Sort attacks
         // Sorting is tricky and not done at the moment.
@@ -418,29 +339,27 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             // Active Effects may be blocking updates
             let ary = []
-            let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> o.changes.find(p=> p.key === `system.characteristics.${key}.value`));
+            let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.value`));
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
             }
-            if (ary.length > 0)
-            {
+            if (ary.length > 0) {
                 characteristic.valueTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
                 characteristic.valueTitle += ary.join('\n ');
                 characteristic.valueTitle += "</ul>";
             }
 
             ary = []
-            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> o.changes.find(p=> p.key === `system.characteristics.${key}.max`));
+            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.max`));
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
             }
-            if (ary.length > 0)
-            {
+            if (ary.length > 0) {
                 characteristic.maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
                 characteristic.maxTitle += ary.join('\n ');
                 characteristic.maxTitle += "</ul>";
             }
-            
+
 
             characteristicSet.push(characteristic)
         }
