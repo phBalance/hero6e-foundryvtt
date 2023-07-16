@@ -1709,10 +1709,6 @@ export function updateItemDescription(item) {
             system.description = levels + "d6 Mind Scan (" +
                 input + " class of minds)";
             break;
-
-
-
-
         case "FORCEFIELD":
         case "ARMOR":
         case "DAMAGERESISTANCE":
@@ -2043,9 +2039,6 @@ export function updateItemDescription(item) {
 
     system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
 
-    // if (system.XMLID == "STR") {
-    //     HEROSYS.log(false, system)
-    // }
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
@@ -2069,6 +2062,12 @@ export function updateItemDescription(item) {
         system.end = 0
     }
 
+    // Charges typically do not cost END
+    if (system.charges?.max && !costsEnd)
+    {
+        system.end = 0;
+    }
+
     // STR only costs endurance when used.
     // Can get a bit messy, like when resisting an entangle, but will deal with that later.
     if (system.XMLID == "STR") {
@@ -2076,7 +2075,6 @@ export function updateItemDescription(item) {
     }
 
     // MOVEMENT only costs endurance when used.  Typically per round.
-
     if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
         system.end = 0
     }
@@ -2151,6 +2149,10 @@ function createPowerDescriptionModifier(modifier, system) {
     if ((parseInt(modifier.LEVELS) || 0) > 1) {
         if (["HARDENED"].includes(modifier.XMLID)) {
             result += "x" + parseInt(modifier.LEVELS) + "; "
+        }
+
+        if (["AOE"].includes(modifier.XMLID)) {
+            result += parseInt(modifier.LEVELS) + "m ";
         }
     }
 
@@ -2537,156 +2539,156 @@ export async function makeAttack(item) {
 
 }
 
-export async function uploadAttack(power) {
-    const xmlid = power.getAttribute('XMLID')
+// export async function uploadAttack(power) {
+//     const xmlid = power.getAttribute('XMLID')
 
-    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
+//     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
 
-    // Verify we have an attack
-    if (!configPowerInfo.powerType.includes("attack")) return
+//     // Verify we have an attack
+//     if (!configPowerInfo.powerType.includes("attack")) return
 
-    let description = power.getAttribute('ALIAS')
-    let name = ''
-    if (power.hasAttribute('NAME') && power.getAttribute('NAME') !== '') {
-        name = power.getAttribute('NAME')
-    } else {
-        name = description
-    }
+//     let description = power.getAttribute('ALIAS')
+//     let name = ''
+//     if (power.hasAttribute('NAME') && power.getAttribute('NAME') !== '') {
+//         name = power.getAttribute('NAME')
+//     } else {
+//         name = description
+//     }
 
-    const levels = parseInt(power.getAttribute('LEVELS'))
-    const input = power.getAttribute('INPUT')
+//     const levels = parseInt(power.getAttribute('LEVELS'))
+//     const input = power.getAttribute('INPUT')
 
-    // Attempt to calculate avantages
-    //let advantages = 1;
-    //for (let mod in powers.)
+//     // Attempt to calculate avantages
+//     //let advantages = 1;
+//     //for (let mod in powers.)
 
-    // Active cost is required for endurance calculation.
-    // It should include all advantages (which we don't handle very well at the moment)
-    let activeCost = (levels * 5)
-    let end = Math.round(activeCost / 10 - 0.01);
+//     // Active cost is required for endurance calculation.
+//     // It should include all advantages (which we don't handle very well at the moment)
+//     let activeCost = (levels * 5)
+//     let end = Math.round(activeCost / 10 - 0.01);
 
-    let itemData = {
-        name,
-        type: "attack",
-        system: {
-            class: input === "ED" ? "energy" : "physical",
-            dice: levels,
-            end: end,
-            extraDice: "zero",
-            killing: false,
-            knockbackMultiplier: 1,
-            targets: "dcv",
-            uses: "ocv",
-            usesStrength: true,
-            activeCost: activeCost,
-        }
-    }
+//     let itemData = {
+//         name,
+//         type: "attack",
+//         system: {
+//             class: input === "ED" ? "energy" : "physical",
+//             dice: levels,
+//             end: end,
+//             extraDice: "zero",
+//             killing: false,
+//             knockbackMultiplier: 1,
+//             targets: "dcv",
+//             uses: "ocv",
+//             usesStrength: true,
+//             activeCost: activeCost,
+//         }
+//     }
 
-    // Armor Piercing
-    let ARMORPIERCING = power.querySelector('[XMLID="ARMORPIERCING"]')
-    if (ARMORPIERCING) {
-        itemData.system.piercing = parseInt(ARMORPIERCING.getAttribute("LEVELS"))
-    }
+//     // Armor Piercing
+//     let ARMORPIERCING = power.querySelector('[XMLID="ARMORPIERCING"]')
+//     if (ARMORPIERCING) {
+//         itemData.system.piercing = parseInt(ARMORPIERCING.getAttribute("LEVELS"))
+//     }
 
-    // Penetrating
-    let PENETRATING = power.querySelector('[XMLID="PENETRATING"]')
-    if (PENETRATING) {
-        itemData.system.penetrating = parseInt(PENETRATING.getAttribute("LEVELS"))
-    }
+//     // Penetrating
+//     let PENETRATING = power.querySelector('[XMLID="PENETRATING"]')
+//     if (PENETRATING) {
+//         itemData.system.penetrating = parseInt(PENETRATING.getAttribute("LEVELS"))
+//     }
 
-    // No Knockback
-    let NOKB = power.querySelector('[XMLID="NOKB"]')
-    if (NOKB) {
-        itemData.system.knockbackMultiplier = 0
-    }
+//     // No Knockback
+//     let NOKB = power.querySelector('[XMLID="NOKB"]')
+//     if (NOKB) {
+//         itemData.system.knockbackMultiplier = 0
+//     }
 
-    // Double Knockback
-    let DOUBLEKB = power.querySelector('[XMLID="DOUBLEKB"]')
-    if (DOUBLEKB) {
-        itemData.system.knockbackMultiplier = 2
-    }
+//     // Double Knockback
+//     let DOUBLEKB = power.querySelector('[XMLID="DOUBLEKB"]')
+//     if (DOUBLEKB) {
+//         itemData.system.knockbackMultiplier = 2
+//     }
 
-    // Alternate Combat Value (uses OMCV against DCV)
-    let ACV = power.querySelector('[XMLID="ACV"]')
-    if (ACV) {
-        if (ACV.getAttribute('OPTION_ALIAS') === "uses OMCV against DCV") {
-            itemData.system.uses = 'omcv'
-            itemData.system.targets = 'dcv'
-        }
-        if (ACV.getAttribute('OPTION_ALIAS') === "uses OCV against DMCV") {
-            itemData.system.uses = 'ocv'
-            itemData.system.targets = 'dmcv'
-        }
-        if (ACV.getAttribute('OPTION_ALIAS') === "uses OMCV against DCV") {
-            itemData.system.uses = 'omcv'
-            itemData.system.targets = 'dcv'
-        }
-    }
-
-
-    if (power.querySelector('[XMLID="PLUSONEPIP"]')) {
-        itemData.system.extraDice = "pip"
-    }
-
-    if (power.querySelector('[XMLID="PLUSONEHALFDIE"]')) {
-        itemData.system.extraDice = "half"
-    }
-
-    if (power.querySelector('[XMLID="MINUSONEPIP"]')) {
-        // Typically only allowed for killing attacks.
-        // Appears that +1d6-1 is roughly equal to +1/2 d6
-        itemData.system.extraDice = "half"
-    }
-
-    const aoe = power.querySelector('[XMLID="AOE"]')
-    if (aoe) {
-        itemData.system.areaOfEffect = {
-            type: aoe.getAttribute('OPTION_ALIAS').toLowerCase(),
-            value: parseInt(aoe.getAttribute('LEVELS'))
-        }
-    }
-
-    if (xmlid === "HANDTOHANDATTACK") {
-        await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        return
-    }
-
-    if (xmlid === "HKA") {
-        itemData.system.killing = true
-        await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        return
-    }
+//     // Alternate Combat Value (uses OMCV against DCV)
+//     let ACV = power.querySelector('[XMLID="ACV"]')
+//     if (ACV) {
+//         if (ACV.getAttribute('OPTION_ALIAS') === "uses OMCV against DCV") {
+//             itemData.system.uses = 'omcv'
+//             itemData.system.targets = 'dcv'
+//         }
+//         if (ACV.getAttribute('OPTION_ALIAS') === "uses OCV against DMCV") {
+//             itemData.system.uses = 'ocv'
+//             itemData.system.targets = 'dmcv'
+//         }
+//         if (ACV.getAttribute('OPTION_ALIAS') === "uses OMCV against DCV") {
+//             itemData.system.uses = 'omcv'
+//             itemData.system.targets = 'dcv'
+//         }
+//     }
 
 
-    if (xmlid === "TELEKINESIS") {
-        // levels is the equivalent strength
-        itemData.system.extraDice = "zero"
-        itemData.system.dice = Math.floor(levels / 5)
-        if (levels % 5 >= 3) itemData.system.extraDice = "half"
-        itemData.name += " (TK strike)"
-        itemData.system.usesStrength = false
-        await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        return
-    }
+//     if (power.querySelector('[XMLID="PLUSONEPIP"]')) {
+//         itemData.system.extraDice = "pip"
+//     }
 
-    if (xmlid === "ENERGYBLAST") {
-        itemData.system.usesStrength = false
-        await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        return
-    }
+//     if (power.querySelector('[XMLID="PLUSONEHALFDIE"]')) {
+//         itemData.system.extraDice = "half"
+//     }
 
-    if (xmlid === "RKA") {
-        itemData.system.killing = true
-        itemData.system.usesStrength = false
-        await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        return
-    }
+//     if (power.querySelector('[XMLID="MINUSONEPIP"]')) {
+//         // Typically only allowed for killing attacks.
+//         // Appears that +1d6-1 is roughly equal to +1/2 d6
+//         itemData.system.extraDice = "half"
+//     }
+
+//     const aoe = power.querySelector('[XMLID="AOE"]')
+//     if (aoe) {
+//         itemData.system.areaOfEffect = {
+//             type: aoe.getAttribute('OPTION_ALIAS').toLowerCase(),
+//             value: parseInt(aoe.getAttribute('LEVELS'))
+//         }
+//     }
+
+//     if (xmlid === "HANDTOHANDATTACK") {
+//         await HeroSystem6eItem.create(itemData, { parent: this.actor })
+//         return
+//     }
+
+//     if (xmlid === "HKA") {
+//         itemData.system.killing = true
+//         await HeroSystem6eItem.create(itemData, { parent: this.actor })
+//         return
+//     }
 
 
-    if (game.settings.get(game.system.id, 'alphaTesting')) {
-        ui.notifications.warn(`${xmlid} ATTACK not implemented during HDC upload of ${this.actor.name}`)
-    }
-}
+//     if (xmlid === "TELEKINESIS") {
+//         // levels is the equivalent strength
+//         itemData.system.extraDice = "zero"
+//         itemData.system.dice = Math.floor(levels / 5)
+//         if (levels % 5 >= 3) itemData.system.extraDice = "half"
+//         itemData.name += " (TK strike)"
+//         itemData.system.usesStrength = false
+//         await HeroSystem6eItem.create(itemData, { parent: this.actor })
+//         return
+//     }
+
+//     if (xmlid === "ENERGYBLAST") {
+//         itemData.system.usesStrength = false
+//         await HeroSystem6eItem.create(itemData, { parent: this.actor })
+//         return
+//     }
+
+//     if (xmlid === "RKA") {
+//         itemData.system.killing = true
+//         itemData.system.usesStrength = false
+//         await HeroSystem6eItem.create(itemData, { parent: this.actor })
+//         return
+//     }
+
+
+//     if (game.settings.get(game.system.id, 'alphaTesting')) {
+//         ui.notifications.warn(`${xmlid} ATTACK not implemented during HDC upload of ${this.actor.name}`)
+//     }
+// }
 
 export function SkillRollUpdateValue(item) {
     let skillData = item.system
