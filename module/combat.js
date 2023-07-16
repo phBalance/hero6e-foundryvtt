@@ -36,7 +36,7 @@ export class HeroSystem6eCombat extends Combat {
         for (let [id, value] of this.combatants.entries()) {
             // Get Combatant data (non-strictly)
             const combatant = this.combatants.get(id);
-            if (!combatant?.isOwner) return results;
+            if (!combatant?.isOwner) return this;
             //if (combatant.hasRolled) continue;
 
             // Produce an initiative roll for the Combatant

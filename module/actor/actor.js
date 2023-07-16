@@ -241,15 +241,17 @@ export class HeroSystem6eActor extends Actor {
         let speaker = ChatMessage.getSpeaker({ actor: this, token })
         speaker["alias"] = this.name
 
-        let content = this.name + ` <span title="
-        Recovering is a Full Phase Action and occurs at the end of
-        the Segment (after all other characters who have a Phase that
-        Segment have acted). A character who Recovers during a Phase
-        may do nothing else. He cannot even maintain a Constant Power
-        or perform Actions that cost no END or take no time. However,
-        he may take Zero Phase Actions at the beginning of his Phase
-        to turn off Powers, and Persistent Powers that don't cost END
-        remain in effect."><i>Takes a Recovery</i></span>`;
+        // let content = this.name + ` <span title="
+        // Recovering is a Full Phase Action and occurs at the end of
+        // the Segment (after all other characters who have a Phase that
+        // Segment have acted). A character who Recovers during a Phase
+        // may do nothing else. He cannot even maintain a Constant Power
+        // or perform Actions that cost no END or take no time. However,
+        // he may take Zero Phase Actions at the beginning of his Phase
+        // to turn off Powers, and Persistent Powers that don't cost END
+        // remain in effect."><i>Takes a Recovery</i></span>`;
+
+        let content = this.name + ` <i>Takes a Recovery</i>`;
         if (deltaEnd || deltaStun) {
             content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
         } else {
