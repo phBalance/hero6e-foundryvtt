@@ -2706,7 +2706,11 @@ export function SkillRollUpdateValue(item) {
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
-        const rollVal = 9 + Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
+        let rollVal = 9 + Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
+
+        if (item.system.XMLID === "FINDWEAKNESS") {
+            rollVal += 2; // 11-
+        }
         skillData.roll = rollVal.toString() + '-'
     } else {
         // This is likely a Skill Enhancer.
@@ -2854,6 +2858,11 @@ export async function updateItemSubTypes(actor, removeDups) {
                 await item.delete()
             }
         }
+
+        // Skill
+        // if (item.type != "skill" && configPowerInfo && configPowerInfo.powerType.includes("skill")) {
+        //     await item.update({ 'system.subType': 'skill'})
+        // }
 
     }
 

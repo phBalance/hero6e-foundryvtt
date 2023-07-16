@@ -579,7 +579,7 @@ HERO.powers = {
     "DETECT": { powerType: ["sense"], costPerLevel: 1 },
     "TARGETINGSENSE": { powerType: ["sense"] },
     "TRACKINGSENSE": { powerType: ["sense"] },
-    "FINDWEAKNESS": { powerType: ["sense", "special"] },
+    "FINDWEAKNESS": { powerType: ["sense", "special", "skill"] },  // Not reall a skill, but behaves like one
 
 
     // Attack
