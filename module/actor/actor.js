@@ -171,6 +171,8 @@ export class HeroSystem6eActor extends Actor {
 
         //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
 
+        if (options.hideChatMessage) return;
+
         let content = "";
 
         if (changed?.system?.characteristics?.stun) {
@@ -187,8 +189,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        if (content)
-        {
+        if (content) {
             const chatData = {
                 user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
                 whisper: ChatMessage.getWhisperRecipients("GM"),
@@ -198,7 +199,7 @@ export class HeroSystem6eActor extends Actor {
             }
             await ChatMessage.create(chatData)
         }
-        
+
 
     }
 
@@ -269,7 +270,7 @@ export class HeroSystem6eActor extends Actor {
         await this.update({
             'system.characteristics.stun.value': newStun,
             'system.characteristics.end.value': newEnd
-        })
+        }, { hideChatMessage: true })
 
         let token = this.token
         let speaker = ChatMessage.getSpeaker({ actor: this, token })

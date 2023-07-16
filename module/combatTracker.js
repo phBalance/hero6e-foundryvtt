@@ -53,6 +53,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 context.activeSegments[i] = (context.combat.turn === null && i === 12) || (context.combat?.combatant && context.combat.combatant.segment === i);
             }
             context.segments = context.combat.segments;
+            
         }
 
         return context;
