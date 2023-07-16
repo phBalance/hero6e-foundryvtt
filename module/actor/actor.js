@@ -272,4 +272,30 @@ export class HeroSystem6eActor extends Actor {
         return content;
     }
 
+    // When stunned, knockedout, etc you cannot act
+    canAct(uiNotice) {
+
+        if (this.statuses.has("knockedOut")) {
+            if (uiNotice) ui.notifications.error(`${this.name} is KNOCKED OUT and cannot act.`);
+            return false;
+        }
+
+        // A character
+        // who is Stunned or recovering from being
+        // Stunned can take no Actions, take no Recoveries
+        // (except his free Post-Segment 12 Recovery), cannot
+        // move, and cannot be affected by Presence Attacks.
+        
+        // Recovering from being Stunned requires a Full
+        // Phase, and is the only thing the character can do
+        // during that Phase.
+
+        if (this.statuses.has("stunned")) {
+            if (uiNotice) ui.notifications.error(`${this.name} is STUNNED and cannot act.`);
+            return false;
+        }
+        return true;
+    }
+
 }
+

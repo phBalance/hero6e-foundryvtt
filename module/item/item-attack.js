@@ -33,6 +33,8 @@ export async function onMessageRendered(html) {
 export async function AttackOptions(item) {
     const actor = item.actor;
 
+    if (!actor.canAct(true)) return;
+
     const data = {
         item: item,
         state: null,
