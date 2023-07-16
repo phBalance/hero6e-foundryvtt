@@ -6,6 +6,7 @@
 - Fixed "undefined id [] does not exist in the EmbeddedCollection collection" [#185](https://github.com/dmdorman/hero6e-foundryvtt/issues/185) [#211](https://github.com/dmdorman/hero6e-foundryvtt/issues/211)
 - Fixed dragging Attack powers to hotbar [#200](https://github.com/dmdorman/hero6e-foundryvtt/issues/200)
 - Fixed Post-Segment 12 errors. [#217](https://github.com/dmdorman/hero6e-foundryvtt/issues/217)
+- STUN and BODY changes show in chat when manually changed. [#209](https://github.com/dmdorman/hero6e-foundryvtt/issues/209)
 
 # Version 3.0.8
 - Take a Recovery now also removes the Stunned condition.

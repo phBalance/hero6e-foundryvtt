@@ -92,7 +92,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        
+
 
         if (activeEffect.id == "knockedOut") {
             // Knocked Out overrides Stunned
@@ -166,7 +166,41 @@ export class HeroSystem6eActor extends Actor {
         return allowed !== false ? this.update(updates) : this;
     }
 
+    async _preUpdate(changed, options, userId) {
+        await super._preUpdate(changed, options, userId)
 
+        //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
+
+        let content = "";
+
+        if (changed?.system?.characteristics?.stun) {
+            content = `STUN from ${this.system.characteristics.stun.value} to ${changed.system.characteristics.stun.value}`
+            if (changed.system.characteristics.stun.value === this.system.characteristics.stun.max) {
+                content += " (at max)";
+            }
+        }
+
+        if (changed?.system?.characteristics?.body) {
+            content = `BODY from ${this.system.characteristics.body.value} to ${changed.system.characteristics.body.value}`
+            if (changed.system.characteristics.body.value === this.system.characteristics.body.max) {
+                content += " (at max)";
+            }
+        }
+
+        if (content)
+        {
+            const chatData = {
+                user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
+                whisper: ChatMessage.getWhisperRecipients("GM"),
+                speaker: ChatMessage.getSpeaker({ actor: this }),
+                blind: true,
+                content: content,
+            }
+            await ChatMessage.create(chatData)
+        }
+        
+
+    }
 
     async _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
