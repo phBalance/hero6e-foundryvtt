@@ -19,7 +19,7 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
-import { createEffects, updateItemSubTypes } from "./utility/upload_hdc.js"
+import { createEffects, updateItemDescription, updateItemSubTypes } from "./utility/upload_hdc.js"
 
 Hooks.once('init', async function () {
 
@@ -39,6 +39,7 @@ Hooks.once('init', async function () {
         },
         macros: macros,
         rollItemMacro: rollItemMacro,
+        CreateCustomAttack: CreateCustomAttack,
         config: HERO
     };
 
@@ -208,6 +209,69 @@ async function handleMacroCreation(bar, data, slot, item) {
     game.user.assignHotbarMacro(macro, slot);
 }
 
+async function CreateCustomAttack(actor) {
+    if (!actor) return ui.notifications.error("You must select token or actor");
+    let myValue = await Dialog.prompt({
+        content: `<h1>${actor.name}</h1><label>Enter Item Data</label><textarea rows="20" cols="200">
+{
+    "name": "Custom Attack",
+    "system": {
+    "modifiers": [],
+    "end": 1,
+    "adders": [],
+    "XMLID": "ENERGYBLAST",
+    "ALIAS": "Blast",
+    "LEVELS": {
+        "value": "1",
+        "max": "1"
+    },
+    "MULTIPLIER": "1.0",
+    "basePointsPlusAdders": 5,
+    "activePoints": 5,
+    "realCost": 2,
+    "subType": "attack",
+    "class": "energy",
+    "dice": 1,
+    "extraDice": "zero",
+    "killing": false,
+    "knockbackMultiplier": 1,
+    "targets": "dcv",
+    "uses": "ocv",
+    "usesStrength": true,
+    "areaOfEffect": {
+        "type": "none",
+        "value": 0
+    },
+    "piercing": 0,
+    "penetrating": 0,
+    "ocv": "+0",
+    "dcv": "+0",
+    "stunBodyDamage": "stunbody"
+    }
+}
+
+</textarea>`,
+        callback: async function (html) {
+
+            let value = html.find("textarea").val()
+            try {
+                let json = JSON.parse(value)
+                console.log(json);
+                json.type = 'attack';
+
+                
+                let item = await Item.create(json, { parent: actor })
+                updateItemDescription(item);
+                return ui.notifications.info(`Added ${item.name} to ${actor.name}`);
+            }
+            catch (e) {
+                return ui.notifications.error(e);
+            }
+        }
+    })
+}
+
+
 
 /**
  * Create a Macro from an Item drop.
@@ -304,7 +368,7 @@ Hooks.once("ready", async function () {
         if (foundry.utils.isNewerVersion('3.0.9', lastMigration)) {
             await ui.notifications.info(`Migragrating actor data.`)
             for (let actor of game.actors.contents) {
-                for (let item of actor.items.filter(o => (o.system.end ||"").toString().indexOf("[") === 0)) {
+                for (let item of actor.items.filter(o => (o.system.end || "").toString().indexOf("[") === 0)) {
                     let _end = item.system.end;
                     let _charges = parseInt(_end.match(/\d+/) || 0)
                     if (_charges) {
@@ -313,7 +377,7 @@ Hooks.once("ready", async function () {
                             max: _charges,
                             recoverable: _end.indexOf("rc") > -1 ? true : false
                         }
-                        await item.update({ 'system.end': 0, 'system.charges': charges})
+                        await item.update({ 'system.end': 0, 'system.charges': charges })
                     }
                 }
             }

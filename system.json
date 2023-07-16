@@ -17,7 +17,13 @@
     "esmodules": [ "module/herosystem6e.js", "module/testing/testing-main.js" ],
     "styles": [ "css/herosystem6e.css", "css/actor-sidebar-sheet.css" ],
     "scripts": [],
-    "packs": [],
+    "packs": [{
+        "name": "heroMacros",
+        "label": "Hero Macros",
+        "system": "hero6efoundryvttv2",
+        "type": "Macro",
+        "path": "packs/heroMacros"
+      }],
     "languages": [
         {
             "lang": "en",
