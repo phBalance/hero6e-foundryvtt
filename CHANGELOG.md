@@ -1,5 +1,6 @@
 # Version 3.0.9
 - Initial support for Charges [#191](https://github.com/dmdorman/hero6e-foundryvtt/issues/191) [#47](https://github.com/dmdorman/hero6e-foundryvtt/issues/47)
+- Fixed adding skills [#195](https://github.com/dmdorman/hero6e-foundryvtt/issues/195)
 
 # Version 3.0.8
 - Take a Recovery now also removes the Stunned condition.

@@ -2706,7 +2706,7 @@ export function SkillRollUpdateValue(item) {
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
-        const rollVal = 9 + Math.round(charValue / 5) + parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels)
+        const rollVal = 9 + Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
         skillData.roll = rollVal.toString() + '-'
     } else {
         // This is likely a Skill Enhancer.
