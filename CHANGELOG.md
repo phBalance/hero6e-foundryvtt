@@ -3,6 +3,7 @@
 - Fixed adding skills with NaN- rolls. [#195](https://github.com/dmdorman/hero6e-foundryvtt/issues/195)
 - Partial Find Weakness (5e) support.  Shows as a skill roll.  [#208](https://github.com/dmdorman/hero6e-foundryvtt/issues/208)
 - Stunned tokens are prevented from attacking.  Stunned effect is removed and end of phase instead of start of phase. [#204](https://github.com/dmdorman/hero6e-foundryvtt/issues/204)
+- Fixed "undefined id [] does not exist in the EmbeddedCollection collection" [#185](https://github.com/dmdorman/hero6e-foundryvtt/issues/185) [#211](https://github.com/dmdorman/hero6e-foundryvtt/issues/211)
 
 # Version 3.0.8
 - Take a Recovery now also removes the Stunned condition.

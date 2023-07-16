@@ -61,7 +61,10 @@ export class HeroSystem6eActor extends Actor {
                 await this.update({ "system.characteristics.end.value": newEnd });
             }
 
-            return existingEffect.delete();
+            //await existingEffect.update({ disabled: true });
+
+            await existingEffect.delete();
+            //await this.deleteEmbeddedDocuments("ActiveEffect", [existingEffect])
         }
     }
 
@@ -84,13 +87,12 @@ export class HeroSystem6eActor extends Actor {
 
             // Check if this ActiveEffect already exists
             const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id));
-            if (existingEffect) {
-                HEROSYS.log(false, activeEffect.id + " already exists")
-                return
+            if (!existingEffect) {
+                await this.createEmbeddedDocuments("ActiveEffect", [newEffect])
             }
         }
 
-        await this.createEmbeddedDocuments("ActiveEffect", [newEffect])
+        
 
         if (activeEffect.id == "knockedOut") {
             // Knocked Out overrides Stunned
@@ -169,7 +171,8 @@ export class HeroSystem6eActor extends Actor {
     async _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
 
-        if (data?.system?.characteristics?.stun) {
+        // If stun was changed and running under triggering users context
+        if (data?.system?.characteristics?.stun && userId === game.user.id) {
 
             if (data.system.characteristics.stun.value <= 0) {
                 this.addActiveEffect(HeroSystem6eActorActiveEffects.knockedOutEffect);
@@ -285,7 +288,7 @@ export class HeroSystem6eActor extends Actor {
         // Stunned can take no Actions, take no Recoveries
         // (except his free Post-Segment 12 Recovery), cannot
         // move, and cannot be affected by Presence Attacks.
-        
+
         // Recovering from being Stunned requires a Full
         // Phase, and is the only thing the character can do
         // during that Phase.
