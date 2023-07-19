@@ -1,28 +1,41 @@
 <div class="form-group">
     <label>Description</label>
     <textarea placeholder="Description" class="power-card-power-description textarea input" name="system.description"
-        rows="8" >{{item.system.description}}</textarea>
+        rows="8">{{system.description}}</textarea>
 </div>
 
 <div class="form-group">
     <label>Base Cost plus Adders</label>
-    <input type="text" name="system.basePointsPlusAdders" value="{{system.basePointsPlusAdders}}" data-dtype="text"
-        />
+    <input type="text" name="system.basePointsPlusAdders" value="{{system.basePointsPlusAdders}}" data-dtype="Number" />
 </div>
 
 <div class="form-group">
     <label>Active Points</label>
-    <input type="text" name="system.activePoints" value="{{system.activePoints}}" data-dtype="text" />
+    <input type="text" name="system.activePoints" value="{{system.activePoints}}" data-dtype="Number" />
 </div>
 
 <div class="form-group">
     <label>Real Cost</label>
-    <input type="text" name="system.realCost" value="{{system.realCost}}" data-dtype="text" />
+    <input type="text" name="system.realCost" value="{{system.realCost}}" data-dtype="Number" />
 </div>
 
 <div class="form-group">
     <label>Endurance</label>
-    <input type="text" name="system.end" value="{{system.end}}" data-dtype="text" />
+    <input type="text" name="system.end" value="{{system.end}}" data-dtype="Number" />
+</div>
+
+<div class="form-group">
+    <label>Charges</label>
+    <div>
+        <input type="text" name="system.charges.value" value="{{system.charges.value}}" data-dtype="Number" />
+        <span>/</span>
+        <input type="text" name="system.charges.max" value="{{system.charges.max}}" data-dtype="Number" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label>CHarges (recoverable)</label>
+    <input type="checkbox" name="system.charges.recoverable" {{checked system.charges.recoverable}} data-dtype="Boolean" />
 </div>
 
 {{!-- <div class="form-group">

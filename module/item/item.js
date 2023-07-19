@@ -114,7 +114,7 @@ export class HeroSystem6eItem extends Item {
 
     // Largely used to determine if we can drag to hotbar
     isRollable() {
-        switch (this.type) {
+        switch (this.system?.subType || this.type) {
             case 'attack': return true
             case 'skill': return true
             case 'defense': return true

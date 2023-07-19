@@ -36,7 +36,7 @@ export class HeroSystem6eCombat extends Combat {
         for (let [id, value] of this.combatants.entries()) {
             // Get Combatant data (non-strictly)
             const combatant = this.combatants.get(id);
-            if (!combatant?.isOwner) return results;
+            if (!combatant?.isOwner) return this;
             //if (combatant.hasRolled) continue;
 
             // Produce an initiative roll for the Combatant
@@ -421,13 +421,28 @@ export class HeroSystem6eCombat extends Combat {
         // The character remains Stunned and can take no
         // Actions (not even Aborting to a defensive action) until his next
         // Phase.
+        // Use actor.canAct to block actions
+        // Remove STUNNED effect _onEndTurn
 
+
+    }
+
+    /**
+     * A workflow that occurs at the end of each Combat Turn.
+     * This workflow occurs after the Combat document update, prior round information exists in this.previous.
+     * This can be overridden to implement system-specific combat tracking behaviors.
+     * This method only executes for one designated GM user. If no GM users are present this method will not be called.
+     * @param {Combatant} combatant     The Combatant whose turn just ended
+     * @returns {Promise<void>}
+     * @protected
+     */
+    async _onEndTurn(combatant) {
+        //console.log("_onStartTurn", combatant.name)
+        super._onEndTurn(combatant)
 
         if (combatant.actor.statuses.has('stunned')) {
             const effect = combatant.actor.effects.contents.find(o => o.statuses.has('stunned'))
 
-            // At beginning of combat if stunned effect is deleted a console error is generated.
-            // This would be extremetly unusual as characters typically don't start combat stunned.
             await effect.delete();
 
             let content = `${combatant.actor.name} recovers from being stunned.`
@@ -445,26 +460,6 @@ export class HeroSystem6eCombat extends Combat {
 
 
         }
-
-        // for (let activeEffect of Array.from(combatant.actor.allApplicableEffects()).find(o => o.duration.type === "nextPhase")) {
-        //     await activeEffect.delete();
-        // }
-
-    }
-
-    /**
-     * A workflow that occurs at the end of each Combat Turn.
-     * This workflow occurs after the Combat document update, prior round information exists in this.previous.
-     * This can be overridden to implement system-specific combat tracking behaviors.
-     * This method only executes for one designated GM user. If no GM users are present this method will not be called.
-     * @param {Combatant} combatant     The Combatant whose turn just ended
-     * @returns {Promise<void>}
-     * @protected
-     */
-    async _onEndTurn(combatant) {
-        //console.log("_onStartTurn", combatant.name)
-        super._onEndTurn(combatant)
-
     }
 
     /**

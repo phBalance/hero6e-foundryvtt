@@ -192,41 +192,41 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         //html.find('.configure-type').click(this._onConfigureType.bind(this))
 
         // Item Description
-        html.find('.textarea').each((id, inp) => {
-            this.changeValue = async function (e) {
-                if (e.code === 'Enter' || e.code === 'Tab') {
-                    if (!'linkId' in this.item.system || this.item.system.linkId === undefined) {
-                        const changes = []
-                        changes[`${e.target.name}`] = e.target.value
-                        await this.item.update(changes)
-                    } else {
-                        const type = this.item.type
+        // html.find('.textarea').each((id, inp) => {
+        //     this.changeValue = async function (e) {
+        //         if (e.code === 'Enter' || e.code === 'Tab') {
+        //             if (!'linkId' in this.item.system || this.item.system.linkId === undefined) {
+        //                 const changes = []
+        //                 changes[`${e.target.name}`] = e.target.value
+        //                 await this.item.update(changes)
+        //             } else {
+        //                 const type = this.item.type
 
-                        const linkId = this.item.system.linkId
-                        const subLinkId = this.item.system.subLinkId
+        //                 const linkId = this.item.system.linkId
+        //                 const subLinkId = this.item.system.subLinkId
 
-                        let item = game.items.get(linkId)
+        //                 let item = game.items.get(linkId)
 
-                        if (item === undefined) {
-                            // item is not a game item / item belongs to an actor
-                            // sub items don't know the actor they belong to
-                            for (const key of game.actors.keys()) {
-                                const actor = game.actors.get(key)
-                                if (actor.items.has(linkId)) {
-                                    item = actor.items.get(linkId)
-                                }
-                            }
-                        }
+        //                 if (item === undefined) {
+        //                     // item is not a game item / item belongs to an actor
+        //                     // sub items don't know the actor they belong to
+        //                     for (const key of game.actors.keys()) {
+        //                         const actor = game.actors.get(key)
+        //                         if (actor.items.has(linkId)) {
+        //                             item = actor.items.get(linkId)
+        //                         }
+        //                     }
+        //                 }
 
-                        const changes = {}
-                        changes[`system.subItems.${type}.${subLinkId}.${e.target.name.split(".")[1]}`] = e.target.value
-                        await item.update(changes)
-                    }
-                }
-            }
+        //                 const changes = {}
+        //                 changes[`system.subItems.${type}.${subLinkId}.${e.target.name.split(".")[1]}`] = e.target.value
+        //                 await item.update(changes)
+        //             }
+        //         }
+        //     }
 
-            inp.addEventListener('keydown', this.changeValue.bind(this))
-        })
+        //     inp.addEventListener('keydown', this.changeValue.bind(this))
+        // })
     }
 
     /**

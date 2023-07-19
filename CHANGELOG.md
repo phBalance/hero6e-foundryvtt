@@ -1,3 +1,15 @@
+# Version 3.0.9
+- Initial support for Charges [#191](https://github.com/dmdorman/hero6e-foundryvtt/issues/191) [#47](https://github.com/dmdorman/hero6e-foundryvtt/issues/47)
+- Fixed adding skills with NaN- rolls. [#195](https://github.com/dmdorman/hero6e-foundryvtt/issues/195)
+- Partial Find Weakness (5e) support.  Shows as a skill roll.  [#208](https://github.com/dmdorman/hero6e-foundryvtt/issues/208)
+- Stunned tokens are prevented from attacking.  Stunned effect is removed and end of phase instead of start of phase. [#204](https://github.com/dmdorman/hero6e-foundryvtt/issues/204)
+- Fixed "undefined id [] does not exist in the EmbeddedCollection collection" [#185](https://github.com/dmdorman/hero6e-foundryvtt/issues/185) [#211](https://github.com/dmdorman/hero6e-foundryvtt/issues/211)
+- Fixed dragging Attack powers to hotbar [#200](https://github.com/dmdorman/hero6e-foundryvtt/issues/200)
+- Fixed Post-Segment 12 errors. [#217](https://github.com/dmdorman/hero6e-foundryvtt/issues/217)
+- STUN and BODY changes show in chat when manually changed. [#209](https://github.com/dmdorman/hero6e-foundryvtt/issues/209)
+- Combat Tracker header shows Segment number [#198](https://github.com/dmdorman/hero6e-foundryvtt/issues/198)
+- Macro Compendium with a Create Attack from JSON macro [#201](https://github.com/dmdorman/hero6e-foundryvtt/issues/201)
+
 # Version 3.0.8
 - Take a Recovery now also removes the Stunned condition.
 - When characteristics are locked (due to Active Effects) they are now readonly and a tooltip shows what is preventing editing.

@@ -579,18 +579,18 @@ HERO.powers = {
     "DETECT": { powerType: ["sense"], costPerLevel: 1 },
     "TARGETINGSENSE": { powerType: ["sense"] },
     "TRACKINGSENSE": { powerType: ["sense"] },
-    "FINDWEAKNESS": { powerType: ["sense", "special"] },
+    "FINDWEAKNESS": { powerType: ["sense", "special", "skill"] },  // Not reall a skill, but behaves like one
 
 
     // Attack
     "HANDTOHANDATTACK": { powerType: ["attack"], costPerLevel: 5 },
-    "HKA": { powerType: ["attack"], costPerLevel: 15 },
+    "HKA": { powerType: ["attack"], costPerLevel: 15, costEnd: true },
     "TELEKINESIS": {
         powerType: ["attack"],
         costEnd: true,
         costPerLevel: 3 / 2
     },
-    "RKA": { powerType: ["attack"], costPerLevel: 15 },
+    "RKA": { powerType: ["attack"], costPerLevel: 15, costEnd: true },
     "ENERGYBLAST": { powerType: ["attack"], costPerLevel: 5, costEnd: true },
     "DARKNESS": { powerType: ["sense-affecting", "attack", "standard"] },
     "DISPEL": { powerType: ["attack", "standard"], costPerLevel: 3 },
@@ -904,7 +904,7 @@ HERO.ModifierOverride = {
     "IMPENETRABLE": { BASECOST: 0.25 },
     "IMPROVEDNONCOMBAT": { BASECOST: 5 },
     "MENTAL": { BASECOST: 5 }, // DAMAGENEGATION
-    "PENETRATING": { dc: true },
+    "PENETRATING": { BASECOST: 0.5, dc: true },
     "PHYSICAL": { BASECOST: 5 }, // DAMAGENEGATION
     "STICKY": { dc: true },
     "TIMELIMIT": { dc: true },

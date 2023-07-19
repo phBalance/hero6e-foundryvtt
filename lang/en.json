@@ -93,7 +93,9 @@
         "TurnNext": "Next Combatant",
 
         "RoundPrev": "Previous Turn",
-        "RoundNext": "Next Turn"
+        "RoundNext": "Next Turn",
+
+        "Segment": "Segment"
         
     },
 

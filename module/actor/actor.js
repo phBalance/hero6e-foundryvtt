@@ -61,7 +61,10 @@ export class HeroSystem6eActor extends Actor {
                 await this.update({ "system.characteristics.end.value": newEnd });
             }
 
-            return existingEffect.delete();
+            //await existingEffect.update({ disabled: true });
+
+            await existingEffect.delete();
+            //await this.deleteEmbeddedDocuments("ActiveEffect", [existingEffect])
         }
     }
 
@@ -84,13 +87,12 @@ export class HeroSystem6eActor extends Actor {
 
             // Check if this ActiveEffect already exists
             const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id));
-            if (existingEffect) {
-                HEROSYS.log(false, activeEffect.id + " already exists")
-                return
+            if (!existingEffect) {
+                await this.createEmbeddedDocuments("ActiveEffect", [newEffect])
             }
         }
 
-        await this.createEmbeddedDocuments("ActiveEffect", [newEffect])
+
 
         if (activeEffect.id == "knockedOut") {
             // Knocked Out overrides Stunned
@@ -164,12 +166,48 @@ export class HeroSystem6eActor extends Actor {
         return allowed !== false ? this.update(updates) : this;
     }
 
+    async _preUpdate(changed, options, userId) {
+        await super._preUpdate(changed, options, userId)
 
+        //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
+
+        if (options.hideChatMessage) return;
+
+        let content = "";
+
+        if (changed?.system?.characteristics?.stun) {
+            content = `STUN from ${this.system.characteristics.stun.value} to ${changed.system.characteristics.stun.value}`
+            if (changed.system.characteristics.stun.value === this.system.characteristics.stun.max) {
+                content += " (at max)";
+            }
+        }
+
+        if (changed?.system?.characteristics?.body) {
+            content = `BODY from ${this.system.characteristics.body.value} to ${changed.system.characteristics.body.value}`
+            if (changed.system.characteristics.body.value === this.system.characteristics.body.max) {
+                content += " (at max)";
+            }
+        }
+
+        if (content) {
+            const chatData = {
+                user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
+                whisper: ChatMessage.getWhisperRecipients("GM"),
+                speaker: ChatMessage.getSpeaker({ actor: this }),
+                blind: true,
+                content: content,
+            }
+            await ChatMessage.create(chatData)
+        }
+
+
+    }
 
     async _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
 
-        if (data?.system?.characteristics?.stun) {
+        // If stun was changed and running under triggering users context
+        if (data?.system?.characteristics?.stun && userId === game.user.id) {
 
             if (data.system.characteristics.stun.value <= 0) {
                 this.addActiveEffect(HeroSystem6eActorActiveEffects.knockedOutEffect);
@@ -232,21 +270,23 @@ export class HeroSystem6eActor extends Actor {
         await this.update({
             'system.characteristics.stun.value': newStun,
             'system.characteristics.end.value': newEnd
-        })
+        }, { hideChatMessage: true })
 
         let token = this.token
         let speaker = ChatMessage.getSpeaker({ actor: this, token })
         speaker["alias"] = this.name
 
-        let content = this.name + ` <span title="
-        Recovering is a Full Phase Action and occurs at the end of
-        the Segment (after all other characters who have a Phase that
-        Segment have acted). A character who Recovers during a Phase
-        may do nothing else. He cannot even maintain a Constant Power
-        or perform Actions that cost no END or take no time. However,
-        he may take Zero Phase Actions at the beginning of his Phase
-        to turn off Powers, and Persistent Powers that don't cost END
-        remain in effect."><i>Takes a Recovery</i></span>`;
+        // let content = this.name + ` <span title="
+        // Recovering is a Full Phase Action and occurs at the end of
+        // the Segment (after all other characters who have a Phase that
+        // Segment have acted). A character who Recovers during a Phase
+        // may do nothing else. He cannot even maintain a Constant Power
+        // or perform Actions that cost no END or take no time. However,
+        // he may take Zero Phase Actions at the beginning of his Phase
+        // to turn off Powers, and Persistent Powers that don't cost END
+        // remain in effect."><i>Takes a Recovery</i></span>`;
+
+        let content = this.name + ` <i>Takes a Recovery</i>`;
         if (deltaEnd || deltaStun) {
             content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
         } else {
@@ -272,4 +312,30 @@ export class HeroSystem6eActor extends Actor {
         return content;
     }
 
+    // When stunned, knockedout, etc you cannot act
+    canAct(uiNotice) {
+
+        if (this.statuses.has("knockedOut")) {
+            if (uiNotice) ui.notifications.error(`${this.name} is KNOCKED OUT and cannot act.`);
+            return false;
+        }
+
+        // A character
+        // who is Stunned or recovering from being
+        // Stunned can take no Actions, take no Recoveries
+        // (except his free Post-Segment 12 Recovery), cannot
+        // move, and cannot be affected by Presence Attacks.
+
+        // Recovering from being Stunned requires a Full
+        // Phase, and is the only thing the character can do
+        // during that Phase.
+
+        if (this.statuses.has("stunned")) {
+            if (uiNotice) ui.notifications.error(`${this.name} is STUNNED and cannot act.`);
+            return false;
+        }
+        return true;
+    }
+
 }
+

@@ -175,7 +175,7 @@
                         <td>-</td>
                         {{/if}}
                         {{#if (ne item.system.areaOfEffect.type "none")}}
-                        <td>{{item.system.areaOfEffect.type}} ({{item.system.areaOfEffect.value}})</td>
+                        <td>{{item.system.areaOfEffect.type}}{{#if (gt item.system.areaOfEffect.value 0)}} ({{item.system.areaOfEffect.value}}){{/if}}</td>
                         {{/if}}
                         <td><a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
                                     height="24"></i></a></td>
@@ -307,7 +307,7 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (and (eq item.type "skill") (filterItem item ../options.itemFilters.skill))}}
+                    {{#if (and (or (eq item.type "skill") (eq item.system.subType "skill")) (filterItem item ../options.itemFilters.skill))}}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -316,7 +316,8 @@
                         <td>{{item.system.realCost}}</td>
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
                             {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
-                            {{#if item.system.description}}{{item.system.description}}{{else}}{{item.name}}{{/if}}
+                            <i>{{item.name}}</i>
+                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
                         </td>
                         <td>
                             {{#if item.system.roll}}

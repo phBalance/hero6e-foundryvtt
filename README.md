@@ -26,7 +26,7 @@ This system is a work in progress. The following features are supported
 - The character sheet in this system supports automation for characteristic and skill rolls.
 - .HDC files created in the Hero Designer can be uploaded to it, and currently supports automatically populating information for a character's characteristics, skills, powers, etc.
 - Most attack powers are displayed in attacks tab.  Most defense powers are displayed in defenses tab.
-- Attacks and defense can be manually added by users.
+- Attacks, defense, and skills can be manually added by users.
 - Defenses and most powers can be toggled on and off.
 - The character sheet can be used to take a Recovery.
 - Character image stored in .HDC file is used for token.
@@ -59,12 +59,12 @@ Activating a maneuver from a character sheet will apply OCV and DCV modifiers wi
 ## Known Limitations
 - The upload of a .HDC file from Hero Designer is practically a requirement.  You can't create powers, skills, or equipment from scratch.  Character editing is limited within the system.
 - Untested/limited support for vehicles, automations, computers, etc.
-- Power frameworks are largely ignored, powers within the framework should work.
+- Power frameworks are partially supported.
 - Endurance use of non-attacking powers is untracked.
 - The following are largely not implemented
   - Adjustment powers (Absorption Aid, Drain, Healing).
   - Attack powers that do not do stun/body damage (Change Environment, Darkness, Dispel, Drain, Entangle, Flash, Images, Mental Illusions, Mind Control, Reflection, Transform).
-  - Attack powers with NND
+  - Attack powers with NND & AVAD
   - Automation powers(Cannot Be Stunned, Does Not Bleed, No Hit Locations, Takes No STUN).
   - Body-Affecting powers (Desolidification, Duplication, Extra Limbs, Growth, Multiform, Shape Shift, Shrinking, Stretching)
   - Mental Powers (Mental Illusions, Mind Control, Mind Scan, Telepathy)
