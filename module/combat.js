@@ -39,6 +39,8 @@ export class HeroSystem6eCombat extends Combat {
             if (!combatant?.isOwner) return this;
             //if (combatant.hasRolled) continue;
 
+            if (!combatant.actor) continue;
+
             // Produce an initiative roll for the Combatant
             let dexValue = combatant.actor.system.characteristics.dex.value
             let intValue = combatant.actor.system.characteristics.int.value
@@ -79,6 +81,7 @@ export class HeroSystem6eCombat extends Combat {
 
             // Lightning Reflexes
             const actor = game.actors.get(combatant.actorId);
+            if (!actor) continue; // Not sure how this could happen
             const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE");
             if (item) {
                 const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
@@ -110,6 +113,10 @@ export class HeroSystem6eCombat extends Combat {
         for (let s = 1; s <= 12; s++) {
             this.segments[s] = []
             for (let t = 0; t < turnsRaw.length; t++) {
+                if (!turnsRaw[t].actor) {
+                    //ui.notifications.warn(`${turnsRaw[t].name} references an Actor which no longer exists within the World.`);
+                    continue;
+                }
                 if (HeroSystem6eCombat.hasPhase(turnsRaw[t].actor.system.characteristics.spd.value, s)) {
                     let combatant = new HeroCombatant(turnsRaw[t])
                     combatant.turn = turns.length;
@@ -246,14 +253,29 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    async _onCreateDescendantDocuments(...args) {
+    async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
         //console.log("_onCreateDescendantDocuments");
+
+
+        //Missing actor?
+        let missingActors = documents.filter(o=> !o.actor)
+        {
+            for(let c of missingActors)
+            {
+                ui.notifications.warn(`${c.name} references an Actor which no longer exists within the World.`);
+            }
+        }
+
+        documents = documents.filter(o=> o.actor)
+        if (documents.length === 0) return;
+
 
         // Get current combatant
         const current = this.combatant;
 
+
         // Super
-        await super._onCreateDescendantDocuments(...args);
+        await super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
 
         // Setup turns in segment fashion
         this.setupTurns();
