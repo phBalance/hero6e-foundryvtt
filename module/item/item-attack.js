@@ -737,8 +737,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
                     }
                 ],
                 duration: {
-                    rounds: 1,
-                    type: "fade",
+                    seconds: 12,
                 },
                 flags: {
                     fade: true

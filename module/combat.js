@@ -310,13 +310,25 @@ export class HeroSystem6eCombat extends Combat {
         // Setup turns in segment fashion
         this.setupTurns();
 
+        const updateData = {};
+
         // If activeTurn == -1 then combat has not begun
         if (activeTurn > -1) {
             // There is an edge case where the last combatant of the round is deleted.
             activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-            await this.update({ turn: activeTurn });
+            //await this.update({ turn: activeTurn });
+            updateData.turn = activeTurn;
 
         }
+
+        // Determine segement
+        let segment_prev = current.segment;
+        let segment = this.combatant.segment;
+        let advanceTime = segment - segment_prev;
+
+        const updateOptions = { advanceTime, direction: 1 };
+        //Hooks.callAll("combatTurn", this, updateData, updateOptions);
+        await this.update(updateData, updateOptions);
 
         // Render the collection
         if (this.active) this.collection.render();
@@ -577,8 +589,8 @@ export class HeroSystem6eCombat extends Combat {
         let segment = this.combatant.segment;
         let segment_prev = this.turns[turn].segment;
         if (round > 0) {
-             segment += 12;
-         }
+            segment += 12;
+        }
         let advanceTime = segment_prev - segment;
 
         // Hero combats start with round 1 and segment 12.
@@ -665,7 +677,7 @@ export class HeroSystem6eCombat extends Combat {
         let segment = this.combatant.segment;
         let segment_next = this.turns[0].segment;
         //if (segment_next < segment) {
-            segment_next += 12;
+        segment_next += 12;
         //}
         let advanceTime = segment_next - segment;
 

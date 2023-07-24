@@ -259,7 +259,7 @@ async function CreateCustomAttack(actor) {
                 console.log(json);
                 json.type = 'attack';
 
-                
+
                 let item = await Item.create(json, { parent: actor })
                 updateItemDescription(item);
                 return ui.notifications.info(`Added ${item.name} to ${actor.name}`);
@@ -552,3 +552,15 @@ Hooks.on("getActorDirectoryEntryContext", (dialog, html, data) => {
 //Modify TokenHUD (need 3 bars: end, stun, body)
 Hooks.on("renderTokenHUD", HeroSystem6eTokenHud);
 Hooks.on("renderTokenConfig", extendTokenConfig);
+
+
+// Expire ActiveEffects
+/**
+ * Handle follow-up actions when the official World time is changed
+ * @param {number} worldTime      The new canonical World time.
+ * @param {object} options        Options passed from the requesting client where the change was made
+ * @param {string} userId         The ID of the User who advanced the time
+ */
+Hooks.on('updateWorldTime', (worldTime, options, userId) => {
+    console.log(worldTime, options, userId)
+});
