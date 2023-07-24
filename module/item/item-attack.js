@@ -709,14 +709,14 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
             }
             maxEffect = parseInt(maxEffect / costPerPoint);
 
-            let newLevels = levels + parseInt(prevEffect.changes[0].value)
+            let newLevels = levels + Math.abs(parseInt(prevEffect.changes[0].value))
             if (newLevels > maxEffect) {
-                levels = maxEffect - parseInt(prevEffect.changes[0].value);
+                levels = maxEffect - Math.abs(parseInt(prevEffect.changes[0].value));
                 newLevels = maxEffect;
                 //effectsFinal = `maximum effect`
             }
 
-            prevEffect.changes[0].value = newLevels
+            prevEffect.changes[0].value = item.system.XMLID == "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels),
 
             prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
 
@@ -726,7 +726,8 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
             // Create new ActiveEffect
             let activeEffect =
             {
-                label: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                name: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                id: `${item.system.XMLID}.${item.id}`,
                 icon: item.img,
                 changes: [
                     {
@@ -737,8 +738,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
                 ],
                 origin: item.actor.uuid
             }
-            token.actor.addActiveEffect(activeEffect);
-
+            await token.actor.addActiveEffect(activeEffect);
 
         }
 

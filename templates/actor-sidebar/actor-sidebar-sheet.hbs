@@ -575,6 +575,7 @@
                         </td>
                         <td data-tooltip="{{{characteristic.maxTitle}}}">
                             <input name="system.characteristics.{{characteristic.key}}.max" type="text"
+                             class="{{#if (gt characteristic.delta 0)}}overMax{{/if}}{{#if (lt characteristic.delta 0)}}underMax{{/if}}"
                                 value="{{characteristic.max}}" data-dtype="Number" {{#if characteristic.maxTitle}}disabled{{/if}}>
                         </td>
                         <td>
