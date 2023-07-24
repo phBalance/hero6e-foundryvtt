@@ -736,6 +736,13 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
                     }
                 ],
+                duration: {
+                    rounds: 1,
+                    type: "fade",
+                },
+                flags: {
+                    fade: true
+                },
                 origin: item.actor.uuid
             }
             await token.actor.addActiveEffect(activeEffect);
