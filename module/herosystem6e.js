@@ -122,6 +122,11 @@ Hooks.once('init', async function () {
 Hooks.once("ready", async function () {
     // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
     Hooks.on("hotbarDrop", (bar, data, slot) => createHeroSystem6eMacro(bar, data, slot));
+
+    if (SimpleCalendar && game.user.isGM && SimpleCalendar.api.getCurrentCalendar().general.gameWorldTimeIntegration != "mixed") {
+        console.log(SimpleCalendar.api.getCurrentCalendar().general.gameWorldTimeIntegration);
+        return ui.notifications.warn(`Recommend setting Simple Calendar GameWorldTimeIntegration = Mixed`);
+    }
 });
 
 Hooks.on("renderChatMessage", (app, html, data) => {
