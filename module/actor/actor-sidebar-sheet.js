@@ -354,7 +354,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             characteristic.delta = 0;
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
-                if (ae.flags?.fade) {
+                if (ae._prepareDuration().duration) {
                     let change = ae.changes.find(o => o.key === `system.characteristics.${key}.max`)
                     if (change.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
                         characteristic.delta += parseInt(change.value);

@@ -20,6 +20,7 @@ import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
 import { createEffects, updateItemDescription, updateItemSubTypes } from "./utility/upload_hdc.js"
+import { AdjustmentMultiplier } from "./utility/adjustment.js";
 
 Hooks.once('init', async function () {
 
@@ -561,6 +562,72 @@ Hooks.on("renderTokenConfig", extendTokenConfig);
  * @param {object} options        Options passed from the requesting client where the change was made
  * @param {string} userId         The ID of the User who advanced the time
  */
-Hooks.on('updateWorldTime', (worldTime, options, userId) => {
+Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     console.log(worldTime, options, userId)
+
+    for (let actor of game.actors) {
+        const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
+
+        for (let ae of actor.temporaryEffects) {
+            let content = "";
+
+            let d = ae._prepareDuration();
+            if (d.remaining <= 0) {
+                // Add duration to startTime
+                ae.duration.startTime += d.duration;
+
+                // Fade by 5 ActivePoints
+                ae.flags.activePoints -= 5;
+                content += `${actor.name}: ${ae.name} fades by 5 active points.`;
+
+                let value = parseInt(ae.changes[0].value);
+                let XMLID = ae.flags.XMLID;
+                let target = ae.flags.target;
+                let source = ae.flags.source;
+                let ActivePoints = ae.flags.activePoints;
+                let costPerPoint = parseInt(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
+                let newLevels = parseInt(ActivePoints / costPerPoint);
+                ae.changes[0].value = XMLID === "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels);
+                ae.name = `${XMLID} ${newLevels} ${target.toUpperCase()} from ${source}`;
+
+                // If ActivePoints <= 0 then remove effect
+                if (ae.flags.activePoints <= 0) {
+                    content += `  Effect deleted.`;
+                    await ae.delete();
+                } else {
+                    await ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags })
+                }
+
+                // DRAIN fade (increase VALUE)
+                if (XMLID === "DRAIN") {
+                    let delta = -value - newLevels;
+                    let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value) + delta);
+                    await actor.update({ [`system.characteristics.${target}.value`]: newValue })
+                }
+
+                // AID fade (VALUE = max)
+                if (XMLID === "AID") {
+                    let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
+                    await actor.update({ [`system.characteristics.${target}.value`]: newValue })
+                }
+
+
+
+            }
+            console.log(ae, d);
+
+            if (content) {
+                const chatData = {
+                    user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
+                    whisper: ChatMessage.getWhisperRecipients("GM"),
+                    speaker: ChatMessage.getSpeaker({ actor: this }),
+                    blind: true,
+                    content: content,
+                }
+                await ChatMessage.create(chatData)
+            }
+        }
+    }
+
+
 });

@@ -702,25 +702,35 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
         let prevEffect = token.actor.effects.find(o => o.origin == item.actor.uuid)
         if (prevEffect) {
 
-            // Maximum Effect
+            // Maximum Effect (ActivePoints)
             let maxEffect = 0
             for (let term of JSON.parse(damageData.terms)) {
                 maxEffect += (parseInt(term.faces) * parseInt(term.number) || 0)
             }
-            maxEffect = parseInt(maxEffect / costPerPoint);
+            //maxEffect = parseInt(maxEffect / costPerPoint);
 
-            let newLevels = levels + Math.abs(parseInt(prevEffect.changes[0].value))
-            if (newLevels > maxEffect) {
-                levels = maxEffect - Math.abs(parseInt(prevEffect.changes[0].value));
-                newLevels = maxEffect;
-                //effectsFinal = `maximum effect`
+            let newActivePoints = (prevEffect.flags?.activePoints || 0) + ActivePoints;
+            if (newActivePoints > maxEffect) {
+                ActivePoints = maxEffect - prevEffect.flags.ActivePoints;
+                newActivePoints = maxEffect;
             }
+
+            let newLevels = newActivePoints / costPerPoint;
+            levels = newLevels - Math.abs(parseInt(prevEffect.changes[0].value));
+
+            //let newLevels = levels + Math.abs(parseInt(prevEffect.changes[0].value))
+            // if (newLevels > maxEffect) {
+            //     levels = maxEffect - Math.abs(parseInt(prevEffect.changes[0].value));
+            //     newLevels = maxEffect;
+            //     //effectsFinal = `maximum effect`
+            // }
 
             prevEffect.changes[0].value = item.system.XMLID == "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels),
 
             prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
+            prevEffect.flags.activePoints = newActivePoints;
 
-            prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
+            prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes, flags: prevEffect.flags })
 
         } else {
             // Create new ActiveEffect
@@ -740,7 +750,10 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
                     seconds: 12,
                 },
                 flags: {
-                    fade: true
+                    activePoints: ActivePoints,
+                    XMLID: item.system.XMLID,
+                    source: item.actor.name,
+                    target: key,
                 },
                 origin: item.actor.uuid
             }
