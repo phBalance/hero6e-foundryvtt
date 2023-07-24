@@ -1,6 +1,6 @@
 # Version 3.0.10
 - Temporary changes to CHARACTERISTIC MAX have red/green backgrounds on character sheet, similar to how VALUE background turns red/green.
-- Combat tracker now advances time.  Confirmed compatibility with Simple Calandar.
+- Combat tracker now advances time.  Confirmed compatibility with Simple Calandar. [#213](https://github.com/dmdorman/hero6e-foundryvtt/issues/213)
 - Improved AID and DRAIN support. [#185](https://github.com/dmdorman/hero6e-foundryvtt/issues/185)
 
 # Version 3.0.9
