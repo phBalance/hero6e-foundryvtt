@@ -563,7 +563,6 @@ Hooks.on("renderTokenConfig", extendTokenConfig);
  * @param {string} userId         The ID of the User who advanced the time
  */
 Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
-    console.log(worldTime, options, userId)
 
     for (let actor of game.actors) {
         const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
@@ -572,7 +571,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
             let content = "";
 
             let d = ae._prepareDuration();
-            if (d.remaining <= 0) {
+            if (d.remaining != null && d.remaining <= 0) {
                 // Add duration to startTime
                 ae.duration.startTime += d.duration;
 
@@ -610,11 +609,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
                     await actor.update({ [`system.characteristics.${target}.value`]: newValue })
                 }
-
-
-
             }
-            console.log(ae, d);
 
             if (content) {
                 const chatData = {
