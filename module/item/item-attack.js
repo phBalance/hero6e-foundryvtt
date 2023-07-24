@@ -699,7 +699,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
         levels = parseInt(ActivePoints / costPerPoint)
 
         // Check for previous ADJUSTMENT from same source
-        let prevEffect = token.actor.effects.find(o => o.origin == item.actor.uuid)
+        let prevEffect = token.actor.effects.find(o => o.origin === item.actor.uuid && o.flags?.XMLID === item.system.XMLID)
         if (prevEffect) {
 
             // Maximum Effect (ActivePoints)
