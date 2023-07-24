@@ -153,7 +153,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // Charges
             if (parseInt(item.system.charges?.max || 0) > 0) {
                 const costsEnd = item.system.modifiers.find(o => o.XMLID == "COSTSEND")
-                if (item.system.endEstimate  === 0 || !costsEnd) item.system.endEstimate = "";
+                if (item.system.endEstimate === 0 || !costsEnd) item.system.endEstimate = "";
                 item.system.endEstimate += ` [${parseInt(item.system.charges?.value || 0)}${item.system.charges?.recoverable ? "rc" : ""}]`;
                 item.system.endEstimate = item.system.endEstimate.trim();
             }
@@ -351,8 +351,18 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             ary = []
             activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.max`));
+            characteristic.delta = 0;
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
+                if (ae._prepareDuration().duration) {
+                    let change = ae.changes.find(o => o.key === `system.characteristics.${key}.max`)
+                    if (change.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
+                        characteristic.delta += parseInt(change.value);
+                    }
+                    if (change.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY) {
+                        characteristic.delta += (parseInt(characteristic.max) * parseInt(change.value)) - parseInt(characteristic.max);
+                    }
+                }
             }
             if (ary.length > 0) {
                 characteristic.maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";

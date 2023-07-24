@@ -39,6 +39,8 @@ export class HeroSystem6eCombat extends Combat {
             if (!combatant?.isOwner) return this;
             //if (combatant.hasRolled) continue;
 
+            if (!combatant.actor) continue;
+
             // Produce an initiative roll for the Combatant
             let dexValue = combatant.actor.system.characteristics.dex.value
             let intValue = combatant.actor.system.characteristics.int.value
@@ -79,6 +81,7 @@ export class HeroSystem6eCombat extends Combat {
 
             // Lightning Reflexes
             const actor = game.actors.get(combatant.actorId);
+            if (!actor) continue; // Not sure how this could happen
             const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE");
             if (item) {
                 const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
@@ -110,6 +113,10 @@ export class HeroSystem6eCombat extends Combat {
         for (let s = 1; s <= 12; s++) {
             this.segments[s] = []
             for (let t = 0; t < turnsRaw.length; t++) {
+                if (!turnsRaw[t].actor) {
+                    //ui.notifications.warn(`${turnsRaw[t].name} references an Actor which no longer exists within the World.`);
+                    continue;
+                }
                 if (HeroSystem6eCombat.hasPhase(turnsRaw[t].actor.system.characteristics.spd.value, s)) {
                     let combatant = new HeroCombatant(turnsRaw[t])
                     combatant.turn = turns.length;
@@ -246,14 +253,29 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    async _onCreateDescendantDocuments(...args) {
+    async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
         //console.log("_onCreateDescendantDocuments");
+
+
+        //Missing actor?
+        let missingActors = documents.filter(o=> !o.actor)
+        {
+            for(let c of missingActors)
+            {
+                ui.notifications.warn(`${c.name} references an Actor which no longer exists within the World.`);
+            }
+        }
+
+        documents = documents.filter(o=> o.actor)
+        if (documents.length === 0) return;
+
 
         // Get current combatant
         const current = this.combatant;
 
+
         // Super
-        await super._onCreateDescendantDocuments(...args);
+        await super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
 
         // Setup turns in segment fashion
         this.setupTurns();
@@ -310,13 +332,25 @@ export class HeroSystem6eCombat extends Combat {
         // Setup turns in segment fashion
         this.setupTurns();
 
+        const updateData = {};
+
         // If activeTurn == -1 then combat has not begun
         if (activeTurn > -1) {
             // There is an edge case where the last combatant of the round is deleted.
             activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-            await this.update({ turn: activeTurn });
+            //await this.update({ turn: activeTurn });
+            updateData.turn = activeTurn;
 
         }
+
+        // Determine segement
+        let segment_prev = current.segment;
+        let segment = this.combatant.segment;
+        let advanceTime = segment - segment_prev;
+
+        const updateOptions = { advanceTime, direction: 1 };
+        //Hooks.callAll("combatTurn", this, updateData, updateOptions);
+        await this.update(updateData, updateOptions);
 
         // Render the collection
         if (this.active) this.collection.render();
@@ -541,8 +575,16 @@ export class HeroSystem6eCombat extends Combat {
             return this.previousRound();
         }
 
-        let advanceTime = -1 * CONFIG.time.turnTime;
+
         let previousTurn = (this.turn ?? this.turns.length) - 1;
+
+        // Determine segement
+        let segment = this.combatant.segment;
+        let segment_prev = this.turns[previousTurn].segment;
+        let advanceTime = segment_prev - segment;
+        if (advanceTime > 0) {
+            advanceTime = 0;
+        }
 
         // Update the document, passing data through a hook first
         const updateData = { round: this.round, turn: previousTurn };
@@ -562,8 +604,16 @@ export class HeroSystem6eCombat extends Combat {
         let turn = (this.round === 0) ? 0 : Math.max(this.turns.length - 1, 0);
         if (this.turn === null) turn = null;
         let round = Math.max(this.round - 1, 0);
-        let advanceTime = -1 * (this.turn || 0) * CONFIG.time.turnTime;
-        if (round > 0) advanceTime -= CONFIG.time.roundTime;
+        //let advanceTime = -1 * (this.turn || 0) * CONFIG.time.turnTime;
+        //if (round > 0) advanceTime -= HERO.time.turn; //CONFIG.time.roundTime;
+
+        // Determine segement
+        let segment = this.combatant.segment;
+        let segment_prev = this.turns[turn].segment;
+        if (round > 0) {
+            segment += 12;
+        }
+        let advanceTime = segment_prev - segment;
 
         // Hero combats start with round 1 and segment 12.
         // So anything less than segment 12 will call previousTurn
@@ -580,6 +630,83 @@ export class HeroSystem6eCombat extends Combat {
         // Update the document, passing data through a hook first
         const updateData = { round, turn };
         const updateOptions = { advanceTime, direction: -1 };
+        Hooks.callAll("combatRound", this, updateData, updateOptions);
+        return this.update(updateData, updateOptions);
+    }
+
+
+    /**
+   * Advance the combat to the next turn
+   * @returns {Promise<Combat>}
+   */
+    async nextTurn() {
+        let turn = this.turn ?? -1;
+        let skip = this.settings.skipDefeated;
+
+        // Determine the next turn number
+        let next = null;
+        if (skip) {
+            for (let [i, t] of this.turns.entries()) {
+                if (i <= turn) continue;
+                if (t.isDefeated) continue;
+                next = i;
+                break;
+            }
+        }
+        else next = turn + 1;
+
+        // Maybe advance to the next round
+        let round = this.round;
+        if ((this.round === 0) || (next === null) || (next >= this.turns.length)) {
+            return this.nextRound();
+        }
+
+        // Determine segement
+        let segment = this.combatant.segment;
+        let segment_next = this.turns[next].segment;
+        if (segment_next < segment) {
+            segment_next += 12;
+        }
+        let advanceTime = segment_next - segment;
+
+        // Update the document, passing data through a hook first
+        const updateData = { round, turn: next };
+        const updateOptions = { advanceTime: advanceTime, direction: 1 };
+        Hooks.callAll("combatTurn", this, updateData, updateOptions);
+        return this.update(updateData, updateOptions);
+    }
+
+
+
+    /**
+   * Advance the combat to the next round
+   * @returns {Promise<Combat>}
+   */
+    async nextRound() {
+        let turn = this.turn === null ? null : 0; // Preserve the fact that it's no-one's turn currently.
+        if (this.settings.skipDefeated && (turn !== null)) {
+            turn = this.turns.findIndex(t => !t.isDefeated);
+            if (turn === -1) {
+                ui.notifications.warn("COMBAT.NoneRemaining", { localize: true });
+                turn = 0;
+            }
+        }
+        //let advanceTime = Math.max(this.turns.length - this.turn, 0) * CONFIG.time.turnTime;
+        //advanceTime += HERO.time.turn; //CONFIG.time.roundTime;
+        let nextRound = this.round + 1;
+
+        // Determine segement
+        let segment = this.combatant.segment;
+        let segment_next = this.turns[0].segment;
+        //if (segment_next < segment) {
+        segment_next += 12;
+        //}
+        let advanceTime = segment_next - segment;
+
+
+        // Update the document, passing data through a hook first
+        const updateData = { round: nextRound, turn };
+        const updateOptions = { advanceTime, direction: 1 };
         Hooks.callAll("combatRound", this, updateData, updateOptions);
         return this.update(updateData, updateOptions);
     }

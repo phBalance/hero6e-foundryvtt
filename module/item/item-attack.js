@@ -699,34 +699,45 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
         levels = parseInt(ActivePoints / costPerPoint)
 
         // Check for previous ADJUSTMENT from same source
-        let prevEffect = token.actor.effects.find(o => o.origin == item.actor.uuid)
+        let prevEffect = token.actor.effects.find(o => o.origin === item.actor.uuid && o.flags?.XMLID === item.system.XMLID)
         if (prevEffect) {
 
-            // Maximum Effect
+            // Maximum Effect (ActivePoints)
             let maxEffect = 0
             for (let term of JSON.parse(damageData.terms)) {
                 maxEffect += (parseInt(term.faces) * parseInt(term.number) || 0)
             }
-            maxEffect = parseInt(maxEffect / costPerPoint);
+            //maxEffect = parseInt(maxEffect / costPerPoint);
 
-            let newLevels = levels + parseInt(prevEffect.changes[0].value)
-            if (newLevels > maxEffect) {
-                levels = maxEffect - parseInt(prevEffect.changes[0].value);
-                newLevels = maxEffect;
-                //effectsFinal = `maximum effect`
+            let newActivePoints = (prevEffect.flags?.activePoints || 0) + ActivePoints;
+            if (newActivePoints > maxEffect) {
+                ActivePoints = maxEffect - prevEffect.flags.ActivePoints;
+                newActivePoints = maxEffect;
             }
 
-            prevEffect.changes[0].value = newLevels
+            let newLevels = newActivePoints / costPerPoint;
+            levels = newLevels - Math.abs(parseInt(prevEffect.changes[0].value));
+
+            //let newLevels = levels + Math.abs(parseInt(prevEffect.changes[0].value))
+            // if (newLevels > maxEffect) {
+            //     levels = maxEffect - Math.abs(parseInt(prevEffect.changes[0].value));
+            //     newLevels = maxEffect;
+            //     //effectsFinal = `maximum effect`
+            // }
+
+            prevEffect.changes[0].value = item.system.XMLID == "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels),
 
             prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
+            prevEffect.flags.activePoints = newActivePoints;
 
-            prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes })
+            prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes, flags: prevEffect.flags })
 
         } else {
             // Create new ActiveEffect
             let activeEffect =
             {
-                label: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                name: `${item.system.XMLID} ${levels} ${key.toUpperCase()} from ${item.actor.name}`,
+                id: `${item.system.XMLID}.${item.id}`,
                 icon: item.img,
                 changes: [
                     {
@@ -735,10 +746,18 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
                     }
                 ],
+                duration: {
+                    seconds: 12,
+                },
+                flags: {
+                    activePoints: ActivePoints,
+                    XMLID: item.system.XMLID,
+                    source: item.actor.name,
+                    target: key,
+                },
                 origin: item.actor.uuid
             }
-            token.actor.addActiveEffect(activeEffect);
-
+            await token.actor.addActiveEffect(activeEffect);
 
         }
 
