@@ -999,14 +999,3 @@ HERO.knockbackMultiplier = {
     1: "Knockback",
     2: "Double Knockback"
 }
-
-// The basic time frame of combat is the Turn,
-// divided into 12 one-second sections called
-// Segments.
-// Internally a HERO.turn is using round code.
-// Internally a HERO.segment is loosely attached to a turn.
-
-HERO.time = {
-    segment: 1,
-    turn: 12,
-}
