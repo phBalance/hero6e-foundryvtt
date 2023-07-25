@@ -402,7 +402,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         defense.dnp = damageNegationValue
         defense.dnptags = "Damage Negation (physical)"
 
-
         // Defense ED
         let edAttack = {
             system: {
@@ -450,6 +449,26 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         defense.dretags = "Damage Reduction (mental)"
         defense.dnm = damageNegationValueM
         defense.dnmtags = "Damage Negation (mental)"
+
+        // Defense POWD
+        let drainAttack = {
+            system: {
+                class: "drain"
+            }
+        }
+        let [defenseValuePOWD, resistantValuePOWD, impenetrableValuePOWD, damageReductionValuePOWD, damageNegationValuePOWD, knockbackResistancePOWD, defenseTagsPOWD] = determineDefense.call(this, this.actor, drainAttack)
+        defense.POWD = defenseValuePOWD
+        defense.rPOWD = resistantValuePOWD
+        defense.POWDtags = "";
+        defense.rPOWDtags = "";
+        for (let tag of defenseTagsPOWD) {
+            if (tag.resistant) {
+                defense.rPOWDtags += `${tag.value} ${tag.title}\n`
+            }
+            else if (tag.resistant != undefined) {
+                defense.POWDtags += `${tag.value} ${tag.title}\n`
+            }
+        }
 
         data.defense = defense
 

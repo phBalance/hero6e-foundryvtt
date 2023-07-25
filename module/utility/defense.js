@@ -141,6 +141,16 @@ function determineDefense(targetActor, attackItem) {
                     }
                 }
 
+                if (!value && ["POWERDEFENSE"].includes(xmlid)) {
+                    switch (attackType) {
+                        case 'drain':
+                        i.system.defenseType = "powd"
+                        value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                        break;
+                    }
+                }
+
+
                 if (!value && ["MENTALDEFENSE"].includes(xmlid)) {
                     switch (attackType) {
                         case 'mental':
