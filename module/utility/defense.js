@@ -45,15 +45,13 @@ function determineDefense(targetActor, attackItem) {
 
     // PD bought as resistant
     for (const item of targetActor.items.filter(o => o.system.XMLID == "PD" && o.system.active)) {
-        if (item.system.modifiers.find(o=> o.XMLID == 'RESISTANT'))
-        {
+        if (item.system.modifiers.find(o => o.XMLID == 'RESISTANT')) {
             const levels = parseInt(item.system.LEVELS.value) || 0
             PD -= levels
             rPD += levels
         }
 
-        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes")
-        {
+        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes") {
             PD -= targetActor.system.characteristics.pd.core;
             rPD += targetActor.system.characteristics.pd.core;
         }
@@ -61,15 +59,13 @@ function determineDefense(targetActor, attackItem) {
 
     // ED bought as resistant
     for (const item of targetActor.items.filter(o => o.system.XMLID == "ED" && o.system.active)) {
-        if (item.system.modifiers.find(o=> o.XMLID == 'RESISTANT'))
-        {
+        if (item.system.modifiers.find(o => o.XMLID == 'RESISTANT')) {
             const levels = parseInt(item.system.LEVELS.value) || 0
             ED -= levels
             rED += levels
         }
 
-        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes")
-        {
+        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes") {
             ED -= targetActor.system.characteristics.ed.core;
             rED += targetActor.system.characteristics.ed.core;
         }
@@ -134,6 +130,7 @@ function determineDefense(targetActor, attackItem) {
                             i.system.resistant = true
                             break;
                         case 'drain':
+                        case 'transfer':
                             i.system.defenseType = "powd"
                             value = parseInt(i.system.POWDLEVELS) || 0
                             i.system.resistant = true
@@ -144,9 +141,10 @@ function determineDefense(targetActor, attackItem) {
                 if (!value && ["POWERDEFENSE"].includes(xmlid)) {
                     switch (attackType) {
                         case 'drain':
-                        i.system.defenseType = "powd"
-                        value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
-                        break;
+                        case 'transfer':
+                            i.system.defenseType = "powd"
+                            value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                            break;
                     }
                 }
 
@@ -154,9 +152,9 @@ function determineDefense(targetActor, attackItem) {
                 if (!value && ["MENTALDEFENSE"].includes(xmlid)) {
                     switch (attackType) {
                         case 'mental':
-                        i.system.defenseType = "md"
-                        value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
-                        break;
+                            i.system.defenseType = "md"
+                            value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                            break;
                     }
                 }
 
@@ -260,7 +258,7 @@ function determineDefense(targetActor, attackItem) {
                         break;
                     case "powd": // Power Defense
                         POWD += valueAp
-                        if (attackType === 'drain') {
+                        if (["drain", "transfer"].includes(attackType)) {
                             defenseTags.push({ name: 'POWD', value: valueAp, resistant: false, title: i.name })
                             impenetrableValue += valueImp
                         }
@@ -288,7 +286,7 @@ function determineDefense(targetActor, attackItem) {
                         break;
                     case "rpowd": // Resistant Power Defense
                         rPOWD += valueAp
-                        if (attackType === 'drain') {
+                        if (["drain", "transfer"].includes(attackType)) {
                             defenseTags.push({ name: 'rPOWD', value: valueAp, resistant: true, title: i.name })
                             impenetrableValue += valueImp
                         }
@@ -358,6 +356,7 @@ function determineDefense(targetActor, attackItem) {
             break;
 
         case 'drain':
+        case 'transfer':
             defenseValue = POWD;
             resistantValue = rPOWD;
             impenetrableValue = Math.max(POWD, rPOWD);

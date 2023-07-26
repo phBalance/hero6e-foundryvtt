@@ -636,9 +636,29 @@ export function XmlToItemData(xml, type) {
     if (configPowerInfo && configPowerInfo.powerType.includes("adjustment")) {
         // Make sure we have a valid INPUT
         let choices = AdjustmentSources()
-        systemData.INPUT = (systemData.INPUT || "").toUpperCase().trim()
-        if (!choices[systemData.INPUT] || systemData.INPUT == "") {
-            ui.notifications.warn(`${systemData.XMLID} adjustment of source ${systemData.INPUT || "UNDEFINED"} not supported.`)
+        systemData.INPUT = (systemData.INPUT || "").trim()
+
+        // TRANSFER X to Y  (AID and DRAIN only have X)
+        let xmlidX = systemData.INPUT.match(/\w+/)[0];
+        let xmlidY = (systemData.INPUT.match(/to[ ]+(\w+)/i)||["",""])[1];
+
+        // Uppercase
+        systemData.INPUT = xmlidX.toUpperCase();
+        xmlidX = xmlidX.toUpperCase();
+
+        if (xmlidY)
+        {
+            systemData.INPUT += " to " + xmlidY.toUpperCase();
+            xmlidY = xmlidY.toUpperCase();
+        }
+
+
+        if (!choices[xmlidX] || xmlidX == "") {
+            ui.notifications.warn(`${systemData.XMLID} adjustment of source ${xmlidX || "UNDEFINED"} not supported.`)
+        }
+
+        if (systemData.XMLID === "TRANSFER" && (!choices[xmlidY] || xmlidY == "")) {
+            ui.notifications.warn(`${systemData.XMLID} adjustment of destination ${xmlidX || "UNDEFINED"} not supported.`)
         }
     }
 

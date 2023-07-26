@@ -2,6 +2,7 @@
 - Drag Ruler units now match grid units of the scene. [#225](https://github.com/dmdorman/hero6e-foundryvtt/issues/225)
 - POWER DEFENSE works vs DRAIN.
 - DELAYED RETURN RATE works vs AID/DRAIN.
+- Initial TRANSFER (5e) support.
 
 # Version 3.0.10
 - Temporary changes to CHARACTERISTIC MAX have red/green backgrounds on character sheet, similar to how VALUE background turns red/green.
