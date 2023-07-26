@@ -734,8 +734,8 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 
         // Check for previous ADJUSTMENT from same source
         // TODO: Variable Effect may result in multiple changes on same AE.
-        let prevEffectX = token.actor.effects.find(o => o.origin === item.uuid); // && o.flags?.keyX === keyX)
-        let prevEffectY = item.actor.effects.find(o => o.origin === item.uuid); // && o.flags?.keyY === keyY)
+        let prevEffectX = token.actor.effects.find(o => o.flags?.XMLID === item.system.XMLID && o.flags?.keyX === keyX)
+        let prevEffectY = item.actor.effects.find(o => o.flags?.XMLID === item.system.XMLID && o.flags?.keyY === keyY)
         if (prevEffectX) {
 
             // Maximum Effect (ActivePoints)
