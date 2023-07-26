@@ -22,16 +22,16 @@
 
   {{#if (eq item.system.XMLID "TRANSFER")}}
   from {{xmlidX}} to {{xmlidY}}.
-  {{targetToken.actor.name}} lost {{levelsX}} {{xmlidX}}.  {{item.actor.name}} gained {{levelsY}} {{xmlidY}}.
+  {{targetToken.actor.name}} lost {{abs levelsX}} {{xmlidX}}.  {{item.actor.name}} gained {{levelsY}} {{xmlidY}}.
   {{else}}
 
-  to {{item.system.INPUT}}. {{item.system.INPUT}}
+  to {{xmlidX}}. {{targetToken.actor.name}}
 
-  {{#if (eq item.system.XMLID "DRAIN")}}
-  decreased
+  {{#if (gte levelsX 0)}}
+  gained 
   {{else}}
-  increased
-  {{/if}} by {{levels}} levels.
+  lost
+  {{/if}} {{abs levelsX}} {{xmlidX}}.
 
   {{/if}}
 

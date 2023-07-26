@@ -19,6 +19,10 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper('indexOf', function (string, searchTerm) {
         return string.indexOf(searchTerm)
     });
+
+    Handlebars.registerHelper('abs', function (string) {;
+        return Math.abs(parseInt(string))
+    });
     
 
 }

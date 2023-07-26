@@ -859,8 +859,8 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 
         // stun
         stunDamage: ActivePoints,
-        levelsX: levelsX,
-        levelsY: levelsY,
+        levelsX: ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX),
+        levelsY: parseInt(levelsY),
         xmlidX: xmlidX,
         xmlidY: xmlidY,
 
