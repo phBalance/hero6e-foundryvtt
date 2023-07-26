@@ -405,6 +405,10 @@ export async function _onRollDamage(event) {
 
     damageRoll = simplifyDamageRoll(damageRoll)
 
+    if (!damageRoll) {
+        return ui.notifications.error(`${item.name} damage roll is undefined.`);
+    }
+
     let roll = new Roll(damageRoll, actor.getRollData());
     let damageResult = await roll.roll({ async: true });
     let damageRenderedResult = await damageResult.render();
@@ -545,12 +549,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
     let newRoll = Roll.fromTerms(newTerms)
 
-    // AID, DRAIN or any adjustmnet powers
-    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
-    if (adjustment) {
-        return _onApplyAdjustmentToSpecificToken(event, tokenId)
-    }
+
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
@@ -580,6 +579,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // We need to recalcuate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(newRoll, item, damageData)
+
+    // AID, DRAIN or any adjustmnet powers
+    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+    if (adjustment) {
+        return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense)
+    }
 
     // check if target is stunned
     if (game.settings.get("hero6efoundryvttv2", "stunned")) {
@@ -674,9 +680,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
 }
 
-async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
+async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense) {
     const button = event.currentTarget;
-    const damageData = { ...button.dataset }
+    //const damageData = { ...button.dataset }
     const item = fromUuidSync(damageData.itemid)
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
@@ -689,12 +695,19 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
     const token = canvas.tokens.get(tokenId)
 
     let levels = 0
+    let ActivePoints = parseInt(damageData.stundamage);
 
     // Apply the ADJUSTMENT to a CHARACTERISTIC
     let key = (item.system.INPUT || "").toLowerCase()
     if (key && token.actor.system.characteristics[key]) {
         const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
-        let ActivePoints = parseInt(damageData.stundamage)
+
+
+        // Power Defense vs DRAIN
+        if (item.system.XMLID === "DRAIN") {
+            ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
+        }
+
         let costPerPoint = parseInt(characteristicCosts[key]) * AdjustmentMultiplier(key.toUpperCase());
         levels = parseInt(ActivePoints / costPerPoint)
 
@@ -727,7 +740,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
 
             prevEffect.changes[0].value = item.system.XMLID == "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels),
 
-            prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
+                prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
             prevEffect.flags.activePoints = newActivePoints;
 
             prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes, flags: prevEffect.flags })
@@ -757,7 +770,33 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
                 },
                 origin: item.actor.uuid
             }
-            await token.actor.addActiveEffect(activeEffect);
+
+            // DELAYEDRETURNRATE
+            let delayedReurnRate = item.system.modifiers.find(o=> o.XMLID === "DELAYEDRETURNRATE");
+            if (delayedReurnRate) {
+                switch (delayedReurnRate.OPTIONID)
+                {
+                    case "MINUTE": activeEffect.duration.seconds = 60; break;
+                    case "FIVEMINUTES": activeEffect.duration.seconds = 60 * 5; break;
+                    case "20MINUTES": activeEffect.duration.seconds = 60 * 20; break;
+                    case "HOUR": activeEffect.duration.seconds = 60 * 60; break;
+                    case "6HOURS": activeEffect.duration.seconds = 60 * 60 * 6; break;
+                    case "DAY": activeEffect.duration.seconds = 60 * 60 * 24; break;
+                    case "WEEK": activeEffect.duration.seconds = 604800; break;
+                    case "MONTH": activeEffect.duration.seconds = 2.628e+6; break;
+                    case "SEASON": activeEffect.duration.seconds = 2.628e+6 * 3; break;
+                    case "YEAR": activeEffect.duration.seconds = 3.154e+7; break;
+                    case "FIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 5; break;
+                    case "TWENTYFIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 25; break;
+                    case "CENTURY": activeEffect.duration.seconds = 3.154e+7 * 100; break;
+                    default: await ui.notifications.error(`DELAYEDRETURNRATE has unhandled option ${delayedReurnRate?.OPTIONID}`);
+                }
+                console.log(delayedReurnRate);
+            }
+
+            if (ActivePoints > 0) {
+                await token.actor.addActiveEffect(activeEffect);
+            }
 
         }
 
@@ -773,11 +812,15 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId) {
         // dice rolls
 
         // stun
-        stunDamage: damageData.stundamage,
+        stunDamage: ActivePoints,
         levels: levels,
 
         // effects
         //effects: effectsFinal,
+
+
+        // defense
+        defense: defense,
 
         // misc
         targetToken: token

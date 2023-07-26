@@ -573,16 +573,23 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
         const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
         for (let ae of actor.temporaryEffects) {
-            let content = "";
 
+
+            let fade = 0;
+            let name = ae.name;
+
+            // With Simple Calendar you can move time ahead in large steps.
+            // Need to loop as multiple fades may be required.
             let d = ae._prepareDuration();
-            if (d.remaining != null && d.remaining <= 0) {
+            while (d.remaining != null && d.remaining <= 0) {
                 // Add duration to startTime
                 ae.duration.startTime += d.duration;
 
                 // Fade by 5 ActivePoints
-                ae.flags.activePoints -= 5;
-                content += `${actor.name}: ${ae.name} fades by 5 active points.`;
+                let _fade = Math.min(ae.flags.activePoints, 5);
+                ae.flags.activePoints -= _fade;
+                fade += _fade;
+
 
                 let value = parseInt(ae.changes[0].value);
                 let XMLID = ae.flags.XMLID;
@@ -596,10 +603,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
                 // If ActivePoints <= 0 then remove effect
                 if (ae.flags.activePoints <= 0) {
-                    content += `  Effect deleted.`;
+                    //content += `  Effect deleted.`;
                     await ae.delete();
                 } else {
-                    await ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags })
+                    await ae.update({ name: ae.name, changes: ae.changes, duration: ae.duration, flags: ae.flags })
                 }
 
                 // DRAIN fade (increase VALUE)
@@ -614,9 +621,18 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
                     await actor.update({ [`system.characteristics.${target}.value`]: newValue })
                 }
+
+                if (ae.flags.activePoints <= 0) break;
+                d = ae._prepareDuration();
             }
 
-            if (content) {
+
+            if (fade) {
+                let content = `${actor.name}: ${name} fades by ${fade} active points.`;
+                if (ae.flags.activePoints <= 0) {
+                    content += `  Effect deleted.`;
+                }
+
                 const chatData = {
                     user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
                     whisper: ChatMessage.getWhisperRecipients("GM"),
@@ -626,6 +642,8 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 }
                 await ChatMessage.create(chatData)
             }
+
+
         }
     }
 
