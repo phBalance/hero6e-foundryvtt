@@ -3,6 +3,7 @@
 - Initial TRANSFER (5e) support. [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)
 - POWER DEFENSE works vs DRAIN/TRANSFER.
 - DELAYED RETURN RATE works vs AID/DRAIN/TRANSFER.
+- Initial REQUIRES A ROLL support.  [#53](https://github.com/dmdorman/hero6e-foundryvtt/issues/53) [#49](https://github.com/dmdorman/hero6e-foundryvtt/issues/49)
 
 
 # Version 3.0.10

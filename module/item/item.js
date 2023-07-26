@@ -123,7 +123,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     async roll() {
-        //if (!this.isRollable()) return;
+
+        const success = await RequiresASkillRollCheck(this);
+        if (!success) {
+            return;
+        }
+
+
 
         switch (this.system.subType || this.type) {
             case "attack":
@@ -200,7 +206,16 @@ export class HeroSystem6eItem extends Item {
     }
 
     async toggle() {
-        let item = this
+        let item = this;
+
+        if (!item.system.active) {
+            const success = await RequiresASkillRollCheck(this);
+            if (!success) {
+                return;
+            }
+        }
+
+
         const attr = 'system.active'
         const newValue = !getProperty(item, attr)
         // await item.update({ [attr]: newValue })
@@ -347,4 +362,76 @@ async function updateCombatAutoMod(actor, item) {
     await actor.update(changes)
 
 
+}
+
+async function RequiresASkillRollCheck(item) {
+    let rar = item.system.modifiers.find(o => o.XMLID === "REQUIRESASKILLROLL");
+    if (rar) {
+
+        let rollEquation = "3d6";
+        let roll = new Roll(rollEquation, item.getRollData());
+
+        let result = await roll.evaluate({ async: true });
+
+        let OPTION_ALIAS = rar.OPTION_ALIAS
+
+        // Requires A Roll (generic) default to 11
+        let value = parseInt(rar.OPTIONID)
+
+        switch (rar.OPTIONID) {
+            case "SKILL":
+            case "SKILL1PER5":
+            case "SKILL1PER20":
+                OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
+                let skill = item.actor.items.find(o => o.system.XMLID === OPTION_ALIAS.toUpperCase() || o.name.toUpperCase() === OPTION_ALIAS.toUpperCase());
+                if (skill) {
+                    value = parseInt(skill.system.roll);
+                    if (rar.OPTIONID === "SKILL1PER5") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints)/5))
+                    if (rar.OPTIONID === "SKILL1PER20") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints)/20))
+
+                    OPTION_ALIAS += ` ${value}-`;
+                } else {
+                    ui.notifications.warn(`Expecting 'SKILL roll', where SKILL is the name of an owned skill.`);
+                }
+                break;
+
+
+            case "CHAR":
+                OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
+                if (item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()]) {
+                    value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
+                    OPTION_ALIAS += ` ${value}-`;
+                } else {
+                    ui.notifications.warn(`Expecting 'CHAR roll', where CHAR is the name of a characteristic.`);
+                }
+                break;
+
+
+
+            default:
+                if (!value) {
+                    ui.notifications.warn(`${OPTION_ALIAS} is not supported.`);
+                }
+        }
+
+
+        let margin = parseInt(value) - result.total;
+
+        let flavor = item.name.toUpperCase() + " (" + OPTION_ALIAS + ") ";
+        if (value > 0) {
+            flavor += (margin >= 0 ? "succeeded" : "failed") + " by " + Math.abs(margin);
+        }
+
+        result.toMessage({
+            speaker: ChatMessage.getSpeaker({ actor: item.actor }),
+            flavor: flavor,
+            borderColor: margin >= 0 ? 0x00FF00 : 0xFF0000,
+        });
+
+        if (margin < 0) {
+            return false;
+        }
+
+    }
+    return true;
 }
