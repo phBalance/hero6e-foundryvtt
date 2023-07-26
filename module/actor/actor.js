@@ -171,7 +171,7 @@ export class HeroSystem6eActor extends Actor {
 
         //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
 
-        if (options.hideChatMessage) return;
+        if (options.hideChatMessage || !options.render) return;
 
         let content = "";
 

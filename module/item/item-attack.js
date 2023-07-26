@@ -697,14 +697,18 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
     let levels = 0
     let ActivePoints = parseInt(damageData.stundamage);
 
+    // TRANSFER X to Y  (AID and DRAIN only have X)
+    let xmlidX = item.system.INPUT.match(/\w+/)[0];
+    let xmlidY = (item.system.INPUT.match(/to (\w+)/i)||["",""])[1];
+
     // Apply the ADJUSTMENT to a CHARACTERISTIC
-    let key = (item.system.INPUT || "").toLowerCase()
+    let key = (xmlidX).toLowerCase()
     if (key && token.actor.system.characteristics[key]) {
         const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
 
         // Power Defense vs DRAIN
-        if (item.system.XMLID === "DRAIN") {
+        if (["DRAIN", "TRANSFER"].includes(item.system.XMLID)) {
             ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
         }
 
@@ -738,9 +742,8 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             //     //effectsFinal = `maximum effect`
             // }
 
-            prevEffect.changes[0].value = item.system.XMLID == "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels),
-
-                prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
+            prevEffect.changes[0].value = item.system.XMLID == "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels);
+            prevEffect.name = `${item.system.XMLID} ${newLevels} ${key.toUpperCase()} from ${item.actor.name}`;
             prevEffect.flags.activePoints = newActivePoints;
 
             prevEffect.update({ name: prevEffect.name, changes: prevEffect.changes, flags: prevEffect.flags })
@@ -755,7 +758,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
                 changes: [
                     {
                         key: "system.characteristics." + key + ".max",
-                        value: item.system.XMLID == "DRAIN" ? -parseInt(levels) : parseInt(levels),
+                        value: ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levels) : parseInt(levels),
                         mode: CONST.ACTIVE_EFFECT_MODES.ADD
                     }
                 ],
@@ -772,10 +775,9 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             }
 
             // DELAYEDRETURNRATE
-            let delayedReurnRate = item.system.modifiers.find(o=> o.XMLID === "DELAYEDRETURNRATE");
+            let delayedReurnRate = item.system.modifiers.find(o => o.XMLID === "DELAYEDRETURNRATE");
             if (delayedReurnRate) {
-                switch (delayedReurnRate.OPTIONID)
-                {
+                switch (delayedReurnRate.OPTIONID) {
                     case "MINUTE": activeEffect.duration.seconds = 60; break;
                     case "FIVEMINUTES": activeEffect.duration.seconds = 60 * 5; break;
                     case "20MINUTES": activeEffect.duration.seconds = 60 * 20; break;
@@ -791,7 +793,6 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
                     case "CENTURY": activeEffect.duration.seconds = 3.154e+7 * 100; break;
                     default: await ui.notifications.error(`DELAYEDRETURNRATE has unhandled option ${delayedReurnRate?.OPTIONID}`);
                 }
-                console.log(delayedReurnRate);
             }
 
             if (ActivePoints > 0) {

@@ -41,7 +41,7 @@ export async function applyCharacterSheet(xmlDoc) {
         // Overwrite token name if PC
         if (this.token) {
             if (this.actor.type == 'pc') {
-                await this.token.update({ name: name })
+                await this.token.update({ name: name }, { hideChatMessage: true })
             }
         }
     }
@@ -67,16 +67,16 @@ export async function applyCharacterSheet(xmlDoc) {
         // No template defined, so we will assume if COM-liness exists it is 5E.
         if (characteristics.querySelector("COM")) {
             ui.notifications.warn(`Import is missing Hero Designer character template.  Assuming 5E.`)
-            this.actor.update({ 'system.is5e': true }, { render: false })
+            this.actor.update({ 'system.is5e': true }, { render: false }, { hideChatMessage: true })
         } else {
             ui.notifications.warn(`Import is missing Hero Designer character template.  Assuming 6E.`)
-            this.actor.update({ 'system.is5e': false }, { render: false })
+            this.actor.update({ 'system.is5e': false }, { render: false }, { hideChatMessage: true })
         }
     } else {
         if (characterTemplate && characterTemplate.includes("builtIn.") && !characterTemplate.includes("6E.")) {
-            this.actor.update({ 'system.is5e': true }, { render: false })
+            this.actor.update({ 'system.is5e': true }, { render: false }, { hideChatMessage: true })
         } else {
-            this.actor.update({ 'system.is5e': false }, { render: false })
+            this.actor.update({ 'system.is5e': false }, { render: false }, { hideChatMessage: true })
         }
     }
 
@@ -262,7 +262,7 @@ export async function applyCharacterSheet(xmlDoc) {
         figuredChanges[`system.characteristics.omcv.realCost`] = 0
         figuredChanges[`system.characteristics.dmcv.realCost`] = 0
 
-        await this.actor.update(figuredChanges, { render: false })
+        await this.actor.update(figuredChanges, { render: false }, { hideChatMessage: true })
     }
     else {
         // Confirm 6E
@@ -271,7 +271,7 @@ export async function applyCharacterSheet(xmlDoc) {
                 ui.notifications.warn(`Actor was incorrectly flagged as 5e.`)
                 console.log(`Actor was incorrectly flagged as 5e.`)
             }
-            await this.actor.update({ 'system.is5e': false }, { render: false })
+            await this.actor.update({ 'system.is5e': false }, { render: false }, { hideChatMessage: true })
         }
     }
 
@@ -386,7 +386,7 @@ export async function applyCharacterSheet(xmlDoc) {
         let path = "worlds/" + game.world.id
         if (this.actor.img.indexOf(filename) == -1) {
             await ImageHelper.uploadBase64(base64, filename, path)
-            await this.actor.update({ [`img`]: path + '/' + filename }, { render: false })
+            await this.actor.update({ [`img`]: path + '/' + filename }, { render: false }, { hideChatMessage: true })
         }
     }
 
@@ -469,7 +469,7 @@ export async function applyCharacterSheet(xmlDoc) {
             attacks[Object.keys(attacks)[0]] = true;
         }
 
-        await cslItem.update({ 'system.attacks': attacks });
+        await cslItem.update({ 'system.attacks': attacks }, { hideChatMessage: true });
     }
 
 
@@ -479,7 +479,7 @@ export async function applyCharacterSheet(xmlDoc) {
     // We may have applied ActiveEffectcs to MAX.
     for (let char of Object.keys(this.actor.system.characteristics)) {
         if (this.actor.system.characteristics[char].value != this.actor.system.characteristics[char].max) {
-            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, { render: false })
+            await this.actor.update({ [`system.characteristics.${char}.value`]: this.actor.system.characteristics[char].max }, { render: false }, { hideChatMessage: true });
         }
 
     }
@@ -529,7 +529,7 @@ async function CalcRealAndActivePoints(actor) {
         _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
     }
     //HEROSYS.log(false, _splitCost)
-    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false })
+    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false }, { hideChatMessage: true });
 }
 
 
@@ -2522,7 +2522,7 @@ export async function makeAttack(item) {
     }
 
     if (item._id) {
-        await item.update(changes)
+        await item.update(changes, { hideChatMessage: true })
     } else {
         // Likely a QUENCH test
         for (let change of Object.keys(changes)) {
@@ -2837,19 +2837,19 @@ export async function updateItemSubTypes(actor, removeDups) {
 
         // Defenses
         if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-            await item.update({ 'system.subType': 'defense', 'system.showToggle': true })
+            await item.update({ 'system.subType': 'defense', 'system.showToggle': true }, { hideChatMessage: true })
         }
 
         // Is this a movement power?
         if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
-            await item.update({ 'system.subType': 'movement', 'system.showToggle': true })
+            await item.update({ 'system.subType': 'movement', 'system.showToggle': true }, { hideChatMessage: true })
         }
 
         // Is this an attack power?
         if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
             if (item.system.subType != 'attack' || !item.system.dice) {
                 await makeAttack(item)
-                await item.update({ 'system.subType': 'attack', 'system.showToggle': true })
+                await item.update({ 'system.subType': 'attack', 'system.showToggle': true }, { hideChatMessage: true })
             }
         }
 
@@ -2890,7 +2890,7 @@ export async function updateItem(item) {
             }
             changed = true;
             //await item.update({ 'system.LEVELS.value': levels, 'system.LEVELS.max': levels })
-            await item.update({ 'system.LEVELS': null })
+            await item.update({ 'system.LEVELS': null }, { hideChatMessage: true })
             let _item = await item.update({ ['system.LEVELS.value']: levels, ['system.LEVELS.max']: levels })
             //console.log(_item.system.LEVELS)
         }
@@ -2925,7 +2925,7 @@ export async function updateItem(item) {
         // Save effect changes
 
         if (item.system.LEVELS.value != item.system.LEVELS.max) {
-            await item.update({ 'system.LEVELS.value': item.system.LEVELS.value })
+            await item.update({ 'system.LEVELS.value': item.system.LEVELS.value }, { hideChatMessage: true })
             changed = true;
         }
 
@@ -2973,7 +2973,7 @@ export async function updateItem(item) {
             //     }
             // } else {
 
-            await item.update({ 'system.description': item.system.description })
+            await item.update({ 'system.description': item.system.description }, { hideChatMessage: true })
             //}
         }
     }
