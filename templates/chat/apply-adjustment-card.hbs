@@ -18,11 +18,21 @@
     <div class="description-tiny">Defense: {{ defense }}</div>
   </div>
 
-  {{item.system.XMLID}} {{stunDamage}} Active Points to {{item.system.INPUT}}. {{item.system.INPUT}}
+  {{item.system.XMLID}} {{stunDamage}} Active Points
+
+  {{#if (eq item.system.XMLID "TRANSFER")}}
+  from {{xmlidX}} to {{xmlidY}}.
+  {{targetToken.actor.name}} lost {{levelsX}} {{xmlidX}}.  {{item.actor.name}} gained {{levelsY}} {{xmlidY}}.
+  {{else}}
+
+  to {{item.system.INPUT}}. {{item.system.INPUT}}
+
   {{#if (eq item.system.XMLID "DRAIN")}}
   decreased
   {{else}}
   increased
   {{/if}} by {{levels}} levels.
+
+  {{/if}}
 
 </div>

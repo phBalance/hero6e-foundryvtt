@@ -3,6 +3,7 @@ import { editSubItem, deleteSubItem, isPowerSubItem } from '../powers/powers.js'
 import { HEROSYS } from '../herosystem6e.js'
 import { onManageActiveEffect } from '../utility/effects.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
+import { updateItemDescription } from '../utility/upload_hdc.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -29,6 +30,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Alternatively, you could use the following return statement to do a
         // unique item sheet by type, like `weapon-sheet.hbs`.
         if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
+            return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
+        }
+
+        if (["TRANSFER"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
         }
 
@@ -108,13 +113,24 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             data.aidSources = AdjustmentSources(this.actor)
         }
 
+        // TRANSFER
+        // A select list of possible AID from sources
+        if (item.system.XMLID == "TRANSFER") {
+            data.transferSources = AdjustmentSources(this.actor)
+
+
+            // TRANSFER X to Y  (AID and DRAIN only have X)
+            data.xmlidX = item.system.INPUT.match(/\w+/)[0];
+            data.xmlidY = (item.system.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
+        }
+
         // Combat Skill Levels & Mental Combat Levels
         if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
             let _ocv = 'ocv'
             if (this.item.system.XMLID === "MENTAL_COMBAT_LEVELS") {
                 _ocv = 'omcv'
             }
-            data.cslChoices = { [_ocv]: _ocv};
+            data.cslChoices = { [_ocv]: _ocv };
             if (this.item.system.OPTION != "SINGLE") {
                 data.cslChoices.dcv = "dcv";
                 data.cslChoices.dc = "dc";
@@ -262,7 +278,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         if (!id) { return; }
 
+        if (expandedData.xmlidX || expandedData.xmlidY) {
+            expandedData.system.INPUT = `${expandedData.xmlidX} to ${expandedData.xmlidY}`;
+        }
+
         await this.item.update(expandedData)
+
+        if (expandedData.xmlidX || expandedData.xmlidY) {
+            await updateItemDescription(this.item);
+        }
 
         // if (expandedData.effects) {
         //     const effectId = Object.keys(expandedData.effects)[0]

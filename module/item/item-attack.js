@@ -707,6 +707,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 
 
     let levelsX = 0
+    let levelsY = 0
     let ActivePoints = parseInt(damageData.stundamage);
 
     // TRANSFER X to Y  (AID and DRAIN only have X)
@@ -729,11 +730,12 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
         levelsX = parseInt(ActivePoints / costPerPointX)
 
         let costPerPointY = parseInt(characteristicCosts[keyY]) * AdjustmentMultiplier(keyY.toUpperCase());
-        let levelsY = parseInt(ActivePoints / costPerPointY)
+        levelsY = parseInt(ActivePoints / costPerPointY)
 
         // Check for previous ADJUSTMENT from same source
-        let prevEffectX = token.actor.effects.find(o => o.origin === item.actor.uuid && o.flags?.XMLID === item.system.XMLID)
-        let prevEffectY = item.actor.effects.find(o => o.origin === item.actor.uuid && o.flags?.XMLID === item.system.XMLID)
+        // TODO: Variable Effect may result in multiple changes on same AE.
+        let prevEffectX = token.actor.effects.find(o => o.origin === item.uuid); // && o.flags?.keyX === keyX)
+        let prevEffectY = item.actor.effects.find(o => o.origin === item.uuid); // && o.flags?.keyY === keyY)
         if (prevEffectX) {
 
             // Maximum Effect (ActivePoints)
@@ -745,7 +747,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 
             let newActivePoints = (prevEffectX.flags?.activePoints || 0) + ActivePoints;
             if (newActivePoints > maxEffect) {
-                ActivePoints = maxEffect - prevEffectX.flags.ActivePoints;
+                ActivePoints = maxEffect - prevEffectX.flags.activePoints;
                 newActivePoints = maxEffect;
             }
 
@@ -763,7 +765,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             if (item.system.XMLID === "TRANSFER" && keyY && prevEffectY) {
 
                 let newLevelsY = newActivePoints / costPerPointY;
-                levelsY = newLevelsY- Math.abs(parseInt(prevEffectY.changes[0].value));
+                levelsY = newLevelsY - Math.abs(parseInt(prevEffectY.changes[0].value));
 
                 prevEffectY.changes[0].value = parseInt(newLevelsY);
                 prevEffectY.name = `${item.system.XMLID} +${parseInt(newLevelsY)} ${keyY.toUpperCase()} [${item.actor.name}]`;
@@ -781,7 +783,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             let activeEffect =
             {
                 name: `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX)} ${keyX.toUpperCase()} [${item.actor.name}]`,
-                id: `${item.system.XMLID}.${item.id}`,
+                id: `${item.system.XMLID}.${item.id}.${keyX}`,
                 icon: item.img,
                 changes: [
                     {
@@ -798,8 +800,10 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
                     XMLID: item.system.XMLID,
                     source: item.actor.name,
                     target: keyX,
+                    keyX: keyX,
+                    keyY: keyY,
                 },
-                origin: item.actor.uuid
+                origin: item.uuid
             }
 
             // DELAYEDRETURNRATE
@@ -828,9 +832,11 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 
                 if (item.system.XMLID === "TRANSFER" && keyY) {
                     let activeEffectY = deepClone(activeEffect);
-                    activeEffectY.name = `${item.system.XMLID} +${parseInt(levelsY)} ${keyY.toUpperCase()} [${item.actor.name}]`,
-                        activeEffectY.changes[0].key = "system.characteristics." + keyY + ".max",
-                        activeEffectY.changes[0].value = parseInt(levelsY)
+                    activeEffectY.id = `${item.system.XMLID}.${item.id}.${keyY}`;
+                    activeEffectY.name = `${item.system.XMLID} +${parseInt(levelsY)} ${keyY.toUpperCase()} [${item.actor.name}]`;
+                    activeEffectY.changes[0].key = "system.characteristics." + keyY + ".max";
+                    activeEffectY.changes[0].value = parseInt(levelsY);
+                    activeEffectY.flags.target = keyY;
                     await item.actor.addActiveEffect(activeEffectY);
 
                     let newValueY = item.actor.system.characteristics[keyY].value + parseInt(levelsY);
@@ -853,7 +859,10 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 
         // stun
         stunDamage: ActivePoints,
-        levels: levelsX,
+        levelsX: levelsX,
+        levelsY: levelsY,
+        xmlidX: xmlidX,
+        xmlidY: xmlidY,
 
         // effects
         //effects: effectsFinal,

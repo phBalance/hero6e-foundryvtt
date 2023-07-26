@@ -598,8 +598,8 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 let ActivePoints = ae.flags.activePoints;
                 let costPerPoint = parseInt(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
                 let newLevels = parseInt(ActivePoints / costPerPoint);
-                ae.changes[0].value = XMLID === "DRAIN" ? -parseInt(newLevels) : parseInt(newLevels);
-                ae.name = `${XMLID} ${newLevels} ${target.toUpperCase()} from ${source}`;
+                ae.changes[0].value = value < 0 ? -parseInt(newLevels) : parseInt(newLevels);
+                ae.name = `${XMLID} ${parseInt(ae.changes[0].value) > 0 ? "+" : ""}${newLevels} ${target.toUpperCase()} [${source}]`;
 
                 // If ActivePoints <= 0 then remove effect
                 if (ae.flags.activePoints <= 0) {
@@ -610,14 +610,14 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 }
 
                 // DRAIN fade (increase VALUE)
-                if (XMLID === "DRAIN") {
+                if (value < 0) {
                     let delta = -value - newLevels;
                     let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value) + delta);
                     await actor.update({ [`system.characteristics.${target}.value`]: newValue })
-                }
+                } else
 
                 // AID fade (VALUE = max)
-                if (XMLID === "AID") {
+                {
                     let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
                     await actor.update({ [`system.characteristics.${target}.value`]: newValue })
                 }
