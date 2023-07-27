@@ -11,6 +11,7 @@ import {
 import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
 import { isPowerSubItem } from "../powers/powers.js";
+import { updateItemDescription } from "../utility/upload_hdc.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -213,6 +214,23 @@ export async function AttackToHit(item, options) {
             spentEnd = parseInt(spentEnd) + parseInt(strEnd);
         }
 
+        const enduranceReserve = item.actor.items.find(o => o.system.XMLID === "ENDURANCERESERVE");
+        if (item.system.USE_END_RESERVE === "Yes") {
+            if (enduranceReserve) {
+                let erValue = parseInt(enduranceReserve.system.LEVELS.value);
+                let erMax = parseInt(enduranceReserve.system.LEVELS.max);
+                if (spentEnd > erValue) {
+                    return await ui.notifications.error(`${item.name} needs ${spentEnd} END, but ${enduranceReserve.name} only has ${erValue} END.`);
+                }
+                erValue -= spentEnd;
+                enduranceReserve.system.LEVELS.value = erValue;
+                updateItemDescription(enduranceReserve);
+                await enduranceReserve.update({ 'system.LEVELS': enduranceReserve.system.LEVELS, 'system.description': enduranceReserve.system.description });
+                newEnd = valueEnd;
+            }
+        }
+
+
         if (newEnd < 0) {
             let stunDice = Math.ceil(Math.abs(newEnd) / 2)
             let stunRollEquation = `${stunDice}d6`
@@ -231,10 +249,16 @@ export async function AttackToHit(item, options) {
                 expended. Yes, characters can Knock themselves out this way.` +
                 `"></i> `
             enduranceText += stunRenderedResult;
+
             await ui.notifications.warn(`${actor.name} used STUN for ENDURANCE.`);
+
 
         } else {
             enduranceText = 'Spent ' + spentEnd + ' END';
+
+            if (item.system.USE_END_RESERVE === "Yes" && enduranceReserve) {
+                enduranceText+= `<br>from ${enduranceReserve.name} (${enduranceReserve.system.LEVELS.value}/${enduranceReserve.system.LEVELS.max})`;
+            }
         }
 
 

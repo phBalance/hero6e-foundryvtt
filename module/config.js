@@ -499,12 +499,23 @@ HERO.powers = {
         name: "Luck",
         powerType: ["special"],
         percievability: "imperceptible",
-        duration: "ersistent",
+        duration: "persistent",
         target: "self only",
         range: "self",
         costEnd: false,
         costPerLevel: 5,
     },
+    "ENDURANCERESERVE": {
+        name: "Endurance Reserve",
+        powerType: ["special"],
+        percievability: "imperceptible",
+        duration: "persistent",
+        target: "self only",
+        range: "self",
+        costEnd: false,
+        costPerLevel: 0.25,
+    },
+    
 
 
 
@@ -899,6 +910,7 @@ HERO.ModifierOverride = {
     "DIMENSIONS": { BASECOST: 5 },
     "DOESBODY": { dc: true },
     "DOUBLEKB": { dc: true },
+    "ENDURANCERESERVEREC": {BASECOST: 2/3},
     "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
     "HARDENED": { BASECOST: 0.25 },
     "IMPENETRABLE": { BASECOST: 0.25 },
