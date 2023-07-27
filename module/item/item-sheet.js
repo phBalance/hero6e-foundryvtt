@@ -37,6 +37,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
         }
 
+        if (["ENDURANCERESERVE"].includes(this.item.system.XMLID)) {
+            return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
+        }
+
         if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`
         }
@@ -163,6 +167,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
         }
 
+        // AID
+        // A select list of possible AID from sources
+        if (item.system.XMLID == "ENDURANCERESERVE") {
+            const power = item.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+            data.rec = parseInt(power.LEVELS);
+        }
+
         return data
     }
 
@@ -285,16 +296,29 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         await this.item.update(expandedData)
 
         if (expandedData.xmlidX || expandedData.xmlidY) {
-            await updateItemDescription(this.item);
+            //updateItemDescription(this.item);
+            //formData['system.description'] = this.item.system.description;
         }
 
-        // if (expandedData.effects) {
-        //     const effectId = Object.keys(expandedData.effects)[0]
-        //     let effect = this.item.effects.get(effectId) || this.actor.effects.get(effectId)
-        //     await effect.update({ disabled: !expandedData.effects[effectId].disabled })
-        // }
+        if (expandedData.rec) {
+            let power = this.item.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+            if (power) {
+                power.LEVELS = parseInt(expandedData.rec) || 1;
+                await this.item.update({'system.powers': this.item.system.powers});
+            }
+        }
 
-        return
+
+        let description = this.item.system.description;
+
+        await super._updateObject(event, formData);
+
+        // If Description changed, update it
+        updateItemDescription(this.item);
+        if (description != this.item.system.description) {
+            this.item.update({'system.description': this.item.system.description})
+        }
+
     }
 
     async _onSubItemCreate(event) {

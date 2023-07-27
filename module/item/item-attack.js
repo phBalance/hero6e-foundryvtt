@@ -215,7 +215,7 @@ export async function AttackToHit(item, options) {
         }
 
         const enduranceReserve = item.actor.items.find(o => o.system.XMLID === "ENDURANCERESERVE");
-        if (item.system.USE_END_RESERVE === "Yes") {
+        if (item.system.USE_END_RESERVE) {
             if (enduranceReserve) {
                 let erValue = parseInt(enduranceReserve.system.LEVELS.value);
                 let erMax = parseInt(enduranceReserve.system.LEVELS.max);
@@ -256,7 +256,7 @@ export async function AttackToHit(item, options) {
         } else {
             enduranceText = 'Spent ' + spentEnd + ' END';
 
-            if (item.system.USE_END_RESERVE === "Yes" && enduranceReserve) {
+            if (item.system.USE_END_RESERVE && enduranceReserve) {
                 enduranceText+= `<br>from ${enduranceReserve.name} (${enduranceReserve.system.LEVELS.value}/${enduranceReserve.system.LEVELS.max})`;
             }
         }

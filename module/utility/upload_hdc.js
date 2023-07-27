@@ -940,8 +940,8 @@ function calcBasePointsPlusAdders(system) {
     if (!system.XMLID)
         return 0
 
-    if (system.XMLID == "RKA")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "RKA")
+    //     HEROSYS.log(false, system.XMLID)
 
 
     // Everyman skills are free
@@ -1053,8 +1053,8 @@ function calcBasePointsPlusAdders(system) {
 function calcActivePoints(_basePointsPlusAdders, system) {
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
 
-    if (system.XMLID == "RKA")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "RKA")
+    //     HEROSYS.log(false, system.XMLID)
 
     let advantages = 0;
     let advantagesDC = 0;
@@ -1124,8 +1124,8 @@ function calcActivePoints(_basePointsPlusAdders, system) {
 function calcRealCost(_activeCost, system) {
     // Real Cost = Active Cost / (1 + total value of all Limitations)
 
-    if (system.XMLID == "RKA")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "RKA")
+    //     HEROSYS.log(false, system.XMLID)
 
     let limitations = 0
     for (let modifier of system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)) {
@@ -1478,7 +1478,7 @@ export function updateItemDescription(item) {
 
             const power = system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
             if (power) {
-                if (system.LEVELS.value === system.LEVELS.max) {
+                if (parseInt(system.LEVELS.value) === parseInt(system.LEVELS.max)) {
                     system.description += ` (${system.LEVELS.max} END, ${power.LEVELS} REC)`
                 } else {
                     system.description += ` (${system.LEVELS.value}/${system.LEVELS.max} END, ${power.LEVELS} REC)`
