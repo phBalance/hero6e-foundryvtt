@@ -1,6 +1,15 @@
+# Version 3.0.11
+- Drag Ruler units now match grid units of the scene. [#225](https://github.com/dmdorman/hero6e-foundryvtt/issues/225)
+- Initial TRANSFER (5e) support. [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)
+- POWER DEFENSE works vs DRAIN/TRANSFER.
+- DELAYED RETURN RATE works vs AID/DRAIN/TRANSFER.
+- Initial REQUIRES A ROLL support.  [#53](https://github.com/dmdorman/hero6e-foundryvtt/issues/53) [#49](https://github.com/dmdorman/hero6e-foundryvtt/issues/49)
+- Initial ENDURANCE RESERVE support. [#54](https://github.com/dmdorman/hero6e-foundryvtt/issues/54)
+
+
 # Version 3.0.10
 - Temporary changes to CHARACTERISTIC MAX have red/green backgrounds on character sheet, similar to how VALUE background turns red/green.
-- Combat tracker now advances time.  Confirmed compatibility with Simple Calandar when GameWorldTimeIntegrations=Mixed. [#213](https://github.com/dmdorman/hero6e-foundryvtt/issues/213)
+- Combat tracker now advances time.  Confirmed compatibility with Simple Calendar when GameWorldTimeIntegrations=Mixed. [#213](https://github.com/dmdorman/hero6e-foundryvtt/issues/213)
 - Improved AID and DRAIN support. [#185](https://github.com/dmdorman/hero6e-foundryvtt/issues/185)
 
 # Version 3.0.9

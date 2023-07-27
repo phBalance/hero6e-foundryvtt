@@ -344,9 +344,9 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // Determine segement
-        let segment_prev = current.segment;
-        let segment = this.combatant.segment;
-        let advanceTime = segment - segment_prev;
+        let segment_prev = current?.segment;
+        let segment = this.combatant?.segment;
+        let advanceTime = (segment - segment_prev) || 0;
 
         const updateOptions = { advanceTime, direction: 1 };
         //Hooks.callAll("combatTurn", this, updateData, updateOptions);

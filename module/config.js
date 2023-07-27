@@ -499,12 +499,23 @@ HERO.powers = {
         name: "Luck",
         powerType: ["special"],
         percievability: "imperceptible",
-        duration: "ersistent",
+        duration: "persistent",
         target: "self only",
         range: "self",
         costEnd: false,
         costPerLevel: 5,
     },
+    "ENDURANCERESERVE": {
+        name: "Endurance Reserve",
+        powerType: ["special"],
+        percievability: "imperceptible",
+        duration: "persistent",
+        target: "self only",
+        range: "self",
+        costEnd: false,
+        costPerLevel: 0.25,
+    },
+    
 
 
 
@@ -899,6 +910,7 @@ HERO.ModifierOverride = {
     "DIMENSIONS": { BASECOST: 5 },
     "DOESBODY": { dc: true },
     "DOUBLEKB": { dc: true },
+    "ENDURANCERESERVEREC": {BASECOST: 2/3},
     "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
     "HARDENED": { BASECOST: 0.25 },
     "IMPENETRABLE": { BASECOST: 0.25 },
@@ -998,15 +1010,4 @@ HERO.knockbackMultiplier = {
     0: "No Knockback",
     1: "Knockback",
     2: "Double Knockback"
-}
-
-// The basic time frame of combat is the Turn,
-// divided into 12 one-second sections called
-// Segments.
-// Internally a HERO.turn is using round code.
-// Internally a HERO.segment is loosely attached to a turn.
-
-HERO.time = {
-    segment: 1,
-    turn: 12,
 }

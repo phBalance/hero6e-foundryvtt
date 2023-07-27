@@ -14,13 +14,25 @@
     Attack: <span class="item-name">{{item.name}}</span>
   </div>
 
+  <div class="card-section">
+    <div class="description-tiny">Defense: {{ defense }}</div>
+  </div>
 
+  {{item.system.XMLID}} {{stunDamage}} Active Points
 
-  {{item.system.XMLID}} {{stunDamage}} Active Points to {{item.system.INPUT}}. {{item.system.INPUT}}
-  {{#if (eq item.system.XMLID "DRAIN")}}
-  decreased
+  {{#if (eq item.system.XMLID "TRANSFER")}}
+  from {{xmlidX}} to {{xmlidY}}.
+  {{targetToken.actor.name}} lost {{abs levelsX}} {{xmlidX}}.  {{item.actor.name}} gained {{levelsY}} {{xmlidY}}.
   {{else}}
-  increased
-  {{/if}} by {{levels}} levels.
+
+  to {{xmlidX}}. {{targetToken.actor.name}}
+
+  {{#if (gte levelsX 0)}}
+  gained 
+  {{else}}
+  lost
+  {{/if}} {{abs levelsX}} {{xmlidX}}.
+
+  {{/if}}
 
 </div>

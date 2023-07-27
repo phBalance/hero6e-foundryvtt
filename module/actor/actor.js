@@ -1,6 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.js"
 import { HeroSystem6eItem } from '../item/item.js'
 import { HEROSYS } from "../herosystem6e.js";
+import { updateItemDescription } from "../utility/upload_hdc.js";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -171,7 +172,7 @@ export class HeroSystem6eActor extends Actor {
 
         //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
 
-        if (options.hideChatMessage) return;
+        if (options.hideChatMessage || !options.render) return;
 
         let content = "";
 
@@ -293,12 +294,7 @@ export class HeroSystem6eActor extends Actor {
             content += ".";
         }
 
-        const chatData = {
-            user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: content,
-            speaker: speaker
-        }
+
 
         if (asAction) {
             await ChatMessage.create(chatData)
@@ -307,6 +303,34 @@ export class HeroSystem6eActor extends Actor {
             // While not technically part of the rules, it is here as a convenience.
             // For example when Combat Tracker isn't being used.
             await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+        }
+
+        // Endurance Reserve Recovery
+        if (!asAction) {
+            const enduranceReserve = this.items.find(o => o.system.XMLID === "ENDURANCERESERVE");
+            if (enduranceReserve) {
+                let erValue = parseInt(enduranceReserve.system.LEVELS.value);
+                let erMax = parseInt(enduranceReserve.system.LEVELS.max);
+                const power = enduranceReserve.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+                if (power) {
+                    let erRec = parseInt(power.LEVELS);
+                    let deltaEndReserve = Math.min(erRec, erMax - erValue);
+                    if (deltaEndReserve) {
+                        erValue += deltaEndReserve;
+                        enduranceReserve.system.LEVELS.value = erValue;
+                        updateItemDescription(enduranceReserve);
+                        await enduranceReserve.update({ 'system.LEVELS': enduranceReserve.system.LEVELS, 'system.description': enduranceReserve.system.description });
+                        content += ` ${enduranceReserve.name} +${deltaEndReserve} END.`;
+                    }
+                }
+            }
+        }
+
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: content,
+            speaker: speaker
         }
 
         return content;

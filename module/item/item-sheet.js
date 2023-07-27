@@ -3,6 +3,7 @@ import { editSubItem, deleteSubItem, isPowerSubItem } from '../powers/powers.js'
 import { HEROSYS } from '../herosystem6e.js'
 import { onManageActiveEffect } from '../utility/effects.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
+import { updateItemDescription } from '../utility/upload_hdc.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -29,6 +30,14 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Alternatively, you could use the following return statement to do a
         // unique item sheet by type, like `weapon-sheet.hbs`.
         if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
+            return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
+        }
+
+        if (["TRANSFER"].includes(this.item.system.XMLID)) {
+            return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
+        }
+
+        if (["ENDURANCERESERVE"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`
         }
 
@@ -108,13 +117,24 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             data.aidSources = AdjustmentSources(this.actor)
         }
 
+        // TRANSFER
+        // A select list of possible AID from sources
+        if (item.system.XMLID == "TRANSFER") {
+            data.transferSources = AdjustmentSources(this.actor)
+
+
+            // TRANSFER X to Y  (AID and DRAIN only have X)
+            data.xmlidX = item.system.INPUT.match(/\w+/)[0];
+            data.xmlidY = (item.system.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
+        }
+
         // Combat Skill Levels & Mental Combat Levels
         if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
             let _ocv = 'ocv'
             if (this.item.system.XMLID === "MENTAL_COMBAT_LEVELS") {
                 _ocv = 'omcv'
             }
-            data.cslChoices = { [_ocv]: _ocv};
+            data.cslChoices = { [_ocv]: _ocv };
             if (this.item.system.OPTION != "SINGLE") {
                 data.cslChoices.dcv = "dcv";
                 data.cslChoices.dc = "dc";
@@ -145,6 +165,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 if (!item.system.attacks[attack.id]) item.system.attacks[attack.id] = false;
                 data.attacks.push({ name: attack.name, id: attack.id, checked: item.system.attacks[attack.id] })
             }
+        }
+
+        // AID
+        // A select list of possible AID from sources
+        if (item.system.XMLID == "ENDURANCERESERVE") {
+            const power = item.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+            data.rec = parseInt(power.LEVELS);
         }
 
         return data
@@ -262,15 +289,36 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         if (!id) { return; }
 
+        if (expandedData.xmlidX || expandedData.xmlidY) {
+            expandedData.system.INPUT = `${expandedData.xmlidX} to ${expandedData.xmlidY}`;
+        }
+
         await this.item.update(expandedData)
 
-        // if (expandedData.effects) {
-        //     const effectId = Object.keys(expandedData.effects)[0]
-        //     let effect = this.item.effects.get(effectId) || this.actor.effects.get(effectId)
-        //     await effect.update({ disabled: !expandedData.effects[effectId].disabled })
-        // }
+        if (expandedData.xmlidX || expandedData.xmlidY) {
+            //updateItemDescription(this.item);
+            //formData['system.description'] = this.item.system.description;
+        }
 
-        return
+        if (expandedData.rec) {
+            let power = this.item.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+            if (power) {
+                power.LEVELS = parseInt(expandedData.rec) || 1;
+                await this.item.update({'system.powers': this.item.system.powers});
+            }
+        }
+
+
+        let description = this.item.system.description;
+
+        await super._updateObject(event, formData);
+
+        // If Description changed, update it
+        updateItemDescription(this.item);
+        if (description != this.item.system.description) {
+            this.item.update({'system.description': this.item.system.description})
+        }
+
     }
 
     async _onSubItemCreate(event) {

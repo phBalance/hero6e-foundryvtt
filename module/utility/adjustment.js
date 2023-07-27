@@ -43,6 +43,7 @@ export function AdjustmentSources(actor) {
 }
 
 export function AdjustmentMultiplier(XMLID) {
+    if (!XMLID) return 1;
     if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
     if (CONFIG.HERO.powers5e[XMLID].powerType.includes("defense")) return 2;
     return 1;

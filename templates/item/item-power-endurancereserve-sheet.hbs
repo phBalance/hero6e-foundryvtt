@@ -1,0 +1,47 @@
+{{ log 'HEROSYS POWER ENDURANCE RESERVE SHEET' this }}
+<form class="hero {{cssClass}} flexcol actor-sheet" autocomplete="off" data-id="{{item._id}}"
+    data-realId="{{item.system.realId}}">
+    <header class="sheet-header flexrow">
+        <img class="profile" name="img" src="{{item.img}}" title="{{item.name}}" data-edit="img" />
+
+        <div class="header-details flexrow">
+            <h1 class="charname">
+                <input name="name" type="text" value="{{item.name}}" placeholder="Power Name" />
+            </h1>
+        </div>
+    </header>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        <div class="form-group">
+            <label>Power</label>
+            <input type="text" name="system.rules" value="{{system.rules}}" data-dtype="Text" disabled />
+        </div>
+
+        <div class="form-group">
+            <label>Charges</label>
+            <div>
+                <input type="text" name="system.LEVELS.value" value="{{system.LEVELS.value}}" data-dtype="Number" />
+                <span>/</span>
+                <input type="text" name="system.LEVELS.max" value="{{system.LEVELS.max}}" data-dtype="Number" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>REC</label>
+            <div>
+                <input type="text" name="rec" value="{{rec}}" data-dtype="Number" />
+            </div>
+        </div>
+
+
+
+        <hr>
+
+        {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
+        {{> systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs item=item alphaTesting=alphaTesting}}
+
+    </section>
+
+
+</form>

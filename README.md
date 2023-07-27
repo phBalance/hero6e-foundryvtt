@@ -40,7 +40,7 @@ Activating a maneuver from a character sheet will apply OCV and DCV modifiers wi
 - An attack can be used by clicking on the attack's image from the Character Sheet 'Attacks' tab. This will add a card to the chat for the attack.
 - The card will show the attack roll and damage roll as well as any additional effects information below.
 - Target defense can be applied to damage rolls.  Final damage is applied to token's stun/body.  If Stun damage exceeds CON then a stunned condition is applied.
-- You can drag attack from character sheet to quick bar.
+- You can drag attacks from character sheet to quick bar.
 
 ## System Options
 
@@ -62,7 +62,7 @@ Activating a maneuver from a character sheet will apply OCV and DCV modifiers wi
 - Power frameworks are partially supported.
 - Endurance use of non-attacking powers is untracked.
 - The following are largely not implemented
-  - Adjustment powers (Absorption Aid, Drain, Healing).
+  - Adjustment powers (Healing).
   - Attack powers that do not do stun/body damage (Change Environment, Darkness, Dispel, Drain, Entangle, Flash, Images, Mental Illusions, Mind Control, Reflection, Transform).
   - Attack powers with NND & AVAD
   - Automation powers(Cannot Be Stunned, Does Not Bleed, No Hit Locations, Takes No STUN).
