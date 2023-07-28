@@ -124,7 +124,7 @@ export function convertToDC(item, formula) {
 
 
 // Determine DC soley from item/attack
-export function convertToDcFromItem(item) {
+export function convertToDcFromItem(item, isAction) {
 
     let actor = item.actor;
     let dc = 0;
@@ -203,6 +203,25 @@ export function convertToDcFromItem(item) {
         tags.push({ value: `${str5}DC`, name: 'TK' })
     }
 
+
+    // Add in Haymaker to any non-maneuver attack DCV based attack
+    const haymakerManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Haymaker' && o.system.active)
+    if (haymakerManeuver) // && item.type != 'maneuver' && item.system.targets == 'dcv')
+    {
+        if (item.name == "Strike" || item.type != 'maneuver' )
+        {
+            if (item.system.targets == 'dcv') {
+            dc += 4;
+            tags.push({ value: `4DC`, name: 'Haymaker' });
+            } else {
+                if (isAction) ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", { localize: true });
+            }
+        } else {
+            if (isAction) ui.notifications.warn("Haymaker cannot be combined with another maneuver (except for Strike).", { localize: true });
+        }
+        
+    }
+    
 
 
 

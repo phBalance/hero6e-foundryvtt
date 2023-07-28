@@ -682,7 +682,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 const chatData = {
                     user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
                     whisper: ChatMessage.getWhisperRecipients("GM"),
-                    speaker: ChatMessage.getSpeaker({ actor: this }),
+                    speaker: ChatMessage.getSpeaker({ actor: actor }),
                     blind: true,
                     content: content,
                 }

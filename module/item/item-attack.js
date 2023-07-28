@@ -418,7 +418,7 @@ export async function _onRollDamage(event) {
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
-    let { dc, tags } = convertToDcFromItem(item);
+    let { dc, tags } = convertToDcFromItem(item, true);
 
 
     let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";
