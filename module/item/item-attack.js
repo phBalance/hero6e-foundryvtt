@@ -143,7 +143,7 @@ export async function AttackToHit(item, options) {
         }
 
         // Calc Distance if we have a target
-        if (game.user.targets) {
+        if (game.user.targets.length > 0) {
 
             // Educated guess for token
             let token = actor.getActiveTokens()[0];

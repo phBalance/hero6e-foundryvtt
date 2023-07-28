@@ -3,6 +3,7 @@
 - Range Penalty applies when targeting tokens. Fixed Set/Brace. 5e range penalties are now based on 1".  [#100](https://github.com/dmdorman/hero6e-foundryvtt/issues/100)
 - Fixed Biography editing. [#233](https://github.com/dmdorman/hero6e-foundryvtt/issues/233)
 - END and STUN recover when time advances (with Simple Calendar) [#228](https://github.com/dmdorman/hero6e-foundryvtt/issues/228)
+- Charges reset each day [#227](https://github.com/dmdorman/hero6e-foundryvtt/issues/227)
 
 # Version 3.0.11
 - Drag Ruler units now match grid units of the scene. [#225](https://github.com/dmdorman/hero6e-foundryvtt/issues/225)
