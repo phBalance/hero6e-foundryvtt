@@ -562,7 +562,7 @@ export class HeroSystem6eCombat extends Combat {
 
             // Make sure we have automation enabled
             if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
-                content += '<li>' + await combatant.actor.TakeRecovery(false) + '</li>'
+                content += '<li>' + await combatant.actor.TakeRecovery() + '</li>'
             }
         }
         content += '</ul>'

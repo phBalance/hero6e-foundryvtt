@@ -47,7 +47,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         // enrichedData
         for (let field of ["BACKGROUND", "PERSONALITY", "QUOTE", "TACTICS", "CAMPAIGN_USE", "APPEARANCE"])
-        data[`enriched${field}`] = await TextEditor.enrichHTML(data.actor.system[field], {async: true});
+            data[`enriched${field}`] = await TextEditor.enrichHTML(data.actor.system[field], { async: true });
 
         if (!data.enrichedBACKGROUND) {
             data.enrichedBACKGROUND
@@ -690,7 +690,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
     async _onRecovery(event) {
-        this.actor.TakeRecovery(true)
+        this.actor.TakeRecovery({ asAction: true })
         //         const chars = this.actor.system.characteristics
 
         //         // Shouldn't happen, but you never know
