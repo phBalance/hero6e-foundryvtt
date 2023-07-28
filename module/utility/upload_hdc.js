@@ -831,9 +831,9 @@ export function XmlToItemData(xml, type) {
         }
     }
 
-    // Make sure all defenses are enabled (if they don't have charges)
+    // Make sure all defenses are enabled (if they don't have charges or AFFECTS_TOTAL = "No")
     if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-        if (systemData.charges?.value > 0) {
+        if (systemData.charges?.value > 0 || systemData.AFFECTS_TOTAL === false) {
             systemData.active = false;
         } else {
             systemData.active = true;
@@ -2315,7 +2315,7 @@ export async function createEffects(itemData, actor) {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
             ],
-            disabled: itemData.system.AFFECTS_TOTAL == 'No',
+            disabled: !itemData.system.AFFECTS_TOTAL,
             transfer: true,
         }
         if (activeEffect.name.toLowerCase().indexOf(itemData.name.toLowerCase()) == -1) {

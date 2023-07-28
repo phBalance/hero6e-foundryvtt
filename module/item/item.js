@@ -384,6 +384,12 @@ async function RequiresASkillRollCheck(item) {
             case "SKILL1PER20":
                 OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
                 let skill = item.actor.items.find(o => o.system.XMLID === OPTION_ALIAS.toUpperCase() || o.name.toUpperCase() === OPTION_ALIAS.toUpperCase());
+                if (!skill && rar.COMMENTS) {
+                    skill = item.actor.items.find(o => o.system.XMLID ===rar.COMMENTS.toUpperCase() || o.name.toUpperCase() === rar.COMMENTS.toUpperCase());
+                    if (skill) {
+                        OPTION_ALIAS = rar.COMMENTS;
+                    }
+                }
                 if (skill) {
                     value = parseInt(skill.system.roll);
                     if (rar.OPTIONID === "SKILL1PER5") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints)/5))
@@ -398,7 +404,14 @@ async function RequiresASkillRollCheck(item) {
 
             case "CHAR":
                 OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
-                if (item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()]) {
+                let char =item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
+                if (!char && rar.COMMENTS) {
+                    char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                    if (char) {
+                        OPTION_ALIAS = rar.COMMENTS;
+                    }
+                }
+                if (char) {
                     value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
                     OPTION_ALIAS += ` ${value}-`;
                 } else {

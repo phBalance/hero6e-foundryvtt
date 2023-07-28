@@ -1,3 +1,6 @@
+# Version 3.0.12
+- Active Powers consume END at beginning of phase. [#77](https://github.com/dmdorman/hero6e-foundryvtt/issues/77)
+
 # Version 3.0.11
 - Drag Ruler units now match grid units of the scene. [#225](https://github.com/dmdorman/hero6e-foundryvtt/issues/225)
 - Initial TRANSFER (5e) support. [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)
