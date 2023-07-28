@@ -7,7 +7,7 @@ export async function enforceManeuverLimits(actor, itemId, itemName) {
 
     const relevantItem = actor.items.get(itemId)
 
-    if (relevantItem.name.toLowerCase().includes("move") || relevantItem.name.toLowerCase().includes("dodge")) {
+    if (relevantItem.name.toLowerCase().includes("move") || relevantItem.name.toLowerCase().includes("dodge") || relevantItem.name.toLowerCase().includes("abort")) {
         // Manuevers with a a move step should clear all other maneuvers
         for (const maneuver of maneuverItems) {
             if (maneuver === relevantItem) {
@@ -24,6 +24,6 @@ export async function enforceManeuverLimits(actor, itemId, itemName) {
             } else if (!exceptions.includes(maneuver.name)) {
                 await maneuver.update({ "system.active": false })
             }
-        }        
+        }
     }
 }

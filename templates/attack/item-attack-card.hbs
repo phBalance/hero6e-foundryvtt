@@ -1,7 +1,7 @@
-{{!-- {{ log 'HEROSYS ITEM ATTACK CARD2' this }} --}}
-<form>
-    <div class="hero chat-card item-card attack-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+{{!-- {{ log 'HEROSYS ITEM ATTACK CARD' this }} --}}
+<form data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
         tokenId}}data-token-id="{{tokenId}}" {{/if}}>
+    <div class="hero chat-card item-card attack-card" >
         <header class="card-header flexrow">
             <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
             <h3 class="item-name">{{item.name}}</h3>

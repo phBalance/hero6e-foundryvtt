@@ -161,8 +161,9 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (or (eq item.type "attack") (eq item.system.subType "attack")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack"))) }}
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -178,7 +179,8 @@
                         <td>-</td>
                         {{/if}}
                         {{#if (ne item.system.areaOfEffect.type "none")}}
-                        <td>{{item.system.areaOfEffect.type}}{{#if (gt item.system.areaOfEffect.value 0)}} ({{item.system.areaOfEffect.value}}){{/if}}</td>
+                        <td>{{item.system.areaOfEffect.type}}{{#if (gt item.system.areaOfEffect.value 0)}}
+                            ({{item.system.areaOfEffect.value}}){{/if}}</td>
                         {{/if}}
                         <td><a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
                                     height="24"></i></a></td>
@@ -208,7 +210,7 @@
                         <th>{{localize "ActorSheet.Phase"}}</th>
                         <th>{{localize "ActorSheet.OCV"}}</th>
                         <th>{{localize "ActorSheet.DCV"}}</th>
-                        
+
                         {{!-- <th>
                             <a class="item-control item-create" title="Create Martial Art" data-type="martialArt">
                                 <i class="fas fa-plus"></i> Add MartialArt</a>
@@ -227,7 +229,7 @@
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocv}}</td>
                         <td>{{item.system.dcv}}</td>
-                        
+
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>
@@ -261,7 +263,8 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "defense") (eq item.system.subType "defense")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -312,7 +315,8 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (and (or (eq item.type "skill") (eq item.system.subType "skill")) (filterItem item ../options.itemFilters.skill))}}
+                    {{#if (and (or (eq item.type "skill") (eq item.system.subType "skill")) (filterItem item
+                    ../options.itemFilters.skill))}}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -355,6 +359,7 @@
                     <tr class="sticky">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
+                        <th>{{localize "ActorSheet.Effect"}}</th>
                         <th>{{localize "ActorSheet.Phase"}}</th>
                         <th>{{localize "ActorSheet.OCV"}}</th>
                         <th>{{localize "ActorSheet.DCV"}}</th>
@@ -372,12 +377,18 @@
                                     height="24" /></div>
                         </td>
                         <td class="left">{{item.name}}</td>
+                        <td class="left">{{item.system.effects}}</td>
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocv}}</td>
                         <td>{{item.system.dcv}}</td>
                         <td>
+                            {{#if (ne item.system.subType "attack")}}
                             <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
                                 item.system.active}} data-dtype="Boolean" />
+                                {{else}}
+                               <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
+                                    height="24"></i></a>
+                            {{/if}}
                         </td>
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
@@ -413,7 +424,8 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "movement")(eq item.system.subType "movement")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -467,7 +479,8 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -477,7 +490,7 @@
                             item.system.childIdx}}{{item.system.childIdx}}) {{/if}}<i>{{item.name}}:</i>
                             {{item.system.description}}</td>
                         <td>{{item.system.endEstimate}}</td>
-                        
+
                         <td>
                             {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
                                 Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
@@ -526,7 +539,8 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (eq item.type "equipment") }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -576,12 +590,13 @@
                             <input name="system.characteristics.{{characteristic.key}}.value" type="text"
                                 value="{{characteristic.value}}" data-dtype="Number"
                                 class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
-                                 {{#if characteristic.valueTitle}}disabled{{/if}}>
+                                {{#if characteristic.valueTitle}}disabled{{/if}}>
                         </td>
                         <td data-tooltip="{{{characteristic.maxTitle}}}">
                             <input name="system.characteristics.{{characteristic.key}}.max" type="text"
-                             class="{{#if (gt characteristic.delta 0)}}overMax{{/if}}{{#if (lt characteristic.delta 0)}}underMax{{/if}}"
-                                value="{{characteristic.max}}" data-dtype="Number" {{#if characteristic.maxTitle}}disabled{{/if}}>
+                                class="{{#if (gt characteristic.delta 0)}}overMax{{/if}}{{#if (lt characteristic.delta 0)}}underMax{{/if}}"
+                                value="{{characteristic.max}}" data-dtype="Number" {{#if
+                                characteristic.maxTitle}}disabled{{/if}}>
                         </td>
                         <td>
                             {{characteristic.core}}

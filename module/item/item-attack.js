@@ -61,7 +61,7 @@ export async function AttackOptions(item) {
         data.hitLoc = CONFIG.HERO.hitLocations;
     }
 
-    const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card2.hbs"
+    const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs"
     const html = await renderTemplate(template, data)
     return new Promise(resolve => {
         const data = {
@@ -70,7 +70,9 @@ export async function AttackOptions(item) {
             buttons: {
                 normal: {
                     label: "Roll to Hit",
-                    callback: html => resolve(_processAttackOptions(item, html[0].querySelector("form")))
+                    callback: html => resolve(
+                        _processAttackOptions(item, html[0].querySelector("form"))
+                    )
                 },
                 // cancel: {
                 //   label: "cancel",
@@ -129,15 +131,46 @@ export async function AttackToHit(item, options) {
         tags.push({ value: ocvMod, name: item.name })
     }
 
-    const autoMod = parseInt(item.actor.system.characteristics.ocv.autoMod) || 0
-    if (autoMod != 0) {
-        rollEquation = modifyRollEquation(rollEquation, autoMod);
-        const maneuvers = item.actor.items.filter(o => o.type == 'maneuver' && o.system.active)
-        for (const maneuver of maneuvers) {
-            tags.push({ value: parseInt(maneuver.system.ocv), name: maneuver.name })
-            rollEquation = modifyRollEquation(rollEquation, parseInt(maneuver.system.ocv));
+    // const autoMod = parseInt(item.actor.system.characteristics.ocv.autoMod) || 0
+    // if (autoMod != 0) {
+    //     rollEquation = modifyRollEquation(rollEquation, autoMod);
+
+        // Set +1 OCV
+        const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
+        if (setManeuver) {
+            tags.push({ value: parseInt(setManeuver.system.ocv), name: setManeuver.name })
+            rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
         }
-    }
+
+        // Calc Distance if we have a target
+        if (game.user.targets) {
+
+            // Educated guess for token
+            let token = actor.getActiveTokens()[0];
+            let target = game.user.targets.first()
+            let distance = canvas.grid.measureDistance(token, target, { gridSpaces: true });
+            let factor = actor.system.is5e ? 4 : 8;
+            let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
+
+            if (rangePenalty) {
+                tags.push({ value: rangePenalty, name: "range penalty" })
+                rollEquation = modifyRollEquation(rollEquation, rangePenalty);
+            }
+
+            // Brace (+2 OCV only to offset the Range Modifier)
+            const braceManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Brace' && o.system.active)
+            if (braceManeuver) {
+                let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
+                if (brace > 0)
+                {
+                    tags.push({ value: brace, name: braceManeuver.name })
+                    rollEquation = modifyRollEquation(rollEquation, brace);
+                }
+                
+            }
+        }
+
+    //}
 
     // Combat Skill Levels
     let csl = CombatSkillLevelsForAttack(item);
@@ -257,7 +290,7 @@ export async function AttackToHit(item, options) {
             enduranceText = 'Spent ' + spentEnd + ' END';
 
             if (item.system.USE_END_RESERVE && enduranceReserve) {
-                enduranceText+= `<br>from ${enduranceReserve.name} (${enduranceReserve.system.LEVELS.value}/${enduranceReserve.system.LEVELS.max})`;
+                enduranceText += `<br>from ${enduranceReserve.name} (${enduranceReserve.system.LEVELS.value}/${enduranceReserve.system.LEVELS.max})`;
             }
         }
 
