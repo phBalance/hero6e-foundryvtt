@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sidebar-sheet' this}} --}}
+{{log 'actor-sidebar-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off">
 
     <aside>
@@ -161,7 +161,8 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack"))) }}
+                    {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack")))
+                    }}
                     <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td>
@@ -385,8 +386,8 @@
                             {{#if (ne item.system.subType "attack")}}
                             <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
                                 item.system.active}} data-dtype="Boolean" />
-                                {{else}}
-                               <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
+                            {{else}}
+                            <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
                                     height="24"></i></a>
                             {{/if}}
                         </td>
@@ -772,21 +773,108 @@
                 <br />
 
                 <table>
+
+                    {{#if actor.system.biography}}
                     <tr>
                         <th class="left">{{localize "ActorSheet.Biography"}}</th>
-                        <th>
-                            {{!-- <a class="item-control item-create" title="Create equipment" data-type="equipment">
-                                <i class="fas fa-plus"></i> Add Equipment</a> --}}
-                        </th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            actor.system.biography
+                            target="system.biography"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+                    {{/if}}
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.BACKGROUND"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedBACKGROUND
+                            target="system.BACKGROUND"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
                     </tr>
 
                     <tr>
+                        <th class="left">{{localize "ActorSheet.PERSONALITY"}}</th>
+                    </tr>
+                    <tr>
                         <td class="left">
-                            {{editor actor.system.biography target="system.biography" rollData=rollData
-                            button=true owner=owner
-                            editable=editable}}
+                            {{editor
+                            enrichedPERSONALITY
+                            target="system.PERSONALITY"
+                            button=true
+                            editable=editable
+                            }}
                         </td>
                     </tr>
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.QUOTE"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedQUOTE
+                            target="system.QUOTE"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.TACTICS"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedTACTICS
+                            target="system.TACTICS"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.CAMPAIGN_USE"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedCAMPAIGN_USE
+                            target="system.CAMPAIGN_USE"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+                     <tr>
+                        <th class="left">{{localize "ActorSheet.APPEARANCE"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedAPPEARANCE
+                            target="system.APPEARANCE"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+
                 </table>
 
 

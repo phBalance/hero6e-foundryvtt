@@ -49,12 +49,16 @@ export async function applyCharacterSheet(xmlDoc) {
     // Biography
     let Biography = ""
     for (let child of characterInfo.children) {
-        let text = child.textContent.trim();
-        if (text) {
-            Biography += "<p><b>" + child.nodeName + "</b>: " + text + "</p>"
-        }
+        //let text = child.textContent.trim();
+        changes[`system.${child.nodeName}`] = child.textContent.trim() || "";
+        // if (text) {
+        //     Biography += "<p><b>" + child.nodeName + "</b>: " + text + "</p>"
+        // }
     }
-    changes[`system.biography`] = Biography;
+    if (this.actor.system.biography) {
+        changes[`system.biography`] = "";
+    }
+    
 
     // Remove all items from
     await this.actor.deleteEmbeddedDocuments("Item", Array.from(this.actor.items.keys()))

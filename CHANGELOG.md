@@ -1,6 +1,7 @@
 # Version 3.0.12
 - Active Powers consume END at beginning of phase. [#77](https://github.com/dmdorman/hero6e-foundryvtt/issues/77)
-- Range Penalty applies when targeting tokens. Tweaked Set/Brace. 5e range penalties are now based on 1".  [#100](https://github.com/dmdorman/hero6e-foundryvtt/issues/100).
+- Range Penalty applies when targeting tokens. Fixed Set/Brace. 5e range penalties are now based on 1".  [#100](https://github.com/dmdorman/hero6e-foundryvtt/issues/100)
+- Fixed Biography editing. [#233](https://github.com/dmdorman/hero6e-foundryvtt/issues/233)
 
 # Version 3.0.11
 - Drag Ruler units now match grid units of the scene. [#225](https://github.com/dmdorman/hero6e-foundryvtt/issues/225)
