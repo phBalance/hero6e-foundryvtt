@@ -469,12 +469,13 @@ export class HeroSystem6eCombat extends Combat {
 
         if (spentEnd > 0) {
             let segment = this.combatant.segment;
-            let newEnd = parseInt(this.combatant.actor.system.characteristics.end.value);
+            let value = parseInt(this.combatant.actor.system.characteristics.end.value);
+            let newEnd = value;
             newEnd -= spentEnd;
 
             await this.combatant.actor.update({ 'system.characteristics.end.value': newEnd });
 
-            content = `Spent ${spentEnd} END on turn ${this.round} segment ${segment}:<ul>${content}</ul>`;
+            content = `Spent ${spentEnd} END (${value} to ${newEnd}) on turn ${this.round} segment ${segment}:<ul>${content}</ul>`;
 
             const token = combatant.token
             const speaker = ChatMessage.getSpeaker({ actor: combatant.actor, token })
