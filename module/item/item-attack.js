@@ -60,8 +60,8 @@ export async function AttackOptions(item) {
         data.showVelocity = true;
         data.velocity = 0;
 
-        const combatants = game.combat.combatants;
-        if (combatants) {
+        const combatants = game?.combat?.combatants;
+        if (combatants && typeof dragRuler != 'undefined') {
             const tokens = item.actor.getActiveTokens();
             if (tokens.length === 1) {
                 const token = tokens[0];

@@ -33,7 +33,7 @@
     {{#if showVelocity}}
     <div class="form-group">
         <label>{{localize "Items.Attack.Velocity"}}</label>
-        <input type="text" name="velocity" value="{{velocity}}" />
+        <input type="text" name="velocity" value="{{velocity}}" title="Typically you assume a starting velocity of 0, accelerate up to half your half-move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided." />
     </div>
     {{/if}}
 
