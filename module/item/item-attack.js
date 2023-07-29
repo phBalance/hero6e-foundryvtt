@@ -56,6 +56,40 @@ export async function AttackOptions(item) {
         }
     }
 
+    if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+        data.showVelocity = true;
+        data.velocity = 0;
+
+        const combatants = game.combat.combatants;
+        if (combatants) {
+            const tokens = item.actor.getActiveTokens();
+            if (tokens.length === 1) {
+                const token = tokens[0];
+                let distance = dragRuler.getMovedDistanceFromToken(token);
+                let speed = dragRuler.getRangesFromSpeedProvider(token)[0].range;
+                let delta = distance;
+                if (delta > speed / 2) {
+                    delta = speed - delta;
+                }
+                data.velocity = delta * 5;
+                // velocityDC = Math.floor(velocity / 10);
+                // if (velocityDC > 0) {
+                //     dc += velocityDC;
+                //     let title = `Started at 0 velocity.`;
+                //     if (delta === distance) {
+                //         title += `Moved ${distance}m.`;
+                //     }
+                //     if (delta != distance) {
+                //         title += ` Increasing velocity over ${speed / 2}m, then decreasing velocity.`;
+                //     }
+                //     title += `<br>Expected to move ${delta}m+ before end of phase to stop at 0 velocity (completing the Move By)`;
+                //     tags.push({ value: `${velocityDC}DC`, name: 'Velocity', title: title })
+                // }
+            }
+        }
+
+    }
+
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
@@ -135,40 +169,39 @@ export async function AttackToHit(item, options) {
     // if (autoMod != 0) {
     //     rollEquation = modifyRollEquation(rollEquation, autoMod);
 
-        // Set +1 OCV
-        const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
-        if (setManeuver) {
-            tags.push({ value: parseInt(setManeuver.system.ocv), name: setManeuver.name })
-            rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
+    // Set +1 OCV
+    const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
+    if (setManeuver) {
+        tags.push({ value: parseInt(setManeuver.system.ocv), name: setManeuver.name })
+        rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
+    }
+
+    // Calc Distance if we have a target
+    if (game.user.targets.length > 0) {
+
+        // Educated guess for token
+        let token = actor.getActiveTokens()[0];
+        let target = game.user.targets.first()
+        let distance = canvas.grid.measureDistance(token, target, { gridSpaces: true });
+        let factor = actor.system.is5e ? 4 : 8;
+        let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
+
+        if (rangePenalty) {
+            tags.push({ value: rangePenalty, name: "range penalty" })
+            rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
-        // Calc Distance if we have a target
-        if (game.user.targets.length > 0) {
-
-            // Educated guess for token
-            let token = actor.getActiveTokens()[0];
-            let target = game.user.targets.first()
-            let distance = canvas.grid.measureDistance(token, target, { gridSpaces: true });
-            let factor = actor.system.is5e ? 4 : 8;
-            let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
-
-            if (rangePenalty) {
-                tags.push({ value: rangePenalty, name: "range penalty" })
-                rollEquation = modifyRollEquation(rollEquation, rangePenalty);
+        // Brace (+2 OCV only to offset the Range Modifier)
+        const braceManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Brace' && o.system.active)
+        if (braceManeuver) {
+            let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
+            if (brace > 0) {
+                tags.push({ value: brace, name: braceManeuver.name })
+                rollEquation = modifyRollEquation(rollEquation, brace);
             }
 
-            // Brace (+2 OCV only to offset the Range Modifier)
-            const braceManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Brace' && o.system.active)
-            if (braceManeuver) {
-                let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
-                if (brace > 0)
-                {
-                    tags.push({ value: brace, name: braceManeuver.name })
-                    rollEquation = modifyRollEquation(rollEquation, brace);
-                }
-                
-            }
         }
+    }
 
     //}
 
@@ -360,6 +393,7 @@ export async function AttackToHit(item, options) {
         renderedHitRoll: renderedResult,
         hitRollText: hitRollText,
         hitRollValue: result.total,
+        velocity: options.velocity,
 
         // data for damage card
         actor,
@@ -418,7 +452,7 @@ export async function _onRollDamage(event) {
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
-    let { dc, tags } = convertToDcFromItem(item, true);
+    let { dc, tags } = convertToDcFromItem(item, {isAction: true, ...toHitData});
 
 
     let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";

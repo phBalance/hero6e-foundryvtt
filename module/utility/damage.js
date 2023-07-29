@@ -1,6 +1,7 @@
 import { HERO } from "../config.js";
 import { HEROSYS } from "../herosystem6e.js";
 import { RoundFavorPlayerDown } from "./round.js";
+import { HeroRuler } from "../ruler.js";
 
 
 
@@ -124,7 +125,7 @@ export function convertToDC(item, formula) {
 
 
 // Determine DC soley from item/attack
-export function convertToDcFromItem(item, isAction) {
+export function convertToDcFromItem(item, options) {
 
     let actor = item.actor;
     let dc = 0;
@@ -178,15 +179,49 @@ export function convertToDcFromItem(item, isAction) {
         tags.push({ value: `${csl.dc}DC`, name: csl.item.name })
     }
 
+    // Move By (add in velocity)
+    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
+    //
+    // A character can accelerate at a rate of 5m per meter, up to his
+    // maximum normal Combat Movement in meters per Phase. Thus
+    // a character with 50m of Flight would be moving at a velocity of
+    // 5m after traveling one meter, 10m after traveling two meters,
+    // 15m after traveling three meters, and so on, up to 50m after
+    // traveling ten meters.
+    //
+    // Currently assuming token starts at 0 velocity and ends at 0 velocity.
+    // Under this assumption the max velocity is half the speed.
+    let velocityDC = 0;
+    if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+        if (!options) {
+            options = {};
+        }
+        options.velocity = parseInt(options?.velocity || 0);
+        let divisor = 10;
+        if (item.system.XMLID === "MOVETHROUGH") {
+            divisor = 6;
+        }
+        velocityDC = Math.floor(options.velocity / divisor);
+        if (velocityDC > 0) {
+            dc += velocityDC;
+            tags.push({ value: `${velocityDC}DC`, name: 'Velocity', title: `Velocity (${options.velocity}) / ${divisor}` })
+        }
+    }
 
     // Add in STR
     if (item.system.usesStrength) {
         let str = actor.system.characteristics.str.value
+
+        // MOVEBY halves STR
+        if (item.system.XMLID === "MOVEBY") {
+            str = str / 2;
+        }
+
         let str5 = Math.floor(str / 5)
         dc += str5
         end += Math.max(1, Math.round(str / 10))
-        tags.push({ value: `${str5}DC`, name: 'STR' })
-        
+        tags.push({ value: `${str5}DC`, name: 'STR', title: (item.system.XMLID === "MOVEBY") ? 'MoveBy is half STR' : ''  })
+
     }
 
     // Add in TK
@@ -208,20 +243,21 @@ export function convertToDcFromItem(item, isAction) {
     const haymakerManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Haymaker' && o.system.active)
     if (haymakerManeuver) // && item.type != 'maneuver' && item.system.targets == 'dcv')
     {
-        if (item.name == "Strike" || item.type != 'maneuver' )
-        {
+        if (item.name == "Strike" || item.type != 'maneuver') {
             if (item.system.targets == 'dcv') {
-            dc += 4;
-            tags.push({ value: `4DC`, name: 'Haymaker' });
+                dc += 4;
+                tags.push({ value: `4DC`, name: 'Haymaker' });
             } else {
-                if (isAction) ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", { localize: true });
+                if (options?.isAction) ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", { localize: true });
             }
         } else {
-            if (isAction) ui.notifications.warn("Haymaker cannot be combined with another maneuver (except for Strike).", { localize: true });
+            if (options?.isAction) ui.notifications.warn("Haymaker cannot be combined with another maneuver (except for Strike).", { localize: true });
         }
-        
+
     }
-    
+
+
+
 
 
 
