@@ -6,7 +6,8 @@
 - Charges reset each day [#227](https://github.com/dmdorman/hero6e-foundryvtt/issues/227)
 - Maneuvers that are attack-ish now have roll icons instead of checkboxes.  [#102](https://github.com/dmdorman/hero6e-foundryvtt/issues/102)
 - Haymaker support. [#98](https://github.com/dmdorman/hero6e-foundryvtt/issues/98)
-- Initial MOVE BY and MOVE THROUGH support.  Velocity assumes token is at rest at beginning and end of phase.  Velocity can be overwritten. [#193](https://github.com/dmdorman/hero6e-foundryvtt/issues/193)  
+- Initial MOVE BY and MOVE THROUGH support.  Velocity assumes token is at rest at beginning and end of phase.  Velocity can be overwritten. [#193](https://github.com/dmdorman/hero6e-foundryvtt/issues/193)
+- Initial support for 'Only Costs END to Activate'. 
 
 # Version 3.0.11
 - Drag Ruler units now match grid units of the scene. [#225](https://github.com/dmdorman/hero6e-foundryvtt/issues/225)
