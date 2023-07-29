@@ -817,10 +817,10 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
         }
 
-        let costPerPointX = parseInt(characteristicCosts[keyX]) * AdjustmentMultiplier(keyX.toUpperCase());
+        let costPerPointX = parseFloat(characteristicCosts[keyX]) * AdjustmentMultiplier(keyX.toUpperCase());
         levelsX = parseInt(ActivePoints / costPerPointX)
 
-        let costPerPointY = parseInt(characteristicCosts[keyY]) * AdjustmentMultiplier(keyY.toUpperCase());
+        let costPerPointY = parseFloat(characteristicCosts[keyY]) * AdjustmentMultiplier(keyY.toUpperCase());
         levelsY = parseInt(ActivePoints / costPerPointY)
 
         // Check for previous ADJUSTMENT from same source
