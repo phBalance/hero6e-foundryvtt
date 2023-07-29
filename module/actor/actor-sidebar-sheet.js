@@ -31,7 +31,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
     /** @override */
-    getData() {
+    async getData() {
         const data = super.getData()
 
         // Alpha Testing (use to show/hide effects)
@@ -44,6 +44,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         // NPC or PC dropdown
         data.isGM = game.user.isGM
         data.actorTypeChoices = { pc: "PC", npc: "NPC" }
+
+        // enrichedData
+        for (let field of ["BACKGROUND", "PERSONALITY", "QUOTE", "TACTICS", "CAMPAIGN_USE", "APPEARANCE"])
+            data[`enriched${field}`] = await TextEditor.enrichHTML(data.actor.system[field], { async: true });
+
+        if (!data.enrichedBACKGROUND) {
+            data.enrichedBACKGROUND
+        }
 
         let weightTotal = 0
         let priceTotal = 0
@@ -682,7 +690,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
     async _onRecovery(event) {
-        this.actor.TakeRecovery(true)
+        this.actor.TakeRecovery({ asAction: true })
         //         const chars = this.actor.system.characteristics
 
         //         // Shouldn't happen, but you never know

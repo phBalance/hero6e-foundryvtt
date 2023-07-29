@@ -334,3 +334,19 @@ ul.left li {
   margin-left: 5px;
   margin-right: 5px;
 }
+
+.editor-content {
+  min-height: 36px;
+  border-radius: 5px;
+  border: 1px dashed rgba(0,0,0,0.3);
+}
+
+.actor-sidebar-sheet .sidebar section ul li>span {
+  position: relative;
+  left: -5px;
+}
+
+.actor-sidebar-sheet .sidebar section .defenses {
+  border-top: 2px groove #eeede0;
+  padding-top: 5px;
+}

@@ -49,12 +49,16 @@ export async function applyCharacterSheet(xmlDoc) {
     // Biography
     let Biography = ""
     for (let child of characterInfo.children) {
-        let text = child.textContent.trim();
-        if (text) {
-            Biography += "<p><b>" + child.nodeName + "</b>: " + text + "</p>"
-        }
+        //let text = child.textContent.trim();
+        changes[`system.${child.nodeName}`] = child.textContent.trim() || "";
+        // if (text) {
+        //     Biography += "<p><b>" + child.nodeName + "</b>: " + text + "</p>"
+        // }
     }
-    changes[`system.biography`] = Biography;
+    if (this.actor.system.biography) {
+        changes[`system.biography`] = "";
+    }
+    
 
     // Remove all items from
     await this.actor.deleteEmbeddedDocuments("Item", Array.from(this.actor.items.keys()))
@@ -353,20 +357,42 @@ export async function applyCharacterSheet(xmlDoc) {
     // combat maneuvers
     async function loadCombatManeuvers(dict, actor) {
         for (const entry of Object.entries(dict)) {
-            const v = entry[1]
+            const name = entry[0];
+            const v = entry[1];
+            const phase = v[0];
+            const ocv = v[1];
+            const dcv = v[2];
+            const effects = v[3];
+            const attack = v[4];
+            const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
             const itemData = {
-                name: entry[0],
+                name,
                 type: 'maneuver',
-                data: {
-                    phase: v[0],
-                    ocv: v[1],
-                    dcv: v[2],
-                    effects: v[3],
-                    active: false
+                system: {
+                    phase,
+                    ocv,
+                    dcv,
+                    effects,
+                    active: false,
+                    description: effects,
+                    XMLID,
                 }
             }
 
-            await HeroSystem6eItem.create(itemData, { parent: actor })
+            // if (attack) {
+            //     await makeAttack(item)
+            //     itemData.system.subType = "attack";
+            //     itemData.system.knockbackMultiplier = 1;
+            //     itemData.system.usesStrength = true;
+            //     itemData.system.LEVELS = { value: 0, max: 0 };
+            //     itemData.system.uses = 'ocv';
+            //     itemData.system.targets = 'dcv';
+            // }
+
+            let item = await HeroSystem6eItem.create(itemData, { parent: actor })
+            if (attack) {
+                await makeAttack(item)
+            }
         }
     }
 
@@ -391,23 +417,23 @@ export async function applyCharacterSheet(xmlDoc) {
     }
 
 
-    // Default Strike attack
-    let itemData = {
-        type: "attack",
-        name: "strike",
-        system: {
-            //xmlid: "HANDTOHANDATTACK",
-            knockbackMultiplier: 1,
-            usesStrength: true,
-            rules: "This is the basic attack maneuver",
-            XMLID: "HANDTOHANDATTACK",
-            NAME: "Strike",
-            LEVELS: { value: 0, max: 0 },
-            ALIAS: "HANDTOHANDATTACK",
-        }
+    // // Default Strike attack
+    // let itemData = {
+    //     type: "attack",
+    //     name: "strike",
+    //     system: {
+    //         //xmlid: "HANDTOHANDATTACK",
+    //         knockbackMultiplier: 1,
+    //         usesStrength: true,
+    //         rules: "This is the basic attack maneuver",
+    //         XMLID: "HANDTOHANDATTACK",
+    //         NAME: "Strike",
+    //         LEVELS: { value: 0, max: 0 },
+    //         ALIAS: "HANDTOHANDATTACK",
+    //     }
 
-    }
-    await HeroSystem6eItem.create(itemData, { parent: this.actor })
+    // }
+    // await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
     await updateItemSubTypes(this.actor)
 
@@ -831,9 +857,9 @@ export function XmlToItemData(xml, type) {
         }
     }
 
-    // Make sure all defenses are enabled (if they don't have charges)
+    // Make sure all defenses are enabled (if they don't have charges or AFFECTS_TOTAL = "No")
     if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-        if (systemData.charges?.value > 0) {
+        if (systemData.charges?.value > 0 || systemData.AFFECTS_TOTAL === false) {
             systemData.active = false;
         } else {
             systemData.active = true;
@@ -1798,7 +1824,7 @@ export async function makeAttack(item) {
 
     // Confirm this is an attack
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: item.actor })
-    if (!configPowerInfo || !configPowerInfo.powerType.includes("attack")) return
+    //if (!configPowerInfo || !configPowerInfo.powerType.includes("attack")) return
 
     let changes = {}
     //changes[`img`] = "icons/svg/sword.svg"
@@ -1806,7 +1832,7 @@ export async function makeAttack(item) {
 
     // Name
     let description = item.system.ALIAS
-    let name = item.system.NAME || description || configPowerInfo.xmlid
+    let name = item.system.NAME || description || configPowerInfo?.xmlid || item.system.name;
     changes[`name`] = name
 
     let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0;
@@ -1872,6 +1898,10 @@ export async function makeAttack(item) {
     changes[`system.ocv`] = ocv
     changes[`system.dcv`] = dcv
     changes['system.stunBodyDamage'] = "stunbody"
+
+    // Maneuvers
+    if (item.system.type === "maneuver") {
+    }
 
     // ENTANGLE (not implemented)
     if (xmlid == "ENTANGLE") {
@@ -2038,10 +2068,6 @@ export async function makeAttack(item) {
         }
     }
 
-    // if (xmlid === "HANDTOHANDATTACK") {
-    //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
-    //     return
-    // }
 
     if (xmlid === "HKA" || item.system.EFFECT?.indexOf("KILLING") > -1) {
         changes[`system.killing`] = true
@@ -2315,7 +2341,7 @@ export async function createEffects(itemData, actor) {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
             ],
-            disabled: itemData.system.AFFECTS_TOTAL == 'No',
+            disabled: !itemData.system.AFFECTS_TOTAL,
             transfer: true,
         }
         if (activeEffect.name.toLowerCase().indexOf(itemData.name.toLowerCase()) == -1) {

@@ -148,7 +148,7 @@ export class HeroRuler {
                 const radioOptions = movementItems.map((item, index) => `
                     <div class="radio" data-tool="${item._id}">
                         <input id="radio-${index}" name="radio" type="radio" ${activeMovement === item._id ? 'checked' : ''}>
-                        <label for="radio-${index}" class="radio-label">${item.name} (${item.value}${game.scenes.current.grid.units||''})</label>
+                        <label for="radio-${index}" class="radio-label">${item.name} (${item.value}${game.scenes.current.grid.units || ''})</label>
                     </div>
                 `).join('');
 
@@ -176,14 +176,16 @@ export class HeroRuler {
 
 function setHeroRulerLabel() {
     Ruler.prototype._getSegmentLabel = function _getSegmentLabel(segmentDistance, totalDistance, isTotal) {
-        let rangeMod = Math.ceil(Math.log2(totalDistance / 8)) * 2;
+        const relevantToken = canvas.tokens.controlled[0]
+        let factor = relevantToken?.actor?.system?.is5e ? 4 : 8;
+        let rangeMod = Math.ceil(Math.log2(totalDistance / factor)) * 2;
 
         rangeMod = rangeMod < 0 ? 0 : rangeMod;
 
-        let label = `[${Math.round(segmentDistance.distance)}${game.scenes.current.grid.units||''}]`;
+        let label = `[${Math.round(segmentDistance.distance)}${game.scenes.current.grid.units || ''}]`;
 
         if (game.modules.get("drag-ruler")?.active && canvas.tokens.controlled.length > 0) {
-            const relevantToken = canvas.tokens.controlled[0];
+            ;
 
             // guard
             if (!relevantToken) return;

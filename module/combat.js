@@ -258,15 +258,14 @@ export class HeroSystem6eCombat extends Combat {
 
 
         //Missing actor?
-        let missingActors = documents.filter(o=> !o.actor)
+        let missingActors = documents.filter(o => !o.actor)
         {
-            for(let c of missingActors)
-            {
+            for (let c of missingActors) {
                 ui.notifications.warn(`${c.name} references an Actor which no longer exists within the World.`);
             }
         }
 
-        documents = documents.filter(o=> o.actor)
+        documents = documents.filter(o => o.actor)
         if (documents.length === 0) return;
 
 
@@ -458,6 +457,43 @@ export class HeroSystem6eCombat extends Combat {
         // Use actor.canAct to block actions
         // Remove STUNNED effect _onEndTurn
 
+        // Spend END for all active powers
+        let content = "";
+        let spentEnd = 0;
+
+        for (let powerUsingEnd of combatant.actor.items.filter(o => o.system.active === true && parseInt(o.system?.end || 0) > 0)) {
+
+            const costEndOnlyToActivate = powerUsingEnd.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
+            if (!costEndOnlyToActivate) {
+                let end = parseInt(powerUsingEnd.system.end);
+                spentEnd += end;
+                content += `<li>${powerUsingEnd.name} (${end})</li>`
+            }
+        }
+
+        if (spentEnd > 0) {
+            let segment = this.combatant.segment;
+            let value = parseInt(this.combatant.actor.system.characteristics.end.value);
+            let newEnd = value;
+            newEnd -= spentEnd;
+
+            await this.combatant.actor.update({ 'system.characteristics.end.value': newEnd });
+
+            content = `Spent ${spentEnd} END (${value} to ${newEnd}) on turn ${this.round} segment ${segment}:<ul>${content}</ul>`;
+
+            const token = combatant.token
+            const speaker = ChatMessage.getSpeaker({ actor: combatant.actor, token })
+            speaker["alias"] = combatant.actor.name
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: content,
+                whisper: ChatMessage.getWhisperRecipients("GM"),
+                speaker,
+            }
+
+            await ChatMessage.create(chatData)
+        }
 
     }
 
@@ -525,23 +561,42 @@ export class HeroSystem6eCombat extends Combat {
         const automation = game.settings.get("hero6efoundryvttv2", "automation");
 
         let content = `Post-Segment 12 (Turn ${this.round - 1})`;
+        let contentHidden = `Post-Segment 12 (Turn ${this.round - 1})`;
         content += '<ul>'
+        contentHidden += '<ul>'
+        let hasHidden = false;
         for (let combatant of this.combatants.filter(o => !o.defeated)) {
             const actor = combatant.actor;
 
             // Make sure we have automation enabled
             if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
-                content += '<li>' + await combatant.actor.TakeRecovery(false) + '</li>'
+
+                // Make sure combatant is visible in combat tracker
+                if (!combatant.hidden) {
+                    content += '<li>' + await combatant.actor.TakeRecovery() + '</li>'
+                } else {
+                    hasHidden = true;
+                    contentHidden += '<li>' + await combatant.actor.TakeRecovery() + '</li>'
+                }
+
             }
         }
         content += '</ul>'
+        contentHidden += '</ul>'
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             content: content,
         }
 
-        return ChatMessage.create(chatData)
+        await ChatMessage.create(chatData);
+
+        if (hasHidden) {
+            return ChatMessage.create({ ...chatData, content: contentHidden, whisper: ChatMessage.getWhisperRecipients("GM") })
+        }
+
+
+
     }
 
     /**

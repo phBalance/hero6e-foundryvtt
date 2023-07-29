@@ -1,4 +1,4 @@
-{{!-- {{log 'actor-sidebar-sheet' this}} --}}
+{{log 'actor-sidebar-sheet' this}}
 <form class="{{cssClass}}" autocomplete="off">
 
     <aside>
@@ -47,26 +47,26 @@
                             </span>
                         </div>
                     </li>
-                </ul>
+                
 
-                <ul>
-                    <li title="{{defense.PDtags}}">PD={{defense.PD}}</li>
-                    <li title="{{defense.rPDtags}}">rPD={{defense.rPD}}</li>
-                    <li title="{{defense.EDtags}}">ED={{defense.ED}}</li>
-                    <li title="{{defense.rEDtags}}">rED={{defense.rED}}</li>
-                    <li title="{{defense.MDtags}}">MD={{defense.MD}}</li>
-                    {{#if defense.rMD}}<li title="{{defense.rMDtags}}">rMD={{defense.rMD}}</li>{{/if}}
+                <ul class="defenses">
+                    <li title="{{defense.PDtags}}"><span>PD={{defense.PD}}</span></li>
+                    <li title="{{defense.rPDtags}}"><span>rPD={{defense.rPD}}</span></li>
+                    <li title="{{defense.EDtags}}"><span>ED={{defense.ED}}</span></li>
+                    <li title="{{defense.rEDtags}}"><span>rED={{defense.rED}}</span></li>
+                    <li title="{{defense.MDtags}}"><span>MD={{defense.MD}}</span></li>
+                    {{#if defense.rMD}}<li title="{{defense.rMDtags}}"><span>rMD={{defense.rMD}}</span></li>{{/if}}
 
-                    {{#if defense.drp}}<li title="{{defense.drptags}}">drp={{defense.drp}}</li>{{/if}}
-                    {{#if defense.dre}}<li title="{{defense.dretags}}">dre={{defense.dre}}</li>{{/if}}
-                    {{#if defense.drm}}<li title="{{defense.drmtags}}">drm={{defense.drm}}</li>{{/if}}
+                    {{#if defense.drp}}<li title="{{defense.drptags}}"><span>drp={{defense.drp}}</span></li>{{/if}}
+                    {{#if defense.dre}}<li title="{{defense.dretags}}"><span>dre={{defense.dre}}</span></li>{{/if}}
+                    {{#if defense.drm}}<li title="{{defense.drmtags}}"><span>drm={{defense.drm}}</span></li>{{/if}}
 
-                    {{#if defense.dnp}}<li title="{{defense.dnptags}}">dnp={{defense.dnp}}</li>{{/if}}
-                    {{#if defense.dne}}<li title="{{defense.dnetags}}">dne={{defense.dne}}</li>{{/if}}
-                    {{#if defense.dnm}}<li title="{{defense.dnmtags}}">dnm={{defense.dnm}}</li>{{/if}}
+                    {{#if defense.dnp}}<li title="{{defense.dnptags}}"><span>dnp={{defense.dnp}}</span>/li>{{/if}}
+                    {{#if defense.dne}}<li title="{{defense.dnetags}}"><span>dne={{defense.dne}}</span></li>{{/if}}
+                    {{#if defense.dnm}}<li title="{{defense.dnmtags}}"><span>dnm={{defense.dnm}}</span></li>{{/if}}
 
-                    {{#if defense.POWD}}<li title="{{defense.POWDtags}}">POWD={{defense.POWD}}</li>{{/if}}
-                    {{#if defense.rPOWD}}<li title="{{defense.rPOWDtags}}">rPOWD={{defense.rPOWD}}</li>{{/if}}
+                    {{#if defense.POWD}}<li title="{{defense.POWDtags}}"><span>POWD={{defense.POWD}}</span></li>{{/if}}
+                    {{#if defense.rPOWD}}<li title="{{defense.rPOWDtags}}"><span>rPOWD={{defense.rPOWD}}</span></li>{{/if}}
 
                 </ul>
 
@@ -161,8 +161,10 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (or (eq item.type "attack") (eq item.system.subType "attack")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack")))
+                    }}
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -178,7 +180,8 @@
                         <td>-</td>
                         {{/if}}
                         {{#if (ne item.system.areaOfEffect.type "none")}}
-                        <td>{{item.system.areaOfEffect.type}}{{#if (gt item.system.areaOfEffect.value 0)}} ({{item.system.areaOfEffect.value}}){{/if}}</td>
+                        <td>{{item.system.areaOfEffect.type}}{{#if (gt item.system.areaOfEffect.value 0)}}
+                            ({{item.system.areaOfEffect.value}}){{/if}}</td>
                         {{/if}}
                         <td><a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
                                     height="24"></i></a></td>
@@ -208,7 +211,7 @@
                         <th>{{localize "ActorSheet.Phase"}}</th>
                         <th>{{localize "ActorSheet.OCV"}}</th>
                         <th>{{localize "ActorSheet.DCV"}}</th>
-                        
+
                         {{!-- <th>
                             <a class="item-control item-create" title="Create Martial Art" data-type="martialArt">
                                 <i class="fas fa-plus"></i> Add MartialArt</a>
@@ -227,7 +230,7 @@
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocv}}</td>
                         <td>{{item.system.dcv}}</td>
-                        
+
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>
@@ -252,6 +255,7 @@
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
+                        <th>{{localize "ActorSheet.End"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create defense" data-type="defense">
@@ -260,13 +264,15 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "defense") (eq item.system.subType "defense")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
                         <td class="left">{{item.name}}</td>
                         <td class="left">{{item.system.description}}</td>
+                        <td>{{item.system.end}}</td>
                         <td>
                             <input class="item-toggle" type="checkbox" {{checked item.system.active}}
                                 data-dtype="Boolean" />
@@ -310,7 +316,8 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (and (or (eq item.type "skill") (eq item.system.subType "skill")) (filterItem item ../options.itemFilters.skill))}}
+                    {{#if (and (or (eq item.type "skill") (eq item.system.subType "skill")) (filterItem item
+                    ../options.itemFilters.skill))}}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -353,6 +360,7 @@
                     <tr class="sticky">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
+                        <th>{{localize "ActorSheet.Effect"}}</th>
                         <th>{{localize "ActorSheet.Phase"}}</th>
                         <th>{{localize "ActorSheet.OCV"}}</th>
                         <th>{{localize "ActorSheet.DCV"}}</th>
@@ -370,12 +378,18 @@
                                     height="24" /></div>
                         </td>
                         <td class="left">{{item.name}}</td>
+                        <td class="left">{{item.system.effects}}</td>
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocv}}</td>
                         <td>{{item.system.dcv}}</td>
                         <td>
+                            {{#if (ne item.system.subType "attack")}}
                             <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
                                 item.system.active}} data-dtype="Boolean" />
+                            {{else}}
+                            <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24"
+                                    height="24"></i></a>
+                            {{/if}}
                         </td>
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
@@ -411,7 +425,8 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "movement")(eq item.system.subType "movement")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -465,7 +480,8 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -475,7 +491,7 @@
                             item.system.childIdx}}{{item.system.childIdx}}) {{/if}}<i>{{item.name}}:</i>
                             {{item.system.description}}</td>
                         <td>{{item.system.endEstimate}}</td>
-                        
+
                         <td>
                             {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
                                 Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
@@ -524,7 +540,8 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (eq item.type "equipment") }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}" data-item-id="{{item._id}}">
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                        data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
@@ -574,12 +591,13 @@
                             <input name="system.characteristics.{{characteristic.key}}.value" type="text"
                                 value="{{characteristic.value}}" data-dtype="Number"
                                 class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
-                                 {{#if characteristic.valueTitle}}disabled{{/if}}>
+                                {{#if characteristic.valueTitle}}disabled{{/if}}>
                         </td>
                         <td data-tooltip="{{{characteristic.maxTitle}}}">
                             <input name="system.characteristics.{{characteristic.key}}.max" type="text"
-                             class="{{#if (gt characteristic.delta 0)}}overMax{{/if}}{{#if (lt characteristic.delta 0)}}underMax{{/if}}"
-                                value="{{characteristic.max}}" data-dtype="Number" {{#if characteristic.maxTitle}}disabled{{/if}}>
+                                class="{{#if (gt characteristic.delta 0)}}overMax{{/if}}{{#if (lt characteristic.delta 0)}}underMax{{/if}}"
+                                value="{{characteristic.max}}" data-dtype="Number" {{#if
+                                characteristic.maxTitle}}disabled{{/if}}>
                         </td>
                         <td>
                             {{characteristic.core}}
@@ -755,21 +773,108 @@
                 <br />
 
                 <table>
+
+                    {{#if actor.system.biography}}
                     <tr>
                         <th class="left">{{localize "ActorSheet.Biography"}}</th>
-                        <th>
-                            {{!-- <a class="item-control item-create" title="Create equipment" data-type="equipment">
-                                <i class="fas fa-plus"></i> Add Equipment</a> --}}
-                        </th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            actor.system.biography
+                            target="system.biography"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+                    {{/if}}
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.BACKGROUND"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedBACKGROUND
+                            target="system.BACKGROUND"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
                     </tr>
 
                     <tr>
+                        <th class="left">{{localize "ActorSheet.PERSONALITY"}}</th>
+                    </tr>
+                    <tr>
                         <td class="left">
-                            {{editor actor.system.biography target="system.biography" rollData=rollData
-                            button=true owner=owner
-                            editable=editable}}
+                            {{editor
+                            enrichedPERSONALITY
+                            target="system.PERSONALITY"
+                            button=true
+                            editable=editable
+                            }}
                         </td>
                     </tr>
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.QUOTE"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedQUOTE
+                            target="system.QUOTE"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.TACTICS"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedTACTICS
+                            target="system.TACTICS"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="left">{{localize "ActorSheet.CAMPAIGN_USE"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedCAMPAIGN_USE
+                            target="system.CAMPAIGN_USE"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+                     <tr>
+                        <th class="left">{{localize "ActorSheet.APPEARANCE"}}</th>
+                    </tr>
+                    <tr>
+                        <td class="left">
+                            {{editor
+                            enrichedAPPEARANCE
+                            target="system.APPEARANCE"
+                            button=true
+                            editable=editable
+                            }}
+                        </td>
+                    </tr>
+
+
                 </table>
 
 

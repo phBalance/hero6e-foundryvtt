@@ -60,7 +60,6 @@ Activating a maneuver from a character sheet will apply OCV and DCV modifiers wi
 - The upload of a .HDC file from Hero Designer is practically a requirement.  You can't create powers, skills, or equipment from scratch.  Character editing is limited within the system.
 - Untested/limited support for vehicles, automations, computers, etc.
 - Power frameworks are partially supported.
-- Endurance use of non-attacking powers is untracked.
 - The following are largely not implemented
   - Adjustment powers (Healing).
   - Attack powers that do not do stun/body damage (Change Environment, Darkness, Dispel, Drain, Entangle, Flash, Images, Mental Illusions, Mind Control, Reflection, Transform).
@@ -81,16 +80,7 @@ The following modules have been successfully tested for compatibility
   - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
 
 ## 5th Edition Support
-This is a 6E framework, however 5E is very similar to 6E and with a few minor changes you may be able to play a 5E game.  A 5E character is detected when you upload a HDC file using one of the 5E Hero Designer character templates.  The following 5E rules are supported:
-- Characteristics
-  - Figured: PD, ED, SPD, REC, END, STUN, OCV/DCV, ECV (is still referred to as OMCV/DMCV)
-  - Comeliness (COM)
-  - Slightly different costs
-- Killing Attack stun multiplier is 1d6-1 (minimum 1)
-- Powers
-  - Armor (Resistant Protection)
-  - Growth
-  - Lack of Weakness (no automation)
+This is a 6E framework, however 5E is very similar to 6E and with a few minor changes you may be able to play a 5E game.  A 5E character is detected when you upload a HDC file using one of the 5E Hero Designer character templates.
 
 ## Frequently Asked Questions and GM suggestions
 1. The Actor Sheet doesn't match HD.
@@ -102,8 +92,7 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
    - You can select multiple targets with shift-t.
 4. I'm unable to change a Characteristics Max number.
    - You likely have a power that is modifying the Max number.  Turn that power off, make the change to Max, then turn power back on.
-   - You can find a list of all characteristic modifications (called Active Effects) on the others tab.
-5. Is there a way to change measuring distance to 1m?
+5. Is there a way to change measuring distance to 1" for 5e campaigns?
    - You can change it scene by scene by opening the scene settings -> grid then edit 'Grid Scale'
 
 ## Screenshots

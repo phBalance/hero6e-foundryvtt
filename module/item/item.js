@@ -209,6 +209,31 @@ export class HeroSystem6eItem extends Item {
         let item = this;
 
         if (!item.system.active) {
+
+            const costEndOnlyToActivate = item.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
+            if (costEndOnlyToActivate) {
+                let end = parseInt(this.system.end);
+                let value = parseInt(this.actor.system.characteristics.end.value);
+                if (end > value) {
+                    ui.notifications.error(`Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.`);
+                    return;
+                }
+
+                await item.actor.update({ 'system.characteristics.end.value': value - end });
+
+                const speaker = ChatMessage.getSpeaker({ actor:item.actor })
+                speaker["alias"] = item.actor.name
+                const chatData = {
+                    user: game.user._id,
+                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    content: `Spent ${end} END to activate ${item.name}`,
+                    whisper: ChatMessage.getWhisperRecipients("GM"),
+                    speaker,
+                }
+
+                await ChatMessage.create(chatData)
+            }
+
             const success = await RequiresASkillRollCheck(this);
             if (!success) {
                 return;
@@ -247,7 +272,7 @@ export class HeroSystem6eItem extends Item {
                 break;
             case "maneuver":
                 await enforceManeuverLimits(this.actor, item.id, item.name)
-                await updateCombatAutoMod(item.actor, item)
+                //await updateCombatAutoMod(item.actor, item)
                 break;
             case "equipment":
                 await item.update({ [attr]: newValue })
@@ -297,72 +322,72 @@ export function getItem(id) {
     return null
 }
 
-async function updateCombatAutoMod(actor, item) {
-    const changes = {}
+// async function updateCombatAutoMod(actor, item) {
+//     const changes = {}
 
-    let ocvEq = 0
-    let dcvEq = '+0'
+//     let ocvEq = 0
+//     let dcvEq = '+0'
 
-    function dcvEquation(dcvEq, newDcv) {
-        if (dcvEq.includes('/') && !newDcv.includes('/')) {
-            // don't modify dcvEq
-        } else if (!dcvEq.includes('/') && newDcv.includes('/')) {
-            dcvEq = newDcv
-        } else if (parseFloat(dcvEq) <= parseFloat(newDcv)) {
-            dcvEq = newDcv
-        } else {
-            dcvEq = Math.round(parseFloat(dcvEq) + parseFloat(newDcv)).toString()
-        }
+//     function dcvEquation(dcvEq, newDcv) {
+//         if (dcvEq.includes('/') && !newDcv.includes('/')) {
+//             // don't modify dcvEq
+//         } else if (!dcvEq.includes('/') && newDcv.includes('/')) {
+//             dcvEq = newDcv
+//         } else if (parseFloat(dcvEq) <= parseFloat(newDcv)) {
+//             dcvEq = newDcv
+//         } else {
+//             dcvEq = Math.round(parseFloat(dcvEq) + parseFloat(newDcv)).toString()
+//         }
 
-        return dcvEq
-    }
+//         return dcvEq
+//     }
 
-    for (const i of actor.items) {
-        if (i.system.active && i.type === 'maneuver') {
-            ocvEq = ocvEq + parseInt(i.system.ocv)
+//     for (const i of actor.items) {
+//         if (i.system.active && i.type === 'maneuver') {
+//             ocvEq = ocvEq + parseInt(i.system.ocv)
 
-            dcvEq = dcvEquation(dcvEq, i.system.dcv)
-        }
+//             dcvEq = dcvEquation(dcvEq, i.system.dcv)
+//         }
 
-        if ((i.type === 'power' || i.type === 'equipment') && ("items" in i.system) && ('maneuver' in i.system.items)) {
-            for (const [key, value] of Object.entries(i.system.items.maneuver)) {
-                if (value.type && value.visible && value.active) {
-                    ocvEq = ocvEq + parseInt(value.ocv)
+//         if ((i.type === 'power' || i.type === 'equipment') && ("items" in i.system) && ('maneuver' in i.system.items)) {
+//             for (const [key, value] of Object.entries(i.system.items.maneuver)) {
+//                 if (value.type && value.visible && value.active) {
+//                     ocvEq = ocvEq + parseInt(value.ocv)
 
-                    dcvEq = dcvEquation(dcvEq, value.dcv)
-                }
-            }
-        }
-    }
+//                     dcvEq = dcvEquation(dcvEq, value.dcv)
+//                 }
+//             }
+//         }
+//     }
 
-    if (isNaN(ocvEq)) {
-        ocvEq = item.system.ocv
-    } else if (ocvEq >= 0) {
-        ocvEq = '+' + ocvEq.toString()
-    } else {
-        ocvEq = ocvEq.toString()
-    }
+//     if (isNaN(ocvEq)) {
+//         ocvEq = item.system.ocv
+//     } else if (ocvEq >= 0) {
+//         ocvEq = '+' + ocvEq.toString()
+//     } else {
+//         ocvEq = ocvEq.toString()
+//     }
 
-    changes['system.characteristics.ocv.autoMod'] = ocvEq
-    changes['system.characteristics.omcv.autoMod'] = ocvEq;
-    changes['system.characteristics.dcv.autoMod'] = dcvEq
-    changes['system.characteristics.dmcv.autoMod'] = dcvEq;
+//     changes['system.characteristics.ocv.autoMod'] = ocvEq
+//     changes['system.characteristics.omcv.autoMod'] = ocvEq;
+//     changes['system.characteristics.dcv.autoMod'] = dcvEq
+//     changes['system.characteristics.dmcv.autoMod'] = dcvEq;
 
-    changes['system.characteristics.ocv.value'] = actor.system.characteristics.ocv.max + parseInt(ocvEq)
-    changes['system.characteristics.omcv.value'] = actor.system.characteristics.omcv.max + parseInt(ocvEq);
+//     changes['system.characteristics.ocv.value'] = actor.system.characteristics.ocv.max + parseInt(ocvEq)
+//     changes['system.characteristics.omcv.value'] = actor.system.characteristics.omcv.max + parseInt(ocvEq);
 
-    if (dcvEq.includes('/')) {
-        changes['system.characteristics.dcv.value'] = Math.round(actor.system.characteristics.dcv.max * (parseFloat(dcvEq.split('/')[0]) / parseFloat(dcvEq.split('/')[1])))
-        changes['system.characteristics.dmcv.value'] = Math.round(actor.system.characteristics.dmcv.max * (parseFloat(dcvEq.split("/")[0]) / parseFloat(dcvEq.split("/")[1])));
-    } else {
-        changes['system.characteristics.dcv.value'] = actor.system.characteristics.dcv.max + parseInt(dcvEq)
-        changes['system.characteristics.dmcv.value'] = actor.system.characteristics.dmcv.max + parseInt(dcvEq);
-    }
+//     if (dcvEq.includes('/')) {
+//         changes['system.characteristics.dcv.value'] = Math.round(actor.system.characteristics.dcv.max * (parseFloat(dcvEq.split('/')[0]) / parseFloat(dcvEq.split('/')[1])))
+//         changes['system.characteristics.dmcv.value'] = Math.round(actor.system.characteristics.dmcv.max * (parseFloat(dcvEq.split("/")[0]) / parseFloat(dcvEq.split("/")[1])));
+//     } else {
+//         changes['system.characteristics.dcv.value'] = actor.system.characteristics.dcv.max + parseInt(dcvEq)
+//         changes['system.characteristics.dmcv.value'] = actor.system.characteristics.dmcv.max + parseInt(dcvEq);
+//     }
 
-    await actor.update(changes)
+//     await actor.update(changes)
 
 
-}
+// }
 
 async function RequiresASkillRollCheck(item) {
     let rar = item.system.modifiers.find(o => o.XMLID === "REQUIRESASKILLROLL");
@@ -384,10 +409,16 @@ async function RequiresASkillRollCheck(item) {
             case "SKILL1PER20":
                 OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
                 let skill = item.actor.items.find(o => o.system.XMLID === OPTION_ALIAS.toUpperCase() || o.name.toUpperCase() === OPTION_ALIAS.toUpperCase());
+                if (!skill && rar.COMMENTS) {
+                    skill = item.actor.items.find(o => o.system.XMLID === rar.COMMENTS.toUpperCase() || o.name.toUpperCase() === rar.COMMENTS.toUpperCase());
+                    if (skill) {
+                        OPTION_ALIAS = rar.COMMENTS;
+                    }
+                }
                 if (skill) {
                     value = parseInt(skill.system.roll);
-                    if (rar.OPTIONID === "SKILL1PER5") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints)/5))
-                    if (rar.OPTIONID === "SKILL1PER20") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints)/20))
+                    if (rar.OPTIONID === "SKILL1PER5") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 5))
+                    if (rar.OPTIONID === "SKILL1PER20") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 20))
 
                     OPTION_ALIAS += ` ${value}-`;
                 } else {
@@ -398,7 +429,14 @@ async function RequiresASkillRollCheck(item) {
 
             case "CHAR":
                 OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
-                if (item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()]) {
+                let char = item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
+                if (!char && rar.COMMENTS) {
+                    char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                    if (char) {
+                        OPTION_ALIAS = rar.COMMENTS;
+                    }
+                }
+                if (char) {
                     value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
                     OPTION_ALIAS += ` ${value}-`;
                 } else {

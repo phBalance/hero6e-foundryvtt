@@ -572,6 +572,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     for (let actor of game.actors) {
         const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
+        // Active Effects
         for (let ae of actor.temporaryEffects) {
 
 
@@ -644,6 +645,49 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
             }
 
 
+        }
+
+        // Out of combat recovery.  When SimpleCalendar is used to advance time.
+        // This simple routine only handles increments of 12 seconds or more.
+        const automation = game.settings.get("hero6efoundryvttv2", "automation");
+        if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
+            if ((parseInt(options) || 0) >= 12 && (
+                parseInt(actor.system.characteristics.end.value) < parseInt(actor.system.characteristics.end.max) ||
+                parseInt(actor.system.characteristics.stun.value) < parseInt(actor.system.characteristics.stun.max))
+            ) {
+                await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+                let multiplier = Math.floor(parseInt(options) / 12);
+                let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
+                actor.system.characteristics.end.value = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
+                actor.system.characteristics.stun.value = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
+                actor.update({ 'system.characteristics.end.value': actor.system.characteristics.end.value, 'system.characteristics.stun.value': actor.system.characteristics.stun.value }, { 'render': true })
+            }
+        }
+
+        // Charges Recover each day
+        if ((parseInt(options) || 0) >= 86400) {
+            const itemsWithCharges = actor.items.filter(o => o.system.charges?.max);
+            let content = "";
+            for (let item of itemsWithCharges) {
+                let value = parseInt(item.system.charges.value);
+                let max = parseInt(item.system.charges.max);
+                if (value < max) {
+                    content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
+                    item.update({ 'system.charges.value': max })
+                }
+
+            }
+
+            if (content) {
+                const chatData = {
+                    user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
+                    whisper: ChatMessage.getWhisperRecipients("GM"),
+                    speaker: ChatMessage.getSpeaker({ actor: actor }),
+                    blind: true,
+                    content: content,
+                }
+                await ChatMessage.create(chatData)
+            }
         }
     }
 

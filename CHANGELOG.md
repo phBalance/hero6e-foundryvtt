@@ -1,3 +1,15 @@
+# Version 3.0.12
+- Active Powers consume END at beginning of phase. May require HDC upload or toggle powers to work on existing actors. [#77](https://github.com/dmdorman/hero6e-foundryvtt/issues/77)
+- Range Penalty applies when targeting tokens. Fixed Set/Brace. 5e range penalties are now based on 1".  [#100](https://github.com/dmdorman/hero6e-foundryvtt/issues/100)
+- Fixed Biography editing. [#233](https://github.com/dmdorman/hero6e-foundryvtt/issues/233)
+- END and STUN recover when time advances (with Simple Calendar) [#228](https://github.com/dmdorman/hero6e-foundryvtt/issues/228)
+- Charges reset each day [#227](https://github.com/dmdorman/hero6e-foundryvtt/issues/227)
+- Maneuvers that are attack-ish now have roll icons instead of checkboxes.  [#102](https://github.com/dmdorman/hero6e-foundryvtt/issues/102)
+- Haymaker support. [#98](https://github.com/dmdorman/hero6e-foundryvtt/issues/98)
+- Initial MOVE BY and MOVE THROUGH support.  Velocity assumes token is at rest at beginning and end of phase.  Velocity can be overwritten. [#193](https://github.com/dmdorman/hero6e-foundryvtt/issues/193)
+- Initial support for 'Only Costs END to Activate'. 
+- AID fix for END.
+
 # Version 3.0.11
 - Drag Ruler units now match grid units of the scene. [#225](https://github.com/dmdorman/hero6e-foundryvtt/issues/225)
 - Initial TRANSFER (5e) support. [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)

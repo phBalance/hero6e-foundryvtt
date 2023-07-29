@@ -296,14 +296,7 @@ export class HeroSystem6eActor extends Actor {
 
 
 
-        if (asAction) {
-            await ChatMessage.create(chatData)
-
-            // Remove stunned condition.
-            // While not technically part of the rules, it is here as a convenience.
-            // For example when Combat Tracker isn't being used.
-            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
-        }
+        
 
         // Endurance Reserve Recovery
         if (!asAction) {
@@ -311,16 +304,18 @@ export class HeroSystem6eActor extends Actor {
             if (enduranceReserve) {
                 let erValue = parseInt(enduranceReserve.system.LEVELS.value);
                 let erMax = parseInt(enduranceReserve.system.LEVELS.max);
-                const power = enduranceReserve.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
-                if (power) {
-                    let erRec = parseInt(power.LEVELS);
-                    let deltaEndReserve = Math.min(erRec, erMax - erValue);
-                    if (deltaEndReserve) {
-                        erValue += deltaEndReserve;
-                        enduranceReserve.system.LEVELS.value = erValue;
-                        updateItemDescription(enduranceReserve);
-                        await enduranceReserve.update({ 'system.LEVELS': enduranceReserve.system.LEVELS, 'system.description': enduranceReserve.system.description });
-                        content += ` ${enduranceReserve.name} +${deltaEndReserve} END.`;
+                if (enduranceReserve.system.powers) {
+                    const power = enduranceReserve.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+                    if (power) {
+                        let erRec = parseInt(power.LEVELS);
+                        let deltaEndReserve = Math.min(erRec, erMax - erValue);
+                        if (deltaEndReserve) {
+                            erValue += deltaEndReserve;
+                            enduranceReserve.system.LEVELS.value = erValue;
+                            updateItemDescription(enduranceReserve);
+                            await enduranceReserve.update({ 'system.LEVELS': enduranceReserve.system.LEVELS, 'system.description': enduranceReserve.system.description });
+                            content += ` ${enduranceReserve.name} +${deltaEndReserve} END.`;
+                        }
                     }
                 }
             }
@@ -331,6 +326,15 @@ export class HeroSystem6eActor extends Actor {
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             content: content,
             speaker: speaker
+        }
+
+        if (asAction) {
+            await ChatMessage.create(chatData)
+
+            // Remove stunned condition.
+            // While not technically part of the rules, it is here as a convenience.
+            // For example when Combat Tracker isn't being used.
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
         }
 
         return content;

@@ -1,7 +1,7 @@
-{{!-- {{ log 'HEROSYS ITEM ATTACK CARD2' this }} --}}
-<form>
-    <div class="hero chat-card item-card attack-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+{{!-- {{ log 'HEROSYS ITEM ATTACK CARD' this }} --}}
+<form data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
         tokenId}}data-token-id="{{tokenId}}" {{/if}}>
+    <div class="hero chat-card item-card attack-card" >
         <header class="card-header flexrow">
             <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
             <h3 class="item-name">{{item.name}}</h3>
@@ -29,6 +29,13 @@
         <label>{{localize "Items.Attack.DcvMod"}}</label>
         <input type="text" name="dcvMod" value="{{item.system.dcv}}" />
     </div>
+
+    {{#if showVelocity}}
+    <div class="form-group">
+        <label>{{localize "Items.Attack.Velocity"}}</label>
+        <input type="text" name="velocity" value="{{velocity}}" title="Typically you assume a starting velocity of 0, accelerate up to half your half-move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided." />
+    </div>
+    {{/if}}
 
 
     {{#if (or item.system.usesStrength item.system.usesTk)}}
