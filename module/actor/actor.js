@@ -311,16 +311,18 @@ export class HeroSystem6eActor extends Actor {
             if (enduranceReserve) {
                 let erValue = parseInt(enduranceReserve.system.LEVELS.value);
                 let erMax = parseInt(enduranceReserve.system.LEVELS.max);
-                const power = enduranceReserve.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
-                if (power) {
-                    let erRec = parseInt(power.LEVELS);
-                    let deltaEndReserve = Math.min(erRec, erMax - erValue);
-                    if (deltaEndReserve) {
-                        erValue += deltaEndReserve;
-                        enduranceReserve.system.LEVELS.value = erValue;
-                        updateItemDescription(enduranceReserve);
-                        await enduranceReserve.update({ 'system.LEVELS': enduranceReserve.system.LEVELS, 'system.description': enduranceReserve.system.description });
-                        content += ` ${enduranceReserve.name} +${deltaEndReserve} END.`;
+                if (enduranceReserve.system.powers) {
+                    const power = enduranceReserve.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+                    if (power) {
+                        let erRec = parseInt(power.LEVELS);
+                        let deltaEndReserve = Math.min(erRec, erMax - erValue);
+                        if (deltaEndReserve) {
+                            erValue += deltaEndReserve;
+                            enduranceReserve.system.LEVELS.value = erValue;
+                            updateItemDescription(enduranceReserve);
+                            await enduranceReserve.update({ 'system.LEVELS': enduranceReserve.system.LEVELS, 'system.description': enduranceReserve.system.description });
+                            content += ` ${enduranceReserve.name} +${deltaEndReserve} END.`;
+                        }
                     }
                 }
             }
