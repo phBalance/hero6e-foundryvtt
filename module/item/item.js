@@ -391,7 +391,7 @@ export function getItem(id) {
 // }
 
 async function RequiresASkillRollCheck(item) {
-    let rar = item.system.modifiers.find(o => o.XMLID === "REQUIRESASKILLROLL");
+    let rar = item.system.modifiers.find(o => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (rar) {
 
         let rollEquation = "3d6";

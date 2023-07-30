@@ -450,6 +450,9 @@ export class HeroSystem6eCombat extends Combat {
         //console.log("_onStartTurn", combatant.name)
         await super._onStartTurn(combatant)
 
+        // Guard
+        if (!combatant) return;
+
         // STUNNING
         // The character remains Stunned and can take no
         // Actions (not even Aborting to a defensive action) until his next
