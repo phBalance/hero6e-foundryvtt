@@ -1,3 +1,8 @@
+# Version 3.0.13
+- Fixed Maneuver OCV/DCV.
+- Velocity estimate uses full move.
+- Fixed import error.
+
 # Version 3.0.12
 - Active Powers consume END at beginning of phase. May require HDC upload or toggle powers to work on existing actors. [#77](https://github.com/dmdorman/hero6e-foundryvtt/issues/77)
 - Range Penalty applies when targeting tokens. Fixed Set/Brace. 5e range penalties are now based on 1".  [#100](https://github.com/dmdorman/hero6e-foundryvtt/issues/100)

@@ -142,7 +142,8 @@ export class HeroSystem6eItem extends Item {
                     case "EGOATTACK":
                     case "AID":
                     case "DRAIN":
-                    //case "AID":
+                    case "AID":
+                    case "STRIKE":
                     case undefined:
                         return await Attack.AttackOptions(this)
 
@@ -221,7 +222,7 @@ export class HeroSystem6eItem extends Item {
 
                 await item.actor.update({ 'system.characteristics.end.value': value - end });
 
-                const speaker = ChatMessage.getSpeaker({ actor:item.actor })
+                const speaker = ChatMessage.getSpeaker({ actor: item.actor })
                 speaker["alias"] = item.actor.name
                 const chatData = {
                     user: game.user._id,
