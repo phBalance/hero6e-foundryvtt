@@ -220,7 +220,7 @@ export function convertToDcFromItem(item, options) {
         let str5 = Math.floor(str / 5)
         dc += str5
         end += Math.max(1, Math.round(str / 10))
-        tags.push({ value: `${str5}DC`, name: 'STR', title: (item.system.XMLID === "MOVEBY") ? 'MoveBy is half STR' : ''  })
+        tags.push({ value: `${str5}DC`, name: 'STR', title: (item.system.XMLID === "MOVEBY") ? 'MoveBy is half STR' : '' })
 
     }
 
@@ -240,20 +240,22 @@ export function convertToDcFromItem(item, options) {
 
 
     // Add in Haymaker to any non-maneuver attack DCV based attack
-    const haymakerManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Haymaker' && o.system.active)
-    if (haymakerManeuver) // && item.type != 'maneuver' && item.system.targets == 'dcv')
-    {
-        if (item.name == "Strike" || item.type != 'maneuver') {
-            if (item.system.targets == 'dcv') {
-                dc += 4;
-                tags.push({ value: `4DC`, name: 'Haymaker' });
+    if (item.actor) {
+        const haymakerManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Haymaker' && o.system.active)
+        if (haymakerManeuver) // && item.type != 'maneuver' && item.system.targets == 'dcv')
+        {
+            if (item.name == "Strike" || item.type != 'maneuver') {
+                if (item.system.targets == 'dcv') {
+                    dc += 4;
+                    tags.push({ value: `4DC`, name: 'Haymaker' });
+                } else {
+                    if (options?.isAction) ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", { localize: true });
+                }
             } else {
-                if (options?.isAction) ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", { localize: true });
+                if (options?.isAction) ui.notifications.warn("Haymaker cannot be combined with another maneuver (except for Strike).", { localize: true });
             }
-        } else {
-            if (options?.isAction) ui.notifications.warn("Haymaker cannot be combined with another maneuver (except for Strike).", { localize: true });
-        }
 
+        }
     }
 
 

@@ -60,13 +60,15 @@ export async function AttackOptions(item) {
         data.showVelocity = true;
         data.velocity = 0;
 
+        const tokens = item.actor.getActiveTokens();
+        const token = tokens[0];
         const combatants = game?.combat?.combatants;
         if (combatants && typeof dragRuler != 'undefined') {
-            const tokens = item.actor.getActiveTokens();
+
             if (tokens.length === 1) {
-                const token = tokens[0];
+                
                 let distance = dragRuler.getMovedDistanceFromToken(token);
-                let speed = dragRuler.getRangesFromSpeedProvider(token)[0].range;
+                let speed = dragRuler.getRangesFromSpeedProvider(token)[1].range;
                 let delta = distance;
                 if (delta > speed / 2) {
                     delta = speed - delta;
@@ -86,6 +88,21 @@ export async function AttackOptions(item) {
                 //     tags.push({ value: `${velocityDC}DC`, name: 'Velocity', title: title })
                 // }
             }
+        }
+
+        // Simplistic velocity calc using dragRuler
+        if (data.velocity === 0) {
+            if (typeof dragRuler != 'undefined') {
+                if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
+                    data.velocity = parseInt(dragRuler.getRangesFromSpeedProvider(token)[1].range || 0);
+                }
+            }
+        }
+
+        // Simplistic velocity calc using running & flight
+        if (data.velocity === 0) {
+            data.velocity = parseInt(item.actor.system.characteristics.running.value || 0);
+            data.velocity = Math.max(data.velocity, parseInt(item.actor.system.characteristics.flight.value || 0));
         }
 
     }
@@ -452,7 +469,7 @@ export async function _onRollDamage(event) {
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
 
-    let { dc, tags } = convertToDcFromItem(item, {isAction: true, ...toHitData});
+    let { dc, tags } = convertToDcFromItem(item, { isAction: true, ...toHitData });
 
 
     let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";

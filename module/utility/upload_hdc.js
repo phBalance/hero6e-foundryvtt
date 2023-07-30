@@ -1838,8 +1838,8 @@ export async function makeAttack(item) {
     let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0;
     const input = item.system.INPUT
 
-    const ocv = parseInt(item.system.OCV) || 0;
-    const dcv = parseInt(item.system.DCV) || 0;
+    const ocv = parseInt(item.system.ocv) || 0;
+    const dcv = parseInt(item.system.dcv) || 0;
 
     // Check if this is a MARTIAL attack.  If so then EXTRA DC's may be present
     if (item.system.XMLID == "MANEUVER") {
