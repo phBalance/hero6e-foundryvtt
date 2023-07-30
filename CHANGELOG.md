@@ -1,3 +1,6 @@
+# Version 3.0.14
+- Fixed issue where some 5e powers were incorrectly calculating END.
+
 # Version 3.0.13
 - Fixed Maneuver OCV/DCV.
 - Velocity estimate uses full move.

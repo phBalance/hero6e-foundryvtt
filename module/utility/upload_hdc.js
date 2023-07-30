@@ -1079,8 +1079,8 @@ function calcBasePointsPlusAdders(system) {
 function calcActivePoints(_basePointsPlusAdders, system) {
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
 
-    // if (system.XMLID == "RKA")
-    //     HEROSYS.log(false, system.XMLID)
+    if (system.XMLID == "ARMOR")
+        HEROSYS.log(false, system.XMLID)
 
     let advantages = 0;
     let advantagesDC = 0;
