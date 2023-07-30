@@ -1,10 +1,10 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
-import { 
-    determineStrengthDamage, determineExtraDiceDamage, 
-    simplifyDamageRoll, getNumberOfEachDice, convertToDC, 
-    convertFromDC, addTerms, handleDamageNegation
+import {
+    determineStrengthDamage, determineExtraDiceDamage,
+    simplifyDamageRoll, getNumberOfEachDice, convertToDC,
+    convertFromDC, addTerms, handleDamageNegation, convertToDcFromItem
 } from "../utility/damage.js"
 
 export function registerDamageFunctionTests(quench) {
@@ -173,7 +173,7 @@ export function registerDamageFunctionTests(quench) {
                 it("1d6", function () {
                     assert.deepEqual(getNumberOfEachDice("1d6"), [1, 0, 0]);
                 });
-                
+
                 it("1d3", function () {
                     assert.deepEqual(getNumberOfEachDice("1d3"), [0, 1, 0]);
                 });
@@ -409,8 +409,8 @@ export function registerDamageFunctionTests(quench) {
                     "isIntermediate": false,
                     "number": 1,
                     "options": {}
-                  }
-                
+                }
+
                 let die, damageResult, die_small, damageResult_small;
 
                 beforeEach(function () {
@@ -423,7 +423,7 @@ export function registerDamageFunctionTests(quench) {
                             { "result": 5, "active": true }
                         ]
                     }
-    
+
                     damageResult = {
                         "terms": [
                             die
@@ -481,7 +481,7 @@ export function registerDamageFunctionTests(quench) {
                             { "result": 3, "active": true }
                         ]
                     }
-                 
+
                     const newDamageResult = await handleDamageNegation(fakeItem_nk, damageResult, { "damageNegationValue": 2 });
 
                     assert.deepEqual(newDamageResult.terms[0].results, newDie.results);
@@ -501,7 +501,7 @@ export function registerDamageFunctionTests(quench) {
                     const newDie = {
                         "results": []
                     }
-                    
+
                     const newDamageResult = await handleDamageNegation(fakeItem_nk, damageResult, { "damageNegationValue": 6 });
 
                     assert.deepEqual(newDamageResult.terms[0].results, newDie.results);
@@ -517,7 +517,7 @@ export function registerDamageFunctionTests(quench) {
                             { "result": 5, "active": true }
                         ]
                     }
-                    
+
                     const expectedDamageResult = {
                         "terms": [
                             newDie,
@@ -547,13 +547,13 @@ export function registerDamageFunctionTests(quench) {
                             { "result": 4, "active": true }
                         ]
                     }
-                    
+
                     const expectedDamageResult = {
                         "total": 11
                     }
-    
+
                     const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult, { "damageNegationValue": 2 });
-    
+
                     assert.equal(newDamageResult.total, expectedDamageResult.total)
                     assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
                     assert.equal(newDamageResult.terms[1].operator, "+")
@@ -569,13 +569,13 @@ export function registerDamageFunctionTests(quench) {
                             { "result": 4, "active": true }
                         ]
                     }
-                    
+
                     const expectedDamageResult = {
                         "total": 10
                     }
-    
+
                     const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult, { "damageNegationValue": 3 });
-    
+
                     assert.equal(newDamageResult.total, expectedDamageResult.total)
                     assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
                 });
@@ -584,13 +584,13 @@ export function registerDamageFunctionTests(quench) {
                     const newDie = {
                         "results": []
                     }
-                    
+
                     const expectedDamageResult = {
                         "total": 0
                     }
-    
+
                     const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 6 });
-    
+
                     assert.equal(newDamageResult.total, expectedDamageResult.total)
                     assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
                 });
@@ -599,13 +599,13 @@ export function registerDamageFunctionTests(quench) {
                     const newDie = {
                         "results": []
                     }
-                    
+
                     const expectedDamageResult = {
                         "total": 1
                     }
-    
+
                     const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 5 });
-    
+
                     assert.equal(newDamageResult.total, expectedDamageResult.total)
                 });
 
@@ -615,13 +615,13 @@ export function registerDamageFunctionTests(quench) {
                             { "result": 1, "active": true }
                         ]
                     }
-                    
+
                     const expectedDamageResult = {
                         "total": 0
                     }
-    
+
                     const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 4 });
-    
+
                     assert.equal(newDamageResult.total, expectedDamageResult.total)
                     assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
                     assert.equal(newDamageResult.terms[1].operator, "-")
@@ -634,17 +634,56 @@ export function registerDamageFunctionTests(quench) {
                             { "result": 1, "active": true }
                         ]
                     }
-                    
+
                     const expectedDamageResult = {
                         "total": 1
                     }
-    
+
                     const newDamageResult = await handleDamageNegation(fakeItem_k, damageResult_small, { "damageNegationValue": 3 });
-    
+
                     assert.equal(newDamageResult.total, expectedDamageResult.total)
                     assert.deepEqual(newDamageResult.terms[0].results, newDie.results)
                 });
+
+                
+
+
             });
+
+            describe("convertToDcFromItem", function () {
+                const item = new HeroSystem6eItem({
+                    name: 'Test',
+                    type: 'attack',
+                    system: {
+                        dice: 1,
+                        extraDice: 'pip',
+                        killing: true
+                    },
+                    parent: actor
+                });
+
+                const item_nk = new HeroSystem6eItem({
+                    name: 'Test',
+                    type: 'attack',
+                    system: {
+                        dice: 1,
+                        extraDice: 'pip',
+                        killing: false,
+                    },
+                    parent: actor
+                });
+
+                //return { dc: dc, tags: tags, end: end };
+
+                it("Killing dc", function () {
+                    assert.equal(convertToDcFromItem(item).dc, 4);
+                });
+
+                it("normal", function () {
+                    assert.equal(convertToDcFromItem(item_nk).dc, 1.20);
+                });
+            });
+
         },
         { displayName: "HERO: Damage Functions" }
     );
