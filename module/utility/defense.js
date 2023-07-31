@@ -1,10 +1,16 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { getPowerInfo } from './util.js'
 
-function determineDefense(targetActor, attackItem) {
+function determineDefense(targetActor, attackItem, options) {
     const attackType = attackItem.system.class
     const piericng = parseInt(attackItem.system.piercing) || 0
     const penetrating = parseInt(attackItem.system.penetrating) || 0
+
+    // The defenses that are active
+    const activeDefenses = targetActor.items.filter(o=> (o.system.subType === 'defense' || o.type === 'defense')
+        && (o.system.active || o.effects.find(o => true)?.disabled === false)
+        && !(options?.ignoreDefenseIds || []).includes(o.id)
+    );
 
 
 
@@ -25,7 +31,7 @@ function determineDefense(targetActor, attackItem) {
     let knockbackResistance = 0;
 
     // DAMAGERESISTANCE (converts PD to rPD)
-    for (const item of targetActor.items.filter(o => o.system.XMLID == "DAMAGERESISTANCE")) {
+    for (const item of activeDefenses.filter(o => o.system.XMLID == "DAMAGERESISTANCE")) {
         const pdLevels = Math.min(PD, parseInt(item.system.PDLEVELS) || 0)
         PD -= pdLevels
         rPD += pdLevels
@@ -44,7 +50,7 @@ function determineDefense(targetActor, attackItem) {
     }
 
     // PD bought as resistant
-    for (const item of targetActor.items.filter(o => o.system.XMLID == "PD" && o.system.active)) {
+    for (const item of activeDefenses.filter(o => o.system.XMLID == "PD")) {
         if (item.system.modifiers.find(o => o.XMLID == 'RESISTANT')) {
             const levels = parseInt(item.system.LEVELS.value) || 0
             PD -= levels
@@ -58,7 +64,7 @@ function determineDefense(targetActor, attackItem) {
     }
 
     // ED bought as resistant
-    for (const item of targetActor.items.filter(o => o.system.XMLID == "ED" && o.system.active)) {
+    for (const item of activeDefenses.filter(o => o.system.XMLID == "ED")) {
         if (item.system.modifiers.find(o => o.XMLID == 'RESISTANT')) {
             const levels = parseInt(item.system.LEVELS.value) || 0
             ED -= levels
@@ -98,15 +104,15 @@ function determineDefense(targetActor, attackItem) {
     }
 
 
-    if ((targetActor.items.size || targetActor.items.length) > 0) {
-        for (let i of targetActor.items) {
+    //if ((targetActor.items.size || targetActor.items.length) > 0) {
+        for (let i of activeDefenses) {
 
             const configPowerInfo = getPowerInfo({ item: i })
             // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
             //     i.subType = 'defense'
             // }
 
-            if ((i.system.subType || i.type) === "defense" && i.system.active) {
+            //if ((i.system.subType || i.type) === "defense" && i.system.active) {
                 let value = parseInt(i.system.value) || 0;
 
                 const xmlid = i.system.XMLID
@@ -325,9 +331,9 @@ function determineDefense(targetActor, attackItem) {
                         }
                         break;
                 }
-            }
+            //}
         }
-    }
+    //}
 
     let defenseValue = 0;
     let resistantValue = 0;

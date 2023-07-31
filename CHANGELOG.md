@@ -1,6 +1,7 @@
 # Version 3.0.14
 - Fixed issue where some 5e powers were incorrectly calculating END.
 - Support for Activation Rolls (similar to Requires a Roll)
+- Initial support for Defenses that have conditional defenses. [#181](https://github.com/dmdorman/hero6e-foundryvtt/issues/181)
 
 # Version 3.0.13
 - Fixed Maneuver OCV/DCV.

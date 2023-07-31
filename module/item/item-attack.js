@@ -66,7 +66,7 @@ export async function AttackOptions(item) {
         if (combatants && typeof dragRuler != 'undefined') {
 
             if (tokens.length === 1) {
-                
+
                 let distance = dragRuler.getMovedDistanceFromToken(token);
                 let speed = dragRuler.getRangesFromSpeedProvider(token)[1].range;
                 let delta = distance;
@@ -635,6 +635,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
     const actor = item.actor
+
+
+
     const template = "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs"
 
     const token = canvas.tokens.get(tokenId)
@@ -642,6 +645,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
+
+
 
     // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
     let newTerms = JSON.parse(damageData.terms);
@@ -661,15 +666,90 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
     let newRoll = Roll.fromTerms(newTerms)
 
-
-
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
+
+
+
+
+
+    // Check for conditional defenses
+    let ignoreDefenseIds = []
+    const conditionalDefenses = token.actor.items.filter(o => (o.system.subType || o.system.type) === "defense" &&
+        (o.system.active || o.effects.find(o => true)?.disabled === false) &&
+        o.system.modifiers.find(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID))
+    )
+    if (conditionalDefenses.length > 0) {
+        const template2 = "systems/hero6efoundryvttv2/templates/attack/item-conditional-defense-card.hbs"
+
+        let options = [];
+        for (let defense of conditionalDefenses) {
+            let option = { id: defense.id, name: defense.name, checked: true, conditions: "" }
+            // for (let modifier of defense.system.modifiers.filter(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID))) {
+            //     option.conditions += modifier.OPTION_ALIAS;
+            //     if (modifier.COMMENTS) {
+            //         option.conditions += ` (${modifier.COMMENTS})`;
+            //     }
+            //     option.conditions += ". ";
+            // }
+            option.description = defense.system.description;
+            options.push(option);
+        }
+
+        let data = {
+            token,
+            item,
+            conditionalDefenses: options,
+        }
+
+        const html = await renderTemplate(template2, data)
+
+        //let cancelled = true;
+
+        async function getDialogOutput() {
+            return new Promise(resolve => {
+                const dataConditionalDefenses = {
+                    title: item.actor.name + " conditional defenses",
+                    content: html,
+                    buttons: {
+                        normal: {
+                            label: "Apply Damage",
+                            callback: (html) => { resolve(html.find("form input")) }
+                            // async function (html) {
+                            // //cancelled = false;
+                            // let inputs = html.find("form input");
+                            // return inputs;
+                            // // for (let input of inputs) {
+                            // //     if (input.checked) {
+                            // //         ignoreDefenseIds.push(input.id);
+                            // //     }
+                            // // }
+                        },
+                        cancel: {
+                            label: "cancel",
+                            callback: () => { resolve(null) }
+                        }
+                    },
+                    default: "normal",
+                    close: () => { resolve(null) }
+                }
+                new Dialog(dataConditionalDefenses).render(true)
+            });
+        }
+
+        const inputs = await getDialogOutput();
+        if (inputs === null) return;
+        for (let input of inputs) {
+            if (!input.checked) {
+                ignoreDefenseIds.push(input.id);
+            }
+        }
+    }
 
     // -------------------------------------------------
     // determine active defenses
     // -------------------------------------------------
     let defense = "";
-    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(token.actor, item)
+    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(token.actor, item, {ignoreDefenseIds})
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); "
     }
