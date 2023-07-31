@@ -738,10 +738,33 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
         const inputs = await getDialogOutput();
         if (inputs === null) return;
+
+        let names = [];
         for (let input of inputs) {
             if (!input.checked) {
                 ignoreDefenseIds.push(input.id);
+                names.push(token.actor.items.get(input.id).name);
             }
+        }
+
+        if (names.length > 0) {
+            let content = `The following defenses were not applied to ${token.actor.name}:<ul>`;
+            for (let name of names) {
+                content += `<li>${name}</li>`
+            }
+            content += "</ul>";
+
+            const speaker = ChatMessage.getSpeaker({ actor: token.actor })
+            speaker["alias"] = token.actor.name
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content,
+                whisper: ChatMessage.getWhisperRecipients("GM"),
+                speaker,
+            }
+
+            await ChatMessage.create(chatData)
         }
     }
 
@@ -749,7 +772,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // determine active defenses
     // -------------------------------------------------
     let defense = "";
-    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(token.actor, item, {ignoreDefenseIds})
+    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(token.actor, item, { ignoreDefenseIds })
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); "
     }

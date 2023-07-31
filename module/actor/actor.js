@@ -177,14 +177,24 @@ export class HeroSystem6eActor extends Actor {
         let content = "";
 
         if (changed?.system?.characteristics?.stun) {
-            content = `STUN from ${this.system.characteristics.stun.value} to ${changed.system.characteristics.stun.value}`
+            if (parseInt(this.system.characteristics.stun.value) != parseInt(changed.system.characteristics.stun.value))
+            {
+                content = `STUN from ${this.system.characteristics.stun.value} to ${changed.system.characteristics.stun.value}`
+            } else {
+                content = `STUN changed to ${changed.system.characteristics.stun.value}`
+            }
             if (changed.system.characteristics.stun.value === this.system.characteristics.stun.max) {
                 content += " (at max)";
             }
         }
 
         if (changed?.system?.characteristics?.body) {
-            content = `BODY from ${this.system.characteristics.body.value} to ${changed.system.characteristics.body.value}`
+            if (parseInt(this.system.characteristics.body.value) != parseInt(changed.system.characteristics.body.value))
+            {
+                content = `BODY from ${this.system.characteristics.body.value} to ${changed.system.characteristics.body.value}`
+            } else {
+                content = `BODY changed to ${changed.system.characteristics.body.value}`
+            }
             if (changed.system.characteristics.body.value === this.system.characteristics.body.max) {
                 content += " (at max)";
             }
