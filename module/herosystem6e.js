@@ -701,7 +701,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                         }
                     }
                 }
-                
+
             }
 
 
@@ -721,7 +721,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 await ChatMessage.create(chatData)
             }
 
-            
+
 
         }
 
@@ -732,15 +732,23 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
         const automation = game.settings.get("hero6efoundryvttv2", "automation");
         if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
 
+
             if (multiplier > 0 && (
                 parseInt(actor.system.characteristics.end.value) < parseInt(actor.system.characteristics.end.max) ||
                 parseInt(actor.system.characteristics.stun.value) < parseInt(actor.system.characteristics.stun.max))
             ) {
-                await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
-                let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
-                actor.system.characteristics.end.value = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
-                actor.system.characteristics.stun.value = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
-                actor.update({ 'system.characteristics.end.value': actor.system.characteristics.end.value, 'system.characteristics.stun.value': actor.system.characteristics.stun.value }, { 'render': true })
+
+                // If this is an NPC and their STUN <= 0 then leave them be.
+                // Typically, you should only use the Recovery Time Table for
+                // PCs. Once an NPC is Knocked Out below the -10 STUN level
+                // he should normally remain unconscious until the fight ends.
+                if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) >-10) {
+                    await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+                    let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
+                    actor.system.characteristics.end.value = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
+                    actor.system.characteristics.stun.value = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
+                    actor.update({ 'system.characteristics.end.value': actor.system.characteristics.end.value, 'system.characteristics.stun.value': actor.system.characteristics.stun.value }, { 'render': true })
+                }
             }
         }
 
