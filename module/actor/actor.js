@@ -172,32 +172,43 @@ export class HeroSystem6eActor extends Actor {
 
         //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
 
+
+
         if (options.hideChatMessage || !options.render) return;
 
         let content = "";
 
         if (changed?.system?.characteristics?.stun) {
-            if (parseInt(this.system.characteristics.stun.value) != parseInt(changed.system.characteristics.stun.value))
-            {
-                content = `STUN from ${this.system.characteristics.stun.value} to ${changed.system.characteristics.stun.value}`
+            let valueT = parseInt(this.system.characteristics.stun.value);
+            let valueC = parseInt(changed.system.characteristics.stun.value);
+            let valueM = parseInt(this.system.characteristics.stun.max);
+            if (valueT != valueC) {
+                content = `STUN from ${valueT} to ${valueC}`
             } else {
-                content = `STUN changed to ${changed.system.characteristics.stun.value}`
+                content = `STUN changed to ${valueC}`
             }
-            if (changed.system.characteristics.stun.value === this.system.characteristics.stun.max) {
+            if (valueC === valueM) {
                 content += " (at max)";
             }
+
+            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
+
         }
 
         if (changed?.system?.characteristics?.body) {
-            if (parseInt(this.system.characteristics.body.value) != parseInt(changed.system.characteristics.body.value))
-            {
-                content = `BODY from ${this.system.characteristics.body.value} to ${changed.system.characteristics.body.value}`
+            let valueT = parseInt(this.system.characteristics.body.value);
+            let valueC = parseInt(changed.system.characteristics.body.value);
+            let valueM = parseInt(this.system.characteristics.body.max);
+            if (valueT != valueC) {
+                content = `BODY from ${valueT} to ${valueC}`
             } else {
-                content = `BODY changed to ${changed.system.characteristics.body.value}`
+                content = `BODY changed to ${valueC}`
             }
-            if (changed.system.characteristics.body.value === this.system.characteristics.body.max) {
+            if (valueC === valueM) {
                 content += " (at max)";
             }
+
+            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0xFF1111' });
         }
 
         if (content) {
@@ -306,7 +317,7 @@ export class HeroSystem6eActor extends Actor {
 
 
 
-        
+
 
         // Endurance Reserve Recovery
         if (!asAction) {
@@ -373,6 +384,38 @@ export class HeroSystem6eActor extends Actor {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Display changes to health as scrolling combat text.
+     * Adapt the font size relative to the Actor's HP total to emphasize more significant blows.
+     * @param {*} change 
+     * @param {*} options 
+     */
+    _displayScrollingChange(change, options) {
+        if (!change) return;
+        const tokens = this.getActiveTokens();
+        if (!tokens) return;
+        const token = tokens[0];
+        if (!token) return;
+        options = options || {};
+
+        let fontSize = 50;
+        if (options.max) {
+            fontSize += Math.floor(Math.abs(change) / options.max * fontSize);
+        }
+
+        canvas.interface.createScrollingText(token.center, change.signedString(), {
+            anchor: (change < 0) ? CONST.TEXT_ANCHOR_POINTS.BOTTOM : CONST.TEXT_ANCHOR_POINTS.TOP,
+            direction: (change < 0) ? 1 : 2,
+            fontSize: Math.clamped(fontSize, 50, 100),
+            fill: options?.fill || "0xFFFFFF",
+            stroke: options?.stroke || 0x00000000,
+            strokeThickness: 4,
+            jitter: 0.25
+        });
+
+
     }
 
 }

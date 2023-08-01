@@ -702,7 +702,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                         let bodyValue = parseInt(actor.system.characteristics.body.value);
                         let bodyMax = parseInt(actor.system.characteristics.body.max);
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
-                        actor.update({ 'system.characteristics.body.value': bodyValue });
+                        await actor.update({ 'system.characteristics.body.value': bodyValue });
 
                         if (bodyValue === bodyMax) {
                             ae.delete();
@@ -767,7 +767,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
                     actor.system.characteristics.end.value = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
                     actor.system.characteristics.stun.value = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
-                    actor.update({ 'system.characteristics.end.value': actor.system.characteristics.end.value, 'system.characteristics.stun.value': actor.system.characteristics.stun.value }, { 'render': true })
+                    await actor.update({ 'system.characteristics.end.value': actor.system.characteristics.end.value, 'system.characteristics.stun.value': actor.system.characteristics.stun.value }, { 'render': true })
                 }
             }
         }

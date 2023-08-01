@@ -46,3 +46,5 @@ export function getModifierInfo(options) {
     const actor = options?.item?.actor || options?.actor
     return CONFIG.HERO.ModifierOverride[xmlid]
 }
+
+
