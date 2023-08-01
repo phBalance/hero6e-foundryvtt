@@ -5,6 +5,7 @@
 - Improved Endurance/Stun (all) and Body (PCs only) recovery out of combat.  NPCs stop stun recovery once they are below -10 stun. PC stun recovery below -10 is still every phase, but should be using the Recovery Time Table (future improvement). Expected to use Simple Calendar to advance time out of combat.
 - Active Effects split out into Temporary, Constant, or Persistent. Where Constant and Persistent largely match the HERO power description; and are typically always on (such as most defenses).  Temporary is for effects with a limited duration (such as AID). May require HDC upload on existing actors for proper assignment. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
 - Combat Skilil Levels (CSL) can be changed within the Roll to Hit dialog. [#189](https://github.com/dmdorman/hero6e-foundryvtt/issues/189)
+- Initial support for DCV penalties associated with some attacks, that last until actors next phase. [#103](https://github.com/dmdorman/hero6e-foundryvtt/issues/103)
 
 # Version 3.0.13
 - Fixed Maneuver OCV/DCV.

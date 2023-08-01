@@ -156,7 +156,7 @@ async function _processAttackOptions(item, form) {
     const checked = form.querySelectorAll(".combat-skill-levels input:checked");
     if (csl && checked) {
         let updateRequired = false;
-        for(let input of checked) {
+        for (let input of checked) {
             let m = input.name.match(/\.(\w+)\.(\d+)/);
             let name = m[1];
             let idx = m[2];
@@ -167,9 +167,11 @@ async function _processAttackOptions(item, form) {
             }
         }
         if (updateRequired) {
-            await csl.skill.update({ 'system.csl' : csl.skill.system.csl});
+            await csl.skill.update({ 'system.csl': csl.skill.system.csl });
         }
     }
+
+
 
     await AttackToHit(item, options)
 }
@@ -206,10 +208,6 @@ export async function AttackToHit(item, options) {
         rollEquation = modifyRollEquation(rollEquation, ocvMod);
         tags.push({ value: ocvMod, name: item.name })
     }
-
-    // const autoMod = parseInt(item.actor.system.characteristics.ocv.autoMod) || 0
-    // if (autoMod != 0) {
-    //     rollEquation = modifyRollEquation(rollEquation, autoMod);
 
     // Set +1 OCV
     const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
@@ -260,19 +258,27 @@ export async function AttackToHit(item, options) {
         // Make sure we don't already have this activeEffect
         let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find(o => o.origin === item.uuid);
         if (!prevActiveEffect) {
+
+            // Estimate of how many seconds the DCV penalty lasts (until next phase).
+            // In combat.js#_onStartTurn we remove this AE for exact timing.
+            let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
+
             let activeEffect = {
-                label: `${item.name} ${("+" + dcv).replace("+-", "-")} DCV`,
+                label: `${item.name} ${("+" + -dcv).replace("+-", "-")} DCV`,
                 icon: "icons/svg/downgrade.svg",
-                origin: item.uuid,
                 changes: [
-                    { key: "system.characteristics.dcv.value", value: dcv, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                    { key: "system.characteristics.dcv.value", value: -dcv, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
                 ],
+                origin: item.uuid,
                 duration: {
-                    type: "nextPhase"
+                    seconds: seconds,
                 },
-                transfer: true,
+                flags: {
+                    nextPhase: true,
+                }
             }
-            //await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            //await item.addActiveEffect(activeEffect);
+            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
         }
 
     }

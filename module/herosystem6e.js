@@ -633,6 +633,18 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
             let fade = 0;
             let name = ae.name;
 
+            // Determein XMLID, ITEM, ACTOR
+            let origin = await fromUuid(ae.origin);
+            let item = origin instanceof HeroSystem6eItem ? origin : null;
+            let actor = origin instanceof HeroSystem6eActor ? origin : item?.actor;
+            let XMLID = ae.flags.XMLID || item?.system?.XMLID;
+
+            let powerInfo = getPowerInfo({ actor: actor, xmlid: XMLID});
+
+            if (!powerInfo && game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+                return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
+            }
+
             // With Simple Calendar you can move time ahead in large steps.
             // Need to loop as multiple fades may be required.
             let d = ae._prepareDuration();
@@ -643,13 +655,12 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 d = ae._prepareDuration();
                 await ae.update({ duration: ae.duration });
 
-
                 // Fade by 5 ActivePoints
                 let _fade = Math.min(ae.flags.activePoints, 5);
                 ae.flags.activePoints -= _fade;
                 fade += _fade;
 
-                if (ae.changes.length > 0) {
+                if (ae.changes.length > 0 && ae.flags.target && powerInfo && powerType.toLowerCase().includes("adjustment")) {
                     let value = parseInt(ae.changes[0].value);
                     let XMLID = ae.flags.XMLID;
                     let target = ae.flags.target;
@@ -699,7 +710,16 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                         } else {
                             //await ae.update({ duration: ae.duration });
                         }
+                    } else {
+
+                        // Default is to delete the expired AE
+                        if (powerInfo) {
+                            ae.delete();
+                        }
+                        
                     }
+
+                    
                 }
 
             }
