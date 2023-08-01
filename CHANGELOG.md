@@ -1,9 +1,9 @@
 # Version 3.0.14
 - Fixed issue where some 5e powers were incorrectly calculating END.
 - Support for Activation Rolls (similar to Requires a Roll)
-- Initial support for conditional Defenses (Only Works Against & Conditional Power). [#181](https://github.com/dmdorman/hero6e-foundryvtt/issues/181)
+- Initial support for conditional Defenses (Only Works Against & Conditional Power). GM will be prompted to select conditional defense when applying damage.  [#181](https://github.com/dmdorman/hero6e-foundryvtt/issues/181)
 - Endurance and Body (PCs only) recover out of combat.  Expected to use Simple Calendar to advance time out of combat.
-- Active Effects split out into Temporary, Constant, or Persistent.  May require HDC upload on existing actors for proper detection. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
+- Active Effects split out into Temporary, Constant, or Persistent. Where Constant and Persistent largely match the HERO power description; and are typically always on (such as most defenses).  Temporary is for effects with a limited duration (such as AID). May require HDC upload on existing actors for proper assignment. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
 
 # Version 3.0.13
 - Fixed Maneuver OCV/DCV.

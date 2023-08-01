@@ -678,7 +678,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         (o.system.active || o.effects.find(o => true)?.disabled === false) &&
         o.system.modifiers.find(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID))
     )
-    if (conditionalDefenses.length > 0) {
+    if (conditionalDefenses.length > 0 && !["AID"].includes(item.system.XMLID)) {
         const template2 = "systems/hero6efoundryvttv2/templates/attack/item-conditional-defense-card.hbs"
 
         let options = [];

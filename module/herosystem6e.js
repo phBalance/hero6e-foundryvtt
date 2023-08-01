@@ -784,7 +784,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     // Notify GM when this is a concern.
     const deltaMs = new Date() - start
     if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting') && deltaMs > 100) {
-        return ui.notifications.warn(`updateWorldTime took ${deltaMs} ms`);
+        return ui.notifications.warn(`updateWorldTime took ${deltaMs} ms.  This routine handles AID/DRAIN fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occures on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`);
     }
 
 });
