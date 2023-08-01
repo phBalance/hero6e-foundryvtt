@@ -264,10 +264,10 @@ export async function AttackToHit(item, options) {
             let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
 
             let activeEffect = {
-                label: `${item.name} ${("+" + -dcv).replace("+-", "-")} DCV`,
-                icon: "icons/svg/downgrade.svg",
+                label: `${item.name} ${("+" + dcv).replace("+-", "-")} DCV`,
+                icon: (dcv) < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
                 changes: [
-                    { key: "system.characteristics.dcv.value", value: -dcv, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                    { key: "system.characteristics.dcv.value", value: dcv, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
                 ],
                 origin: item.uuid,
                 duration: {
