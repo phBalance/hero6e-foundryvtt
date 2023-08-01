@@ -74,19 +74,7 @@ export async function AttackOptions(item) {
                     delta = speed - delta;
                 }
                 data.velocity = delta * 5;
-                // velocityDC = Math.floor(velocity / 10);
-                // if (velocityDC > 0) {
-                //     dc += velocityDC;
-                //     let title = `Started at 0 velocity.`;
-                //     if (delta === distance) {
-                //         title += `Moved ${distance}m.`;
-                //     }
-                //     if (delta != distance) {
-                //         title += ` Increasing velocity over ${speed / 2}m, then decreasing velocity.`;
-                //     }
-                //     title += `<br>Expected to move ${delta}m+ before end of phase to stop at 0 velocity (completing the Move By)`;
-                //     tags.push({ value: `${velocityDC}DC`, name: 'Velocity', title: title })
-                // }
+
             }
         }
 
@@ -110,6 +98,23 @@ export async function AttackOptions(item) {
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
+    }
+
+    // Combat Skill Levels
+    const csl = CombatSkillLevelsForAttack(item);
+    if (csl && csl.skill) {
+        let _ocv = csl.omcv > 0 ? 'omcv' : 'ocv';
+        data.cslChoices = { [_ocv]: _ocv };
+        if (csl.skill.system.OPTION != "SINGLE") {
+            data.cslChoices.dcv = "dcv";
+            data.cslChoices.dc = "dc";
+        }
+
+        // CSL radioBoxes names
+        data.csl = []
+        for (let c = 0; c < parseInt(csl.skill.system.LEVELS.value); c++) {
+            data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl[c] })
+        }
     }
 
     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs"
@@ -144,6 +149,26 @@ async function _processAttackOptions(item, form) {
     let options = {}
     for (const [key, value] of formData) {
         options[key] = value
+    }
+
+    // Combat Skill Levels (update SKILL if changed)
+    const csl = CombatSkillLevelsForAttack(item);
+    const checked = form.querySelectorAll(".combat-skill-levels input:checked");
+    if (csl && checked) {
+        let updateRequired = false;
+        for(let input of checked) {
+            let m = input.name.match(/\.(\w+)\.(\d+)/);
+            let name = m[1];
+            let idx = m[2];
+
+            if (csl.skill.system.csl[idx] != input.value) {
+                csl.skill.system.csl[idx] = input.value;
+                updateRequired = true;
+            }
+        }
+        if (updateRequired) {
+            await csl.skill.update({ 'system.csl' : csl.skill.system.csl});
+        }
     }
 
     await AttackToHit(item, options)
@@ -474,46 +499,6 @@ export async function _onRollDamage(event) {
 
     let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";
 
-    //let tags = []
-
-    // BASE ATTACK
-    // let baseTag = ""
-    // if (parseInt(item.system.dice) > 0) {
-    //     //tags.push({ value: item.system.dice + "d6", name: "base" })
-    //     baseTag = item.system.dice + "d6";
-    // }
-    // const extraDiceDamage = determineExtraDiceDamage(item)
-    // if (extraDiceDamage !== "") {
-    //     //tags.push({ value: extraDiceDamage, name: "extraDice" })
-    //     damageRoll += extraDiceDamage
-    //     baseTag += extraDiceDamage;
-    // }
-    // tags.push({ value: baseTag || 0, name: item.name })
-
-    // const strDamage = determineStrengthDamage(item, toHitData.effectivestr)
-    // if (strDamage) {
-    //     tags.push({ value: damageRollToTag(strDamage), name: "strength" })
-    //     damageRoll += strDamage
-    // }
-
-
-
-    // const csl = CombatSkillLevelsForAttack(item)
-    // if (csl && csl.dc > 0) {
-
-    //     let cslDamage = csl.dc + "d6"
-    //     if (item.system.killing) {
-    //         cslDamage = Math.floor(csl.dc / 3) + "d6";
-    //         if (csl.dc % 3 >= 0.5) {
-    //             cslDamage += " + 1d3"
-    //         } else if (csl.dc % 3 >= 0.2) {
-    //             cslDamage += " + 1"
-    //         }
-    //     }
-
-    //     tags.push({ value: cslDamage, name: csl.item.name })
-    //     damageRoll += cslDamage
-    // }
 
     damageRoll = simplifyDamageRoll(damageRoll)
 
