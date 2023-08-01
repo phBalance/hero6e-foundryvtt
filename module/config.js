@@ -379,24 +379,24 @@ HERO.movementPowers = {
 HERO.powers = {
 
     // Characteristics (will likely use active effects for these)
-    "STR": { powerType: ["characteristic"], costEnd: true },
-    "DEX": { powerType: ["characteristic"] },
-    "CON": { powerType: ["characteristic"] },
-    "INT": { powerType: ["characteristic"] },
-    "EGO": { powerType: ["characteristic"] },
-    "PRE": { powerType: ["characteristic"] },
-    "OCV": { powerType: ["characteristic"] },
-    "DCV": { powerType: ["characteristic"] },
-    "OMCV": { powerType: ["characteristic"] },
-    "DMCV": { powerType: ["characteristic"] },
-    "SPD": { powerType: ["characteristic"] },
-    "PD": { powerType: ["characteristic", "defense"] },
-    "ED": { powerType: ["characteristic", "defense"] },
-    "REC": { powerType: ["characteristic"] },
-    "END": { powerType: ["characteristic"] },
-    "BODY": { powerType: ["characteristic"] },
-    "STUN": { powerType: ["characteristic"] },
-    "COM": { powerType: ["characteristic"] },
+    "STR": { powerType: ["characteristic"], duration: "persistent", costEnd: true },
+    "DEX": { powerType: ["characteristic"], duration: "persistent" },
+    "CON": { powerType: ["characteristic"], duration: "persistent" },
+    "INT": { powerType: ["characteristic"], duration: "persistent" },
+    "EGO": { powerType: ["characteristic"], duration: "persistent" },
+    "PRE": { powerType: ["characteristic"], duration: "persistent" },
+    "OCV": { powerType: ["characteristic"], duration: "persistent" },
+    "DCV": { powerType: ["characteristic"], duration: "persistent" },
+    "OMCV": { powerType: ["characteristic"], duration: "persistent" },
+    "DMCV": { powerType: ["characteristic"], duration: "persistent" },
+    "SPD": { powerType: ["characteristic"], duration: "persistent" },
+    "PD": { powerType: ["characteristic", "defense"], duration: "persistent" },
+    "ED": { powerType: ["characteristic", "defense"], duration: "persistent" },
+    "REC": { powerType: ["characteristic"], duration: "persistent" },
+    "END": { powerType: ["characteristic"], duration: "persistent" },
+    "BODY": { powerType: ["characteristic"], duration: "persistent" },
+    "STUN": { powerType: ["characteristic"], duration: "persistent" },
+    "COM": { powerType: ["characteristic"], duration: "persistent" },
 
     // Misc
     "CLINGING": { powerType: ["standard"] },
@@ -515,7 +515,7 @@ HERO.powers = {
         costEnd: false,
         costPerLevel: 0.25,
     },
-    
+
 
 
 
@@ -627,7 +627,7 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 1,
     },
-    "INVISIBILITY": { 
+    "INVISIBILITY": {
         name: "Invisibility",
         powerType: ["sense-affecting"],
         percievability: "Special",
@@ -910,7 +910,7 @@ HERO.ModifierOverride = {
     "DIMENSIONS": { BASECOST: 5 },
     "DOESBODY": { dc: true },
     "DOUBLEKB": { dc: true },
-    "ENDURANCERESERVEREC": {BASECOST: 2/3},
+    "ENDURANCERESERVEREC": { BASECOST: 2 / 3 },
     "ENERGY": { BASECOST: 5 }, // DAMAGENEGATION
     "HARDENED": { BASECOST: 0.25 },
     "IMPENETRABLE": { BASECOST: 0.25 },

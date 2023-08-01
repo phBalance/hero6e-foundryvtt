@@ -2341,6 +2341,9 @@ export async function createEffects(itemData, actor) {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
             ],
+            flags: {
+                XMLID: xmlid.toUpperCase() || itemData.system.XMLID
+            },
             disabled: !itemData.system.AFFECTS_TOTAL,
             transfer: true,
         }

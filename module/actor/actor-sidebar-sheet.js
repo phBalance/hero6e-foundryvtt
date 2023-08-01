@@ -481,7 +481,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         data.defense = defense
 
         // Get all applicable effects (from actor and all items)
-        data.allApplicableEffects = Array.from(this.actor.allApplicableEffects()).sort((a, b) => a.name.localeCompare(b.name))
+        data.allTemporaryEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> o.duration.duration).sort((a, b) => a.name.localeCompare(b.name))
+        data.allConstantEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> !o.duration.duration && (!o.flags?.XMLID || getPowerInfo({xmlid: o.flags?.XMLID, actor: this.actor})?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
+        data.allPersistentEffects = Array.from(this.actor.allApplicableEffects()).filter(o=> !o.duration.duration && o.flags?.XMLID && getPowerInfo({xmlid: o.flags?.XMLID, actor: this.actor})?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
 
         return data
     }
