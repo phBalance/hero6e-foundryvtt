@@ -842,6 +842,7 @@ HERO.powers = {
         costPerLevel: 1 / 5,
     },
     "CUSTOMPOWER": { powerType: ["custom"] },
+    "[naturalBodyHealing]": {},
 }
 
 HERO.powers5e = {
