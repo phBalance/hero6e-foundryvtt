@@ -641,12 +641,14 @@ HERO.powers = {
     "FORCEWALL": {
         powerType: ["defense"],
         name: "Barrier",
+        duration: "Instant",
         costEnd: true,
         costPerLevel: 3 / 2,
     }, // AKA BARRIER
     "FORCEFIELD": {
         powerType: ["defense"],
         name: "Resistant Protection",
+        duration: "Persistent",
         costPerLevel: 3 / 2
     },  // AKA RESISTANT PROTECTION
     "FLASHDEFENSE": {
@@ -662,6 +664,11 @@ HERO.powers = {
     "MENTALDEFENSE": {
         powerType: ["defense", "special"],
         name: "Mental Defense",
+        percievability: "Imperceptible",
+        target: "self only",
+        range: "self",
+        costEnd: false,
+        duration: "Persistent",
         costPerLevel: 1
     },
     "POWERDEFENSE": {
@@ -746,7 +753,10 @@ HERO.powers = {
     },
 
     // Powers can include Talents
-    "COMBAT_LUCK": { powerType: ["talent", "defense"], costPerLevel: 6 },
+    "COMBAT_LUCK": { 
+        powerType: ["talent", "defense"], 
+        duration: "constant",  // behaves like a constant power
+        costPerLevel: 6 },
     "COMBAT_SENSE": {
         powerType: ["talent"],
         name: "Combat Sense",
@@ -842,7 +852,7 @@ HERO.powers = {
         costPerLevel: 1 / 5,
     },
     "CUSTOMPOWER": { powerType: ["custom"] },
-    "[naturalBodyHealing]": {},
+    "naturalBodyHealing": {},
 }
 
 HERO.powers5e = {
@@ -870,6 +880,7 @@ HERO.powers5e = {
     "ARMOR": {
         powerType: ["defense"],
         name: "Resistant Protection",
+        duration: "Persistent",
         costPerLevel: 3 / 2
     },  // AKA RESISTANT PROTECTION
     "DAMAGERESISTANCE": {
@@ -885,6 +896,7 @@ HERO.powers5e = {
     "FORCEFIELD": {
         powerType: ["defense"],
         name: "Resistant Protection",
+        duration: "Constant",
         costEnd: true,
         costPerLevel: 3 / 2
     },

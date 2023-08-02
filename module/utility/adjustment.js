@@ -11,9 +11,9 @@ export function AdjustmentSources(actor) {
     const powers = (!actor || actor.system.is5e)  ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     for (const key in powers) {
         if (
-            !powers[key].powerType.includes("skill") &&
-            !powers[key].powerType.includes("talent") &&
-            !powers[key].powerType.includes("framework")
+            !powers[key].powerType?.includes("skill") &&
+            !powers[key].powerType?.includes("talent") &&
+            !powers[key].powerType?.includes("framework")
         ) {
             choices[key.toUpperCase()] = key.toUpperCase();
         }
@@ -44,7 +44,8 @@ export function AdjustmentSources(actor) {
 
 export function AdjustmentMultiplier(XMLID) {
     if (!XMLID) return 1;
+    if (!CONFIG.HERO.powers5e[XMLID]) return 1;
     if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
-    if (CONFIG.HERO.powers5e[XMLID].powerType.includes("defense")) return 2;
+    if (CONFIG.HERO.powers5e[XMLID].powerType?.includes("defense")) return 2;
     return 1;
 }

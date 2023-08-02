@@ -859,7 +859,7 @@ export function XmlToItemData(xml, type) {
 
     // Make sure all defenses are enabled (if they don't have charges or AFFECTS_TOTAL = "No")
     if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-        if (systemData.charges?.value > 0 || systemData.AFFECTS_TOTAL === false) {
+        if (systemData.charges?.value > 0 || systemData.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
             systemData.active = false;
         } else {
             systemData.active = true;

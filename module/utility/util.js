@@ -31,11 +31,24 @@ export function getPowerInfo(options) {
         powerInfo = CONFIG.HERO.powers5e[xmlid] || powerInfo
     }
 
+    if (!powerInfo && options?.item?.type == "maneuver") {
+        powerInfo = {
+            powerType: ["maneuver"],
+            percievability: "obvious",
+            duration: "Instant",
+            costEnd: false,
+            target: "target's dcv",
+        }
+    }
 
 
     if (powerInfo) {
         powerInfo.xmlid = xmlid;
     }
+
+    // LowerCase
+    if (powerInfo?.duration) powerInfo.duration = powerInfo.duration.toLowerCase();
+
     return powerInfo
 }
 

@@ -595,7 +595,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     // All actors plus any unlinked actors in active scene
     let actors = Array.from(game.actors);
     for (let token of game.scenes.current.tokens) {
-        if (token.actor && !actors.find(o=> o.id === token.actor.id)) {
+        if (token.actor && !actors.find(o => o.id === token.actor.id)) {
             actors.push(token.actor);
         }
     }
@@ -604,7 +604,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
         const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
         // Create a natural body healing if needed
-        const naturalBodyHealing = actor.temporaryEffects.find(o => o.flags.XMLID === "[naturalBodyHealing]");
+        const naturalBodyHealing = actor.temporaryEffects.find(o => o.flags.XMLID === "naturalBodyHealing");
         if (actor.type === "pc" && !naturalBodyHealing && parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)) {
             const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
             const secondsPerBody = Math.floor(2.628e+6 / bodyPerMonth);
@@ -617,7 +617,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     seconds: secondsPerBody,
                 },
                 flags: {
-                    XMLID: "[naturalBodyHealing]",
+                    XMLID: "naturalBodyHealing",
                 }
             }
             await actor.addActiveEffect(activeEffect);
@@ -642,7 +642,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
             let aeActor = origin instanceof HeroSystem6eActor ? origin : item?.actor || actor;
             let XMLID = ae.flags.XMLID || item?.system?.XMLID;
 
-            let powerInfo = getPowerInfo({ actor: aeActor, xmlid: XMLID});
+            let powerInfo = getPowerInfo({ actor: aeActor, xmlid: XMLID, item: item });
 
             if (!powerInfo && game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
                 return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
@@ -677,8 +677,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     // If ActivePoints <= 0 then remove effect
                     if (ae.flags.activePoints <= 0) {
                         //content += `  Effect deleted.`;
-                        //await 
-                        ae.delete();
+                        await ae.delete();
                     } else {
                         //await 
                         ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
@@ -703,11 +702,11 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     // No changes defined
 
                     // Natural Body Healing
-                    if (ae.flags.XMLID === "[naturalBodyHealing]") {
+                    if (ae.flags.XMLID === "naturalBodyHealing") {
                         let bodyValue = parseInt(actor.system.characteristics.body.value);
                         let bodyMax = parseInt(actor.system.characteristics.body.max);
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
-                       // await 
+                        // await 
                         actor.update({ 'system.characteristics.body.value': bodyValue });
 
                         if (bodyValue === bodyMax) {
@@ -720,12 +719,13 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
                         // Default is to delete the expired AE
                         if (powerInfo) {
-                            ae.delete();
+                            await ae.delete();
+                            break;
                         }
-                        
+
                     }
 
-                    
+
                 }
 
             }
@@ -769,16 +769,15 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 // Typically, you should only use the Recovery Time Table for
                 // PCs. Once an NPC is Knocked Out below the -10 STUN level
                 // he should normally remain unconscious until the fight ends.
-                if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) >-10) {
-                    //await 
-                    actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+                if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
+                    await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
                     let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
                     let endValue = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
                     let stunValue = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
                     a//wait 
-                    actor.update({ 
-                        'system.characteristics.end.value': endValue, 
-                        'system.characteristics.stun.value': stunValue 
+                    actor.update({
+                        'system.characteristics.end.value': endValue,
+                        'system.characteristics.stun.value': stunValue
                     }, { 'render': true })
                 }
             }

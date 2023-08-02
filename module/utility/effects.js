@@ -10,8 +10,32 @@ export async function onManageActiveEffect(event, owner) {
     //const effect = li.dataset.effectId ? owner.effects.get(li.dataset.effectId) : null;
     const effect = Array.from(owner.allApplicableEffects()).find(o => o.id == li.dataset.effectId)
 
-    // guard
-    if (!effect) return;
+    // guard or perhaps a defense item
+    if (!effect) {
+        const item = owner.items.get(li.dataset.effectId);
+        if (item) {
+            switch (a.dataset.action) {
+                case "edit":
+                    item.sheet.render(true);
+                    break;
+                case "toggle":
+                    item.toggle();
+                    break;
+                case "delete":
+                    const confirmed = await Dialog.confirm({
+                        title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+                        content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
+                    });
+
+                    if (confirmed) {
+                        item.delete()
+                        //this.render();
+                    }
+                    break;
+            }
+        }
+        return;
+    }
 
     switch (a.dataset.action) {
         case "create":

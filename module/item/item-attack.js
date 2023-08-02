@@ -253,6 +253,13 @@ export async function AttackToHit(item, options) {
     }
 
     let dcv = parseInt(item.system.dcv) + csl.dcv
+
+    // Haymaker -5 DCV
+    const haymakerManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Haymaker' && o.system.active)
+    if (haymakerManeuver) {
+        dcv -= 4;
+    }
+
     if (dcv != 0) {
 
         // Make sure we don't already have this activeEffect
