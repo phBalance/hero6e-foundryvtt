@@ -58,7 +58,7 @@ export async function applyCharacterSheet(xmlDoc) {
     if (this.actor.system.biography) {
         changes[`system.biography`] = "";
     }
-    
+
 
     // Remove all items from
     await this.actor.deleteEmbeddedDocuments("Item", Array.from(this.actor.items.keys()))
@@ -362,7 +362,7 @@ export async function applyCharacterSheet(xmlDoc) {
             const phase = v[0];
             const ocv = v[1];
             const dcv = v[2];
-            const effects = v[3];
+            const effect = v[3];
             const attack = v[4];
             const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
             const itemData = {
@@ -372,9 +372,9 @@ export async function applyCharacterSheet(xmlDoc) {
                     phase,
                     ocv,
                     dcv,
-                    effects,
+                    EFFECT: effect,
                     active: false,
-                    description: effects,
+                    description: effect,
                     XMLID,
                 }
             }
@@ -1418,6 +1418,14 @@ export function updateItemDescription(item) {
 
         case "MANEUVER":
 
+            system.description = "";
+
+
+            // For most maneuvers we can use the EFFECT
+            if (system.EFFECT) {
+                system.description = system.EFFECT + ", ";
+            }
+
             // Martial attacks tyipcally add STR to description
             let fullDice = system.dice;
             let extraDice = 0;
@@ -1461,7 +1469,7 @@ export function updateItemDescription(item) {
 
             // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
             // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
-            system.description = ""; //`${system.ALIAS}:`
+            //`${system.ALIAS}:`
             if (system.PHASE) system.description += ` ${system.PHASE} Phase`
             if (system.OCV) system.description += `, ${system.OCV} OCV, ${system.DCV} DCV`
             if (system.EFFECT) {
@@ -1838,8 +1846,8 @@ export async function makeAttack(item) {
     let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0;
     const input = item.system.INPUT
 
-    const ocv = parseInt(item.system.ocv) || 0;
-    const dcv = parseInt(item.system.dcv) || 0;
+    const ocv = parseInt(item.system.ocv) || parseInt(item.system.OCV) || 0;
+    const dcv = parseInt(item.system.dcv) || parseInt(item.system.DCV) || 0;
 
     // Check if this is a MARTIAL attack.  If so then EXTRA DC's may be present
     if (item.system.XMLID == "MANEUVER") {
@@ -1899,8 +1907,13 @@ export async function makeAttack(item) {
     changes[`system.dcv`] = dcv
     changes['system.stunBodyDamage'] = "stunbody"
 
-    // Maneuvers
-    if (item.system.type === "maneuver") {
+    // BLOCK and DODGE typically do not use STR
+    if (["maneuver", "martialart"].includes(item.type)) {
+        if (item.system.EFFECT.toLowerCase().indexOf("block") > -1 ||
+            item.system.EFFECT.toLowerCase().indexOf("dodge") > -1
+        ) {
+            changes[`system.usesStrength`] = false;
+        }
     }
 
     // ENTANGLE (not implemented)

@@ -330,7 +330,7 @@ HERO.hitLocations = {
 
 HERO.combatManeuvers = {
     // Maneuver : [phase, OCV, DCV, Effects, Attack]
-    "Block": ["1/2", "+0", "+0", "Blocks HTH attacks, Abort"],
+    "Block": ["1/2", "+0", "+0", "Blocks HTH attacks, Abort", true],
     "Brace": ["0", "+2", "1/2", "+2 OCV only to offset the Range Modifier"],
     "Disarm": ["1/2", "-2", "+0", "Disarm target, requires STR vs. STR Roll", true],
     "Dodge": ["1/2", "+0", "+3", "Dodge all attacks, Abort", true],

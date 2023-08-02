@@ -176,13 +176,14 @@ async function _processAttackOptions(item, form) {
 
 
 
+
     await AttackToHit(item, options)
 }
 
 
 /// ChatMessage showing Attack To Hit
 export async function AttackToHit(item, options) {
-    const template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs"
+    let template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs"
 
     const actor = item.actor
     const itemId = item._id
@@ -292,6 +293,8 @@ export async function AttackToHit(item, options) {
         }
 
     }
+
+
 
 
     // [x Stun, x N Stun, x Body, OCV modifier]
@@ -458,6 +461,38 @@ export async function AttackToHit(item, options) {
 
         await ChatMessage.create(chatData)
         return;
+    }
+
+    // Block (which is a repeatable abort)
+    if (item.system.EFFECT?.toLowerCase().indexOf("block") > -1) {
+        template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-block-card.hbs"
+        hitRollText = `Block roll of ${hitRollData} vs OCV of pending attack.`;
+    }
+
+
+
+    // Abort
+    if (item.system.EFFECT?.toLowerCase().indexOf("abort") > -1) {
+        item.actor.addActiveEffect({
+            ...HeroSystem6eActorActiveEffects.abortEffect,
+            name: `Aborted [${item.name}]`,
+            flags: {
+                itemId: item.uuid
+            }
+        });
+    }
+
+    // Dodge (which is a repeatable abort)
+    if (item.system.EFFECT?.toLowerCase().indexOf("dodge") > -1) {
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor })
+        speaker["alias"] = item.actor.name
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: `${item.name} ${dcv.signedString()} DCV`,
+            speaker,
+        }
+        return ChatMessage.create(chatData)
     }
 
     let cardData = {
@@ -1280,8 +1315,8 @@ async function _calcDamage(damageResult, item, options) {
     let stunDamage = stun;
 
     let effects = "";
-    if (item.system.effects) {
-        effects = item.system.effects + ";"
+    if (item.system.EFFECT) {
+        effects = item.system.EFFECT + ";"
     }
 
     // determine knockback

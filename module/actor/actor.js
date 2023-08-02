@@ -369,6 +369,16 @@ export class HeroSystem6eActor extends Actor {
             return false;
         }
 
+        if (this.statuses.has("stunned")) {
+            if (uiNotice) ui.notifications.error(`${this.name} is STUNNED and cannot act.`);
+            return false;
+        }
+
+        if (this.statuses.has("aborted")) {
+            if (uiNotice) ui.notifications.error(`${this.name} has ABORTED and cannot act.`);
+            return false;
+        }
+
         // A character
         // who is Stunned or recovering from being
         // Stunned can take no Actions, take no Recoveries

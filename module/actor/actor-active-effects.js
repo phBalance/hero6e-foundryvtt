@@ -87,10 +87,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         name: "EFFECT.StatusBlind",
         id: "blind",
         icon: 'icons/svg/blind.svg',
-        // changes: [
-        //     { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
-        //     { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
-        // ]
+        changes: [
+            { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+            { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
+        ]
     };
 
     static asleepEffect = {
@@ -106,7 +106,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static proneEffect = {
         id: "prone",
         name: "EFFECT.StatusProne",
-        icon: "icons/svg/falling.svg"
+        icon: "icons/svg/falling.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+        ]
     };
 
     static entangledEffect = {
@@ -192,6 +195,12 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         id: "holyShield",
         name: "Shield: holy",
         icon: "icons/svg/holy-shield.svg"
+    };
+
+    static abortEffect = {
+        id: "aborted",
+        name: "Aborted",
+        icon: "systems/hero6efoundryvttv2/icons/aborted.svg"
     };
 
     

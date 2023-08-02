@@ -505,6 +505,12 @@ export class HeroSystem6eCombat extends Combat {
             await ae.delete();
         }
 
+        // Remove Aborted
+        if (combatant.actor.statuses.has('aborted')) {
+            const effect = combatant.actor.effects.contents.find(o => o.statuses.has('aborted'))
+            await effect.delete();
+        }
+
     }
 
     /**

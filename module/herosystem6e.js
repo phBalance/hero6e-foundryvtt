@@ -644,7 +644,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
             let powerInfo = getPowerInfo({ actor: aeActor, xmlid: XMLID, item: item });
 
-            if (!powerInfo && game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            if (!powerInfo && ae.statuses.size === 0 && game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
                 return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
             }
 

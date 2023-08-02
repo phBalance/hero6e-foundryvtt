@@ -124,7 +124,7 @@ export class HeroSystem6eItem extends Item {
 
     async roll() {
 
-        
+        if (!this.actor.canAct(true)) return;
 
         switch (this.system.subType || this.type) {
             case "attack":
@@ -143,7 +143,11 @@ export class HeroSystem6eItem extends Item {
                         return await Attack.AttackOptions(this)
 
                     default:
-                        ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`)
+                        if (!this.system.EFFECT || (
+                            this.system.EFFECT.toLowerCase().indexOf("block") === 0 &&
+                            this.system.EFFECT.toLowerCase().indexOf("dodge") === 0
+                        ))
+                            ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`)
                         return await Attack.AttackOptions(this)
                 }
 
@@ -205,7 +209,12 @@ export class HeroSystem6eItem extends Item {
     async toggle() {
         let item = this;
 
+
+
         if (!item.system.active) {
+
+
+            if (!this.actor.canAct(true)) return;
 
             const costEndOnlyToActivate = item.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (costEndOnlyToActivate) {
