@@ -5,6 +5,7 @@
 - Initial Dodge support. [#105](https://github.com/dmdorman/hero6e-foundryvtt/issues/105)
 - Fixed Martial Arts uploads where OCV and DCV modifiers were ignored.
 - Improved Blind and Prone statuses to include appropriate CV penalties. 
+- Fixed 1/2 DCV rounding down.  Now follows standard rounding rules that favor the player. [#153](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
 
 
 # Version 3.0.14
