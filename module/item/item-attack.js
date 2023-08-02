@@ -12,6 +12,7 @@ import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
 import { isPowerSubItem } from "../powers/powers.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
+import { RequiresASkillRollCheck } from "../item/item.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -116,6 +117,8 @@ export async function AttackOptions(item) {
             data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl[c] })
         }
     }
+
+
 
     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs"
     const html = await renderTemplate(template, data)
@@ -440,6 +443,21 @@ export async function AttackToHit(item, options) {
             targetIds.push(target.id)
         }
 
+    }
+
+    if (!await RequiresASkillRollCheck(item)) {
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor })
+        speaker["alias"] = item.actor.name
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: enduranceText,
+            whisper: ChatMessage.getWhisperRecipients("GM"),
+            speaker,
+        }
+
+        await ChatMessage.create(chatData)
+        return;
     }
 
     let cardData = {

@@ -124,12 +124,7 @@ export class HeroSystem6eItem extends Item {
 
     async roll() {
 
-        const success = await RequiresASkillRollCheck(this);
-        if (!success) {
-            return;
-        }
-
-
+        
 
         switch (this.system.subType || this.type) {
             case "attack":
@@ -156,6 +151,7 @@ export class HeroSystem6eItem extends Item {
                 return this.toggle()
             case "skill":
                 SkillRollUpdateValue(this)
+                if (!await RequiresASkillRollCheck(this)) return;
                 return createSkillPopOutFromItem(this, this.actor)
             default: ui.notifications.warn(`${this.name} roll is not supported`)
         }
@@ -323,7 +319,12 @@ export function getItem(id) {
     return null
 }
 
-async function RequiresASkillRollCheck(item) {
+export async function RequiresASkillRollCheck(item) {
+
+    // Toggles don't need a roll to turn off
+    if (item.system?.active === true) return true;
+
+
     let rar = item.system.modifiers.find(o => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (rar) {
 
@@ -394,7 +395,7 @@ async function RequiresASkillRollCheck(item) {
             flavor += (margin >= 0 ? "succeeded" : "failed") + " by " + Math.abs(margin);
         }
 
-        result.toMessage({
+        await result.toMessage({
             speaker: ChatMessage.getSpeaker({ actor: item.actor }),
             flavor: flavor,
             borderColor: margin >= 0 ? 0x00FF00 : 0xFF0000,
