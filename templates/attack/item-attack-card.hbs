@@ -1,7 +1,6 @@
 {{!-- {{ log 'HEROSYS ITEM ATTACK CARD' this }} --}}
-<form data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
-        tokenId}}data-token-id="{{tokenId}}" {{/if}}>
-    <div class="hero chat-card item-card attack-card" >
+<form data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if tokenId}}data-token-id="{{tokenId}}" {{/if}}>
+    <div class="hero chat-card item-card attack-card">
         <header class="card-header flexrow">
             <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
             <h3 class="item-name">{{item.name}}</h3>
@@ -33,7 +32,8 @@
     {{#if showVelocity}}
     <div class="form-group">
         <label>{{localize "Items.Attack.Velocity"}}</label>
-        <input type="text" name="velocity" value="{{velocity}}" title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
+        <input type="text" name="velocity" value="{{velocity}}"
+            title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
     </div>
     {{/if}}
 
@@ -43,6 +43,22 @@
         <label>Effective Strength</label>
         <input type="text" name="effectiveStr" value="{{str}}" />
         <label>/ {{str}}</label>
+    </div>
+    {{/if}}
+
+    {{#if cslChoices}}
+    <div class="form-group">
+        <label>Combat Skill Levels</label>
+        <div class="form-fields combat-skill-levels">
+            <ol>
+                {{#each csl}}
+                <li>
+                    {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+                </li>
+                {{/each}}
+            </ol>
+
+        </div>
     </div>
     {{/if}}
 

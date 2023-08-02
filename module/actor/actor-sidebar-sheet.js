@@ -75,6 +75,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
             }
 
+
+
             // Framework?
             if (item.system.PARENTID) {
                 const parent = data.actor.items.find(o => o.system.ID === item.system.PARENTID)
@@ -118,6 +120,18 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 if (item.system.dcv != undefined) {
                     item.system.dcv = ("+" + parseInt(item.system.dcv)).replace("+-", "-")
                     item.system.dcvEstimated = ("+" + (parseInt(item.system.dcv) + parseInt(csl.dcv))).replace("+-", "-")
+                }
+
+                // Set +1 OCV
+                const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
+                if (setManeuver) {
+                    item.system.ocvEstimated = (parseInt(item.system.ocvEstimated) + 1).signedString();
+                }
+
+                // Haymaker -5 DCV
+                const haymakerManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Haymaker' && o.system.active)
+                if (haymakerManeuver) {
+                    item.system.dcvEstimated = (parseInt(item.system.dcvEstimated) - 4).signedString();
                 }
 
 
@@ -481,7 +495,48 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         data.defense = defense
 
         // Get all applicable effects (from actor and all items)
-        data.allApplicableEffects = Array.from(this.actor.allApplicableEffects()).sort((a, b) => a.name.localeCompare(b.name))
+        data.allTemporaryEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.duration.duration).sort((a, b) => a.name.localeCompare(b.name))
+        data.allConstantEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && (!o.flags?.XMLID || getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
+        data.allPersistentEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.flags?.XMLID && getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
+
+
+        // Add defenses (without active effects) to actorEffects.
+        // This provides a nice way to see ALL powers that are effecting 
+        // the actor regardless of how they are implemented.
+        const defensePowers = data.actor.items.filter(o => (o.system.subType || o.type) === 'defense' &&
+            !o.effects.size);
+        for (let d of defensePowers) {
+            d.disabled = !d.system.active;
+            switch (getPowerInfo({ xmlid: d.system.XMLID, actor: this.actor })?.duration) {
+                case "instant":
+                    // Might Vary
+                    switch (d.system.XMLID) {
+                        case "FORCEWALL":
+                            data.allPersistentEffects.push(d);
+                            break;
+                        default:
+                            data.allTemporaryEffects.push(d);
+                    }
+
+                    break;
+                case "constant":
+                    data.allConstantEffects.push(d);
+                    break;
+                case "persistent":
+                    data.allPersistentEffects.push(d);
+                    break;
+                default:
+                    data.allConstantEffects.push(d);
+
+                    if (game.settings.get(game.system.id, 'alphaTesting')) {
+                        console.log(getPowerInfo({ xmlid: d.system.XMLID, actor: this.actor }))
+                        ui.notifications.warn(`${d.system.XMLID} has no duration specified.`);
+
+                    }
+
+            }
+
+        }
 
         return data
     }

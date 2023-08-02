@@ -62,6 +62,10 @@
         "Talent": "Talent",
         "Complication": "Complication",
         "ActiveEffect": "ActiveEffect",
+        
+        "ActiveEffectTemporary": "Temporary Effects",
+        "ActiveEffectConstant": "Constant Effects",
+        "ActiveEffectPersistent": "Persistent Effects",
         "Biography": "Biography",
         "Velocity" : "Velocity",
         "Effect" : "Effect",

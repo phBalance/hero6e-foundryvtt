@@ -160,7 +160,7 @@
   margin-left: 0.5em;
 }
 
-.actor-sidebar-sheet table tr:first-child {
+.actor-sidebar-sheet table tr:first-child, .actor-sidebar-sheet table tr.activeEffects {
   box-shadow: inset 0 -1px 0 darkgray;
   background-color: #CFCEC3;
 }
@@ -185,7 +185,8 @@
   margin-top: 0;
 }
 
-.actor-sidebar-sheet table tr td.left, .actor-sidebar-sheet table tr th.left {
+/* .actor-sidebar-sheet table tr td.left, .actor-sidebar-sheet table tr th.left { */
+th.left, td.left {
   text-align: left;
 }
 
@@ -349,4 +350,10 @@ ul.left li {
 .actor-sidebar-sheet .sidebar section .defenses {
   border-top: 2px groove #eeede0;
   padding-top: 5px;
+}
+
+.conditional-defense-card div.description {
+  border: 1px dashed rgba(0,0,0,0.5);
+  margin: 15px 0;
+  padding: 5px;
 }

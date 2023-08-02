@@ -450,6 +450,9 @@ export class HeroSystem6eCombat extends Combat {
         //console.log("_onStartTurn", combatant.name)
         await super._onStartTurn(combatant)
 
+        // Guard
+        if (!combatant) return;
+
         // STUNNING
         // The character remains Stunned and can take no
         // Actions (not even Aborting to a defensive action) until his next
@@ -493,6 +496,13 @@ export class HeroSystem6eCombat extends Combat {
             }
 
             await ChatMessage.create(chatData)
+        }
+
+        // Some attacks include a DCV penalty which was added as an ActiveEffect.
+        // At the beginning of our turn we make sure that AE is deleted.
+        const removeOnNextPhase = combatant.actor.effects.filter(o=> o.flags.nextPhase && o.duration.startTime < game.time.worldTime);
+        for (const ae of removeOnNextPhase) {
+            await ae.delete();
         }
 
     }

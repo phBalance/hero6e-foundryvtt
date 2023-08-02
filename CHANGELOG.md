@@ -1,3 +1,14 @@
+# Version 3.0.14
+- Fixed issue where some 5e powers were incorrectly calculating END.
+- Support for Activation Rolls (similar to Requires a Roll)
+- Initial support for conditional Defenses (Only Works Against & Conditional Power). GM will be prompted to select conditional defense when applying damage.  [#181](https://github.com/dmdorman/hero6e-foundryvtt/issues/181)
+- Improved Endurance/Stun (all) and Body (PCs only) recovery out of combat.  NPCs stop stun recovery once they are below -10 stun. PC stun recovery below -10 is still every phase, but should be using the Recovery Time Table (future improvement). Expected to use Simple Calendar to advance time out of combat.
+- Active Effects split out into Temporary, Constant, or Persistent. Where Constant and Persistent largely match the HERO power description; and are typically always on (such as most defenses).  Temporary is for effects with a limited duration (such as AID).  In a future realease constant powers will toggle off when knocked out.  May require HDC upload on existing actors for proper assignment. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
+- Defenses show as effects in other tab. Internally they are not Active Effects, but behave similarily.  A quality of life enhancement which shows all powers & effects in one spot.
+- Combat Skill Levels (CSL) can be changed within the _Roll to Hit_ dialog. [#189](https://github.com/dmdorman/hero6e-foundryvtt/issues/189)
+- Initial support for DCV buffs/penalties associated with some attacks, that last until actors next phase. [#103](https://github.com/dmdorman/hero6e-foundryvtt/issues/103)
+- STUN and BODY changes for tokens show as scrolling combat text.  Stun is green and Body is red, matching the attribute bar colors. [#81](https://github.com/dmdorman/hero6e-foundryvtt/issues/81)
+
 # Version 3.0.13
 - Fixed Maneuver OCV/DCV.
 - Velocity estimate uses full move.

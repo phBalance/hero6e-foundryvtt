@@ -859,7 +859,7 @@ export function XmlToItemData(xml, type) {
 
     // Make sure all defenses are enabled (if they don't have charges or AFFECTS_TOTAL = "No")
     if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-        if (systemData.charges?.value > 0 || systemData.AFFECTS_TOTAL === false) {
+        if (systemData.charges?.value > 0 || systemData.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
             systemData.active = false;
         } else {
             systemData.active = true;
@@ -1079,8 +1079,8 @@ function calcBasePointsPlusAdders(system) {
 function calcActivePoints(_basePointsPlusAdders, system) {
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
 
-    // if (system.XMLID == "RKA")
-    //     HEROSYS.log(false, system.XMLID)
+    if (system.XMLID == "ARMOR")
+        HEROSYS.log(false, system.XMLID)
 
     let advantages = 0;
     let advantagesDC = 0;
@@ -2341,6 +2341,9 @@ export async function createEffects(itemData, actor) {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD
                 }
             ],
+            flags: {
+                XMLID: xmlid.toUpperCase() || itemData.system.XMLID
+            },
             disabled: !itemData.system.AFFECTS_TOTAL,
             transfer: true,
         }

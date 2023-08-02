@@ -70,7 +70,6 @@ Activating a maneuver from a character sheet will apply OCV and DCV modifiers wi
   - Sense-Affecting powers (Darkness, Flash, Images, Invisibility)
   - Sensory powers (Clairsentience, Enhanced Senses, Mind Scan)
   - Special powers (Duplication, Endurance Reserve, Enhanced Senses, Extra Limbs, Flash Defense, Luck, Power Defense, Regeneration)
-  - Power limitations
   - Perks, Talents, and Complications
 
 ## Modules

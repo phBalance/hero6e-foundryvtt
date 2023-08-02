@@ -25,13 +25,30 @@ export function getTokenChar(token, char, data) {
 export function getPowerInfo(options) {
     const xmlid = options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id
     const actor = options?.item?.actor || options?.actor
-    let powerInfo = CONFIG.HERO.powers[xmlid]
+    let powerInfo = CONFIG.HERO.powers[xmlid] || CONFIG.HERO.powers5e[xmlid]
+    //let characteristicInfo = CONFIG.HERO.characteristicCosts[xmlid.toLowerCase()] || CONFIG.HERO.characteristicCosts5e[xmlid.toLowerCase()]
     if (actor?.system?.is5e) {
-        powerInfo = CONFIG.HERO.powers5e[xmlid]
+        powerInfo = CONFIG.HERO.powers5e[xmlid] || powerInfo
     }
+
+    if (!powerInfo && options?.item?.type == "maneuver") {
+        powerInfo = {
+            powerType: ["maneuver"],
+            percievability: "obvious",
+            duration: "Instant",
+            costEnd: false,
+            target: "target's dcv",
+        }
+    }
+
+
     if (powerInfo) {
-        powerInfo.xmlid = xmlid
+        powerInfo.xmlid = xmlid;
     }
+
+    // LowerCase
+    if (powerInfo?.duration) powerInfo.duration = powerInfo.duration.toLowerCase();
+
     return powerInfo
 }
 
@@ -42,3 +59,5 @@ export function getModifierInfo(options) {
     const actor = options?.item?.actor || options?.actor
     return CONFIG.HERO.ModifierOverride[xmlid]
 }
+
+
