@@ -309,6 +309,7 @@
                         <th></th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
+                        <th>{{localize "ActorSheet.Char"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create skill" data-type="skill">
@@ -324,11 +325,13 @@
                                     height="24" /></div>
                         </td>
                         <td>{{item.system.realCost}}</td>
+                        
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
                             {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
                             <i>{{item.name}}</i>
                             {{#if item.system.description}}: {{item.system.description}}{{/if}}
                         </td>
+                        <td>{{#if (ne item.system.characteristic "general")}}{{item.system.characteristic}}{{/if}}</td>
                         <td>
                             {{#if item.system.roll}}
                             <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"

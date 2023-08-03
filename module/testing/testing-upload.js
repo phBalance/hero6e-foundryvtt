@@ -792,6 +792,47 @@ export function registerUploadTests(quench) {
                 });
             });
 
+            describe("Skill Levels", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                }, { temporary: true });
+                actor.system.characteristics.ego.value = 38
+
+                const contents = `
+                <SKILL XMLID="SKILL_LEVELS" ID="1605812225611" BASECOST="0.0" LEVELS="10" ALIAS="Skill Levels" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CHARACTERISTIC" OPTIONID="CHARACTERISTIC" OPTION_ALIAS="with single Skill or Characteristic Roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1604669259284" NAME="Martial Practice" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                <NOTES />
+                </SKILL>
+                    `;
+                let parser = new DOMParser()
+                let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                itemData.actor = actor
+                let item = itemData;
+                makeAttack(item);
+                updateItemDescription(item);
+
+                it("description", function () {
+                    assert.equal(item.system.description, "+10 with single Skill or Characteristic Roll");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 20);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 20);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, "0");
+                });
+
+                it("LEVELS", function () {
+                    assert.equal(item.system.LEVELS.max, 10);
+                });
+            });
+
 
 
         },

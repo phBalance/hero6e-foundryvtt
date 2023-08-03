@@ -1212,30 +1212,17 @@ export async function uploadPower(power, type) {
 
     let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
 
-
-    // let itemData = XmlToItemData(xml, type)
-    // await HeroSystem6eItem.create(itemData, { parent: this.actor })
-
     let xmlid = itemData.system.XMLID
-    // const name = power.getAttribute('NAME')
-    // const alias = power.getAttribute('ALIAS')
-    // const levels = power.getAttribute('LEVELS')
-    // const input = power.getAttribute('INPUT')
-    // const optionAlias = power.getAttribute("OPTION_ALIAS")
-
-    // const relevantFields = ['BASECOST', 'LEVELS', 'ALIAS', 'MULTIPLIER', 'NAME', 'OPTION_ALIAS', 'SFX',
-    //     'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST' // FORCEFIELD
-    // ]
-    //if (xmlid === 'GENERIC_OBJECT') return;
 
     // Check if we have CONFIG info about this power
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
 
     if (configPowerInfo) {
 
-        if ((configPowerInfo?.powerType || "").includes("skill")) {
-            await uploadSkill.call(this, power, true)
-        }
+        // if ((configPowerInfo?.powerType || "").includes("skill")) {
+        // //     await uploadSkill.call(this, power, true)
+        //     await item.update({ 'system.subType': 'skill'});
+        // }
 
         // Detect attacks
         if (configPowerInfo.powerType.includes("attack")) {
@@ -1459,8 +1446,6 @@ export function updateItemDescription(item) {
                 extraDice = pips - fullDice * 3
             }
 
-            console.log(system.ALIAS);
-
             // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
             // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
             //`${system.ALIAS}:`
@@ -1485,7 +1470,7 @@ export function updateItemDescription(item) {
                         }
                         system.description += ` ${system.EFFECT.replace("[NORMALDC]", damageDice).replace("[KILLINGDC]", damageDice.replace("+ 1", "+1"))}`
                     }
-                } else  {
+                } else {
                     system.description += ", " + system.EFFECT;
                 }
 
@@ -1522,6 +1507,11 @@ export function updateItemDescription(item) {
                     system.description += ` (${system.LEVELS.value}/${system.LEVELS.max} END, ${power.LEVELS} REC)`
                 }
             }
+            break;
+
+        case "SKILL_LEVELS":
+            //<i>Martial Practice:</i>  +10 with single Skill or Characteristic Roll
+            system.description = `${parseInt(system.LEVELS.value).signedString()} ${system.OPTION_ALIAS}`;
             break;
 
         default:
@@ -2297,16 +2287,35 @@ export async function makeAttack(item) {
 // }
 
 export function SkillRollUpdateValue(item) {
+
     let skillData = item.system
+
+    skillData.tags = [];
+
+    // SKILL LEVELS
+    if (item.system.XMLID === "SKILL_LEVELS") {
+        skillData.roll = null;
+        return;
+    }
+
+    // Skill Enhancers (educated guess)
+    if (skillData.BASECOST === "3.0" && skillData.LEVELS.max === "0" && !skillData.CHARACTERISTIC) {
+        skillData.roll = null;
+        return;
+    }
+
     //if (skillData.state === 'everyman') {
     if (skillData.EVERYMAN) {
         skillData.roll = '8-'
+        skillData.tags.push({ value: 8, name: "Everyman" })
         //} else if (skillData.state === 'familiar') {
     } else if (skillData.FAMILIARITY) {
         skillData.roll = '8-'
+        skillData.tags.push({ value: 8, name: "Familiarity" })
         //} else if (skillData.state === 'proficient') {
     } else if (skillData.PROFICIENCY) {
         skillData.roll = '10-'
+        skillData.tags.push({ value: 10, name: "Proficiency" })
         //} else if (skillData.state === 'trained') {
     } else if (skillData.CHARACTERISTIC || skillData.characteristic) {
         let characteristic = (skillData.CHARACTERISTIC || skillData.characteristic).toLowerCase()
@@ -2314,11 +2323,19 @@ export function SkillRollUpdateValue(item) {
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
-        let rollVal = 9 + Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
+        let charNumber =  Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
+        let rollVal = 9 + charNumber;
+        skillData.tags.push({ value: 9, name: "Skill" })
+        if (charNumber != 0) {
+            skillData.tags.push({ value: charNumber, name: characteristic })
+        }
+        
 
         if (item.system.XMLID === "FINDWEAKNESS") {
             rollVal += 2; // 11-
+            skillData.tags.push({ value: 2, name: "FindWeakness" })
         }
+
         skillData.roll = rollVal.toString() + '-'
     } else {
         // This is likely a Skill Enhancer.
@@ -2443,7 +2460,6 @@ export async function updateItemSubTypes(actor, removeDups) {
     for (const item of actor.items) {
         const configPowerInfo = getPowerInfo({ item: item })
 
-
         // Defenses
         if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
             await item.update({ 'system.subType': 'defense', 'system.showToggle': true }, { hideChatMessage: true })
@@ -2470,10 +2486,10 @@ export async function updateItemSubTypes(actor, removeDups) {
             }
         }
 
-        // Skill
-        // if (item.type != "skill" && configPowerInfo && configPowerInfo.powerType.includes("skill")) {
-        //     await item.update({ 'system.subType': 'skill'})
-        // }
+        // Skills
+        if (configPowerInfo && configPowerInfo.powerType.includes("skill")) {
+            await item.update({ 'system.subType': 'skill' }, { hideChatMessage: true })
+        }
 
     }
 
