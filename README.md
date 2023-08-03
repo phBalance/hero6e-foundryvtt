@@ -44,7 +44,7 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
 - Target defense can be applied to damage rolls.  Final damage is applied to token's stun/body.  If Stun damage exceeds CON then a stunned condition is applied.
 - You can drag attacks (or any power) from character sheet to quick bar.
 
-## Other Automation
+### Other Automation
 - END and Charges are spent for each attack. 
 - END can be spent from personal endurance or from an endurance reserve.
 - Post Segment 12 recovery: Endurance and Stun
