@@ -1,7 +1,7 @@
 # Version 3.0.15
 - Fixes for Requires A Roll.  Attacks spend END when RAR fails.  Hotbar macros no longer RAR when powers toggle off. [#244](https://github.com/dmdorman/hero6e-foundryvtt/issues/244)
 - Initial Abort support.  Aborted status icon.  When Stunned, Knocked Out, or Aborted you can not act (make rolls or toggle powers on).
-- Initial Block support.  Minimal automation here.  The GM/Player should speak up before the attacker rolls.  Multiple blocks are possible, but you have to remove the abort condition before making a second block at -2.  In the future it may be possible to prompt the defender if they want to block, and handle multiple blocks.  Block assume no STR/END use.  Initiative changes are not automated.
+- Initial Block support.  Minimal automation here.  The GM/Player should speak up before the attacker rolls.  Multiple blocks are possible, but you have to remove the abort condition before making a second block at -2.  In the future it may be possible to prompt the defender if they want to block, and handle multiple blocks.  Block assume no STR/END use.  Any potential Initiative benefits to dodge are not automated.
 - Initial Dodge support. [#105](https://github.com/dmdorman/hero6e-foundryvtt/issues/105)
 - Fixed Martial Arts uploads where OCV and DCV modifiers were ignored.
 - Improved Blind and Prone statuses to include appropriate CV penalties. 
