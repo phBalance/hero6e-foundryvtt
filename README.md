@@ -12,6 +12,8 @@ Star Hero © 2003, 2011 by DOJ, Inc. d/b/a Hero Games. All rights reserved.
 All DOJ trademarks and copyrights used with permission.
 For further information about Hero Games and the HERO System, visit www.herogames.com.
 
+Support can be found here by creating a new issue, or on the [Hero-Champions-RPG (unofficial) Foundry-vtt Discord Channal](https://discord.com/channels/609528652878839828/770825017729482772)
+
 ## Functionality
 
 This system is a work in progress. The following features are supported

@@ -73,6 +73,22 @@ export class HeroSystem6eToken extends Token {
     constructor(document) {
         super(document)
         //this.bar3 = this.bar.addChild(new PIXI.Graphics());
+
+        
+        // const token = this;
+        // token.heroVisualEffects ??= token.addChild(new PIXI.Container()); //canvas.grid.heroVisualEffects.addChild(new PIXI.Container())
+        // const gfx = token.heroVisualEffects.addChild(new PIXI.Graphics());
+
+        // let [cx, cy] = [token.getBounds().x, token.getBounds().y]
+        // cx += token.w /2;
+        // cy += token.h /2;
+        // const w = token.w /2;
+        // const h = token.h /2;
+        
+        // //gfx.beginFill(0x000000, 0.5);
+        // gfx.lineStyle(2, 0xffffff)
+        // gfx.drawEllipse(cx, cy, w, h);
+        // //gfx.endFill()
     }
 
     getData(options) {
@@ -81,11 +97,23 @@ export class HeroSystem6eToken extends Token {
         return data
     }
 
+    async _draw()
+    {
+        super._draw();
+        console.log("_draw");
+    }
+
     // _drawAttributeBars() {
     //     //HEROSYS.log(false, "_drawAttributeBars")
     //     let bars = super._drawAttributeBars()
     //     bars.bar3 = bars.addChild(new PIXI.Graphics());
     //     return bars;
+    // }
+
+    // _drawOverlay (src, number)
+    // {
+    //     super._drawOverlay(src, number);
+    //     console.log("_drawOverlay");
     // }
 
     _drawBar(number, bar, data) {

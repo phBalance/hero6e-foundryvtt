@@ -21,6 +21,7 @@ import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
 import { createEffects, updateItemDescription, updateItemSubTypes } from "./utility/upload_hdc.js"
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
+import { HeroVisualEffects } from "./HeroVisualEffects.js"
 
 Hooks.once('init', async function () {
 
@@ -77,6 +78,8 @@ Hooks.once('init', async function () {
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     HeroRuler.initialize()
+
+    HeroVisualEffects.initialize()
 
     SettingsHelpers.initLevelSettings();
 

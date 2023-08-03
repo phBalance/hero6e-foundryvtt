@@ -49,6 +49,8 @@ export class HeroSystem6eActor extends Actor {
         // Bar3 is a flag
         //await this.prototypeToken.setFlag(game.system.id, "bar3", { "attribute": "characteristics.end" })
 
+
+
     }
 
     async removeActiveEffect(activeEffect) {
