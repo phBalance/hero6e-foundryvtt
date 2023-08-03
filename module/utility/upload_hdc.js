@@ -1467,7 +1467,7 @@ export function updateItemDescription(item) {
             if (system.PHASE) system.description += ` ${system.PHASE} Phase`
             let ocv = parseInt(system.ocv || system.OCV);
             let dcv = parseInt(system.dcv || system.DCV);
-            if (system.ocv === "--") {
+            if (isNaN(ocv)) {
                 system.description += `, -- OCV`;
             } else {
                 system.description += `, ${ocv.signedString()} OCV`;
@@ -1485,7 +1485,10 @@ export function updateItemDescription(item) {
                         }
                         system.description += ` ${system.EFFECT.replace("[NORMALDC]", damageDice).replace("[KILLINGDC]", damageDice.replace("+ 1", "+1"))}`
                     }
+                } else  {
+                    system.description += ", " + system.EFFECT;
                 }
+
             }
             break;
 
