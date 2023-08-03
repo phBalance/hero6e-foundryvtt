@@ -6,6 +6,7 @@
 - Fixed Martial Arts uploads where OCV and DCV modifiers were ignored.
 - Improved Blind and Prone statuses to include appropriate CV penalties. 
 - Fixed 1/2 DCV rounding down.  Now follows standard rounding rules that favor the player. [#153](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
+- Initial AUTOFIRE support.  Some automation for single targets.  No automation for multiple targets as the workflow of tohit/damage would be awkward unless fully automated.  Full automation limites the ability for GM's to handle unusual situations. [#43](https://github.com/dmdorman/hero6e-foundryvtt/issues/43)
 
 
 # Version 3.0.14

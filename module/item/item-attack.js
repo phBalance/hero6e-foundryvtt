@@ -311,7 +311,9 @@ export async function AttackToHit(item, options) {
 
     let hitRollData = result.total;
     let hitRollText = "Hits a " + toHitChar + " of " + hitRollData;
-    // -------------------------------------------------
+
+
+
 
 
 
@@ -447,6 +449,35 @@ export async function AttackToHit(item, options) {
         }
 
     }
+
+    // AUTOFIRE
+    const autofire = item.system.modifiers.find(o => o.XMLID === "AUTOFIRE")
+    if (autofire) {
+        let autoFireShots = parseInt(autofire.OPTION_ALIAS.match(/\d+/));
+        hitRollText = `Autofire ${autofire.OPTION_ALIAS.toLowerCase()}<br>` + hitRollText;
+
+        // Autofire check for multiple hits on single target
+        if (targetData.length === 1) {
+            let singleTarget = Array.from(game.user.targets)[0];
+
+            for (let shot = 1; shot < autoFireShots; shot++) {
+                let hit = "Miss"
+                let value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value
+                if (value <= result.total - (shot * 2)) {
+                    hit = "Hit"
+                }
+                let by = result.total - value - (shot * 2)
+                if (by >= 0) {
+                    by = "+" + by;
+                }
+                targetData.push({ id: singleTarget.id, name: singleTarget.name, toHitChar: toHitChar, value: value, result: { hit: hit, by: by.toString() } })
+            }
+
+        }
+
+    }
+
+
 
     if (!await RequiresASkillRollCheck(item)) {
         const speaker = ChatMessage.getSpeaker({ actor: item.actor })
