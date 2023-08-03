@@ -1414,7 +1414,9 @@ export function updateItemDescription(item) {
 
             // For most maneuvers we can use the EFFECT
             if (system.EFFECT) {
-                system.description = system.EFFECT + ", ";
+                //system.description = system.EFFECT + ", ";
+                // BLOCK or DODGE modifiers
+                console.log(system);
             }
 
             // Martial attacks tyipcally add STR to description
@@ -1457,12 +1459,20 @@ export function updateItemDescription(item) {
                 extraDice = pips - fullDice * 3
             }
 
+            console.log(system.ALIAS);
 
             // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
             // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
             //`${system.ALIAS}:`
             if (system.PHASE) system.description += ` ${system.PHASE} Phase`
-            if (system.OCV) system.description += `, ${system.OCV} OCV, ${system.DCV} DCV`
+            let ocv = parseInt(system.ocv || system.OCV);
+            let dcv = parseInt(system.dcv || system.DCV);
+            if (system.ocv === "--") {
+                system.description += `, -- OCV`;
+            } else {
+                system.description += `, ${ocv.signedString()} OCV`;
+            }
+            system.description += `, ${dcv.signedString()} DCV`
             if (system.EFFECT) {
                 let dc = convertToDcFromItem(item).dc;
                 if (dc) {
@@ -1900,8 +1910,8 @@ export async function makeAttack(item) {
 
     // BLOCK and DODGE typically do not use STR
     if (["maneuver", "martialart"].includes(item.type)) {
-        if (item.system.EFFECT.toLowerCase().indexOf("block") > -1 ||
-            item.system.EFFECT.toLowerCase().indexOf("dodge") > -1
+        if (item.system.EFFECT?.toLowerCase().indexOf("block") > -1 ||
+            item.system.EFFECT?.toLowerCase().indexOf("dodge") > -1
         ) {
             changes[`system.usesStrength`] = false;
         }

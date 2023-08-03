@@ -755,6 +755,43 @@ export function registerUploadTests(quench) {
             });
 
 
+            describe("Martial Dodge", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                }, { temporary: true });
+                actor.system.characteristics.ego.value = 38
+
+                const contents = `
+                <MANEUVER XMLID="MANEUVER" ID="1691013321509" BASECOST="4.0" LEVELS="0" ALIAS="Martial Dodge" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Dodge" OCV="--" DCV="+5" DC="0" PHASE="1/2" EFFECT="Dodge, Affects All Attacks, Abort" ADDSTR="No" ACTIVECOST="35" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No">
+                <NOTES />
+                </MANEUVER>
+                    `;
+                let parser = new DOMParser()
+                let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                itemData.actor = actor
+                let item = itemData;
+                makeAttack(item);
+                updateItemDescription(item);
+
+                it("description", function () {
+                    assert.equal(item.system.description, "1/2 Phase, -- OCV, +5 DCV, Dodge, Affects All Attacks, Abort");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 4);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 4);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, "0");
+                });
+            });
+
 
 
         },
