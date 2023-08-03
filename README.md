@@ -35,14 +35,40 @@ This system is a work in progress. The following features are supported
 
 #### Maneuvers
 
-Activating a maneuver from a character sheet will apply OCV and DCV modifiers with the exception of variable modifiers or modifiers that take speed into account. Only one maneuver can be selected at a time with the exception of 'Set' and 'Brace'.
+Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver's tab.  The ones that are actions (and behave like an attack) have a roll icon and behave like an attack.  Set/Brace/Haymaker are toggles and enhance other attacks.
 
 ### Attack Automation
 
-- An attack can be used by clicking on the attack's image from the Character Sheet 'Attacks' tab. This will add a card to the chat for the attack.
+- An attack can be used by clicking on dice icon from the Character Sheet 'Attacks' tab. This will add a card to the chat for the attack.
 - The card will show the attack roll and damage roll as well as any additional effects information below.
 - Target defense can be applied to damage rolls.  Final damage is applied to token's stun/body.  If Stun damage exceeds CON then a stunned condition is applied.
-- You can drag attacks from character sheet to quick bar.
+- You can drag attacks (or any power) from character sheet to quick bar.
+
+## Other Automation
+- END and Charges are spent for each attack. 
+- END can be spent from personal endurance or from an endurance reserve.
+- Post Segment 12 recovery: Endurance and Stun
+- END for active powers are spent each phase.
+- Stun and attacks that have DCV modifications expire on next phase.
+- Some status' have CV modifications.
+- Powers that modify characteristics and defenses can be toggled on/off.
+- Powers with Requires A Roll are automatically rolled.
+- Charges recover each day (Simple Calendar required)
+- END/STUN/BODY recover out of combat (Simple Calendar required)
+- Stun/KnockedOut/Aborted prevent attacks or turning on powers.
+- Combat Skill Levels are calculated.
+- Knockback calculations.
+- Aid/Drain/Transfer effects are calculated, they fade and eventually expire.
+- Penetrating/Impenetrable and Armor Piercing/Hardened calculations.
+- Drag Ruler (optional module) show color coded full/half moves.
+- Velocity estimations for move by and move through based on current movement type.  Drag Ruler (optional module) improves velocity estimation.
+- Range penalties included in calculations.
+
+
+
+
+
+
 
 ## System Options
 
@@ -59,14 +85,14 @@ Activating a maneuver from a character sheet will apply OCV and DCV modifiers wi
     PCs and NPCs: attack card will update stun, body, and end for all tokens/actors
 
 ## Known Limitations
-- The upload of a .HDC file from Hero Designer is practically a requirement.  You can't create powers, skills, or equipment from scratch.  Character editing is limited within the system.
+- The upload of a .HDC file from Hero Designer is practically a requirement.  You can't create powers, skills, or equipment from scratch.  Character editing is limited within the system.  Some power modifiers are supported, some are not, character sheets do not clearly show power modifiers.  You can click the chat icon next to a power to see the full description.
 - Untested/limited support for vehicles, automations, computers, etc.
 - Power frameworks are partially supported.
 - The following are largely not implemented
   - Adjustment powers (Healing).
   - Attack powers that do not do stun/body damage (Change Environment, Darkness, Dispel, Drain, Entangle, Flash, Images, Mental Illusions, Mind Control, Reflection, Transform).
   - Attack powers with NND & AVAD
-  - Automation powers(Cannot Be Stunned, Does Not Bleed, No Hit Locations, Takes No STUN).
+  - Automation powers (Cannot Be Stunned, Does Not Bleed, No Hit Locations, Takes No STUN).
   - Body-Affecting powers (Desolidification, Duplication, Extra Limbs, Growth, Multiform, Shape Shift, Shrinking, Stretching)
   - Mental Powers (Mental Illusions, Mind Control, Mind Scan, Telepathy)
   - Sense-Affecting powers (Darkness, Flash, Images, Invisibility)
@@ -75,7 +101,7 @@ Activating a maneuver from a character sheet will apply OCV and DCV modifiers wi
   - Perks, Talents, and Complications
 
 ## Modules
-The following modules have been successfully tested for compatibility
+The following modules have been successfully tested for compatibility.  They are also recommended.
   - [Dice so nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice)
   - [Simple Calendar](https://github.com/vigoren/foundryvtt-simple-calendar)
   - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
