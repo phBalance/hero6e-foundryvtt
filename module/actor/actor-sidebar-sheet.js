@@ -92,7 +92,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
             // Damage
-            if (item.type == 'attack' || item.system.subType == 'attack') {
+            if (item.type == 'attack' || item.system.subType === 'attack' || item.system.XMLID === 'martialart') {
 
                 // Combat Skill Levels
                 const csl = CombatSkillLevelsForAttack(item)
@@ -114,12 +114,70 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 // Signed OCV and DCV
                 if (item.system.ocv != undefined) {
-                    item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-")
-                    item.system.ocvEstimated = ("+" + (parseInt(item.system.ocv) + parseInt(csl.ocv || csl.omcv))).replace("+-", "-")
+                    switch (item.system.ocv) {
+                        case "--": item.system.ocvEstimated = ""; break;
+                        case "-v/10":
+                            item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-");
+
+                            let velocity = 0;
+
+                            // Velocity from drag ruler
+                            const tokens = item.actor.getActiveTokens();
+                            const token = tokens[0];
+                            const combatants = game?.combat?.combatants;
+                            if (combatants && typeof dragRuler != 'undefined') {
+
+                                if (tokens.length === 1) {
+
+                                    let distance = dragRuler.getMovedDistanceFromToken(token);
+                                    let speed = dragRuler.getRangesFromSpeedProvider(token)[1].range;
+                                    let delta = distance;
+                                    if (delta > speed / 2) {
+                                        delta = speed - delta;
+                                    }
+                                    velocity = delta * 5;
+
+                                }
+                            }
+
+                            // Simplistic velocity calc using dragRuler
+                            if (velocity === 0) {
+                                if (typeof dragRuler != 'undefined') {
+                                    if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
+                                        velocity = parseInt(dragRuler.getRangesFromSpeedProvider(token)[1].range || 0);
+                                    }
+                                }
+                            }
+
+                            // Simplistic velocity calc using running & flight
+                            if (velocity === 0) {
+                                velocity = parseInt(item.actor.system.characteristics.running.value || 0);
+                                velocity = Math.max(velocity, parseInt(item.actor.system.characteristics.flight.value || 0));
+                            }
+
+                            item.system.ocvEstimated = (
+                                //parseInt(item.actor.system.characteristics.ocv.value) + 
+                                parseInt(csl.ocv) +
+                                parseInt(velocity / 10)
+                            ).signedString()
+
+                            break;
+                        default:
+                            item.system.ocv = parseInt(item.system.ocv).signedString();
+                            item.system.ocvEstimated = (
+                                //parseInt(item.system.targets === 'omcv' ? item.actor.system.characteristics.omcv.value : item.actor.system.characteristics.ocv.value) +
+                                parseInt(item.system.ocv) +
+                                parseInt(csl.ocv || csl.omcv)
+                            ).signedString();
+                    }
                 }
                 if (item.system.dcv != undefined) {
-                    item.system.dcv = ("+" + parseInt(item.system.dcv)).replace("+-", "-")
-                    item.system.dcvEstimated = ("+" + (parseInt(item.system.dcv) + parseInt(csl.dcv))).replace("+-", "-")
+                    item.system.dcv = parseInt(item.system.dcv).signedString();
+                    item.system.dcvEstimated = (
+                        //parseInt(item.system.targets === 'dmcv' ? item.actor.system.characteristics.dmcv.value : item.actor.system.characteristics.dcv.value) +
+                        parseInt(item.system.dcv) +
+                        parseInt(csl.dcv)
+                    ).signedString();
                 }
 
                 // Set +1 OCV

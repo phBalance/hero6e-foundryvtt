@@ -333,7 +333,7 @@ HERO.combatManeuvers = {
     "Block": ["1/2", "+0", "+0", "Blocks HTH attacks, Abort", true],
     "Brace": ["0", "+2", "1/2", "+2 OCV only to offset the Range Modifier"],
     "Disarm": ["1/2", "-2", "+0", "Disarm target, requires STR vs. STR Roll", true],
-    "Dodge": ["1/2", "+0", "+3", "Dodge all attacks, Abort", true],
+    "Dodge": ["1/2", "--", "+3", "Dodge all attacks, Abort", true],
     "Grab": ["1/2", "-1", "-2", "Grab Two Limbs; can Squeeze, Slam, or Throw", true],
     "Grab By": ["1/2 †", "-3", "-4", "Move and Grab object, +(v/10) to STR", true],
     "Haymaker": ["1/2*", "+0", "-5", "+4 Damage Classes to any attack"],

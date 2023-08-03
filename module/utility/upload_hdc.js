@@ -359,35 +359,25 @@ export async function applyCharacterSheet(xmlDoc) {
         for (const entry of Object.entries(dict)) {
             const name = entry[0];
             const v = entry[1];
-            const phase = v[0];
-            const ocv = v[1];
-            const dcv = v[2];
-            const effect = v[3];
+            const PHASE = v[0];
+            const OCV = v[1];
+            const DCV = v[2];
+            const EFFECT = v[3];
             const attack = v[4];
             const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
             const itemData = {
                 name,
                 type: 'maneuver',
                 system: {
-                    phase,
-                    ocv,
-                    dcv,
-                    EFFECT: effect,
+                    PHASE,
+                    OCV,
+                    DCV,
+                    EFFECT,
                     active: false,
-                    description: effect,
+                    description: EFFECT,
                     XMLID,
                 }
             }
-
-            // if (attack) {
-            //     await makeAttack(item)
-            //     itemData.system.subType = "attack";
-            //     itemData.system.knockbackMultiplier = 1;
-            //     itemData.system.usesStrength = true;
-            //     itemData.system.LEVELS = { value: 0, max: 0 };
-            //     itemData.system.uses = 'ocv';
-            //     itemData.system.targets = 'dcv';
-            // }
 
             let item = await HeroSystem6eItem.create(itemData, { parent: actor })
             if (attack) {
@@ -462,7 +452,8 @@ export async function applyCharacterSheet(xmlDoc) {
                 attack.system.XMLID === "HTH" ||
                 attack.system.XMLID === "HANDTOHANDATTACK" ||
                 attack.system.XMLID === "HKA" ||
-                attack.system.XMLID === "MANEUVER"
+                attack.system.XMLID === "MANEUVER" ||
+                (attack.type === "maneuver" && !attack.system.EFFECT?.match(/throw/i))
             )
             ) {
                 checked = true;
@@ -1846,8 +1837,8 @@ export async function makeAttack(item) {
     let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0;
     const input = item.system.INPUT
 
-    const ocv = parseInt(item.system.ocv) || parseInt(item.system.OCV) || 0;
-    const dcv = parseInt(item.system.dcv) || parseInt(item.system.DCV) || 0;
+    const ocv = parseInt(item.system.ocv) || parseInt(item.system.OCV) || item.system.OCV || 0;
+    const dcv = parseInt(item.system.dcv) || parseInt(item.system.DCV) || item.system.DCV || 0;
 
     // Check if this is a MARTIAL attack.  If so then EXTRA DC's may be present
     if (item.system.XMLID == "MANEUVER") {

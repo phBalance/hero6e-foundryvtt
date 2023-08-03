@@ -228,8 +228,8 @@
                         <td class="left">{{item.system.description}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.phase}}</td>
-                        <td>{{item.system.ocv}}</td>
-                        <td>{{item.system.dcv}}</td>
+                        <td>{{item.system.ocvEstimated}}</td>
+                        <td>{{item.system.dcvEstimated}}</td>
 
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
@@ -380,8 +380,8 @@
                         <td class="left">{{item.name}}</td>
                         <td class="left">{{item.system.EFFECT}}</td>
                         <td>{{item.system.phase}}</td>
-                        <td>{{item.system.ocv}}</td>
-                        <td>{{item.system.dcv}}</td>
+                        <td>{{item.system.ocvEstimated}}</td>
+                        <td>{{item.system.dcvEstimated}}</td>
                         <td>
                             {{#if (ne item.system.subType "attack")}}
                             <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
