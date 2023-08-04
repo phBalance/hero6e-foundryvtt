@@ -11,6 +11,7 @@
 - Fixed issue where some active effects using icons not associated with statuses caused error when loading world.
 - Initial Encumbrance penalty support. [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118)
 - Fixed issue where END was spent twice a phase for actors with Lightning Reflexes.  Now it only spends END on the beginning of the non LR phase for that actor.
+- Improved scrolling numbers for STUN and BODY changes.  They now show when you Take a recovery.  Also show for all players, not jus the GM.
 
 
 # Version 3.0.14

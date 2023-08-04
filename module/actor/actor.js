@@ -172,11 +172,17 @@ export class HeroSystem6eActor extends Actor {
     async _preUpdate(changed, options, userId) {
         let data = await super._preUpdate(changed, options, userId)
 
-        //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
+        // Forwrd changed date to _onUpdate.
+        // _preUpdate only seems to run for GM or one user which
+        // results in _displayScrollingChange only showing for those users.
+        // Where as _onUpdate runs for all users.
+        options.displayScrollingChanges = [];
+
+        if (!ChatMessage.getWhisperRecipients("GM").map(o => o.id).includes(game.user.id)) return;
 
 
 
-        if (options.hideChatMessage || !options.render) return;
+        
 
         let content = "";
 
@@ -193,7 +199,8 @@ export class HeroSystem6eActor extends Actor {
                 content += " (at max)";
             }
 
-            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
+            //this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
+            options.displayScrollingChanges.push({ value: valueC - valueT, options: { max: valueM, fill: '0x00FF00' } });
 
         }
 
@@ -210,9 +217,12 @@ export class HeroSystem6eActor extends Actor {
                 content += " (at max)";
             }
 
-            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0xFF1111' });
+            //this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0xFF1111' });
+            options.displayScrollingChanges.push({ value: valueC - valueT, options: { max: valueM, fill: '0xFF1111' } });
         }
 
+        if (options.hideChatMessage || !options.render) return;
+        
         if (content) {
             const chatData = {
                 user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
@@ -224,7 +234,6 @@ export class HeroSystem6eActor extends Actor {
             await ChatMessage.create(chatData)
         }
 
-        return changed;
     }
 
     async _onUpdate(data, options, userId) {
@@ -248,56 +257,11 @@ export class HeroSystem6eActor extends Actor {
             this.applyEncumbrancePenalty();
         }
 
-
-        if (options.hideChatMessage || !options.render) return;
-
-        let content = "";
-
-        if (data?.system?.characteristics?.stun) {
-            let valueT = parseInt(this.system.characteristics.stun.value);
-            let valueC = parseInt(data.system.characteristics.stun.value);
-            let valueM = parseInt(this.system.characteristics.stun.max);
-            if (valueT != valueC) {
-                content = `STUN from ${valueT} to ${valueC}`
-            } else {
-                content = `STUN changed to ${valueC}`
-            }
-            if (valueC === valueM) {
-                content += " (at max)";
-            }
-
-            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
-
+        // Display changes from _preUpdate
+        for(let d of options.displayScrollingChanges)
+        {
+            this._displayScrollingChange(d.value, d.options); 
         }
-
-        if (data?.system?.characteristics?.body) {
-            let valueT = parseInt(this.system.characteristics.body.value);
-            let valueC = parseInt(data.system.characteristics.body.value);
-            let valueM = parseInt(this.system.characteristics.body.max);
-            if (valueT != valueC) {
-                content = `BODY from ${valueT} to ${valueC}`
-            } else {
-                content = `BODY changed to ${valueC}`
-            }
-            if (valueC === valueM) {
-                content += " (at max)";
-            }
-
-            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0xFF1111' });
-        }
-
-        if (content) {
-            const chatData = {
-                user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
-                whisper: ChatMessage.getWhisperRecipients("GM"),
-                speaker: ChatMessage.getSpeaker({ actor: this }),
-                blind: true,
-                content: content,
-            }
-            await ChatMessage.create(chatData)
-        }
-
-        //this._displayScrollingChange(15, { max: 100, fill: '0x00FFFF' });
 
     }
 
