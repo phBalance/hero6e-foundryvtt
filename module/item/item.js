@@ -112,6 +112,15 @@ export class HeroSystem6eItem extends Item {
     //     data.roll = Math.round(roll);
     // }
 
+    async _onUpdate(data, options, userId) {
+        super._onUpdate(data, options, userId);
+        
+        if (this.actor && this.type === 'equipment') {
+            this.actor.applyEncumbrancePenalty();
+        }
+
+    }
+
     // Largely used to determine if we can drag to hotbar
     isRollable() {
         switch (this.system?.subType || this.type) {
@@ -255,15 +264,14 @@ export class HeroSystem6eItem extends Item {
 
         switch (this.type) {
             case "defense":
-                // TODO: Remove duplicate defense items and make them ActiveEffects
                 await item.update({ [attr]: newValue })
                 break;
 
             case "power":
-
+            case "equipment":
                 // Is this a defense power?  If so toggle active state
                 const configPowerInfo = getPowerInfo({ item: item })
-                if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+                if ((configPowerInfo && configPowerInfo.powerType.includes("defense")) || item.type === "equipment") {
                     await item.update({ [attr]: newValue })
                 }
 
@@ -280,12 +288,7 @@ export class HeroSystem6eItem extends Item {
                 await enforceManeuverLimits(this.actor, item.id, item.name)
                 //await updateCombatAutoMod(item.actor, item)
                 break;
-            case "equipment":
-                await item.update({ [attr]: newValue })
-                // Do nothing special for now.
-                // Weight/encumbrance will automtically be calculated.
-                // TODO: tie defensive/buff items into equipment.
-                break;
+
             case "talent": // COMBAT_LUCK
                 await item.update({ [attr]: newValue })
                 break;

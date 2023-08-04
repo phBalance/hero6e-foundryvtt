@@ -207,9 +207,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             if (item.type == 'equipment') {
                 data.hasEquipment = true
                 if (item.system.active) {
-                    weightTotal += parseFloat(item.system.WEIGHT) || 0
+                    weightTotal += parseFloat(item.system.WEIGHT || 0)
                 }
-                if (parseFloat(item.system.WEIGHT) > 0) {
+                if (parseFloat(item.system.WEIGHT || 0) > 0) {
                     item.system.WEIGHTtext = parseFloat(item.system.WEIGHT) + "kg"
                 }
                 else {
@@ -217,8 +217,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
 
 
-                priceTotal += parseFloat(item.system.PRICE) || 0
-                if (parseFloat(item.system.PRICE) > 0) {
+                priceTotal += parseFloat(item.system.PRICE || 0)
+                if (parseFloat(item.system.PRICE || 0) > 0) {
                     item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE))
                 }
                 else {
@@ -238,7 +238,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 item.system.endEstimate = item.system.endEstimate.trim();
             }
 
-            items.push(item)
+            items.push(foundry.utils.deepClone(item))
         }
 
 
@@ -340,7 +340,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             // Notes
             if (key == 'str') {
-               const strDetails = await this.actor.strDetails();
+                const strDetails = this.actor.strDetails();
                 characteristic.notes = `lift ${strDetails.strLiftText}, throw ${strDetails.strThrow}m`
             }
 

@@ -244,9 +244,9 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // If STR was change check encumbrance
-        // if (data?.system?.characteristics?.str && userId === game.user.id) {
-        //     this.strDetails();
-        // }
+        if (data?.system?.characteristics?.str && userId === game.user.id) {
+            this.applyEncumbrancePenalty();
+        }
 
     }
 
@@ -435,7 +435,7 @@ export class HeroSystem6eActor extends Actor {
 
     }
 
-    async strDetails() {
+    strDetails() {
         let strLiftText = 0;
         let strThrow = 0;
         let value = this.system.characteristics.str.value;
@@ -481,12 +481,18 @@ export class HeroSystem6eActor extends Actor {
         strLiftKg = m ? m[1] * 1000 * 1000 : strLiftKg;
 
 
+
+
+        return { strLiftText, strThrow, strLiftKg };
+    }
+
+    async applyEncumbrancePenalty() {
         // Encumbrance (requires permissions to mess with ActiveEffects)
         if (game.user.isGM) {
 
-
+            const {strLiftKg} = this.strDetails()
             let encumbrance = 0
-            const itemsWithWeight = this.items.filter(o => o.system.WEIGHT);
+            const itemsWithWeight = this.items.filter(o => o.system.WEIGHT && o.system.active);
             for (const item of itemsWithWeight) {
                 encumbrance += parseFloat(item.system.WEIGHT);
             }
@@ -520,7 +526,7 @@ export class HeroSystem6eActor extends Actor {
             }
 
             const name = `Encumbered ${Math.floor(encumbrance / strLiftKg * 100)}%`
-            const prevActiveEffect = this.effects.find(o => o.flags?.encumbrance);
+            let prevActiveEffect = this.effects.find(o => o.flags?.encumbrance);
             if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
                 let activeEffect = {
 
@@ -552,6 +558,7 @@ export class HeroSystem6eActor extends Actor {
 
                 if (prevActiveEffect) {
                     await prevActiveEffect.delete();
+                    prevActiveEffect = null;
                 }
 
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -564,8 +571,6 @@ export class HeroSystem6eActor extends Actor {
                 await prevActiveEffect.update({ 'name': name });
             }
         }
-
-        return { strLiftText, strThrow, strLiftKg };
     }
 
 

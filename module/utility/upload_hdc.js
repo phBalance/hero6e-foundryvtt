@@ -60,11 +60,13 @@ export async function applyCharacterSheet(xmlDoc) {
     }
 
 
+    // Remove all existing effects
+    await this.actor.deleteEmbeddedDocuments("ActiveEffect", this.actor.effects.map(o => o.id))
+    
     // Remove all items from
     await this.actor.deleteEmbeddedDocuments("Item", Array.from(this.actor.items.keys()))
 
-    // Remove all existing effects
-    await this.actor.deleteEmbeddedDocuments("ActiveEffect", this.actor.effects.map(o => o.id))
+
 
     // 6e vs 5e
     if (!characterTemplate) {
@@ -2323,13 +2325,13 @@ export function SkillRollUpdateValue(item) {
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
 
-        let charNumber =  Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
+        let charNumber = Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
         let rollVal = 9 + charNumber;
         skillData.tags.push({ value: 9, name: "Skill" })
         if (charNumber != 0) {
             skillData.tags.push({ value: charNumber, name: characteristic })
         }
-        
+
 
         if (item.system.XMLID === "FINDWEAKNESS") {
             rollVal += 2; // 11-
