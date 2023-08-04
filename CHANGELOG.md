@@ -9,6 +9,7 @@
 - Initial AUTOFIRE support.  Some automation for single targets.  No automation for multiple targets as the workflow of tohit/damage would be awkward unless fully automated.  Full automation limites the ability for GM's to handle unusual situations. [#43](https://github.com/dmdorman/hero6e-foundryvtt/issues/43)
 - Initial support for Skill Levels.  Player is prompted to confirm Skill Level applies to rolled skill.  Skill rolls now show tag details. [#89](https://github.com/dmdorman/hero6e-foundryvtt/issues/89)
 - Fixed issue where some active effects using icons not associated with statuses caused error when loading world.
+- Initial Encumbrance penalty support. [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118)
 
 
 # Version 3.0.14
