@@ -124,7 +124,7 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
 6. Marking a token as dead marks all identical tokens as dead. [#247](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
    - You need to turn off *Link Actor Data* in the actor Prototype Token or Token screen.
    - Named actors can have tokens on several scenes, and by default their properies are linked to the master actor.  So as you move from scene to scene their STUN/BODY/Statuses and all other properties remain the same.
-   - Generic actors should have their link actor data unchecked, which allows you to make distinct changes to the tokens, those changes do not affect the master actor.  You may find [Token Mold](https://foundryvtt.com/packages/token-mold) useful to rename generic actors.
+   - Generic actors should have their link actor data unchecked, which allows you to make distinct changes to the tokens, those changes do not affect the master actor.  There are also options on the Prototype token to add a number or adjetive to the token name.
 
 ## Screenshots
 
