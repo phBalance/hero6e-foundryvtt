@@ -27,23 +27,24 @@ export class HeroVisualEffects {
         });
     }
 
-    static drawVisualEffect(token) {
+    // static drawVisualEffect(token) {
 
-        if ( token.heroVisualEffects?.removeChildren ) token.heroVisualEffects.removeChildren().forEach(c => c.destroy());
+    //     if ( token.heroVisualEffects?.removeChildren ) token.heroVisualEffects.removeChildren().forEach(c => c.destroy());
 
-        // if (!canvas.grid.heroVisualEffects) {
-        //     canvas.grid.heroVisualEffects = canvas.grid.addChildAt(new PIXI.Container(), canvas.grid.getChildIndex(canvas.grid.borders));
-        // }
+    //     // if (!canvas.grid.heroVisualEffects) {
+    //     //     canvas.grid.heroVisualEffects = canvas.grid.addChildAt(new PIXI.Container(), canvas.grid.getChildIndex(canvas.grid.borders));
+    //     // }
 
-        token.heroVisualEffects ??= token.addChild(new PIXI.Container()); //canvas.grid.heroVisualEffects.addChild(new PIXI.Container())
-        const gfx = token.heroVisualEffects.addChild(new PIXI.Graphics());
+    //     token.heroVisualEffects ??= token.addChild(new PIXI.Container()); //canvas.grid.heroVisualEffects.addChild(new PIXI.Container())
+    //     const gfx = token.heroVisualEffects.addChild(new PIXI.Graphics());
 
-        const [cx, cy] = [token.getBounds().x, token.getBounds().y]
-        const w = token.w * 2;
-        const h = token.h * 2;
+    //     const [cx, cy] = [token.getBounds().x, token.getBounds().y]
+    //     const w = token.w * 2;
+    //     const h = token.h * 2;
         
-        gfx.beginFill(0x000000, 0.5);
-        gfx.drawEllipse(cx, cy, w, h);
-        gfx.endFill()
-    }
+    //     gfx.beginFill(0x000000, 0.5);
+    //     gfx.drawEllipse(cx, cy, w, h);
+    //     gfx.endFill()
+    // }
+    
 }

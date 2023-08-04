@@ -79,7 +79,7 @@ Hooks.once('init', async function () {
 
     HeroRuler.initialize()
 
-    HeroVisualEffects.initialize()
+    //HeroVisualEffects.initialize()
 
     SettingsHelpers.initLevelSettings();
 
@@ -577,7 +577,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
     const start = new Date();
 
+    
+
     // Guard
+    if (!game.user.isGM) return;
     if (!lastDate) game.user.getFlag(game.system.id, "lastDate") || 0;
 
 
@@ -606,7 +609,8 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     for (let actor of actors) {
         const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
-        // Create a natural body healing if needed
+        // Create a natural body healing if needed (requires permissions)
+        
         const naturalBodyHealing = actor.temporaryEffects.find(o => o.flags.XMLID === "naturalBodyHealing");
         if (actor.type === "pc" && !naturalBodyHealing && parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)) {
             const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
@@ -623,8 +627,9 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     XMLID: "naturalBodyHealing",
                 }
             }
-            await actor.addActiveEffect(activeEffect);
+            if (game.user.isGM) await actor.addActiveEffect(activeEffect);
         }
+        
 
         // Delete natural body healing when body value = max (typically by manual adjustment)
         // if (naturalBodyHealing && parseInt(actor.system.characteristics.body.value) >= parseInt(actor.system.characteristics.body.max)) {
@@ -647,7 +652,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
             let powerInfo = getPowerInfo({ actor: aeActor, xmlid: XMLID, item: item });
 
-            if (!powerInfo && ae.statuses.size === 0 && game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            if (!powerInfo && ae.statuses.size === 0 && game.user.isGM && 
+                game.settings.get(game.system.id, 'alphaTesting') &&
+                ae.duration?.seconds < 3.154e+7 * 100
+            ) {
                 return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
             }
 
@@ -659,7 +667,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 let x = ae.duration.startTime;
                 ae.duration.startTime += d.duration;
                 d = ae._prepareDuration();
-                await ae.update({ duration: ae.duration });
+                if (game.user.isGM) await ae.update({ duration: ae.duration });
 
                 // Fade by 5 ActivePoints
                 let _fade = Math.min(ae.flags.activePoints, 5);
@@ -680,10 +688,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     // If ActivePoints <= 0 then remove effect
                     if (ae.flags.activePoints <= 0) {
                         //content += `  Effect deleted.`;
-                        await ae.delete();
+                        if (game.user.isGM) await ae.delete();
                     } else {
                         //await 
-                        ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
+                        if (game.user.isGM) ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
                     }
 
                     // DRAIN fade (increase VALUE)
@@ -696,7 +704,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     // AID fade (VALUE = max)
                     {
                         let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
-                        actor.update({ [`system.characteristics.${target}.value`]: newValue })
+                        if (game.user.isGM) actor.update({ [`system.characteristics.${target}.value`]: newValue })
                     }
 
                     if (ae.flags.activePoints <= 0) break;
@@ -710,10 +718,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                         let bodyMax = parseInt(actor.system.characteristics.body.max);
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
                         // await 
-                        actor.update({ 'system.characteristics.body.value': bodyValue });
+                        if (game.user.isGM) actor.update({ 'system.characteristics.body.value': bodyValue });
 
                         if (bodyValue === bodyMax) {
-                            ae.delete();
+                            if (game.user.isGM) ae.delete();
                             break;
                         } else {
                             //await ae.update({ duration: ae.duration });
@@ -722,7 +730,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
                         // Default is to delete the expired AE
                         if (powerInfo) {
-                            await ae.delete();
+                            if (game.user.isGM) await ae.delete();
                             break;
                         }
 
@@ -773,12 +781,12 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 // PCs. Once an NPC is Knocked Out below the -10 STUN level
                 // he should normally remain unconscious until the fight ends.
                 if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
-                    await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+                    if (game.user.isGM) await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
                     let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
                     let endValue = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
                     let stunValue = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
                     a//wait 
-                    actor.update({
+                    if (game.user.isGM) actor.update({
                         'system.characteristics.end.value': endValue,
                         'system.characteristics.stun.value': stunValue
                     }, { 'render': true })

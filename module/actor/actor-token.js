@@ -97,11 +97,11 @@ export class HeroSystem6eToken extends Token {
         return data
     }
 
-    async _draw()
-    {
-        super._draw();
-        console.log("_draw");
-    }
+    // async _draw()
+    // {
+    //     super._draw();
+    //     console.log("_draw");
+    // }
 
     // _drawAttributeBars() {
     //     //HEROSYS.log(false, "_drawAttributeBars")

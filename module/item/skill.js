@@ -62,7 +62,7 @@ async function skillRoll(item, actor, html) {
 		const skillLevel = actor.items.get(skillLevelinput.id);
 		const level = parseInt(skillLevel.system.LEVELS.value);
 		if (level > 0) {
-			tags.push({ value: level, name: skillLevel.name })
+			tags.push({ value: level, name: skillLevel.name, title: skillLevel.system.description })
 			//rollEquation = modifyRollEquation(rollEquation, level)
 			//targetNumber += level;
 		}
