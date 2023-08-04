@@ -10,6 +10,7 @@
 - Initial support for Skill Levels.  Player is prompted to confirm Skill Level applies to rolled skill.  Skill rolls now show tag details. [#89](https://github.com/dmdorman/hero6e-foundryvtt/issues/89)
 - Fixed issue where some active effects using icons not associated with statuses caused error when loading world.
 - Initial Encumbrance penalty support. [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118)
+- Fixed issue where END was spent twice a phase for actors with Lightning Reflexes.  Now it only spends END on the beginning of the non LR phase for that actor.
 
 
 # Version 3.0.14
