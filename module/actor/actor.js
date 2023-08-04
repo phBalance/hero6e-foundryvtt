@@ -178,11 +178,7 @@ export class HeroSystem6eActor extends Actor {
         // Where as _onUpdate runs for all users.
         options.displayScrollingChanges = [];
 
-        if (!ChatMessage.getWhisperRecipients("GM").map(o => o.id).includes(game.user.id)) return;
-
-
-
-        
+        //if (!ChatMessage.getWhisperRecipients("GM").map(o => o.id).includes(game.user.id)) return;
 
         let content = "";
 
@@ -222,7 +218,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (options.hideChatMessage || !options.render) return;
-        
+
         if (content) {
             const chatData = {
                 user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
