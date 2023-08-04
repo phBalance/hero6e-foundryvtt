@@ -114,7 +114,7 @@ export class HeroSystem6eItem extends Item {
 
     async _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
-        
+
         if (this.actor && this.type === 'equipment') {
             this.actor.applyEncumbrancePenalty();
         }
@@ -189,12 +189,11 @@ export class HeroSystem6eItem extends Item {
             }
         }
         content += `<b>${this.name}</b>`
-        if (this.system.description && this.system.description != this.name) {
-            content += ` ${this.system.description}`
-        }
-        // if (this.system.roll) {
-        //     content += ` (${this.system.roll})`
-        // }
+        let _desc = this.system.description
+
+        content += ` ${_desc}`;
+        //}
+
         content += "."
 
         if (this.system.end) {

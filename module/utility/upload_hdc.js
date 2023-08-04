@@ -291,7 +291,7 @@ export async function applyCharacterSheet(xmlDoc) {
         type: 'skill',
         system: {
             ALIAS: "Perception",
-            characteristic: "int",
+            CHARACTERISTIC: "int",
             state: 'trained',
             levels: "0"
         }
@@ -869,11 +869,14 @@ export function XmlToItemData(xml, type) {
     systemData.activePoints = RoundFavorPlayerDown(_activePoints)
     systemData.realCost = RoundFavorPlayerDown(_realCost)
 
-    // Update Item Description (to closely match Hero Designer)
-    updateItemDescription({ system: systemData, type: type })
 
     // Item name
     let name = xml.getAttribute('NAME').trim() || xml.getAttribute('ALIAS').trim() || xml.tagName
+
+    // Update Item Description (to closely match Hero Designer)
+    updateItemDescription({ name: name, system: systemData, type: type })
+
+
 
     // This item was created via HDC Uploadn (could be useful later)
     systemData.FromHdcUpload = true
@@ -1335,7 +1338,7 @@ export function updateItemDescription(item) {
 
         case "LANGUAGES":
             //English:  Language (basic conversation) (1 Active Points)
-            system.description = system.NAME + ": " + (system.INPUT || system.ALIAS)
+            system.description = (system.INPUT || system.ALIAS)
             if (system.OPTION_ALIAS) {
                 system.description += " (" + system.OPTION_ALIAS + ")"
             }
@@ -1402,11 +1405,11 @@ export function updateItemDescription(item) {
 
 
             // For most maneuvers we can use the EFFECT
-            if (system.EFFECT) {
-                //system.description = system.EFFECT + ", ";
-                // BLOCK or DODGE modifiers
-                console.log(system);
-            }
+            // if (system.EFFECT) {
+            //     //system.description = system.EFFECT + ", ";
+            //     // BLOCK or DODGE modifiers
+            //     console.log(system);
+            // }
 
             // Martial attacks tyipcally add STR to description
             let fullDice = system.dice;
@@ -1521,7 +1524,13 @@ export function updateItemDescription(item) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
                 break;
             }
-            system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS || "")
+
+            let _desc = (system.OPTION_ALIAS || system.ALIAS || "")
+            // if (system.INPUT) {
+            //     const re = new RegExp(`^${system.INPUT}`, 'i')
+            //     _desc = _desc.replace(re, "").trim();
+            // }
+            system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
 
             // Skill Roll?
             if (type == 'skill') {
@@ -1536,6 +1545,20 @@ export function updateItemDescription(item) {
             }
 
     }
+
+    // Remove duplicate name from descripton and related cleanup
+    let _rawName = item.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    try {
+        let re = new RegExp(`^${_rawName}`, 'i')
+        system.description = system.description.replace(re, "").trim();
+        re = new RegExp(`: ${item.name}$`, 'i')
+        system.description = system.description.replace(re, "").trim();
+        system.description = system.description.replace(/^: /, "").trim();
+    } catch (e) {
+        ui.notifications.warn(`${item.actor.name} has item "${item.name.substr(0, 30)}" which failed to update item description`);
+        console.log(e);
+    }
+
 
     // ADDRS
     let _adderArray = []
@@ -2300,14 +2323,18 @@ export function SkillRollUpdateValue(item) {
         return;
     }
 
-    // Skill Enhancers (educated guess) are not rollable
-    if (skillData.BASECOST === "3.0" && skillData.LEVELS.max === "0" && !skillData.CHARACTERISTIC) {
+    // No Characteristic = no roll.  Skill Enhancers for example
+    if (!skillData.CHARACTERISTIC && !skillData.characteristic) {//skillData.BASECOST === "3.0" && skillData.LEVELS.max === "0" && ) {
         skillData.roll = null;
         return;
     }
 
+    const configPowerInfo = getPowerInfo({ xmlid: skillData.XMLID || skillData.rules, actor: item.actor })
+
+
     // Combat Skill Levels are not rollable
-    if (["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS"].includes(skillData.XMLID)) {
+    //if (["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "LANGUAGES"].includes(skillData.XMLID)) {
+    if (configPowerInfo && configPowerInfo.rollable === false) {
         skillData.roll = null;
         return;
     }

@@ -324,12 +324,17 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td>{{item.system.realCost}}</td>
+                        <td>
+                            {{#if (and (ne item.syste.realCost 0) (ne item.system.XMLID "LIST"))}}
+                            {{item.system.realCost}}</td>
+                            {{/if}}
                         
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
                             {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
+                            {{#if (ne item.name "LIST")}}
                             <i>{{item.name}}</i>
                             {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                            {{/if}}
                         </td>
                         <td>{{#if (ne item.system.characteristic "general")}}{{item.system.characteristic}}{{/if}}</td>
                         <td>

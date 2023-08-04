@@ -393,6 +393,22 @@ Hooks.once("ready", async function () {
             await ui.notifications.info(`Migragtion complete.`)
         }
 
+        // if lastMigration < 3.0.15
+        // Improved item descriptions
+        if (foundry.utils.isNewerVersion('3.0.15', lastMigration)) {
+            await ui.notifications.info(`Migragrating actor data.`)
+            for (let actor of game.actors.contents) {
+                for (let item of actor.items) {
+                    let _oldDescription = item.system.description;
+                    updateItemDescription(item);
+                    if (_oldDescription != item.system.description) {
+                        await item.update({ 'system.description':  item.system.description})
+                    }
+                }
+            }
+            await ui.notifications.info(`Migragtion complete.`)
+        }
+
     }
 
 });

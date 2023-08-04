@@ -226,7 +226,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
             }
 
-            if (item.type == 'skill') {
+            if (item.system.subType || item.type == 'skill') {
                 SkillRollUpdateValue(item)
             }
 
