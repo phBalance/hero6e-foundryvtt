@@ -297,7 +297,7 @@ export class HeroSystem6eActor extends Actor {
             await ChatMessage.create(chatData)
         }
 
-        this._displayScrollingChange(15, { max: 100, fill: '0x00FFFF' });
+        //this._displayScrollingChange(15, { max: 100, fill: '0x00FFFF' });
 
     }
 
