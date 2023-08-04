@@ -62,7 +62,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // Remove all existing effects
     await this.actor.deleteEmbeddedDocuments("ActiveEffect", this.actor.effects.map(o => o.id))
-    
+
     // Remove all items from
     await this.actor.deleteEmbeddedDocuments("Item", Array.from(this.actor.items.keys()))
 
@@ -2300,8 +2300,14 @@ export function SkillRollUpdateValue(item) {
         return;
     }
 
-    // Skill Enhancers (educated guess)
+    // Skill Enhancers (educated guess) are not rollable
     if (skillData.BASECOST === "3.0" && skillData.LEVELS.max === "0" && !skillData.CHARACTERISTIC) {
+        skillData.roll = null;
+        return;
+    }
+
+    // Combat Skill Levels are not rollable
+    if (["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS"].includes(skillData.XMLID)) {
         skillData.roll = null;
         return;
     }
