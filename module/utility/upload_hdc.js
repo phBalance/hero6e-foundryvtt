@@ -381,6 +381,7 @@ export async function applyCharacterSheet(xmlDoc) {
         name: 'Perception',
         type: 'skill',
         system: {
+            XMLID: "PERCEPTION",
             ALIAS: "Perception",
             CHARACTERISTIC: "int",
             state: 'trained',
@@ -997,8 +998,7 @@ function calcBasePointsPlusAdders(item) {
     let configPowerInfoParent = null;
     if (system.PARENTID && actor?.items) {
         parentItem = actor.items.find(o => o.system.ID === system.PARENTID);
-        if (parentItem)
-        {
+        if (parentItem) {
             configPowerInfoParent = getPowerInfo({ xmlid: parentItem.system.XMLID, actor: actor })
         }
     }
@@ -1102,15 +1102,15 @@ function calcBasePointsPlusAdders(item) {
     system.basePointsPlusAdders = cost;
 
     //return cost; //Math.max(1, cost)
-    return { changed: old === system.basePointsPlusAdders};
+    return { changed: old === system.basePointsPlusAdders };
 }
 
 function calcActivePoints(item) {
     let system = item.system;
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
 
-    if (system.XMLID == "ARMOR")
-        HEROSYS.log(false, system.XMLID)
+    // if (system.XMLID == "ARMOR")
+    //     HEROSYS.log(false, system.XMLID)
 
     let advantages = 0;
     let advantagesDC = 0;
@@ -1177,7 +1177,7 @@ function calcActivePoints(item) {
     system.activePoints = RoundFavorPlayerDown(_activePoints);
 
     //return RoundFavorPlayerDown(_activePoints)
-    return { changed: old === system.activePoints};
+    return { changed: old === system.activePoints };
 }
 
 function calcRealCost(item) {
@@ -1243,7 +1243,7 @@ function calcRealCost(item) {
     let old = system.realCost;
     system.realCost = _realCost;
 
-    return { changed: old === system.realCost}; //_realCost
+    return { changed: old === system.realCost }; //_realCost
 }
 
 export async function uploadPower(power, type) {
@@ -1545,12 +1545,14 @@ export function updateItemDescription(item) {
             // Endurance Reserve  (20 END, 5 REC) (9 Active Points)
             system.description = `${system.ALIAS.replace('Endurance Reserve', '')}`;
 
-            const power = system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
-            if (power) {
-                if (parseInt(system.LEVELS.value) === parseInt(system.LEVELS.max)) {
-                    system.description += ` (${system.LEVELS.max} END, ${power.LEVELS} REC)`
-                } else {
-                    system.description += ` (${system.LEVELS.value}/${system.LEVELS.max} END, ${power.LEVELS} REC)`
+            if (system.powers) {
+                const power = system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
+                if (power) {
+                    if (parseInt(system.LEVELS.value) === parseInt(system.LEVELS.max)) {
+                        system.description += ` (${system.LEVELS.max} END, ${power.LEVELS} REC)`
+                    } else {
+                        system.description += ` (${system.LEVELS.value}/${system.LEVELS.max} END, ${power.LEVELS} REC)`
+                    }
                 }
             }
             break;
@@ -1901,7 +1903,7 @@ export async function makeAttack(item) {
 
     // Name
     let description = item.system.ALIAS
-    let name = item.system.NAME || description || configPowerInfo?.xmlid || item.system.name;
+    let name = item.system.NAME || description || configPowerInfo?.xmlid || item.system.name || item.name;
     changes[`name`] = name
 
     let levels = parseInt(item.system.LEVELS?.value) || parseInt(item.system.DC) || 0;
@@ -2186,16 +2188,17 @@ export async function makeAttack(item) {
 
     if (item._id) {
         await item.update(changes, { hideChatMessage: true })
-    } else {
-        // Likely a QUENCH test
-        for (let change of Object.keys(changes)) {
-            let target = item;
-            for (let key of change.split('.')) {
-                if (typeof target[key] == 'object') {
-                    target = target[key]
-                } else {
-                    target[key] = changes[change]
-                }
+    } 
+    
+
+    // Possibly a QUENCH test
+    for (let change of Object.keys(changes).filter(o=>o!= "_id")) {
+        let target = item;
+        for (let key of change.split('.')) {
+            if (typeof target[key] == 'object') {
+                target = target[key]
+            } else {
+                target[key] = changes[change]
             }
         }
     }
