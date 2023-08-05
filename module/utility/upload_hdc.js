@@ -863,9 +863,9 @@ export function XmlToItemData(xml, type) {
 
 
     // Calculate RealCost, ActivePoints, and END
-    let _basePointsPlusAdders = calcBasePointsPlusAdders({ system: systemData, actor: this.actor })
-    let _activePoints = calcActivePoints({ system: systemData, actor: this.actor }); //_basePointsPlusAdders, systemData)
-    let _realCost = calcRealCost({ system: systemData, actor: this.actor }) //_activePoints, systemData)
+    let _basePointsPlusAdders = calcBasePointsPlusAdders({ system: systemData, actor: this?.actor })
+    let _activePoints = calcActivePoints({ system: systemData, actor: this?.actor }); //_basePointsPlusAdders, systemData)
+    let _realCost = calcRealCost({ system: systemData, actor: this?.actor }) //_activePoints, systemData)
     // systemData.basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
     // systemData.activePoints = RoundFavorPlayerDown(_activePoints)
     // systemData.realCost = RoundFavorPlayerDown(_realCost)
