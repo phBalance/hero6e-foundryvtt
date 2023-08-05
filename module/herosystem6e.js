@@ -19,9 +19,10 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
-import { createEffects, updateItemDescription, updateItemSubTypes } from "./utility/upload_hdc.js"
+import { createEffects, updateItemDescription, updateItemSubTypes, calcItemPoints, CalcActorRealAndActivePoints } from "./utility/upload_hdc.js"
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
 import { HeroVisualEffects } from "./HeroVisualEffects.js"
+import { RoundFavorPlayerDown } from "./utility/round.js"
 
 Hooks.once('init', async function () {
 
@@ -398,13 +399,38 @@ Hooks.once("ready", async function () {
         if (foundry.utils.isNewerVersion('3.0.15', lastMigration)) {
             await ui.notifications.info(`Migragrating actor data.`)
             for (let actor of game.actors.contents) {
+                let itemsChanged = false;
                 for (let item of actor.items) {
-                    let _oldDescription = item.system.description;
-                    updateItemDescription(item);
-                    if (_oldDescription != item.system.description) {
-                        await item.update({ 'system.description':  item.system.description})
+
+
+                    let changes = {};
+                    // Calculate RealCost, ActivePoints, and END
+                    if (calcItemPoints(item)) {
+                        if (item.system.realCost) { // Some items like Perception have NaN for cost (TODO: fix)
+                            changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+                            changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+                            changes['system.realCost'] = RoundFavorPlayerDown(item.system.realCost);
+                        }
+                    }
+
+                    if (item.system.realCost) {
+                        let _oldDescription = item.system.description;
+                        updateItemDescription(item);
+                        if (_oldDescription != item.system.description) {
+                            changes['system.description'] = item.system.description;
+                        }
+                    }
+
+                    if (Object.keys(changes).length > 0) {
+                        await item.update(changes, { hideChatMessage: true })
+                        itemsChanged = true;
                     }
                 }
+
+                if (itemsChanged) {
+                    await CalcActorRealAndActivePoints(actor);
+                }
+                
             }
             await ui.notifications.info(`Migragtion complete.`)
         }
@@ -593,7 +619,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
     const start = new Date();
 
-    
+
 
     // Guard
     if (!game.user.isGM) return;
@@ -626,7 +652,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
         const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
         // Create a natural body healing if needed (requires permissions)
-        
+
         const naturalBodyHealing = actor.temporaryEffects.find(o => o.flags.XMLID === "naturalBodyHealing");
         if (actor.type === "pc" && !naturalBodyHealing && parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)) {
             const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
@@ -645,7 +671,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
             }
             if (game.user.isGM) await actor.addActiveEffect(activeEffect);
         }
-        
+
 
         // Delete natural body healing when body value = max (typically by manual adjustment)
         // if (naturalBodyHealing && parseInt(actor.system.characteristics.body.value) >= parseInt(actor.system.characteristics.body.max)) {
@@ -668,7 +694,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
             let powerInfo = getPowerInfo({ actor: aeActor, xmlid: XMLID, item: item });
 
-            if (!powerInfo && ae.statuses.size === 0 && game.user.isGM && 
+            if (!powerInfo && ae.statuses.size === 0 && game.user.isGM &&
                 game.settings.get(game.system.id, 'alphaTesting') &&
                 ae.duration?.seconds < 3.154e+7 * 100
             ) {

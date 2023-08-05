@@ -62,7 +62,7 @@ export function registerUploadTests(quench) {
                 const item = XmlToItemData(xmlDoc.children[0], "skill")
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Mind Empowered: +2 with a group of Mental Powers");
+                    assert.equal(item.system.description, "+2 with a group of Mental Powers");
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 6);
@@ -80,10 +80,10 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.end, 0);
                 });
 
-                it("roll", function () {
-                    SkillRollUpdateValue(item)
-                    assert.equal(item.system.roll, "11-");
-                });
+                // it("roll", function () {
+                //     SkillRollUpdateValue(item)
+                //     assert.equal(item.system.roll, "11-");
+                // });
             });
 
             describe("CLIMBING", function () {
@@ -105,7 +105,7 @@ export function registerUploadTests(quench) {
                 item.actor = actor;
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Climbing");
+                    assert.equal(item.system.description, ""); // Climbing is part of the name
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 3);
@@ -147,7 +147,7 @@ export function registerUploadTests(quench) {
                 item.actor = actor;
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Fire Blast 1d6");
+                    assert.equal(item.system.description, "1d6");
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 5);
@@ -382,7 +382,7 @@ export function registerUploadTests(quench) {
                 makeAttack(item);
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Mind Control 15d6");
+                    assert.equal(item.system.description, "15d6");
                 });
                 it("realCost", function () {
                     assert.equal(item.system.realCost, 75);

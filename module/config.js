@@ -786,7 +786,7 @@ HERO.powers = {
     "CRAMMING": { powerType: ["skill"] },
     "CRIMINOLOGY": { powerType: ["skill"] },
     "CRYPTOGRAPHY": { powerType: ["skill"] },
-    "CUSTOMSKILL": { powerType: ["skill"] },
+    "CUSTOMSKILL": { powerType: ["skill"], costPerLevel: 1 },
     "DEDUCTION": { powerType: ["skill"] },
     "DEFENSE_MANEUVER": { powerType: ["skill"] },
     "DEMOLITIONS": { powerType: ["skill"] },

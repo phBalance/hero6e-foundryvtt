@@ -127,7 +127,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                             const combatants = game?.combat?.combatants;
                             if (combatants && typeof dragRuler != 'undefined') {
 
-                                if (tokens.length === 1) {
+                                if (token) {
 
                                     let distance = dragRuler.getMovedDistanceFromToken(token);
                                     let speed = dragRuler.getRangesFromSpeedProvider(token)[1].range;
@@ -141,7 +141,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                             }
 
                             // Simplistic velocity calc using dragRuler
-                            if (velocity === 0) {
+                            if (velocity === 0 && token) {
                                 if (typeof dragRuler != 'undefined') {
                                     if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
                                         velocity = parseInt(dragRuler.getRangesFromSpeedProvider(token)[1].range || 0);

@@ -285,19 +285,7 @@ export async function applyCharacterSheet(xmlDoc) {
         await uploadSkill.call(this, skill)
     }
 
-    // Perception Skill
-    const itemDataPerception = {
-        name: 'Perception',
-        type: 'skill',
-        system: {
-            ALIAS: "Perception",
-            CHARACTERISTIC: "int",
-            state: 'trained',
-            levels: "0"
-        }
-    }
 
-    await HeroSystem6eItem.create(itemDataPerception, { parent: this.actor })
 
     // EXTRA DC's from martial arts
     // let extraDc = 0
@@ -388,6 +376,19 @@ export async function applyCharacterSheet(xmlDoc) {
         }
     }
 
+    // Perception Skill
+    const itemDataPerception = {
+        name: 'Perception',
+        type: 'skill',
+        system: {
+            ALIAS: "Perception",
+            CHARACTERISTIC: "int",
+            state: 'trained',
+            levels: "0"
+        }
+    }
+
+    await HeroSystem6eItem.create(itemDataPerception, { parent: this.actor })
 
 
     await loadCombatManeuvers(CONFIG.HERO.combatManeuvers, this.actor)
@@ -503,7 +504,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     }
 
-    await CalcRealAndActivePoints(this.actor)
+    await CalcActorRealAndActivePoints(this.actor)
 
 
 
@@ -519,7 +520,8 @@ export async function applyCharacterSheet(xmlDoc) {
     Hooks.call('hdcUpload')
 }
 
-async function CalcRealAndActivePoints(actor) {
+
+export async function CalcActorRealAndActivePoints(actor) {
     // Calculate realCost & Active Points for bought as characteristics
     let realCost = 0;
     let activePoints = 0;
@@ -537,7 +539,6 @@ async function CalcRealAndActivePoints(actor) {
     // Add in costs for items
     let _splitCost = {}
     for (let item of actor.items.filter(o => o.type != 'attack' && o.type != 'defense' && o.type != 'movement' && o.type != 'complication' && !o.system.duplicate)) {
-        //HEROSYS.log(false, item.type, item.name, item.system.realCost)
 
         // Equipment is typically purchased with money, not character points
         if (item.type != 'equipment') {
@@ -862,12 +863,12 @@ export function XmlToItemData(xml, type) {
 
 
     // Calculate RealCost, ActivePoints, and END
-    let _basePointsPlusAdders = calcBasePointsPlusAdders.call(this, systemData)
-    let _activePoints = calcActivePoints(_basePointsPlusAdders, systemData)
-    let _realCost = calcRealCost(_activePoints, systemData)
-    systemData.basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
-    systemData.activePoints = RoundFavorPlayerDown(_activePoints)
-    systemData.realCost = RoundFavorPlayerDown(_realCost)
+    let _basePointsPlusAdders = calcBasePointsPlusAdders({ system: systemData, actor: this.actor })
+    let _activePoints = calcActivePoints({ system: systemData, actor: this.actor }); //_basePointsPlusAdders, systemData)
+    let _realCost = calcRealCost({ system: systemData, actor: this.actor }) //_activePoints, systemData)
+    // systemData.basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
+    // systemData.activePoints = RoundFavorPlayerDown(_activePoints)
+    // systemData.realCost = RoundFavorPlayerDown(_realCost)
 
 
     // Item name
@@ -956,8 +957,16 @@ export async function uploadSkill(skill, duplicate) {
 
 }
 
-function calcBasePointsPlusAdders(system) {
+export function calcItemPoints(item) {
+    let changed = calcBasePointsPlusAdders(item).changed;
+    changed = changed || calcActivePoints(item);
+    changed = changed || calcRealCost(item);
+    return changed;
+}
 
+function calcBasePointsPlusAdders(item) {
+    let system = item.system;
+    let actor = item.actor;
 
     if (!system.XMLID)
         return 0
@@ -977,17 +986,30 @@ function calcBasePointsPlusAdders(system) {
     }
 
     // Check if we have CONFIG info about this power
-    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this?.actor })
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: actor })
 
 
     // Base Cost is typcailly extracted directly from HDC
     let baseCost = parseInt(system.BASECOST)
 
+    // PowerFramework might be important
+    let parentItem = null;
+    let configPowerInfoParent = null;
+    if (system.PARENTID && actor?.items) {
+        parentItem = actor.items.find(o => o.system.ID === system.PARENTID);
+        if (parentItem)
+        {
+            configPowerInfoParent = getPowerInfo({ xmlid: parentItem.system.XMLID, actor: actor })
+        }
+    }
+
+
+
 
     // Cost per level is NOT included in the HDC file.
     // We will try to get cost per level via config.js
     // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
-    const characteristicCosts = this?.actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
+    const characteristicCosts = actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
     let costPerLevel = parseFloat(
         configPowerInfo?.costPerLevel ||
         characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
@@ -1046,6 +1068,8 @@ function calcBasePointsPlusAdders(system) {
         }
     }
 
+
+
     // POWERS (likely ENDURANCERESERVEREC)
     if (system.powers) {
         for (let adder of system.powers) {
@@ -1053,6 +1077,11 @@ function calcBasePointsPlusAdders(system) {
             let adderLevels = Math.max(1, parseInt(adder.LEVELS))
             adderCost += Math.ceil(adderBaseCost * adderLevels);
         }
+    }
+
+    // Skill Enhancer discount (a hidden discount; not shown in item description)
+    if (configPowerInfoParent && configPowerInfoParent.powerType.includes("enhancer")) {
+        cost = Math.max(1, cost - 1);
     }
 
     cost += adderCost
@@ -1069,10 +1098,15 @@ function calcBasePointsPlusAdders(system) {
         cost = cost * advantages
     }
 
-    return Math.max(0, cost)
+    let old = system.basePointsPlusAdders;
+    system.basePointsPlusAdders = cost;
+
+    //return cost; //Math.max(1, cost)
+    return { changed: old === system.basePointsPlusAdders};
 }
 
-function calcActivePoints(_basePointsPlusAdders, system) {
+function calcActivePoints(item) {
+    let system = item.system;
     // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
 
     if (system.XMLID == "ARMOR")
@@ -1131,19 +1165,23 @@ function calcActivePoints(_basePointsPlusAdders, system) {
         }
     }
 
-    const _activePoints = _basePointsPlusAdders * (1 + advantages)
-    system.activePointsDc = RoundFavorPlayerDown(_basePointsPlusAdders * (1 + advantagesDC))
+    const _activePoints = system.basePointsPlusAdders * (1 + advantages)
+    system.activePointsDc = RoundFavorPlayerDown(system.basePointsPlusAdders * (1 + advantagesDC))
 
     // HALFEND is based on active points without the HALFEND modifier
     if (system.modifiers.find(o => o.XMLID == "REDUCEDEND")) {
-        system._activePointsWithoutEndMods = _basePointsPlusAdders * (1 + advantages - 0.25);
+        system._activePointsWithoutEndMods = system.basePointsPlusAdders * (1 + advantages - 0.25);
     }
 
+    let old = system.activePoints;
+    system.activePoints = RoundFavorPlayerDown(_activePoints);
 
-    return RoundFavorPlayerDown(_activePoints)
+    //return RoundFavorPlayerDown(_activePoints)
+    return { changed: old === system.activePoints};
 }
 
-function calcRealCost(_activeCost, system) {
+function calcRealCost(item) {
+    let system = item.system;
     // Real Cost = Active Cost / (1 + total value of all Limitations)
 
     // if (system.XMLID == "RKA")
@@ -1194,15 +1232,18 @@ function calcRealCost(_activeCost, system) {
     // if (system.XMLID == "END")
     //     HEROSYS.log(false, system.XMLID)
 
-    let _realCost = _activeCost / (1 + limitations)
+    let _realCost = system.activePoints / (1 + limitations)
     _realCost = RoundFavorPlayerDown(_realCost)
 
     // Minumum cost
-    if (_realCost == 0 && _activeCost > 0) {
+    if (_realCost == 0 && system.activePoints > 0) {
         _realCost = 1
     }
 
-    return _realCost
+    let old = system.realCost;
+    system.realCost = _realCost;
+
+    return { changed: old === system.realCost}; //_realCost
 }
 
 export async function uploadPower(power, type) {
@@ -1554,6 +1595,7 @@ export function updateItemDescription(item) {
         re = new RegExp(`: ${item.name}$`, 'i')
         system.description = system.description.replace(re, "").trim();
         system.description = system.description.replace(/^: /, "").trim();
+        system.description = system.description.replace(/^:/, "").trim();
     } catch (e) {
         ui.notifications.warn(`${item.actor.name} has item "${item.name.substr(0, 30)}" which failed to update item description`);
         console.log(e);
@@ -2594,30 +2636,6 @@ export async function updateItem(item) {
             makeAttack(item)
         }
     }
-
-
-
-
-    //let _basePointsPlusAdders = calcBasePointsPlusAdders.call(item, item.system)
-    //let _activePoints = calcActivePoints(_basePointsPlusAdders, item.system)
-
-    //_basePointsPlusAdders = RoundFavorPlayerDown(_basePointsPlusAdders)
-    // let _realCost = calcRealCost(_activePoints, item.system)
-
-    //_activePoints = RoundFavorPlayerDown(_activePoints)
-    // _realCost = RoundFavorPlayerDown(_realCost)
-
-    // if (item.system.basePointsPlusAdders != _basePointsPlusAdders && _basePointsPlusAdders) {
-    //     await item.update({ 'system.basePointsPlusAdders': _basePointsPlusAdders })
-    // }
-    // if (item.system.activePoints != _activePoints)
-    // {
-    //     await item.update({'system.activePoints': _activePoints})
-    // }
-    // if (item.system.basePointsPlusAdders != _realCost)
-    // {
-    //     await item.update({'system.realCost': _realCost})
-    // }
 
     const oldDesc = item.system.description;
     await updateItemDescription(item)
