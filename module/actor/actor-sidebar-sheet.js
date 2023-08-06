@@ -272,7 +272,15 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
         for (const key of characteristicKeys) {
-            let characteristic = data.actor.system.characteristics[key]
+
+             // Automation has no EGO, OMCV, or DMCV
+             if (data.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
+            
+            
+             let characteristic = data.actor.system.characteristics[key]
+
+            // Automation has no EGO, OMCV, or DMCV
+            //if (item.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
 
             if (!characteristic) {
                 characteristic = {}

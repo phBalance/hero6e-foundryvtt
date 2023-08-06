@@ -673,6 +673,10 @@ Hooks.on("renderDialog", (dialog, html, data) => {
     if (html[0].querySelector(".window-title").textContent != "Create New Actor") return
     let option = html[0].querySelector("option[value*='character']")
     if (option) option.remove()
+
+    // rename base2 to base
+    let base2 = html[0].querySelector("option[value*='base2']")
+    if (base2) base2.text = base2.text.replace("2", "");
 })
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {

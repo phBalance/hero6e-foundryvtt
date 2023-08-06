@@ -111,7 +111,7 @@ export class HeroSystem6eActor extends Actor {
         let cardData = {
             actor,
             groupName: "typeChoice",
-            choices: { pc: "PC", npc: "NPC" },
+            choices: Actor.TYPES.filter(o => o != 'character').reduce((a, v) => ({ ...a, [v]: v.replace("2","") }), {}), //{ pc: "PC", npc: "NPC"}, //, automation: "Automation", vehicle: "Vehicle", computer: "Computer" },
             chosen: actor.type,
         }
         const html = await renderTemplate(template, cardData)
@@ -254,9 +254,8 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Display changes from _preUpdate
-        for(let d of options.displayScrollingChanges)
-        {
-            this._displayScrollingChange(d.value, d.options); 
+        for (let d of options.displayScrollingChanges) {
+            this._displayScrollingChange(d.value, d.options);
         }
 
     }
