@@ -464,7 +464,10 @@ export class HeroSystem6eCombat extends Combat {
         let content = "";
         let spentEnd = 0;
 
-        for (let powerUsingEnd of combatant.actor.items.filter(o => o.system.active === true && parseInt(o.system?.end || 0) > 0)) {
+        for (let powerUsingEnd of combatant.actor.items.filter(o => o.system.active === true && 
+            parseInt(o.system?.end || 0) > 0 &&
+            (o.system.subType || o.type) != "attack"
+        )) {
 
             const costEndOnlyToActivate = powerUsingEnd.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (!costEndOnlyToActivate) {
@@ -474,7 +477,18 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        if (spentEnd > 0) {
+        const encumbered = combatant.actor.effects.find(o=> o.flags.encumbrance);
+        if (encumbered)
+        {
+            const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.dcvDex)) -1;
+            if (endCostPerTurn >0) {
+                spentEnd += endCostPerTurn;
+                content += `<li>${encumbered.name} (${endCostPerTurn})</li>`
+            }
+
+        }
+
+        if (spentEnd > 0 && !this.combatant.isFake) {
             let segment = this.combatant.segment;
             let value = parseInt(this.combatant.actor.system.characteristics.end.value);
             let newEnd = value;
@@ -503,6 +517,12 @@ export class HeroSystem6eCombat extends Combat {
         const removeOnNextPhase = combatant.actor.effects.filter(o=> o.flags.nextPhase && o.duration.startTime < game.time.worldTime);
         for (const ae of removeOnNextPhase) {
             await ae.delete();
+        }
+
+        // Remove Aborted
+        if (combatant.actor.statuses.has('aborted')) {
+            const effect = combatant.actor.effects.contents.find(o => o.statuses.has('aborted'))
+            await effect.delete();
         }
 
     }

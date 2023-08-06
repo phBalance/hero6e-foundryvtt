@@ -92,7 +92,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
 
             // Damage
-            if (item.type == 'attack' || item.system.subType == 'attack') {
+            if (item.type == 'attack' || item.system.subType === 'attack' || item.system.XMLID === 'martialart') {
 
                 // Combat Skill Levels
                 const csl = CombatSkillLevelsForAttack(item)
@@ -114,12 +114,70 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 // Signed OCV and DCV
                 if (item.system.ocv != undefined) {
-                    item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-")
-                    item.system.ocvEstimated = ("+" + (parseInt(item.system.ocv) + parseInt(csl.ocv || csl.omcv))).replace("+-", "-")
+                    switch (item.system.ocv) {
+                        case "--": item.system.ocvEstimated = ""; break;
+                        case "-v/10":
+                            item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-");
+
+                            let velocity = 0;
+
+                            // Velocity from drag ruler
+                            const tokens = item.actor.getActiveTokens();
+                            const token = tokens[0];
+                            const combatants = game?.combat?.combatants;
+                            if (combatants && typeof dragRuler != 'undefined') {
+
+                                if (token) {
+
+                                    let distance = dragRuler.getMovedDistanceFromToken(token);
+                                    let speed = dragRuler.getRangesFromSpeedProvider(token)[1].range;
+                                    let delta = distance;
+                                    if (delta > speed / 2) {
+                                        delta = speed - delta;
+                                    }
+                                    velocity = delta * 5;
+
+                                }
+                            }
+
+                            // Simplistic velocity calc using dragRuler
+                            if (velocity === 0 && token) {
+                                if (typeof dragRuler != 'undefined') {
+                                    if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
+                                        velocity = parseInt(dragRuler.getRangesFromSpeedProvider(token)[1].range || 0);
+                                    }
+                                }
+                            }
+
+                            // Simplistic velocity calc using running & flight
+                            if (velocity === 0) {
+                                velocity = parseInt(item.actor.system.characteristics.running.value || 0);
+                                velocity = Math.max(velocity, parseInt(item.actor.system.characteristics.flight.value || 0));
+                            }
+
+                            item.system.ocvEstimated = (
+                                //parseInt(item.actor.system.characteristics.ocv.value) + 
+                                parseInt(csl.ocv) +
+                                parseInt(velocity / 10)
+                            ).signedString()
+
+                            break;
+                        default:
+                            item.system.ocv = parseInt(item.system.ocv).signedString();
+                            item.system.ocvEstimated = (
+                                //parseInt(item.system.targets === 'omcv' ? item.actor.system.characteristics.omcv.value : item.actor.system.characteristics.ocv.value) +
+                                parseInt(item.system.ocv) +
+                                parseInt(csl.ocv || csl.omcv)
+                            ).signedString();
+                    }
                 }
                 if (item.system.dcv != undefined) {
-                    item.system.dcv = ("+" + parseInt(item.system.dcv)).replace("+-", "-")
-                    item.system.dcvEstimated = ("+" + (parseInt(item.system.dcv) + parseInt(csl.dcv))).replace("+-", "-")
+                    item.system.dcv = parseInt(item.system.dcv).signedString();
+                    item.system.dcvEstimated = (
+                        //parseInt(item.system.targets === 'dmcv' ? item.actor.system.characteristics.dmcv.value : item.actor.system.characteristics.dcv.value) +
+                        parseInt(item.system.dcv) +
+                        parseInt(csl.dcv)
+                    ).signedString();
                 }
 
                 // Set +1 OCV
@@ -149,9 +207,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             if (item.type == 'equipment') {
                 data.hasEquipment = true
                 if (item.system.active) {
-                    weightTotal += parseFloat(item.system.WEIGHT) || 0
+                    weightTotal += parseFloat(item.system.WEIGHT || 0)
                 }
-                if (parseFloat(item.system.WEIGHT) > 0) {
+                if (parseFloat(item.system.WEIGHT || 0) > 0) {
                     item.system.WEIGHTtext = parseFloat(item.system.WEIGHT) + "kg"
                 }
                 else {
@@ -159,8 +217,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
 
 
-                priceTotal += parseFloat(item.system.PRICE) || 0
-                if (parseFloat(item.system.PRICE) > 0) {
+                priceTotal += parseFloat(item.system.PRICE || 0)
+                if (parseFloat(item.system.PRICE || 0) > 0) {
                     item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE))
                 }
                 else {
@@ -168,7 +226,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
             }
 
-            if (item.type == 'skill') {
+            if (item.system.subType || item.type == 'skill') {
                 SkillRollUpdateValue(item)
             }
 
@@ -180,7 +238,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 item.system.endEstimate = item.system.endEstimate.trim();
             }
 
-            items.push(item)
+            items.push(foundry.utils.deepClone(item))
         }
 
 
@@ -214,7 +272,15 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
         for (const key of characteristicKeys) {
-            let characteristic = data.actor.system.characteristics[key]
+
+             // Automation has no EGO, OMCV, or DMCV
+             if (data.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
+            
+            
+             let characteristic = data.actor.system.characteristics[key]
+
+            // Automation has no EGO, OMCV, or DMCV
+            //if (item.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
 
             if (!characteristic) {
                 characteristic = {}
@@ -282,40 +348,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             // Notes
             if (key == 'str') {
-                let _lift = 0;
-                let _throw = 0;
-                if (characteristic.value >= 1) { _lift = '8kg'; _throw = 2 }
-                if (characteristic.value >= 2) { _lift = '16kg'; _throw = 3 }
-                if (characteristic.value >= 3) { _lift = '25kg'; _throw = 4 }
-                if (characteristic.value >= 4) { _lift = '38kg'; _throw = 6 }
-                if (characteristic.value >= 5) { _lift = '50kg'; _throw = 8 }
-                if (characteristic.value >= 8) { _lift = '75kg'; _throw = 12 }
-                if (characteristic.value >= 10) { _lift = '16kg'; _throw = 16 }
-                if (characteristic.value >= 13) { _lift = '150kg'; _throw = 20 }
-                if (characteristic.value >= 15) { _lift = '200kg'; _throw = 24 }
-                if (characteristic.value >= 18) { _lift = '300kg'; _throw = 28 }
-                if (characteristic.value >= 20) { _lift = '400kg'; _throw = 32 }
-                if (characteristic.value >= 23) { _lift = '600kg'; _throw = 36 }
-                if (characteristic.value >= 25) { _lift = '800kg'; _throw = 40 }
-                if (characteristic.value >= 28) { _lift = '1,200kg'; _throw = 44 }
-                if (characteristic.value >= 30) { _lift = '1,600kg'; _throw = 48 }
-                if (characteristic.value >= 35) { _lift = '3,200kg'; _throw = 56 }
-                if (characteristic.value >= 40) { _lift = '6,400kg'; _throw = 64 }
-                if (characteristic.value >= 45) { _lift = '12.5 tons'; _throw = 72 }
-                if (characteristic.value >= 50) { _lift = '25 tons'; _throw = 80 }
-                if (characteristic.value >= 55) { _lift = '50 tons'; _throw = 88 }
-                if (characteristic.value >= 60) { _lift = '100 tons'; _throw = 96 }
-                if (characteristic.value >= 65) { _lift = '200 tons'; _throw = 104 }
-                if (characteristic.value >= 70) { _lift = '400 tons'; _throw = 112 }
-                if (characteristic.value >= 75) { _lift = '800 tons'; _throw = 120 }
-                if (characteristic.value >= 80) { _lift = '1.6 ktons'; _throw = 128 }
-                if (characteristic.value >= 85) { _lift = '3.2 ktons'; _throw = 136 }
-                if (characteristic.value >= 90) { _lift = '6.4 ktons'; _throw = 144 }
-                if (characteristic.value >= 95) { _lift = '12.5 ktons'; _throw = 152 }
-                if (characteristic.value >= 100) { _lift = '25 ktons'; _throw = 160 }
-                if (characteristic.value >= 105) { _lift = '50+ ktons'; _throw = '168+' }
-
-                characteristic.notes = `lift ${_lift}, throw ${_throw}m`
+                const strDetails = this.actor.strDetails();
+                characteristic.notes = `lift ${strDetails.strLiftText}, throw ${strDetails.strThrow}m`
             }
 
 
@@ -495,9 +529,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         data.defense = defense
 
         // Get all applicable effects (from actor and all items)
-        data.allTemporaryEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.duration.duration).sort((a, b) => a.name.localeCompare(b.name))
-        data.allConstantEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && (!o.flags?.XMLID || getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
-        data.allPersistentEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.flags?.XMLID && getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
+        data.allTemporaryEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.duration.duration > 0 || o.statuses.size).sort((a, b) => a.name.localeCompare(b.name))
+        data.allConstantEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && (!o.flags?.XMLID || getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
+        data.allPersistentEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && o.flags?.XMLID && getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
 
 
         // Add defenses (without active effects) to actorEffects.
@@ -639,7 +673,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 result.toMessage({
                     speaker: ChatMessage.getSpeaker({ actor }),
-                    flavor: dataset.label.toUpperCase() + ' roll ' + (margin >= 0 ? 'succeeded' : 'failed') + ' by ' + Math.abs(margin),
+                    flavor: content + dataset.label.toUpperCase() + ' roll ' + (margin >= 0 ? 'succeeded' : 'failed') + ' by ' + Math.abs(margin),
                     borderColor: margin >= 0 ? 0x00FF00 : 0xFF0000
                 })
             })

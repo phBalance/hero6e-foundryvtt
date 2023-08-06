@@ -49,6 +49,8 @@ export class HeroSystem6eActor extends Actor {
         // Bar3 is a flag
         //await this.prototypeToken.setFlag(game.system.id, "bar3", { "attribute": "characteristics.end" })
 
+
+
     }
 
     async removeActiveEffect(activeEffect) {
@@ -109,7 +111,7 @@ export class HeroSystem6eActor extends Actor {
         let cardData = {
             actor,
             groupName: "typeChoice",
-            choices: { pc: "PC", npc: "NPC" },
+            choices: Actor.TYPES.filter(o => o != 'character').reduce((a, v) => ({ ...a, [v]: v.replace("2","") }), {}), //{ pc: "PC", npc: "NPC"}, //, automation: "Automation", vehicle: "Vehicle", computer: "Computer" },
             chosen: actor.type,
         }
         const html = await renderTemplate(template, cardData)
@@ -168,13 +170,15 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async _preUpdate(changed, options, userId) {
-        await super._preUpdate(changed, options, userId)
+        let data = await super._preUpdate(changed, options, userId)
 
-        //if (ChatMessage.getWhisperRecipients("GM").map(o=>o.id).includes(game.user.id)) return;
+        // Forwrd changed date to _onUpdate.
+        // _preUpdate only seems to run for GM or one user which
+        // results in _displayScrollingChange only showing for those users.
+        // Where as _onUpdate runs for all users.
+        options.displayScrollingChanges = [];
 
-
-
-        if (options.hideChatMessage || !options.render) return;
+        //if (!ChatMessage.getWhisperRecipients("GM").map(o => o.id).includes(game.user.id)) return;
 
         let content = "";
 
@@ -191,7 +195,8 @@ export class HeroSystem6eActor extends Actor {
                 content += " (at max)";
             }
 
-            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
+            //this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
+            options.displayScrollingChanges.push({ value: valueC - valueT, options: { max: valueM, fill: '0x00FF00' } });
 
         }
 
@@ -208,8 +213,11 @@ export class HeroSystem6eActor extends Actor {
                 content += " (at max)";
             }
 
-            this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0xFF1111' });
+            //this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0xFF1111' });
+            options.displayScrollingChanges.push({ value: valueC - valueT, options: { max: valueM, fill: '0xFF1111' } });
         }
+
+        if (options.hideChatMessage || !options.render) return;
 
         if (content) {
             const chatData = {
@@ -221,7 +229,6 @@ export class HeroSystem6eActor extends Actor {
             }
             await ChatMessage.create(chatData)
         }
-
 
     }
 
@@ -241,7 +248,19 @@ export class HeroSystem6eActor extends Actor {
 
         }
 
+        // If STR was change check encumbrance
+        if (data?.system?.characteristics?.str && userId === game.user.id) {
+            this.applyEncumbrancePenalty();
+        }
+
+        // Display changes from _preUpdate
+        for (let d of options.displayScrollingChanges) {
+            this._displayScrollingChange(d.value, d.options);
+        }
+
     }
+
+
 
 
     async TakeRecovery(asAction) {
@@ -369,6 +388,16 @@ export class HeroSystem6eActor extends Actor {
             return false;
         }
 
+        if (this.statuses.has("stunned")) {
+            if (uiNotice) ui.notifications.error(`${this.name} is STUNNED and cannot act.`);
+            return false;
+        }
+
+        if (this.statuses.has("aborted")) {
+            if (uiNotice) ui.notifications.error(`${this.name} has ABORTED and cannot act.`);
+            return false;
+        }
+
         // A character
         // who is Stunned or recovering from being
         // Stunned can take no Actions, take no Recoveries
@@ -418,5 +447,145 @@ export class HeroSystem6eActor extends Actor {
 
     }
 
+    strDetails() {
+        let strLiftText = 0;
+        let strThrow = 0;
+        let value = this.system.characteristics.str.value;
+        if (value >= 1) { strLiftText = '8kg'; strThrow = 2 }
+        if (value >= 2) { strLiftText = '16kg'; strThrow = 3 }
+        if (value >= 3) { strLiftText = '25kg'; strThrow = 4 }
+        if (value >= 4) { strLiftText = '38kg'; strThrow = 6 }
+        if (value >= 5) { strLiftText = '50kg'; strThrow = 8 }
+        if (value >= 8) { strLiftText = '75kg'; strThrow = 12 }
+        if (value >= 10) { strLiftText = '16kg'; strThrow = 16 }
+        if (value >= 13) { strLiftText = '150kg'; strThrow = 20 }
+        if (value >= 15) { strLiftText = '200kg'; strThrow = 24 }
+        if (value >= 18) { strLiftText = '300kg'; strThrow = 28 }
+        if (value >= 20) { strLiftText = '400kg'; strThrow = 32 }
+        if (value >= 23) { strLiftText = '600kg'; strThrow = 36 }
+        if (value >= 25) { strLiftText = '800kg'; strThrow = 40 }
+        if (value >= 28) { strLiftText = '1,200kg'; strThrow = 44 }
+        if (value >= 30) { strLiftText = '1,600kg'; strThrow = 48 }
+        if (value >= 35) { strLiftText = '3,200kg'; strThrow = 56 }
+        if (value >= 40) { strLiftText = '6,400kg'; strThrow = 64 }
+        if (value >= 45) { strLiftText = '12.5 tons'; strThrow = 72 }
+        if (value >= 50) { strLiftText = '25 tons'; strThrow = 80 }
+        if (value >= 55) { strLiftText = '50 tons'; strThrow = 88 }
+        if (value >= 60) { strLiftText = '100 tons'; strThrow = 96 }
+        if (value >= 65) { strLiftText = '200 tons'; strThrow = 104 }
+        if (value >= 70) { strLiftText = '400 tons'; strThrow = 112 }
+        if (value >= 75) { strLiftText = '800 tons'; strThrow = 120 }
+        if (value >= 80) { strLiftText = '1.6 ktons'; strThrow = 128 }
+        if (value >= 85) { strLiftText = '3.2 ktons'; strThrow = 136 }
+        if (value >= 90) { strLiftText = '6.4 ktons'; strThrow = 144 }
+        if (value >= 95) { strLiftText = '12.5 ktons'; strThrow = 152 }
+        if (value >= 100) { strLiftText = '25 ktons'; strThrow = 160 }
+        if (value >= 105) { strLiftText = `${50 + Math.floor((value - 105) / 5) * 25} ktons`; strThrow = 168 + Math.floor((value - 105) / 5) * 8 }
+
+        // Get numeric strLiftKg
+        let m = strLiftText.replace(",", "").match(/(\d+)kg/)
+        let strLiftKg = m ? m[1] : 0;
+
+        m = strLiftText.replace(",", "").match(/(\d+) tons/)
+        strLiftKg = m ? m[1] * 1000 : strLiftKg;
+
+        m = strLiftText.replace(",", "").match(/(\d+) ktons/)
+        strLiftKg = m ? m[1] * 1000 * 1000 : strLiftKg;
+
+
+
+
+        return { strLiftText, strThrow, strLiftKg };
+    }
+
+    async applyEncumbrancePenalty() {
+        // Encumbrance (requires permissions to mess with ActiveEffects)
+        if (game.user.isGM) {
+
+            const { strLiftKg } = this.strDetails()
+            let encumbrance = 0
+            const itemsWithWeight = this.items.filter(o => o.system.WEIGHT && o.system.active);
+            for (const item of itemsWithWeight) {
+                encumbrance += parseFloat(item.system.WEIGHT);
+            }
+
+            // Is actor encumbered?
+            let dcvDex = 0;
+            let move = 0;
+            let end = 0;
+            if (encumbrance / strLiftKg >= 0.1) {
+                dcvDex = -1;
+            }
+            if (encumbrance / strLiftKg >= 0.25) {
+                dcvDex = -2;
+                move = -2;
+                end = 1;
+            }
+            if (encumbrance / strLiftKg >= 0.50) {
+                dcvDex = -3;
+                move = -4;
+                end = 2;
+            }
+            if (encumbrance / strLiftKg >= 0.75) {
+                dcvDex = -4;
+                move = -8;
+                end = 3;
+            }
+            if (encumbrance / strLiftKg >= 0.90) {
+                dcvDex = -5;
+                move = -16;
+                end = 4;
+            }
+
+            const name = `Encumbered ${Math.floor(encumbrance / strLiftKg * 100)}%`
+            let prevActiveEffect = this.effects.find(o => o.flags?.encumbrance);
+            if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
+                let activeEffect = {
+
+                    name: name,
+                    id: 'encumbered',
+                    //icon: 'icons/svg/daze.svg', //'systems/hero6efoundryvttv2/icons/encumbered.svg',
+                    icon: 'systems/hero6efoundryvttv2/icons/encumbered.svg',
+                    changes: [
+                        { key: "system.characteristics.dcv.value", value: dcvDex, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.dex.value", value: dcvDex, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.running.value", value: move, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.swimming.value", value: move, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.leaping.value", value: move, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.flight.value", value: move, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.swinging.value", value: move, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.teleportation.value", value: move, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                        { key: "system.characteristics.tunneling.value", value: move, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                    ],
+                    origin: this.uuid,
+                    duration: {
+                        seconds: 3.154e+7 * 100, // 100 years should be close to infinity
+                    },
+                    flags: {
+                        dcvDex: dcvDex,
+                        // temporary: true,
+                        encumbrance: true,
+                    }
+                }
+
+                if (prevActiveEffect) {
+                    await prevActiveEffect.delete();
+                    prevActiveEffect = null;
+                }
+
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+
+            }
+
+            if (dcvDex === 0 && prevActiveEffect) {
+                await prevActiveEffect.delete();
+            } else if (prevActiveEffect && prevActiveEffect.name != name) {
+                await prevActiveEffect.update({ 'name': name });
+            }
+        }
+    }
+
+
 }
+
 

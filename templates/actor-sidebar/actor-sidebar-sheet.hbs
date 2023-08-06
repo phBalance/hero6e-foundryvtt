@@ -228,8 +228,8 @@
                         <td class="left">{{item.system.description}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.phase}}</td>
-                        <td>{{item.system.ocv}}</td>
-                        <td>{{item.system.dcv}}</td>
+                        <td>{{item.system.ocvEstimated}}</td>
+                        <td>{{item.system.dcvEstimated}}</td>
 
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
@@ -300,7 +300,7 @@
                 <table>
                     <tr class="sticky">
                         <th colspan="1" class="right">Filter:</th>
-                        <th colspan="4">
+                        <th colspan="5">
                             <input class="left" name="itemFilters.skill" type="text"
                                 value="{{options.itemFilters.skill}}">
                         </th>
@@ -309,6 +309,7 @@
                         <th></th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
+                        <th>{{localize "ActorSheet.Char"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create skill" data-type="skill">
@@ -323,12 +324,19 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td>{{item.system.realCost}}</td>
+                        <td>
+                            {{#if (and (ne item.syste.realCost 0) (ne item.system.XMLID "LIST"))}}
+                            {{item.system.realCost}}</td>
+                            {{/if}}
+                        
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
                             {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
+                            {{#if (ne item.name "LIST")}}
                             <i>{{item.name}}</i>
                             {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                            {{/if}}
                         </td>
+                        <td>{{#if (ne item.system.characteristic "general")}}{{item.system.characteristic}}{{/if}}</td>
                         <td>
                             {{#if item.system.roll}}
                             <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
@@ -378,10 +386,10 @@
                                     height="24" /></div>
                         </td>
                         <td class="left">{{item.name}}</td>
-                        <td class="left">{{item.system.effects}}</td>
+                        <td class="left">{{item.system.EFFECT}}</td>
                         <td>{{item.system.phase}}</td>
-                        <td>{{item.system.ocv}}</td>
-                        <td>{{item.system.dcv}}</td>
+                        <td>{{item.system.ocvEstimated}}</td>
+                        <td>{{item.system.dcvEstimated}}</td>
                         <td>
                             {{#if (ne item.system.subType "attack")}}
                             <input class="item-toggle" type="checkbox" name="item.system.active" {{checked

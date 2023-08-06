@@ -1,10 +1,30 @@
+# Version 3.0.15
+- Fixes for Requires A Roll.  Attacks spend END when RAR fails.  Hotbar macros no longer RAR when powers toggle off. [#244](https://github.com/dmdorman/hero6e-foundryvtt/issues/244)
+- Initial Abort support.  Aborted status icon.  When Stunned, Knocked Out, or Aborted you can not act (make rolls or toggle powers on).
+- Initial Block support.  Minimal automation here.  The GM/Player should speak up before the attacker rolls.  Multiple blocks are possible, but you have to remove the abort condition before making a second block at -2.  In the future it may be possible to prompt the defender if they want to block, and handle multiple blocks.  Block assume no STR/END use.  Any potential Initiative benefits to dodge are not automated.
+- Initial Dodge support. [#105](https://github.com/dmdorman/hero6e-foundryvtt/issues/105)
+- Fixed Martial Arts uploads where OCV and DCV modifiers were ignored.
+- Improved Blind and Prone statuses to include appropriate CV penalties. 
+- Fixed 1/2 DCV rounding down.  Now follows standard rounding rules that favor the player. [#153](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
+- Initial AUTOFIRE support.  Some automation for single targets.  No automation for multiple targets as the workflow of tohit/damage would be awkward unless fully automated.  Full automation limits  the ability for GM's to handle unusual situations. [#43](https://github.com/dmdorman/hero6e-foundryvtt/issues/43)
+- Initial support for Skill Levels.  Player is prompted to confirm Skill Level applies to rolled skill.  Skill rolls now show tag details. [#89](https://github.com/dmdorman/hero6e-foundryvtt/issues/89)
+- Fixed issue where some active effects using icons not associated with statuses caused error when loading world.
+- Initial Encumbrance penalty support. [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118)
+- Fixed issue where END was spent twice a phase for actors with Lightning Reflexes.  Now it only spends END on the beginning of the non LR phase for that actor.
+- Improved scrolling numbers for STUN and BODY changes.  They now show when you Take a recovery.  Also show for all players, not jus the GM.
+- Improved Skill and Power descriptions. [#248](https://github.com/dmdorman/hero6e-foundryvtt/issues/248)
+- Improved Skill Enhancer calculations [#249](https://github.com/dmdorman/hero6e-foundryvtt/issues/249)
+- Fixed rare and minor issue where velocity wasn't calculated when there is no token for an actor. [#250](https://github.com/dmdorman/hero6e-foundryvtt/issues/250)
+- Fixed 0d6 + 1 rolls.  [#252](https://github.com/dmdorman/hero6e-foundryvtt/issues/252)
+
+
 # Version 3.0.14
 - Fixed issue where some 5e powers were incorrectly calculating END.
 - Support for Activation Rolls (similar to Requires a Roll)
 - Initial support for conditional Defenses (Only Works Against & Conditional Power). GM will be prompted to select conditional defense when applying damage.  [#181](https://github.com/dmdorman/hero6e-foundryvtt/issues/181)
 - Improved Endurance/Stun (all) and Body (PCs only) recovery out of combat.  NPCs stop stun recovery once they are below -10 stun. PC stun recovery below -10 is still every phase, but should be using the Recovery Time Table (future improvement). Expected to use Simple Calendar to advance time out of combat.
-- Active Effects split out into Temporary, Constant, or Persistent. Where Constant and Persistent largely match the HERO power description; and are typically always on (such as most defenses).  Temporary is for effects with a limited duration (such as AID).  In a future realease constant powers will toggle off when knocked out.  May require HDC upload on existing actors for proper assignment. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
-- Defenses show as effects in other tab. Internally they are not Active Effects, but behave similarily.  A quality of life enhancement which shows all powers & effects in one spot.
+- Active Effects split out into Temporary, Constant, or Persistent. Where Constant and Persistent largely match the HERO power description; and are typically always on (such as most defenses).  Temporary is for effects with a limited duration (such as AID).  In a future release constant powers will toggle off when knocked out.  May require HDC upload on existing actors for proper assignment. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
+- Defenses show as effects in other tab. Internally they are not Active Effects, but behave similarly.  A quality of life enhancement which shows all powers & effects in one spot.
 - Combat Skill Levels (CSL) can be changed within the _Roll to Hit_ dialog. [#189](https://github.com/dmdorman/hero6e-foundryvtt/issues/189)
 - Initial support for DCV buffs/penalties associated with some attacks, that last until actors next phase. [#103](https://github.com/dmdorman/hero6e-foundryvtt/issues/103)
 - STUN and BODY changes for tokens show as scrolling combat text.  Stun is green and Body is red, matching the attribute bar colors. [#81](https://github.com/dmdorman/hero6e-foundryvtt/issues/81)

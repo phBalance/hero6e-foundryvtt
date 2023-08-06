@@ -330,10 +330,10 @@ HERO.hitLocations = {
 
 HERO.combatManeuvers = {
     // Maneuver : [phase, OCV, DCV, Effects, Attack]
-    "Block": ["1/2", "+0", "+0", "Blocks HTH attacks, Abort"],
+    "Block": ["1/2", "+0", "+0", "Blocks HTH attacks, Abort", true],
     "Brace": ["0", "+2", "1/2", "+2 OCV only to offset the Range Modifier"],
     "Disarm": ["1/2", "-2", "+0", "Disarm target, requires STR vs. STR Roll", true],
-    "Dodge": ["1/2", "+0", "+3", "Dodge all attacks, Abort", true],
+    "Dodge": ["1/2", "--", "+3", "Dodge all attacks, Abort", true],
     "Grab": ["1/2", "-1", "-2", "Grab Two Limbs; can Squeeze, Slam, or Throw", true],
     "Grab By": ["1/2 †", "-3", "-4", "Move and Grab object, +(v/10) to STR", true],
     "Haymaker": ["1/2*", "+0", "-5", "+4 Damage Classes to any attack"],
@@ -753,10 +753,11 @@ HERO.powers = {
     },
 
     // Powers can include Talents
-    "COMBAT_LUCK": { 
-        powerType: ["talent", "defense"], 
+    "COMBAT_LUCK": {
+        powerType: ["talent", "defense"],
         duration: "constant",  // behaves like a constant power
-        costPerLevel: 6 },
+        costPerLevel: 6
+    },
     "COMBAT_SENSE": {
         powerType: ["talent"],
         name: "Combat Sense",
@@ -777,7 +778,7 @@ HERO.powers = {
     "CLIMBING": { powerType: ["skill"] },
     "COMBAT_DRIVING": { powerType: ["skill"] },
     "COMBAT_PILOTING": { powerType: ["skill"] },
-    "COMBAT_LEVELS": { powerType: ["skill"] },
+    "COMBAT_LEVELS": { powerType: ["skill"], rollable: false },
     "COMPUTER_PROGRAMMING": { powerType: ["skill"] },
     "CONCEALMENT": { powerType: ["skill"] },
     "CONTORTIONIST": { powerType: ["skill"] },
@@ -785,7 +786,7 @@ HERO.powers = {
     "CRAMMING": { powerType: ["skill"] },
     "CRIMINOLOGY": { powerType: ["skill"] },
     "CRYPTOGRAPHY": { powerType: ["skill"] },
-    "CUSTOMSKILL": { powerType: ["skill"] },
+    "CUSTOMSKILL": { powerType: ["skill"], costPerLevel: 1 },
     "DEDUCTION": { powerType: ["skill"] },
     "DEFENSE_MANEUVER": { powerType: ["skill"] },
     "DEMOLITIONS": { powerType: ["skill"] },
@@ -799,11 +800,11 @@ HERO.powers = {
     "INTERROGATION": { powerType: ["skill"] },
     "INVENTOR": { powerType: ["skill"] },
     "KNOWLEDGE_SKILL": { powerType: ["skill"], costPerLevel: 1 },
-    "LANGUAGES": { powerType: ["skill"] },
+    "LANGUAGES": { powerType: ["skill"], rollable: false },
     "LIPREADING": { powerType: ["skill"] },
     "LOCKPICKING": { powerType: ["skill"] },
     "MECHANICS": { powerType: ["skill"] },
-    "MENTAL_COMBAT_LEVELS": { powerType: ["skill"] },
+    "MENTAL_COMBAT_LEVELS": { powerType: ["skill"], rollable: false },
     "MIMICRY": { powerType: ["skill"] },
     "NAVIGATION": { powerType: ["skill"], categorized: true },
     "ORATORY": { powerType: ["skill"] },
@@ -832,6 +833,14 @@ HERO.powers = {
     "VENTRILOQUISM": { powerType: ["skill"] },
     "WEAPON_FAMILIARITY": { powerType: ["skill"] },
     "WEAPONSMITH": { powerType: ["skill"], categorized: true },
+
+    // Skill Enhancers
+    "JACK_OF_ALL_TRADES": { powerType: ["skill", "enhancer"], rollable: false },
+    "LINGUIST": { powerType: ["skill", "enhancer"], rollable: false },
+    "SCIENTIST": { powerType: ["skill", "enhancer"], rollable: false },
+    "SCHOLAR": { powerType: ["skill", "enhancer"], rollable: false },
+    "TRAVELER": { powerType: ["skill", "enhancer"], rollable: false },
+
 
     // Power Frameworks
     "LIST": { powerType: ["framework"] },

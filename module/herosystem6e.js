@@ -19,8 +19,10 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
-import { createEffects, updateItemDescription, updateItemSubTypes } from "./utility/upload_hdc.js"
+import { createEffects, updateItemDescription, updateItemSubTypes, calcItemPoints, CalcActorRealAndActivePoints, makeAttack } from "./utility/upload_hdc.js"
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
+import { HeroVisualEffects } from "./HeroVisualEffects.js"
+import { RoundFavorPlayerDown } from "./utility/round.js"
 
 Hooks.once('init', async function () {
 
@@ -77,6 +79,8 @@ Hooks.once('init', async function () {
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     HeroRuler.initialize()
+
+    //HeroVisualEffects.initialize()
 
     SettingsHelpers.initLevelSettings();
 
@@ -343,6 +347,7 @@ Hooks.once("ready", async function () {
 
         // if lastMigration < 2.2.0-alpha
         if (foundry.utils.isNewerVersion('2.2.0', lastMigration)) {
+            await ui.notifications.info(`Migragrating actor data 2.2.0`)
             migrateActorTypes()
             migrateKnockback()
             migrateRemoveDuplicateDefenseMovementItems()
@@ -350,29 +355,27 @@ Hooks.once("ready", async function () {
 
         // if lastMigration < 3.0.0-alpha
         if (foundry.utils.isNewerVersion('3.0.0', lastMigration)) {
-            ui.notifications.info(`Migragrating actor data.`)
+            await ui.notifications.info(`Migragrating actor data 3.0.0`)
             for (let actor of game.actors.contents) {
                 await updateItemSubTypes(actor, true)
             }
-            ui.notifications.info(`Migragtion complete.`)
         }
 
         // if lastMigration < 3.0.4
         // Remove all tranferred effects
         if (foundry.utils.isNewerVersion('3.0.4', lastMigration)) {
-            await ui.notifications.info(`Migragrating actor data.`)
+            await ui.notifications.info(`Migragrating actor data 3.0.4`)
             for (let actor of game.actors.contents) {
                 for (let effect of actor.effects.filter(o => o.origin)) {
                     await effect.delete();
                 }
             }
-            await ui.notifications.info(`Migragtion complete.`)
         }
 
         // if lastMigration < 3.0.9
         // Charges
         if (foundry.utils.isNewerVersion('3.0.9', lastMigration)) {
-            await ui.notifications.info(`Migragrating actor data.`)
+            await ui.notifications.info(`Migragrating actor data 3.0.9`)
             for (let actor of game.actors.contents) {
                 for (let item of actor.items.filter(o => (o.system.end || "").toString().indexOf("[") === 0)) {
                     let _end = item.system.end;
@@ -387,8 +390,167 @@ Hooks.once("ready", async function () {
                     }
                 }
             }
-            await ui.notifications.info(`Migragtion complete.`)
         }
+
+        // if lastMigration < 3.0.15
+        // Martial Arts and missing XMLID
+        if (foundry.utils.isNewerVersion('3.0.15', lastMigration)) {
+            await ui.notifications.info(`Migragrating actor data  3.0.15`)
+            for (let actor of game.actors.contents) {
+                try {
+
+                    for (let item of actor.items) {
+
+                        let changes = {};
+
+                        // Martial Arts
+                        if (item.type === 'maneuver' && !item.system.XMLID) {
+
+                            let entry = CONFIG.HERO.combatManeuvers[item.name];
+                            //if (!entry) entry = CONFIG.HERO.combatManeuversOptional[item.name];
+                            if (entry) {
+
+
+                                //const name = entry[0];
+                                const v = entry;
+                                const PHASE = v[0];
+                                const OCV = v[1];
+                                const DCV = v[2];
+                                const EFFECT = v[3];
+                                const attack = v[4];
+
+                                item.system = {
+                                    ...item.system,
+                                    PHASE,
+                                    OCV,
+                                    DCV,
+                                    EFFECT,
+                                    active: false,
+                                    description: EFFECT,
+                                    XMLID: item.name.toUpperCase().replace(" ", ""), // A fake XMLID
+                                    adders: [],
+                                    modifiers: [],
+                                    powers: [],
+                                }
+
+                                if (attack) {
+                                    await makeAttack(item)
+                                }
+                                changes['system'] = item.system;
+
+                            }
+
+                        }
+
+                        // Missing XMLID
+                        if (!item.system.XMLID) {
+                            if (item.type === 'skill' && item.name === 'Perception') {
+                                item.system.XMLID = "PERCEPTION";
+                                item.system.adders ??= [];
+                                item.system.modifiers ??= [];
+                                item.system.powers ??= [];
+                                item.system.description = "";
+                                changes['system'] = item.system;
+                            } else if (item.type === 'movement') {
+                                item.system.XMLID = (item.system.type || item.system.class).toUpperCase();
+                                changes['system.XMLID'] = item.system.XMLID;
+                            } else if (item.system.rules) {
+                                item.system.XMLID = item.system.rules;
+                                changes['system.XMLID'] = item.system.XMLID;
+                            } else if (item.type === 'attack') {
+                            } else {
+                                let fakeItem = { system: foundry.utils.deepClone(item.system) };
+                                fakeItem.system.XMLID = item.name.toUpperCase();
+                                // switch (fakeItem.system.XMLID) {
+                                //     case "Combat Skill Levels": fakeItem.system.XMLID = "COMBAT_LEVELS"; break;
+                                //     case "Forensic Medicine": fakeItem.system.XMLID = "FORENSIC_MEDICINE"; break;
+                                //     FORENSIC_MEDICINE
+                                // }
+                                let configPowerInfo = getPowerInfo({ item: fakeItem })
+                                if (!configPowerInfo) {
+                                    fakeItem.system.XMLID = fakeItem.system.XMLID.replace(/ /g, "_").replace("(", "").replace(")", "");
+                                    configPowerInfo = getPowerInfo({ item: fakeItem })
+                                }
+                                if (!configPowerInfo) {
+                                    fakeItem.system.XMLID = fakeItem.system.XMLID.replace("SKILL_", "");
+                                    configPowerInfo = getPowerInfo({ item: fakeItem })
+                                }
+                                if (!configPowerInfo) {
+                                    if (fakeItem.system.XMLID === "TF") fakeItem.system.XMLID = "TRANSPORT_FAMILIARITY";
+                                    if (fakeItem.system.XMLID === "WF") fakeItem.system.XMLID = "WEAPON_FAMILIARITY";
+                                    configPowerInfo = getPowerInfo({ item: fakeItem })
+                                }
+                                if (configPowerInfo && configPowerInfo.powerType.includes(item.type)) {
+                                    item.system.XMLID = configPowerInfo.xmlid;
+                                    changes['system.XMLID'] = item.system.XMLID;
+                                } else {
+                                    // Not enough info to make a good guess
+                                    //console.log(item.name, fakeItem.system.XMLID, item.system);
+                                }
+
+                            }
+                        }
+
+                        if (Object.keys(changes).length > 0) {
+                            await item.update(changes, { hideChatMessage: true })
+                        }
+                    }
+
+                } catch (e) {
+                    console.log(e);
+                }
+
+            }
+        }
+
+        // Reparse all items (description, cost, etc) on every migration
+        if (true) {
+            await ui.notifications.info(`Migragrating actor data (reparse items)`)
+            for (let actor of game.actors.contents) {
+                try {
+                    let itemsChanged = false;
+                    for (let item of actor.items) {
+
+                        let changes = {};
+
+                        // Calculate RealCost, ActivePoints, and END
+                        if (calcItemPoints(item)) {
+                            if (item.system.realCost) { // Some items like Perception have NaN for cost (TODO: fix)
+                                changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+                                changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+                                changes['system.realCost'] = RoundFavorPlayerDown(item.system.realCost);
+                            }
+                        }
+
+                        if (item.system.realCost) {
+                            let _oldDescription = item.system.description;
+                            updateItemDescription(item);
+                            if (_oldDescription != item.system.description) {
+                                changes['system.description'] = item.system.description;
+                            }
+                        }
+
+                        if (Object.keys(changes).length > 0) {
+                            await item.update(changes, { hideChatMessage: true })
+                            itemsChanged = true;
+                        }
+                    }
+
+                    if (itemsChanged) {
+                        await CalcActorRealAndActivePoints(actor);
+                    }
+
+
+                } catch (e) {
+                    console.log(e);
+                }
+
+            }
+        }
+
+        await ui.notifications.info(`Migragtion complete.`)
+
+
 
     }
 
@@ -511,6 +673,10 @@ Hooks.on("renderDialog", (dialog, html, data) => {
     if (html[0].querySelector(".window-title").textContent != "Create New Actor") return
     let option = html[0].querySelector("option[value*='character']")
     if (option) option.remove()
+
+    // rename base2 to base
+    let base2 = html[0].querySelector("option[value*='base2']")
+    if (base2) base2.text = base2.text.replace("2", "");
 })
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
@@ -574,7 +740,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
     const start = new Date();
 
+
+
     // Guard
+    if (!game.user.isGM) return;
     if (!lastDate) game.user.getFlag(game.system.id, "lastDate") || 0;
 
 
@@ -603,7 +772,8 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     for (let actor of actors) {
         const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
-        // Create a natural body healing if needed
+        // Create a natural body healing if needed (requires permissions)
+
         const naturalBodyHealing = actor.temporaryEffects.find(o => o.flags.XMLID === "naturalBodyHealing");
         if (actor.type === "pc" && !naturalBodyHealing && parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)) {
             const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
@@ -620,8 +790,9 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     XMLID: "naturalBodyHealing",
                 }
             }
-            await actor.addActiveEffect(activeEffect);
+            if (game.user.isGM) await actor.addActiveEffect(activeEffect);
         }
+
 
         // Delete natural body healing when body value = max (typically by manual adjustment)
         // if (naturalBodyHealing && parseInt(actor.system.characteristics.body.value) >= parseInt(actor.system.characteristics.body.max)) {
@@ -644,7 +815,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
             let powerInfo = getPowerInfo({ actor: aeActor, xmlid: XMLID, item: item });
 
-            if (!powerInfo && game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            if (!powerInfo && ae.statuses.size === 0 && game.user.isGM &&
+                game.settings.get(game.system.id, 'alphaTesting') &&
+                ae.duration?.seconds < 3.154e+7 * 100
+            ) {
                 return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
             }
 
@@ -656,7 +830,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 let x = ae.duration.startTime;
                 ae.duration.startTime += d.duration;
                 d = ae._prepareDuration();
-                await ae.update({ duration: ae.duration });
+                if (game.user.isGM) await ae.update({ duration: ae.duration });
 
                 // Fade by 5 ActivePoints
                 let _fade = Math.min(ae.flags.activePoints, 5);
@@ -677,10 +851,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     // If ActivePoints <= 0 then remove effect
                     if (ae.flags.activePoints <= 0) {
                         //content += `  Effect deleted.`;
-                        await ae.delete();
+                        if (game.user.isGM) await ae.delete();
                     } else {
                         //await 
-                        ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
+                        if (game.user.isGM) ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
                     }
 
                     // DRAIN fade (increase VALUE)
@@ -693,7 +867,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     // AID fade (VALUE = max)
                     {
                         let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
-                        actor.update({ [`system.characteristics.${target}.value`]: newValue })
+                        if (game.user.isGM) actor.update({ [`system.characteristics.${target}.value`]: newValue })
                     }
 
                     if (ae.flags.activePoints <= 0) break;
@@ -707,10 +881,10 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                         let bodyMax = parseInt(actor.system.characteristics.body.max);
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
                         // await 
-                        actor.update({ 'system.characteristics.body.value': bodyValue });
+                        if (game.user.isGM) actor.update({ 'system.characteristics.body.value': bodyValue });
 
                         if (bodyValue === bodyMax) {
-                            ae.delete();
+                            if (game.user.isGM) ae.delete();
                             break;
                         } else {
                             //await ae.update({ duration: ae.duration });
@@ -719,7 +893,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
                         // Default is to delete the expired AE
                         if (powerInfo) {
-                            await ae.delete();
+                            if (game.user.isGM) await ae.delete();
                             break;
                         }
 
@@ -770,12 +944,12 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 // PCs. Once an NPC is Knocked Out below the -10 STUN level
                 // he should normally remain unconscious until the fight ends.
                 if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
-                    await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+                    if (game.user.isGM) await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
                     let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
                     let endValue = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
                     let stunValue = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
                     a//wait 
-                    actor.update({
+                    if (game.user.isGM) actor.update({
                         'system.characteristics.end.value': endValue,
                         'system.characteristics.stun.value': stunValue
                     }, { 'render': true })

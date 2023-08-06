@@ -1,3 +1,5 @@
+import { RoundFavorPlayerUp } from "../utility/round.js"
+
 export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
     // Rhair3 suggestion:
@@ -87,10 +89,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         name: "EFFECT.StatusBlind",
         id: "blind",
         icon: 'icons/svg/blind.svg',
-        // changes: [
-        //     { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
-        //     { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
-        // ]
+        changes: [
+            { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+            { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
+        ]
     };
 
     static asleepEffect = {
@@ -106,7 +108,10 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static proneEffect = {
         id: "prone",
         name: "EFFECT.StatusProne",
-        icon: "icons/svg/falling.svg"
+        icon: "icons/svg/falling.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+        ]
     };
 
     static entangledEffect = {
@@ -194,7 +199,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         icon: "icons/svg/holy-shield.svg"
     };
 
-    
+    static abortEffect = {
+        id: "aborted",
+        name: "Aborted",
+        icon: "systems/hero6efoundryvttv2/icons/aborted.svg"
+    };
+
+
 
     /** @override */
     // apply(actor, change) {
@@ -233,4 +244,51 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     //     console.log("_onUpdate")
     //     return super._onUpdate(data, options, userId)
     // }
+
+    /**
+   * Apply this ActiveEffect to a provided Actor.
+   * TODO: This method is poorly conceived. Its functionality is static, applying a provided change to an Actor
+   * TODO: When we revisit this in Active Effects V2 this should become an Actor method, or a static method
+   * @param {Actor} actor                   The Actor to whom this effect should be applied
+   * @param {EffectChangeData} change       The change data being applied
+   * @returns {*}                           The resulting applied value
+   */
+
+    // apply(actor, change) {
+    //     super.apply(actor, change);
+
+    //     const current = foundry.utils.getProperty(actor, change.key) ?? null;
+    //     const modes = CONST.ACTIVE_EFFECT_MODES;
+    //     const changes = {};
+    //     switch (change.mode) {
+    //         case modes.MULTIPLY:
+    //             this._applyMultiply(actor, change, current, delta, changes);
+    //             break;
+    //     }
+    // }
+
+
+    /**
+   * Apply an ActiveEffect that uses a MULTIPLY application mode.
+   * Changes which MULTIPLY must be numeric to allow for multiplication.
+   * @param {Actor} actor                   The Actor to whom this effect should be applied
+   * @param {EffectChangeData} change       The change data being applied
+   * @param {*} current                     The current value being modified
+   * @param {*} delta                       The parsed value of the change object
+   * @param {object} changes                An object which accumulates changes to be applied
+   * @private
+   */
+    _applyMultiply(actor, change, current, delta, changes) {
+        let update;
+        const ct = foundry.utils.getType(current);
+        switch (ct) {
+            case "boolean":
+                update = current && delta;
+                break;
+            case "number":
+                update = RoundFavorPlayerUp(current * delta);
+                break;
+        }
+        changes[change.key] = update;
+    }
 }

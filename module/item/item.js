@@ -112,6 +112,15 @@ export class HeroSystem6eItem extends Item {
     //     data.roll = Math.round(roll);
     // }
 
+    async _onUpdate(data, options, userId) {
+        super._onUpdate(data, options, userId);
+
+        if (this.actor && this.type === 'equipment') {
+            this.actor.applyEncumbrancePenalty();
+        }
+
+    }
+
     // Largely used to determine if we can drag to hotbar
     isRollable() {
         switch (this.system?.subType || this.type) {
@@ -124,12 +133,7 @@ export class HeroSystem6eItem extends Item {
 
     async roll() {
 
-        const success = await RequiresASkillRollCheck(this);
-        if (!success) {
-            return;
-        }
-
-
+        if (!this.actor.canAct(true)) return;
 
         switch (this.system.subType || this.type) {
             case "attack":
@@ -148,7 +152,11 @@ export class HeroSystem6eItem extends Item {
                         return await Attack.AttackOptions(this)
 
                     default:
-                        ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`)
+                        if (!this.system.EFFECT || (
+                            this.system.EFFECT.toLowerCase().indexOf("block") === 0 &&
+                            this.system.EFFECT.toLowerCase().indexOf("dodge") === 0
+                        ))
+                            ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`)
                         return await Attack.AttackOptions(this)
                 }
 
@@ -156,6 +164,7 @@ export class HeroSystem6eItem extends Item {
                 return this.toggle()
             case "skill":
                 SkillRollUpdateValue(this)
+                if (!await RequiresASkillRollCheck(this)) return;
                 return createSkillPopOutFromItem(this, this.actor)
             default: ui.notifications.warn(`${this.name} roll is not supported`)
         }
@@ -180,12 +189,11 @@ export class HeroSystem6eItem extends Item {
             }
         }
         content += `<b>${this.name}</b>`
-        if (this.system.description && this.system.description != this.name) {
-            content += ` ${this.system.description}`
-        }
-        // if (this.system.roll) {
-        //     content += ` (${this.system.roll})`
-        // }
+        let _desc = this.system.description
+
+        content += ` ${_desc}`;
+        //}
+
         content += "."
 
         if (this.system.end) {
@@ -209,7 +217,12 @@ export class HeroSystem6eItem extends Item {
     async toggle() {
         let item = this;
 
+
+
         if (!item.system.active) {
+
+
+            if (!this.actor.canAct(true)) return;
 
             const costEndOnlyToActivate = item.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (costEndOnlyToActivate) {
@@ -250,15 +263,14 @@ export class HeroSystem6eItem extends Item {
 
         switch (this.type) {
             case "defense":
-                // TODO: Remove duplicate defense items and make them ActiveEffects
                 await item.update({ [attr]: newValue })
                 break;
 
             case "power":
-
+            case "equipment":
                 // Is this a defense power?  If so toggle active state
                 const configPowerInfo = getPowerInfo({ item: item })
-                if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+                if ((configPowerInfo && configPowerInfo.powerType.includes("defense")) || item.type === "equipment") {
                     await item.update({ [attr]: newValue })
                 }
 
@@ -275,12 +287,7 @@ export class HeroSystem6eItem extends Item {
                 await enforceManeuverLimits(this.actor, item.id, item.name)
                 //await updateCombatAutoMod(item.actor, item)
                 break;
-            case "equipment":
-                await item.update({ [attr]: newValue })
-                // Do nothing special for now.
-                // Weight/encumbrance will automtically be calculated.
-                // TODO: tie defensive/buff items into equipment.
-                break;
+
             case "talent": // COMBAT_LUCK
                 await item.update({ [attr]: newValue })
                 break;
@@ -323,7 +330,12 @@ export function getItem(id) {
     return null
 }
 
-async function RequiresASkillRollCheck(item) {
+export async function RequiresASkillRollCheck(item) {
+
+    // Toggles don't need a roll to turn off
+    if (item.system?.active === true) return true;
+
+
     let rar = item.system.modifiers.find(o => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (rar) {
 
@@ -394,7 +406,7 @@ async function RequiresASkillRollCheck(item) {
             flavor += (margin >= 0 ? "succeeded" : "failed") + " by " + Math.abs(margin);
         }
 
-        result.toMessage({
+        await result.toMessage({
             speaker: ChatMessage.getSpeaker({ actor: item.actor }),
             flavor: flavor,
             borderColor: margin >= 0 ? 0x00FF00 : 0xFF0000,

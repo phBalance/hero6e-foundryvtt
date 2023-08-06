@@ -124,7 +124,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
 
             // TRANSFER X to Y  (AID and DRAIN only have X)
-            data.xmlidX = item.system.INPUT.match(/\w+/)[0];
+            data.xmlidX = (item.system.INPUT.match(/\w+/) || [""])[0];
             data.xmlidY = (item.system.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
         }
 
@@ -304,7 +304,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             let power = this.item.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
             if (power) {
                 power.LEVELS = parseInt(expandedData.rec) || 1;
-                await this.item.update({'system.powers': this.item.system.powers});
+                await this.item.update({ 'system.powers': this.item.system.powers });
             }
         }
 
@@ -316,7 +316,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // If Description changed, update it
         updateItemDescription(this.item);
         if (description != this.item.system.description) {
-            this.item.update({'system.description': this.item.system.description})
+            this.item.update({ 'system.description': this.item.system.description })
         }
 
     }

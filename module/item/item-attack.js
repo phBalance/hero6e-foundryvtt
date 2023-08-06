@@ -12,6 +12,7 @@ import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
 import { isPowerSubItem } from "../powers/powers.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
+import { RequiresASkillRollCheck } from "../item/item.js";
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
@@ -65,7 +66,7 @@ export async function AttackOptions(item) {
         const combatants = game?.combat?.combatants;
         if (combatants && typeof dragRuler != 'undefined') {
 
-            if (tokens.length === 1) {
+            if (token) {
 
                 let distance = dragRuler.getMovedDistanceFromToken(token);
                 let speed = dragRuler.getRangesFromSpeedProvider(token)[1].range;
@@ -79,7 +80,7 @@ export async function AttackOptions(item) {
         }
 
         // Simplistic velocity calc using dragRuler
-        if (data.velocity === 0) {
+        if (data.velocity === 0 && token) {
             if (typeof dragRuler != 'undefined') {
                 if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
                     data.velocity = parseInt(dragRuler.getRangesFromSpeedProvider(token)[1].range || 0);
@@ -116,6 +117,8 @@ export async function AttackOptions(item) {
             data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl[c] })
         }
     }
+
+
 
     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs"
     const html = await renderTemplate(template, data)
@@ -173,13 +176,14 @@ async function _processAttackOptions(item, form) {
 
 
 
+
     await AttackToHit(item, options)
 }
 
 
 /// ChatMessage showing Attack To Hit
 export async function AttackToHit(item, options) {
-    const template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs"
+    let template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs"
 
     const actor = item.actor
     const itemId = item._id
@@ -291,6 +295,8 @@ export async function AttackToHit(item, options) {
     }
 
 
+
+
     // [x Stun, x N Stun, x Body, OCV modifier]
     let noHitLocationsPower = item.system.noHitLocations || false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim && options.aim !== "none" && !noHitLocationsPower) {
@@ -305,7 +311,9 @@ export async function AttackToHit(item, options) {
 
     let hitRollData = result.total;
     let hitRollText = "Hits a " + toHitChar + " of " + hitRollData;
-    // -------------------------------------------------
+
+
+
 
 
 
@@ -440,6 +448,82 @@ export async function AttackToHit(item, options) {
             targetIds.push(target.id)
         }
 
+    }
+
+    // AUTOFIRE
+    const autofire = item.system.modifiers.find(o => o.XMLID === "AUTOFIRE")
+    if (autofire) {
+        let autoFireShots = parseInt(autofire.OPTION_ALIAS.match(/\d+/));
+        hitRollText = `Autofire ${autofire.OPTION_ALIAS.toLowerCase()}<br>` + hitRollText;
+
+        // Autofire check for multiple hits on single target
+        if (targetData.length === 1) {
+            let singleTarget = Array.from(game.user.targets)[0];
+
+            for (let shot = 1; shot < autoFireShots; shot++) {
+                let hit = "Miss"
+                let value = singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value
+                if (value <= result.total - (shot * 2)) {
+                    hit = "Hit"
+                }
+                let by = result.total - value - (shot * 2)
+                if (by >= 0) {
+                    by = "+" + by;
+                }
+                targetData.push({ id: singleTarget.id, name: singleTarget.name, toHitChar: toHitChar, value: value, result: { hit: hit, by: by.toString() } })
+            }
+
+        }
+
+    }
+
+
+
+    if (!await RequiresASkillRollCheck(item)) {
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor })
+        speaker["alias"] = item.actor.name
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: enduranceText,
+            whisper: ChatMessage.getWhisperRecipients("GM"),
+            speaker,
+        }
+
+        await ChatMessage.create(chatData)
+        return;
+    }
+
+    // Block (which is a repeatable abort)
+    if (item.system.EFFECT?.toLowerCase().indexOf("block") > -1) {
+        template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-block-card.hbs"
+        hitRollText = `Block roll of ${hitRollData} vs OCV of pending attack.`;
+    }
+
+
+
+    // Abort
+    if (item.system.EFFECT?.toLowerCase().indexOf("abort") > -1) {
+        item.actor.addActiveEffect({
+            ...HeroSystem6eActorActiveEffects.abortEffect,
+            name: `Aborted [${item.name}]`,
+            flags: {
+                itemId: item.uuid
+            }
+        });
+    }
+
+    // Dodge (which is a repeatable abort)
+    if (item.system.EFFECT?.toLowerCase().indexOf("dodge") > -1) {
+        const speaker = ChatMessage.getSpeaker({ actor: item.actor })
+        speaker["alias"] = item.actor.name
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: `${item.name} ${dcv.signedString()} DCV`,
+            speaker,
+        }
+        return ChatMessage.create(chatData)
     }
 
     let cardData = {
@@ -1237,17 +1321,19 @@ async function _calcDamage(damageResult, item, options) {
     else {
         // Normal Attack
         // counts body damage for non-killing attack
-        for (let die of damageResult.terms[0].results) {
-            switch (die.result) {
-                case 1:
-                    countedBody += 0;
-                    break;
-                case 6:
-                    countedBody += 2;
-                    break;
-                default:
-                    countedBody += 1;
-                    break;
+        if (damageResult.terms[0].results) { // Possible 0d6 roll
+            for (let die of damageResult.terms[0].results) {
+                switch (die.result) {
+                    case 1:
+                        countedBody += 0;
+                        break;
+                    case 6:
+                        countedBody += 2;
+                        break;
+                    default:
+                        countedBody += 1;
+                        break;
+                }
             }
         }
 
@@ -1262,8 +1348,8 @@ async function _calcDamage(damageResult, item, options) {
     let stunDamage = stun;
 
     let effects = "";
-    if (item.system.effects) {
-        effects = item.system.effects + ";"
+    if (item.system.EFFECT) {
+        effects = item.system.EFFECT + ";"
     }
 
     // determine knockback
