@@ -1321,17 +1321,19 @@ async function _calcDamage(damageResult, item, options) {
     else {
         // Normal Attack
         // counts body damage for non-killing attack
-        for (let die of damageResult.terms[0].results) {
-            switch (die.result) {
-                case 1:
-                    countedBody += 0;
-                    break;
-                case 6:
-                    countedBody += 2;
-                    break;
-                default:
-                    countedBody += 1;
-                    break;
+        if (damageResult.terms[0].results) { // Possible 0d6 roll
+            for (let die of damageResult.terms[0].results) {
+                switch (die.result) {
+                    case 1:
+                        countedBody += 0;
+                        break;
+                    case 6:
+                        countedBody += 2;
+                        break;
+                    default:
+                        countedBody += 1;
+                        break;
+                }
             }
         }
 
