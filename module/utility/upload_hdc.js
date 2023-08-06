@@ -615,7 +615,7 @@ export function XmlToItemData(xml, type) {
     // Make sure we have a name
     systemData.NAME = systemData.NAME || systemData.ALIAS
 
-    switch (systemData.NAME) {
+    switch (systemData.NAME &&  systemData.INPUT) {
         case "Aid":
             systemData.NAME += " " + systemData.INPUT;
             break;
@@ -672,7 +672,7 @@ export function XmlToItemData(xml, type) {
         systemData.INPUT = (systemData.INPUT || "").trim()
 
         // TRANSFER X to Y  (AID and DRAIN only have X)
-        let xmlidX = systemData.INPUT.match(/\w+/)[0];
+        let xmlidX = (systemData.INPUT.match(/\w+/)|| [""])[0];
         let xmlidY = (systemData.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
 
         // Uppercase
