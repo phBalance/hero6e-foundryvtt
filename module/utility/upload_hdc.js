@@ -84,6 +84,32 @@ export async function applyCharacterSheet(xmlDoc) {
         } else {
             this.actor.update({ 'system.is5e': false }, { render: false }, { hideChatMessage: true })
         }
+
+        // Override existing actor type?  (npc, vehicles, bases, computers, automatons, ai or pc/npc)
+        let targetType = this.actor.type;
+        if (characterTemplate.match(/[.]Vehicle/i)) {
+            targetType = 'vehicle'
+        }
+        if (characterTemplate.match(/[.]Base/i)) {
+            targetType = 'base2'
+        }
+        if (characterTemplate.match(/[.]Automaton/i)) {
+            targetType = 'automaton'
+        }
+        if (characterTemplate.match(/[.]Computer/i)) {
+            targetType = 'computer'
+        }
+        if (characterTemplate.match(/[.]AI/i)) {
+            targetType = 'ai'
+        }
+        if (characterTemplate.match(/Heroic/i) && !["pc", "npc"].includes(targetType)) {
+            targetType = 'pc'
+        }
+        if (targetType != this.actor.type) {
+            await this.actor.update({ type: targetType });
+        }
+
+
     }
 
     const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
@@ -103,12 +129,12 @@ export async function applyCharacterSheet(xmlDoc) {
     for (const characteristic of characteristics.children) {
         const key = CONFIG.HERO.characteristicsXMLKey[characteristic.getAttribute('XMLID')]
         const levels = parseInt(characteristic.getAttribute('LEVELS'))
-        value = characteristicDefaults[key] + levels
+        value = (characteristicDefaults[key] || 0) + levels
 
 
-        // if (key === "running" && this.actor.system.is5e) {
-        //     HEROSYS.log(false, key)
-        // }
+        if (key === "BASESIZE") {
+            HEROSYS.log(false, key)
+        }
 
         if (key === "leaping" && this.actor.system.is5e) {
             const str = parseInt(changes[`system.characteristics.str.core`])
@@ -615,7 +641,7 @@ export function XmlToItemData(xml, type) {
     // Make sure we have a name
     systemData.NAME = systemData.NAME || systemData.ALIAS
 
-    switch (systemData.NAME &&  systemData.INPUT) {
+    switch (systemData.NAME && systemData.INPUT) {
         case "Aid":
             systemData.NAME += " " + systemData.INPUT;
             break;
@@ -672,7 +698,7 @@ export function XmlToItemData(xml, type) {
         systemData.INPUT = (systemData.INPUT || "").trim()
 
         // TRANSFER X to Y  (AID and DRAIN only have X)
-        let xmlidX = (systemData.INPUT.match(/\w+/)|| [""])[0];
+        let xmlidX = (systemData.INPUT.match(/\w+/) || [""])[0];
         let xmlidY = (systemData.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
 
         // Uppercase
@@ -2188,11 +2214,11 @@ export async function makeAttack(item) {
 
     if (item._id) {
         await item.update(changes, { hideChatMessage: true })
-    } 
-    
+    }
+
 
     // Possibly a QUENCH test
-    for (let change of Object.keys(changes).filter(o=>o!= "_id")) {
+    for (let change of Object.keys(changes).filter(o => o != "_id")) {
         let target = item;
         for (let key of change.split('.')) {
             if (typeof target[key] == 'object') {

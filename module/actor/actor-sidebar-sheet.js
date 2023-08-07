@@ -43,7 +43,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         // NPC or PC dropdown
         data.isGM = game.user.isGM
-        data.actorTypeChoices = { pc: "PC", npc: "NPC" }
+        //data.actorTypeChoices = { pc: "PC", npc: "NPC" }
 
         // enrichedData
         for (let field of ["BACKGROUND", "PERSONALITY", "QUOTE", "TACTICS", "CAMPAIGN_USE", "APPEARANCE"])
@@ -273,14 +273,20 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         for (const key of characteristicKeys) {
 
-             // Automation has no EGO, OMCV, or DMCV
-             if (data.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
-            
-            
-             let characteristic = data.actor.system.characteristics[key]
+
+            // Some actor types do not show all characteristics
+            const powerInfo = getPowerInfo({xmlid: key.toUpperCase(), actor: this.actor});
+            if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(this.actor.type)) {
+                continue;
+            }
+            if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(this.actor.type)) {
+                continue;
+            }
+                        
+            let characteristic = data.actor.system.characteristics[key]
 
             // Automation has no EGO, OMCV, or DMCV
-            //if (item.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
+            //if (item.actor.type === "automaton" && ["ego", "omcv", "dmcv"].includes(key)) continue;
 
             if (!characteristic) {
                 characteristic = {}

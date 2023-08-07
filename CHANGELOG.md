@@ -1,3 +1,7 @@
+# Version 3.0.16
+- Migration skipped on new/empty worlds [#254](https://github.com/dmdorman/hero6e-foundryvtt/issues/254)
+- Initial support for vehicles, bases, computers, automatons, and ai's. [#109](https://github.com/dmdorman/hero6e-foundryvtt/issues/109)
+
 # Version 3.0.15
 - Fixes for Requires A Roll.  Attacks spend END when RAR fails.  Hotbar macros no longer RAR when powers toggle off. [#244](https://github.com/dmdorman/hero6e-foundryvtt/issues/244)
 - Initial Abort support.  Aborted status icon.  When Stunned, Knocked Out, or Aborted you can not act (make rolls or toggle powers on).
@@ -16,7 +20,6 @@
 - Improved Skill Enhancer calculations [#249](https://github.com/dmdorman/hero6e-foundryvtt/issues/249)
 - Fixed rare and minor issue where velocity wasn't calculated when there is no token for an actor. [#250](https://github.com/dmdorman/hero6e-foundryvtt/issues/250)
 - Fixed 0d6 + 1 rolls.  [#252](https://github.com/dmdorman/hero6e-foundryvtt/issues/252)
-- Initial support for Weight encumbrance penalties.
 
 
 # Version 3.0.14

@@ -340,15 +340,19 @@ Hooks.once("ready", async function () {
 
     // Check if we have already migrated
     const lastMigration = game.settings.get(game.system.id, 'lastMigration')
+
     if (foundry.utils.isNewerVersion(game.system.version.replace("-alpha", ""), lastMigration)) {
 
         // Update lastMigration
         await game.settings.set(game.system.id, 'lastMigration', game.system.version.replace("-alpha", ""))
 
+        // Don't bother trying to migrate an world with no actors or items
+        if (game.actors.size === 0 && game.items.size === 0) return;
+
         // if lastMigration < 2.2.0-alpha
         if (foundry.utils.isNewerVersion('2.2.0', lastMigration)) {
             await ui.notifications.info(`Migragrating actor data 2.2.0`)
-            migrateActorTypes()
+            //migrateActorTypes()
             migrateKnockback()
             migrateRemoveDuplicateDefenseMovementItems()
         }
@@ -503,6 +507,20 @@ Hooks.once("ready", async function () {
             }
         }
 
+        // Fix any invalid actor types
+        for (let invalidId of game.actors.invalidDocumentIds) {
+            let invalidActor = game.actors.getInvalid(invalidId);
+
+            const validType = Actor.TYPES.filter(o => o != 'character' && o != 'base').map(o => o.replace("2", ""));
+
+
+            if (!validType.includes(invalidActor.type)) {
+                await invalidActor.update({ type: "npc" });
+                await ui.notifications.error(`${invalidActor.name} had an invalid actor type.  It was changed to 'npc'.  Reload world to access token.`);
+            }
+        }
+
+
         // Reparse all items (description, cost, etc) on every migration
         if (true) {
             await ui.notifications.info(`Migragrating actor data (reparse items)`)
@@ -628,24 +646,24 @@ async function migrateActorDefenseMovementData(actor) {
 // }
 
 // Change Actor type from "character" to "pc"
-async function migrateActorTypes() {
-    const updates = [];
-    for (let actor of game.actors) {
-        if (actor.type !== "character") continue;
+// async function migrateActorTypes() {
+//     const updates = [];
+//     for (let actor of game.actors) {
+//         if (actor.type !== "character") continue;
 
-        if (actor.prototypeToken.disposition == CONST.TOKEN_DISPOSITIONS.FRIENDLY) {
-            updates.push({ _id: actor.id, type: "pc" });
-        }
-        else {
-            updates.push({ _id: actor.id, type: "npc" });
-        }
+//         if (actor.prototypeToken.disposition == CONST.TOKEN_DISPOSITIONS.FRIENDLY) {
+//             updates.push({ _id: actor.id, type: "pc" });
+//         }
+//         else {
+//             updates.push({ _id: actor.id, type: "npc" });
+//         }
 
-    }
-    if (updates.length > 0) {
-        await Actor.updateDocuments(updates);
-        ui.notifications.info(`${updates.length} actors migrated.`)
-    }
-}
+//     }
+//     if (updates.length > 0) {
+//         await Actor.updateDocuments(updates);
+//         ui.notifications.info(`${updates.length} actors migrated.`)
+//     }
+// }
 
 // Change Attack knockback to knockbackMultiplier
 async function migrateKnockback() {
@@ -685,7 +703,7 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
 
     let element = document.createElement("a");
     element.setAttribute(`data-id`, data.actor.id)
-    element.title = data.actor.type.toUpperCase()
+    element.title = data.actor.type.toUpperCase().replace("2", "");
     element.addEventListener('click', () => {
         const actor = game.actors.get(event.target.dataset.id)
         actor.ChangeType()

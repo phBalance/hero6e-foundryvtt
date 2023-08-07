@@ -3,7 +3,11 @@
         "types": [
             "pc",
             "npc",
-            "character"
+            "vehicle",
+            "base2",
+            "computer",
+            "automaton",
+            "ai"
         ],
         "templates": {
             "base": {},
@@ -138,6 +142,11 @@
                         "max": 20,
                         "type": "resource"
                     },
+                    "size": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "resource"
+                    },
                     "running": {
                         "value": 12,
                         "max": 12,
@@ -186,7 +195,27 @@
                 "characterTemplate"
             ]
         },
-        "character": {
+        "vehicle": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "base2": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "automaton": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "computer": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "ai": {
             "templates": [
                 "characterTemplate"
             ]
