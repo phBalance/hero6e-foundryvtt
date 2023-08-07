@@ -1,5 +1,5 @@
 # Version 3.0.16
-- Migration skipped on new/empty worlds [#254](https://github.com/dmdorman/hero6e-foundryvtt/issues/254)
+- Migration unnecessary on new/empty worlds [#254](https://github.com/dmdorman/hero6e-foundryvtt/issues/254)
 - Initial support for vehicles, bases, computers, automatons, and ai's. [#109](https://github.com/dmdorman/hero6e-foundryvtt/issues/109)
 - Fixed issue with some talents failing to upload, that would prevent other powers from uploading.  Improved warn/error messages during upload to assist with similar in the future.
 - Improved defense summary tooltips/mouseovers.
