@@ -952,7 +952,7 @@ export function XmlToItemData(xml, type) {
     let name = xml.getAttribute('NAME').trim() || xml.getAttribute('ALIAS').trim() || xml.tagName
 
     // Update Item Description (to closely match Hero Designer)
-    updateItemDescription({ actor: this.actor, name: name, system: systemData, type: type })
+    updateItemDescription({ actor: this?.actor, name: name, system: systemData, type: type })
 
 
 
