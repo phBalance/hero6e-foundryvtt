@@ -1674,6 +1674,8 @@ export function updateItemDescription(item) {
         system.description = system.description.replace(re, "").trim();
         system.description = system.description.replace(/^: /, "").trim();
         system.description = system.description.replace(/^:/, "").trim();
+        system.description = system.description.replace(/^Damage Reduction: /, "").trim();
+
     } catch (e) {
         ui.notifications.warn(`${item.actor.name} has item "${item.name.substr(0, 30)}" which failed to update item description`);
         console.log(e);
