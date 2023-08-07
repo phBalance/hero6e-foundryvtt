@@ -333,39 +333,79 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // EXTRADC goes first (so we can more easily add these DC's to MANEUVER's)
     for (const martialart of martialarts.querySelectorAll("EXTRADC")) {
-        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+        try {
+            await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+        } catch (e) {
+            ui.notifications.error(`${martialart.actor.name} has item "${martialart.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
     // WEAPON_ELEMENT next
     for (const martialart of martialarts.querySelectorAll("WEAPON_ELEMENT")) {
-        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+        try {
+            await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+        } catch (e) {
+            ui.notifications.error(`${martialart.actor.name} has item "${martialart.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
     // MANEUVER next
     for (const martialart of martialarts.querySelectorAll("MANEUVER")) {
-        await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+        try {
+            await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
+        } catch (e) {
+            ui.notifications.error(`${martialart.actor.name} has item "${martialart.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
 
 
     for (const power of powers.children) {
-        await uploadPower.call(this, power, 'power')
+        try {
+            await uploadPower.call(this, power, 'power')
+        } catch (e) {
+            ui.notifications.error(`${power.actor.name} has item "${power.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
     for (const perk of perks.children) {
-        await uploadBasic.call(this, perk, 'perk')
+        try {
+            await uploadBasic.call(this, perk, 'perk')
+        } catch (e) {
+            ui.notifications.error(`${perk.actor.name} has item "${perk.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
     for (const talent of talents.children) {
-        await uploadBasic.call(this, talent, 'talent')
+        try {
+            await uploadBasic.call(this, talent, 'talent')
+        } catch (e) {
+            ui.notifications.error(`${talent.actor.name} has item "${talent.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
     for (const complication of complications.children) {
-        await uploadBasic.call(this, complication, 'complication')
+        try {
+            await uploadBasic.call(this, complication, 'complication')
+        } catch (e) {
+            ui.notifications.error(`${complication.actor.name} has item "${complication.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
     for (const equip of equipment.children) {
-        await uploadPower.call(this, equip, 'equipment')
+        try {
+            await uploadPower.call(this, equip, 'equipment')
+        } catch (e) {
+            ui.notifications.error(`${equip.actor.name} has item "${equip.name.substr(0, 30)}" which failed to upload`);
+            console.log(e);
+        }
     }
 
 
@@ -555,7 +595,17 @@ export async function CalcActorRealAndActivePoints(actor) {
     const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts : CONFIG.HERO.characteristicCosts5e
     //if (actor.system.is5e) {
     for (const key of Object.keys(characteristicCosts)) {
-        realCost += parseInt(actor.system.characteristics[key].realCost || 0);
+
+        // Some actor types do not show all characteristics
+        const powerInfo = getPowerInfo({xmlid: key.toUpperCase(), actor: actor});
+        if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(actor.type)) {
+            continue;
+        }
+        if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(actor.type)) {
+            continue;
+        }
+
+        realCost += parseInt(actor.system.characteristics[key]?.realCost || 0);
     }
     // } else {
     //     for (const key of Object.keys(CONFIG.HERO.characteristicCosts)) {
@@ -902,7 +952,7 @@ export function XmlToItemData(xml, type) {
     let name = xml.getAttribute('NAME').trim() || xml.getAttribute('ALIAS').trim() || xml.tagName
 
     // Update Item Description (to closely match Hero Designer)
-    updateItemDescription({ name: name, system: systemData, type: type })
+    updateItemDescription({ actor: this.actor, name: name, system: systemData, type: type })
 
 
 
@@ -1620,7 +1670,7 @@ export function updateItemDescription(item) {
     try {
         let re = new RegExp(`^${_rawName}`, 'i')
         system.description = system.description.replace(re, "").trim();
-        re = new RegExp(`: ${item.name}$`, 'i')
+        re = new RegExp(`: ${_rawName}$`, 'i')
         system.description = system.description.replace(re, "").trim();
         system.description = system.description.replace(/^: /, "").trim();
         system.description = system.description.replace(/^:/, "").trim();

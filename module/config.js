@@ -772,6 +772,11 @@ HERO.powers = {
         name: "Combat Sense",
         costPerLevel: 1,
     },
+    "RESISTANCE": {
+        powerType: ["talent"],
+        name: "Resistance",
+        costPerLevel: 1,
+    },
 
     // Powers can include Skills.
     "ACROBATICS": { powerType: ["skill"] },
