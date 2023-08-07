@@ -95,6 +95,7 @@ HERO.characteristics = {
     "swinging": "Swinging",
     "teleportation": "Teleportation",
     "tunneling": "Tunneling",
+    "basesize": "Base Size",
 };
 
 HERO.characteristics5e = {
@@ -123,6 +124,7 @@ HERO.characteristics5e = {
     "swinging": "Swinging",
     "teleportation": "Teleportation",
     "tunneling": "Tunneling",
+    "basesize": "Base Size",
 };
 
 HERO.characteristicDefaults = {
@@ -151,6 +153,7 @@ HERO.characteristicDefaults = {
     "swinging": 0,
     "teleportation": 0,
     "tunneling": 0,
+    "basesize": 0,
 };
 
 HERO.characteristicDefaults5e = {
@@ -179,6 +182,7 @@ HERO.characteristicDefaults5e = {
     "swinging": 0,
     "teleportation": 0,
     "tunneling": 0,
+    "basesize": 0,
 };
 
 HERO.characteristicCosts = {
@@ -206,6 +210,7 @@ HERO.characteristicCosts = {
     "swinging": 1,
     "teleportation": 1,
     "tunneling": 1,
+    "basesize": 5,
 };
 
 HERO.characteristicCosts5e = {
@@ -234,6 +239,7 @@ HERO.characteristicCosts5e = {
     "swinging": 1,
     "teleportation": 1,
     "tunneling": 1,
+    "basesize": 5,
 };
 
 
@@ -263,7 +269,8 @@ HERO.characteristicsXMLKey = {
     "SWINGING": "swinging",
     "TELEPORTATION": "teleportation",
     "TUNNELING": "tunneling",
-    "GENERAL": "general"
+    "GENERAL": "general",
+    "BASESIZE": "basesize",
 };
 
 HERO.skillCharacteristics = {
@@ -379,24 +386,25 @@ HERO.movementPowers = {
 HERO.powers = {
 
     // Characteristics (will likely use active effects for these)
-    "STR": { powerType: ["characteristic"], duration: "persistent", costEnd: true },
-    "DEX": { powerType: ["characteristic"], duration: "persistent" },
-    "CON": { powerType: ["characteristic"], duration: "persistent" },
-    "INT": { powerType: ["characteristic"], duration: "persistent" },
-    "EGO": { powerType: ["characteristic"], duration: "persistent" },
-    "PRE": { powerType: ["characteristic"], duration: "persistent" },
-    "OCV": { powerType: ["characteristic"], duration: "persistent" },
-    "DCV": { powerType: ["characteristic"], duration: "persistent" },
-    "OMCV": { powerType: ["characteristic"], duration: "persistent" },
-    "DMCV": { powerType: ["characteristic"], duration: "persistent" },
-    "SPD": { powerType: ["characteristic"], duration: "persistent" },
-    "PD": { powerType: ["characteristic", "defense"], duration: "persistent" },
-    "ED": { powerType: ["characteristic", "defense"], duration: "persistent" },
-    "REC": { powerType: ["characteristic"], duration: "persistent" },
-    "END": { powerType: ["characteristic"], duration: "persistent" },
-    "BODY": { powerType: ["characteristic"], duration: "persistent" },
-    "STUN": { powerType: ["characteristic"], duration: "persistent" },
-    "COM": { powerType: ["characteristic"], duration: "persistent" },
+    "STR": { powerType: ["characteristic"], duration: "persistent", costEnd: true, ignoreFor: ["base2", "computer", "ai"] },
+    "DEX": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["base2"] },
+    "CON": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["vehicle", "base2", "computer", "ai"] },
+    "INT": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["vehicle", "base2"] },
+    "EGO": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["automaton", "vehicle", "base2", "computer"] },
+    "PRE": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["vehicle", "base2", "computer", "ai"] },
+    "OCV": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["base2"] },
+    "DCV": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["base2"] },
+    "OMCV": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["automaton", "vehicle", "base2"] },
+    "DMCV": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["automaton", "vehicle", "base2"] },
+    "SPD": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["base2"] },
+    "PD": { powerType: ["characteristic", "defense"], duration: "persistent", ignoreFor: ["computer", "ai"] },
+    "ED": { powerType: ["characteristic", "defense"], duration: "persistent", ignoreFor: ["computer", "ai"] },
+    "REC": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["vehicle", "base2", "computer", "ai"] },
+    "END": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["vehicle", "base2", "computer", "ai"] },
+    "BODY": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["base2", "computer", "ai"] },
+    "STUN": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["vehicle", "base2", "computer", "ai"] },
+    "COM": { powerType: ["characteristic"], duration: "persistent", ignoreFor: ["vehicle", "base2", "computer", "ai"] },
+    "BASESIZE": { powerType: ["characteristic"], duration: "persistent", onlyFor: ["automaton", "vehicle", "base2"] },
 
     // Misc
     "CLINGING": { powerType: ["standard"] },
@@ -722,13 +730,13 @@ HERO.powers = {
 
 
     // Movement
-    "FLIGHT": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
-    "LEAPING": { powerType: ["movement"], costEnd: true, costPerLevel: 0.5, },
-    "TELEPORTATION": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
-    "SWIMMING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
-    "SWINGING": { powerType: ["movement"], costEnd: true, costPerLevel: 0.5, },
-    "TUNNELING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
-    "RUNNING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, },
+    "FLIGHT": { powerType: ["movement"], costEnd: true, costPerLevel: 1, ignoreFor: ["base2", "computer", "ai"] },
+    "LEAPING": { powerType: ["movement"], costEnd: true, costPerLevel: 0.5, ignoreFor: ["base2", "computer", "ai"] },
+    "TELEPORTATION": { powerType: ["movement"], costEnd: true, costPerLevel: 1, ignoreFor: ["base2", "computer", "ai"] },
+    "SWIMMING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, ignoreFor: ["base2", "computer", "ai"] },
+    "SWINGING": { powerType: ["movement"], costEnd: true, costPerLevel: 0.5, ignoreFor: ["base2", "computer", "ai"] },
+    "TUNNELING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, ignoreFor: ["base2", "computer", "ai"] },
+    "RUNNING": { powerType: ["movement"], costEnd: true, costPerLevel: 1, ignoreFor: ["base2", "computer", "ai"] },
     "EXTRADIMENSIONALMOVEMENT": {
         powerType: ["movement"],
         name: "Extra-Dimensional movement",
@@ -738,6 +746,7 @@ HERO.powers = {
         range: "Self",
         costEnd: true,
         costPerLevel: 20,
+        ignoreFor: ["base2", "computer", "ai"]
     },
 
     // PERKS
@@ -761,6 +770,11 @@ HERO.powers = {
     "COMBAT_SENSE": {
         powerType: ["talent"],
         name: "Combat Sense",
+        costPerLevel: 1,
+    },
+    "RESISTANCE": {
+        powerType: ["talent"],
+        name: "Resistance",
         costPerLevel: 1,
     },
 

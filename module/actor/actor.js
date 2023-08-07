@@ -32,7 +32,7 @@ export class HeroSystem6eActor extends Actor {
 
         }
 
-        if (this.type === "pc") {
+        if (this.type != "npc") {
             prototypeToken = {
                 ...prototypeToken,
                 actorLink: true,
@@ -111,7 +111,7 @@ export class HeroSystem6eActor extends Actor {
         let cardData = {
             actor,
             groupName: "typeChoice",
-            choices: Actor.TYPES.filter(o => o != 'character').reduce((a, v) => ({ ...a, [v]: v.replace("2","") }), {}), //{ pc: "PC", npc: "NPC"}, //, automation: "Automation", vehicle: "Vehicle", computer: "Computer" },
+            choices: Actor.TYPES.filter(o => o != 'character' && o != 'base').reduce((a, v) => ({ ...a, [v]: v.replace("2","") }), {}), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         }
         const html = await renderTemplate(template, cardData)

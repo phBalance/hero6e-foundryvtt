@@ -7,7 +7,7 @@ function determineDefense(targetActor, attackItem, options) {
     const penetrating = parseInt(attackItem.system.penetrating) || 0
 
     // The defenses that are active
-    const activeDefenses = targetActor.items.filter(o=> (o.system.subType === 'defense' || o.type === 'defense')
+    const activeDefenses = targetActor.items.filter(o => (o.system.subType === 'defense' || o.type === 'defense')
         && (o.system.active || o.effects.find(o => true)?.disabled === false)
         && !(options?.ignoreDefenseIds || []).includes(o.id)
     );
@@ -94,10 +94,12 @@ function determineDefense(targetActor, attackItem, options) {
 
     switch (attackType) {
         case 'physical':
-            defenseTags.push({ name: 'PD', value: PD, resistant: false, title: 'Natural PD' })
+            if (PD > 0) defenseTags.push({ name: 'PD', value: PD, resistant: false, title: 'Natural PD' })
+            if (rPD > 0) defenseTags.push({ name: 'rPD', value: rPD, resistant: true, title: 'resistant PD' })
             break;
         case 'energy':
-            defenseTags.push({ name: 'ED', value: PD, resistant: false, title: 'Natural ED' })
+            if (ED > 0) defenseTags.push({ name: 'ED', value: ED, resistant: false, title: 'Natural ED' })
+            if (rED > 0) defenseTags.push({ name: 'rED', value: rED, resistant: true, title: 'resistant ED' })
             break;
         case 'mental':
             break;
@@ -105,234 +107,240 @@ function determineDefense(targetActor, attackItem, options) {
 
 
     //if ((targetActor.items.size || targetActor.items.length) > 0) {
-        for (let i of activeDefenses) {
+    for (let i of activeDefenses) {
 
-            const configPowerInfo = getPowerInfo({ item: i })
-            // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-            //     i.subType = 'defense'
-            // }
+        const configPowerInfo = getPowerInfo({ item: i })
+        // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
+        //     i.subType = 'defense'
+        // }
 
-            //if ((i.system.subType || i.type) === "defense" && i.system.active) {
-                let value = parseInt(i.system.value) || 0;
+        //if ((i.system.subType || i.type) === "defense" && i.system.active) {
+        let value = parseInt(i.system.value) || 0;
 
-                const xmlid = i.system.XMLID
+        const xmlid = i.system.XMLID
 
-                // Newer solution is to use POWER item, instead of a sepearete defense item
-                if (!value && ["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
-                    switch (attackType) {
-                        case 'physical':
-                            value = parseInt(i.system.PDLEVELS) || 0
-                            i.system.defenseType = "pd"
-                            i.system.resistant = true
-                            break;
-                        case 'energy':
-                            value = parseInt(i.system.EDLEVELS) || 0
-                            i.system.defenseType = "ed"
-                            i.system.resistant = true
-                            break;
-                        case 'mental':
-                            i.system.defenseType = "md"
-                            value = parseInt(i.system.MDLEVELS) || 0
-                            i.system.resistant = true
-                            break;
-                        case 'drain':
-                        case 'transfer':
-                            i.system.defenseType = "powd"
-                            value = parseInt(i.system.POWDLEVELS) || 0
-                            i.system.resistant = true
-                            break;
-                    }
-                }
-
-                if (!value && ["POWERDEFENSE"].includes(xmlid)) {
-                    switch (attackType) {
-                        case 'drain':
-                        case 'transfer':
-                            i.system.defenseType = "powd"
-                            value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
-                            break;
-                    }
-                }
-
-
-                if (!value && ["MENTALDEFENSE"].includes(xmlid)) {
-                    switch (attackType) {
-                        case 'mental':
-                            i.system.defenseType = "md"
-                            value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
-                            break;
-                    }
-                }
-
-
-                if (!value && ["DAMAGEREDUCTION"].includes(xmlid) && i.system.INPUT.toLowerCase() == attackType) {
-                    value = parseInt(i.system.OPTIONID.match(/\d+/)) || 0
-                    i.system.resistant = i.system.OPTIONID.match(/RESISTANT/) ? true : false
-                    switch (attackType) {
-                        case 'physical':
-                            i.system.defenseType = "drp"
-                            break;
-                        case 'energy':
-                            i.system.defenseType = "dre"
-                            break;
-                        case 'mental':
-                            i.system.defenseType = "drm"
-                            break;
-                    }
-                }
-
-                if (!value && ["DAMAGENEGATION"].includes(xmlid)) {
-                    switch (attackType) {
-                        case 'physical':
-                            i.system.defenseType = "dnp"
-                            value = parseInt(i.system.adders.find(o => o.XMLID == "PHYSICAL")?.LEVELS) || 0
-                            break;
-                        case 'energy':
-                            i.system.defenseType = "dne"
-                            value = parseInt(i.system.adders.find(o => o.XMLID == "ENERGY")?.LEVELS) || 0
-                            break;
-                        case 'mental':
-                            i.system.defenseType = "dnm"
-                            value = parseInt(i.system.adders.find(o => o.XMLID == "MENTAL")?.LEVELS) || 0
-                            break;
-                    }
-                }
-
-                if (!value && ["COMBAT_LUCK"].includes(xmlid)) {
-                    switch (attackType) {
-                        case 'physical':
-                            i.system.defenseType = "pd"
-                            value = (parseInt(i.system.LEVELS.value) || 0) * 3
-                            i.system.resistant = true
-                            break;
-                        case 'energy':
-                            i.system.defenseType = "ed"
-                            value = (parseInt(i.system.LEVELS.value) || 0) * 3
-                            i.system.resistant = true
-                            break;
-                    }
-                }
-
-                let valueAp = value
-                let valueImp = 0
-
-                // Hardened
-                let hardened = parseInt(i.system.hardened) || 0
-                if (!hardened) {
-                    hardened = parseInt(i.system.modifiers.find(o => o.XMLID == "HARDENED")?.LEVELS) || 0
-                }
-
-
-                // Armor Piercing
-                if (piericng > hardened) {
-                    valueAp = Math.round(valueAp / 2)
-                }
-
-                // Impenetrable
-                let impenetrable = parseInt(i.system.impenetrable) || 0
-                if (!impenetrable) {
-                    impenetrable = parseInt(i.system.modifiers.find(o => o.XMLID == "IMPENETRABLE")?.LEVELS) || 0
-                }
-
-                // Penetrating
-                if (penetrating <= impenetrable) {
-                    valueImp = valueAp
-                }
-
-
-                switch ((i.system.resistant ? "r" : "") + i.system.defenseType) {
-                    case "pd": // Physical Defense
-                        PD += valueAp;
-                        if (attackType === 'physical') {
-                            defenseTags.push({ name: 'PD', value: valueAp, resistant: false, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "ed": // Energy Defense
-                        ED += valueAp
-                        if (attackType === 'energy') {
-                            defenseTags.push({ name: 'ED', value: valueAp, resistant: false, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "md": // Mental Defense
-                        MD += valueAp
-                        if (attackType === 'mental') {
-                            defenseTags.push({ name: 'MD', value: valueAp, resistant: false, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "powd": // Power Defense
-                        POWD += valueAp
-                        if (["drain", "transfer"].includes(attackType)) {
-                            defenseTags.push({ name: 'POWD', value: valueAp, resistant: false, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "rpd": // Resistant PD
-                        rPD += valueAp
-                        if (attackType === 'physical') {
-                            defenseTags.push({ name: 'rPD', value: valueAp, resistant: true, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "red": // Resistant ED
-                        rED += valueAp
-                        if (attackType === 'energy') {
-                            defenseTags.push({ name: 'rED', value: valueAp, resistant: true, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "rmd": // Resistant MD
-                        rMD += valueAp
-                        if (attackType === 'mental') {
-                            defenseTags.push({ name: 'rMD', value: valueAp, resistant: true, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "rpowd": // Resistant Power Defense
-                        rPOWD += valueAp
-                        if (["drain", "transfer"].includes(attackType)) {
-                            defenseTags.push({ name: 'rPOWD', value: valueAp, resistant: true, title: i.name })
-                            impenetrableValue += valueImp
-                        }
-                        break;
-                    case "drp": // Damage Reduction Physical
-                    case "rdrp":
-                        DRP = Math.max(DRP, value);
-                        break;
-                    case "dre": // Damage Reduction Energy
-                    case "rdre":
-                        DRE = Math.max(DRE, value);
-                        break;
-                    case "drm": // Damage Reduction Mental
-                    case "rdrm":
-                        DRM = Math.max(DRM, value);
-                        break;
-                    case "dnp": // Damage Negation Physical
-                        DNP += value
-                        break;
-                    case "dne": // Damage Negation Energy
-                        DNE += value
-                        break;
-                    case "dnm": // Damage Negation Mental
-                        DNM += value
-                        break;
-                    case "kbr": // Knockback Resistance
-                        knockbackResistance += value;
-                        if (attackType != 'mental' && game.settings.get("hero6efoundryvttv2", "knockback")) {
-                            defenseTags.push({ name: 'KB Resistance', value: value, title: i.name })
-                        }
-                        break;
-                    default:
-                        if (game.settings.get(game.system.id, 'alphaTesting')) {
-                            //ui.notifications.warn(i.system.defenseType + " not yet supported!")
-                            //HEROSYS.log(false, i.system.defenseType + " not yet supported!");
-                        }
-                        break;
-                }
-            //}
+        // Newer solution is to use POWER item, instead of a sepearete defense item
+        if (!value && ["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
+            switch (attackType) {
+                case 'physical':
+                    value = parseInt(i.system.PDLEVELS) || 0
+                    i.system.defenseType = "pd"
+                    i.system.resistant = true
+                    break;
+                case 'energy':
+                    value = parseInt(i.system.EDLEVELS) || 0
+                    i.system.defenseType = "ed"
+                    i.system.resistant = true
+                    break;
+                case 'mental':
+                    i.system.defenseType = "md"
+                    value = parseInt(i.system.MDLEVELS) || 0
+                    i.system.resistant = true
+                    break;
+                case 'drain':
+                case 'transfer':
+                    i.system.defenseType = "powd"
+                    value = parseInt(i.system.POWDLEVELS) || 0
+                    i.system.resistant = true
+                    break;
+            }
         }
+
+        if (!value && ["POWERDEFENSE"].includes(xmlid)) {
+            switch (attackType) {
+                case 'drain':
+                case 'transfer':
+                    i.system.defenseType = "powd"
+                    value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                    break;
+            }
+        }
+
+
+        if (!value && ["MENTALDEFENSE"].includes(xmlid)) {
+            switch (attackType) {
+                case 'mental':
+                    i.system.defenseType = "md"
+                    value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                    break;
+            }
+        }
+
+
+        if (!value && ["DAMAGEREDUCTION"].includes(xmlid) && i.system.INPUT.toLowerCase() == attackType) {
+            value = parseInt(i.system.OPTIONID.match(/\d+/)) || 0
+            i.system.resistant = i.system.OPTIONID.match(/RESISTANT/) ? true : false
+            switch (attackType) {
+                case 'physical':
+                    i.system.defenseType = "drp"
+                    break;
+                case 'energy':
+                    i.system.defenseType = "dre"
+                    break;
+                case 'mental':
+                    i.system.defenseType = "drm"
+                    break;
+            }
+        }
+
+        if (!value && ["DAMAGENEGATION"].includes(xmlid)) {
+            switch (attackType) {
+                case 'physical':
+                    i.system.defenseType = "dnp"
+                    value = parseInt(i.system.adders.find(o => o.XMLID == "PHYSICAL")?.LEVELS) || 0
+                    break;
+                case 'energy':
+                    i.system.defenseType = "dne"
+                    value = parseInt(i.system.adders.find(o => o.XMLID == "ENERGY")?.LEVELS) || 0
+                    break;
+                case 'mental':
+                    i.system.defenseType = "dnm"
+                    value = parseInt(i.system.adders.find(o => o.XMLID == "MENTAL")?.LEVELS) || 0
+                    break;
+            }
+        }
+
+        if (!value && ["COMBAT_LUCK"].includes(xmlid)) {
+            switch (attackType) {
+                case 'physical':
+                    i.system.defenseType = "pd"
+                    value = (parseInt(i.system.LEVELS.value) || 0) * 3
+                    i.system.resistant = true
+                    break;
+                case 'energy':
+                    i.system.defenseType = "ed"
+                    value = (parseInt(i.system.LEVELS.value) || 0) * 3
+                    i.system.resistant = true
+                    break;
+            }
+        }
+
+        let valueAp = value
+        let valueImp = 0
+
+        // Hardened
+        let hardened = parseInt(i.system.hardened) || 0
+        if (!hardened) {
+            hardened = parseInt(i.system.modifiers.find(o => o.XMLID == "HARDENED")?.LEVELS) || 0
+        }
+
+
+        // Armor Piercing
+        if (piericng > hardened) {
+            valueAp = Math.round(valueAp / 2)
+        }
+
+        // Impenetrable
+        let impenetrable = parseInt(i.system.impenetrable) || 0
+        if (!impenetrable) {
+            impenetrable = parseInt(i.system.modifiers.find(o => o.XMLID == "IMPENETRABLE")?.LEVELS) || 0
+        }
+
+        // Penetrating
+        if (penetrating <= impenetrable) {
+            valueImp = valueAp
+        }
+
+
+        switch ((i.system.resistant ? "r" : "") + i.system.defenseType) {
+            case "pd": // Physical Defense
+                PD += valueAp;
+                if (attackType === 'physical') {
+                    if (valueAp > 0) defenseTags.push({ name: 'PD', value: valueAp, resistant: false, title: i.name })
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "ed": // Energy Defense
+                ED += valueAp
+                if (attackType === 'energy') {
+                    if (valueAp > 0) defenseTags.push({ name: 'ED', value: valueAp, resistant: false, title: i.name })
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "md": // Mental Defense
+                MD += valueAp
+                if (attackType === 'mental') {
+                    if (valueAp > 0) defenseTags.push({ name: 'MD', value: valueAp, resistant: false, title: i.name })
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "powd": // Power Defense
+                POWD += valueAp
+                if (["drain", "transfer"].includes(attackType)) {
+                    if (valueAp > 0) defenseTags.push({ name: 'POWD', value: valueAp, resistant: false, title: i.name })
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "rpd": // Resistant PD
+                rPD += valueAp
+                if (attackType === 'physical') {
+                    if (valueAp > 0) defenseTags.push({ name: 'rPD', value: valueAp, resistant: true, title: i.name })
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "red": // Resistant ED
+                rED += valueAp
+                if (attackType === 'energy') {
+                    if (valueAp > 0) defenseTags.push({ name: 'rED', value: valueAp, resistant: true, title: i.name})
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "rmd": // Resistant MD
+                rMD += valueAp
+                if (attackType === 'mental') {
+                    if (valueAp > 0) defenseTags.push({ name: 'rMD', value: valueAp, resistant: true, title: i.name })
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "rpowd": // Resistant Power Defense
+                rPOWD += valueAp
+                if (["drain", "transfer"].includes(attackType)) {
+                    if (valueAp > 0) defenseTags.push({ name: 'rPOWD', value: valueAp, resistant: true, title: i.name })
+                    impenetrableValue += valueImp
+                }
+                break;
+            case "drp": // Damage Reduction Physical
+            case "rdrp":
+                if (value > 0) defenseTags.push({ name: 'drp', value: `${i.system.resistant ? "r" : ""}${value}%`, resistant: i.system.resistant, title: i.name })
+                DRP = Math.max(DRP, value);
+                break;
+            case "dre": // Damage Reduction Energy
+            case "rdre":
+                if (value > 0) defenseTags.push({ name: 'dre', value: `${i.system.resistant ? "r" : ""}${value}%`, resistant: i.system.resistant, title: i.name })
+                DRE = Math.max(DRE, value);
+                break;
+            case "drm": // Damage Reduction Mental
+            case "rdrm":
+                if (value > 0) defenseTags.push({ name: 'drm', value: `${i.system.resistant ? "r" : ""}${value}%`, resistant: i.system.resistant, title: i.name })
+                DRM = Math.max(DRM, value);
+                break;
+            case "dnp": // Damage Negation Physical
+                if (value > 0) defenseTags.push({ name: 'dnp', value: value, resistant: false, title: i.name })
+                DNP += value
+                break;
+            case "dne": // Damage Negation Energy
+                if (value > 0) defenseTags.push({ name: 'dne', value: value, resistant: false, title: i.name })
+                DNE += value
+                break;
+            case "dnm": // Damage Negation Mental
+                if (value > 0) defenseTags.push({ name: 'dnm', value: value, resistant: false, title: i.name })
+                DNM += value
+                break;
+            case "kbr": // Knockback Resistance
+                knockbackResistance += value;
+                if (attackType != 'mental' && game.settings.get("hero6efoundryvttv2", "knockback")) {
+                    defenseTags.push({ name: 'KB Resistance', value: value, title: i.name })
+                }
+                break;
+            default:
+                if (game.settings.get(game.system.id, 'alphaTesting')) {
+                    //ui.notifications.warn(i.system.defenseType + " not yet supported!")
+                    //HEROSYS.log(false, i.system.defenseType + " not yet supported!");
+                }
+                break;
+        }
+        //}
+    }
     //}
 
     let defenseValue = 0;

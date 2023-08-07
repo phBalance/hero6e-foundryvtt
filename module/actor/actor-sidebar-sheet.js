@@ -43,7 +43,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         // NPC or PC dropdown
         data.isGM = game.user.isGM
-        data.actorTypeChoices = { pc: "PC", npc: "NPC" }
+        //data.actorTypeChoices = { pc: "PC", npc: "NPC" }
 
         // enrichedData
         for (let field of ["BACKGROUND", "PERSONALITY", "QUOTE", "TACTICS", "CAMPAIGN_USE", "APPEARANCE"])
@@ -273,14 +273,20 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         for (const key of characteristicKeys) {
 
-             // Automation has no EGO, OMCV, or DMCV
-             if (data.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
-            
-            
-             let characteristic = data.actor.system.characteristics[key]
+
+            // Some actor types do not show all characteristics
+            const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this.actor });
+            if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(this.actor.type)) {
+                continue;
+            }
+            if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(this.actor.type)) {
+                continue;
+            }
+
+            let characteristic = data.actor.system.characteristics[key]
 
             // Automation has no EGO, OMCV, or DMCV
-            //if (item.actor.type === "automation" && ["ego", "omcv", "dmcv"].includes(key)) continue;
+            //if (item.actor.type === "automaton" && ["ego", "omcv", "dmcv"].includes(key)) continue;
 
             if (!characteristic) {
                 characteristic = {}
@@ -443,9 +449,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTagsP] = determineDefense.call(this, this.actor, pdAttack)
         defense.PD = defenseValue
         defense.rPD = resistantValue
-        defense.PDtags = "";
-        defense.rPDtags = "";
-        for (let tag of defenseTagsP) {
+        defense.PDtags = "PHYSICAL DEFENSE\n";
+        defense.rPDtags = "PHYSICAL DEFENSE (RESISTANT)\n";
+        for (let tag of defenseTagsP.filter(o => o.name.match(/pd$/i))) {
             if (tag.resistant) {
                 defense.rPDtags += `${tag.value} ${tag.title}\n`
             }
@@ -454,9 +460,20 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
         defense.drp = damageReductionValue
-        defense.drptags = "Damage Reduction (physical)"
+        defense.drptags = "DAMAGE REDUCTION PHYSICAL\n"
+        for (let tag of defenseTagsP.filter(o => o.name.match(/drp$/i))) {
+            if (tag.resistant) {
+                defense.drptags += `${tag.value} ${tag.title}\n`
+            }
+            else if (tag.resistant != undefined) {
+                defense.drptags += `${tag.value} ${tag.title}\n`
+            }
+        }
         defense.dnp = damageNegationValue
-        defense.dnptags = "Damage Negation (physical)"
+        defense.dnptags = "DAMAGE NEGATION PHYSICAL\n"
+        for (let tag of defenseTagsP.filter(o => o.name.match(/dnp$/i))) {
+            defense.dnptags += `${tag.value} ${tag.title}\n`
+        }
 
         // Defense ED
         let edAttack = {
@@ -467,9 +484,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
         defense.ED = defenseValueE
         defense.rED = resistantValueE
-        defense.EDtags = "";
-        defense.rEDtags = "";
-        for (let tag of defenseTagsE) {
+        defense.EDtags = "ENERGY DEFENSE\n";
+        defense.rEDtags = "ENERGY DEFENSE (RESISTANT)\n";
+        for (let tag of defenseTagsE.filter(o => o.name.match(/ed$/i))) {
             if (tag.resistant) {
                 defense.rEDtags += `${tag.value} ${tag.title}\n`
             }
@@ -478,9 +495,20 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
         defense.dre = damageReductionValueE
-        defense.dretags = "Damage Reduction (energy)"
+        defense.dretags = "DAMAGE REDUCTION ENERGY\n"
+        for (let tag of defenseTagsE.filter(o => o.name.match(/dre$/i))) {
+            if (tag.resistant) {
+                defense.dretags += `${tag.value} ${tag.title}\n`
+            }
+            else if (tag.resistant != undefined) {
+                defense.dretags += `${tag.value} ${tag.title}\n`
+            }
+        }
         defense.dne = damageNegationValueE
-        defense.dnetags = "Damage Negation (energy)"
+        defense.dnetags = "DAMAGE NEGATION ENERGY\n"
+        for (let tag of defenseTagsE.filter(o => o.name.match(/dne$/i))) {
+            defense.dnetags += `${tag.value} ${tag.title}\n`
+        }
 
         // Defense MD
         let mdAttack = {
@@ -491,9 +519,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         let [defenseValueM, resistantValueM, impenetrableValueM, damageReductionValueM, damageNegationValueM, knockbackResistanceM, defenseTagsM] = determineDefense.call(this, this.actor, mdAttack)
         defense.MD = defenseValueM
         defense.rMD = resistantValueM
-        defense.MDtags = "";
-        defense.rMDtags = "";
-        for (let tag of defenseTagsM) {
+        defense.MDtags = "MENTAL DEFENSE\n";
+        defense.rMDtags = "MENTAL DEFENSE (RESISTANT)\n";
+        for (let tag of defenseTagsM.filter(o => o.name.match(/md$/i))) {
             if (tag.resistant) {
                 defense.rMDtags += `${tag.value} ${tag.title}\n`
             }
@@ -502,9 +530,20 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
         defense.drm = damageReductionValueM
-        defense.dretags = "Damage Reduction (mental)"
+        defense.drmtags = "DAMAGE REDUCTION MENTAL\n"
+        for (let tag of defenseTagsM.filter(o => o.name.match(/drm$/i))) {
+            if (tag.resistant) {
+                defense.drmtags += `${tag.value} ${tag.title}\n`
+            }
+            else if (tag.resistant != undefined) {
+                defense.drmtags += `${tag.value} ${tag.title}\n`
+            }
+        }
         defense.dnm = damageNegationValueM
-        defense.dnmtags = "Damage Negation (mental)"
+        defense.dnmtags = "DAMAGE NEGATION MENTAL\n"
+        for (let tag of defenseTagsM.filter(o => o.name.match(/dnm$/i))) {
+            defense.dnmtags += `${tag.value} ${tag.title}\n`
+        }
 
         // Defense POWD
         let drainAttack = {
@@ -515,9 +554,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         let [defenseValuePOWD, resistantValuePOWD, impenetrableValuePOWD, damageReductionValuePOWD, damageNegationValuePOWD, knockbackResistancePOWD, defenseTagsPOWD] = determineDefense.call(this, this.actor, drainAttack)
         defense.POWD = defenseValuePOWD
         defense.rPOWD = resistantValuePOWD
-        defense.POWDtags = "";
-        defense.rPOWDtags = "";
-        for (let tag of defenseTagsPOWD) {
+        defense.POWDtags = "POWER DEFENSE\n";
+        defense.rPOWDtags = "POWER DEFENSE (RESISTANT)\n";
+        for (let tag of defenseTagsPOWD.filter(o => o.name.match(/powd$/i))) {
             if (tag.resistant) {
                 defense.rPOWDtags += `${tag.value} ${tag.title}\n`
             }
