@@ -1,7 +1,12 @@
+# Version 3.0.17
+- Improved CSL detection of small/large group by selecting the first 3 attacks for small group, and all attacks on the attack tab for large group.  You can edit CSL's after upload to override auto selection of relavent attacks.
+- Martial +1 HTH Damage Class(es) was incorrectly created as an attack and shown in attack tab. [#258](https://github.com/dmdorman/hero6e-foundryvtt/issues/258)
+- Fixed missing martial "+1 Ranged Damage Class(es)" upload.
+
 # Version 3.0.16
 - Migration unnecessary on new/empty worlds [#254](https://github.com/dmdorman/hero6e-foundryvtt/issues/254)
 - Initial support for vehicles, bases, computers, automatons, and ai's. [#109](https://github.com/dmdorman/hero6e-foundryvtt/issues/109)
-- Fixed issue with some talents failing to upload, that would prevent other powers from uploading.  Improved warn/error messages during upload to assist with similar in the future.
+- Fixed issue with some talents failing to upload, that would prevent other powers from uploading.  Improved warn/error messages during upload to assist with similar issues in the future.
 - Improved defense summary tooltips/mouseovers.
 
 

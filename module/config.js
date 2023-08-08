@@ -614,6 +614,14 @@ HERO.powers = {
     "DARKNESS": { powerType: ["sense-affecting", "attack", "standard"] },
     "DISPEL": { powerType: ["attack", "standard"], costPerLevel: 3 },
     "ENTANGLE": { powerType: ["attack", "standard"] },
+    "FLASH": { 
+        powerType: ["attack", "sense-affecting", "standard"],
+        percievability: "obvious",
+        duration: "instant",
+        target: "Target’s DCV",
+        range: "standard",
+        costEnd: true 
+    },
     "IMAGES": {
         name: "Images",
         powerType: ["attack", "sense-affecting", "standard"],

@@ -332,7 +332,7 @@ export async function applyCharacterSheet(xmlDoc) {
     // }
 
     // EXTRADC goes first (so we can more easily add these DC's to MANEUVER's)
-    for (const martialart of martialarts.querySelectorAll("EXTRADC")) {
+    for (const martialart of martialarts.querySelectorAll("EXTRADC, RANGEDDC")) {
         try {
             await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
         } catch (e) {
@@ -507,6 +507,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
         let attacks = {}
         let checkedCount = 0;
+        
         for (let attack of this.actor.items.filter(o =>
             (o.type == 'attack' || o.system.subType == 'attack') &&
             o.system.uses === _ocv
@@ -541,8 +542,32 @@ export async function applyCharacterSheet(xmlDoc) {
                 checked = true;
             }
 
-            if (cslItem.system.OPTION === "BROAD" && cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
-                checked = true;
+            if (cslItem.system.OPTION === "TIGHT") {
+
+                // up to three
+                if (cslItem.system.XMLID === "COMBAT_LEVELS" && attack.type != "maneuver" && checkedCount < 3) {
+                    checked = true;
+                }
+
+                // up to three
+                if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS" && checkedCount < 3) {
+                    checked = true;
+                }
+            }
+
+
+            if (cslItem.system.OPTION === "BROAD") {
+
+                // A large group is more than 3 but less than ALL (whatever that means).
+                // For now just assume all (non maneuvers).
+                if (cslItem.system.XMLID === "COMBAT_LEVELS" && attack.type != "maneuver") {
+                    checked = true;
+                }
+
+                // For mental BROAD is actuallyl equal to ALL
+                if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                    checked = true;
+                }
             }
 
             attacks[attack.id] = checked;
@@ -552,9 +577,9 @@ export async function applyCharacterSheet(xmlDoc) {
         }
 
         // Make sure at least one attacked is checked
-        if (checkedCount === 0 && Object.keys(attacks).length > 0) {
-            attacks[Object.keys(attacks)[0]] = true;
-        }
+        // if (checkedCount === 0 && Object.keys(attacks).length > 0) {
+        //     attacks[Object.keys(attacks)[0]] = true;
+        // }
 
         await cslItem.update({ 'system.attacks': attacks }, { hideChatMessage: true });
     }
@@ -597,7 +622,7 @@ export async function CalcActorRealAndActivePoints(actor) {
     for (const key of Object.keys(characteristicCosts)) {
 
         // Some actor types do not show all characteristics
-        const powerInfo = getPowerInfo({xmlid: key.toUpperCase(), actor: actor});
+        const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: actor });
         if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(actor.type)) {
             continue;
         }
@@ -1002,7 +1027,12 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
 
     let itemData = XmlToItemData.call(this, power, type)
     let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
-    makeAttack(item)
+
+    // Make this martial item an attack, unless it is a +DC
+    if (!["EXTRADC", "RANGEDDC"].includes(item.system.XMLID)) {
+        makeAttack(item)
+    }
+
 
 
 
