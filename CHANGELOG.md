@@ -2,6 +2,7 @@
 - Improved CSL detection of small/large group by selecting the first 3 attacks for small group, and all attacks on the attack tab for large group.  You can edit CSL's after upload to override auto selection of relavent attacks.
 - Martial +1 HTH Damage Class(es) was incorrectly created as an attack and shown in attack tab. [#258](https://github.com/dmdorman/hero6e-foundryvtt/issues/258)
 - Fixed missing martial "+1 Ranged Damage Class(es)" upload.
+- Templates will automatically select tokens within bounds of template.
 
 # Version 3.0.16
 - Migration unnecessary on new/empty worlds [#254](https://github.com/dmdorman/hero6e-foundryvtt/issues/254)

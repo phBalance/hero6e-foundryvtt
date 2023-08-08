@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eCard } from "./card.js";
-import { HeroSystem6eToHitCard2 } from "./toHit-card2.js";
+import { HeroSystem6eToHitCard2 } from "./toHit-card.js";
 
 export class HeroSystem6eAttackCard extends HeroSystem6eCard {
     static chatListeners(html) {

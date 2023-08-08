@@ -10,7 +10,7 @@ import * as chat from "./chat.js";
 import * as macros from "./macros.js";
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.js";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.js";
-import HeroSystem6eTemplate from "./template.js";
+import HeroSystem6eMeasuredTemplate from "./measuretemplate.js";
 import { HeroSystem6eCombat } from "./combat.js";
 import { HeroSystem6eCombatTracker } from "./combatTracker.js"
 import SettingsHelpers from "./settings/settings-helpers.js";
@@ -37,9 +37,9 @@ Hooks.once('init', async function () {
             HeroSystem6eTokenDocument,
             HeroSystem6eToken
         },
-        canvas: {
-            HeroSystem6eTemplate
-        },
+        // canvas: {
+        //     HeroSystem6eMeasuredTemplate
+        // },
         macros: macros,
         rollItemMacro: rollItemMacro,
         CreateCustomAttack: CreateCustomAttack,
@@ -74,6 +74,7 @@ Hooks.once('init', async function () {
     CONFIG.Item.documentClass = HeroSystem6eItem;
     CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
     CONFIG.Token.objectClass = HeroSystem6eToken;
+    CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects();
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
@@ -1020,3 +1021,15 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     }
 
 });
+
+
+// Hooks.on("updateMeasuredTemplate", updateMeasuredTemplateHook);
+// Hooks.on("refreshMeasuredTemplate", refreshMeasuredTemplate); 
+
+// async function updateMeasuredTemplateHook(templateD, data, _options, _userId){
+//     console.log("updateMeasuredTemplateHook")
+// }
+
+// async function refreshMeasuredTemplate(templateD, data, _options, _userId){
+//     console.log("refreshMeasuredTemplate")
+// }

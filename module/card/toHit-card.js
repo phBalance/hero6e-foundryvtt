@@ -247,8 +247,8 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
 
         const token = canvas.tokens.controlled[0];
         if (token) {
-            templateData.x = token.data.x;
-            templateData.y = token.data.y;
+            templateData.x = token.center.x;
+            templateData.y = token.center.y;
 
 
             canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [ templateData ]);
