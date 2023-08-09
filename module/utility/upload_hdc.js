@@ -1500,18 +1500,10 @@ export function updateItemDescription(item) {
 
             // 6e HDC
             //if (system.ALIAS == "KS") {
-            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
-            // } else {
-            //     system.description = system.NAME
-            // }
-            // let item = {
-            //     actor: this?.actor || this,
-            //     system: system
-            // }
-            // SkillRollUpdateValue(item)
-            // if (system.roll) {
-            //     system.description += ` ${system.roll}`
-            // }
+           // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
+           system.description = system.NAME.replace(system.ALIAS, "");
+           if (system.description.indexOf(system.ALIAS) === -1) system.description += system.ALIAS;
+           if (system.INPUT) system.description += `: ${system.INPUT}`;
 
             break;
         case "TRANSPORT_FAMILIARITY":
