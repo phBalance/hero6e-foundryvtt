@@ -830,20 +830,35 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 // Damage Reduction
                 if (avad.INPUT.toUpperCase() == "PD" && defense.system.INPUT === "Physical") option.checked = true;
                 if (avad.INPUT.toUpperCase() == "ED"  && defense.system.INPUT === "Energy") option.checked = true;
-                if (avad.INPUT.toUpperCase() == "MD"  && defense.system.INPUT === "Mental") option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD"  && defense.system.INPUT === "Mental") option.checked = true;
 
                 // Damage Negation
                 if (avad.INPUT.toUpperCase() == "PD" && defense.system.adders.find(o=> o.XMLID=== "PHYSICAL")) option.checked = true;
                 if (avad.INPUT.toUpperCase() == "ED" && defense.system.adders.find(o=> o.XMLID=== "ENERGY")) option.checked = true;
-                if (avad.INPUT.toUpperCase() == "MD" && defense.system.adders.find(o=> o.XMLID=== "MENTAL")) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.adders.find(o=> o.XMLID=== "MENTAL")) option.checked = true;
 
                 // Flash Defense
                 if (avad.INPUT.match(/flash/i) && defense.system.XMLID === "FLASHDEFENSE") option.checked = true;
 
+                // Power Defense
+                if (avad.INPUT.match(/power/i) && defense.system.XMLID === "POWERDEFENSE") option.checked = true;
+
                 // Life Support
                 if (avad.INPUT.match(/life/i) && defense.system.XMLID === "LIFESUPPORT") option.checked = true;
 
-            
+                // Resistant Damage Reduction
+                if (avad.INPUT == "Resistant PD" && defense.system.INPUT === "Physical" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
+                if (avad.INPUT == "Resistant ED" && defense.system.INPUT === "Energy" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
+                if (avad.INPUT == "Resistant MD"  && defense.system.INPUT === "Mental" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
+
+
+                // FORCEFIELD, RESISTANT PROTECTION
+                if (avad.INPUT.toUpperCase() == "PD" && parseInt(defense.system.PDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED"  && parseInt(defense.system.EDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD"  && parseInt(defense.system.MDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.match(/power/i) && parseInt(defense.system.POWDLEVELS || 0) > 0) option.checked = true;
+
+
             }
 
             option.description = defense.system.description;
