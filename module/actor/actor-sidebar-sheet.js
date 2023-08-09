@@ -685,7 +685,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         event.preventDefault()
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId
         const item = this.actor.items.get(itemId)
-        item.roll()
+        item.roll(event)
     }
 
     async _onItemChat(event) {

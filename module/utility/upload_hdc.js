@@ -367,7 +367,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadPower.call(this, power, 'power')
         } catch (e) {
-            ui.notifications.error(`${power.actor.name} has item "${power.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${power.getAttribute("NAME")} has item "${(power.getAttribute("NAME")||power.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -376,7 +376,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadBasic.call(this, perk, 'perk')
         } catch (e) {
-            ui.notifications.error(`${perk.actor.name} has item "${perk.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${this.actor.name} has item "${perk.name.substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -2177,6 +2177,12 @@ export async function makeAttack(item) {
         changes[`system.class`] = 'flash'
         changes[`system.usesStrength`] = false
         changes[`system.noHitLocations`] = true
+    }
+
+    // AVAD
+    const avad = item.system?.modifiers ? item.system.modifiers.find(o => o.XMLID === "AVAD") : null;
+    if (avad) {
+        changes[`system.class`] = 'avad'
     }
 
 

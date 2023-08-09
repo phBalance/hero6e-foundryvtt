@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eCard } from "./card.js";
-import { HeroSystem6eToHitCard2 } from "./toHit-card.js";
+import { HeroSystem6eToHitCard } from "./toHit-card.js";
 
 export class HeroSystem6eAttackCard extends HeroSystem6eCard {
     static chatListeners(html) {
@@ -73,7 +73,7 @@ export class HeroSystem6eAttackCard extends HeroSystem6eCard {
 
         const targets = HeroSystem6eCard._getChatCardTargets();
         
-        await HeroSystem6eToHitCard2.createFromAttackCard(item, data, actor, itemId);
+        await HeroSystem6eToHitCard.createFromAttackCard(item, data, actor, itemId);
     }
 
     // _RollToHit2 is slightly different from _RollToHit.
@@ -105,7 +105,7 @@ export class HeroSystem6eAttackCard extends HeroSystem6eCard {
             data['knockbackMod'] = form.knockbackMod.value;
         }
 
-        await HeroSystem6eToHitCard2.createFromAttackCard(item, data, actor, game.user.targets)
+        await HeroSystem6eToHitCard.createFromAttackCard(item, data, actor, game.user.targets)
     }
 
     static async _renderInternal(item, actor, stateData, itemId) {

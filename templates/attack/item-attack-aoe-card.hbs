@@ -1,0 +1,15 @@
+{{ log 'HEROSYS ITEM ATTACK-AOE CARD' this }}
+<div data-actor-id="{{actor.id}}" data-item-id="{{item.id}}" data-token-id="{{token.id}}">
+    <div class="hero chat-card item-card attack-aoe-card">
+        <header class="card-header flexrow">
+            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
+            <h3 class="item-name">{{item.name}}</h3>
+        </header>
+    </div>
+
+    <button class="place-template" data-item-id="{{item.uuid}}"
+    >
+        Place Template
+    </button>
+
+</div>

@@ -5,40 +5,62 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     //   this._highlighted = token;
     // }
 
-
-    async _onUpdate(...args) {
-        await super._onUpdate(...args);
-        await this.updateTargets()
+    async _onClickLeft(...args) {
+        await super._onClickLeft(...args);
+        await this.selectObjects({ checkPositions: true })
     }
+
+    async _onUpdate(data, options, userId) {
+        console.log("_onUpdate");
+        await super._onUpdate(data, options, userId);
+        await this.selectObjects({ checkPositions: true, templateData: data })
+    }
+
+    // async _onDragLeftDrop(...args) {
+    //     console.log("_refre_onDragLeftDropshTemplate");
+    //     await super._onDragLeftDrop(...args);
+    //     await this.selectObjects({ checkPositions: true}); //, templateData: data })
+    // }
 
     async _refreshTemplate(...args) {
         await super._refreshTemplate(...args);
-        await this.updateTargets()
+        await this.selectObjects({ checkPositions: true})
     }
 
     // Tokens within template
-    getTokensInTempalte() {
+    getTokensInTempalte(options) {
         let tokens = [];
         for (let token of this.scene.tokens) {
-            if (this.isTokenInside(token)) {
+            if (this.isTokenInside(token, options)) {
                 tokens.push(token);
             }
         }
         return tokens;
     }
 
-    isTokenInside(token) {
-        const obj = token?.object;
-        const _x = obj.center.x - this.x;
-        const _y = obj.center.y - this.y;
-        return this.shape.contains(_x, _y)
+    isTokenInside(token, options ) {
+        options = { checkShape: true, checkPositions: true, ...options }
+        // Use Shape (but there are rorunding issues; specifically if token and MeasuredTemplate have same hex origin)
+        if (options.checkShape) {
+            const obj = token?.object;
+            const _x = obj.center.x - (options?.templateData?.x || this.x);
+            const _y = obj.center.y - (options?.templateData?.y || this.y);
+            if (this.shape.contains(_x, _y)) return true;
+        }
+
+        // Use positions (but some tokens may not be exctly centered on a 1 hex)
+        if (options.checkPositions) {
+            if (this._getGridHighlightPositions().find(o => o.x === token.x && o.y === token.y)) return true;
+        }
+
+        return false;
     }
 
     // Update user.targets based on which tokens are in the template
-    async updateTargets() {
+    async selectObjects(options) {
         let targets = [];
 
-        for (let token of this.getTokensInTempalte()) {
+        for (let token of this.getTokensInTempalte(options)) {
             if (token?.visible) {
                 targets.push(token.id);
             }
