@@ -820,13 +820,32 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         let options = [];
         for (let defense of conditionalDefenses) {
             let option = { id: defense.id, name: defense.name, checked: !avad, conditions: "" }
-            // for (let modifier of defense.system.modifiers.filter(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID))) {
-            //     option.conditions += modifier.OPTION_ALIAS;
-            //     if (modifier.COMMENTS) {
-            //         option.conditions += ` (${modifier.COMMENTS})`;
-            //     }
-            //     option.conditions += ". ";
-            // }
+
+            // AVAD: Attempt to check likely defenses
+            if (avad) {
+
+                // PD, ED, MD
+                if (avad.INPUT.toUpperCase() === defense.system.XMLID) option.checked = true;
+
+                // Damage Reduction
+                if (avad.INPUT.toUpperCase() == "PD" && defense.system.INPUT === "Physical") option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED"  && defense.system.INPUT === "Energy") option.checked = true;
+                if (avad.INPUT.toUpperCase() == "MD"  && defense.system.INPUT === "Mental") option.checked = true;
+
+                // Damage Negation
+                if (avad.INPUT.toUpperCase() == "PD" && defense.system.adders.find(o=> o.XMLID=== "PHYSICAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED" && defense.system.adders.find(o=> o.XMLID=== "ENERGY")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "MD" && defense.system.adders.find(o=> o.XMLID=== "MENTAL")) option.checked = true;
+
+                // Flash Defense
+                if (avad.INPUT.match(/flash/i) && defense.system.XMLID === "FLASHDEFENSE") option.checked = true;
+
+                // Life Support
+                if (avad.INPUT.match(/life/i) && defense.system.XMLID === "LIFESUPPORT") option.checked = true;
+
+            
+            }
+
             option.description = defense.system.description;
             options.push(option);
         }

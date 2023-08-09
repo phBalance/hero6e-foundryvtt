@@ -367,7 +367,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadPower.call(this, power, 'power')
         } catch (e) {
-            ui.notifications.error(`${power.getAttribute("NAME")} has item "${(power.getAttribute("NAME")||power.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${power.getAttribute("NAME")} has item "${(power.getAttribute("NAME") || power.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -507,7 +507,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
         let attacks = {}
         let checkedCount = 0;
-        
+
         for (let attack of this.actor.items.filter(o =>
             (o.type == 'attack' || o.system.subType == 'attack') &&
             o.system.uses === _ocv
@@ -1740,7 +1740,12 @@ export function updateItemDescription(item) {
                 case "PHYSICAL":
                 case "ENERGY":
                 case "MENTAL":
-                    _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
+                    // Damage Negation (-1 DCs Energy)
+                    if (system.XMLID === "DAMAGENEGATION") {
+                        if (parseInt(adder.LEVELS) != 0) _adderArray.push("-" + parseInt(adder.LEVELS) + " DCs " + adder.ALIAS.replace(" DCs", ""))
+                    } else {
+                        if (parseInt(adder.LEVELS) != 0) _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
+                    }
                     break;
                 case "PLUSONEHALFDIE":
                     system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
@@ -1928,7 +1933,7 @@ function createPowerDescriptionModifier(modifier, system) {
         result += parseInt(system.LEVELS.value || system.LEVELS) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
     }
 
-    if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) {
+    if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES", "AVAD"].includes(modifier.XMLID)) {
         result += modifier.OPTION_ALIAS
         switch (modifier.XMLID) {
             case "EXTRATIME":
@@ -1941,10 +1946,10 @@ function createPowerDescriptionModifier(modifier, system) {
         }
     }
 
-    // if (modifier.COMMENTS)
-    // {
-    //     result += modifier.COMMENTS + "; ";
-    // }
+    if (modifier.INPUT)
+    {
+        result += modifier.INPUT + "; ";
+    }
 
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
