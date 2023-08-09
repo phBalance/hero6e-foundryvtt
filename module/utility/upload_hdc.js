@@ -1075,6 +1075,9 @@ function calcBasePointsPlusAdders(item) {
     let system = item.system;
     let actor = item.actor;
 
+    let old = system.basePointsPlusAdders;
+    
+
     if (!system.XMLID)
         return 0
 
@@ -1084,12 +1087,14 @@ function calcBasePointsPlusAdders(item) {
 
     // Everyman skills are free
     if (system.EVERYMAN) {
-        return 0
+        system.basePointsPlusAdders = 0;
+        return { changed: old === system.basePointsPlusAdders };
     }
 
     // Native Tongue
     if (system.NATIVE_TONGUE) {
-        return 0
+        system.basePointsPlusAdders = 0;
+        return { changed: old === system.basePointsPlusAdders };
     }
 
     // Check if we have CONFIG info about this power
@@ -1204,7 +1209,7 @@ function calcBasePointsPlusAdders(item) {
         cost = cost * advantages
     }
 
-    let old = system.basePointsPlusAdders;
+    
     system.basePointsPlusAdders = cost;
 
     //return cost; //Math.max(1, cost)

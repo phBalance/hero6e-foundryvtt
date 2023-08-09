@@ -4,6 +4,7 @@
 - Fixed missing martial "+1 Ranged Damage Class(es)" upload.
 - Templates automatically select tokens within the template.  Intend to improve AOE attack workflow.
 - Initial AVAD support. [#206](https://github.com/dmdorman/hero6e-foundryvtt/issues/206)
+- Fixed everyman skills showing NaN [#259](https://github.com/dmdorman/hero6e-foundryvtt/issues/259)
 
 
 # Version 3.0.16
