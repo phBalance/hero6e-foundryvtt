@@ -5,11 +5,12 @@ import { modifyRollEquation, getTokenChar } from "../utility/util.js"
 import { HEROSYS } from "../herosystem6e.js";
 import { getItem } from "../item/item.js";
 
-export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
+export class HeroSystem6eToHitCard extends HeroSystem6eCard {
     static async chatListeners(html) {
         // NOTE: Make sure we are listed in card-helpers.js
 
         html.on('click', '.area-effect-tag', this._spawnAreaOfEffect.bind(this))
+        
     }
 
     static onMessageRendered(html) {
@@ -46,12 +47,12 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
     }
 
     async render() {
-        return await HeroSystem6eToHitCard2._renderInternal(this.item, this.actor, this.message.flags.state);
+        return await HeroSystem6eToHitCard._renderInternal(this.item, this.actor, this.message.flags.state);
     }
 
     async init(card) {
         super.init(card);
-        this.target = await HeroSystem6eToHitCard2._getChatCardTarget(card);
+        this.target = await HeroSystem6eToHitCard._getChatCardTarget(card);
     }
 
     static async _getChatCardTarget(card) {
@@ -178,7 +179,7 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
         };
 
         // render card
-        let cardHtml = await HeroSystem6eToHitCard2._renderInternal(item, actor, stateData);
+        let cardHtml = await HeroSystem6eToHitCard._renderInternal(item, actor, stateData);
         
         let token = actor.token;
 
@@ -198,9 +199,11 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
         HEROSYS.log(false, 'spawn area of effect!')
 
         const clickedElement = $(event.currentTarget);
-
         const aoeType = clickedElement.data().aoeType;
         const aoeValue = clickedElement.data().aoeValue;
+        const actorId = clickedElement.closest("div[data-actor-id]").data()?.actorId;
+        const actor = game.actors.get(actorId);
+        const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
 
         const keyConversions = {
             radius: "circle",
@@ -216,7 +219,7 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
             t: templateType,
             user: game.user.id,
             distance: aoeValue,
-            // direction: 0,
+            direction: -token.document?.rotation || 0 + 90,  // Top down tokens typically face south
             fillColor: game.user.color
         };
 
@@ -228,7 +231,7 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
                 break;
             }
             case ("ray"): {
-                templateData.width = 1;
+                templateData.width = 2; //2m = 1 hex
                 break;
             }
             case ("rect"): {
@@ -245,10 +248,9 @@ export class HeroSystem6eToHitCard2 extends HeroSystem6eCard {
             }
         }
 
-        const token = canvas.tokens.controlled[0];
         if (token) {
-            templateData.x = token.data.x;
-            templateData.y = token.data.y;
+            templateData.x = token.center.x;
+            templateData.y = token.center.y;
 
 
             canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [ templateData ]);

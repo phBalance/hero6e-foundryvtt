@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS ITEM ATTACK CARD' this }} --}}
+{{ log 'HEROSYS ITEM ATTACK APPLICATION CARD' this }}
 <form data-actor-id="{{actor.id}}" data-item-id="{{item.id}}" data-token-id="{{token.id}}">
     <div class="hero chat-card item-card attack-card">
         <header class="card-header flexrow">
@@ -13,7 +13,7 @@
         <select name="aim" id="aim">
             <option value="none">None</option>
             {{#each hitLoc as |hitLoc key|}}
-            <option value={{key}}>{{key}}</option>
+            <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
             {{/each}}
         </select>
     </div>
@@ -21,12 +21,12 @@
 
     <div class="form-group">
         <label>{{localize "Items.Attack.OcvMod"}}</label>
-        <input type="text" name="ocvMod" value="{{item.system.ocv}}" />
+        <input type="text" name="ocvMod" value="{{ocvMod}}" />
     </div>
 
     <div class="form-group">
         <label>{{localize "Items.Attack.DcvMod"}}</label>
-        <input type="text" name="dcvMod" value="{{item.system.dcv}}" />
+        <input type="text" name="dcvMod" value="{{dcvMod}}" />
     </div>
 
     {{#if showVelocity}}
@@ -41,7 +41,7 @@
     {{#if (or item.system.usesStrength item.system.usesTk)}}
     <div class="form-group">
         <label>Effective Strength</label>
-        <input type="text" name="effectiveStr" value="{{str}}" />
+        <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
         <label>/ {{str}}</label>
     </div>
     {{/if}}
@@ -62,4 +62,9 @@
     </div>
     {{/if}}
 
+  <footer class="sheet-footer flexrow">
+    <button type="submit" name="submit" autofocus>
+        Roll to Hit
+    </button>
+  </footer>
 </form>

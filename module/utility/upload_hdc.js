@@ -332,7 +332,7 @@ export async function applyCharacterSheet(xmlDoc) {
     // }
 
     // EXTRADC goes first (so we can more easily add these DC's to MANEUVER's)
-    for (const martialart of martialarts.querySelectorAll("EXTRADC")) {
+    for (const martialart of martialarts.querySelectorAll("EXTRADC, RANGEDDC")) {
         try {
             await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
         } catch (e) {
@@ -367,7 +367,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadPower.call(this, power, 'power')
         } catch (e) {
-            ui.notifications.error(`${power.actor.name} has item "${power.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${power.getAttribute("NAME")} has item "${(power.getAttribute("NAME") || power.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -376,7 +376,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadBasic.call(this, perk, 'perk')
         } catch (e) {
-            ui.notifications.error(`${perk.actor.name} has item "${perk.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${this.actor.name} has item "${perk.name.substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -507,6 +507,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
         let attacks = {}
         let checkedCount = 0;
+
         for (let attack of this.actor.items.filter(o =>
             (o.type == 'attack' || o.system.subType == 'attack') &&
             o.system.uses === _ocv
@@ -541,8 +542,32 @@ export async function applyCharacterSheet(xmlDoc) {
                 checked = true;
             }
 
-            if (cslItem.system.OPTION === "BROAD" && cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
-                checked = true;
+            if (cslItem.system.OPTION === "TIGHT") {
+
+                // up to three
+                if (cslItem.system.XMLID === "COMBAT_LEVELS" && attack.type != "maneuver" && checkedCount < 3) {
+                    checked = true;
+                }
+
+                // up to three
+                if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS" && checkedCount < 3) {
+                    checked = true;
+                }
+            }
+
+
+            if (cslItem.system.OPTION === "BROAD") {
+
+                // A large group is more than 3 but less than ALL (whatever that means).
+                // For now just assume all (non maneuvers).
+                if (cslItem.system.XMLID === "COMBAT_LEVELS" && attack.type != "maneuver") {
+                    checked = true;
+                }
+
+                // For mental BROAD is actuallyl equal to ALL
+                if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                    checked = true;
+                }
             }
 
             attacks[attack.id] = checked;
@@ -552,9 +577,9 @@ export async function applyCharacterSheet(xmlDoc) {
         }
 
         // Make sure at least one attacked is checked
-        if (checkedCount === 0 && Object.keys(attacks).length > 0) {
-            attacks[Object.keys(attacks)[0]] = true;
-        }
+        // if (checkedCount === 0 && Object.keys(attacks).length > 0) {
+        //     attacks[Object.keys(attacks)[0]] = true;
+        // }
 
         await cslItem.update({ 'system.attacks': attacks }, { hideChatMessage: true });
     }
@@ -597,7 +622,7 @@ export async function CalcActorRealAndActivePoints(actor) {
     for (const key of Object.keys(characteristicCosts)) {
 
         // Some actor types do not show all characteristics
-        const powerInfo = getPowerInfo({xmlid: key.toUpperCase(), actor: actor});
+        const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: actor });
         if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(actor.type)) {
             continue;
         }
@@ -1002,7 +1027,12 @@ export async function uploadMartial(power, type, extraDc, usesTk) {
 
     let itemData = XmlToItemData.call(this, power, type)
     let item = await HeroSystem6eItem.create(itemData, { parent: this.actor })
-    makeAttack(item)
+
+    // Make this martial item an attack, unless it is a +DC
+    if (!["EXTRADC", "RANGEDDC"].includes(item.system.XMLID)) {
+        makeAttack(item)
+    }
+
 
 
 
@@ -1045,6 +1075,9 @@ function calcBasePointsPlusAdders(item) {
     let system = item.system;
     let actor = item.actor;
 
+    let old = system.basePointsPlusAdders;
+    
+
     if (!system.XMLID)
         return 0
 
@@ -1054,12 +1087,14 @@ function calcBasePointsPlusAdders(item) {
 
     // Everyman skills are free
     if (system.EVERYMAN) {
-        return 0
+        system.basePointsPlusAdders = 0;
+        return { changed: old === system.basePointsPlusAdders };
     }
 
     // Native Tongue
     if (system.NATIVE_TONGUE) {
-        return 0
+        system.basePointsPlusAdders = 0;
+        return { changed: old === system.basePointsPlusAdders };
     }
 
     // Check if we have CONFIG info about this power
@@ -1174,7 +1209,7 @@ function calcBasePointsPlusAdders(item) {
         cost = cost * advantages
     }
 
-    let old = system.basePointsPlusAdders;
+    
     system.basePointsPlusAdders = cost;
 
     //return cost; //Math.max(1, cost)
@@ -1465,18 +1500,10 @@ export function updateItemDescription(item) {
 
             // 6e HDC
             //if (system.ALIAS == "KS") {
-            system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
-            // } else {
-            //     system.description = system.NAME
-            // }
-            // let item = {
-            //     actor: this?.actor || this,
-            //     system: system
-            // }
-            // SkillRollUpdateValue(item)
-            // if (system.roll) {
-            //     system.description += ` ${system.roll}`
-            // }
+           // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
+           system.description = system.NAME.replace(system.ALIAS, "");
+           if (system.description.indexOf(system.ALIAS) === -1) system.description += system.ALIAS;
+           if (system.INPUT) system.description += `: ${system.INPUT}`;
 
             break;
         case "TRANSPORT_FAMILIARITY":
@@ -1710,7 +1737,12 @@ export function updateItemDescription(item) {
                 case "PHYSICAL":
                 case "ENERGY":
                 case "MENTAL":
-                    _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
+                    // Damage Negation (-1 DCs Energy)
+                    if (system.XMLID === "DAMAGENEGATION") {
+                        if (parseInt(adder.LEVELS) != 0) _adderArray.push("-" + parseInt(adder.LEVELS) + " DCs " + adder.ALIAS.replace(" DCs", ""))
+                    } else {
+                        if (parseInt(adder.LEVELS) != 0) _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
+                    }
                     break;
                 case "PLUSONEHALFDIE":
                     system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
@@ -1898,7 +1930,7 @@ function createPowerDescriptionModifier(modifier, system) {
         result += parseInt(system.LEVELS.value || system.LEVELS) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
     }
 
-    if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES"].includes(modifier.XMLID)) {
+    if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES", "AVAD"].includes(modifier.XMLID)) {
         result += modifier.OPTION_ALIAS
         switch (modifier.XMLID) {
             case "EXTRATIME":
@@ -1911,10 +1943,10 @@ function createPowerDescriptionModifier(modifier, system) {
         }
     }
 
-    // if (modifier.COMMENTS)
-    // {
-    //     result += modifier.COMMENTS + "; ";
-    // }
+    if (modifier.INPUT)
+    {
+        result += modifier.INPUT + "; ";
+    }
 
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
@@ -2147,6 +2179,12 @@ export async function makeAttack(item) {
         changes[`system.class`] = 'flash'
         changes[`system.usesStrength`] = false
         changes[`system.noHitLocations`] = true
+    }
+
+    // AVAD
+    const avad = item.system?.modifiers ? item.system.modifiers.find(o => o.XMLID === "AVAD") : null;
+    if (avad) {
+        changes[`system.class`] = 'avad'
     }
 
 

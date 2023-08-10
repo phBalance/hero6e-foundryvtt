@@ -13,11 +13,13 @@ import { AdjustmentMultiplier } from "../utility/adjustment.js";
 import { isPowerSubItem } from "../powers/powers.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
 import { RequiresASkillRollCheck } from "../item/item.js";
+import { ItemAttackFormApplication } from "../item/item-attack-application.js"
 
 export async function chatListeners(html) {
     // Called by card-helpers.js
     html.on('click', 'button.roll-damage', this._onRollDamage.bind(this));
     html.on('click', 'button.apply-damage', this._onApplyDamage.bind(this));
+    //html.on('click', 'button.place-template', this._onPlaceTemplate.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -32,13 +34,18 @@ export async function onMessageRendered(html) {
 }
 
 /// Dialog box for AttackOptions
-export async function AttackOptions(item) {
+export async function AttackOptions(item, event) {
+    //const clickedElement = $(event.currentTarget);
     const actor = item.actor;
+    //const tokenId = clickedElement.closest("form[data-token-id]")?.dataset?.tokenId;
+    const token = actor.getActiveTokens()[0];
 
     if (!actor.canAct(true)) return;
 
     const data = {
         item: item,
+        actor: actor,
+        token: token,
         state: null,
         str: item.actor.system.characteristics.str.value
     }
@@ -114,70 +121,110 @@ export async function AttackOptions(item) {
         // CSL radioBoxes names
         data.csl = []
         for (let c = 0; c < parseInt(csl.skill.system.LEVELS.value); c++) {
-            data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl[c] })
+            data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl ? csl.skill.system.csl[c] : 'undefined'})
         }
     }
-
-
 
     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs"
     const html = await renderTemplate(template, data)
-    return new Promise(resolve => {
-        const data = {
-            title: item.actor.name + " roll to hit",
-            content: html,
-            buttons: {
-                normal: {
-                    label: "Roll to Hit",
-                    callback: html => resolve(
-                        _processAttackOptions(item, html[0].querySelector("form"))
-                    )
-                },
-                // cancel: {
-                //   label: "cancel",
-                //   callback: html => resolve({canclled: true})
-                // }
-            },
-            default: "normal",
-            close: () => resolve({ cancelled: true })
-        }
-        new Dialog(data, null).render(true)
-    });
+
+
+    // Testing out a replacement for the dialog box.
+    // This would allow for more interactive CSL.
+    // This may allow better workflow for AOE and placement of templates.
+    if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+
+        // let app = new ItemAttackFormApplication(data);
+        // await app.render();
+        // delete app;
+        await new ItemAttackFormApplication(data).render(true);
+        
+    }
+
+
+    // return new Promise(resolve => {
+    //     const data = {
+    //         title: item.actor.name + " roll to hit",
+    //         content: html,
+    //         buttons: {
+    //             normal: {
+    //                 label: "Roll to Hit",
+    //                 callback: html => resolve(
+    //                     _processAttackOptions(item, html[0].querySelector("form"))
+    //                 )
+    //             },
+    //             // cancel: {
+    //             //   label: "cancel",
+    //             //   callback: html => resolve({canclled: true})
+    //             // }
+    //         },
+    //         default: "normal",
+    //         close: () => resolve({ cancelled: true })
+    //     }
+    //     new Dialog(data, null).render(true)
+    // });
 
 }
 
-async function _processAttackOptions(item, form) {
+export async function _processAttackOptions(item, formData) {
     // convert form data into json object
-    const formData = new FormData(form)
-    let options = {}
-    for (const [key, value] of formData) {
-        options[key] = value
-    }
+    //const formData = new FormData(form)
+    // let options = {}
+    // for (const [key, value] of formData) {
+    //     options[key] = value
+    // }
 
     // Combat Skill Levels (update SKILL if changed)
-    const csl = CombatSkillLevelsForAttack(item);
-    const checked = form.querySelectorAll(".combat-skill-levels input:checked");
-    if (csl && checked) {
-        let updateRequired = false;
-        for (let input of checked) {
-            let m = input.name.match(/\.(\w+)\.(\d+)/);
-            let name = m[1];
-            let idx = m[2];
+    // const csl = CombatSkillLevelsForAttack(item);
+    // const checked = form.querySelectorAll(".combat-skill-levels input:checked");
+    // if (csl && checked) {
+    //     let updateRequired = false;
+    //     for (let input of checked) {
+    //         let m = input.name.match(/\.(\w+)\.(\d+)/);
+    //         let name = m[1];
+    //         let idx = m[2];
 
-            if (csl.skill.system.csl[idx] != input.value) {
-                csl.skill.system.csl[idx] = input.value;
-                updateRequired = true;
-            }
-        }
-        if (updateRequired) {
-            await csl.skill.update({ 'system.csl': csl.skill.system.csl });
-        }
-    }
-
-
+    //         if (csl.skill.system.csl[idx] != input.value) {
+    //             csl.skill.system.csl[idx] = input.value;
+    //             updateRequired = true;
+    //         }
+    //     }
+    //     if (updateRequired) {
+    //         await csl.skill.update({ 'system.csl': csl.skill.system.csl });
+    //     }
+    // }
 
 
-    await AttackToHit(item, options)
+    // AOE
+    // const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    // if (aoe) {
+    //     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-aoe-card.hbs";
+
+    //     const actorId = form.closest("form[data-actor-id]").dataset?.actorId;
+    //     const actor = game.actors.get(actorId);
+    //     const tokenId = form.closest("form[data-token-id]")?.dataset?.tokenId;
+    //     const token = canvas.scene.tokens.get(tokenId) || actor.getActiveTokens()[0];
+
+    //     let cardData = {
+    //         ...options,
+    //         item,
+    //         token,
+    //         actor,
+    //     }
+    //     const html = await renderTemplate(template, cardData)
+    //     const speaker = ChatMessage.getSpeaker({ actor: item.actor })
+    //     const chatData = {
+    //         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+    //         user: game.user._id,
+    //         content: html,
+    //         speaker: speaker,
+    //         whisper: ChatMessage.getWhisperRecipients("GM"),
+    //     }
+    //     return ChatMessage.create(chatData)
+    // }
+
+
+    await AttackToHit(item, formData)
 }
 
 
@@ -752,27 +799,72 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
 
 
-
+    const avad = item.system.modifiers.find(q => q.XMLID === "AVAD");
 
     // Check for conditional defenses
     let ignoreDefenseIds = []
     const conditionalDefenses = token.actor.items.filter(o => (o.system.subType || o.system.type) === "defense" &&
         (o.system.active || o.effects.find(o => true)?.disabled === false) &&
-        o.system.modifiers.find(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID))
+        (
+            o.system.modifiers.find(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID)) ||
+            avad
+        )
     )
+
+    // AVAD Life Support
+    if (avad) {
+        const lifeSupport = token.actor.items.filter(o => o.system.XMLID === "LIFESUPPORT");
+        conditionalDefenses.push(...lifeSupport);
+    }
+
+
     if (conditionalDefenses.length > 0 && !["AID"].includes(item.system.XMLID)) {
         const template2 = "systems/hero6efoundryvttv2/templates/attack/item-conditional-defense-card.hbs"
 
         let options = [];
         for (let defense of conditionalDefenses) {
-            let option = { id: defense.id, name: defense.name, checked: true, conditions: "" }
-            // for (let modifier of defense.system.modifiers.filter(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID))) {
-            //     option.conditions += modifier.OPTION_ALIAS;
-            //     if (modifier.COMMENTS) {
-            //         option.conditions += ` (${modifier.COMMENTS})`;
-            //     }
-            //     option.conditions += ". ";
-            // }
+            let option = { id: defense.id, name: defense.name, checked: !avad, conditions: "" }
+
+            // AVAD: Attempt to check likely defenses
+            if (avad) {
+
+                // PD, ED, MD
+                if (avad.INPUT.toUpperCase() === defense.system.XMLID) option.checked = true;
+
+                // Damage Reduction
+                if (avad.INPUT.toUpperCase() == "PD" && defense.system.INPUT === "Physical") option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED"  && defense.system.INPUT === "Energy") option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD"  && defense.system.INPUT === "Mental") option.checked = true;
+
+                // Damage Negation
+                if (avad.INPUT.toUpperCase() == "PD" && defense.system.adders.find(o=> o.XMLID=== "PHYSICAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED" && defense.system.adders.find(o=> o.XMLID=== "ENERGY")) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.adders.find(o=> o.XMLID=== "MENTAL")) option.checked = true;
+
+                // Flash Defense
+                if (avad.INPUT.match(/flash/i) && defense.system.XMLID === "FLASHDEFENSE") option.checked = true;
+
+                // Power Defense
+                if (avad.INPUT.match(/power/i) && defense.system.XMLID === "POWERDEFENSE") option.checked = true;
+
+                // Life Support
+                if (avad.INPUT.match(/life/i) && defense.system.XMLID === "LIFESUPPORT") option.checked = true;
+
+                // Resistant Damage Reduction
+                if (avad.INPUT == "Resistant PD" && defense.system.INPUT === "Physical" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
+                if (avad.INPUT == "Resistant ED" && defense.system.INPUT === "Energy" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
+                if (avad.INPUT == "Resistant MD"  && defense.system.INPUT === "Mental" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
+
+
+                // FORCEFIELD, RESISTANT PROTECTION
+                if (avad.INPUT.toUpperCase() == "PD" && parseInt(defense.system.PDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED"  && parseInt(defense.system.EDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD"  && parseInt(defense.system.MDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.match(/power/i) && parseInt(defense.system.POWDLEVELS || 0) > 0) option.checked = true;
+
+
+            }
+
             option.description = defense.system.description;
             options.push(option);
         }
@@ -821,18 +913,18 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         const inputs = await getDialogOutput();
         if (inputs === null) return;
 
-        let names = [];
+        let defenses = [];
         for (let input of inputs) {
             if (!input.checked) {
                 ignoreDefenseIds.push(input.id);
-                names.push(token.actor.items.get(input.id).name);
+                defenses.push(token.actor.items.get(input.id));
             }
         }
 
-        if (names.length > 0) {
-            let content = `The following defenses were not applied to ${token.actor.name}:<ul>`;
-            for (let name of names) {
-                content += `<li>${name}</li>`
+        if (defenses.length > 0) {
+            let content = `The following defenses were not applied vs <span title="${item.name.replace(/"/g, "")}: ${item.system.description.replace(/"/g, "")}">${item.name}</span>:<ul>`;
+            for (let def of defenses) {
+                content += `<li title="${def.name.replace(/"/g, "")}: ${def.system.description.replace(/"/g, "")}">${def.name}</li>`
             }
             content += "</ul>";
 
@@ -871,6 +963,25 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     damageData.damageReductionValue = damageReductionValue
     damageData.damageNegationValue = damageNegationValue
     damageData.knockbackResistance = knockbackResistance
+    damageData.defenseAvad = defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue + knockbackResistance;
+
+    // AVAD All or Nothing
+    if (avad) {
+        const nnd = avad.adders.find(o => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
+        if (nnd && (damageData.defenseAvad === 0)) {
+
+            // render card
+            let speaker = ChatMessage.getSpeaker({ actor: item.actor })
+
+            const chatData = {
+                user: game.user._id,
+                content: `${item.name} did no damage.`,
+                speaker: speaker,
+            }
+
+            return ChatMessage.create(chatData);
+        }
+    }
 
     newRoll = await handleDamageNegation(item, newRoll, damageData)
 

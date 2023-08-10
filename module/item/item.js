@@ -131,7 +131,7 @@ export class HeroSystem6eItem extends Item {
         return false
     }
 
-    async roll() {
+    async roll(event) {
 
         if (!this.actor.canAct(true)) return;
 
@@ -149,7 +149,7 @@ export class HeroSystem6eItem extends Item {
                     case "AID":
                     case "STRIKE":
                     case undefined:
-                        return await Attack.AttackOptions(this)
+                        return await Attack.AttackOptions(this, event)
 
                     default:
                         if (!this.system.EFFECT || (
