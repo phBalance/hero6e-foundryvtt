@@ -121,7 +121,7 @@ export async function AttackOptions(item, event) {
         // CSL radioBoxes names
         data.csl = []
         for (let c = 0; c < parseInt(csl.skill.system.LEVELS.value); c++) {
-            data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl ? csl.skill.system.csl[c] : 'undefined'})
+            data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl ? csl.skill.system.csl[c] : 'undefined' })
         }
     }
 
@@ -132,14 +132,7 @@ export async function AttackOptions(item, event) {
     // Testing out a replacement for the dialog box.
     // This would allow for more interactive CSL.
     // This may allow better workflow for AOE and placement of templates.
-    if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
-
-        // let app = new ItemAttackFormApplication(data);
-        // await app.render();
-        // delete app;
-        await new ItemAttackFormApplication(data).render(true);
-        
-    }
+    await new ItemAttackFormApplication(data).render(true);
 
 
     // return new Promise(resolve => {
@@ -833,13 +826,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
                 // Damage Reduction
                 if (avad.INPUT.toUpperCase() == "PD" && defense.system.INPUT === "Physical") option.checked = true;
-                if (avad.INPUT.toUpperCase() == "ED"  && defense.system.INPUT === "Energy") option.checked = true;
-                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD"  && defense.system.INPUT === "Mental") option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED" && defense.system.INPUT === "Energy") option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.INPUT === "Mental") option.checked = true;
 
                 // Damage Negation
-                if (avad.INPUT.toUpperCase() == "PD" && defense.system.adders.find(o=> o.XMLID=== "PHYSICAL")) option.checked = true;
-                if (avad.INPUT.toUpperCase() == "ED" && defense.system.adders.find(o=> o.XMLID=== "ENERGY")) option.checked = true;
-                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.adders.find(o=> o.XMLID=== "MENTAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "PD" && defense.system.adders.find(o => o.XMLID === "PHYSICAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED" && defense.system.adders.find(o => o.XMLID === "ENERGY")) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.adders.find(o => o.XMLID === "MENTAL")) option.checked = true;
 
                 // Flash Defense
                 if (avad.INPUT.match(/flash/i) && defense.system.XMLID === "FLASHDEFENSE") option.checked = true;
@@ -853,13 +846,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 // Resistant Damage Reduction
                 if (avad.INPUT == "Resistant PD" && defense.system.INPUT === "Physical" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
                 if (avad.INPUT == "Resistant ED" && defense.system.INPUT === "Energy" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
-                if (avad.INPUT == "Resistant MD"  && defense.system.INPUT === "Mental" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
+                if (avad.INPUT == "Resistant MD" && defense.system.INPUT === "Mental" && defense.system.OPTION.match(/RESISTANT/i)) option.checked = true;
 
 
                 // FORCEFIELD, RESISTANT PROTECTION
                 if (avad.INPUT.toUpperCase() == "PD" && parseInt(defense.system.PDLEVELS || 0) > 0) option.checked = true;
-                if (avad.INPUT.toUpperCase() == "ED"  && parseInt(defense.system.EDLEVELS || 0) > 0) option.checked = true;
-                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD"  && parseInt(defense.system.MDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED" && parseInt(defense.system.EDLEVELS || 0) > 0) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && parseInt(defense.system.MDLEVELS || 0) > 0) option.checked = true;
                 if (avad.INPUT.match(/power/i) && parseInt(defense.system.POWDLEVELS || 0) > 0) option.checked = true;
 
 
