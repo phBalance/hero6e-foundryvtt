@@ -121,7 +121,7 @@ export async function AttackOptions(item, event) {
         // CSL radioBoxes names
         data.csl = []
         for (let c = 0; c < parseInt(csl.skill.system.LEVELS.value); c++) {
-            data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl[c] })
+            data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl ? csl.skill.system.csl[c] : 'undefined'})
         }
     }
 
@@ -132,63 +132,63 @@ export async function AttackOptions(item, event) {
     // Testing out a replacement for the dialog box.
     // This would allow for more interactive CSL.
     // This may allow better workflow for AOE and placement of templates.
-    // if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+    if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
 
-    //     await new ItemAttackFormApplication('example').render(true);
-    // }
+        await new ItemAttackFormApplication(data).render(true);
+    }
 
 
-    return new Promise(resolve => {
-        const data = {
-            title: item.actor.name + " roll to hit",
-            content: html,
-            buttons: {
-                normal: {
-                    label: "Roll to Hit",
-                    callback: html => resolve(
-                        _processAttackOptions(item, html[0].querySelector("form"))
-                    )
-                },
-                // cancel: {
-                //   label: "cancel",
-                //   callback: html => resolve({canclled: true})
-                // }
-            },
-            default: "normal",
-            close: () => resolve({ cancelled: true })
-        }
-        new Dialog(data, null).render(true)
-    });
+    // return new Promise(resolve => {
+    //     const data = {
+    //         title: item.actor.name + " roll to hit",
+    //         content: html,
+    //         buttons: {
+    //             normal: {
+    //                 label: "Roll to Hit",
+    //                 callback: html => resolve(
+    //                     _processAttackOptions(item, html[0].querySelector("form"))
+    //                 )
+    //             },
+    //             // cancel: {
+    //             //   label: "cancel",
+    //             //   callback: html => resolve({canclled: true})
+    //             // }
+    //         },
+    //         default: "normal",
+    //         close: () => resolve({ cancelled: true })
+    //     }
+    //     new Dialog(data, null).render(true)
+    // });
 
 }
 
-async function _processAttackOptions(item, form) {
+export async function _processAttackOptions(item, formData) {
     // convert form data into json object
-    const formData = new FormData(form)
-    let options = {}
-    for (const [key, value] of formData) {
-        options[key] = value
-    }
+    //const formData = new FormData(form)
+    // let options = {}
+    // for (const [key, value] of formData) {
+    //     options[key] = value
+    // }
 
     // Combat Skill Levels (update SKILL if changed)
-    const csl = CombatSkillLevelsForAttack(item);
-    const checked = form.querySelectorAll(".combat-skill-levels input:checked");
-    if (csl && checked) {
-        let updateRequired = false;
-        for (let input of checked) {
-            let m = input.name.match(/\.(\w+)\.(\d+)/);
-            let name = m[1];
-            let idx = m[2];
+    // const csl = CombatSkillLevelsForAttack(item);
+    // const checked = form.querySelectorAll(".combat-skill-levels input:checked");
+    // if (csl && checked) {
+    //     let updateRequired = false;
+    //     for (let input of checked) {
+    //         let m = input.name.match(/\.(\w+)\.(\d+)/);
+    //         let name = m[1];
+    //         let idx = m[2];
 
-            if (csl.skill.system.csl[idx] != input.value) {
-                csl.skill.system.csl[idx] = input.value;
-                updateRequired = true;
-            }
-        }
-        if (updateRequired) {
-            await csl.skill.update({ 'system.csl': csl.skill.system.csl });
-        }
-    }
+    //         if (csl.skill.system.csl[idx] != input.value) {
+    //             csl.skill.system.csl[idx] = input.value;
+    //             updateRequired = true;
+    //         }
+    //     }
+    //     if (updateRequired) {
+    //         await csl.skill.update({ 'system.csl': csl.skill.system.csl });
+    //     }
+    // }
 
 
     // AOE
@@ -220,7 +220,7 @@ async function _processAttackOptions(item, form) {
     // }
 
 
-    await AttackToHit(item, options)
+    await AttackToHit(item, formData)
 }
 
 
