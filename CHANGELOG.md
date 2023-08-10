@@ -1,5 +1,7 @@
 # Version 3.0.19
 - Framework modifiers now tranfser REDUCEDEND to slots [#266](https://github.com/dmdorman/hero6e-foundryvtt/issues/266)
+- Improved MULTIPOWER descriptions
+
 
 # Version 3.0.18
 - Fix for new attacks that only worked with alpha flag turned on.
