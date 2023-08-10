@@ -5,7 +5,7 @@
 - Templates automatically select tokens within the template.  Intend to improve AOE attack workflow.
 - Initial AVAD support. [#206](https://github.com/dmdorman/hero6e-foundryvtt/issues/206)
 - Fixed everyman skills showing NaN [#259](https://github.com/dmdorman/hero6e-foundryvtt/issues/259)
-
+- Backend changes to Item Attack dialog.  Values now sync with other windows/players.
 
 # Version 3.0.16
 - Migration unnecessary on new/empty worlds [#254](https://github.com/dmdorman/hero6e-foundryvtt/issues/254)
