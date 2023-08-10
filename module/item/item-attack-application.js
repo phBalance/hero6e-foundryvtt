@@ -11,7 +11,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     Hooks.on("updateItem", function (item, changes, options, userId) {
       if (!this.rendered) return;
-      
+
       // if (changes.system.attacks) {
       //   const key = Object.keys(changes.system.attacks)[0]
       //   const value = changes.system.attacks[key]
@@ -28,6 +28,7 @@ export class ItemAttackFormApplication extends FormApplication {
       }
       if (!cslSkill && data.cslSkill) {
         this.updateItem(item, changes, options, userId)
+
       }
 
     }.bind(this));
@@ -56,6 +57,10 @@ export class ItemAttackFormApplication extends FormApplication {
   getData() {
     const data = this.data;
     const item = data.item;
+
+    data.ocvMod ??= item.system.ocv
+    data.dcvMod ??= item.system.dcv
+    data.effectiveStr ??= data.str;
 
     // Combat Skill Levels
     const csl = CombatSkillLevelsForAttack(item);
@@ -107,6 +112,11 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     this._updateCsl(event, formData)
+
+    this.data.aim = formData.aim;
+    this.data.ocvMod = formData.ocvMod;
+    this.data.dcvMod = formData.dcvMod;
+    this.data.effectiveStr = formData.effectiveStr;
 
 
   }
