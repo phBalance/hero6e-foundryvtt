@@ -134,7 +134,11 @@ export async function AttackOptions(item, event) {
     // This may allow better workflow for AOE and placement of templates.
     if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
 
+        // let app = new ItemAttackFormApplication(data);
+        // await app.render();
+        // delete app;
         await new ItemAttackFormApplication(data).render(true);
+        
     }
 
 
