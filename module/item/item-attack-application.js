@@ -27,17 +27,31 @@ export class ItemAttackFormApplication extends FormApplication {
   getData() {
     const data = this.data;
     console.log(data);
+
+    
+    
     return data;
   }
 
   activateListeners(html) {
     super.activateListeners(html);
     //html.find(".combat-skill-levels input").change((event) => this._updateCsl(event, html));
+
+    
+  }
+
+  async _render(...args)
+  {
+    await super._render(...args);
+
+    // CSL can cause differences in form size.
+    if (this.position) {
+      this.setPosition({height: 'auto'});
+    }
+
   }
 
   async _updateObject(event, formData) {
-    console.log(formData);
-
 
     if (event.submitter) {
       this.close();
