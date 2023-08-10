@@ -1076,7 +1076,7 @@ function calcBasePointsPlusAdders(item) {
     let actor = item.actor;
 
     let old = system.basePointsPlusAdders;
-    
+
 
     if (!system.XMLID)
         return 0
@@ -1209,7 +1209,7 @@ function calcBasePointsPlusAdders(item) {
         cost = cost * advantages
     }
 
-    
+
     system.basePointsPlusAdders = cost;
 
     //return cost; //Math.max(1, cost)
@@ -1278,6 +1278,10 @@ function calcActivePoints(item) {
 
     const _activePoints = system.basePointsPlusAdders * (1 + advantages)
     system.activePointsDc = RoundFavorPlayerDown(system.basePointsPlusAdders * (1 + advantagesDC))
+
+
+    // This may be a slot in a framework if so get parent
+    // const parent = item.actor.items.find(o=> o.system.ID === system.PARENTID);
 
     // HALFEND is based on active points without the HALFEND modifier
     if (system.modifiers.find(o => o.XMLID == "REDUCEDEND")) {
@@ -1500,10 +1504,10 @@ export function updateItemDescription(item) {
 
             // 6e HDC
             //if (system.ALIAS == "KS") {
-           // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
-           system.description = system.NAME.replace(system.ALIAS, "");
-           if (system.description.indexOf(system.ALIAS) === -1) system.description += system.ALIAS;
-           if (system.INPUT) system.description += `: ${system.INPUT}`;
+            // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
+            system.description = system.NAME.replace(system.ALIAS, "");
+            if (system.description.indexOf(system.ALIAS) === -1) system.description += system.ALIAS;
+            if (system.INPUT) system.description += `: ${system.INPUT}`;
 
             break;
         case "TRANSPORT_FAMILIARITY":
@@ -1811,6 +1815,10 @@ export function updateItemDescription(item) {
     system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
 
 
+    // This may be a slot in a framework if so get parent
+    const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+
+
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
     const costsEnd = system.modifiers.find(o => o.XMLID == "COSTSEND")
@@ -1819,7 +1827,8 @@ export function updateItemDescription(item) {
         system.end *= parseInt(increasedEnd.OPTION.replace('x', ''))
     }
 
-    const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND")
+    const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND") ||
+        (parent && parent.system.modifiers.find(o => o.XMLID == "REDUCEDEND"))
     if (reducedEnd && reducedEnd.OPTION === 'HALFEND') {
         system.end = RoundFavorPlayerDown(system._activePointsWithoutEndMods / 10)
         system.end = RoundFavorPlayerDown(system.end / 2);
@@ -1943,8 +1952,7 @@ function createPowerDescriptionModifier(modifier, system) {
         }
     }
 
-    if (modifier.INPUT)
-    {
+    if (modifier.INPUT) {
         result += modifier.INPUT + "; ";
     }
 
