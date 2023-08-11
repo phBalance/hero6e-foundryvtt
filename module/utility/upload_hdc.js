@@ -675,7 +675,7 @@ export function XmlToItemData(xml, type) {
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
         "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
         "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE",
-        "USE_END_RESERVE",
+        "USE_END_RESERVE", "ULTRA_SLOT"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -1302,8 +1302,18 @@ function calcRealCost(item) {
     // if (system.XMLID == "RKA")
     //     HEROSYS.log(false, system.XMLID)
 
+    // This may be a slot in a framework if so get parent
+    const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+
+    let modifiers =  system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)
+
+    // Add limitations from parent
+    if (parent) {
+        modifiers.push(... parent.system.modifiers.filter(o => parseFloat(o.BASECOST) < 0))
+    }
+
     let limitations = 0
-    for (let modifier of system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)) {
+    for (let modifier of modifiers) {
         let _myLimitation = 0
         const modifierBaseCost = parseFloat(modifier.BASECOST || 0)
         _myLimitation += -modifierBaseCost;
@@ -1344,10 +1354,30 @@ function calcRealCost(item) {
         limitations += _myLimitation
     }
 
-    // if (system.XMLID == "END")
-    //     HEROSYS.log(false, system.XMLID)
-
     let _realCost = system.activePoints / (1 + limitations)
+
+
+
+
+    // MULTIPOWER
+    let costSuffix = "";
+    if (parent && parent.system.XMLID === "MULTIPOWER") {
+        // Fixed
+        if (item.system.ULTRA_SLOT) {
+            costSuffix = "f";
+            _realCost /= 10.0;
+        } else
+
+        // Variable
+        {
+            costSuffix = "v";
+            _realCost /= 5.0;
+        }
+
+    }
+
+
+
     _realCost = RoundFavorPlayerDown(_realCost)
 
     // Minumum cost
@@ -1356,7 +1386,7 @@ function calcRealCost(item) {
     }
 
     let old = system.realCost;
-    system.realCost = _realCost;
+    system.realCost = _realCost + costSuffix;
 
     return { changed: old === system.realCost }; //_realCost
 }
@@ -1416,7 +1446,8 @@ export function updateItemDescription(item) {
     const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: item?.actor })
 
 
-
+    // This may be a slot in a framework if so get parent
+    const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
 
     switch (configPowerInfo?.xmlid || system.XMLID) {
 
@@ -1669,6 +1700,8 @@ export function updateItemDescription(item) {
             system.description = `${parseInt(system.LEVELS.value).signedString()} ${system.OPTION_ALIAS}`;
             break;
 
+        case "VPP":
+        case "ELEMENTAL_CONTROL":
         case "MULTIPOWER":
             // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
             let _descMultiPower = (system.OPTION_ALIAS || system.ALIAS || "")
@@ -1809,21 +1842,22 @@ export function updateItemDescription(item) {
     }
 
     // Active Points
-    if (system.realCost != system.activePoints) {
+    if (system.realCost != system.activePoints || parent) {
         system.description += " (" + system.activePoints + " Active Points); "
     }
 
+    // MULTIPOWER slots typically include limitations
+    let modifiers = system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })
+    if (parent) {
+        modifiers.push(... parent.system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
+    }
+
     // Disadvantages sorted low to high
-    for (let modifier of system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })) {
+    for (let modifier of modifiers) {
         system.description += createPowerDescriptionModifier(modifier, item)
     }
 
     system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
-
-
-    // This may be a slot in a framework if so get parent
-    const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
-
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
@@ -2011,16 +2045,18 @@ function createPowerDescriptionModifier(modifier, item) {
         result = result.replace(`Focus (${modifier.OPTION}; `, `${modifier.OPTION} (`)
     }
 
+
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: item?.actor })
+
     // All Slots?  // This may be a slot in a framework if so get parent
     // const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
-    if (system.XMLID === "MULTIPOWER") {
-        if (result.match (/^,/)) {
+    if (configPowerInfo && configPowerInfo.powerType.includes("framework")) {
+        if (result.match(/^,/)) {
             result = result.replace(/^,/, ", all slots");
-        } else
-        {
+        } else {
             result = "all slots " + result;
         }
-        
+
     }
 
     return result;
