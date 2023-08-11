@@ -7,14 +7,18 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
     async _onClickLeft(event) {
         await super._onClickLeft(event);
-        if (game.user.id != this.document.user.id) return;
+        //if (game.user.id != this.document.user.id) return;
         await this.selectObjects({ checkPositions: true })
+        await game.user.broadcastActivity({targets: Array.from(game.user.targets.map(o=>o.id))});
+        console.log(event);
     }
 
     async _onUpdate(data, options, userId) {
         await super._onUpdate(data, options, userId);
-        if (userId != this.document.user.id) return;
+        if (game.user.id != userId) return; //this.document.user.id) return;
         await this.selectObjects({ checkPositions: true, templateData: data })
+        console.log(game.user.targets.map(o=>o.id))
+        await game.user.broadcastActivity({targets: Array.from(game.user.targets.map(o=>o.id))});
     }
 
     // async _onDragLeftDrop(...args) {
@@ -69,6 +73,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
         if (JSON.stringify(targets) != JSON.stringify(Array.from(game.user.targets).map(o => o.id))) {
             await game.user.updateTokenTargets(targets);
+            
         }
 
     }

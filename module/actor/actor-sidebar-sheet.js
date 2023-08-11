@@ -981,6 +981,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
         }
+
+        await this.actor.applyEncumbrancePenalty();
     }
 
 }
