@@ -911,6 +911,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
 
+        // We just cleared encumbrance, check if it applies again
+        this.actor.applyEncumbrancePenalty();
+
 
 
     }
