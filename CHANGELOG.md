@@ -1,3 +1,6 @@
+# Version 3.0.20
+- Improved AOE template targeting.
+
 # Version 3.0.19
 - Framework modifiers now transfer REDUCEDEND to slots [#266](https://github.com/dmdorman/hero6e-foundryvtt/issues/266)
 - Improved MULTIPOWER descriptions and slot costs.
