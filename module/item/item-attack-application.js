@@ -85,10 +85,12 @@ export class ItemAttackFormApplication extends FormApplication {
         const csl = CombatSkillLevelsForAttack(item);
         if (csl && csl.skill) {
             data.cslSkill = csl.skill;
-            let _ocv = csl.omcv > 0 ? 'omcv' : 'ocv';
+            let mental = csl.skill.system.XMLID === "MENTAL_COMBAT_LEVELS"
+            let _ocv = mental ? 'omcv' : 'ocv';
+            let _dcv = mental ? 'dmcv' : 'dcv';
             data.cslChoices = { [_ocv]: _ocv };
             if (csl.skill.system.OPTION != "SINGLE") {
-                data.cslChoices.dcv = "dcv";
+                data.cslChoices[_dcv] = _dcv;
                 data.cslChoices.dc = "dc";
             }
 
@@ -125,13 +127,13 @@ export class ItemAttackFormApplication extends FormApplication {
 
     async _updateObject(event, formData) {
 
-        if (event.submitter.name === "roll") {
+        if (event.submitter?.name === "roll") {
             canvas.tokens.activate()
             await this.close();
             return _processAttackOptions(this.data.item, formData);
         }
 
-        if (event.submitter.name === "aoe") {
+        if (event.submitter?.name === "aoe") {
             return this._spawnAreaOfEffect(this.data);
         }
 

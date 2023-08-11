@@ -296,7 +296,8 @@ export async function AttackToHit(item, options) {
         tags.push({ value: csl.ocv || csl.omcv, name: csl.item.name })
     }
 
-    let dcv = parseInt(item.system.dcv) + csl.dcv
+    let dcv = parseInt(item.system.dcv || 0) + csl.dcv
+    let dmcv =  parseInt(item.system.dmcv || 0) + csl.dmcv
 
     // Haymaker -5 DCV
     const haymakerManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Haymaker' && o.system.active)
@@ -304,7 +305,7 @@ export async function AttackToHit(item, options) {
         dcv -= 4;
     }
 
-    if (dcv != 0) {
+    if (dcv != 0 || dmcv != 0) {
 
         // Make sure we don't already have this activeEffect
         let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find(o => o.origin === item.uuid);
@@ -314,11 +315,19 @@ export async function AttackToHit(item, options) {
             // In combat.js#_onStartTurn we remove this AE for exact timing.
             let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
 
+            let _dcvText = 'DCV'
+            let _dcvValue = dcv;
+
+            if (dmcv != 0) {
+                _dcvText = 'DMCV'
+                _dcvValue = dmcv;
+            }
+
             let activeEffect = {
-                label: `${item.name} ${("+" + dcv).replace("+-", "-")} DCV`,
+                label: `${item.name} ${_dcvValue.signedString()} ${_dcvText}`,
                 icon: (dcv) < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
                 changes: [
-                    { key: "system.characteristics.dcv.value", value: dcv, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+                    { key: `system.characteristics.${_dcvText.toLowerCase()}.value`, value: _dcvValue, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
                 ],
                 origin: item.uuid,
                 duration: {
@@ -469,10 +478,24 @@ export async function AttackToHit(item, options) {
     }
 
     const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoeTemplate = game.scenes.current.templates.find(o=> o.flags.itemId === item.id) ||
+            game.scenes.current.templates.find(o=> o.user.id === game.user.id) ;
+    const explosion = aoe?.adders ? aoe.adders.find(o=> o.XMLID === "EXPLOSION") : null;
 
     let targetData = []
     let targetIds = []
-    for (let target of Array.from(game.user.targets)) {
+    let targetsArray = Array.from(game.user.targets);
+
+    // If AOE then sort by distance from center
+    if (explosion) {
+        targetsArray.sort( function (a,b) {
+        let distanceA = canvas.grid.measureDistance(aoeTemplate, a, { gridSpaces: true });
+        let distanceB = canvas.grid.measureDistance(aoeTemplate, b, { gridSpaces: true });
+        return distanceA - distanceB;
+        })
+    }
+
+    for (let target of targetsArray) {
 
         let hit = "Miss"
         let value = target.actor.system.characteristics[toHitChar.toLowerCase()].value
@@ -484,10 +507,16 @@ export async function AttackToHit(item, options) {
             by = "+" + by;
         }
 
-        if (aoe) {
+        if (explosion) {
             value = 0;
             hit = "Hit";
             by = aoe.OPTION_ALIAS + aoe.LEVELS;
+
+            // Distance from center
+            if (aoeTemplate) {
+                let distance = canvas.grid.measureDistance(aoeTemplate, target, { gridSpaces: true });
+                by += ` (${distance}m from center)`;
+            }
         }
 
         targetData.push({ id: target.id, name: target.name, toHitChar: toHitChar, value: value, result: { hit: hit, by: by.toString() } })

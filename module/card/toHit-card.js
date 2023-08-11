@@ -9,7 +9,8 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
     static async chatListeners(html) {
         // NOTE: Make sure we are listed in card-helpers.js
 
-        html.on('click', '.area-effect-tag', this._spawnAreaOfEffect.bind(this))
+        // _spawnAreaOfEffect no longer needed as this is now handle in the to hit routines
+        //html.on('click', '.area-effect-tag', this._spawnAreaOfEffect.bind(this))
         
     }
 
@@ -195,78 +196,78 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
         
     }
 
-    static async _spawnAreaOfEffect(event) {
-        HEROSYS.log(false, 'spawn area of effect!')
+    // static async _spawnAreaOfEffect(event) {
+    //     HEROSYS.log(false, 'spawn area of effect!')
 
-        const clickedElement = $(event.currentTarget);
-        const aoeType = clickedElement.data().aoeType;
-        const aoeValue = clickedElement.data().aoeValue;
-        const actorId = clickedElement.closest("div[data-actor-id]").data()?.actorId;
-        const actor = game.actors.get(actorId);
-        const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
+    //     const clickedElement = $(event.currentTarget);
+    //     const aoeType = clickedElement.data().aoeType;
+    //     const aoeValue = clickedElement.data().aoeValue;
+    //     const actorId = clickedElement.closest("div[data-actor-id]").data()?.actorId;
+    //     const actor = game.actors.get(actorId);
+    //     const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
 
-        const keyConversions = {
-            radius: "circle",
-            cone: "cone",
-            line: "ray",
-            surface: "rect",
-            any: "rect"
-        }
+    //     const keyConversions = {
+    //         radius: "circle",
+    //         cone: "cone",
+    //         line: "ray",
+    //         surface: "rect",
+    //         any: "rect"
+    //     }
 
-        const templateType = keyConversions[aoeType]
+    //     const templateType = keyConversions[aoeType]
 
-        const templateData = {
-            t: templateType,
-            user: game.user.id,
-            distance: aoeValue,
-            direction: -token.document?.rotation || 0 + 90,  // Top down tokens typically face south
-            fillColor: game.user.color
-        };
+    //     const templateData = {
+    //         t: templateType,
+    //         user: game.user.id,
+    //         distance: aoeValue,
+    //         direction: -token.document?.rotation || 0 + 90,  // Top down tokens typically face south
+    //         fillColor: game.user.color
+    //     };
 
-        switch(templateType) {
-            case ("radius"): {
-                break;
-            }
-            case ("cone"): {
-                break;
-            }
-            case ("ray"): {
-                templateData.width = 2; //2m = 1 hex
-                break;
-            }
-            case ("rect"): {
-                const warningMessage = game.i18n.localize("Warning.AreaOfEffectUnsupported")
+    //     switch(templateType) {
+    //         case ("radius"): {
+    //             break;
+    //         }
+    //         case ("cone"): {
+    //             break;
+    //         }
+    //         case ("ray"): {
+    //             templateData.width = 2; //2m = 1 hex
+    //             break;
+    //         }
+    //         case ("rect"): {
+    //             const warningMessage = game.i18n.localize("Warning.AreaOfEffectUnsupported")
 
-                ui.notifications.warn(warningMessage)
+    //             ui.notifications.warn(warningMessage)
 
-                return
+    //             return
 
-                break;
-            }
-            default: {
-                break;
-            }
-        }
+    //             break;
+    //         }
+    //         default: {
+    //             break;
+    //         }
+    //     }
 
-        if (token) {
-            templateData.x = token.center.x;
-            templateData.y = token.center.y;
+    //     if (token) {
+    //         templateData.x = token.center.x;
+    //         templateData.y = token.center.y;
 
 
-            canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [ templateData ]);
+    //         canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [ templateData ]);
 
-            canvas.templates.activate()
-            canvas.templates.selectObjects({
-                x: templateData.x,
-                y: templateData.y,
-                releaseOthers: true,
-                control: true,
-                toggle: false
-            })
-        } else {
-            const errorMessage = game.i18n.localize("Errors.TokenSelect")
+    //         canvas.templates.activate()
+    //         canvas.templates.selectObjects({
+    //             x: templateData.x,
+    //             y: templateData.y,
+    //             releaseOthers: true,
+    //             control: true,
+    //             toggle: false
+    //         })
+    //     } else {
+    //         const errorMessage = game.i18n.localize("Errors.TokenSelect")
 
-            ui.notifications.error(errorMessage)
-        }
-    }
+    //         ui.notifications.error(errorMessage)
+    //     }
+    // }
 }

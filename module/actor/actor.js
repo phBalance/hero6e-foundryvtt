@@ -111,7 +111,7 @@ export class HeroSystem6eActor extends Actor {
         let cardData = {
             actor,
             groupName: "typeChoice",
-            choices: Actor.TYPES.filter(o => o != 'character' && o != 'base').reduce((a, v) => ({ ...a, [v]: v.replace("2","") }), {}), // base is internal type and/or keyword. BASE2 is for bases.
+            choices: Actor.TYPES.filter(o => o != 'character' && o != 'base').reduce((a, v) => ({ ...a, [v]: v.replace("2", "") }), {}), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         }
         const html = await renderTemplate(template, cardData)
@@ -240,6 +240,22 @@ export class HeroSystem6eActor extends Actor {
 
             if (data.system.characteristics.stun.value <= 0) {
                 this.addActiveEffect(HeroSystem6eActorActiveEffects.knockedOutEffect);
+            }
+
+            // Mark as defeated in combat tracker
+            if (data.type != 'pc' && data.system.characteristics.stun.value < -10) {
+                let combatant = game.combat.combatants.find(o => o.actorId === data._id)
+                if (combatant && !combatant.defeated) {
+                    combatant.update({ defeated: true });
+                }
+            }
+
+            // Mark as undefeated in combat tracker
+            if (data.type != 'pc' && data.system.characteristics.stun.value > -10) {
+                let combatant = game.combat.combatants.find(o => o.actorId === data._id)
+                if (combatant && combatant.defeated) {
+                    combatant.update({ defeated: false });
+                }
             }
 
             if (data.system.characteristics.stun.value > 0) {

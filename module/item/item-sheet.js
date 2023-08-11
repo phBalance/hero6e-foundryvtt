@@ -131,12 +131,14 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Combat Skill Levels & Mental Combat Levels
         if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
             let _ocv = 'ocv'
+            let _dcv = 'dcv'
             if (this.item.system.XMLID === "MENTAL_COMBAT_LEVELS") {
                 _ocv = 'omcv'
+                _dcv = 'dmcv'
             }
             data.cslChoices = { [_ocv]: _ocv };
             if (this.item.system.OPTION != "SINGLE") {
-                data.cslChoices.dcv = "dcv";
+                data.cslChoices[_dcv] = _dcv;
                 data.cslChoices.dc = "dc";
             }
 

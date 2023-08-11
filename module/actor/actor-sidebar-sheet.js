@@ -176,7 +176,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     item.system.dcvEstimated = (
                         //parseInt(item.system.targets === 'dmcv' ? item.actor.system.characteristics.dmcv.value : item.actor.system.characteristics.dcv.value) +
                         parseInt(item.system.dcv) +
-                        parseInt(csl.dcv)
+                        parseInt(csl.dcv || csl.dmcv)
                     ).signedString();
                 }
 

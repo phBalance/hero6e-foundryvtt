@@ -683,7 +683,7 @@ div.tags {
 
 .tags .tag.area-effect-tag {
   background-color: #d06fa2;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
 td {
