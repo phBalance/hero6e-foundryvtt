@@ -409,10 +409,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 characteristic.valueTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
                 characteristic.valueTitle += ary.join('\n ');
                 characteristic.valueTitle += "</ul>";
+                characteristic.valueTitle += "<small><i>Click to unblock</i></small>";
             }
 
             ary = []
-            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.max`));
+            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.max`) && !o.disabled);
             characteristic.delta = 0;
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
@@ -430,6 +431,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 characteristic.maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
                 characteristic.maxTitle += ary.join('\n ');
                 characteristic.maxTitle += "</ul>";
+                characteristic.maxTitle += "<small><i>Click to unblock</i></small>";
             }
 
 
@@ -650,6 +652,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
         html.find('.item-chat').click(this._onItemChat.bind(this))
+
+        html.find('td.characteristic-locked').click(this._onUnlockCharacteristic.bind(this))
 
         // Drag events for macros.
         if (this.actor.isOwner) {
@@ -908,6 +912,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
 
+
     }
 
     async _uploadCharacterSheet(event) {
@@ -924,6 +929,58 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             applyCharacterSheet.bind(this)(xmlDoc)
         }.bind(this)
         reader.readAsText(file)
+    }
+
+    async _onUnlockCharacteristic(event) {
+        event.preventDefault()
+
+        // Find all associated Active Effects
+        let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === event.target.name));
+        for (let ae of activeEffects) {
+
+            // Delete status
+            if (ae.statuses) {
+                let confirmed = await Dialog.confirm({
+                    title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+                    content: `Remove ${ae.name}?`
+                });
+
+                if (confirmed) {
+                    await ae.delete();
+                }
+                continue;
+            }
+
+            // Delete Temporary Effects
+            if (parseInt(ae.duration?.seconds || 0) > 0) {
+
+                let confirmed = await Dialog.confirm({
+                    title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+                    content: `Delete ${ae.name}?`
+                });
+
+                if (confirmed) {
+                    await ae.delete();
+                }
+                continue;
+            }
+
+            // Turn off Perenant powers
+            if (ae.parent instanceof HeroSystem6eItem) {
+
+                let confirmed = await Dialog.confirm({
+                    title: "Turn off?",
+                    content: `Turn off ${ae.name}?`
+                });
+
+                if (confirmed) {
+                    await ae.parent.toggle()
+                    //await ae.update({ disabled: true })
+                }
+                continue;
+            }
+
+        }
     }
 
 }

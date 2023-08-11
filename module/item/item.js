@@ -354,11 +354,21 @@ export async function RequiresASkillRollCheck(item) {
             case "SKILL1PER5":
             case "SKILL1PER20":
                 OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
-                let skill = item.actor.items.find(o => o.system.XMLID === OPTION_ALIAS.toUpperCase() || o.name.toUpperCase() === OPTION_ALIAS.toUpperCase());
+                let skill = item.actor.items.find(o => (o.system.subType || o.system.type) === 'skill' &&
+                    (o.system.XMLID === OPTION_ALIAS.toUpperCase() || o.name.toUpperCase() === OPTION_ALIAS.toUpperCase())
+                );
                 if (!skill && rar.COMMENTS) {
-                    skill = item.actor.items.find(o => o.system.XMLID === rar.COMMENTS.toUpperCase() || o.name.toUpperCase() === rar.COMMENTS.toUpperCase());
+                    skill = item.actor.items.find(o => (o.system.subType || o.system.type) === 'skill' &&
+                        (o.system.XMLID === rar.COMMENTS.toUpperCase() || o.name.toUpperCase() === rar.COMMENTS.toUpperCase())
+                    );
                     if (skill) {
                         OPTION_ALIAS = rar.COMMENTS;
+                    }
+                }
+                if (!skill && rar.COMMENTS) {
+                    let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                    if (char) {
+                        ui.notifications.warn(`${item.name} incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`);
                     }
                 }
                 if (skill) {
