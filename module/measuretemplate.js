@@ -5,14 +5,15 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     //   this._highlighted = token;
     // }
 
-    async _onClickLeft(...args) {
-        await super._onClickLeft(...args);
+    async _onClickLeft(event) {
+        await super._onClickLeft(event);
+        if (game.user.id != this.document.user.id) return;
         await this.selectObjects({ checkPositions: true })
     }
 
     async _onUpdate(data, options, userId) {
-        console.log("_onUpdate");
         await super._onUpdate(data, options, userId);
+        if (userId != this.document.user.id) return;
         await this.selectObjects({ checkPositions: true, templateData: data })
     }
 
@@ -61,7 +62,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         let targets = [];
 
         for (let token of this.getTokensInTempalte(options)) {
-            if (token?.visible) {
+            if (!token?.hidden) {
                 targets.push(token.id);
             }
         }
