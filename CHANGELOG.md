@@ -3,6 +3,7 @@
 - Improved MULTIPOWER descriptions and slot costs.
 - Fixed Skill Box Prompt (- is harder) [#265](https://github.com/dmdorman/hero6e-foundryvtt/issues/265)
 - Fixed edge case where Combat tracker starts before segment 12 [#267](https://github.com/dmdorman/hero6e-foundryvtt/issues/267)
+- Added FULL HEALTH button to actor sheet. [#264](https://github.com/dmdorman/hero6e-foundryvtt/issues/264)
 
 
 # Version 3.0.18

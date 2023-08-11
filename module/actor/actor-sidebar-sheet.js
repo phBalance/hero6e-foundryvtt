@@ -641,6 +641,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         html.find('.recovery-button').click(this._onRecovery.bind(this))
         html.find('.presence-button').click(this._onPresenseAttack.bind(this))
+        html.find('.full-health-button').click(this._onFullHealth.bind(this))
 
         // Active Effects
         html.find('.effect-create').click(this._onEffectCreate.bind(this))
@@ -871,8 +872,42 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         //         return ChatMessage.create(chatData)
     }
 
-    _onPresenseAttack(event) {
+    async _onPresenseAttack(event) {
         presenceAttackPopOut(this.actor)
+    }
+
+    async _onFullHealth(event) {
+
+        const confirmed = await Dialog.confirm({
+            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
+            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content")
+        });
+        if (!confirmed) return;
+
+        // Remove all status effects
+        for (let status of this.actor.statuses) {
+            let ae = Array.from(this.actor.effects).find(o => o.statuses.has(status))
+            await ae.delete();
+        }
+
+
+        // Remove temporary effects
+        let tempEffects = Array.from(this.actor.effects).filter(o => parseInt(o.duration?.seconds || 0) > 0)
+        for (let ae of tempEffects) {
+            await ae.delete();
+        }
+
+        // Set Characterstics VALUE to MAX
+        for (let char of Object.keys(this.actor.system.characteristics)) {
+            let value = parseInt(this.actor.system.characteristics[char].value);
+            let max = parseInt(this.actor.system.characteristics[char].max);
+            if (value != max) {
+                //this.actor.system.characteristics[char].value = max;
+                await this.actor.update({ [`system.characteristics.${char}.value`]: max })
+            }
+        }
+
+
     }
 
     async _uploadCharacterSheet(event) {
