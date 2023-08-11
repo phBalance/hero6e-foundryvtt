@@ -1303,7 +1303,7 @@ function calcRealCost(item) {
     //     HEROSYS.log(false, system.XMLID)
 
     // This may be a slot in a framework if so get parent
-    const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+    const parent = item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
 
     let modifiers =  system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)
 
@@ -1447,7 +1447,7 @@ export function updateItemDescription(item) {
 
 
     // This may be a slot in a framework if so get parent
-    const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+    const parent = item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
 
     switch (configPowerInfo?.xmlid || system.XMLID) {
 
