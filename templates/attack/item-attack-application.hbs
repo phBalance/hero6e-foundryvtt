@@ -1,70 +1,80 @@
-{{ log 'HEROSYS ITEM ATTACK APPLICATION CARD' this }}
+{{!-- {{ log 'HEROSYS ITEM ATTACK APPLICATION CARD' this }} --}}
 <form data-actor-id="{{actor.id}}" data-item-id="{{item.id}}" data-token-id="{{token.id}}">
-    <div class="hero chat-card item-card attack-card">
-        <header class="card-header flexrow">
-            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-            <h3 class="item-name">{{item.name}}</h3>
-        </header>
+  <div class="hero chat-card item-card attack-card">
+    <header class="card-header flexrow">
+      <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
+      <h3 class="item-name">{{item.name}}</h3>
+    </header>
+  </div>
+
+  {{#if useHitLoc}}
+  <div class="form-group">
+    <label>Aim</label>
+    <select name="aim" id="aim">
+      <option value="none">None</option>
+      {{#each hitLoc as |hitLoc key|}}
+      <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
+      {{/each}}
+    </select>
+  </div>
+  {{/if}}
+
+  <div class="form-group">
+    <label>{{localize "Items.Attack.OcvMod"}}</label>
+    <input type="text" name="ocvMod" value="{{ocvMod}}" />
+  </div>
+
+  <div class="form-group">
+    <label>{{localize "Items.Attack.DcvMod"}}</label>
+    <input type="text" name="dcvMod" value="{{dcvMod}}" />
+  </div>
+
+  {{#if showVelocity}}
+  <div class="form-group">
+    <label>{{localize "Items.Attack.Velocity"}}</label>
+    <input type="text" name="velocity" value="{{velocity}}"
+      title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
+  </div>
+  {{/if}}
+
+
+  {{#if (or item.system.usesStrength item.system.usesTk)}}
+  <div class="form-group">
+    <label>Effective Strength</label>
+    <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
+    <label>/ {{str}}</label>
+  </div>
+  {{/if}}
+
+  {{#if cslChoices}}
+  <div class="form-group">
+    <label>Combat Skill Levels</label>
+    <div class="form-fields combat-skill-levels">
+      <ol>
+        {{#each csl}}
+        <li>
+          {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+        </li>
+        {{/each}}
+      </ol>
+
     </div>
+  </div>
+  {{/if}}
 
-    {{#if useHitLoc}}
-    <div class="form-group">
-        <label>Aim</label>
-        <select name="aim" id="aim">
-            <option value="none">None</option>
-            {{#each hitLoc as |hitLoc key|}}
-            <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
-            {{/each}}
-        </select>
-    </div>
-    {{/if}}
+  {{#if aoeText}}
+  <div class="aoe-button flexrow">
+    <button type="submit" name="aoe">
+      Place {{aoeText}} template
+    </button>
+  </div>
+  {{/if}}
 
-    <div class="form-group">
-        <label>{{localize "Items.Attack.OcvMod"}}</label>
-        <input type="text" name="ocvMod" value="{{ocvMod}}" />
-    </div>
-
-    <div class="form-group">
-        <label>{{localize "Items.Attack.DcvMod"}}</label>
-        <input type="text" name="dcvMod" value="{{dcvMod}}" />
-    </div>
-
-    {{#if showVelocity}}
-    <div class="form-group">
-        <label>{{localize "Items.Attack.Velocity"}}</label>
-        <input type="text" name="velocity" value="{{velocity}}"
-            title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
-    </div>
-    {{/if}}
-
-
-    {{#if (or item.system.usesStrength item.system.usesTk)}}
-    <div class="form-group">
-        <label>Effective Strength</label>
-        <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
-        <label>/ {{str}}</label>
-    </div>
-    {{/if}}
-
-    {{#if cslChoices}}
-    <div class="form-group">
-        <label>Combat Skill Levels</label>
-        <div class="form-fields combat-skill-levels">
-            <ol>
-                {{#each csl}}
-                <li>
-                    {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
-                </li>
-                {{/each}}
-            </ol>
-
-        </div>
-    </div>
-    {{/if}}
 
   <footer class="sheet-footer flexrow">
-    <button type="submit" name="submit" autofocus>
-        Roll to Hit
+    <button type="submit" name="roll" {{#if rollHide}}disabled 
+      title="You must select at least 1 target token, preferabililty by using the AOE template."{{/if}}>
+      Roll to Hit
     </button>
   </footer>
 </form>

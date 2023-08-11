@@ -1,3 +1,13 @@
+# Version 3.0.19
+- Framework modifiers now transfer REDUCEDEND to slots [#266](https://github.com/dmdorman/hero6e-foundryvtt/issues/266)
+- Improved MULTIPOWER descriptions and slot costs.
+- Fixed Skill Box Prompt (- is harder) [#265](https://github.com/dmdorman/hero6e-foundryvtt/issues/265)
+- Fixed edge case where Combat tracker starts before segment 12 [#267](https://github.com/dmdorman/hero6e-foundryvtt/issues/267)
+- Added FULL HEALTH button to actor sheet. [#264](https://github.com/dmdorman/hero6e-foundryvtt/issues/264)
+- Clicking on a locked characteristic will prompt to unlock [#261](https://github.com/dmdorman/hero6e-foundryvtt/issues/261)
+- Improved AOE workflow. Attacker is prompted to place an AOE template, which automatically selects visible targets within the template.  AOE attacks assume template always hits hex and that all targets are hit regardless of their DCV.
+
+
 # Version 3.0.18
 - Fix for new attacks that only worked with alpha flag turned on.
 # Version 3.0.17

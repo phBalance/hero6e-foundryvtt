@@ -132,7 +132,7 @@ export async function AttackOptions(item, event) {
     // Testing out a replacement for the dialog box.
     // This would allow for more interactive CSL.
     // This may allow better workflow for AOE and placement of templates.
-    await new ItemAttackFormApplication(data).render(true);
+    delete await new ItemAttackFormApplication(data).render(true);
 
 
     // return new Promise(resolve => {
@@ -468,9 +468,12 @@ export async function AttackToHit(item, options) {
 
     }
 
+    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+
     let targetData = []
     let targetIds = []
     for (let target of Array.from(game.user.targets)) {
+
         let hit = "Miss"
         let value = target.actor.system.characteristics[toHitChar.toLowerCase()].value
         if (value <= result.total) {
@@ -480,6 +483,13 @@ export async function AttackToHit(item, options) {
         if (by >= 0) {
             by = "+" + by;
         }
+
+        if (aoe) {
+            value = 0;
+            hit = "Hit";
+            by = aoe.OPTION_ALIAS + aoe.LEVELS;
+        }
+
         targetData.push({ id: target.id, name: target.name, toHitChar: toHitChar, value: value, result: { hit: hit, by: by.toString() } })
 
         // Keep track of which tokens were hit so we can apply damage later,

@@ -409,10 +409,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 characteristic.valueTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
                 characteristic.valueTitle += ary.join('\n ');
                 characteristic.valueTitle += "</ul>";
+                characteristic.valueTitle += "<small><i>Click to unblock</i></small>";
             }
 
             ary = []
-            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.max`));
+            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.max`) && !o.disabled);
             characteristic.delta = 0;
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
@@ -430,6 +431,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 characteristic.maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
                 characteristic.maxTitle += ary.join('\n ');
                 characteristic.maxTitle += "</ul>";
+                characteristic.maxTitle += "<small><i>Click to unblock</i></small>";
             }
 
 
@@ -641,6 +643,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         html.find('.recovery-button').click(this._onRecovery.bind(this))
         html.find('.presence-button').click(this._onPresenseAttack.bind(this))
+        html.find('.full-health-button').click(this._onFullHealth.bind(this))
 
         // Active Effects
         html.find('.effect-create').click(this._onEffectCreate.bind(this))
@@ -649,6 +652,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
 
         html.find('.item-chat').click(this._onItemChat.bind(this))
+
+        html.find('td.characteristic-locked').click(this._onUnlockCharacteristic.bind(this))
 
         // Drag events for macros.
         if (this.actor.isOwner) {
@@ -871,8 +876,43 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         //         return ChatMessage.create(chatData)
     }
 
-    _onPresenseAttack(event) {
+    async _onPresenseAttack(event) {
         presenceAttackPopOut(this.actor)
+    }
+
+    async _onFullHealth(event) {
+
+        const confirmed = await Dialog.confirm({
+            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
+            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content")
+        });
+        if (!confirmed) return;
+
+        // Remove all status effects
+        for (let status of this.actor.statuses) {
+            let ae = Array.from(this.actor.effects).find(o => o.statuses.has(status))
+            await ae.delete();
+        }
+
+
+        // Remove temporary effects
+        let tempEffects = Array.from(this.actor.effects).filter(o => parseInt(o.duration?.seconds || 0) > 0)
+        for (let ae of tempEffects) {
+            await ae.delete();
+        }
+
+        // Set Characterstics VALUE to MAX
+        for (let char of Object.keys(this.actor.system.characteristics)) {
+            let value = parseInt(this.actor.system.characteristics[char].value);
+            let max = parseInt(this.actor.system.characteristics[char].max);
+            if (value != max) {
+                //this.actor.system.characteristics[char].value = max;
+                await this.actor.update({ [`system.characteristics.${char}.value`]: max })
+            }
+        }
+
+
+
     }
 
     async _uploadCharacterSheet(event) {
@@ -889,6 +929,60 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             applyCharacterSheet.bind(this)(xmlDoc)
         }.bind(this)
         reader.readAsText(file)
+    }
+
+    async _onUnlockCharacteristic(event) {
+        event.preventDefault()
+
+        // Find all associated Active Effects
+        let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === event.target.name));
+        for (let ae of activeEffects) {
+
+            // Delete status
+            if (ae.statuses) {
+                let confirmed = await Dialog.confirm({
+                    title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+                    content: `Remove ${ae.name}?`
+                });
+
+                if (confirmed) {
+                    await ae.delete();
+                }
+                continue;
+            }
+
+            // Delete Temporary Effects
+            if (parseInt(ae.duration?.seconds || 0) > 0) {
+
+                let confirmed = await Dialog.confirm({
+                    title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+                    content: `Delete ${ae.name}?`
+                });
+
+                if (confirmed) {
+                    await ae.delete();
+                }
+                continue;
+            }
+
+            // Turn off Perenant powers
+            if (ae.parent instanceof HeroSystem6eItem) {
+
+                let confirmed = await Dialog.confirm({
+                    title: "Turn off?",
+                    content: `Turn off ${ae.name}?`
+                });
+
+                if (confirmed) {
+                    await ae.parent.toggle()
+                    //await ae.update({ disabled: true })
+                }
+                continue;
+            }
+
+        }
+
+        await this.actor.applyEncumbrancePenalty();
     }
 
 }

@@ -336,7 +336,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
         } catch (e) {
-            ui.notifications.error(`${martialart.actor.name} has item "${martialart.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${item.actor.name} has item "${(martialart.getAttribute("NAME") || martialart.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -346,7 +346,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
         } catch (e) {
-            ui.notifications.error(`${martialart.actor.name} has item "${martialart.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${item.actor.name} has item "${(martialart.getAttribute("NAME") || martialart.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -356,7 +356,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadMartial.call(this, martialart, 'martialart') //, extraDc, usesTk)
         } catch (e) {
-            ui.notifications.error(`${martialart.actor.name} has item "${martialart.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${item.actor.name} has item "${(martialart.getAttribute("NAME") || martialart.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -367,7 +367,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadPower.call(this, power, 'power')
         } catch (e) {
-            ui.notifications.error(`${power.getAttribute("NAME")} has item "${(power.getAttribute("NAME") || power.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${this.actor.name} has item "${(power.getAttribute("NAME") || power.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -376,7 +376,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadBasic.call(this, perk, 'perk')
         } catch (e) {
-            ui.notifications.error(`${this.actor.name} has item "${perk.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${this.actor.name} has item "${(perk.getAttribute("NAME") || perk.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -385,7 +385,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadBasic.call(this, talent, 'talent')
         } catch (e) {
-            ui.notifications.error(`${talent.actor.name} has item "${talent.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${talent.actor.name} has item "${(talent.getAttribute("NAME") || talent.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -394,7 +394,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadBasic.call(this, complication, 'complication')
         } catch (e) {
-            ui.notifications.error(`${complication.actor.name} has item "${complication.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${this.actor.name} has item "${(complication.getAttribute("NAME") || complication.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -403,7 +403,7 @@ export async function applyCharacterSheet(xmlDoc) {
         try {
             await uploadPower.call(this, equip, 'equipment')
         } catch (e) {
-            ui.notifications.error(`${equip.actor.name} has item "${equip.name.substr(0, 30)}" which failed to upload`);
+            ui.notifications.error(`${equip.actor.name} has item "${(equip.getAttribute("NAME") || equip.getAttribute("XMLID")).substr(0, 30)}" which failed to upload`);
             console.log(e);
         }
     }
@@ -675,7 +675,7 @@ export function XmlToItemData(xml, type) {
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
         "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
         "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE",
-        "USE_END_RESERVE",
+        "USE_END_RESERVE", "ULTRA_SLOT"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -1076,7 +1076,7 @@ function calcBasePointsPlusAdders(item) {
     let actor = item.actor;
 
     let old = system.basePointsPlusAdders;
-    
+
 
     if (!system.XMLID)
         return 0
@@ -1209,7 +1209,7 @@ function calcBasePointsPlusAdders(item) {
         cost = cost * advantages
     }
 
-    
+
     system.basePointsPlusAdders = cost;
 
     //return cost; //Math.max(1, cost)
@@ -1279,6 +1279,10 @@ function calcActivePoints(item) {
     const _activePoints = system.basePointsPlusAdders * (1 + advantages)
     system.activePointsDc = RoundFavorPlayerDown(system.basePointsPlusAdders * (1 + advantagesDC))
 
+
+    // This may be a slot in a framework if so get parent
+    // const parent = item.actor.items.find(o=> o.system.ID === system.PARENTID);
+
     // HALFEND is based on active points without the HALFEND modifier
     if (system.modifiers.find(o => o.XMLID == "REDUCEDEND")) {
         system._activePointsWithoutEndMods = system.basePointsPlusAdders * (1 + advantages - 0.25);
@@ -1298,8 +1302,18 @@ function calcRealCost(item) {
     // if (system.XMLID == "RKA")
     //     HEROSYS.log(false, system.XMLID)
 
+    // This may be a slot in a framework if so get parent
+    const parent = item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
+
+    let modifiers =  system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)
+
+    // Add limitations from parent
+    if (parent) {
+        modifiers.push(... parent.system.modifiers.filter(o => parseFloat(o.BASECOST) < 0))
+    }
+
     let limitations = 0
-    for (let modifier of system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)) {
+    for (let modifier of modifiers) {
         let _myLimitation = 0
         const modifierBaseCost = parseFloat(modifier.BASECOST || 0)
         _myLimitation += -modifierBaseCost;
@@ -1340,10 +1354,30 @@ function calcRealCost(item) {
         limitations += _myLimitation
     }
 
-    // if (system.XMLID == "END")
-    //     HEROSYS.log(false, system.XMLID)
-
     let _realCost = system.activePoints / (1 + limitations)
+
+
+
+
+    // MULTIPOWER
+    let costSuffix = "";
+    if (parent && parent.system.XMLID === "MULTIPOWER") {
+        // Fixed
+        if (item.system.ULTRA_SLOT) {
+            costSuffix = "f";
+            _realCost /= 10.0;
+        } else
+
+        // Variable
+        {
+            costSuffix = "v";
+            _realCost /= 5.0;
+        }
+
+    }
+
+
+
     _realCost = RoundFavorPlayerDown(_realCost)
 
     // Minumum cost
@@ -1352,7 +1386,7 @@ function calcRealCost(item) {
     }
 
     let old = system.realCost;
-    system.realCost = _realCost;
+    system.realCost = _realCost + costSuffix;
 
     return { changed: old === system.realCost }; //_realCost
 }
@@ -1412,7 +1446,8 @@ export function updateItemDescription(item) {
     const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: item?.actor })
 
 
-
+    // This may be a slot in a framework if so get parent
+    const parent = item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
 
     switch (configPowerInfo?.xmlid || system.XMLID) {
 
@@ -1500,10 +1535,10 @@ export function updateItemDescription(item) {
 
             // 6e HDC
             //if (system.ALIAS == "KS") {
-           // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
-           system.description = system.NAME.replace(system.ALIAS, "");
-           if (system.description.indexOf(system.ALIAS) === -1) system.description += system.ALIAS;
-           if (system.INPUT) system.description += `: ${system.INPUT}`;
+            // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
+            system.description = system.NAME.replace(system.ALIAS, "");
+            if (system.description.indexOf(system.ALIAS) === -1) system.description += system.ALIAS;
+            if (system.INPUT) system.description += `: ${system.INPUT}`;
 
             break;
         case "TRANSPORT_FAMILIARITY":
@@ -1665,6 +1700,14 @@ export function updateItemDescription(item) {
             system.description = `${parseInt(system.LEVELS.value).signedString()} ${system.OPTION_ALIAS}`;
             break;
 
+        case "VPP":
+        case "ELEMENTAL_CONTROL":
+        case "MULTIPOWER":
+            // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
+            let _descMultiPower = (system.OPTION_ALIAS || system.ALIAS || "")
+            system.description = `${system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`
+            break;
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
@@ -1795,21 +1838,26 @@ export function updateItemDescription(item) {
 
     // Advantages sorted low to high
     for (let modifier of system.modifiers.filter(o => o.BASECOST >= 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })) {
-        system.description += createPowerDescriptionModifier(modifier, system)
+        system.description += createPowerDescriptionModifier(modifier, item)
     }
 
     // Active Points
-    if (system.realCost != system.activePoints) {
+    if (system.realCost != system.activePoints || parent) {
         system.description += " (" + system.activePoints + " Active Points); "
     }
 
+    // MULTIPOWER slots typically include limitations
+    let modifiers = system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })
+    if (parent) {
+        modifiers.push(... parent.system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
+    }
+
     // Disadvantages sorted low to high
-    for (let modifier of system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })) {
-        system.description += createPowerDescriptionModifier(modifier, system)
+    for (let modifier of modifiers) {
+        system.description += createPowerDescriptionModifier(modifier, item)
     }
 
     system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
-
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
@@ -1819,7 +1867,8 @@ export function updateItemDescription(item) {
         system.end *= parseInt(increasedEnd.OPTION.replace('x', ''))
     }
 
-    const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND")
+    const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND") ||
+        (parent && parent.system.modifiers.find(o => o.XMLID == "REDUCEDEND"))
     if (reducedEnd && reducedEnd.OPTION === 'HALFEND') {
         system.end = RoundFavorPlayerDown(system._activePointsWithoutEndMods / 10)
         system.end = RoundFavorPlayerDown(system.end / 2);
@@ -1857,10 +1906,10 @@ export function updateItemDescription(item) {
 
 }
 
-function createPowerDescriptionModifier(modifier, system) {
+function createPowerDescriptionModifier(modifier, item) {
 
 
-
+    let system = item.system
     let result = ""
 
     switch (modifier.XMLID) {
@@ -1943,8 +1992,7 @@ function createPowerDescriptionModifier(modifier, system) {
         }
     }
 
-    if (modifier.INPUT)
-    {
+    if (modifier.INPUT) {
         result += modifier.INPUT + "; ";
     }
 
@@ -1995,6 +2043,20 @@ function createPowerDescriptionModifier(modifier, system) {
         //result = `, ${modifier.OPTION} (${fraction.trim()})`
         // 'Focus (OAF; Pen-sized Device in pocket; -1)'
         result = result.replace(`Focus (${modifier.OPTION}; `, `${modifier.OPTION} (`)
+    }
+
+
+    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: item?.actor })
+
+    // All Slots?  // This may be a slot in a framework if so get parent
+    // const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+    if (configPowerInfo && configPowerInfo.powerType.includes("framework")) {
+        if (result.match(/^,/)) {
+            result = result.replace(/^,/, ", all slots");
+        } else {
+            result = "all slots " + result;
+        }
+
     }
 
     return result;

@@ -8,6 +8,9 @@ export class HeroSystem6eCombat extends Combat {
         super(data, context);
 
         this.segments = []
+        for (let s = 1; s <= 12; s++) {
+            this.segments[s] = []
+        }
 
         this.previous = this.previous || {
             combatantId: null
@@ -283,7 +286,20 @@ export class HeroSystem6eCombat extends Combat {
         if (current) {
             let activeTurn = this.turns.find(o => o.tokenId === current.tokenId && o.segment === current.segment && o.initiative == current.initiative).turn;
             activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-            await this.update({ turn: activeTurn });
+
+            // Edge case where combat tracker is empty and this is the first combatant.
+            // Advance to phase 12
+            while (this.round === 1 && activeTurn < (this.turns.length -1) && this.turns[activeTurn].segment < 12)
+            {
+                activeTurn++
+            }
+
+            // Another Edge case where combatant has speed of 1 and thus no segment 12
+            if (this.round === 1 && this.turns[activeTurn].segment != 12) {
+                this.round = 2;
+            }
+
+            await this.update({ turn: activeTurn, round: this.round });
         }
 
         // Render the collection
@@ -464,7 +480,7 @@ export class HeroSystem6eCombat extends Combat {
         let content = "";
         let spentEnd = 0;
 
-        for (let powerUsingEnd of combatant.actor.items.filter(o => o.system.active === true && 
+        for (let powerUsingEnd of combatant.actor.items.filter(o => o.system.active === true &&
             parseInt(o.system?.end || 0) > 0 &&
             (o.system.subType || o.type) != "attack"
         )) {
@@ -477,11 +493,10 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        const encumbered = combatant.actor.effects.find(o=> o.flags.encumbrance);
-        if (encumbered)
-        {
-            const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.dcvDex)) -1;
-            if (endCostPerTurn >0) {
+        const encumbered = combatant.actor.effects.find(o => o.flags.encumbrance);
+        if (encumbered) {
+            const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.dcvDex)) - 1;
+            if (endCostPerTurn > 0) {
                 spentEnd += endCostPerTurn;
                 content += `<li>${encumbered.name} (${endCostPerTurn})</li>`
             }
@@ -514,7 +529,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // Some attacks include a DCV penalty which was added as an ActiveEffect.
         // At the beginning of our turn we make sure that AE is deleted.
-        const removeOnNextPhase = combatant.actor.effects.filter(o=> o.flags.nextPhase && o.duration.startTime < game.time.worldTime);
+        const removeOnNextPhase = combatant.actor.effects.filter(o => o.flags.nextPhase && o.duration.startTime < game.time.worldTime);
         for (const ae of removeOnNextPhase) {
             await ae.delete();
         }
@@ -635,6 +650,8 @@ export class HeroSystem6eCombat extends Combat {
    */
     async startCombat() {
         await super.startCombat();
+
+        await this.setupTurns();
 
         // Find first TURN with segment 12
         if (!this.segments[12].length) return;

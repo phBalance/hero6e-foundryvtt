@@ -5,15 +5,19 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     //   this._highlighted = token;
     // }
 
-    async _onClickLeft(...args) {
-        await super._onClickLeft(...args);
+    async _onClickLeft(event) {
+        await super._onClickLeft(event);
+        //if (game.user.id != this.document.user.id) return;
         await this.selectObjects({ checkPositions: true })
+        await game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
+        console.log(event);
     }
 
     async _onUpdate(data, options, userId) {
-        console.log("_onUpdate");
         await super._onUpdate(data, options, userId);
+        if (game.user.id != userId) return; //this.document.user.id) return;
         await this.selectObjects({ checkPositions: true, templateData: data })
+        await game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
     }
 
     // async _onDragLeftDrop(...args) {
@@ -22,10 +26,29 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     //     await this.selectObjects({ checkPositions: true}); //, templateData: data })
     // }
 
-    async _refreshTemplate(...args) {
-        await super._refreshTemplate(...args);
-        await this.selectObjects({ checkPositions: true})
-    }
+    // async _refreshTemplate(...args) {
+    //     await super._refreshTemplate(...args);
+    //     console.log("_refreshTemplate", args)
+    //     await this.selectObjects({ checkPositions: true})
+    // }
+
+    // async _computeShape(...args) {
+    //     await this._computeShape(...args);
+    //     console.log("_computeShape", args)
+    //     await this.selectObjects({ checkPositions: true})
+    // }
+
+    // async _onDragLeftMove(...args) {
+    //     await this._onDragLeftMove(...args);
+    //     console.log("_onDragLeftMove", args)
+    //     await this.selectObjects({ checkPositions: true})
+    // }
+
+    // async _updateRotation(...args) {
+    //     await super._updateRotation(...args);
+    //     console.log("_updateRotation", args)
+    //     await this.selectObjects({ checkPositions: true })
+    // }
 
     // Tokens within template
     getTokensInTempalte(options) {
@@ -38,7 +61,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         return tokens;
     }
 
-    isTokenInside(token, options ) {
+    isTokenInside(token, options) {
         options = { checkShape: true, checkPositions: true, ...options }
         // Use Shape (but there are rorunding issues; specifically if token and MeasuredTemplate have same hex origin)
         if (options.checkShape) {
@@ -61,13 +84,14 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         let targets = [];
 
         for (let token of this.getTokensInTempalte(options)) {
-            if (token?.visible) {
+            if (!token?.hidden) {
                 targets.push(token.id);
             }
         }
 
         if (JSON.stringify(targets) != JSON.stringify(Array.from(game.user.targets).map(o => o.id))) {
             await game.user.updateTokenTargets(targets);
+
         }
 
     }

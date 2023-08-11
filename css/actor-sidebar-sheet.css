@@ -357,3 +357,11 @@ ul.left li {
   margin: 15px 0;
   padding: 5px;
 }
+
+td.characteristic-locked > input {
+  cursor: pointer;
+}
+
+div.aoe-button {
+  margin-bottom: 3px;
+}

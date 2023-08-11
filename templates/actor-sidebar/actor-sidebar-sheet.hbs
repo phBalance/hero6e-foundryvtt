@@ -47,33 +47,36 @@
                             </span>
                         </div>
                     </li>
-                
 
-                <ul class="defenses">
-                    <li title="{{defense.PDtags}}"><span>PD={{defense.PD}}</span></li>
-                    <li title="{{defense.rPDtags}}"><span>rPD={{defense.rPD}}</span></li>
-                    <li title="{{defense.EDtags}}"><span>ED={{defense.ED}}</span></li>
-                    <li title="{{defense.rEDtags}}"><span>rED={{defense.rED}}</span></li>
-                    <li title="{{defense.MDtags}}"><span>MD={{defense.MD}}</span></li>
-                    {{#if defense.rMD}}<li title="{{defense.rMDtags}}"><span>rMD={{defense.rMD}}</span></li>{{/if}}
 
-                    {{#if defense.drp}}<li title="{{defense.drptags}}"><span>drp={{defense.drp}}%</span></li>{{/if}}
-                    {{#if defense.dre}}<li title="{{defense.dretags}}"><span>dre={{defense.dre}}%</span></li>{{/if}}
-                    {{#if defense.drm}}<li title="{{defense.drmtags}}"><span>drm={{defense.drm}}%</span></li>{{/if}}
+                    <ul class="defenses">
+                        <li title="{{defense.PDtags}}"><span>PD={{defense.PD}}</span></li>
+                        <li title="{{defense.rPDtags}}"><span>rPD={{defense.rPD}}</span></li>
+                        <li title="{{defense.EDtags}}"><span>ED={{defense.ED}}</span></li>
+                        <li title="{{defense.rEDtags}}"><span>rED={{defense.rED}}</span></li>
+                        <li title="{{defense.MDtags}}"><span>MD={{defense.MD}}</span></li>
+                        {{#if defense.rMD}}<li title="{{defense.rMDtags}}"><span>rMD={{defense.rMD}}</span></li>{{/if}}
 
-                    {{#if defense.dnp}}<li title="{{defense.dnptags}}"><span>dnp={{defense.dnp}}</span></li>{{/if}}
-                    {{#if defense.dne}}<li title="{{defense.dnetags}}"><span>dne={{defense.dne}}</span></li>{{/if}}
-                    {{#if defense.dnm}}<li title="{{defense.dnmtags}}"><span>dnm={{defense.dnm}}</span></li>{{/if}}
+                        {{#if defense.drp}}<li title="{{defense.drptags}}"><span>drp={{defense.drp}}%</span></li>{{/if}}
+                        {{#if defense.dre}}<li title="{{defense.dretags}}"><span>dre={{defense.dre}}%</span></li>{{/if}}
+                        {{#if defense.drm}}<li title="{{defense.drmtags}}"><span>drm={{defense.drm}}%</span></li>{{/if}}
 
-                    {{#if defense.POWD}}<li title="{{defense.POWDtags}}"><span>POWD={{defense.POWD}}</span></li>{{/if}}
-                    {{#if defense.rPOWD}}<li title="{{defense.rPOWDtags}}"><span>rPOWD={{defense.rPOWD}}</span></li>{{/if}}
+                        {{#if defense.dnp}}<li title="{{defense.dnptags}}"><span>dnp={{defense.dnp}}</span></li>{{/if}}
+                        {{#if defense.dne}}<li title="{{defense.dnetags}}"><span>dne={{defense.dne}}</span></li>{{/if}}
+                        {{#if defense.dnm}}<li title="{{defense.dnmtags}}"><span>dnm={{defense.dnm}}</span></li>{{/if}}
 
-                </ul>
+                        {{#if defense.POWD}}<li title="{{defense.POWDtags}}"><span>POWD={{defense.POWD}}</span></li>
+                        {{/if}}
+                        {{#if defense.rPOWD}}<li title="{{defense.rPOWDtags}}"><span>rPOWD={{defense.rPOWD}}</span></li>
+                        {{/if}}
 
-                <div class="sidebar-actions flexrow flex-group-center">
-                    <button type="button" class="recovery-button">Take Recovery</button>
-                    <button type="button" class="presence-button">Presence Attack</button>
-                </div>
+                    </ul>
+
+                    <div class="sidebar-actions flexrow flex-group-center">
+                        <button type="button" class="recovery-button">Take Recovery</button>
+                        <button type="button" class="presence-button">Presence Attack</button>
+                        <button type="button" class="full-health-button" title="Restore all characteristics to max, remove status effects, and remote temporary effects">Full Health</button>
+                    </div>
 
             </section>
         </div>
@@ -327,8 +330,8 @@
                         <td>
                             {{#if (and (ne item.syste.realCost 0) (ne item.system.XMLID "LIST"))}}
                             {{item.system.realCost}}</td>
-                            {{/if}}
-                        
+                        {{/if}}
+
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
                             {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
                             {{#if (ne item.name "LIST")}}
@@ -595,15 +598,15 @@
                     </tr>
                     {{#each characteristicSet as |characteristic key|}}
                     <tr class="characteristic">
-                        <td data-tooltip="{{{characteristic.valueTitle}}}">
+                        <td data-tooltip="{{{characteristic.valueTitle}}}" class="{{#if characteristic.valueTitle}}characteristic-locked{{/if}}">
                             <input name="system.characteristics.{{characteristic.key}}.value" type="text"
                                 value="{{characteristic.value}}" data-dtype="Number"
                                 class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
                                 {{#if characteristic.valueTitle}}disabled{{/if}}>
                         </td>
-                        <td data-tooltip="{{{characteristic.maxTitle}}}">
+                        <td data-tooltip="{{{characteristic.maxTitle}}}" class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
                             <input name="system.characteristics.{{characteristic.key}}.max" type="text"
-                                class="{{#if (gt characteristic.delta 0)}}overMax{{/if}}{{#if (lt characteristic.delta 0)}}underMax{{/if}}"
+                                class="{{#if (gt characteristic.delta 0)}} overMax{{/if}}{{#if (lt characteristic.delta 0)}} underMax{{/if}}"
                                 value="{{characteristic.max}}" data-dtype="Number" {{#if
                                 characteristic.maxTitle}}disabled{{/if}}>
                         </td>
@@ -775,7 +778,8 @@
                     </tr>
                     {{/each}}
 
-                {{!-- </table>
+                    {{!--
+                </table>
 
                 <table> --}}
                     <tr class="activeEffects ConstantEffects">
@@ -933,7 +937,7 @@
                         </td>
                     </tr>
 
-                     <tr>
+                    <tr>
                         <th class="left">{{localize "ActorSheet.APPEARANCE"}}</th>
                     </tr>
                     <tr>
