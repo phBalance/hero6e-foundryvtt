@@ -361,3 +361,7 @@ ul.left li {
 td.characteristic-locked > input {
   cursor: pointer;
 }
+
+div.aoe-button {
+  margin-bottom: 3px;
+}

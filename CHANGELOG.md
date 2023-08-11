@@ -5,6 +5,7 @@
 - Fixed edge case where Combat tracker starts before segment 12 [#267](https://github.com/dmdorman/hero6e-foundryvtt/issues/267)
 - Added FULL HEALTH button to actor sheet. [#264](https://github.com/dmdorman/hero6e-foundryvtt/issues/264)
 - Clicking on a locked characteristic will prompt to unlock [#261](https://github.com/dmdorman/hero6e-foundryvtt/issues/261)
+- Improved AOE workflow. Attacker is prompted to place an AOE template, which automatically selects visible targets within the template.  AOE attacks assume template always hits hex and that all targets are hit regardless of their DCV.
 
 
 # Version 3.0.18
