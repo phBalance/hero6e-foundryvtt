@@ -1,5 +1,5 @@
 # Version 3.0.19
-- Framework modifiers now tranfser REDUCEDEND to slots [#266](https://github.com/dmdorman/hero6e-foundryvtt/issues/266)
+- Framework modifiers now transfer REDUCEDEND to slots [#266](https://github.com/dmdorman/hero6e-foundryvtt/issues/266)
 - Improved MULTIPOWER descriptions and slot costs.
 - Fixed Skill Box Prompt (- is harder) [#265](https://github.com/dmdorman/hero6e-foundryvtt/issues/265)
 - Fixed edge case where Combat tracker starts before segment 12 [#267](https://github.com/dmdorman/hero6e-foundryvtt/issues/267)
