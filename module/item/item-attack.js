@@ -132,7 +132,7 @@ export async function AttackOptions(item, event) {
     // Testing out a replacement for the dialog box.
     // This would allow for more interactive CSL.
     // This may allow better workflow for AOE and placement of templates.
-    await new ItemAttackFormApplication(data).render(true);
+    delete await new ItemAttackFormApplication(data).render(true);
 
 
     // return new Promise(resolve => {

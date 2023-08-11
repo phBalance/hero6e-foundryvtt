@@ -71,12 +71,11 @@ export class ItemAttackFormApplication extends FormApplication {
 
             if (this.aoeTemplate() || game.user.targets.size > 0) {
                 data.rollHide = false;
-            } else
-            {
+            } else {
                 data.rollHide = true;
             }
         }
-        
+
 
         data.ocvMod ??= item.system.ocv
         data.dcvMod ??= item.system.dcv
@@ -118,7 +117,7 @@ export class ItemAttackFormApplication extends FormApplication {
         await super._render(...args);
 
         // CSL can cause differences in form size.
-        if (this.position) {
+        if (this.position && this.rendered) {
             this.setPosition({ height: 'auto' });
         }
 
@@ -270,7 +269,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     aoeTemplate() {
         return Array.from(canvas.templates.getDocuments()).find(o => o.user.id === game.user.id && o.flags.itemId === this.data.item.id);
- 
+
     }
 
 }
