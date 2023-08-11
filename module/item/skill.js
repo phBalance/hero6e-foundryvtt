@@ -78,7 +78,7 @@ async function skillRoll(item, actor, html) {
 
 	let content = `<div class="tags"><div class="tags" style="line-height: 14px;">`
 	for (let tag of tags) {
-		content += `<span class="tag tag_transparent" title="${tag.title ||''}" >${tag.name} +${tag.value}</span>`;
+		content += `<span class="tag tag_transparent" title="${tag.title ||''}" >${tag.name} ${tag.value.signedString()}</span>`;
 	}
 	content += `</div></div>`;
 
