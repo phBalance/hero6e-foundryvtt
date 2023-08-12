@@ -12,7 +12,10 @@
     </div>
 
     <div class="tags">
-        <span class="tag">{{item.system.class}}</span>
+        {{#each attackTags as |tag id|}}
+        <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+        {{/each}}
+        {{!-- <span class="tag">{{item.system.class}}</span>
         {{#if item.system.killing}}
         <span class="tag">killing</span>
         {{/if}}
@@ -30,12 +33,12 @@
             data-aoe-value="{{item.system.areaOfEffect.value}}">
             {{item.system.areaOfEffect.type}} ({{item.system.areaOfEffect.value}})
         </span>
-        {{/if}}
+        {{/if}} --}}
     </div>
     <hr>
     <div class="tags">
         {{#each tags as |tag id|}}
-        <span class="tag tag_transparent" title="{{tag.title}}" >{{tag.name}} +{{tag.value}}</span>
+        <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} +{{tag.value}}</span>
         {{/each}}
     </div>
 
@@ -78,7 +81,7 @@
                 {{else}}
                 Apply Damage to <b>{{target.name}}{{item.system.XMLID}}</b>
                 {{/if}}
-                </button>
+            </button>
             {{/each}}
 
             {{#if targetIds}}

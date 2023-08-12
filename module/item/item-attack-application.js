@@ -74,6 +74,7 @@ export class ItemAttackFormApplication extends FormApplication {
             } else {
                 data.rollHide = true;
             }
+            
         }
 
 

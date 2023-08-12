@@ -42,7 +42,11 @@
         </div>
 
         <div class="tags">
-            <span class="tag">{{item.system.class}}</span>
+            {{#each attackTags as |tag id|}}
+                <span class="tag" {{#if tag.title}}title="{{tag.title}}"{{/if}}>{{tag.name}}</span>
+            {{/each}}
+
+            {{!-- <span class="tag">{{item.system.class}}</span>
             {{#if item.system.killing}}
             <span class="tag">killing</span>
             {{/if}}
@@ -61,6 +65,9 @@
                 {{item.system.areaOfEffect.type}} ({{item.system.areaOfEffect.value}})
             </span>
             {{/if}}
+            {{#if explosion}}
+            <span class="tag" title="Explosion">explosion</span>
+            {{/if}} --}}
         </div>
         <hr>
         <div class="tags">

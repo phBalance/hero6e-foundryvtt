@@ -157,6 +157,8 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
             targetIds.push(target.id)
         }
 
+
+
         let stateData = {
             // dice rolls
             //rolls: [attackRoll],
@@ -177,6 +179,9 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
             // endurance
             useEnd: useEnd,
             enduranceText: enduranceText,
+
+            // Misc
+            //attackTags,
         };
 
         // render card

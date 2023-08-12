@@ -660,6 +660,8 @@ div.tags {
 
 .tag {
   margin-right: 4px;
+  margin-top: 1px;
+  margin-bottom: 1px;
 }
 
 .tags .tag {
