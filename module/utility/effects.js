@@ -9,33 +9,34 @@ export async function onManageActiveEffect(event, owner) {
     if (!li) return
     //const effect = li.dataset.effectId ? owner.effects.get(li.dataset.effectId) : null;
     const effect = Array.from(owner.allApplicableEffects()).find(o => o.id == li.dataset.effectId)
+    const item = owner.items.get(li.dataset.effectId);
 
     // guard or perhaps a defense item
-    if (!effect) {
-        const item = owner.items.get(li.dataset.effectId);
-        if (item) {
-            switch (a.dataset.action) {
-                case "edit":
-                    item.sheet.render(true);
-                    break;
-                case "toggle":
-                    item.toggle();
-                    break;
-                case "delete":
-                    const confirmed = await Dialog.confirm({
-                        title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
-                        content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
-                    });
+    // if (!effect) {
+    //     const item = owner.items.get(li.dataset.effectId);
+    //     if (item) {
+    //         switch (a.dataset.action) {
+    //             case "edit":
+    //                 item.sheet.render(true);
+    //                 break;
+    //             case "toggle":
+    //                 item.toggle();
+    //                 break;
+    //             case "delete":
+    //                 const confirmed = await Dialog.confirm({
+    //                     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+    //                     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
+    //                 });
 
-                    if (confirmed) {
-                        item.delete()
-                        //this.render();
-                    }
-                    break;
-            }
-        }
-        return;
-    }
+    //                 if (confirmed) {
+    //                     item.delete()
+    //                     //this.render();
+    //                 }
+    //                 break;
+    //         }
+    //     }
+    //     return;
+    // }
 
     switch (a.dataset.action) {
         case "create":
@@ -48,8 +49,7 @@ export async function onManageActiveEffect(event, owner) {
                 //   disabled: li.dataset.effectType === "inactive"
             }]);
         case "edit":
-            if (!effect) return
-            return effect.sheet.render(true);
+            return (effect || item).sheet.render(true);
         case "delete":
             if (!effect) return
             const confirmed = await Dialog.confirm({
@@ -59,12 +59,17 @@ export async function onManageActiveEffect(event, owner) {
 
             if (confirmed) {
 
-                if (!effect.disabled) {
-                    await onActiveEffectToggle(effect)
+                if (effect) {
+                    if (!effect.disabled) {
+                        await onActiveEffectToggle(effect)
+                    }
+                    await effect.delete()
+                } else {
+                    item.delete()
                 }
-                await effect.delete()
 
-                let actor = effect.parent instanceof HeroSystem6eActor ? effect.parent : effect.parent.actor
+
+                //let actor = effect.parent instanceof HeroSystem6eActor ? effect.parent : effect.parent.actor
 
                 // Characteristic VALUE should not exceed MAX
                 // for (let char of Object.keys(actor.system.characteristics)) {
@@ -76,9 +81,8 @@ export async function onManageActiveEffect(event, owner) {
             }
             return
         case "toggle":
-            if (!effect) return
-            onActiveEffectToggle(effect)
-            return
+            if (effect) return onActiveEffectToggle(effect)
+            return item.toggle();
     }
 }
 

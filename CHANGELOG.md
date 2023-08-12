@@ -3,6 +3,7 @@
 - Initial AOE EXPLOSION support.  Sorts by range to center of template and shows distance to center.  Damage falloff not implemented yet.  [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)
 - Non PCs are marked as defeated when they drop below -10 STUN.  Once defeated they no longer get post segment 12 recoveries.
 - Improved handling of Mental attacks OMCV/DMCV, DMCV buffs and Mental Combat Skill Levels.
+- Fixed inability to manually create new active effects. [#271](https://github.com/dmdorman/hero6e-foundryvtt/issues/271)
 
 # Version 3.0.19
 - Framework modifiers now transfer REDUCEDEND to slots [#266](https://github.com/dmdorman/hero6e-foundryvtt/issues/266)
