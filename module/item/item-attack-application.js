@@ -186,9 +186,9 @@ export class ItemAttackFormApplication extends FormApplication {
         const item = this.data.item
         const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
         if (!aoe) return;
-
+        
         const aoeType = aoe.OPTION.toLowerCase();
-        const aoeValue = parseInt(aoe.LEVELS || 0);
+        const aoeValue = Math.max(1, parseInt(aoe.LEVELS || 0), 1); // Even 1 hex it technically 1m
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!token) return;

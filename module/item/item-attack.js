@@ -722,9 +722,15 @@ function getAttackTags(item) {
 
     for (let adder of item.system.adders) {
         switch (adder.XMLID) {
+            case "MINUSONEPIP":
+            case "PLUSONEHALFDIE":
+            case "PLUSONEPIP":
+                break;
+
             case "MULTIPLECLASSES":
                 attackTags.push({ name: `${adder.ALIAS}`, title: `${adder.XMLID}` });
                 break;
+
             default:
                 attackTags.push({ name: `${adder.ALIAS || adder.XMLID}`, title: `${adder.OPTION_ALIAS || ""}` });
         }
@@ -734,17 +740,27 @@ function getAttackTags(item) {
         switch (mod.XMLID) {
             case "AUTOFIRE":
                 const autoFireShots = parseInt(mod.OPTION_ALIAS.match(/\d+/))
-                attackTags.push({ name: `${mod.ALIAS || mod.XMLID}(${autoFireShots})` });
+                attackTags.push({ name: `${mod.ALIAS || mod.XMLID}(${autoFireShots})`, title: `${mod.OPTION_ALIAS || ""}` });
                 break;
+
+
             case "AOE":
                 attackTags.push({ name: `${mod.OPTION_ALIAS}(${mod.LEVELS})`, title: `${mod.XMLID}` });
                 break;
+
+            // case "LIMITEDPOWER":
+            //     attackTags.push({ name: `${mod.OPTION_ALIAS}`, title: `${mod.XMLID}` });
+            //     break;
+
             default:
-                attackTags.push({ name: `${mod.ALIAS || mod.XMLID}`, title: `${mod.OPTION_ALIAS || ""}` });
+                attackTags.push({ name: `${mod.ALIAS || mod.XMLID}`, title: `${mod.OPTION_ALIAS || mod.XMLID}` });
         }
 
         for (let adder of mod.adders) {
             switch (adder.XMLID) {
+                case "CONTINUOUSCONCENTRATION":
+                    attackTags.push({ name: `Continuous`, title: `${adder.ALIAS || ""}` });
+                    break;
                 default:
                     attackTags.push({ name: `${adder.ALIAS || adder.XMLID}`, title: `${adder.OPTION_ALIAS || ""}` });
             }
