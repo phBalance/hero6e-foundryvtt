@@ -1,54 +1,38 @@
 export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
-    // const token = combatant.token?.object;
-    // if ( token?.isVisible ) {
-    //   if ( !token.controlled ) token._onHoverIn(event, {hoverOutOthers: true});
-    //   this._highlighted = token;
-    // }
 
     async _onClickLeft(event) {
         await super._onClickLeft(event);
         //if (game.user.id != this.document.user.id) return;
-        await this.selectObjects({ checkPositions: true })
+        await this.selectObjects()
         await game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
-        console.log(event);
     }
 
     async _onUpdate(data, options, userId) {
         await super._onUpdate(data, options, userId);
         if (game.user.id != userId) return; //this.document.user.id) return;
-        await this.selectObjects({ checkPositions: true, templateData: data })
-        await game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
+        this._computeShape();
+        this.selectObjects({ checkPositions: true, templateData: data })
+        game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
     }
 
-    // async _onDragLeftDrop(...args) {
-    //     console.log("_refre_onDragLeftDropshTemplate");
-    //     await super._onDragLeftDrop(...args);
-    //     await this.selectObjects({ checkPositions: true}); //, templateData: data })
-    // }
+    _onRelease(...args) {
+        console.log("_onRelease", ...args);
+        super._onRelease(...args);
+    }
 
-    // async _refreshTemplate(...args) {
-    //     await super._refreshTemplate(...args);
-    //     console.log("_refreshTemplate", args)
-    //     await this.selectObjects({ checkPositions: true})
-    // }
+    async _refreshTemplate(...args) {
+        await super._refreshTemplate(...args);
 
-    // async _computeShape(...args) {
-    //     await this._computeShape(...args);
-    //     console.log("_computeShape", args)
-    //     await this.selectObjects({ checkPositions: true})
-    // }
+        // A tad hacky here.  When template is first rendered we don't want to selectObjects
+        if (game.user.id != this.document.user.id) return;
 
-    // async _onDragLeftMove(...args) {
-    //     await this._onDragLeftMove(...args);
-    //     console.log("_onDragLeftMove", args)
-    //     await this.selectObjects({ checkPositions: true})
-    // }
+        await this.selectObjects()
+        
+        if (!this.isPreview) {
+            await game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
+        }
+    }
 
-    // async _updateRotation(...args) {
-    //     await super._updateRotation(...args);
-    //     console.log("_updateRotation", args)
-    //     await this.selectObjects({ checkPositions: true })
-    // }
 
     // Tokens within template
     getTokensInTempalte(options) {

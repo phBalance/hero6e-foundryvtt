@@ -289,8 +289,7 @@ export class HeroSystem6eCombat extends Combat {
 
             // Edge case where combat tracker is empty and this is the first combatant.
             // Advance to phase 12
-            while (this.round === 1 && activeTurn < (this.turns.length -1) && this.turns[activeTurn].segment < 12)
-            {
+            while (this.round === 1 && activeTurn < (this.turns.length - 1) && this.turns[activeTurn].segment < 12) {
                 activeTurn++
             }
 
@@ -612,6 +611,17 @@ export class HeroSystem6eCombat extends Combat {
         let hasHidden = false;
         for (let combatant of this.combatants.filter(o => !o.defeated)) {
             const actor = combatant.actor;
+
+            /// If this is an NPC and their STUN <= 0 then leave them be.
+            // Typically, you should only use the Recovery Time Table for
+            // PCs. Once an NPC is Knocked Out below the -10 STUN level
+            // he should normally remain unconscious until the fight ends.
+            // ACTOR#ONUPDATE SHOULD MARK AS DEFEATED
+            // if (actor.type != "pc" && parseInt(actor.system.characteristics.stun.value) <= -10) 
+            // {
+            //     //console.log("defeated", combatant)
+            //     continue;
+            // }
 
             // Make sure we have automation enabled
             if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {

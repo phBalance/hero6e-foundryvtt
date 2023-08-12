@@ -74,6 +74,7 @@ export class ItemAttackFormApplication extends FormApplication {
             } else {
                 data.rollHide = true;
             }
+            
         }
 
 
@@ -85,10 +86,12 @@ export class ItemAttackFormApplication extends FormApplication {
         const csl = CombatSkillLevelsForAttack(item);
         if (csl && csl.skill) {
             data.cslSkill = csl.skill;
-            let _ocv = csl.omcv > 0 ? 'omcv' : 'ocv';
+            let mental = csl.skill.system.XMLID === "MENTAL_COMBAT_LEVELS"
+            let _ocv = mental ? 'omcv' : 'ocv';
+            let _dcv = mental ? 'dmcv' : 'dcv';
             data.cslChoices = { [_ocv]: _ocv };
             if (csl.skill.system.OPTION != "SINGLE") {
-                data.cslChoices.dcv = "dcv";
+                data.cslChoices[_dcv] = _dcv;
                 data.cslChoices.dc = "dc";
             }
 
@@ -125,13 +128,13 @@ export class ItemAttackFormApplication extends FormApplication {
 
     async _updateObject(event, formData) {
 
-        if (event.submitter.name === "roll") {
+        if (event.submitter?.name === "roll") {
             canvas.tokens.activate()
             await this.close();
             return _processAttackOptions(this.data.item, formData);
         }
 
-        if (event.submitter.name === "aoe") {
+        if (event.submitter?.name === "aoe") {
             return this._spawnAreaOfEffect(this.data);
         }
 
@@ -183,9 +186,9 @@ export class ItemAttackFormApplication extends FormApplication {
         const item = this.data.item
         const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
         if (!aoe) return;
-
+        
         const aoeType = aoe.OPTION.toLowerCase();
-        const aoeValue = parseInt(aoe.LEVELS || 0);
+        const aoeValue = Math.max(1, parseInt(aoe.LEVELS || 0), 1); // Even 1 hex it technically 1m
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!token) return;

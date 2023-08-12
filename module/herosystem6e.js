@@ -967,7 +967,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
                     let endValue = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
                     let stunValue = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
-                    a//wait 
+                    //await 
                     if (game.user.isGM) actor.update({
                         'system.characteristics.end.value': endValue,
                         'system.characteristics.stun.value': stunValue

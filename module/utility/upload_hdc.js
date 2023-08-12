@@ -750,6 +750,14 @@ export function XmlToItemData(xml, type) {
         }
     }
 
+    if (systemData.XMLID == "MENTAL_COMBAT_LEVELS") {
+         // Make sure CSL's are defined
+         systemData.csl = {}
+         for (let c = 0; c < parseInt(systemData.LEVELS.value); c++) {
+             systemData.csl[c] = 'omcv';
+         }
+    }
+
 
     if (systemData.XMLID == "SKILL_LEVELS") {
         switch (systemData.OPTION) {
@@ -2791,7 +2799,6 @@ export async function updateItem(item) {
             for (const effect of item.actor.effects.filter(o => o.origin == item.actor.uuid && !o.disabled)) {
                 for (const change of effect.changes) {
                     if (change.key == item.id) {
-                        console.log(effect)
                         switch (change.mode) {
                             case CONST.ACTIVE_EFFECT_MODES.ADD:
                                 const ActivePointsPerLevel = parseInt(item.system.activePoints) / parseFloat(item.system.LEVELS.value)
