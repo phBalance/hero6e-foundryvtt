@@ -927,10 +927,31 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
 
-
-
     // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
     let newTerms = JSON.parse(damageData.terms);
+
+    // Explosion
+    // Simple rules is to remove the hightest dice term for each
+    // hex distance from center.  Works fine when radius = dice,
+    // but that isn't alwasy the case.
+    // const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    // const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
+    //     game.scenes.current.templates.find(o => o.user.id === game.user.id);
+    // const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+    // if (explosion) {
+
+    //     // First thing to do is sort the dice terms (high to low)
+    //     let results = newTerms[0].results
+    //     results.sort(function (a, b) { return b.result - a.result });
+
+    //     // Remove highest terms based on distance
+    //     let distance = canvas.grid.measureDistance(aoeTemplate, token, { gridSpaces: true });
+    //     let pct = distance / aoeTemplate.distance
+    //     let termsToRemove = Math.floor(pct * (results.length - 1));
+    //     results = results.splice(0, termsToRemove)
+    // }
+
+    // Finish spoofing terms for die roll
     for (let idx in newTerms) {
         let term = newTerms[idx]
         switch (term.class) {
@@ -945,6 +966,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 break
         }
     }
+
+
+
+
+
     let newRoll = Roll.fromTerms(newTerms)
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
