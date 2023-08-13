@@ -107,7 +107,7 @@ jobs:
       run: echo "RELEASE_NAME=${{ needs.check_release.outputs.release }}" >> $GITHUB_ENV
 
     - name: Publish to Foundry
-      uses: Varriount/fvtt-autopublish@latest
+      uses: Varriount/fvtt-autopublish@v1.1.1
       with:
         username: ${{ secrets.FOUNDRY_ADMIN_USERNAME }}
         password: ${{ secrets.FOUNDRY_ADMIN_PASSWORD }}
