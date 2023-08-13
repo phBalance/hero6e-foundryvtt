@@ -106,6 +106,9 @@ jobs:
     - name: Set RELEASE_NAME environment variable
       run: echo "RELEASE_NAME=${{ needs.check_release.outputs.release }}" >> $GITHUB_ENV
 
+    - name: Set MANIFEST_FILE_PATH environment variable
+      run: echo "MANIFEST_FILE_PATH=system.json" >> $GITHUB_ENV
+
     - name: Publish to Foundry
       uses: Varriount/fvtt-autopublish@v1.1.1
       with:
