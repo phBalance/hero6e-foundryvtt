@@ -1,3 +1,5 @@
+# Version 3.0.21
+- Macro compendium and supporting code for "Full Heal All Owned Tokens in Scene"
 # Version 3.0.20
 - Improved AOE template targeting.
 - Initial AOE EXPLOSION support.  Sorts by range to center of template and shows distance to center.  Damage falloff not implemented yet.  [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)

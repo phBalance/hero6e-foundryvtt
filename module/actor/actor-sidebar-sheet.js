@@ -130,7 +130,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                                 if (token) {
 
                                     let distance = dragRuler.getMovedDistanceFromToken(token);
-                                    let speed = dragRuler.getRangesFromSpeedProvider(token)[1].range;
+                                    let ranges = dragRuler.getRangesFromSpeedProvider(token);
+                                    let speed = ranges.length > 1 ? ranges[1].range : 0;
                                     let delta = distance;
                                     if (delta > speed / 2) {
                                         delta = speed - delta;
@@ -881,40 +882,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     }
 
     async _onFullHealth(event) {
-
+        
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
             content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content")
         });
         if (!confirmed) return;
-
-        // Remove all status effects
-        for (let status of this.actor.statuses) {
-            let ae = Array.from(this.actor.effects).find(o => o.statuses.has(status))
-            await ae.delete();
-        }
-
-
-        // Remove temporary effects
-        let tempEffects = Array.from(this.actor.effects).filter(o => parseInt(o.duration?.seconds || 0) > 0)
-        for (let ae of tempEffects) {
-            await ae.delete();
-        }
-
-        // Set Characterstics VALUE to MAX
-        for (let char of Object.keys(this.actor.system.characteristics)) {
-            let value = parseInt(this.actor.system.characteristics[char].value);
-            let max = parseInt(this.actor.system.characteristics[char].max);
-            if (value != max) {
-                //this.actor.system.characteristics[char].value = max;
-                await this.actor.update({ [`system.characteristics.${char}.value`]: max })
-            }
-        }
-
-        // We just cleared encumbrance, check if it applies again
-        this.actor.applyEncumbrancePenalty();
-
-
+        return this.actor.FullHealth();
 
     }
 
