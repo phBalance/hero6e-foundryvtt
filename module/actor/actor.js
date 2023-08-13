@@ -601,6 +601,34 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
+    async FullHealth() {
+
+        // Remove all status effects
+        for (let status of this.statuses) {
+            let ae = Array.from(this.effects).find(o => o.statuses.has(status))
+            await ae.delete();
+        }
+
+        // Remove temporary effects
+        let tempEffects = Array.from(this.effects).filter(o => parseInt(o.duration?.seconds || 0) > 0)
+        for (let ae of tempEffects) {
+            await ae.delete();
+        }
+
+        // Set Characterstics VALUE to MAX
+        for (let char of Object.keys(this.system.characteristics)) {
+            let value = parseInt(this.system.characteristics[char].value);
+            let max = parseInt(this.system.characteristics[char].max);
+            if (value != max) {
+                //this.actor.system.characteristics[char].value = max;
+                await this.update({ [`system.characteristics.${char}.value`]: max })
+            }
+        }
+
+        // We just cleared encumbrance, check if it applies again
+        this.applyEncumbrancePenalty();
+
+    }
 
 }
 
