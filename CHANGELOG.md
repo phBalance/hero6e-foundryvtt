@@ -1,4 +1,4 @@
-# Version 3.0.21
+# Version 3.0.22
 - Macro compendium and supporting code for "Full Heal All Owned Tokens in Scene"
 # Version 3.0.20
 - Improved AOE template targeting.
