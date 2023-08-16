@@ -1,3 +1,6 @@
+# Version 3.0.23
+- Improved AOE EXPLOSION support. Damage is now based on distance from template. [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)
+
 # Version 3.0.22
 - Fix missing Macro compendium and supporting code for "Full Heal All Owned Tokens in Scene"
 

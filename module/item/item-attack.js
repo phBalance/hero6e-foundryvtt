@@ -514,7 +514,7 @@ export async function AttackToHit(item, options) {
 
             // Distance from center
             if (aoeTemplate) {
-                let distance = canvas.grid.measureDistance(aoeTemplate, target, { gridSpaces: true });
+                let distance = canvas.grid.measureDistance(aoeTemplate, target.center, { gridSpaces: true });
                 by += ` (${distance}m from center)`;
             }
         }
@@ -807,12 +807,61 @@ export async function _onRollDamage(event) {
 
     const damageDetail = await _calcDamage(damageResult, item, toHitData)
 
+    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
+        game.scenes.current.templates.find(o => o.user.id === game.user.id);
+    const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+
+
     // Apply Damage button for specific targets
     let targetTokens = []
+    //let damageAoe = []
     for (const id of toHitData.targetids.split(',')) {
         let token = canvas.scene.tokens.get(id)
         if (token) {
-            targetTokens.push(token)
+            //targetTokens.push(token)
+            if (explosion) {
+                // Distance from center
+                if (aoeTemplate) {
+                    let newTerms = JSON.parse(JSON.stringify(damageResult.terms));
+
+
+                    // Explosion
+                    // Simple rules is to remove the hightest dice term for each
+                    // hex distance from center.  Works fine when radius = dice,
+                    // but that isn't alwasy the case.
+                    // First thing to do is sort the dice terms (high to low)
+                    let results = newTerms[0].results
+                    results.sort(function (a, b) { return b.result - a.result });
+
+                    // Remove highest terms based on distance
+                    let distance = canvas.grid.measureDistance(aoeTemplate, token.object.center, { gridSpaces: true });
+                    let pct = distance / aoeTemplate.distance
+                    let termsToRemove = Math.floor(pct * (results.length - 1));
+                    results = results.splice(0, termsToRemove)
+
+
+                    // Finish spoofing terms for die roll
+                    for (let idx in newTerms) {
+                        let term = newTerms[idx]
+                        switch (term.class) {
+                            case "Die":
+                                newTerms[idx] = Object.assign(new Die(), term)
+                                break
+                            case "OperatorTerm":
+                                newTerms[idx] = Object.assign(new OperatorTerm(), term)
+                                break
+                            case "NumericTerm":
+                                newTerms[idx] = Object.assign(new NumericTerm(), term)
+                                break
+                        }
+                    }
+                    let newRoll = Roll.fromTerms(newTerms);
+                    newRoll._total = newRoll.terms[0].results.reduce((partialSum, a) => partialSum + a.result, 0);
+                    newRoll.title = newRoll.terms[0].results.map(o=> o.result).toString();
+                    targetTokens.push({ token, distance, roll: newRoll, terms: JSON.stringify(newRoll.terms) })
+                }
+            }
         }
     }
 
@@ -929,7 +978,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
     let newTerms = JSON.parse(damageData.terms);
-
+    
     // Explosion
     // Simple rules is to remove the hightest dice term for each
     // hex distance from center.  Works fine when radius = dice,
@@ -972,6 +1021,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
 
     let newRoll = Roll.fromTerms(newTerms)
+    newRoll._total ??= newRoll.terms[0].results.reduce((partialSum, a) => partialSum + parseInt(a.result), 0);
+    newRoll.title = newRoll.terms[0].results.map(o=> o.result).toString();
+    newRoll._evaluated = true;
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
@@ -1207,6 +1259,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     let cardData = {
         item: item,
         // dice rolls
+        roll: newRoll,
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
 

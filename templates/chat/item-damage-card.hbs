@@ -70,16 +70,15 @@
                 {{/if}}
             </button>
 
-
             {{#each targetTokens as |target id|}}
-            <button class="apply-damage" title="Apply damage to {{target.name}}." data-itemId="{{../item.uuid}}"
-                data-target-token-id="{{target.id}}" data-bodyDamage="{{../bodyDamage}}"
-                data-stunDamage="{{../stunDamage}}" data-terms="{{../terms}}"
+            <button class="apply-damage" title="Apply damage to {{target.token.name}}." data-itemId="{{../item.uuid}}"
+                data-target-token-id="{{target.token.id}}" data-bodyDamage="{{../bodyDamage}}"
+                data-stunDamage="{{../stunDamage}}" data-terms="{{target.terms}}"
                 data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">
                 {{#if ../adjustment}}
                 Apply {{../item.system.XMLID}} to <b>{{target.name}}</b>
                 {{else}}
-                Apply Damage to <b>{{target.name}}{{item.system.XMLID}}</b>
+                Apply <span title="{{target.roll.title}}">{{target.roll.total}}</span> Damage to <b>{{target.token.name}}{{item.system.XMLID}}</b>
                 {{/if}}
             </button>
             {{/each}}
