@@ -74,7 +74,7 @@ export class ItemAttackFormApplication extends FormApplication {
             } else {
                 data.rollHide = true;
             }
-            
+
         }
 
 
@@ -186,7 +186,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const item = this.data.item
         const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
         if (!aoe) return;
-        
+
         const aoeType = aoe.OPTION.toLowerCase();
         const aoeValue = Math.max(1, parseInt(aoe.LEVELS || 0), 1); // Even 1 hex it technically 1m
         const actor = item.actor;
@@ -228,6 +228,12 @@ export class ItemAttackFormApplication extends FormApplication {
                 break;
             }
             case ("cone"): {
+                if (aoe.adders.find(o => o.XMLID === "THINCONE")) {
+                    templateData.angle = 31;
+                } else {
+                    templateData.angle = 61; // 60 has odd rounding error
+                }
+
                 break;
             }
             case ("ray"): {

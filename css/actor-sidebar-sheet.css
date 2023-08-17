@@ -365,3 +365,13 @@ td.characteristic-locked > input {
 div.aoe-button {
   margin-bottom: 3px;
 }
+
+div.applyDamageAmount {
+  border-top: 1px solid var(--color-underline-header);
+  border-bottom: 1px solid var(--color-underline-header);
+  text-align: center;
+  font-size: var(--font-size-20);
+  line-height: 24px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+}

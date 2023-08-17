@@ -751,11 +751,11 @@ export function XmlToItemData(xml, type) {
     }
 
     if (systemData.XMLID == "MENTAL_COMBAT_LEVELS") {
-         // Make sure CSL's are defined
-         systemData.csl = {}
-         for (let c = 0; c < parseInt(systemData.LEVELS.value); c++) {
-             systemData.csl[c] = 'omcv';
-         }
+        // Make sure CSL's are defined
+        systemData.csl = {}
+        for (let c = 0; c < parseInt(systemData.LEVELS.value); c++) {
+            systemData.csl[c] = 'omcv';
+        }
     }
 
 
@@ -827,7 +827,6 @@ export function XmlToItemData(xml, type) {
 
         systemData.powers.push(_power)
     }
-
 
     // ADDERS
     for (let ADDER of xml.querySelectorAll(":scope > ADDER")) {
@@ -1137,6 +1136,15 @@ function calcBasePointsPlusAdders(item) {
         || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
     )
 
+    // FLASH (target group cost 5 per level, non-targeting costs 3 per level)
+    if (system.XMLID === "FLASH") {
+        if (system.OPTIONID === "SIGHTGROUP") { // The only targeting group
+            costPerLevel = 5;
+        } else {
+            costPerLevel = 3;
+        }
+    }
+
     // But configPowerInfo?.costPerLevel could actually be 0 (EXTRALIMBS)
     if (configPowerInfo?.costPerLevel != undefined) {
         costPerLevel = parseFloat(configPowerInfo?.costPerLevel)
@@ -1313,11 +1321,11 @@ function calcRealCost(item) {
     // This may be a slot in a framework if so get parent
     const parent = item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
 
-    let modifiers =  system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)
+    let modifiers = system.modifiers.filter(o => parseFloat(o.BASECOST) < 0)
 
     // Add limitations from parent
     if (parent) {
-        modifiers.push(... parent.system.modifiers.filter(o => parseFloat(o.BASECOST) < 0))
+        modifiers.push(...parent.system.modifiers.filter(o => parseFloat(o.BASECOST) < 0))
     }
 
     let limitations = 0
@@ -1716,6 +1724,46 @@ export function updateItemDescription(item) {
             system.description = `${system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`
             break;
 
+
+
+        case "FLASH":
+            //Sight and Hearing Groups Flash 5 1/2d6
+            //Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6
+            // Groups
+            let _groups = [system.OPTION_ALIAS]
+            for (let addr of system.adders.filter(o => o.XMLID.indexOf("GROUP") > -1)) {
+                _groups.push(addr.ALIAS)
+            }
+            if (_groups.length === 1) {
+                system.description = _groups[0];
+            } else {
+                system.description = _groups.slice(0, -1).join(", ").replace(/ Group/g, "");
+                system.description += " and " + _groups.slice(-1) + "s";
+            }
+
+
+            // spacing
+            // if (_groups.length > 1) {
+            //     system.description += ", ";
+            // }
+
+            // singles
+            let _singles = [];
+            for (let addr of system.adders.filter(o => o.XMLID.indexOf("GROUP") === -1 && o.XMLID.match(/(NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/))) {
+                _singles.push(addr.ALIAS);
+            }
+            if (_singles.length === 1) {
+                system.description += ", " + _singles[0];
+            } else {
+                system.description += ", " + _singles.slice(0, -1).join(", ");
+                system.description += " and " + _singles.slice(-1);
+            }
+
+            system.description += ` ${system.ALIAS} ${system.LEVELS.value}d6 `;
+            break;
+
+
+
         default:
             if (configPowerInfo && configPowerInfo.powerType.includes("characteristic")) {
                 system.description = "+" + system.LEVELS?.value + " " + system.ALIAS;
@@ -1833,6 +1881,10 @@ export function updateItemDescription(item) {
                     }
 
                     break;
+                case "FLASH":
+                    // The senses are already in the description
+                    system.description += "(" + _adderArray.filter(o=> !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i)).join("; ") + ")"
+                    break;
                 default:
                     system.description += "(" + _adderArray.join("; ") + ")"
             }
@@ -1857,7 +1909,7 @@ export function updateItemDescription(item) {
     // MULTIPOWER slots typically include limitations
     let modifiers = system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })
     if (parent) {
-        modifiers.push(... parent.system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
+        modifiers.push(...parent.system.modifiers.filter(o => o.BASECOST < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
     }
 
     // Disadvantages sorted low to high

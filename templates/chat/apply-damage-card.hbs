@@ -1,9 +1,9 @@
-{{!-- {{ log 'HEROSYS apply-damage-card' this }} --}}
-<div class="hero chat-card item-card toHit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}"
-  {{#if tokenId}}data-token-id="{{tokenId}}"{{/if}}>
+{{ log 'HEROSYS apply-damage-card' this }}
+<div class="hero chat-card item-card toHit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+  tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
   <header class="card-header flexrow">
-    <img src="{{item.img}}" title="{{item.name}}" width="36" height="36"/>
+    <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
     <h3>vs {{targetToken.name}}</h3>
   </header>
 
@@ -14,45 +14,47 @@
     Attack: <span class="item-name">{{item.name}}</span>
   </div>
 
+  <div class="applyDamageAmount">
+    <span title="{{roll.title}}">{{roll.total}} Damage</span>
+  </div>
+
   <div class="tags">
     <span class="tag">{{item.system.class}}</span>
     {{#if item.system.killing}}
-      <span class="tag">killing</span>
+    <span class="tag">killing</span>
     {{/if}}
     {{#if (ne item.system.stunBodyDamage 'stunbody')}}
-        <span class="tag">{{item.system.stunBodyDamage}}</span>
+    <span class="tag">{{item.system.stunBodyDamage}}</span>
     {{/if}}
     {{#if item.system.piercing}}
-        <span class="tag" title="Armor Piercing">APx{{item.system.piercing}}</span>
+    <span class="tag" title="Armor Piercing">APx{{item.system.piercing}}</span>
     {{/if}}
-      {{#if item.system.penetrating}}
-        <span class="tag" title="Penetrating">PENx{{item.system.penetrating}}</span>
+    {{#if item.system.penetrating}}
+    <span class="tag" title="Penetrating">PENx{{item.system.penetrating}}</span>
     {{/if}}
     {{#if (ne item.system.areaOfEffect.type 'none')}}
-        <span class="tag area-effect-tag" 
-            data-aoe-type="{{item.system.areaOfEffect.type}}"
-            data-aoe-value="{{item.system.areaOfEffect.value}}"
-        >
-            {{item.system.areaOfEffect.type}} ({{item.system.areaOfEffect.value}})
-        </span>
+    <span class="tag area-effect-tag" data-aoe-type="{{item.system.areaOfEffect.type}}"
+      data-aoe-value="{{item.system.areaOfEffect.value}}">
+      {{item.system.areaOfEffect.type}} ({{item.system.areaOfEffect.value}})
+    </span>
     {{/if}}
   </div>
   <hr>
   <div class="tags">
-      {{#each tags as |tag id|}}
-      <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} +{{tag.value}}</span>
-      {{/each}}
+    {{#each tags as |tag id|}}
+    <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} +{{tag.value}}</span>
+    {{/each}}
   </div>
 
   {{#if damageNegationValue}}
   <div class="card-section">
     <div class="damage-roll">{{{ renderedDamageRoll }}}</div>
     {{#if hasStunMultiplierRoll}}
-      <div class="description-tiny">Stun Multiplier</div>
-      <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
+    <div class="description-tiny">Stun Multiplier</div>
+    <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
     {{/if}}
     <div class="description-tiny">{{ bodyDamage }} BODY; {{ stunDamage }} STUN (after DN)</div>
-  </div> 
+  </div>
   {{/if}}
 
   <div class="card-section">
@@ -64,11 +66,11 @@
     <div class="description-medium">{{ bodyDamageEffective }} BODY; {{ stunDamageEffective }} STUN</div>
     <div class="description-tiny">{{{ effects }}}</div>
     {{#if useKnockBack}}
-        <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
-        <div class="description-tiny">{{ knockbackMessage }}</div>
+    <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
+    <div class="description-tiny">{{ knockbackMessage }}</div>
     {{/if}}
 
-    
+
   </div>
 
 </div>

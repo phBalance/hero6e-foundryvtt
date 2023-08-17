@@ -1,3 +1,8 @@
+# Version 3.0.23
+- Improved AOE EXPLOSION support. Damage is now based on distance from template. [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)
+- Area Effect Cone is now 60º and narrow cone 30º support [#276](https://github.com/dmdorman/hero6e-foundryvtt/issues/276)
+- Initial FLASH support [#184](https://github.com/dmdorman/hero6e-foundryvtt/issues/184)
+
 # Version 3.0.22
 - Fix missing Macro compendium and supporting code for "Full Heal All Owned Tokens in Scene"
 
