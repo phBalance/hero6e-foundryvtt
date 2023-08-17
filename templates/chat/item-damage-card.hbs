@@ -55,7 +55,8 @@
             <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
             {{/if}}
             <div class="description-tiny">
-                (Raw Roll) {{ bodyDamage }} BODY; {{ stunDamage }} STUN
+                (
+                    {{#if item.system.USESTANDARDEFFECT}}Standard Effect{{else}}Raw Roll{{/if}}) {{ bodyDamage }} BODY; {{ stunDamage }} STUN
             </div>
         </div>
 

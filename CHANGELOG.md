@@ -1,5 +1,9 @@
+# Version 3.0.25
+- Support for Use Standard Effect. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
+- Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on damage.
+
 # Version 3.0.24
-- Fix for Firefox where svg files apparently must have width="512" height="512".
+- Fix for Firefox where svg files must have width="512" height="512". [#278](https://github.com/dmdorman/hero6e-foundryvtt/discussions/278)
 
 # Version 3.0.23
 - Improved AOE EXPLOSION support. Damage is now based on distance from template. [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)

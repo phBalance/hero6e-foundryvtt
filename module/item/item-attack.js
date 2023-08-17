@@ -693,10 +693,7 @@ function getAttackTags(item) {
         attackTags.push({ name: `killing` });
     }
 
-    // FLASH
-    if (item.system.XMLID === "FLASH") {
-        attackTags.push({ name: item.system.OPTION_ALIAS })
-    }
+
 
     for (let adder of item.system.adders) {
         switch (adder.XMLID) {
@@ -712,6 +709,16 @@ function getAttackTags(item) {
             default:
                 attackTags.push({ name: `${adder.ALIAS || adder.XMLID}`, title: `${adder.OPTION_ALIAS || ""}` });
         }
+    }
+
+    // USESTANDARDEFFECT
+    if (item.system.USESTANDARDEFFECT) {
+        attackTags.push({ name: `Standard Effect`, title: `USESTANDARDEFFECT` })
+    }
+
+    // FLASH
+    if (item.system.XMLID === "FLASH") {
+        attackTags.push({ name: item.system.OPTION_ALIAS })
     }
 
     for (let mod of item.system.modifiers) {
@@ -782,7 +789,33 @@ export async function _onRollDamage(event) {
 
     let roll = new Roll(damageRoll, actor.getRollData());
     let damageResult = await roll.roll({ async: true });
-    let damageRenderedResult = await damageResult.render();
+
+    // USESTANDARDEFFECT
+    // if (item.system.USESTANDARDEFFECT) {
+    //     damageResult.standardEffect ??= { stun: 0, body: 0 }
+
+    //     // Override term results
+    //     for (let term of damageResult.terms.filter(o => o.number)) {
+    //         if (term.results) {
+    //             for (let result of term.results) {
+    //                 if (term.faces === 6) {
+    //                     result.result = 3;
+    //                     damageResult.standardEffect.stun += 3;
+    //                     damageResult.standardEffect.body += 1;
+    //                 } else {  // + half dice
+    //                     damageResult.standardEffect.stun += 1;
+    //                     damageResult.standardEffect.body += 1;
+    //                 }
+    //             }
+    //         } else { // +1
+    //             damageResult.standardEffect.stun += 1;
+    //             damageResult.standardEffect.body += 1;
+    //         }
+    //     }
+    // }
+
+
+    let damageRenderedResult = item.system.USESTANDARDEFFECT ? "" : await damageResult.render();
 
     const damageDetail = await _calcDamage(damageResult, item, toHitData)
 
@@ -890,11 +923,16 @@ export async function _onRollDamage(event) {
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        roll: damageResult,
+
 
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
+    }
+    if (!item.system.USESTANDARDEFFECT) {
+        chatData.roll = damageResult;
+    } else {
+        chatData.standardEffect = damageResult.standardEffect;
     }
 
     return ChatMessage.create(chatData);
@@ -909,6 +947,7 @@ export async function _onApplyDamage(event) {
     const button = event.currentTarget;
     button.blur()  // The button remains hilighed for some reason; kluge to fix.
     const toHitData = { ...button.dataset }
+    const item = fromUuidSync(event.currentTarget.dataset.itemid)
 
     // Single target
     if (toHitData.targetTokenId) {
@@ -917,8 +956,28 @@ export async function _onApplyDamage(event) {
 
     // All targets
     if (toHitData.targetIds) {
-        for (const id of toHitData.targetIds.split(',')) {
-            _onApplyDamageToSpecificToken(event, id)
+
+        let targetsArray = toHitData.targetIds.split(',');
+
+        // If AOE then sort by distance from center
+        const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+        const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
+            game.scenes.current.templates.find(o => o.user.id === game.user.id);
+        const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+
+        if (explosion) {
+            
+            targetsArray.sort(function (a, b) {
+                let distanceA = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(a).object, { gridSpaces: true });
+                let distanceB = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(b).object, { gridSpaces: true });
+                return distanceA - distanceB;
+            })
+        }
+
+
+        for (const id of targetsArray) {
+            console.log(game.scenes.current.tokens.get(id).name);
+            await _onApplyDamageToSpecificToken(event, id)
         }
         return
     }
@@ -959,26 +1018,51 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
     let newTerms = JSON.parse(damageData.terms);
 
+
+    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
+        game.scenes.current.templates.find(o => o.user.id === game.user.id);
+    const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+
     // Explosion
-    // Simple rules is to remove the hightest dice term for each
-    // hex distance from center.  Works fine when radius = dice,
-    // but that isn't alwasy the case.
-    // const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
-    // const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
-    //     game.scenes.current.templates.find(o => o.user.id === game.user.id);
-    // const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
-    // if (explosion) {
+    if (explosion) {
+        // Distance from center
+        if (aoeTemplate) {
 
-    //     // First thing to do is sort the dice terms (high to low)
-    //     let results = newTerms[0].results
-    //     results.sort(function (a, b) { return b.result - a.result });
+            // Explosion
+            // Simple rules is to remove the hightest dice term for each
+            // hex distance from center.  Works fine when radius = dice,
+            // but that isn't alwasy the case.
+            // First thing to do is sort the dice terms (high to low)
+            let results = newTerms[0].results
+            results.sort(function (a, b) { return b.result - a.result });
 
-    //     // Remove highest terms based on distance
-    //     let distance = canvas.grid.measureDistance(aoeTemplate, token, { gridSpaces: true });
-    //     let pct = distance / aoeTemplate.distance
-    //     let termsToRemove = Math.floor(pct * (results.length - 1));
-    //     results = results.splice(0, termsToRemove)
-    // }
+            // Remove highest terms based on distance
+            let distance = canvas.grid.measureDistance(aoeTemplate, token.center, { gridSpaces: true });
+            let pct = distance / aoeTemplate.distance
+            let termsToRemove = Math.floor(pct * (results.length - 1));
+            results = results.splice(0, termsToRemove)
+
+
+            // Finish spoofing terms for die roll
+            for (let idx in newTerms) {
+                let term = newTerms[idx]
+                switch (term.class) {
+                    case "Die":
+                        newTerms[idx] = Object.assign(new Die(), term)
+                        break
+                    case "OperatorTerm":
+                        newTerms[idx] = Object.assign(new OperatorTerm(), term)
+                        break
+                    case "NumericTerm":
+                        newTerms[idx] = Object.assign(new NumericTerm(), term)
+                        break
+                }
+            }
+            let newRoll = Roll.fromTerms(newTerms);
+            newRoll._total = newRoll.terms[0].results.reduce((partialSum, a) => partialSum + a.result, 0);
+        }
+    }
 
     // Finish spoofing terms for die roll
     for (let idx in newTerms) {
@@ -1603,40 +1687,69 @@ async function _calcDamage(damageResult, item, options) {
 
     let pip = 0
 
-    // We may have spoofed a roll, so total is missing.
-    if (!damageResult.total) {
-        damageResult._total = 0
+    // USESTANDARDEFFECT
+    if (item.system.USESTANDARDEFFECT) {
 
-        for (let term of damageResult.terms) {
-            if (term instanceof OperatorTerm) continue;
-            if (term instanceof Die) {
+        // Override term results
+        for (let term of damageResult.terms.filter(o => o.number)) {
+            if (term.results) {
                 for (let result of term.results) {
-                    damageResult._total += result.result
+                    if (term.faces === 6) {
+                        result.result = 3;
+                        stun += 3;
+                        body += 1;
+                    } else {  // + half dice
+                        result.result = 1;
+                        stun += 1;
+                        body += 1;
+                    }
                 }
-                continue
-            }
-            if (term instanceof NumericTerm) {
-                damageResult._total += term.number
+            } else { // +1
+                stun += 1;
+                body += 1;
             }
         }
+    }
 
-        damageResult._formula = damageResult.terms[0].results.length + "d6"
-        if (damageResult.terms[1]) {
-            damageResult._formula += " + "
+    else {
 
-            if (damageResult.terms[2] instanceof Die) {
-                damageResult._formula += damageResult.terms[2].results[0].rersults += "1d3"
+
+
+        // We may have spoofed a roll, so total is missing.
+        if (!damageResult.total) {
+            damageResult._total = 0
+
+            for (let term of damageResult.terms) {
+                if (term instanceof OperatorTerm) continue;
+                if (term instanceof Die) {
+                    for (let result of term.results) {
+                        damageResult._total += result.result
+                    }
+                    continue
+                }
+                if (term instanceof NumericTerm) {
+                    damageResult._total += term.number
+                }
             }
 
-            if (damageResult.terms[2] instanceof NumericTerm) {
-                damageResult._formula += damageResult.terms[2].number
+            damageResult._formula = damageResult.terms[0].results.length + "d6"
+            if (damageResult.terms[1]) {
+                damageResult._formula += " + "
+
+                if (damageResult.terms[2] instanceof Die) {
+                    damageResult._formula += damageResult.terms[2].results[0].rersults += "1d3"
+                }
+
+                if (damageResult.terms[2] instanceof NumericTerm) {
+                    damageResult._formula += damageResult.terms[2].number
+                }
+
+
             }
 
 
+            damageResult._evaluated = true
         }
-
-
-        damageResult._evaluated = true
     }
 
     let hasStunMultiplierRoll = false;
@@ -1701,7 +1814,7 @@ async function _calcDamage(damageResult, item, options) {
     if (itemData.killing) {
         // Killing Attack
         hasStunMultiplierRoll = true;
-        body = damageResult.total;
+        body = item.system.USESTANDARDEFFECT ? stun : damageResult.total;
         //let hitLocationModifiers = [1, 1, 1, 0];
 
         // 6E uses 1d3 stun multiplier
@@ -1749,8 +1862,8 @@ async function _calcDamage(damageResult, item, options) {
             }
         }
 
-        stun = damageResult.total;
-        body = countedBody;
+        stun = item.system.USESTANDARDEFFECT ? stun : damageResult.total;
+        body = item.system.USESTANDARDEFFECT ? body : countedBody;
     }
 
 

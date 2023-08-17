@@ -675,7 +675,7 @@ export function XmlToItemData(xml, type) {
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
         "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
         "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE",
-        "USE_END_RESERVE", "ULTRA_SLOT"
+        "USE_END_RESERVE", "ULTRA_SLOT", "USESTANDARDEFFECT"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
@@ -1503,7 +1503,6 @@ export function updateItemDescription(item) {
             if (system.USESTANDARDEFFECT) {
                 system.description += " (standard effect: " + parseInt(system.LEVELS?.value * 3) + " points)"
             }
-            //system.description = `${system.ALIAS} ${system.LEVELS}d6`
             break;
 
         case "STRETCHING":
