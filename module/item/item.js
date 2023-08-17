@@ -148,6 +148,7 @@ export class HeroSystem6eItem extends Item {
                     case "DRAIN":
                     case "AID":
                     case "STRIKE":
+                    case "FLASH":
                     case undefined:
                         return await Attack.AttackOptions(this, event)
 

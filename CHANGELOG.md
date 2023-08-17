@@ -1,3 +1,6 @@
+# Version 3.0.24
+- Fix for Firefox where svg files apparently must have width="512" height="512".
+
 # Version 3.0.23
 - Improved AOE EXPLOSION support. Damage is now based on distance from template. [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)
 - Area Effect Cone is now 60º and narrow cone 30º support [#276](https://github.com/dmdorman/hero6e-foundryvtt/issues/276)
