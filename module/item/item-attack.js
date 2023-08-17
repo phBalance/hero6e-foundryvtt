@@ -238,6 +238,7 @@ export async function AttackToHit(item, options) {
 
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+    const senseAffecting = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("sense-affecting")
 
     // -------------------------------------------------
     // attack roll
@@ -645,6 +646,7 @@ export async function AttackToHit(item, options) {
         actor,
         item,
         adjustment,
+        senseAffecting,
         ...options,
         hitRollData: hitRollData,
         //effectivestr: options.effectivestr,
@@ -691,34 +693,10 @@ function getAttackTags(item) {
         attackTags.push({ name: `killing` });
     }
 
-    // if (item.system.stunBodyDamage != 'stunbody') {
-    //     attackTags.push({name: item.system.stunBodyDamage});
-    // }
-
-    // if (item.system.piercing) {
-    //     attackTags.push({name: `APx${item.system.piercing}`, title: `Armor Piercing`});
-    // }
-
-    // if (item.system.penetrating) {
-    //     attackTags.push({name: `PENx${item.system.penetrating}`, title: `Penetrating`});
-    // }
-
-    // const autofire = item.system.modifiers.find(o => o.XMLID === "AUTOFIRE")
-    // const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0
-    // if (autofire) {
-    //     attackTags.push({name: `AFx${autoFireShots}`, title: `Autofire`});
-    // }
-
-    // const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
-
-    // if (aoe) {
-    //     attackTags.push({name: `${aoe.OPTION_ALIAS}(${aoe.LEVELS})`});
-    // }
-
-    // const explosion = aoe?.adders ? aoe.adders.find(o=> o.XMLID === "EXPLOSION") : null;
-    // if (explosion) {
-    //     attackTags.push({name: `explosion`});
-    // }
+    // FLASH
+    if (item.system.XMLID === "FLASH") {
+        attackTags.push({ name: item.system.OPTION_ALIAS })
+    }
 
     for (let adder of item.system.adders) {
         switch (adder.XMLID) {
@@ -788,6 +766,7 @@ export async function _onRollDamage(event) {
 
     const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+    const senseAffecting = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("sense-affecting")
 
     let { dc, tags } = convertToDcFromItem(item, { isAction: true, ...toHitData });
 
@@ -858,7 +837,7 @@ export async function _onRollDamage(event) {
                     }
                     let newRoll = Roll.fromTerms(newTerms);
                     newRoll._total = newRoll.terms[0].results.reduce((partialSum, a) => partialSum + a.result, 0);
-                    newRoll.title = newRoll.terms[0].results.map(o=> o.result).toString();
+                    newRoll.title = newRoll.terms[0].results.map(o => o.result).toString();
                     targetTokens.push({ token, distance, roll: newRoll, terms: JSON.stringify(newRoll.terms) })
                 }
             }
@@ -873,6 +852,7 @@ export async function _onRollDamage(event) {
     let cardData = {
         item: item,
         adjustment,
+        senseAffecting,
         // dice rolls
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
@@ -978,7 +958,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
     let newTerms = JSON.parse(damageData.terms);
-    
+
     // Explosion
     // Simple rules is to remove the hightest dice term for each
     // hex distance from center.  Works fine when radius = dice,
@@ -1022,7 +1002,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     let newRoll = Roll.fromTerms(newTerms)
     newRoll._total ??= newRoll.terms[0].results.reduce((partialSum, a) => partialSum + parseInt(a.result), 0);
-    newRoll.title = newRoll.terms[0].results.map(o=> o.result).toString();
+    newRoll.title = newRoll.terms[0].results.map(o => o.result).toString();
     newRoll._evaluated = true;
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
@@ -1224,6 +1204,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense)
     }
+    const senseAffecting = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("sense-affecting")
+    if (senseAffecting) {
+        return _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense)
+    }
 
     // check if target is stunned
     if (game.settings.get("hero6efoundryvttv2", "stunned")) {
@@ -1392,7 +1376,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 
 
             prevEffectX.changes[0].value = ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(newLevelsX) : parseInt(newLevelsX);
-            prevEffectX.name = `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(newLevelsX) : parseInt(newLevelsX)} ${keyX.toUpperCase()} [${item.actor.name}]`;
+            prevEffectX.name = `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(newLevelsX) : parseInt(newLevelsX).signedString()} ${keyX.toUpperCase()} [${item.actor.name}]`;
             prevEffectX.flags.activePoints = newActivePoints;
 
             await prevEffectX.update({ name: prevEffectX.name, changes: prevEffectX.changes, flags: prevEffectX.flags })
@@ -1417,7 +1401,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             // Create new ActiveEffect
             let activeEffect =
             {
-                name: `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX)} ${keyX.toUpperCase()} [${item.actor.name}]`,
+                name: `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX).signedString()} ${keyX.toUpperCase()} [${item.actor.name}]`,
                 id: `${item.system.XMLID}.${item.id}.${keyX}`,
                 icon: item.img,
                 changes: [
@@ -1502,6 +1486,92 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
         // effects
         //effects: effectsFinal,
 
+
+        // defense
+        defense: defense,
+
+        // misc
+        targetToken: token
+    };
+
+    // render card
+    let cardHtml = await renderTemplate(template, cardData)
+    let speaker = ChatMessage.getSpeaker({ actor: item.actor })
+
+    const chatData = {
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    }
+
+    return ChatMessage.create(chatData);
+}
+
+async function _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense) {
+    const button = event.currentTarget;
+    //const damageData = { ...button.dataset }
+    const item = fromUuidSync(damageData.itemid)
+    if (!item) {
+        // This typically happens when the attack id stored in the damage card no longer exists on the actor.
+        // For example if the attack item was deleted or the HDC was uploaded again.
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
+
+    const template = "systems/hero6efoundryvttv2/templates/chat/apply-sense-affecting-card.hbs"
+    const token = canvas.tokens.get(tokenId)
+
+    if (!item.actor) {
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
+
+    // FLASHDEFENSE
+    const flashDefense = item.actor.items.find(o => o.system.XMLID === "FLASHDEFENSE");
+    if (flashDefense) {
+        const value = parseInt(flashDefense.system.LEVELS.value || 0);
+        damageData.bodydamage = Math.max(0, damageData.bodydamage - value);
+        defense = `${value} Flash Defense`;
+    }
+
+    // Create new ActiveEffect
+    if (damageData.bodydamage > 0) {
+        token.actor.addActiveEffect({
+            ...HeroSystem6eActorActiveEffects.blindEffect,
+            name: `${item.system.XMLID} ${damageData.bodydamage} [${item.actor.name}]`,
+            duration: {
+                seconds: damageData.bodydamage,
+            },
+            flags: {
+                bodyDamage: damageData.bodydamage,
+                XMLID: item.system.XMLID,
+                source: item.actor.name,
+            },
+            origin: item.uuid
+        })
+        // let activeEffect =
+        // {
+        //     name: `${item.system.XMLID} ${damageData.bodyDamage} [${item.actor.name}]`,
+        //     id: `${item.system.XMLID}.${item.id}`,
+        //     //icon: item.img,
+        //     statuses: ['blind'],
+        //     duration: {
+        //         seconds: 12,
+        //     },
+        //     flags: {
+        //         bodyDamage: damageData.bodyDamage,
+        //         XMLID: item.system.XMLID,
+        //         source: item.actor.name,
+        //     },
+        //     origin: item.uuid
+        // }
+        // await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+    }
+
+    let cardData = {
+        item: item,
+        // dice rolls
+
+        // body
+        damageData,
 
         // defense
         defense: defense,

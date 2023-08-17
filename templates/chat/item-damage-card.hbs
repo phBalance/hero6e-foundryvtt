@@ -63,7 +63,7 @@
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
                 data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-terms="{{terms}}"
                 data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
-                {{#if adjustment}}
+                {{#if (or adjustment senseAffecting)}}
                 Apply {{item.system.XMLID}}
                 {{else}}
                 Apply Damage

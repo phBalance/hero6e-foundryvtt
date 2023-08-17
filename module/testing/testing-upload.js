@@ -835,6 +835,78 @@ export function registerUploadTests(quench) {
 
 
 
+
+            describe("Flash", async function () {
+
+                let actor = new HeroSystem6eActor({
+                    name: 'Test Actor',
+                    type: 'pc',
+                }, { temporary: true });
+                actor.system.characteristics.str.value = 15
+
+                const contents = `
+                <POWER XMLID="FLASH" ID="1692225594431" BASECOST="0.0" LEVELS="5" ALIAS="Flash" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES />
+                <ADDER XMLID="HEARINGGROUP" ID="1692227848754" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                    <NOTES />
+                </ADDER>
+                <ADDER XMLID="PLUSONEHALFDIE" ID="1692227848755" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="No" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                    <NOTES />
+                </ADDER>
+                <ADDER XMLID="MENTALGROUP" ID="1692227851548" BASECOST="5.0" LEVELS="0" ALIAS="Mental Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                    <NOTES />
+                </ADDER>
+                <ADDER XMLID="NORMALSMELL" ID="1692227860234" BASECOST="3.0" LEVELS="0" ALIAS="Normal Smell" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                    <NOTES />
+                </ADDER>
+                <ADDER XMLID="DANGER_SENSE" ID="1692227865084" BASECOST="3.0" LEVELS="0" ALIAS="Danger Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                    <NOTES />
+                </ADDER>
+                <ADDER XMLID="COMBAT_SENSE" ID="1692227866025" BASECOST="5.0" LEVELS="0" ALIAS="Combat Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                    <NOTES />
+                </ADDER>
+                </POWER>
+                    `;
+                let parser = new DOMParser()
+                let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                itemData.actor = actor
+                let item = itemData;
+                makeAttack(item);
+                updateItemDescription(item);
+                let dcItem = convertToDcFromItem(item);
+
+                it("description", function () {
+                    assert.equal(item.system.description, "Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6");
+                });
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 49);
+                });
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 49);
+                });
+                it("end", function () {
+                    assert.equal(item.system.end, "5");
+                });
+                it("dice", function () {
+                    assert.equal(item.system.dice, "5");
+                });
+                it("extraDice", function () {
+                    assert.equal(item.system.extraDice, "half");
+                });
+                it("DC", function () {
+                    assert.equal(dcItem.dc, 5.5);
+                });
+                it("killing", function () {
+                    assert.equal(item.system.killing, false);
+                });
+            });
+
+
+
+
+
+
         },
         { displayName: "HERO: Upload" }
     );

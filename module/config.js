@@ -614,13 +614,13 @@ HERO.powers = {
     "DARKNESS": { powerType: ["sense-affecting", "attack", "standard"] },
     "DISPEL": { powerType: ["attack", "standard"], costPerLevel: 3 },
     "ENTANGLE": { powerType: ["attack", "standard"] },
-    "FLASH": { 
+    "FLASH": {
         powerType: ["attack", "sense-affecting", "standard"],
         percievability: "obvious",
         duration: "instant",
         target: "Target’s DCV",
         range: "standard",
-        costEnd: true 
+        costEnd: true
     },
     "IMAGES": {
         name: "Images",
@@ -1055,3 +1055,33 @@ HERO.knockbackMultiplier = {
     1: "Knockback",
     2: "Double Knockback"
 }
+
+// HERO.Senses = {
+//     "SIGHTGROUP": {
+//         targeting: true
+//     },
+//     "HEARINGGROUP": {
+//         targeting: false
+//     },
+//     "MENTALGROUP": {
+//         targeting: false
+//     },
+//     "SMELLGROUP": {
+//         targeting: false
+//     },
+//     "RADIOGROUP": {
+//         targeting: false
+//     },
+//     "TOUCHGROUP": {
+//         targeting: false
+//     },
+//     "DANGER_SENSE": {
+//         targeting: false
+//     },
+//     "COMBAT_SENSE": {
+//         targeting: false
+//     },
+//     "SPATIALAWARENESS": {
+//         targeting: false
+//     }
+// }
