@@ -1930,7 +1930,7 @@ export function updateItemDescription(item) {
     const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND") ||
         (parent && parent.system.modifiers.find(o => o.XMLID == "REDUCEDEND"))
     if (reducedEnd && reducedEnd.OPTION === 'HALFEND') {
-        system.end = RoundFavorPlayerDown(system._activePointsWithoutEndMods / 10)
+        system.end = RoundFavorPlayerDown((system._activePointsWithoutEndMods || system.activePoints) / 10)
         system.end = Math.max(1, RoundFavorPlayerDown(system.end / 2));
     }
     if (reducedEnd && reducedEnd.OPTION === 'ZERO') {
