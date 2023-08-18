@@ -1,5 +1,5 @@
 # Version 3.0.25
-- Support for Use Standard Effect. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
+- Support for Use Standard Effect.  Requires uploading of HDC again. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
 - Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on damage.
 - Movement during combat now costs END (1 END per 10m). [#239](https://github.com/dmdorman/hero6e-foundryvtt/issues/239)
 - RoundFavorPlayerUp on DCV to ensure whole number. [#210](https://github.com/dmdorman/hero6e-foundryvtt/issues/210)
