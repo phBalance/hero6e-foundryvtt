@@ -1882,7 +1882,8 @@ export function updateItemDescription(item) {
                     break;
                 case "FLASH":
                     // The senses are already in the description
-                    system.description += "(" + _adderArray.filter(o=> !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i)).join("; ") + ")"
+                    system.description += "(" + _adderArray.filter(o => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i)).join("; ") + ")"
+                    system.description = system.description.replace("()", "");
                     break;
                 default:
                     system.description += "(" + _adderArray.join("; ") + ")"
