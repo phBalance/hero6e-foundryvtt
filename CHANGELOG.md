@@ -1,3 +1,5 @@
+# Version 3.0.26
+- Testing workflow to publish to FoundryVTT.
 # Version 3.0.25
 - Support for Use Standard Effect.  Requires uploading of HDC again. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
 - Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on damage.
