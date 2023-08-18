@@ -49,8 +49,8 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
 
         // Add label
         let attr = alternative?.alternative || this[barName]?.attribute;
-        if(attr && attr.indexOf(".")>-1) attr = attr.split('.').pop();
-        if (attr) return { ...data, label: attr};
+        if (attr && attr.indexOf(".") > -1) attr = attr.split('.').pop();
+        if (attr) return { ...data, label: attr };
         return data;
     }
 
@@ -74,7 +74,7 @@ export class HeroSystem6eToken extends Token {
         super(document)
         //this.bar3 = this.bar.addChild(new PIXI.Graphics());
 
-        
+
         // const token = this;
         // token.heroVisualEffects ??= token.addChild(new PIXI.Container()); //canvas.grid.heroVisualEffects.addChild(new PIXI.Container())
         // const gfx = token.heroVisualEffects.addChild(new PIXI.Graphics());
@@ -84,7 +84,7 @@ export class HeroSystem6eToken extends Token {
         // cy += token.h /2;
         // const w = token.w /2;
         // const h = token.h /2;
-        
+
         // //gfx.beginFill(0x000000, 0.5);
         // gfx.lineStyle(2, 0xffffff)
         // gfx.drawEllipse(cx, cy, w, h);
@@ -96,6 +96,13 @@ export class HeroSystem6eToken extends Token {
         data.bar3 = this.token.flags.bar3; //this.token.getBarAttribute?.("bar3")
         return data
     }
+
+    CalcMovementEndurance(distanceBefore)
+    {
+        let distanceAfter = dragRuler.getMovedDistanceFromToken(this);
+        console.log("_onUpdate", distanceBefore, distanceAfter);
+    }
+
 
     // async _draw()
     // {
@@ -175,7 +182,7 @@ export class HeroSystem6eToken extends Token {
         return PIXI.utils.rgb2hex(ary)
     }
 
-    
+
 
     drawBarLabel(bar, data, value, max) {
         // remove any existing children (may want save the previous one, not sure yet)

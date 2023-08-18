@@ -1,5 +1,13 @@
+# Version 3.0.25
+- Support for Use Standard Effect.  Requires uploading of HDC again. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
+- Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on damage.
+- Movement during combat now costs END (1 END per 10m). [#239](https://github.com/dmdorman/hero6e-foundryvtt/issues/239)
+- RoundFavorPlayerUp on DCV to ensure whole number. [#210](https://github.com/dmdorman/hero6e-foundryvtt/issues/210)
+- Reduced Endurance (half) now has minimum cost of 1 END.
+- Improved generic migration to update costs, END and descriptions.  This overwrites any manual changes that may have been made.
+
 # Version 3.0.24
-- Fix for Firefox where svg files apparently must have width="512" height="512".
+- Fix for Firefox where svg files must have width="512" height="512". [#278](https://github.com/dmdorman/hero6e-foundryvtt/discussions/278)
 
 # Version 3.0.23
 - Improved AOE EXPLOSION support. Damage is now based on distance from template. [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)

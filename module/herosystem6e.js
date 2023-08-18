@@ -524,7 +524,7 @@ Hooks.once("ready", async function () {
 
         // Reparse all items (description, cost, etc) on every migration
         if (true) {
-            await ui.notifications.info(`Migragrating actor data (reparse items)`)
+            await ui.notifications.info(`Migragrating actor data (Updating costs, END, and descriptions)`)
             for (let actor of game.actors.contents) {
                 try {
                     let itemsChanged = false;
@@ -543,9 +543,13 @@ Hooks.once("ready", async function () {
 
                         if (item.system.realCost) {
                             let _oldDescription = item.system.description;
+                            let _oldEnd = parseInt(item.system.end || 0);
                             updateItemDescription(item);
                             if (_oldDescription != item.system.description) {
                                 changes['system.description'] = item.system.description;
+                            }
+                            if (_oldEnd != parseInt(item.system.end)) {
+                                changes['system.end'] = item.system.end;
                             }
                         }
 

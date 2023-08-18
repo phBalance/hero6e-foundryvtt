@@ -49,6 +49,35 @@ export class HeroRuler {
 
                     return movementValue
                 }
+
+                async onMovementHistoryUpdate(tokens) {
+                    await super.onMovementHistoryUpdate(tokens);
+
+                    let automation = game.settings.get("hero6efoundryvttv2", "automation");
+
+                    if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
+
+
+                        for (let tokenObj of tokens) {
+                            let token = tokenObj.document;
+                            let actor = token.actor;
+                            let combatant = game.combat.combatants.find(o => o.actorId === actor.id);
+                            if (combatant) {
+                                let spentEnd = parseInt(combatant.flags.dragRuler.spentEnd || 0);
+                                let currentDistance = dragRuler.getMovedDistanceFromToken(tokenObj);
+
+                                // Assuming every 10 costs 1 endurance
+                                let totalEnd = Math.ceil(currentDistance / 10);
+                                let costEnd = totalEnd - spentEnd;
+                                if (costEnd > 0) {
+                                    actor.update({ ['system.characteristics.end.value']: parseInt(actor.system.characteristics.end.value) - costEnd })
+                                }
+                                combatant.update({ ['flags.dragRuler.spentEnd']: totalEnd })
+                            }
+                        }
+                    }
+
+                }
             }
 
             dragRuler.registerSystem(HEROSYS.module, HeroSysSpeedProvider)
@@ -172,6 +201,9 @@ export class HeroRuler {
             renderRadioOptions();
         }
     }
+
+
+
 }
 
 function setHeroRulerLabel() {
