@@ -2,7 +2,7 @@ import { modifyRollEquation, getTokenChar } from "../utility/util.js";
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { RoundFavorPlayerDown } from "../utility/round.js";
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
 import {
     determineStrengthDamage, determineExtraDiceDamage,
     simplifyDamageRoll, convertToDC, handleDamageNegation,
@@ -499,7 +499,7 @@ export async function AttackToHit(item, options) {
     for (let target of targetsArray) {
 
         let hit = "Miss"
-        let value = target.actor.system.characteristics[toHitChar.toLowerCase()].value
+        let value = RoundFavorPlayerUp(target.actor.system.characteristics[toHitChar.toLowerCase()].value)
         if (value <= result.total) {
             hit = "Hit"
         }
@@ -694,20 +694,21 @@ function getAttackTags(item) {
     }
 
 
+    if (item.system.adders) {
+        for (let adder of item.system.adders) {
+            switch (adder.XMLID) {
+                case "MINUSONEPIP":
+                case "PLUSONEHALFDIE":
+                case "PLUSONEPIP":
+                    break;
 
-    for (let adder of item.system.adders) {
-        switch (adder.XMLID) {
-            case "MINUSONEPIP":
-            case "PLUSONEHALFDIE":
-            case "PLUSONEPIP":
-                break;
+                case "MULTIPLECLASSES":
+                    attackTags.push({ name: `${adder.ALIAS}`, title: `${adder.XMLID}` });
+                    break;
 
-            case "MULTIPLECLASSES":
-                attackTags.push({ name: `${adder.ALIAS}`, title: `${adder.XMLID}` });
-                break;
-
-            default:
-                attackTags.push({ name: `${adder.ALIAS || adder.XMLID}`, title: `${adder.OPTION_ALIAS || ""}` });
+                default:
+                    attackTags.push({ name: `${adder.ALIAS || adder.XMLID}`, title: `${adder.OPTION_ALIAS || ""}` });
+            }
         }
     }
 
@@ -966,7 +967,7 @@ export async function _onApplyDamage(event) {
         const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
 
         if (explosion) {
-            
+
             targetsArray.sort(function (a, b) {
                 let distanceA = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(a).object, { gridSpaces: true });
                 let distanceB = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(b).object, { gridSpaces: true });
