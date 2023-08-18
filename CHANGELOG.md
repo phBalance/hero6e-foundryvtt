@@ -1,6 +1,7 @@
 # Version 3.0.25
 - Support for Use Standard Effect. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
 - Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on damage.
+- Movement during combat now costs END (1 END per 10m). [#239](https://github.com/dmdorman/hero6e-foundryvtt/issues/239)
 
 # Version 3.0.24
 - Fix for Firefox where svg files must have width="512" height="512". [#278](https://github.com/dmdorman/hero6e-foundryvtt/discussions/278)
