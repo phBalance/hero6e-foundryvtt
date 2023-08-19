@@ -1,30 +1,81 @@
-{{!-- 
-<form class="{{cssClass}}" autocomplete="off">
+{{ log 'HEROSYS item-sheet' this }}
+<form class="{{cssClass}} item-sheet" autocomplete="off" data-id="{{item._id}}">
     <header class="sheet-header">
-        <img class="profile-img" name="img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
+        <img class="profile-img" name="img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
         <div class="header-fields">
-            <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
+            <div class="xmlid">{{item.system.XMLID}}</div>
+            <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name" /></h1>
         </div>
     </header>
 
-    {{!-- Sheet Tab Navigation --}}
-    <nav class="sheet-tabs tabs" data-group="primary">
-        <a class="item" data-tab="description">Description</a>
-        <a class="item" data-tab="attributes">Attributes</a>
-    </nav>
+    <div>
+        {{item.system.description}}
+    </div>
 
-    {{!-- Sheet Body --}}
-    <section class="sheet-body">
+    {{!-- OPTION OPTIONID OPTION_ALIAS --}}
+    {{#if item.system.OPTIONID}}
+    <div class="form-group">
+        <label>OPTIONID</label>
+        <input name="system.OPTIONID" type="text" value="{{item.system.OPTIONID}}" placeholder="OPTIONID" />
+    </div>
+    {{/if}}
 
-        {{!-- Description Tab --}}
-        <div class="tab" data-group="primary" data-tab="description">
-            {{editor content=data.description target="data.description" button=true owner=owner editable=editable}}
-        </div>
+    {{!-- INPUT --}}
+    {{#if (or item.system.INPUT sheet.INPUT)}}
+    <div class="form-group">
+        <label for="system.INPUT">{{sheet.INPUT.label}}</label>
+        {{#if sheet.INPUT.selectOptions}}
+        <select name="system.INPUT" data-dtype="text">
+            {{selectOptions sheet.INPUT.selectOptions selected=item.system.INPUT}}
+        </select>
+        {{else}}
+        <input name="system.INPUT" type="text" value="{{item.system.INPUT}}" placeholder="INPUT" />
+        {{/if}}
+    </div>
+    {{/if}}
 
-        {{!-- Attributes Tab --}}
-        <div class="tab attributes" data-group="primary" data-tab="attributes">
-            {{!-- As you add new fields, add them in here! --}}
-        </div>
-    </section>
+    {{!-- SFX --}}
+    <div class="form-group">
+        <label for="system.SFX">SFX</label>
+        {{#if sheet.SFX.selectOptions}}
+        <select name="system.SFX" data-dtype="text">
+            {{selectOptions sheet.SFX.selectOptions selected=item.system.SFX}}
+        </select>
+        {{else}}
+        <input name="system.SFX" type="text" value="{{item.system.SFX}}" list="datalist-SFX" />
+        {{#if sheet.SFX.datalist}}
+        <datalist id="datalist-SFX">
+            {{#each sheet.SFX.datalist}}
+            <option value="{{this}}"></option>
+            {{/each}}
+        </datalist>
+        {{/if}}
+        {{/if}}
+    </div>
+
+    {{!-- Active Points --}}
+    <div class="form-group">
+        <label>Active Points</label>
+        <input name="system.activePoints" type="number" value="{{item.system.activePoints}}"
+            placeholder="activePoints" />
+    </div>
+
+    {{!-- Cost --}}
+    <div class="form-group">
+        <label>Cost</label>
+        <input name="system.realCost" type="number" value="{{item.system.realCost}}" placeholder="realCost" />
+    </div>
+
+
+
+    {{!-- <label for="ice-cream-choice">Choose a flavor:</label>
+    <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
+    <datalist id="ice-cream-flavors">
+        <option value="Chocolate"></option>
+        <option value="Coconut"></option>
+        <option value="Mint"></option>
+        <option value="Strawberry"></option>
+        <option value="Vanilla"></option>
+    </datalist> --}}
+
 </form>
---}}

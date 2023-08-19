@@ -375,3 +375,11 @@ div.applyDamageAmount {
   margin-top: 3px;
   margin-bottom: 3px;
 }
+
+div.xmlid {
+  margin-left: 8px;
+}
+
+form.item-sheet h1.charname input {
+ margin-top: 0px;
+}

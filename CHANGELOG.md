@@ -1,8 +1,11 @@
+# Version 3.0.27
+- Proof of concept for improved editing of powers.  Currently only RKA is using the improved editing.
+
 # Version 3.0.26
 - Testing workflow to publish to FoundryVTT.
 # Version 3.0.25
 - Support for Use Standard Effect.  Requires uploading of HDC again. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
-- Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on damage.
+- Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on distance.
 - Movement during combat now costs END (1 END per 10m). [#239](https://github.com/dmdorman/hero6e-foundryvtt/issues/239)
 - RoundFavorPlayerUp on DCV to ensure whole number. [#210](https://github.com/dmdorman/hero6e-foundryvtt/issues/210)
 - Reduced Endurance (half) now has minimum cost of 1 END.

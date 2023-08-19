@@ -609,7 +609,22 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 3 / 2
     },
-    "RKA": { powerType: ["attack"], costPerLevel: 15, costEnd: true },
+    "RKA": {
+        powerType: ["attack"],
+        costPerLevel: 15,
+        costEnd: true,
+        sheet: {
+            INPUT: {
+                label: "Vs.",
+                selectOptions: {
+                    ED: "ED",
+                    PD: "PD",
+                    
+                }
+
+            }
+        }
+    },
     "ENERGYBLAST": { powerType: ["attack"], costPerLevel: 5, costEnd: true },
     "DARKNESS": { powerType: ["sense-affecting", "attack", "standard"] },
     "DISPEL": { powerType: ["attack", "standard"], costPerLevel: 3 },
