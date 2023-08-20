@@ -673,12 +673,13 @@ export function XmlToItemData(xml, type) {
         'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
         'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
         "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_TOTAL",
+        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_PRIMARY", "AFFECTS_TOTAL",
         "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE",
         "USE_END_RESERVE", "ULTRA_SLOT", "USESTANDARDEFFECT"
     ]
     for (const attribute of xml.attributes) {
         if (relevantFields.includes(attribute.name)) {
+
             switch (attribute.name) {
                 case "CARRIED":
                     systemData.active = attribute.value == "Yes" ? true : false
@@ -1072,6 +1073,44 @@ export async function uploadSkill(skill, duplicate) {
 }
 
 export function calcItemPoints(item) {
+
+    if (item.name === "Cosmic Blast") {
+        console.log(item.name);
+    }
+
+    // For some reason some ADDERs have a 0 value.
+    if (item.system.adders) {
+        for (let adder of item.system.adders) {
+            if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
+                let baseCost = CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST || adder.BASECOST
+                if (baseCost != adder.BASECOST) {
+                    adder.BASECOST = baseCost;
+                    adder.update({ BASECOST: adder.BASECOST })
+                }
+            }
+        }
+    }
+    if (item.system.modifiers) {
+        for (let modifier of item.system.modifiers) {
+
+            let baseCost = CONFIG.HERO.ModifierOverride[modifier.XMLID]?.BASECOST || modifier.BASECOST
+            if (baseCost != modifier.BASECOST) {
+                modifier.BASECOST = baseCost;
+                modifier.update({ BASECOST: modifier.BASECOST })
+            }
+
+            for (let adder of modifier.adders) {
+                if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
+                    let baseCost = CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST || adder.BASECOST
+                    if (baseCost != adder.BASECOST) {
+                        adder.BASECOST = baseCost;
+                        adder.update({ BASECOST: adder.BASECOST })
+                    }
+                }
+            }
+        }
+    }
+
     let changed = calcBasePointsPlusAdders(item).changed;
     changed = changed || calcActivePoints(item);
     changed = changed || calcRealCost(item);

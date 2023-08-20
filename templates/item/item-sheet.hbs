@@ -8,74 +8,123 @@
         </div>
     </header>
 
-    <div>
+    <div class="description">
         {{item.system.description}}
     </div>
 
     {{!-- OPTION OPTIONID OPTION_ALIAS --}}
-    {{#if item.system.OPTIONID}}
-    <div class="form-group">
-        <label>OPTIONID</label>
-        <input name="system.OPTIONID" type="text" value="{{item.system.OPTIONID}}" placeholder="OPTIONID" />
-    </div>
-    {{/if}}
+    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
+    _value=item.system.OPTIONID
+    _name="system.OPTIONID"
+    _label=sheet.OPTIONID.label
+    _selectOptions = sheet.OPTIONID.selectOptions
+    }}
+
 
     {{!-- INPUT --}}
-    {{#if (or item.system.INPUT sheet.INPUT)}}
+    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
+    _value=item.system.INPUT
+    _name="system.INPUT"
+    _label=sheet.INPUT.label
+    _selectOptions = sheet.INPUT.selectOptions
+    }}
+
+
+    {{!-- SFX --}}
+    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
+    _value=item.system.SFX
+    _name="system.SFX"
+    _label=sheet.SFX.label
+    _selectOptions = sheet.SFX.selectOptions
+    }}
+
+    {{!-- LEVELS --}}
+    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
+    _value=item.system.LEVELS
+    _name="system.LEVELS"
+    _label=sheet.LEVELS.label
+    _selectOptions = sheet.LEVELS.selectOptions
+    }}
+
+    {{!-- STANDARD EFFECT --}}
+    {{#if (or item.system.USESTANDARDEFFECT (eq item.system.USESTANDARDEFFECT false)) }}
     <div class="form-group">
-        <label for="system.INPUT">{{sheet.INPUT.label}}</label>
-        {{#if sheet.INPUT.selectOptions}}
-        <select name="system.INPUT" data-dtype="text">
-            {{selectOptions sheet.INPUT.selectOptions selected=item.system.INPUT}}
-        </select>
-        {{else}}
-        <input name="system.INPUT" type="text" value="{{item.system.INPUT}}" placeholder="INPUT" />
-        {{/if}}
+        <label>USESTANDARDEFFECT</label>
+        <input type="checkbox" name="system.USESTANDARDEFFECT" {{checked item.system.USESTANDARDEFFECT}}
+            data-dtype="Boolean" />
     </div>
     {{/if}}
 
-    {{!-- SFX --}}
+    {{!-- AFFECTS_PRIMARY --}}
+    {{#if totalingOptions }}
     <div class="form-group">
-        <label for="system.SFX">SFX</label>
-        {{#if sheet.SFX.selectOptions}}
-        <select name="system.SFX" data-dtype="text">
-            {{selectOptions sheet.SFX.selectOptions selected=item.system.SFX}}
-        </select>
-        {{else}}
-        <input name="system.SFX" type="text" value="{{item.system.SFX}}" list="datalist-SFX" />
-        {{#if sheet.SFX.datalist}}
-        <datalist id="datalist-SFX">
-            {{#each sheet.SFX.datalist}}
-            <option value="{{this}}"></option>
-            {{/each}}
-        </datalist>
-        {{/if}}
-        {{/if}}
+        <label>AFFECTS_PRIMARY</label>
+        <input type="checkbox" name="system.AFFECTS_PRIMARY" {{checked item.system.AFFECTS_PRIMARY}}
+            data-dtype="Boolean" />
     </div>
+    {{/if}}
+
+    {{!-- AFFECTS_TOTAL --}}
+    {{#if totalingOptions }}
+    <div class="form-group">
+        <label>AFFECTS_TOTAL</label>
+        <input type="checkbox" name="system.AFFECTS_TOTAL" {{checked item.system.AFFECTS_TOTAL}} data-dtype="Boolean" />
+    </div>
+    {{/if}}
+
+    {{!-- ADD_MODIFIERS_TO_BASE --}}
+    {{#if totalingOptions }}
+    <div class="form-group">
+        <label>ADD_MODIFIERS_TO_BASE</label>
+        <input type="checkbox" name="system.ADD_MODIFIERS_TO_BASE" {{checked item.system.ADD_MODIFIERS_TO_BASE}}
+            data-dtype="Boolean" />
+    </div>
+    {{/if}}
 
     {{!-- Active Points --}}
-    <div class="form-group">
-        <label>Active Points</label>
-        <input name="system.activePoints" type="number" value="{{item.system.activePoints}}"
-            placeholder="activePoints" />
-    </div>
-
-    {{!-- Cost --}}
-    <div class="form-group">
-        <label>Cost</label>
-        <input name="system.realCost" type="number" value="{{item.system.realCost}}" placeholder="realCost" />
-    </div>
+    <li class="flexrow summaryBreak">
+        <h4>Active Points: {{item.system.activePoints}}</h4>
+        <h4 class="center">END: {{item.system.end}}</h4>
+        <h4 class="right">Real Cost: {{item.system.realCost}}</h4>
+    </li>
 
 
 
-    {{!-- <label for="ice-cream-choice">Choose a flavor:</label>
-    <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
-    <datalist id="ice-cream-flavors">
-        <option value="Chocolate"></option>
-        <option value="Coconut"></option>
-        <option value="Mint"></option>
-        <option value="Strawberry"></option>
-        <option value="Vanilla"></option>
-    </datalist> --}}
+
+    <table>
+
+        {{!-- ADDERS --}}
+        <tr class="activeEffects adders">
+            <th class="left">Adders</th>
+            <th>Cost</th>
+            {{!-- <th>Add</th> --}}
+            </td>
+        </tr>
+        {{#each item.system.adders as |adder XMLID|}}
+        <tr>
+            <td class="left">{{adder.ALIAS}}</td>
+            <td>{{adder.BASECOST}}</td>
+        </tr>
+        {{/each}}
+
+        {{!-- {{Modifiers}} --}}
+        <tr class="activeEffects adders">
+            <th class="left">Modifiers</th>
+            <th>Cost</th>
+            {{!-- <th>Add</th> --}}
+        </tr>
+        {{#each item.system.modifiers as |mod id|}}
+        <tr>
+            <td class="left">{{mod.ALIAS}}</td>
+            <td>{{mod.BASECOST}}</td>
+        </tr>
+        {{#each mod.adders as |adder id|}}
+        <tr class="modifierAdder">
+            <td class="left">{{adder.ALIAS}}</td>
+            <td>{{adder.BASECOST}}</td>
+        </tr>
+        {{/each}}
+        {{/each}}
+    </table>
 
 </form>

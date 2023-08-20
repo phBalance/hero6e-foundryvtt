@@ -6,6 +6,7 @@ import { HeroSystem6eActorSidebarSheet } from "./actor/actor-sidebar-sheet.js";
 import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-token.js";
 import { HeroSystem6eItem } from "./item/item.js";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.js";
+import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.js";
 import * as chat from "./chat.js";
 import * as macros from "./macros.js";
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.js";
@@ -93,6 +94,7 @@ Hooks.once('init', async function () {
     Actors.registerSheet("herosystem6e", HeroSystem6eActorSidebarSheet, { makeDefault: true });
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, { makeDefault: true });
+    Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, { makeDefault: false });
 
     // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheetMini, { makeDefault: false });
 
@@ -120,6 +122,7 @@ Hooks.once('init', async function () {
         `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
         `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
         `systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs`,
+        `systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs`,
     ]);
 
 });
