@@ -6,7 +6,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 -  F: No support, HDC upload may not even work.
 
 
-| SKILLS | Rating | Comments |
+| :SKILLS | Rating | Comments |
 | --- | :---:  | --- |
 | ACROBATICS | B | Surprise not supported |
 | ACTING | A | |
@@ -78,7 +78,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | WEAPONSMITH | A | |
 
 
-| PERKS | Rating | Comments |
+| :PERKS | Rating | Comments |
 | --- | :---:  | --- |
 | ACCESS| D | |
 | ANONYMITY| D | |
@@ -93,7 +93,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | VEHICLES AND BASES | C | Need a seperate character sheet for these, but basic support is present |
 
 
-| TALENTS | Rating | Comments |
+| :TALENTS | Rating | Comments |
 | --- | :---:  | --- |
 | ABSOLUTE RANGE SENSE | D | |
 | ABSOLUTE TIME SENSE | D | |
@@ -120,7 +120,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | WEAPONMASTER | D | |
 
 
-| POWERS | Rating | Comments |
+| :POWERS | Rating | Comments |
 | --- | :---:  | --- |
 | ABSORPTION | F ||
 | BARRIER | C | Implemented like resistant protection, no token other target to destroy. | 
@@ -187,7 +187,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | TUNNELING | B | | non-combat penalties not auotmated | 
 
 
-| POWER MODIFIERS | Rating | Comments |
+| :POWER MODIFIERS | Rating | Comments |
 | --- | :---:  | --- |
 | ABLATIVE | D |  |
 | AFFECTED AS ANOTHER SENSE | D |  |
@@ -334,13 +334,13 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | WORKS AGAINST EGO, NOT [CHARACTERISTIC] | D |  |
 
 
-| POWER FRAMEWORKS | Rating | Comments |
+| :POWER FRAMEWORKS | Rating | Comments |
 | --- | :---:  | --- |
 | MULTIPOWER | B | CP costs work, no enforcement of one slot at a time  |
 | VARIABLE POWER POOL | D | |
 
 
-| COMPLICATIONS | Rating | Comments |
+| :COMPLICATIONS | Rating | Comments |
 | --- | :---:  | --- |
 | ACCIDENTAL CHANGE | D | |
 | DEPENDENCE | D | |
