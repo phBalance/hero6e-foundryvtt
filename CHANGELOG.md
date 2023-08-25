@@ -1,6 +1,7 @@
 # Version 3.0.27
-- Proof of concept for improved editing of powers.  Open item, click on Sheet in header, then select Herosystem6eItem2Sheet to preview.
+- A work in progress proof of concept for improved editing of powers.  Open item, click on Sheet in header, then select Herosystem6eItem2Sheet to preview.
 - Improved actor migration to update power modifiers. [#287](https://github.com/dmdorman/hero6e-foundryvtt/issues/287)
+- Added FEATURES.md file that lists all the skills, perks, talents, powers, modifiers and complications.  Each is given a support rating.
 
 # Version 3.0.26
 - Testing workflow to publish to FoundryVTT.
