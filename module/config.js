@@ -609,7 +609,22 @@ HERO.powers = {
         costEnd: true,
         costPerLevel: 3 / 2
     },
-    "RKA": { powerType: ["attack"], costPerLevel: 15, costEnd: true },
+    "RKA": {
+        powerType: ["attack"],
+        costPerLevel: 15,
+        costEnd: true,
+        sheet: {
+            INPUT: {
+                label: "Vs.",
+                selectOptions: {
+                    ED: "ED",
+                    PD: "PD",
+
+                }
+
+            }
+        }
+    },
     "ENERGYBLAST": { powerType: ["attack"], costPerLevel: 5, costEnd: true },
     "DARKNESS": { powerType: ["sense-affecting", "attack", "standard"] },
     "DISPEL": { powerType: ["attack", "standard"], costPerLevel: 3 },
@@ -1055,6 +1070,57 @@ HERO.knockbackMultiplier = {
     1: "Knockback",
     2: "Double Knockback"
 }
+
+HERO.SFX = [
+    "Default",
+    "Acid",
+    "Alien",
+    "Air/Wind",
+    "Animal",
+    "Body Control",
+    "Chi",
+    "Cosmic Energy",
+    "Cyberkinesis",
+    "Darkness",
+    "Density Alteration",
+    "Dimensional Manipulation",
+    "Earth/Stone",
+    "Electricity",
+    "Emotion Control",
+    "Fire/Heat",
+    "Force",
+    "Gravity",
+    "Ice/Cold",
+    "Illusion",
+    "Kinetic Energy",
+    "Light",
+    "Luck",
+    "Magic/Mystic",
+    "Magnetism",
+    "Martial Arts",
+    "Matter Manipulation",
+    "Mental/Psionic",
+    "Metamorphic",
+    "Precognition",
+    "Radiation",
+    "Serum Based",
+    "Shape Alteration",
+    "Size Alteration",
+    "Sleep/Dream",
+    "Solar/Celestial",
+    "Sonic",
+    "Speedster",
+    "Strength/Toughness",
+    "Stretching",
+    "Telekinetic",
+    "Teleportation",
+    "Time",
+    "Vibration",
+    "Water",
+    "Weather",
+    "Wood/Plant",
+    "Miscellaneous",
+]
 
 // HERO.Senses = {
 //     "SIGHTGROUP": {

@@ -90,7 +90,7 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
 - Power frameworks are partially supported.
 - The following are largely not implemented
   - Adjustment powers (Healing).
-  - Attack powers that do not do stun/body damage (Change Environment, Darkness, Dispel, Drain, Entangle, Flash, Images, Mental Illusions, Mind Control, Reflection, Transform).
+  - Attack powers that do not do stun/body damage (Change Environment, Darkness, Dispel,  Entangle, Flash, Images, Mental Illusions, Mind Control, Reflection, Transform).
   - Attack powers with NND & AVAD
   - Automation powers (Cannot Be Stunned, Does Not Bleed, No Hit Locations, Takes No STUN).
   - Body-Affecting powers (Desolidification, Duplication, Extra Limbs, Growth, Multiform, Shape Shift, Shrinking, Stretching)
@@ -99,6 +99,7 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
   - Sensory powers (Clairsentience, Enhanced Senses, Mind Scan)
   - Special powers (Duplication, Endurance Reserve, Enhanced Senses, Extra Limbs, Flash Defense, Luck, Power Defense, Regeneration)
   - Perks, Talents, and Complications
+  - See the [FEATURES](FEATURES.md) list which includes a support rating.
 
 ## Modules
 The following modules have been successfully tested for compatibility.  They are also recommended.

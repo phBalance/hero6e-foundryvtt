@@ -832,12 +832,12 @@ export async function _onRollDamage(event) {
     for (const id of toHitData.targetids.split(',')) {
         let token = canvas.scene.tokens.get(id)
         if (token) {
+            let targetToken = { token, terms: JSON.stringify(damageResult.terms) }
             //targetTokens.push(token)
             if (explosion) {
                 // Distance from center
                 if (aoeTemplate) {
                     let newTerms = JSON.parse(JSON.stringify(damageResult.terms));
-
 
                     // Explosion
                     // Simple rules is to remove the hightest dice term for each
@@ -872,9 +872,15 @@ export async function _onRollDamage(event) {
                     let newRoll = Roll.fromTerms(newTerms);
                     newRoll._total = newRoll.terms[0].results.reduce((partialSum, a) => partialSum + a.result, 0);
                     newRoll.title = newRoll.terms[0].results.map(o => o.result).toString();
-                    targetTokens.push({ token, distance, roll: newRoll, terms: JSON.stringify(newRoll.terms) })
+                    targetToken = {
+                        ...targetToken,
+                        distance,
+                        roll: newRoll,
+                        terms: JSON.stringify(newRoll.terms)
+                    }
                 }
             }
+            targetTokens.push(targetToken);
         }
     }
 
@@ -1406,7 +1412,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
     }
 
     if (item.actor.id === token.actor.id && ["DRAIN", "TRANSFER"].includes(item.system.XMLID)) {
-        return ui.notifications.error(`${item.system.XMLID} source and target cannot be the same.`);
+        return ui.notifications.error(`${item.system.XMLID} attacker (${item.actor.name}) and defender (${token.actor.name}) cannot be the same.`);
     }
 
 

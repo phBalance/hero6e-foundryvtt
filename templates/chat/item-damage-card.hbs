@@ -77,9 +77,9 @@
                 data-stunDamage="{{../stunDamage}}" data-terms="{{target.terms}}"
                 data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">
                 {{#if ../adjustment}}
-                Apply {{../item.system.XMLID}} to <b>{{target.name}}</b>
+                Apply {{../item.system.XMLID}} to <b>{{target.token.name}}</b>
                 {{else}}
-                Apply <span title="{{target.roll.title}}">{{target.roll.total}}</span> Damage to <b>{{target.token.name}}{{item.system.XMLID}}</b>
+                Apply <span title="{{target.roll.title}}">{{target.roll.total}}</span> Damage to <b>{{target.token.name}} {{item.system.XMLID}}</b>
                 {{/if}}
             </button>
             {{/each}}

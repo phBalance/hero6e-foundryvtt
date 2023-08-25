@@ -4,6 +4,7 @@ import { HEROSYS } from '../herosystem6e.js'
 import { onManageActiveEffect } from '../utility/effects.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
 import { updateItemDescription } from '../utility/upload_hdc.js'
+import { getPowerInfo } from '../utility/util.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -44,6 +45,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(this.item.system.XMLID)) {
             return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`
         }
+
+        if (["RKA"].includes(this.item.system.XMLID)) {
+            return `${path}/item-sheet.hbs`
+        }
+
         return `${path}/item-${this.item.type}-sheet.hbs`
     }
 
@@ -92,6 +98,123 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (data.system.dcv != undefined) {
             data.system.dcv = ("+" + parseInt(data.system.dcv)).replace("+-", "-")
         }
+
+        const configPowerInfo = getPowerInfo({ xmlid: item.system.XMLID, actor: item?.actor })
+        data.sheet = { ...configPowerInfo?.sheet || {} };
+
+        // SFX
+        let sfx = [
+            "Default",
+            "Acid",
+            "Alien",
+            "Air/Wind",
+            "Animal",
+            "Body Control",
+            "Chi",
+            "Cosmic Energy",
+            "Cyberkinesis",
+            "Darkness",
+            "Density Alteration",
+            "Dimensional Manipulation",
+            "Earth/Stone",
+            "Electricity",
+            "Emotion Control",
+            "Fire/Heat",
+            "Force",
+            "Gravity",
+            "Ice/Cold",
+            "Illusion",
+            "Kinetic Energy",
+            "Light",
+            "Luck",
+            "Magic/Mystic",
+            "Magnetism",
+            "Martial Arts",
+            "Matter Manipulation",
+            "Mental/Psionic",
+            "Metamorphic",
+            "Precognition",
+            "Radiation",
+            "Serum Based",
+            "Shape Alteration",
+            "Size Alteration",
+            "Sleep/Dream",
+            "Solar/Celestial",
+            "Sonic",
+            "Speedster",
+            "Strength/Toughness",
+            "Stretching",
+            "Telekinetic",
+            "Teleportation",
+            "Time",
+            "Vibration",
+            "Water",
+            "Weather",
+            "Wood/Plant",
+            "Miscellaneous",
+        ]
+
+        data.sheet.SFX = {
+            //dataList: sfx
+            selectOptions: sfx.reduce( (current, item) => {
+                current[item] = item;
+                return current;
+              }, {})
+            // selectOptions: {
+            //     "Default": "Default",
+            //     "Acid": "Acid",
+            //     "Alien": "Alien",
+            //     "Air/Wind": "Air/Wind",
+            //     "Animal": "Animal",
+            //     "Body Control": "Body Control",
+            //     "Chi": "Chi",
+            //     "Cosmic Energy": "Cosmic Energy",
+            //     "Cyberkinesis": "Cyberkinesis",
+            //     "Darkness": "Darkness",
+            //     "Density Alteration": "Density Alteration",
+            //     "Dimensional Manipulation": "Dimensional Manipulation",
+            //     "Earth/Stone": "Earth/Stone",
+            //     "Electricity": "Electricity",
+            //     "Emotion Control": "Emotion Control",
+            //     "Fire/Heat": "Fire/Heat",
+            //     "Force": "Force",
+            //     "Gravity": "Gravity",
+            //     "Ice/Cold": "Ice/Cold",
+            //     "Illusion": "Illusion",
+            //     "Kinetic Energy": "Kinetic Energy",
+            //     "Light": "Light",
+            //     "Luck": "Luck",
+            //     "Magic/Mystic": "Magic/Mystic",
+            //     "Magnetism": "Magnetism",
+            //     "Martial Arts": "Martial Arts",
+            //     "Matter Manipulation": "Matter Manipulation",
+            //     "Mental/Psionic": "Mental/Psionic",
+            //     "Metamorphic": "Metamorphic",
+            //     "Precognition": "Precognition",
+            //     "Radiation": "Radiation",
+            //     "Serum Based": "Serum Based",
+            //     "Shape Alteration": "Shape Alteration",
+            //     "Size Alteration": "Size Alteration",
+            //     "Sleep/Dream": "Sleep/Dream",
+            //     "Solar/Celestial": "Solar/Celestial",
+            //     "Sonic": "Sonic",
+            //     "Speedster": "Speedster",
+            //     "Strength/Toughness": "Strength/Toughness",
+            //     "Stretching": "Stretching",
+            //     "Telekinetic": "Telekinetic",
+            //     "Teleportation": "Teleportation",
+            //     "Time": "Time",
+            //     "Vibration": "Vibration",
+            //     "Water": "Water",
+            //     "Weather": "Weather",
+            //     "Wood/Plant": "Wood/Plant",
+            //     "Miscellaneous": "Miscellaneous",
+            // }
+        }
+
+
+
+
 
         // DRAIN
         // A select list of possible DRAIN from sources
@@ -286,22 +409,19 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         const expandedData = foundry.utils.expandObject(formData);
 
         const clickedElement = $(event.currentTarget);
-        const form = clickedElement.closest('form[data-id][data-realId]')
+        const form = clickedElement.closest('form[data-id]')
         const id = form.data()?.id
 
         if (!id) { return; }
 
+        // Adjustment Powers
         if (expandedData.xmlidX || expandedData.xmlidY) {
             expandedData.system.INPUT = `${expandedData.xmlidX} to ${expandedData.xmlidY}`;
         }
 
-        await this.item.update(expandedData)
+        //await this.item.update(expandedData)
 
-        if (expandedData.xmlidX || expandedData.xmlidY) {
-            //updateItemDescription(this.item);
-            //formData['system.description'] = this.item.system.description;
-        }
-
+        // Endurance Reserve
         if (expandedData.rec) {
             let power = this.item.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
             if (power) {

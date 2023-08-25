@@ -1,8 +1,14 @@
+# Version 3.0.27
+- A work in progress proof of concept for improved editing of powers.  Open item, click on Sheet in header, then select Herosystem6eItem2Sheet to preview.
+- Improved actor migration to update power modifiers. [#287](https://github.com/dmdorman/hero6e-foundryvtt/issues/287)
+- Added [FEATURES.md](FEATURES.md) file that lists all the skills, perks, talents, powers, modifiers and complications.  Each is given a support rating.
+- Improved Aid/Drain descriptions and fixed issue where targets were not passed to apply damage. [#289](https://github.com/dmdorman/hero6e-foundryvtt/issues/289)
+
 # Version 3.0.26
 - Testing workflow to publish to FoundryVTT.
 # Version 3.0.25
 - Support for Use Standard Effect.  Requires uploading of HDC again. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
-- Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on damage.
+- Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on distance.
 - Movement during combat now costs END (1 END per 10m). [#239](https://github.com/dmdorman/hero6e-foundryvtt/issues/239)
 - RoundFavorPlayerUp on DCV to ensure whole number. [#210](https://github.com/dmdorman/hero6e-foundryvtt/issues/210)
 - Reduced Endurance (half) now has minimum cost of 1 END.
