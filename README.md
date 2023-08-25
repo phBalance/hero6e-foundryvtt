@@ -99,7 +99,7 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
   - Sensory powers (Clairsentience, Enhanced Senses, Mind Scan)
   - Special powers (Duplication, Endurance Reserve, Enhanced Senses, Extra Limbs, Flash Defense, Luck, Power Defense, Regeneration)
   - Perks, Talents, and Complications
-  - See the [FEATURES](https://github.com/dmdorman/hero6e-foundryvtt/FEATURES.md) list which includes a support rating.
+  - See the [FEATURES](https://github.com/aeauseth/hero6efoundryvttv2/blob/main/FEATURES.md) list which includes a support rating.
 
 ## Modules
 The following modules have been successfully tested for compatibility.  They are also recommended.
