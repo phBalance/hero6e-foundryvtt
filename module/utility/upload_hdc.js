@@ -1542,6 +1542,12 @@ export function updateItemDescription(item) {
             if (system.USESTANDARDEFFECT) {
                 system.description += " (standard effect: " + parseInt(system.LEVELS?.value * 3) + " points)"
             }
+
+            // Overwrite Name if equals the ALIAS
+            if (system.INPUT && item.name === system.ALIAS) {
+                item.name = `${system.ALIAS} ${system.INPUT}`
+                item.update({name: item.name});
+            }
             break;
 
         case "STRETCHING":

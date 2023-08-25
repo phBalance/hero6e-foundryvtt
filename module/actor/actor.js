@@ -464,7 +464,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     strDetails() {
-        let strLiftText = 0;
+        let strLiftText = '0';
         let strThrow = 0;
         let value = this.system.characteristics.str.value;
         if (value >= 1) { strLiftText = '8kg'; strThrow = 2 }
