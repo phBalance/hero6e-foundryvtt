@@ -1,7 +1,1 @@
-2023/08/25-14:25:24.491 cad8 Recovering log #433
-2023/08/25-14:25:24.495 cad8 Delete type=0 #433
-2023/08/25-14:25:24.495 cad8 Delete type=3 #432
-2023/08/25-14:25:48.116 ba3c Level-0 table #437: started
-2023/08/25-14:25:48.116 ba3c Level-0 table #437: 0 bytes OK
-2023/08/25-14:25:48.118 ba3c Delete type=0 #435
-2023/08/25-14:25:48.118 ba3c Manual compaction at level-0 from '!macros!54Q339fVYcYayFcH' @ 72057594037927935 : 1 .. '!macros!BE4ew1ACTogrkjWi' @ 0 : 0; will stop at (end)
+2023/08/25-14:35:09.775 d08 Recovering log #436

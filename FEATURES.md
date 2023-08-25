@@ -129,6 +129,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | POWERS | Support | Comments |
 | :--- | :---:  | :--- |
 | ABSORPTION | D ||
+| AID | B | Works for characteristics, cannot aid powers, no boost support |
 | BARRIER | C | Implemented like resistant protection, no support for destroying barriers, no placeables for a barrier |
 | BLAST | A ||
 | CANNOT BE STUNNED | D ||
@@ -144,7 +145,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | DESOLIDIFICATION | D | |
 | DISPEL | C | |
 | DOES NOT BLEED | D | |
-| DRAIN | B | Works for characteristics, may have imitations when used on powers |
+| DRAIN | B | Works for characteristics, cannot drain powers |
 | DUPLICATION | F | You will have to create a separate HDC file and import that for each duplicate.  No injury support. |
 | ENDURANCE RESERVE | B | Only 1 endurance reserve is supported |
 | ENHANCED SENSES | D | |
