@@ -1,12 +1,12 @@
 Here is a list of Hero System skills, perks, talents, powers, modifiers and complications.  Each is given a support rating:
 -  A: Full support and automation
 -  B: Good support and automation.  A few rare edge cases may be unsupported, those edge cases may have limited/no automation.
--  C: Minimal support.  Simplistic dice rolling, but defenses/results are poorly/wrongly applied.
--  D: Minimal support.  Dice rolling is not available, wrong, or otherwise poorly implemented.
--  F: No support, HDC upload may not even work.
+-  C: Poor support.  Simplistic dice rolling.  Defenses/results are poorly/wrongly applied.
+-  D: Minimal support.  Dice rolling is not available, wrong, or otherwise poorly implemented.  No automation.
+-  F: No support. HDC upload may not even work.
 
 
-| SKILLS | Rating | Comments |
+| SKILLS | Support | Comments |
 | :--- | :---:  | :--- |
 | ACROBATICS | B | Surprise not supported |
 | ACTING | A | |
@@ -34,7 +34,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | DEMOLITIONS | A | |
 | DISGUISE | A | |
 | ELECTRONICS | A | |
-| FAST DRAW | D | no clip support, no held action support, |
+| FAST DRAW | D | no clip support, no held action support |
 | FORENSIC MEDICINE | A | |
 | FORGERY | A | |
 | GAMBLING | A | |
@@ -78,7 +78,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | WEAPONSMITH | A | |
 
 
-| PERKS | Rating | Comments |
+| PERKS | Support | Comments |
 | :--- | :---:  | :--- |
 | ACCESS| D | |
 | ANONYMITY| D | |
@@ -93,7 +93,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | VEHICLES AND BASES | C | Need a seperate character sheet for these, but basic support is present |
 
 
-| TALENTS | Rating | Comments |
+| TALENTS | Support | Comments |
 | :--- | :---:  | :--- |
 | ABSOLUTE RANGE SENSE | D | |
 | ABSOLUTE TIME SENSE | D | |
@@ -120,10 +120,10 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | WEAPONMASTER | D | |
 
 
-| POWERS | Rating | Comments |
+| POWERS | Support | Comments |
 | :--- | :---:  | :--- |
 | ABSORPTION | F ||
-| BARRIER | C | Implemented like resistant protection, no token other target to destroy. | 
+| BARRIER | C | Implemented like resistant protection, no support for destroying barriers, no placables for a barrier | 
 | BLAST | A ||
 | CANNOT BE STUNNED | D ||
 | CHANGE ENVIRONMENT | D ||
@@ -187,7 +187,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | TUNNELING | B | | non-combat penalties not auotmated | 
 
 
-| POWER MODIFIERS | Rating | Comments |
+| POWER MODIFIERS | Support | Comments |
 | :--- | :---:  | :--- |
 | ABLATIVE | D |  |
 | AFFECTED AS ANOTHER SENSE | D |  |
@@ -334,13 +334,13 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | WORKS AGAINST EGO, NOT [CHARACTERISTIC] | D |  |
 
 
-| POWER FRAMEWORKS | Rating | Comments |
+| POWER FRAMEWORKS | Support | Comments |
 | :--- | :---:  | :--- |
 | MULTIPOWER | B | CP costs work, no enforcement of one slot at a time  |
 | VARIABLE POWER POOL | D | |
 
 
-| COMPLICATIONS | Rating | Comments |
+| COMPLICATIONS | Support | Comments |
 | :--- | :---:  | :--- |
 | ACCIDENTAL CHANGE | D | |
 | DEPENDENCE | D | |
