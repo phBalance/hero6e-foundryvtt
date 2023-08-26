@@ -82,10 +82,10 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 
 | PERKS | Support | Comments |
 | :--- | :---:  | :--- |
-| ACCESS| D | |
-| ANONYMITY| D | |
+| ACCESS | D | |
+| ANONYMITY | D | |
 | COMPUTER LINK | D | |
-| CONTACT| D | |
+| CONTACT | D | |
 | DEEP COVER | D | |
 | FAVOR | D | |
 | FOLLOWER| D | |

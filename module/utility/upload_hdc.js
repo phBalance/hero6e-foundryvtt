@@ -1544,7 +1544,7 @@ export function updateItemDescription(item) {
             }
 
             // Overwrite Name if equals the ALIAS
-            if (system.INPUT && item.name === system.ALIAS) {
+            if (item.update && system.INPUT && item.name === system.ALIAS) {
                 item.name = `${system.ALIAS} ${system.INPUT}`
                 item.update({name: item.name});
             }
