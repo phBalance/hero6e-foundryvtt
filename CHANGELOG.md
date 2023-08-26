@@ -1,3 +1,7 @@
+# Version 3.0.28
+- Fix for AID/DRAIN failing to upload when no name specified.
+- Fix for AID/DRAIN fade.
+
 # Version 3.0.27
 - A work in progress proof of concept for improved editing of powers.  Open item, click on Sheet in header, then select Herosystem6eItem2Sheet to preview.
 - Improved actor migration to update power modifiers. [#287](https://github.com/dmdorman/hero6e-foundryvtt/issues/287)

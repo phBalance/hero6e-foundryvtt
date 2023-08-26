@@ -863,7 +863,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 ae.flags.activePoints -= _fade;
                 fade += _fade;
 
-                if (ae.changes.length > 0 && ae.flags.target && powerInfo && powerType.toLowerCase().includes("adjustment")) {
+                if (ae.changes.length > 0 && ae.flags.target && powerInfo && powerInfo.powerType.includes("adjustment")) {
                     let value = parseInt(ae.changes[0].value);
                     let XMLID = ae.flags.XMLID;
                     let target = ae.flags.target;
@@ -872,15 +872,15 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     let costPerPoint = parseFloat(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
                     let newLevels = parseInt(ActivePoints / costPerPoint);
                     ae.changes[0].value = value < 0 ? -parseInt(newLevels) : parseInt(newLevels);
-                    ae.name = `${XMLID} ${parseInt(ae.changes[0].value) > 0 ? "+" : ""}${newLevels} ${target.toUpperCase()} [${source}]`;
+                    ae.name = `${XMLID} ${ae.changes[0].value} ${target.toUpperCase()} [${source}]`;
 
                     // If ActivePoints <= 0 then remove effect
                     if (ae.flags.activePoints <= 0) {
                         //content += `  Effect deleted.`;
                         if (game.user.isGM) await ae.delete();
                     } else {
-                        //await 
-                        if (game.user.isGM) ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
+                        //await to make sure MAX is updated before VALUE
+                        if (game.user.isGM) await ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
                     }
 
                     // DRAIN fade (increase VALUE)
