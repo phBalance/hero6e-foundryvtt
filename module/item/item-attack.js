@@ -1295,7 +1295,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense)
     }
-    const senseAffecting = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("sense-affecting")
+    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID}).powerType?.includes("sense-affecting")
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense)
     }
