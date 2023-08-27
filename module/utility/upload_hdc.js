@@ -135,7 +135,7 @@ export async function applyCharacterSheet(xmlDoc) {
         changes[`system.characteristics.omcv.core`] = null
         changes[`system.characteristics.dmcv.core`] = null
     }
-    
+
 
 
     for (const characteristic of characteristics.children) {
@@ -795,7 +795,7 @@ export function XmlToItemData(xml, type) {
     }
 
     // AID, DRAIN, TRANSFER (any adjustment power)
-    
+
     if (configPowerInfo && configPowerInfo.powerType?.includes("adjustment")) {
         // Make sure we have a valid INPUT
         let choices = AdjustmentSources(this.actor)
@@ -1522,7 +1522,7 @@ export function updateItemDescription(item) {
 
 
     // This may be a slot in a framework if so get parent
-    const parent = item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
+    const parent = item.actor ? item.actor.items.find(o => system.PARENTID && o.system.ID === system.PARENTID) : null;
 
     switch (configPowerInfo?.xmlid || system.XMLID) {
 
@@ -1559,9 +1559,7 @@ export function updateItemDescription(item) {
         case "AID":
             // Aid  STR 5d6 (standard effect: 15 points)
             system.description = system.ALIAS + (system.INPUT ? " " + system.INPUT : "") + " " + system.LEVELS?.value + "d6"
-            if (system.USESTANDARDEFFECT) {
-                system.description += " (standard effect: " + parseInt(system.LEVELS?.value * 3) + " points)"
-            }
+
 
             // Overwrite Name if equals the ALIAS
             if (item.update && system.INPUT && item.name === system.ALIAS) {
@@ -1855,6 +1853,8 @@ export function updateItemDescription(item) {
 
     }
 
+
+
     // Remove duplicate name from descripton and related cleanup
     let _rawName = item.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     try {
@@ -1956,7 +1956,22 @@ export function updateItemDescription(item) {
         }
     }
 
+    // Standard Effect
+    if (system.USESTANDARDEFFECT) {
+        let stun = parseInt(system.LEVELS?.value * 3)
+        let body = parseInt(system.LEVELS?.value)
 
+        if (system.adders.find(o => o.XMLID === "PLUSONEHALFDIE") || system.adders.find(o => o.XMLID === "PLUSONEPIP")) {
+            stun += 1;
+            body += 1;
+        }
+
+        if (configPowerInfo.powerType.includes("adjustment")) {
+            system.description += " (standard effect: " + parseInt(system.LEVELS?.value * 3) + " points)"
+        } else {
+            system.description += ` (standard effect: ${stun} STUN, ${body} BODY)`;
+        }
+    }
 
     // if (system.XMLID === "MINDCONTROL")
     //     HEROSYS.log(false, system.XMLID);
@@ -1967,8 +1982,8 @@ export function updateItemDescription(item) {
     }
 
     // Active Points
-    if (system.realCost != system.activePoints || parent) {
-        system.description += " (" + system.activePoints + " Active Points); "
+    if (parseInt(system.realCost) != parseInt(system.activePoints) || parent) {
+        system.description += " (" + system.activePoints + " Active Points)"
     }
 
     // MULTIPOWER slots typically include limitations

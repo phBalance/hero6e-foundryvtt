@@ -104,6 +104,18 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 // text descrdiption of damage
                 item.system.damage = convertFromDC(item, dc).replace(/ /g, "");
+
+                // Standard Effect
+                if (item.system.USESTANDARDEFFECT) {
+                    let stun = parseInt(item.system.LEVELS?.value * 3)
+                    let body = parseInt(item.system.LEVELS?.value)
+                    if (item.system.adders.find(o => o.XMLID === "PLUSONEHALFDIE") || item.system.adders.find(o => o.XMLID === "PLUSONEPIP")) {
+                        stun += 1;
+                        body += 1;
+                    }
+                    item.system.damage = stun;
+                }
+
                 if (dc > 0) {
                     if (item.system.killing) {
                         item.system.damage += 'K'
@@ -293,7 +305,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             //     continue;
             // }
 
-            let characteristic = { ...data.actor.system.characteristics[powerInfo.key.toLowerCase()]}
+            let characteristic = { ...data.actor.system.characteristics[powerInfo.key.toLowerCase()] }
 
             // Automation has no EGO, OMCV, or DMCV
             //if (item.actor.type === "automaton" && ["ego", "omcv", "dmcv"].includes(key)) continue;
@@ -305,7 +317,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             characteristic.key = powerInfo.key.toLowerCase();
             characteristic.value = parseInt(characteristic.value) || 0;
             characteristic.max = parseInt(characteristic.max) || 0;
-            
+
             characteristic.base = this.actor.getCharacteristicBase(powerInfo.key.toUpperCase());
 
 
@@ -424,7 +436,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             ary = []
             activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.max`) && !o.disabled);
-            
+
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
                 if (ae._prepareDuration().duration) {

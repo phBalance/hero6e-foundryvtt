@@ -1,5 +1,6 @@
 # Version 3.0.31
 - Added ability to set END use of manually added attacks.
+- Improved USESTANDARDEFFECT support.
 
 # Version 3.0.30
 - Fixed issue where attacks failed to apply damage.
