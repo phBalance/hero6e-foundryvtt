@@ -25,10 +25,10 @@ export function getTokenChar(token, char, data) {
 export function getPowerInfo(options) {
     const xmlid = options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id
     const actor = options?.item?.actor || options?.actor
-    let powerInfo = CONFIG.HERO.powers[xmlid] || CONFIG.HERO.powers5e[xmlid]
+    let powerInfo = CONFIG.HERO.powers.find(o => o.key === xmlid); //] || CONFIG.HERO.powers5e[xmlid]
     //let characteristicInfo = CONFIG.HERO.characteristicCosts[xmlid.toLowerCase()] || CONFIG.HERO.characteristicCosts5e[xmlid.toLowerCase()]
     if (actor?.system?.is5e) {
-        powerInfo = CONFIG.HERO.powers5e[xmlid] || powerInfo
+        powerInfo = { ...powerInfo, ...CONFIG.HERO.powers5e.find(o=> o.key === xmlid)}
     }
 
     if (!powerInfo && options?.item?.type == "maneuver") {
@@ -60,4 +60,22 @@ export function getModifierInfo(options) {
     return CONFIG.HERO.ModifierOverride[xmlid]
 }
 
+export function getCharactersticInfoArrayForActor(actor) {
+    let powers = CONFIG.HERO.powers.filter(o =>
+        (o.powerType?.includes("characteristic") || o.powerType?.includes("movement")) &&
+        !o.ignoreFor?.includes(actor.type) &&
+        !o.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
+        (!o.onlyFor || o.onlyFor.includes(actor.type))
+    );
 
+    if (actor.system.is5e) {
+        for (const power5e of CONFIG.HERO.powers5e) {
+            let idx = powers.findIndex(o => o.key === power5e.key);
+            if (idx > -1) {
+                powers[idx] = { ...powers[idx], ...power5e }
+            } 
+        }
+    }
+
+    return powers;
+}

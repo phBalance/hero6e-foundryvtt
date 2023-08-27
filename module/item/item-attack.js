@@ -1,4 +1,4 @@
-import { modifyRollEquation, getTokenChar } from "../utility/util.js";
+import { modifyRollEquation, getTokenChar, getPowerInfo } from "../utility/util.js";
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { HEROSYS } from "../herosystem6e.js";
@@ -236,9 +236,9 @@ export async function AttackToHit(item, options) {
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
-    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
-    const senseAffecting = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("sense-affecting")
+    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("adjustment");
+    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("sense-affecting")
 
     // -------------------------------------------------
     // attack roll
@@ -772,9 +772,9 @@ export async function _onRollDamage(event) {
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
 
-    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
-    const senseAffecting = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("sense-affecting")
+    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("adjustment");
+    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("sense-affecting")
 
     let { dc, tags } = convertToDcFromItem(item, { isAction: true, ...toHitData });
 
@@ -1290,8 +1290,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const damageDetail = await _calcDamage(newRoll, item, damageData)
 
     // AID, DRAIN or any adjustmnet powers
-    const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense)
     }
@@ -1436,10 +1436,10 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
         }
 
-        let costPerPointX = parseFloat(characteristicCosts[keyX]) * AdjustmentMultiplier(keyX.toUpperCase());
+        let costPerPointX = parseFloat(getPowerInfo({xmlid: keyX.toUpperCase(), actor: item.actor})?.cost) * AdjustmentMultiplier(keyX.toUpperCase());
         levelsX = parseInt(ActivePoints / costPerPointX)
 
-        let costPerPointY = parseFloat(characteristicCosts[keyY]) * AdjustmentMultiplier(keyY.toUpperCase());
+        let costPerPointY = parseFloat(getPowerInfo({xmlid: keyY.toUpperCase(), actor: item.actor})?.cost) * AdjustmentMultiplier(keyY.toUpperCase());
         levelsY = parseInt(ActivePoints / costPerPointY)
 
         // Check for previous ADJUSTMENT from same source

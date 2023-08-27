@@ -113,6 +113,10 @@ Hooks.once('init', async function () {
         return str.toLowerCase();
     });
 
+    Handlebars.registerHelper('toUpperCase', function (str) {
+        return str.toUpperCase();
+    });
+
     Handlebars.registerHelper('is_active_segment', function (actives, index) {
         return actives[index];
     });

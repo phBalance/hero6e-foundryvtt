@@ -1,3 +1,7 @@
+# Version 3.0.29
+- Reworked Characteristics internal data structure.  Consolidating 6e/5e base, core, costs, bought as powers, etc into one data structure.  Improved hover descriptions.  You can now make changes to CORE characteristics, which will update BASE and COST.  Core, base, and cost are mostly for reference and have no effective gameplay function; although MAX should equal MAX when all powers/effects are turned off.  This is a small step toward improving actor editing within FoundryVTT.
+- Fixed incorrect values for some 5e movements during HDC upload. [#299](https://github.com/dmdorman/hero6e-foundryvtt/issues/299)
+
 # Version 3.0.28
 - Fix for AID/DRAIN failing to upload when no name specified.
 - Fix for AID/DRAIN fade.
