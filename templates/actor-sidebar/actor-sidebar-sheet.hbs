@@ -1,4 +1,4 @@
-{{log 'actor-sidebar-sheet' this}}
+{{!-- {{log 'actor-sidebar-sheet' this}} --}}
 <form class="{{cssClass}}" autocomplete="off">
 
     <aside>
@@ -75,7 +75,9 @@
                     <div class="sidebar-actions flexrow flex-group-center">
                         <button type="button" class="recovery-button">Take Recovery</button>
                         <button type="button" class="presence-button">Presence Attack</button>
-                        <button type="button" class="full-health-button" title="Restore all characteristics to max, remove status effects, and remote temporary effects">Full Health</button>
+                        <button type="button" class="full-health-button"
+                            title="Restore all characteristics to max, remove status effects, and remote temporary effects">Full
+                            Health</button>
                     </div>
 
             </section>
@@ -587,36 +589,49 @@
             <div class="tab tab-body" data-group="primary" data-tab="characteristics">
                 <table>
                     <tr class="sticky">
-                        <th title="{{localize " ActorSheet.ValueTitle"}}">{{localize "ActorSheet.Value"}}</th>
-                        <th title="{{localize " ActorSheet.MaxTitle"}}">{{localize "ActorSheet.Max"}}</th>
-                        <th title="{{localize " ActorSheet.CoreTitle"}}">{{localize "ActorSheet.Core"}}</th>
+                        <th title="{{localize 'ActorSheet.ValueTitle'}}">{{localize "ActorSheet.Value"}}</th>
+                        <th title="{{localize 'ActorSheet.MaxTitle'}}">{{localize "ActorSheet.Max"}}</th>
+                        <th title="{{localize 'ActorSheet.CoreTitle'}}">{{localize "ActorSheet.Core"}}</th>
                         <th>{{localize "ActorSheet.Char"}}</th>
-                        <th>{{localize "ActorSheet.Base"}}</th>
-                        <th>{{localize "ActorSheet.Cost"}}</th>
+                        <th title="{{localize 'ActorSheet.BaseTitle'}}">{{localize "ActorSheet.Base"}}</th>
+                        <th title="{{localize 'ActorSheet.CostTitle'}}">{{localize "ActorSheet.Cost"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>{{localize "ActorSheet.Notes"}}</th>
                     </tr>
                     {{#each characteristicSet as |characteristic key|}}
                     <tr class="characteristic">
-                        <td data-tooltip="{{{characteristic.valueTitle}}}" class="{{#if characteristic.valueTitle}}characteristic-locked{{/if}}">
+                        <td data-tooltip="{{{characteristic.valueTitle}}}"
+                            class="{{#if characteristic.valueTitle}}characteristic-locked{{/if}}">
                             <input name="system.characteristics.{{characteristic.key}}.value" type="text"
                                 value="{{characteristic.value}}" data-dtype="Number"
                                 class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
                                 {{#if characteristic.valueTitle}}disabled{{/if}}>
                         </td>
-                        <td data-tooltip="{{{characteristic.maxTitle}}}" class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
+                        <td data-tooltip="{{{characteristic.maxTitle}}}"
+                            class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
                             <input name="system.characteristics.{{characteristic.key}}.max" type="text"
                                 class="{{#if (gt characteristic.delta 0)}} overMax{{/if}}{{#if (lt characteristic.delta 0)}} underMax{{/if}}"
                                 value="{{characteristic.max}}" data-dtype="Number" {{#if
                                 characteristic.maxTitle}}disabled{{/if}}>
                         </td>
                         <td>
-                            {{characteristic.core}}
+                            {{#unless (eq characteristic.core null)}}
+                            <input name="system.characteristics.{{characteristic.key}}.core" type="text"
+                                value="{{characteristic.core}}" data-dtype="Number" {{#if (eq characteristic.core
+                                null)}}disabled{{/if}}>
+                            {{/unless}}
                         </td>
-                        <td>{{characteristic.name}}</td>
-                        <td>{{characteristic.base}}</td>
-                        <td>{{characteristic.realCost}}</td>
-
+                        <td title="{{characteristic.name}}">{{toUpperCase characteristic.key}}</td>
+                        <td>
+                            {{#if characteristic.base}}
+                            {{characteristic.base}}
+                            {{/if}}
+                        </td>
+                        <td {{#if characteristic.costTitle}}title="{{characteristic.costTitle}}" {{/if}}>
+                            {{#unless (eq characteristic.core null)}}
+                            {{characteristic.realCost}}
+                            {{/unless}}
+                        </td>
                         <td>
                             {{#if characteristic.roll}}
                             <button type="button" class="characteristic-roll" data-roll="3d6"

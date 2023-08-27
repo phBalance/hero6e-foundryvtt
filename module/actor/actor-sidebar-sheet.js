@@ -2,11 +2,11 @@ import { HERO } from '../config.js'
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eItem } from '../item/item.js'
 import { presenceAttackPopOut } from '../utility/presence-attack.js'
-import { applyCharacterSheet, SkillRollUpdateValue } from '../utility/upload_hdc.js'
+import { applyCharacterSheet, SkillRollUpdateValue, CalcActorRealAndActivePoints } from '../utility/upload_hdc.js'
 import { RoundFavorPlayerDown } from "../utility/round.js"
 import { HEROSYS } from '../herosystem6e.js';
 import { onManageActiveEffect } from '../utility/effects.js'
-import { getPowerInfo } from '../utility/util.js'
+import { getPowerInfo, getCharactersticInfoArrayForActor } from '../utility/util.js'
 import { CombatSkillLevelsForAttack, convertToDcFromItem, convertFromDC } from '../utility/damage.js';
 
 export class HeroSystem6eActorSidebarSheet extends ActorSheet {
@@ -260,66 +260,73 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
 
+        // Powers hack
+        // let powersArray = []
+        // for (let key of Object.keys(CONFIG.HERO.powers))
+        // {
+        //     powersArray.push({ key, ... CONFIG.HERO.powers[key]});
+        // }
+        // console.log(powersArray)
+
 
         // Characteristics
         const characteristicSet = []
 
         // Caracteristics for 6e
-        let characteristicKeys = Object.keys(CONFIG.HERO.characteristicCosts) //Object.entries(data.actor.system.characteristics)
+        //let characteristics = CONFIG.HERO.characteristics.filter(o=> o[data.actor.system.is5e ? "cost5e" : "cost"] != undefined ) //Object.keys(CONFIG.HERO.characteristicCosts) //Object.entries(data.actor.system.characteristics)
+        let powers = getCharactersticInfoArrayForActor(this.actor);
 
         // Characteristics for 5e
-        if (data.actor.system.is5e) {
-            characteristicKeys = Object.keys(CONFIG.HERO.characteristicCosts5e)
-        }
+        // if (data.actor.system.is5e) {
+        //     characteristicKeys = Object.keys(CONFIG.HERO.characteristicCosts5e)
+        // }
 
-        for (const key of characteristicKeys) {
+        for (const powerInfo of powers) {
 
 
             // Some actor types do not show all characteristics
-            const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this.actor });
-            if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(this.actor.type)) {
-                continue;
-            }
-            if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(this.actor.type)) {
-                continue;
-            }
+            //const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this.actor });
+            // if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(this.actor.type)) {
+            //     continue;
+            // }
+            // if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(this.actor.type)) {
+            //     continue;
+            // }
 
-            let characteristic = data.actor.system.characteristics[key]
+            let characteristic = { ...data.actor.system.characteristics[powerInfo.key.toLowerCase()]}
 
             // Automation has no EGO, OMCV, or DMCV
             //if (item.actor.type === "automaton" && ["ego", "omcv", "dmcv"].includes(key)) continue;
 
-            if (!characteristic) {
-                characteristic = {}
-            }
+            // if (!characteristic) {
+            //     characteristic = {}
+            // }
 
-            characteristic.key = key
+            characteristic.key = powerInfo.key.toLowerCase();
             characteristic.value = parseInt(characteristic.value) || 0;
             characteristic.max = parseInt(characteristic.max) || 0;
+            
+            characteristic.base = this.actor.getCharacteristicBase(powerInfo.key.toUpperCase());
 
-            if (!characteristic.base) {
-                if (data.actor.system.is5e) {
-                    characteristic.base = CONFIG.HERO.characteristicDefaults5e[key]
-                } else {
-                    characteristic.base = CONFIG.HERO.characteristicDefaults[key]
-                }
-            }
 
-            if (data.actor.system.is5e) {
-                if (!CONFIG.HERO.characteristicCosts5e[key]) {
-                    continue;
-                }
-                characteristic.name = CONFIG.HERO.characteristics5e[key]
-                //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts5e[key])
+            characteristic.name = powerInfo.name || powerInfo.key.toUpperCase();
+            characteristic.costTitle = powerInfo.cost ? `${powerInfo.cost} * (${characteristic.core} - ${characteristic.base})` : null;
 
-            }
-            else {
-                if (!CONFIG.HERO.characteristicCosts[key]) {
-                    continue;
-                }
-                characteristic.name = CONFIG.HERO.characteristics[key]
-                //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts[key])
-            }
+            // if (data.actor.system.is5e) {
+            //     if (!CONFIG.HERO.characteristicCosts5e[key]) {
+            //         continue;
+            //     }
+            //     characteristic.name = CONFIG.HERO.characteristics5e[key]
+            //     //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts5e[key])
+
+            // }
+            // else {
+            //     if (!CONFIG.HERO.characteristicCosts[key]) {
+            //         continue;
+            //     }
+            //     characteristic.name = CONFIG.HERO.characteristics[key]
+            //     //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts[key])
+            // }
             // if (isNaN(characteristic.cost)) {
             //     //characteristic.cost = "";
             // }
@@ -354,55 +361,57 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             // Notes
-            if (key == 'str') {
+            if (powerInfo.key === 'STR') {
                 const strDetails = this.actor.strDetails();
                 characteristic.notes = `lift ${strDetails.strLiftText}, throw ${strDetails.strThrow}m`
             }
 
 
-            if (key == 'leaping') characteristic.notes = `${characteristic.value}m forward, ${Math.round(characteristic.value / 2)}m upward`
+            if (powerInfo.key === 'LEAPING') characteristic.notes = `${Math.max(0, characteristic.value)}m forward, ${Math.max(0, Math.round(characteristic.value / 2))}m upward`
 
-
+            characteristic.delta = 0;
             if (data.actor.system.is5e) {
 
-                if (key == 'pd') {
+                if (powerInfo.key.toLowerCase() == 'pd') {
                     characteristic.notes = '5e figured STR/5'
                 }
 
-                if (key == 'ed') {
+                if (powerInfo.key.toLowerCase() == 'ed') {
                     characteristic.notes = '5e figured STR/5'
                 }
 
-                if (key == 'spd') {
+                if (powerInfo.key.toLowerCase() == 'spd') {
                     characteristic.notes = '5e figured 1 + DEX/10'
                 }
 
-                if (key == 'rec') {
+                if (powerInfo.key.toLowerCase() == 'rec') {
                     characteristic.notes = "5e figured STR/5 + CON/5"
                 }
 
-                if (key == 'end') {
+                if (powerInfo.key.toLowerCase() == 'end') {
                     characteristic.notes = '5e figured 2 x CON'
                 }
 
-                if (key == 'stun') {
+                if (powerInfo.key.toLowerCase() == 'stun') {
                     characteristic.notes = '5e figured BODY+STR/2+CON/2'
                 }
 
-                if (['ocv', 'dcv'].includes(key)) {
-                    characteristic.base = ''
+                if (['ocv', 'dcv'].includes(powerInfo.key.toLowerCase())) {
+                    //characteristic.base = ''
                     characteristic.notes = '5e figured DEX/3'
+                    characteristic.delta = characteristic.max - characteristic.base
                 }
 
-                if (['omcv', 'dmcv'].includes(key)) {
-                    characteristic.base = ''
+                if (['omcv', 'dmcv'].includes(powerInfo.key.toLowerCase())) {
+                    //characteristic.base = ''
                     characteristic.notes = '5e figured EGO/3'
+                    characteristic.delta = characteristic.max - characteristic.base
                 }
             }
 
             // Active Effects may be blocking updates
             let ary = []
-            let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.value`));
+            let activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.value`));
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
             }
@@ -414,12 +423,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             ary = []
-            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${key}.max`) && !o.disabled);
-            characteristic.delta = 0;
+            activeEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.changes.find(p => p.key === `system.characteristics.${powerInfo.key.toLowerCase()}.max`) && !o.disabled);
+            
             for (let ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
                 if (ae._prepareDuration().duration) {
-                    let change = ae.changes.find(o => o.key === `system.characteristics.${key}.max`)
+                    let change = ae.changes.find(o => o.key === `system.characteristics.${powerInfo.key.toLowerCase()}.max`)
                     if (change.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
                         characteristic.delta += parseInt(change.value);
                     }
@@ -684,6 +693,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         await this.actor.update(expandedData)
 
+        if (expandedData.system.characteristics) {
+            await this.actor.calcCharacteristicsCost();
+            await CalcActorRealAndActivePoints(this.actor)
+        }
+
         this.render();
     }
 
@@ -882,7 +896,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     }
 
     async _onFullHealth(event) {
-        
+
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
             content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content")
