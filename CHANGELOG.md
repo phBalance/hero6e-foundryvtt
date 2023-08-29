@@ -1,6 +1,9 @@
 # Version 3.0.31
 - Added ability to set END use of manually added attacks.
 - Improved USESTANDARDEFFECT support.
+- Fixed ARMORPIERCING -1/4.
+- Improved TRANSPORT_FAMILIARITY HDC uploads, descriptions & costs.
+- Improved ENTANGLE HDC uploads, descriptions & costs.
 
 # Version 3.0.30
 - Fixed issue where attacks failed to apply damage.

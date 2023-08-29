@@ -251,6 +251,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 item.system.endEstimate = item.system.endEstimate.trim();
             }
 
+            // 0 END
+            if (!item.system.endEstimate)
+            {
+                item.system.endEstimate = ""
+            }
+
             items.push(foundry.utils.deepClone(item))
         }
 

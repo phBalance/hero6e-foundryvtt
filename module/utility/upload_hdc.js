@@ -851,7 +851,7 @@ export function XmlToItemData(xml, type) {
 
     // ADDERS
     for (let ADDER of xml.querySelectorAll(":scope > ADDER")) {
-        let _adder = {}
+        let _adder = { adders: [] }
         for (const attribute of ADDER.attributes) {
             switch (attribute.value.toUpperCase()) {
                 case "YES":
@@ -870,6 +870,35 @@ export function XmlToItemData(xml, type) {
         // We will override those values as necessary.
         if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST) {
             _adder.BASECOST = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST || _adder.BASECOST
+        }
+        
+        // ADDERs can have ADDERs.
+        // And sometimes MODIFIERs, which we will coerce into an ADDER (CONTINUOUSCONCENTRATION).
+        for (let ADDER2 of ADDER.querySelectorAll(":scope > ADDER, :scope > ADDER")) {
+            let _adder2 = {}
+            for (const attribute of ADDER2.attributes) {
+                switch (attribute.value.toUpperCase()) {
+                    case "YES":
+                        _adder2[attribute.name] = true;
+                        break;
+                    case "NO":
+                        _adder2[attribute.name] = false;
+                        break;
+                    default:
+                        _adder2[attribute.name] = attribute.value
+                }
+            }
+
+            // For some reason some ADDERs have a 0 value.
+            // We will override those values as necessary.
+            if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST != undefined) {
+                _adder2.BASECOST = CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST
+            }
+            if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER) {
+                _adder2.MULTIPLIER = CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER || _adder2.MULTIPLIER
+            }
+
+            _adder.adders.push(_adder2)
         }
 
         systemData.adders.push(_adder)
@@ -1237,10 +1266,10 @@ function calcBasePointsPlusAdders(item) {
     let adderCost = 0
     if (system.adders) {
         for (let adder of system.adders.filter(o => o.SELECTED)) {
-            let adderBaseCost = parseInt(adder.BASECOST)
+            let adderBaseCost = parseFloat(adder.BASECOST)
 
             let adderLevels = Math.max(1, parseInt(adder.LEVELS))
-            adderCost += adderBaseCost * adderLevels
+            adderCost += Math.ceil(adderBaseCost * adderLevels)  // ceil is for ENTANGLE +5 PD
         }
     }
 
@@ -1621,6 +1650,7 @@ export function updateItemDescription(item) {
             break;
         case "TRANSPORT_FAMILIARITY":
             //TF:  Custom Adder, Small Motorized Ground Vehicles
+            //TF:  Equines, Small Motorized Ground Vehicles
             system.description = system.ALIAS + ": "
             break;
 
@@ -1634,16 +1664,21 @@ export function updateItemDescription(item) {
         case "ENERGYBLAST": //Energy Blast 1d6
         case "EGOATTACK":
         case "MINDCONTROL":
-            system.description = `${system.ALIAS} ${system.LEVELS?.value}d6`
-            break;
 
         case "HANDTOHANDATTACK":
-            system.description = `${system.ALIAS} +${system.LEVELS?.value}d6`
+            system.description = `${system.ALIAS} ${system.LEVELS?.value}d6`
             break;
 
         case "KBRESISTANCE":
             system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
                 + ` -${system.LEVELS?.value}m`
+            break;
+
+        case "ENTANGLE":
+            // Entangle 2d6, 7 PD/2 ED
+            let pd_entangle = parseInt(system.LEVELS?.value || 0) + parseInt(system.adders.find(o => o.XMLID === "ADDITIONALPD")?.LEVELS || 0)
+            let ed_entangle = parseInt(system.LEVELS?.value || 0) + parseInt(system.adders.find(o => o.XMLID === "ADDITIONALED")?.LEVELS || 0)
+            system.description = `${system.ALIAS} ${system.LEVELS?.value}d6, ${pd_entangle} PD/${ed_entangle} ED`
             break;
 
         case "ELEMENTAL_CONTROL":
@@ -1883,6 +1918,9 @@ export function updateItemDescription(item) {
                 case "DIMENSIONS":
                     system.description += ", " + adder.ALIAS
                     break;
+
+                case "ADDITIONALPD":
+                case "ADDITIONALED":
                 case "DEFBONUS":
                     break
                 case "EXTENDEDBREATHING":
@@ -1909,6 +1947,18 @@ export function updateItemDescription(item) {
                     break;
                 case "PLUSONEHALFDIE":
                     system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
+                    break;
+                case "RIDINGANIMALS":
+                    if (adder.SELECTED)
+                    {
+                        _adderArray.push(adder.ALIAS)
+                    } else
+                    {
+                        for(let adder2 of adder.adders)
+                        {
+                            _adderArray.push(adder2.ALIAS)
+                        }
+                    }
                     break;
                 default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
             }
@@ -2296,6 +2346,7 @@ export async function makeAttack(item) {
         changes[`system.class`] = 'entangle'
         changes[`system.usesStrength`] = false
         changes[`system.noHitLocations`] = true
+        changes[`system.knockbackMultiplier`] = 0
     }
 
     // DARKNESS (not implemented)
