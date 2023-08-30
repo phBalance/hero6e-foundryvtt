@@ -253,7 +253,7 @@ export class HeroSystem6eActor extends Actor {
 
             // Mark as undefeated in combat tracker
             if (data.type != 'pc' && data.system.characteristics.stun.value > -10) {
-                let combatant = game.combat.combatants.find(o => o.actorId === data._id)
+                let combatant = game.combat?.combatants?.find(o => o.actorId === data._id)
                 if (combatant && combatant.defeated) {
                     combatant.update({ defeated: false });
                 }

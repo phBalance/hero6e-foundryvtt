@@ -237,8 +237,8 @@ export async function AttackToHit(item, options) {
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("adjustment");
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("sense-affecting")
+    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment");
+    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
 
     // -------------------------------------------------
     // attack roll
@@ -773,8 +773,8 @@ export async function _onRollDamage(event) {
     }
 
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("adjustment");
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("sense-affecting")
+    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment");
+    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
 
     let { dc, tags } = convertToDcFromItem(item, { isAction: true, ...toHitData });
 
@@ -1291,11 +1291,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // AID, DRAIN or any adjustmnet powers
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID}).powerType.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense)
     }
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID}).powerType?.includes("sense-affecting")
+    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense)
     }

@@ -1,5 +1,12 @@
+# Version 3.0.31
+- Added ability to set END use of manually added attacks.
+- Improved USESTANDARDEFFECT support.
+- Fixed ARMORPIERCING -1/4.
+- Improved TRANSPORT_FAMILIARITY HDC uploads, descriptions & costs.
+- Improved ENTANGLE HDC uploads, descriptions & costs.
+
 # Version 3.0.30
-- Fix issue where attacks failed to apply damage.
+- Fixed issue where attacks failed to apply damage.
 
 # Version 3.0.29
 - Reworked Characteristics internal data structure.  Consolidating 6e/5e base, core, costs, bought as powers, etc into one data structure.  Improved hover descriptions.  You can now make changes to CORE characteristics, which will update BASE and COST.  Core, base, and cost are mostly for reference and have no effective gameplay function; although MAX should equal CORE  when all powers/effects are turned off.  This is a small step toward improving actor editing within FoundryVTT.

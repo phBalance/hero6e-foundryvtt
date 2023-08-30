@@ -3,8 +3,9 @@ import { editSubItem, deleteSubItem, isPowerSubItem } from '../powers/powers.js'
 import { HEROSYS } from '../herosystem6e.js'
 import { onManageActiveEffect } from '../utility/effects.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
-import { updateItemDescription } from '../utility/upload_hdc.js'
+import { CalcActorRealAndActivePoints, calcItemPoints, updateItemDescription } from '../utility/upload_hdc.js'
 import { getPowerInfo } from '../utility/util.js'
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -121,16 +122,34 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         }
 
         // The description may have changed
-        let description = this.item.system.description;
+        //let description = this.item.system.description;
 
         // Stadndard UpdateObject
         await super._updateObject(event, formData);
 
         // If Description changed, update it
-        updateItemDescription(this.item);
-        if (description != this.item.system.description) {
-            this.item.update({ 'system.description': this.item.system.description })
+        //updateItemDescription(this.item);
+        // if (description != this.item.system.description) {
+        //     this.item.update({ 'system.description': this.item.system.description })
+        // }
+
+        // Recalc Item cost
+        let item = this.item;
+        if (await calcItemPoints(item)) {
+            if (item.system.realCost) { // Some items like Perception have NaN for cost (TODO: fix)
+                let changes = {}
+                changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+                changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+                changes['system.realCost'] = RoundFavorPlayerDown(item.system.realCost);
+                await this.item.update(changes);
+            }
         }
+
+        updateItemDescription(this.item);
+        item.update({ 'system.description': item.system.description })
+
+        // Recalc Actor points
+        //CalcActorRealAndActivePoints(this.actor)
 
     }
 

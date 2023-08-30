@@ -1110,7 +1110,9 @@ HERO.powers = [
         "powerType": [
             "attack",
             "standard"
-        ]
+        ],
+        "costPerLevel": 10,
+        "costEnd": true
     },
     {
         "key": "FLASH",
@@ -2655,9 +2657,11 @@ HERO.powers5e = [
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
 HERO.ModifierOverride = {
+    "ADDITIONALED": { BASECOST: 5/2 },
+    "ADDITIONALPD": { BASECOST: 5/2 },
     "ALWAYSOCCURS": { BASECOST: 0, MULTIPLIER: 2 },
     "AOE": { dc: true },
-    "ARMORPIERCING": { BASECOST: 0.5, dc: true },
+    "ARMORPIERCING": { BASECOST: 0.25, dc: true },
     "AUTOFIRE": { dc: true },
     "AVAD": { dc: true },
     "BOOSTABLE": { dc: true },
