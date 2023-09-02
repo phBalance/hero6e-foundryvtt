@@ -308,6 +308,14 @@ export class HeroSystem6eItem extends Item {
         if (this.system.active === false)
             return false;
 
+        // FOCUS
+        let FOCUS = this.system.modifiers?.find(o => o.XMLID === "FOCUS")
+        if (FOCUS) {
+            if (FOCUS?.OPTION?.startsWith("O")) return true;
+            if (FOCUS?.OPTION?.startsWith("I")) return perceptionSuccess;
+        }
+
+
         let VISIBLE = this.system.modifiers?.find(o => o.XMLID === "VISIBLE")
         if (VISIBLE) {
             if (VISIBLE?.OPTION === "INVISIBLEINOBVIOUS") return true;

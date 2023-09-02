@@ -1206,6 +1206,10 @@ HERO.powers = [
         ],
         "name": "Resistant Protection",
         "duration": "Persistent",
+        "perceivability": "inobvious",
+        "target": "self only",
+        "range": "self",
+        "costEnd": false,
         "costPerLevel": 1.5
     },
     {
