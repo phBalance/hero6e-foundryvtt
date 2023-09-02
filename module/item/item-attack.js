@@ -1920,6 +1920,22 @@ async function _calcDamage(damageResult, item, options) {
         }
     }
 
+    // Splits an attack into two equal parts for the purpose of
+    // determining BODY damage and applying it to the target’s
+    // defenses (though it’s still resolved with one Attack Roll and
+    // treated as a single attack).
+    // This is super awkward with the current system.
+    // KLUGE: Apply body defense twice.
+    let REDUCEDPENETRATION = item.system.modifiers.find(o=> o.XMLID === "REDUCEDPENETRATION");
+    if (REDUCEDPENETRATION)
+    {
+        if (item.killing)
+        {
+            body = Math.max(0, body - options.resistantValue);
+        }
+        body = Math.max(0, body - options.defenseValue);
+    }
+
 
     // -------------------------------------------------
     // determine effective damage

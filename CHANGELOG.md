@@ -1,3 +1,7 @@
+# Version 3.0.32
+- Inintial REDUCEDPENETRATION support.  Rules as written are to split the attack into two sepearate dice pools, which is awkward with the current system.  A simplified solution is to apply defenses twice to the body damage. [#313](https://github.com/dmdorman/hero6e-foundryvtt/issues/313)
+
+
 # Version 3.0.31
 - Added ability to set END use of manually added attacks.
 - Improved USESTANDARDEFFECT support.
