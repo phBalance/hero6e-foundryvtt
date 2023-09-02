@@ -296,6 +296,44 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    isPerceivable(perceptionSuccess) {
+        if (["NAKEDMODIFIER"].includes(this.system.XMLID)) {
+            return false;
+        }
+        if (this.system.XMLID === "DENSITYINCREASE") {
+            console.log("DENSITYINCREASE");
+        }
+
+        // Power must be turned on
+        if (this.system.active === false)
+            return false;
+
+        let VISIBLE = this.system.modifiers?.find(o => o.XMLID === "VISIBLE")
+        if (VISIBLE) {
+            if (VISIBLE?.OPTION === "INVISIBLEINOBVIOUS") return true;
+            if (VISIBLE?.OPTION === "INVISIBLEOBVIOUS") return true;
+        }
+
+
+        const configPowerInfo = getPowerInfo({ item: this })
+        if (!configPowerInfo?.perceivability) {
+            // if (!["LIST"].includes(this.system.XMLID) && game.settings.get(game.system.id, 'alphaTesting')) {
+            //     ui.notifications.warn(`${this.system.XMLID} has undetermined percievability`)
+            // }
+            return false;
+        }
+
+        if (configPowerInfo?.duration.toLowerCase() === "instant") return false;
+        if (configPowerInfo.perceivability.toLowerCase() == "imperceptible") return false;
+        if (configPowerInfo.perceivability.toLowerCase() == "obvious") return true;
+        if (configPowerInfo.perceivability.toLowerCase() == "inobvious") return perceptionSuccess
+
+        if (game.settings.get(game.system.id, 'alphaTesting')) {
+            ui.notifications.warn(`${this.name} has undetermined percievability`)
+        }
+        return false;
+    }
+
 
 
     /**

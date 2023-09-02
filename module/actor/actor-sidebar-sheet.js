@@ -252,8 +252,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             // 0 END
-            if (!item.system.endEstimate)
-            {
+            if (!item.system.endEstimate) {
                 item.system.endEstimate = ""
             }
 
@@ -672,6 +671,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         html.find('.recovery-button').click(this._onRecovery.bind(this))
         html.find('.presence-button').click(this._onPresenseAttack.bind(this))
         html.find('.full-health-button').click(this._onFullHealth.bind(this))
+        html.find('.actor-description-button').click(this._onActorDescription.bind(this))
 
         // Active Effects
         html.find('.effect-create').click(this._onEffectCreate.bind(this))
@@ -922,6 +922,37 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         if (!confirmed) return;
         return this.actor.FullHealth();
 
+    }
+
+    async _onActorDescription(event) {
+
+
+        let content = `${this.actor.system.APPEARANCE}`;
+        let perceivable = []
+        for (let item of this.actor.items) {
+            if (item.isPerceivable(true)) {
+                perceivable.push(`<b>${item.name}</b> ${item.system.description}`);
+            }
+        }
+        if (perceivable.length > 0)
+        {
+            content += "<ul>";
+            for(let p of perceivable) {
+                content += `<li>${p}</li>`
+            }
+            content += "</ul>";
+        }
+
+
+        let token = this.actor.token
+        let speaker = ChatMessage.getSpeaker({ actor: this.actor, token })
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: content,
+            speaker: speaker
+        }
+        return ChatMessage.create(chatData)
     }
 
     async _uploadCharacterSheet(event) {
