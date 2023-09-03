@@ -936,6 +936,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
         if (perceivable.length > 0)
         {
+            perceivable.sort();
             content += "<ul>";
             for(let p of perceivable) {
                 content += `<li>${p}</li>`

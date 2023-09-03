@@ -297,11 +297,11 @@ export class HeroSystem6eItem extends Item {
     }
 
     isPerceivable(perceptionSuccess) {
-        if (["NAKEDMODIFIER"].includes(this.system.XMLID)) {
+        if (["NAKEDMODIFIER", "LIST"].includes(this.system.XMLID)) {
             return false;
         }
-        if (this.system.XMLID === "DENSITYINCREASE") {
-            console.log("DENSITYINCREASE");
+        if (this.system.XMLID === "STR") {
+            console.log("STR");
         }
 
         // Power must be turned on
@@ -318,8 +318,19 @@ export class HeroSystem6eItem extends Item {
 
         let VISIBLE = this.system.modifiers?.find(o => o.XMLID === "VISIBLE")
         if (VISIBLE) {
-            if (VISIBLE?.OPTION === "INVISIBLEINOBVIOUS") return true;
-            if (VISIBLE?.OPTION === "INVISIBLEOBVIOUS") return true;
+            if (VISIBLE?.OPTION?.endsWith("OBVIOUS")) return true;
+            if (VISIBLE?.OPTION?.endsWith("INOBVIOUS")) return perceptionSuccess;
+            return true; // 5e?
+        }
+
+        // PARENT?
+        let PARENT = this.actor.items.find(o => o.system.ID === (this.system.PARENTID || 'null'))
+        if (PARENT) {
+            let VISIBLE = PARENT.system.modifiers?.find(o => o.XMLID === "VISIBLE")
+            if (VISIBLE) {
+                if (VISIBLE?.OPTION.endsWith("OBVIOUS")) return true;
+                if (VISIBLE?.OPTION.endsWith("INOBVIOUS")) return perceptionSuccess;
+            }
         }
 
 
@@ -335,6 +346,10 @@ export class HeroSystem6eItem extends Item {
         if (configPowerInfo.perceivability.toLowerCase() == "imperceptible") return false;
         if (configPowerInfo.perceivability.toLowerCase() == "obvious") return true;
         if (configPowerInfo.perceivability.toLowerCase() == "inobvious") return perceptionSuccess
+
+        if (["INVISIBILITY"].includes(this.system.XMLID)) {
+            return false;
+        }
 
         if (game.settings.get(game.system.id, 'alphaTesting')) {
             ui.notifications.warn(`${this.name} has undetermined percievability`)
