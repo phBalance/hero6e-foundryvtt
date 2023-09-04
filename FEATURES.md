@@ -207,7 +207,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | ALTERABLE SIZE | D |  |
 | ALTERNATE COMBAT VALUE | C | Works on some attacks |
 | ALWAYS ON | D |  |
-| AREA OF EFFECT | B | any surface not supported |
+| AREA OF EFFECT | B | any surface not supported, LINE height/width not supported. |
 | ARMOR PIERCING | A | |
 | ATTACK VERSUS ALTERNATE DEFENSE | D |  |
 | AUTOFIRE | B | good single target support, poor multiple target support  |
@@ -308,7 +308,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | REDUCED BY SHRINKING | D |  |
 | REDUCED ENDURANCE | A |  |
 | REDUCED NEGATION | D |  |
-| REDUCED PENETRATION | D |  |
+| REDUCED PENETRATION | B | Simplified by applying defenses to body twice |
 | REDUCED RANGE MODIFIER | D |  |
 | REQUIRED HANDS | D |  |
 | REQUIRES A ROLL | B | good support for flat and characteristic rolls, no burnout/jam |
