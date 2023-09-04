@@ -2214,7 +2214,7 @@ function createPowerDescriptionModifier(modifier, item) {
             }
         }
         if (parseInt(modifier.LEVELS || 0) > 0) {
-            result += parseInt(modifier.LEVELS) + (item.actor.system.is5e ? "\" " : "m ");
+            result += parseInt(modifier.LEVELS) + (item.actor?.system?.is5e ? "\" " : "m ");
         }
 
     }
