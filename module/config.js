@@ -745,7 +745,7 @@ HERO.powers = [
         "powerType": [
             "special"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -756,7 +756,7 @@ HERO.powers = [
         "powerType": [
             "adjustment"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "instant",
         "target": "target's dcv",
         "range": "no range",
@@ -769,7 +769,7 @@ HERO.powers = [
             "body-affecting",
             "standard"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "constant",
         "target": "self only",
         "range": "self",
@@ -782,7 +782,7 @@ HERO.powers = [
         "powerType": [
             "standard"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -795,7 +795,7 @@ HERO.powers = [
             "adjustment",
             "attack"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "Instant",
         "target": "target’s DCV",
         "range": "no range",
@@ -809,7 +809,7 @@ HERO.powers = [
             "adjustment",
             "attack"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "Instant",
         "target": "target’s DCV",
         "range": "standard",
@@ -823,7 +823,7 @@ HERO.powers = [
             "adjustment",
             "attack"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "Instant",
         "target": "target’s DCV",
         "range": "no range",
@@ -836,7 +836,7 @@ HERO.powers = [
         "powerType": [
             "body-affecting"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "constant",
         "target": "self only",
         "range": "self",
@@ -849,7 +849,7 @@ HERO.powers = [
             "body-affecting",
             "standard"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "constant",
         "target": "self only",
         "range": "self",
@@ -858,9 +858,11 @@ HERO.powers = [
     },
     {
         "key": "NAKEDMODIFIER",
-        "powerType": [],
+        "powerType": ["special"],
+        //"duration": "instant",  // Not true, hack for isPercievable
         "costEnd": true,
-        "costPerLevel": 1
+        "costPerLevel": 1,
+        
     },
     {
         "key": "GROWTH",
@@ -869,7 +871,7 @@ HERO.powers = [
             "body-affecting",
             "size"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "constant",
         "target": "self only",
         "range": "self",
@@ -882,7 +884,7 @@ HERO.powers = [
         "powerType": [
             "special"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -895,7 +897,7 @@ HERO.powers = [
         "powerType": [
             "special"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -908,7 +910,7 @@ HERO.powers = [
             "attack",
             "mental"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "constant",
         "target": "dmcv",
         "range": "special",
@@ -920,7 +922,7 @@ HERO.powers = [
         "powerType": [
             "mental"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "instant",
         "target": "dmcv",
         "range": "los",
@@ -934,7 +936,7 @@ HERO.powers = [
             "attack",
             "mental"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "instant",
         "target": "dmcv",
         "range": "los",
@@ -948,7 +950,7 @@ HERO.powers = [
             "attack",
             "mental"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "instant",
         "target": "dmcv",
         "range": "los",
@@ -962,7 +964,7 @@ HERO.powers = [
             "attack",
             "mental"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "instant",
         "target": "dmcv",
         "range": "los",
@@ -975,7 +977,7 @@ HERO.powers = [
         "powerType": [
             "mental"
         ],
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "persistent",
         "target": "dmcv",
         "range": "los",
@@ -1121,7 +1123,7 @@ HERO.powers = [
             "sense-affecting",
             "standard"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "instant",
         "target": "Target’s DCV",
         "range": "standard",
@@ -1135,7 +1137,7 @@ HERO.powers = [
             "sense-affecting",
             "standard"
         ],
-        "percievability": "obvious",
+        "perceivability": "obvious",
         "duration": "constant",
         "target": "area (see text)",
         "range": "standard",
@@ -1168,7 +1170,7 @@ HERO.powers = [
         "powerType": [
             "attack"
         ],
-        "percievability": "Obvious",
+        "perceivability": "Obvious",
         "duration": "Constant",
         "target": "Target’s DCV",
         "range": "Standard",
@@ -1181,7 +1183,7 @@ HERO.powers = [
         "powerType": [
             "sense-affecting"
         ],
-        "percievability": "Special",
+        "perceivability": "Special",
         "duration": "Constant",
         "target": "Self Only",
         "range": "Self",
@@ -1204,6 +1206,10 @@ HERO.powers = [
         ],
         "name": "Resistant Protection",
         "duration": "Persistent",
+        "perceivability": "inobvious",
+        "target": "self only",
+        "range": "self",
+        "costEnd": false,
         "costPerLevel": 1.5
     },
     {
@@ -1213,7 +1219,7 @@ HERO.powers = [
             "special"
         ],
         "name": "Flash Defense",
-        "percievability": "inobvious",
+        "perceivability": "inobvious",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -1227,7 +1233,7 @@ HERO.powers = [
             "special"
         ],
         "name": "Mental Defense",
-        "percievability": "Imperceptible",
+        "perceivability": "Imperceptible",
         "target": "self only",
         "range": "self",
         "costEnd": false,
@@ -1241,7 +1247,7 @@ HERO.powers = [
             "special"
         ],
         "name": "Power Defense",
-        "percievability": "inobvious",
+        "perceivability": "inobvious",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -1255,7 +1261,7 @@ HERO.powers = [
             "special"
         ],
         "name": "Damage Negation",
-        "percievability": "inobvious",
+        "perceivability": "inobvious",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -1268,7 +1274,7 @@ HERO.powers = [
             "standard"
         ],
         "name": "Damage Reduction",
-        "percievability": "inobvious",
+        "perceivability": "inobvious",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -1281,7 +1287,7 @@ HERO.powers = [
             "standard"
         ],
         "name": "Knockback Resistance",
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -1295,7 +1301,7 @@ HERO.powers = [
             "special"
         ],
         "name": "Knockback Resistance",
-        "percievability": "imperceptible",
+        "perceivability": "imperceptible",
         "duration": "persistent",
         "target": "self only",
         "range": "self",
@@ -1363,7 +1369,7 @@ HERO.powers = [
             "movement"
         ],
         "name": "Extra-Dimensional movement",
-        "percievability": "Inobvious",
+        "perceivability": "Inobvious",
         "duration": "instant",
         "target": "Self Only",
         "range": "Self",
@@ -1940,7 +1946,7 @@ HERO.powers = [
             "special"
         ],
         "name": "Duplication",
-        "percievability": "Obvious",
+        "perceivability": "Obvious",
         "duration": "persistent",
         "target": "Self Only",
         "range": "Self",
@@ -1955,7 +1961,18 @@ HERO.powers = [
     },
     {
         "key": "naturalBodyHealing"
-    }
+    },
+
+    {
+        "key": "AUTOMATON",  //CANNOT BE STUNNED
+        powerType: ["automaton", "special"],
+        name: "Automaton",
+        perceivability: "Inobvious",
+        duration: "Persistent",
+        target: "Self Only",
+        range: "Self",
+        costEnd: false,
+    },
 ]
 
 HERO.powers5e = [
@@ -2050,7 +2067,7 @@ HERO.powers5e = [
         "key": "TRANSFER",
         name: "Transfer",
         powerType: ["adjustment", "attack"],
-        percievability: "obvious",
+        perceivability: "obvious",
         duration: "Instant",
         target: "target's DCV",
         range: "no range",
@@ -2068,7 +2085,7 @@ HERO.powers5e = [
         "key": "DAMAGERESISTANCE",
         name: "Damage Resistance",
         powerType: ["defense"],
-        //percievability: "obvious",
+        //perceivability: "obvious",
         duration: "Instant",
         target: "Self Only",
         range: "Self",
@@ -2083,6 +2100,9 @@ HERO.powers5e = [
         costEnd: true,
         costPerLevel: 3 / 2
     },
+
+    
+
 ]
 
 // HERO.powers = {
@@ -2113,10 +2133,10 @@ HERO.powers5e = [
 //     "EXTRALIMBS": { powerType: ["standard"], costPerLevel: 0 },
 //     "SUMMON": { powerType: ["standard"] },
 //     "DESOLIDIFICATION": { powerType: ["body-affecting", "standard"], name: "Desolidification" },
-//     "REGENERATION": { powerType: ["special"], percievability: "imperceptible", duration: "persistent", target: "self only", range: "self", costEnd: false },
+//     "REGENERATION": { powerType: ["special"], perceivability: "imperceptible", duration: "persistent", target: "self only", range: "self", costEnd: false },
 //     "HEALING": {
 //         powerType: ["adjustment"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "instant",
 //         target: "target's dcv",
 //         range: "no range",
@@ -2125,7 +2145,7 @@ HERO.powers5e = [
 //     },
 //     "STRETCHING": {
 //         powerType: ["body-affecting", "standard"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "constant",
 //         target: "self only",
 //         range: "self",
@@ -2135,7 +2155,7 @@ HERO.powers5e = [
 //     "LIFESUPPORT": {
 //         name: "Life Support",
 //         powerType: ["standard"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2144,7 +2164,7 @@ HERO.powers5e = [
 //     "AID": {
 //         name: "Aid",
 //         powerType: ["adjustment", "attack"], // not really an attack, but it behaves like one
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "Instant",
 //         target: "target’s DCV",
 //         range: "no range",
@@ -2154,7 +2174,7 @@ HERO.powers5e = [
 //     "DRAIN": {
 //         name: "Drain",
 //         powerType: ["adjustment", "attack"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "Instant",
 //         target: "target’s DCV",
 //         range: "standard",
@@ -2164,7 +2184,7 @@ HERO.powers5e = [
 //     "TRANSFER": {
 //         name: "Transfer",
 //         powerType: ["adjustment", "attack"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "Instant",
 //         target: "target’s DCV",
 //         range: "no range",
@@ -2174,7 +2194,7 @@ HERO.powers5e = [
 //     "SHAPESHIFT": {
 //         name: "Shape Shift",
 //         powerType: ["body-affecting"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "constant",
 //         target: "self only",
 //         range: "self",
@@ -2183,7 +2203,7 @@ HERO.powers5e = [
 //     "DENSITYINCREASE": {
 //         name: "Density Increase",
 //         powerType: ["body-affecting", "standard"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "constant",
 //         target: "self only",
 //         range: "self",
@@ -2198,7 +2218,7 @@ HERO.powers5e = [
 //     "GROWTH": {
 //         name: "Growth",
 //         powerType: ["body-affecting", "size"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "constant",
 //         target: "self only",
 //         range: "self",
@@ -2208,7 +2228,7 @@ HERO.powers5e = [
 //     "LUCK": {
 //         name: "Luck",
 //         powerType: ["special"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2218,7 +2238,7 @@ HERO.powers5e = [
 //     "ENDURANCERESERVE": {
 //         name: "Endurance Reserve",
 //         powerType: ["special"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2233,7 +2253,7 @@ HERO.powers5e = [
 //     "MINDSCAN": {
 //         powerType: ["mental"],
 //         powerType: ["attack", "mental"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "constant",
 //         target: "dmcv",
 //         range: "special",
@@ -2242,7 +2262,7 @@ HERO.powers5e = [
 //     },
 //     "TELEPATHY": {
 //         powerType: ["mental"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "instant",
 //         target: "dmcv",
 //         range: "los",
@@ -2252,7 +2272,7 @@ HERO.powers5e = [
 //     "EGOATTACK": {
 //         name: "Mental Blast",
 //         powerType: ["attack", "mental"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "instant",
 //         target: "dmcv",
 //         range: "los",
@@ -2262,7 +2282,7 @@ HERO.powers5e = [
 //     "MENTALILLUSIONS": {
 //         name: "Mental Illusions",
 //         powerType: ["attack", "mental"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "instant",
 //         target: "dmcv",
 //         range: "los",
@@ -2272,7 +2292,7 @@ HERO.powers5e = [
 //     "MINDCONTROL": {
 //         name: "Mind Control",
 //         powerType: ["attack", "mental"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "instant",
 //         target: "dmcv",
 //         range: "los",
@@ -2282,7 +2302,7 @@ HERO.powers5e = [
 //     "MINDLINK": {
 //         name: "Mind Link",
 //         powerType: ["mental"],
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "persistent",
 //         target: "dmcv",
 //         range: "los",
@@ -2333,7 +2353,7 @@ HERO.powers5e = [
 //     "ENTANGLE": { powerType: ["attack", "standard"] },
 //     "FLASH": {
 //         powerType: ["attack", "sense-affecting", "standard"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "instant",
 //         target: "Target’s DCV",
 //         range: "standard",
@@ -2342,7 +2362,7 @@ HERO.powers5e = [
 //     "IMAGES": {
 //         name: "Images",
 //         powerType: ["attack", "sense-affecting", "standard"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "constant",
 //         target: "area (see text)",
 //         range: "standard",
@@ -2353,7 +2373,7 @@ HERO.powers5e = [
 //     "CHANGEENVIRONMENT": {
 //         name: "Change Environment",
 //         powerType: ["attack"],
-//         percievability: "Obvious",
+//         perceivability: "Obvious",
 //         duration: "Constant",
 //         target: "Target’s DCV",
 //         range: "Standard",
@@ -2363,7 +2383,7 @@ HERO.powers5e = [
 //     "INVISIBILITY": {
 //         name: "Invisibility",
 //         powerType: ["sense-affecting"],
-//         percievability: "Special",
+//         perceivability: "Special",
 //         duration: "Constant",
 //         target: "Self Only",
 //         range: "Self",
@@ -2387,7 +2407,7 @@ HERO.powers5e = [
 //     "FLASHDEFENSE": {
 //         powerType: ["defense", "special"],
 //         name: "Flash Defense",
-//         percievability: "inobvious",
+//         perceivability: "inobvious",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2397,7 +2417,7 @@ HERO.powers5e = [
 //     "MENTALDEFENSE": {
 //         powerType: ["defense", "special"],
 //         name: "Mental Defense",
-//         percievability: "Imperceptible",
+//         perceivability: "Imperceptible",
 //         target: "self only",
 //         range: "self",
 //         costEnd: false,
@@ -2407,7 +2427,7 @@ HERO.powers5e = [
 //     "POWERDEFENSE": {
 //         powerType: ["defense", "special"],
 //         name: "Power Defense",
-//         percievability: "inobvious",
+//         perceivability: "inobvious",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2417,7 +2437,7 @@ HERO.powers5e = [
 //     "DAMAGENEGATION": {
 //         powerType: ["defense", "special"],
 //         name: "Damage Negation",
-//         percievability: "inobvious",
+//         perceivability: "inobvious",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2426,7 +2446,7 @@ HERO.powers5e = [
 //     "DAMAGEREDUCTION": {
 //         powerType: ["defense", "standard"],
 //         name: "Damage Reduction",
-//         percievability: "inobvious",
+//         perceivability: "inobvious",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2435,7 +2455,7 @@ HERO.powers5e = [
 //     "KBRESISTANCE": {
 //         powerType: ["defense", "standard"],
 //         name: "Knockback Resistance",
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2445,7 +2465,7 @@ HERO.powers5e = [
 //     "LACKOFWEAKNESS": {
 //         powerType: ["defense", "special"],
 //         name: "Knockback Resistance",
-//         percievability: "imperceptible",
+//         perceivability: "imperceptible",
 //         duration: "persistent",
 //         target: "self only",
 //         range: "self",
@@ -2465,7 +2485,7 @@ HERO.powers5e = [
 //     "EXTRADIMENSIONALMOVEMENT": {
 //         powerType: ["movement"],
 //         name: "Extra-Dimensional movement",
-//         percievability: "Inobvious",
+//         perceivability: "Inobvious",
 //         duration: "instant",
 //         target: "Self Only",
 //         range: "Self",
@@ -2592,7 +2612,7 @@ HERO.powers5e = [
 //     "DUPLICATION": {
 //         powerType: ["BodyAffecting", "special"],
 //         name: "Duplication",
-//         percievability: "Obvious",
+//         perceivability: "Obvious",
 //         duration: "persistent",
 //         target: "Self Only",
 //         range: "Self",
@@ -2608,7 +2628,7 @@ HERO.powers5e = [
 //     "AID": {
 //         name: "Aid",
 //         powerType: ["adjustment", "attack"], // not really an attack, but it behaves like one
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "Instant",
 //         target: "target’s DCV",
 //         range: "no range",
@@ -2618,7 +2638,7 @@ HERO.powers5e = [
 //     "TRANSFER": {
 //         name: "Transfer",
 //         powerType: ["adjustment", "attack"],
-//         percievability: "obvious",
+//         perceivability: "obvious",
 //         duration: "Instant",
 //         target: "target’s DCV",
 //         range: "no range",
@@ -2634,7 +2654,7 @@ HERO.powers5e = [
 //     "DAMAGERESISTANCE": {
 //         name: "Damage Resistance",
 //         powerType: ["defense"],
-//         //percievability: "obvious",
+//         //perceivability: "obvious",
 //         duration: "Instant",
 //         target: "Self Only",
 //         range: "Self",

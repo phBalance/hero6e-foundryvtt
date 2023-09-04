@@ -296,6 +296,67 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    isPerceivable(perceptionSuccess) {
+        if (["NAKEDMODIFIER", "LIST"].includes(this.system.XMLID)) {
+            return false;
+        }
+        if (this.system.XMLID === "STR") {
+            console.log("STR");
+        }
+
+        // Power must be turned on
+        if (this.system.active === false)
+            return false;
+
+        // FOCUS
+        let FOCUS = this.system.modifiers?.find(o => o.XMLID === "FOCUS")
+        if (FOCUS) {
+            if (FOCUS?.OPTION?.startsWith("O")) return true;
+            if (FOCUS?.OPTION?.startsWith("I")) return perceptionSuccess;
+        }
+
+
+        let VISIBLE = this.system.modifiers?.find(o => o.XMLID === "VISIBLE")
+        if (VISIBLE) {
+            if (VISIBLE?.OPTION?.endsWith("OBVIOUS")) return true;
+            if (VISIBLE?.OPTION?.endsWith("INOBVIOUS")) return perceptionSuccess;
+            return true; // 5e?
+        }
+
+        // PARENT?
+        let PARENT = this.actor.items.find(o => o.system.ID === (this.system.PARENTID || 'null'))
+        if (PARENT) {
+            let VISIBLE = PARENT.system.modifiers?.find(o => o.XMLID === "VISIBLE")
+            if (VISIBLE) {
+                if (VISIBLE?.OPTION.endsWith("OBVIOUS")) return true;
+                if (VISIBLE?.OPTION.endsWith("INOBVIOUS")) return perceptionSuccess;
+            }
+        }
+
+
+        const configPowerInfo = getPowerInfo({ item: this })
+        if (!configPowerInfo?.perceivability) {
+            // if (!["LIST"].includes(this.system.XMLID) && game.settings.get(game.system.id, 'alphaTesting')) {
+            //     ui.notifications.warn(`${this.system.XMLID} has undetermined percievability`)
+            // }
+            return false;
+        }
+
+        if (configPowerInfo?.duration.toLowerCase() === "instant") return false;
+        if (configPowerInfo.perceivability.toLowerCase() == "imperceptible") return false;
+        if (configPowerInfo.perceivability.toLowerCase() == "obvious") return true;
+        if (configPowerInfo.perceivability.toLowerCase() == "inobvious") return perceptionSuccess
+
+        if (["INVISIBILITY"].includes(this.system.XMLID)) {
+            return false;
+        }
+
+        if (game.settings.get(game.system.id, 'alphaTesting')) {
+            ui.notifications.warn(`${this.name} has undetermined percievability`)
+        }
+        return false;
+    }
+
 
 
     /**

@@ -188,7 +188,7 @@ export class ItemAttackFormApplication extends FormApplication {
         if (!aoe) return;
 
         const aoeType = aoe.OPTION.toLowerCase();
-        const aoeValue = Math.max(1, parseInt(aoe.LEVELS || 0), 1); // Even 1 hex it technically 1m
+        const aoeValue = Math.max(item.actor.system.is5e ? 0.5 : 1, parseInt(aoe.LEVELS || 0)); // Even 1 hex it technically 1m
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!token) return;

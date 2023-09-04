@@ -871,7 +871,7 @@ export function XmlToItemData(xml, type) {
         if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST) {
             _adder.BASECOST = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST || _adder.BASECOST
         }
-        
+
         // ADDERs can have ADDERs.
         // And sometimes MODIFIERs, which we will coerce into an ADDER (CONTINUOUSCONCENTRATION).
         for (let ADDER2 of ADDER.querySelectorAll(":scope > ADDER, :scope > ADDER")) {
@@ -1121,46 +1121,49 @@ export async function uploadSkill(skill, duplicate) {
 
 }
 
-export function calcItemPoints(item) {
+export async function calcItemPoints(item) {
 
-    if (item.name === "Cosmic Blast") {
-        console.log(item.name);
-    }
+    let changed = false
 
     // For some reason some ADDERs have a 0 value.
-    if (item.system.adders) {
-        for (let adder of item.system.adders) {
+    for (let adder of item.system?.adders || []) {
+        if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
+            let baseCost = CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST || adder.BASECOST
+            if (baseCost != adder.BASECOST) {
+                adder.BASECOST = baseCost;
+                await item.update({ 'system.adders': item.system.adders })
+                changed = true
+            }
+        }
+    }
+
+
+    for (let modifier of item.system?.modifiers || []) {
+        let baseCost = CONFIG.HERO.ModifierOverride[modifier.XMLID]?.BASECOST || modifier.BASECOST
+        if (baseCost != modifier.BASECOST) {
+            modifier.BASECOST = baseCost;
+            await item.update({ 'system.modifiers': item.system.modifiers })
+            changed = true
+        }
+
+        for (let adder of modifier?.adders || []) {
             if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
                 let baseCost = CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST || adder.BASECOST
                 if (baseCost != adder.BASECOST) {
                     adder.BASECOST = baseCost;
-                    adder.update({ BASECOST: adder.BASECOST })
-                }
-            }
-        }
-    }
-    if (item.system.modifiers) {
-        for (let modifier of item.system.modifiers) {
-
-            let baseCost = CONFIG.HERO.ModifierOverride[modifier.XMLID]?.BASECOST || modifier.BASECOST
-            if (baseCost != modifier.BASECOST) {
-                modifier.BASECOST = baseCost;
-                modifier.update({ BASECOST: modifier.BASECOST })
-            }
-
-            for (let adder of modifier.adders) {
-                if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
-                    let baseCost = CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST || adder.BASECOST
-                    if (baseCost != adder.BASECOST) {
-                        adder.BASECOST = baseCost;
-                        adder.update({ BASECOST: adder.BASECOST })
-                    }
+                    await item.update({ 'system.modifiers': item.system.modifiers })
+                    changed = true
                 }
             }
         }
     }
 
-    let changed = calcBasePointsPlusAdders(item).changed;
+
+    if (item.name === "Razor Arrow") {
+        console.log(item)
+    }
+
+    changed = changed || calcBasePointsPlusAdders(item);
     changed = changed || calcActivePoints(item);
     changed = changed || calcRealCost(item);
     return changed;
@@ -1317,7 +1320,7 @@ function calcBasePointsPlusAdders(item) {
     system.basePointsPlusAdders = cost;
 
     //return cost; //Math.max(1, cost)
-    return { changed: old === system.basePointsPlusAdders };
+    return (old != system.basePointsPlusAdders);
 }
 
 function calcActivePoints(item) {
@@ -1396,7 +1399,7 @@ function calcActivePoints(item) {
     system.activePoints = RoundFavorPlayerDown(_activePoints);
 
     //return RoundFavorPlayerDown(_activePoints)
-    return { changed: old === system.activePoints };
+    return (old != system.activePoints);
 }
 
 function calcRealCost(item) {
@@ -1492,7 +1495,7 @@ function calcRealCost(item) {
     let old = system.realCost;
     system.realCost = _realCost + costSuffix;
 
-    return { changed: old === system.realCost }; //_realCost
+    return (old != system.realCost); //_realCost
 }
 
 export async function uploadPower(power, type) {
@@ -1949,13 +1952,10 @@ export function updateItemDescription(item) {
                     system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
                     break;
                 case "RIDINGANIMALS":
-                    if (adder.SELECTED)
-                    {
+                    if (adder.SELECTED) {
                         _adderArray.push(adder.ALIAS)
-                    } else
-                    {
-                        for(let adder2 of adder.adders)
-                        {
+                    } else {
+                        for (let adder2 of adder?.adders || []) {
                             _adderArray.push(adder2.ALIAS)
                         }
                     }
@@ -2033,7 +2033,7 @@ export function updateItemDescription(item) {
 
     // Active Points
     if (parseInt(system.realCost) != parseInt(system.activePoints) || parent) {
-        system.description += " (" + system.activePoints + " Active Points)"
+        system.description += " (" + system.activePoints + " Active Points);"
     }
 
     // MULTIPOWER slots typically include limitations
@@ -2047,7 +2047,7 @@ export function updateItemDescription(item) {
         system.description += createPowerDescriptionModifier(modifier, item)
     }
 
-    system.description = system.description.replace("; ,", ";").replace("; ;", ";").trim()
+    system.description = system.description.replace(";,", ";").replace("; ,", ";").replace("; ;", ";").trim()
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
@@ -2125,7 +2125,7 @@ function createPowerDescriptionModifier(modifier, item) {
 
             break;
         case "FOCUS":
-            result += modifier.ALIAS
+            result += ", " + modifier.ALIAS
             break;
 
         default:
@@ -2159,11 +2159,66 @@ function createPowerDescriptionModifier(modifier, item) {
         if (["HARDENED"].includes(modifier.XMLID)) {
             result += "x" + parseInt(modifier.LEVELS) + "; "
         }
-
-        if (["AOE"].includes(modifier.XMLID)) {
-            result += parseInt(modifier.LEVELS) + "m ";
-        }
     }
+
+    if (["AOE"].includes(modifier.XMLID)) {
+
+        // 5e has a calculated size
+        if (item.actor?.system?.is5e) {
+            let levels = 1;
+
+            // not counting the Area Of Effect Advantage.
+            let _activePointsWithoutAoeAdvantage = item.system.activePoints / (1 + modifier.BASECOST_total);
+            switch (modifier.OPTIONID) {
+
+
+                case "CONE":
+                    // +1 for a Cone with sides (1”+ (1” for
+                    // every 5 Active Points in the power))
+                    // long; double the length of the sides for
+                    // each additional +¼
+                    levels = 1 + Math.floor(parseInt(_activePointsWithoutAoeAdvantage || 0) / 5);
+                    break;
+
+                case "HEX":
+                    levels = 0;
+                    break;
+
+                case "LINE":
+                    // +1 for a Line 2” long for every 5 Active
+                    // Points in the power; double the length,
+                    // width, or height of the Line for each additional
+                    // +¼
+                    levels = Math.floor(parseInt(_activePointsWithoutAoeAdvantage || 0) / 5) * 2;
+                    break;
+
+                case "RADIUS":
+                    // +1 for a 1” Radius for every 10 Active
+                    // Points in the power; double the Radius for
+                    // each additional +¼
+                    levels = 1 + Math.floor(parseInt(_activePointsWithoutAoeAdvantage || 0) / 10);
+                    break;
+            }
+
+            const DOUBLEAREA = modifier?.adders.find(o => o.XMLID === "DOUBLEAREA");
+            if (DOUBLEAREA) {
+                levels *= (parseInt(DOUBLEAREA.LEVELS) * 2)
+            }
+
+            if (parseInt(modifier.LEVELS) != levels) {
+                modifier.LEVELS = levels;
+                if (item.update) {
+                    item.update({ 'system.modifiers': item.system.modifiers });
+                }
+
+            }
+        }
+        if (parseInt(modifier.LEVELS || 0) > 0) {
+            result += parseInt(modifier.LEVELS) + (item.actor?.system?.is5e ? "\" " : "m ");
+        }
+
+    }
+
 
     if (modifier.XMLID == "CUMULATIVE" && (parseInt(modifier.LEVELS) > 0)) {
         result += parseInt(system.LEVELS.value || system.LEVELS) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
@@ -2189,7 +2244,15 @@ function createPowerDescriptionModifier(modifier, item) {
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
     for (let adder of modifier.adders) {
-        result += adder.ALIAS + ", "
+        switch (adder.XMLID) {
+
+            case "DOUBLEAREA":
+                break;
+
+            default:
+                result += adder.ALIAS + ", "
+        }
+
     }
 
     let fraction = ""
@@ -2248,6 +2311,11 @@ function createPowerDescriptionModifier(modifier, item) {
         }
 
     }
+
+    // Mind Control Inobvious Power, Invisible to Mental Group
+    // Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)
+    // Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points), Extra Time (Full Phase, -1/2)
+    result = result.replace("Inobvious Power, Invisible ", "Invisible ");
 
     return result;
 }
