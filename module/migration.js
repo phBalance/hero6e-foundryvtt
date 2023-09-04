@@ -1,4 +1,4 @@
-import { calcItemPoints, updateItemDescription, CalcActorRealAndActivePoints} from "./utility/upload_hdc.js"
+import { calcItemPoints, updateItemDescription, CalcActorRealAndActivePoints } from "./utility/upload_hdc.js"
 import { RoundFavorPlayerDown } from "./utility/round.js"
 
 export async function migrateWorld() {
@@ -188,7 +188,7 @@ export async function migrateWorld() {
             try {
                 let itemsChanged = false;
                 for (let item of actor.items) {
-                        let changes = {};
+                    let changes = {};
 
                     // Calculate RealCost, ActivePoints, and END
                     if (await calcItemPoints(item)) {
@@ -224,10 +224,13 @@ export async function migrateWorld() {
 
             } catch (e) {
                 console.log(e);
+                if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+                    await ui.notifications.warn(`Migragtion failed for ${actor.name}.`)
+                }
             }
 
         }
-        
+
     }
     await ui.notifications.info(`Migragtion complete.`)
 }
