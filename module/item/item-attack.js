@@ -27,9 +27,19 @@ export async function onMessageRendered(html) {
     //[data-visibility="gm"]
     if (!game.user.isGM) {
         html.find(`[data-visibility="gm"]`).remove();
-        // .each((i, element) => {
-        //     element.classList.remove('hideFromPlayers');
-        // });
+    }
+
+    // visibility based on actor owner
+    let element = html.find('div [data-visibility]')
+    if (element) {
+        let actorId = element.data("visibility")
+        if (actorId) {
+            let actor = game.actors.get(actorId)
+            if (!actor.isOwner) {
+                element.remove();
+            }
+        }
+        console.log(element)
     }
 }
 
@@ -237,8 +247,8 @@ export async function AttackToHit(item, options) {
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment");
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
+    const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment");
+    const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
 
     // -------------------------------------------------
     // attack roll
@@ -773,8 +783,8 @@ export async function _onRollDamage(event) {
     }
 
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment");
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
+    const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment");
+    const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
 
     let { dc, tags } = convertToDcFromItem(item, { isAction: true, ...toHitData });
 
@@ -1291,11 +1301,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // AID, DRAIN or any adjustmnet powers
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+    const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense)
     }
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
+    const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense)
     }
@@ -1436,10 +1446,10 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
         }
 
-        let costPerPointX = parseFloat(getPowerInfo({xmlid: keyX.toUpperCase(), actor: item.actor})?.cost) * AdjustmentMultiplier(keyX.toUpperCase());
+        let costPerPointX = parseFloat(getPowerInfo({ xmlid: keyX.toUpperCase(), actor: item.actor })?.cost) * AdjustmentMultiplier(keyX.toUpperCase());
         levelsX = parseInt(ActivePoints / costPerPointX)
 
-        let costPerPointY = parseFloat(getPowerInfo({xmlid: keyY.toUpperCase(), actor: item.actor})?.cost) * AdjustmentMultiplier(keyY.toUpperCase());
+        let costPerPointY = parseFloat(getPowerInfo({ xmlid: keyY.toUpperCase(), actor: item.actor })?.cost) * AdjustmentMultiplier(keyY.toUpperCase());
         levelsY = parseInt(ActivePoints / costPerPointY)
 
         // Check for previous ADJUSTMENT from same source
@@ -1884,17 +1894,15 @@ async function _calcDamage(damageResult, item, options) {
         effects = item.system.EFFECT + ";"
     }
 
-     // Splits an attack into two equal parts for the purpose of
+    // Splits an attack into two equal parts for the purpose of
     // determining BODY damage and applying it to the target’s
     // defenses (though it’s still resolved with one Attack Roll and
     // treated as a single attack).
     // This is super awkward with the current system.
     // KLUGE: Apply body defense twice.
-    let REDUCEDPENETRATION = item.system.modifiers.find(o=> o.XMLID === "REDUCEDPENETRATION");
-    if (REDUCEDPENETRATION)
-    {
-        if (item.killing)
-        {
+    let REDUCEDPENETRATION = item.system.modifiers.find(o => o.XMLID === "REDUCEDPENETRATION");
+    if (REDUCEDPENETRATION) {
+        if (item.killing) {
             body = Math.max(0, body - options.resistantValue);
         }
         body = Math.max(0, body - options.defenseValue);
@@ -1936,7 +1944,7 @@ async function _calcDamage(damageResult, item, options) {
         }
     }
 
-   
+
 
 
     // -------------------------------------------------
