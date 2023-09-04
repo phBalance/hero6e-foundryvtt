@@ -2159,11 +2159,66 @@ function createPowerDescriptionModifier(modifier, item) {
         if (["HARDENED"].includes(modifier.XMLID)) {
             result += "x" + parseInt(modifier.LEVELS) + "; "
         }
-
-        if (["AOE"].includes(modifier.XMLID)) {
-            result += parseInt(modifier.LEVELS) + "m ";
-        }
     }
+
+    if (["AOE"].includes(modifier.XMLID)) {
+
+        // 5e has a calculated size
+        if (item.actor?.system?.is5e) {
+            let levels = 1;
+
+            // not counting the Area Of Effect Advantage.
+            let _activePointsWithoutAoeAdvantage = item.system.activePoints / (1 + modifier.BASECOST_total);
+            switch (modifier.OPTIONID) {
+
+
+                case "CONE":
+                    // +1 for a Cone with sides (1”+ (1” for
+                    // every 5 Active Points in the power))
+                    // long; double the length of the sides for
+                    // each additional +¼
+                    levels = 1 + Math.floor(parseInt(_activePointsWithoutAoeAdvantage || 0) / 5);
+                    break;
+
+                case "HEX":
+                    levels = 0;
+                    break;
+
+                case "LINE":
+                    // +1 for a Line 2” long for every 5 Active
+                    // Points in the power; double the length,
+                    // width, or height of the Line for each additional
+                    // +¼
+                    levels = Math.floor(parseInt(_activePointsWithoutAoeAdvantage || 0) / 5) * 2;
+                    break;
+
+                case "RADIUS":
+                    // +1 for a 1” Radius for every 10 Active
+                    // Points in the power; double the Radius for
+                    // each additional +¼
+                    levels = 1 + Math.floor(parseInt(_activePointsWithoutAoeAdvantage || 0) / 10);
+                    break;
+            }
+
+            const DOUBLEAREA = modifier?.adders.find(o => o.XMLID === "DOUBLEAREA");
+            if (DOUBLEAREA) {
+                levels *= (parseInt(DOUBLEAREA.LEVELS) * 2)
+            }
+
+            if (parseInt(modifier.LEVELS) != levels) {
+                modifier.LEVELS = levels;
+                if (item.update) {
+                    item.update({ 'system.modifiers': item.system.modifiers });
+                }
+
+            }
+        }
+        if (parseInt(modifier.LEVELS || 0) > 0) {
+            result += parseInt(modifier.LEVELS) + (item.actor.system.is5e ? "\" " : "m ");
+        }
+
+    }
+
 
     if (modifier.XMLID == "CUMULATIVE" && (parseInt(modifier.LEVELS) > 0)) {
         result += parseInt(system.LEVELS.value || system.LEVELS) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
@@ -2189,7 +2244,15 @@ function createPowerDescriptionModifier(modifier, item) {
     //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
     if (modifier.COMMENTS) result += modifier.COMMENTS + "; "
     for (let adder of modifier.adders) {
-        result += adder.ALIAS + ", "
+        switch (adder.XMLID) {
+
+            case "DOUBLEAREA":
+                break;
+
+            default:
+                result += adder.ALIAS + ", "
+        }
+
     }
 
     let fraction = ""

@@ -2,6 +2,7 @@
 - Inintial REDUCEDPENETRATION support.  Rules as written are to split the attack into two sepearate dice pools, which is awkward with the current system.  A simplified solution is to apply defenses twice to the body damage. [#313](https://github.com/dmdorman/hero6e-foundryvtt/issues/313)
 - Initial Actor description.  Sends APPEARANCE and all obvious & inobvious powers to chat log.  A future improvment will include a perception roll for inobvious powers. [#311](https://github.com/dmdorman/hero6e-foundryvtt/issues/311)
 - Improved migration script.  Fixes mistakes in some power costs & power descriptions without the need to re-upload HDC.
+- Fix for missing AOE sizes for 5e. [#356](https://github.com/dmdorman/hero6e-foundryvtt/issues/356) [#353](https://github.com/dmdorman/hero6e-foundryvtt/issues/356)
 
 # Version 3.0.31
 - Added ability to set END use of manually added attacks.
