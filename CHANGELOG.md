@@ -3,6 +3,7 @@
 - The "Roll Damage" button is now only shown for token owners.
 - Improved AOE workflow to use DCV 3 for template placement. [#354](https://github.com/dmdorman/hero6e-foundryvtt/issues/354) 
 - Initial support for SELECTIVE and NONSELECTIVE. [#322](https://github.com/dmdorman/hero6e-foundryvtt/issues/322)
+- You now have to hold down SHIFT to change turn in combat tracker. [#352](https://github.com/dmdorman/hero6e-foundryvtt/issues/352)
 
 # Version 3.0.32
 - Initial REDUCEDPENETRATION support.  Rules as written are to split the attack into two separate dice pools, which is awkward with the current system.  A simplified solution is to apply defenses twice to the body damage. [#313](https://github.com/dmdorman/hero6e-foundryvtt/issues/313)
