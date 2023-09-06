@@ -1,9 +1,9 @@
 Here is a list of Hero System skills, perks, talents, powers, modifiers and complications.  Each is given a support rating:
--  A: Full support and automation
--  B: Good support and automation.  A few rare edge cases may be unsupported, those edge cases may have limited/no automation.
--  C: Poor support.  Simplistic dice rolling.  Defenses/results are poorly/wrongly applied.
--  D: Minimal support.  Dice rolling is not available, wrong, or otherwise poorly implemented.  No automation.
--  F: No support. HDC upload may not even work.
+-  A: Full support and automation.  Power descriptions largely match Hero Designer.
+-  B: Good support and automation.  A few rare edge cases may be unsupported, those edge cases may have limited/no automation.  Power descriptions largley match Hero Designer, but power costs may be incorrect.
+-  C: Poor support.  Simplistic dice rolling.  Defenses/results are poorly/wrongly applied.  Power description shows name, but some non-damage details may be missing/incorrect and power costs have not been reviewed.
+-  D: Minimal support.  Dice rolling is not available, wrong, or otherwise poorly implemented.  No automation.  Power description shows name, but likely missing significant details and power costs have not been reviewed.
+-  F: Unknown or No support. HDC upload may not even work.
 
 
 | SKILLS | Support | Comments |
@@ -132,7 +132,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | AID | B | Works for characteristics, cannot aid powers, no boost support |
 | BARRIER | C | Implemented like resistant protection, no support for destroying barriers, no placeables for a barrier |
 | BLAST | A ||
-| CANNOT BE STUNNED | D ||
+| CANNOT BE STUNNED | B | Not fully vetted |
 | CHANGE ENVIRONMENT | D ||
 | CHARACTERISTICS | A ||
 | CLAIRSENTIENCE | D ||
@@ -185,7 +185,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | SUMMON | F |  You will have to create a separate HDC file and import that for each duplicate. |
 | SWIMMING | B | non-combat penalties not automated |
 | SWINGING | B | non-combat penalties not automated |
-| TAKES NO STUN | D |  |
+| TAKES NO STUN | B | Not fully vetted |
 | TELEKINESIS | B | TK strength based attacks work.  Multiple TK powers are additive for STR.  Non-attack uses are poorly implemented. |
 | TELEPATHY | D |  |
 | TELEPORTATION | B | non-combat penalties not automated |
@@ -325,7 +325,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | STICKY | D |  |
 | STOPS WORKING IF KNOCKED OUT/STUNNED | D |  |
 | STR MINIMUM | D |  |
-| STUN ONLY | D |  |
+| STUN ONLY | C |  |
 | SUBJECT TO RANGE MODIFIER | D |  |
 | TIME LIMIT | D |  |
 | TRANSDIMENSIONAL | D |  |

@@ -14,6 +14,15 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         html.find('.segment-active').click(ev => this._onSegmentToggleContent(ev));
     }
 
+    async _onCombatControl(event) {
+        const target = event.target
+        if (["fas fa-step-backward", "fas fa-step-forward"].includes(target.className) && !event.shiftKey) {
+            return await ui.notifications.warn(`Changing turns is unusual. Hold SHIFT to change turn.`);
+        }
+
+        await super._onCombatControl(event)
+    }
+
     _onSegmentToggleContent(event) {
         event.preventDefault();
         const header = event.currentTarget;
@@ -53,7 +62,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 context.activeSegments[i] = (context.combat.turn === null && i === 12) || (context.combat?.combatant && context.combat.combatant.segment === i);
             }
             context.segments = context.combat.segments;
-            
+
         }
 
         return context;
@@ -71,7 +80,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         let active = this.element.find(".active")[0];
         if (!active)
             return;
-        let container = active.closest("ol.directory-list"); 
+        let container = active.closest("ol.directory-list");
 
         // Collapse all segments except for the one with the active combatant.
         // Scroll to sement header because it would be nice if it was in view.

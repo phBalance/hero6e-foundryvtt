@@ -19,6 +19,7 @@ export async function chatListeners(html) {
     // Called by card-helpers.js
     html.on('click', 'button.roll-damage', this._onRollDamage.bind(this));
     html.on('click', 'button.apply-damage', this._onApplyDamage.bind(this));
+    html.on('click', 'button.rollAoe-damage', this._onRollAoeDamage.bind(this));
     //html.on('click', 'button.place-template', this._onPlaceTemplate.bind(this));
 }
 
@@ -27,9 +28,19 @@ export async function onMessageRendered(html) {
     //[data-visibility="gm"]
     if (!game.user.isGM) {
         html.find(`[data-visibility="gm"]`).remove();
-        // .each((i, element) => {
-        //     element.classList.remove('hideFromPlayers');
-        // });
+    }
+
+    // visibility based on actor owner
+    let element = html.find('div [data-visibility]')
+    if (element) {
+        let actorId = element.data("visibility")
+        if (actorId) {
+            let actor = game.actors.get(actorId)
+            if (actor && !actor.isOwner) {
+                element.remove();
+            }
+        }
+        //console.log(element)
     }
 }
 
@@ -103,10 +114,20 @@ export async function AttackOptions(item, event) {
 
     }
 
-    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations) {
+    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations && !aoe) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
+
+        // Penalty Skill Levels
+        const PENALTY_SKILL_LEVELS = actor.items.find(o => o.system.XMLID === "PENALTY_SKILL_LEVELS")
+        if (PENALTY_SKILL_LEVELS) {
+            data.PENALTY_SKILL_LEVELS = PENALTY_SKILL_LEVELS
+        }
     }
+
+
 
     // Combat Skill Levels
     const csl = CombatSkillLevelsForAttack(item);
@@ -160,94 +181,50 @@ export async function AttackOptions(item, event) {
 }
 
 export async function _processAttackOptions(item, formData) {
-    // convert form data into json object
-    //const formData = new FormData(form)
-    // let options = {}
-    // for (const [key, value] of formData) {
-    //     options[key] = value
-    // }
-
-    // Combat Skill Levels (update SKILL if changed)
-    // const csl = CombatSkillLevelsForAttack(item);
-    // const checked = form.querySelectorAll(".combat-skill-levels input:checked");
-    // if (csl && checked) {
-    //     let updateRequired = false;
-    //     for (let input of checked) {
-    //         let m = input.name.match(/\.(\w+)\.(\d+)/);
-    //         let name = m[1];
-    //         let idx = m[2];
-
-    //         if (csl.skill.system.csl[idx] != input.value) {
-    //             csl.skill.system.csl[idx] = input.value;
-    //             updateRequired = true;
-    //         }
-    //     }
-    //     if (updateRequired) {
-    //         await csl.skill.update({ 'system.csl': csl.skill.system.csl });
-    //     }
-    // }
-
-
-    // AOE
-    // const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
-    // if (aoe) {
-    //     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-aoe-card.hbs";
-
-    //     const actorId = form.closest("form[data-actor-id]").dataset?.actorId;
-    //     const actor = game.actors.get(actorId);
-    //     const tokenId = form.closest("form[data-token-id]")?.dataset?.tokenId;
-    //     const token = canvas.scene.tokens.get(tokenId) || actor.getActiveTokens()[0];
-
-    //     let cardData = {
-    //         ...options,
-    //         item,
-    //         token,
-    //         actor,
-    //     }
-    //     const html = await renderTemplate(template, cardData)
-    //     const speaker = ChatMessage.getSpeaker({ actor: item.actor })
-    //     const chatData = {
-    //         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-    //         user: game.user._id,
-    //         content: html,
-    //         speaker: speaker,
-    //         whisper: ChatMessage.getWhisperRecipients("GM"),
-    //     }
-    //     return ChatMessage.create(chatData)
-    // }
-
-
     await AttackToHit(item, formData)
 }
 
+export async function _processAttackAoeOptions(item, formData) {
+    await AttackAoeToHit(item, formData)
+}
 
-/// ChatMessage showing Attack To Hit
-export async function AttackToHit(item, options) {
-    let template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs"
+
+export async function AttackAoeToHit(item, options) {
+    let template = "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs"
 
     const actor = item.actor
-    const itemId = item._id
-    const itemData = item.system;
+    if (!actor) {
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
+
+    const token = actor.getActiveTokens()[0]
+    if (!token) {
+        return ui.notifications.error(`Token was not found.`);
+    }
+
+    const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
+        game.scenes.current.templates.find(o => o.user.id === game.user.id);
+    if (!aoeTemplate) {
+        return ui.notifications.error(`Attack AOE template was not found.`);
+    }
+
+    let distanceToken = canvas.grid.measureDistance(aoeTemplate, token, { gridSpaces: true });
+    let dcvTargetNumber = 0
+    if (distanceToken > (actor.system.is5e ? 1 : 2)) {
+        dcvTargetNumber = 3
+    }
+
+    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const SELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "SELECTIVETARGET") : null;
+
+    const hitCharacteristic = actor.system.characteristics.ocv.value;
     let tags = []
 
-    const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
-
-    let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
-
-    let automation = game.settings.get("hero6efoundryvttv2", "automation");
-
-    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment");
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
-
-    // -------------------------------------------------
-    // attack roll
-    // -------------------------------------------------
     let rollEquation = "11 + " + hitCharacteristic;
-    tags.push({ value: hitCharacteristic, name: itemData.uses })
+    tags.push({ value: hitCharacteristic, name: item.system.uses })
+    rollEquation = rollEquation + " - 3D6";
 
     const ocvMod = parseInt(options.ocvMod) || 0
-    const dcvMod = parseInt(options.dcvMod) || 0
     if (parseInt(ocvMod) != 0) {
 
         rollEquation = modifyRollEquation(rollEquation, ocvMod);
@@ -258,6 +235,118 @@ export async function AttackToHit(item, options) {
     const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
     if (setManeuver) {
         tags.push({ value: parseInt(setManeuver.system.ocv), name: setManeuver.name })
+        rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
+    }
+
+
+
+    let attackRoll = new Roll(rollEquation, actor.getRollData());
+    let result = await attackRoll.evaluate({ async: true });
+    let renderedResult = await result.render();
+    let hitRollData = result.total;
+    let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollData;
+
+    if (hitRollData < dcvTargetNumber) {
+        let missBy = dcvTargetNumber - hitRollData;
+        let facingRoll = new Roll("1d6", actor.getRollData());
+        let facingResult = await facingRoll.evaluate({ async: true });
+        let moveDistance = RoundFavorPlayerDown(Math.min(distanceToken / 2, (item.actor.system.is5e ? missBy : missBy * 2)))
+        hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${moveDistance + (item.actor.system.is5e ? "\"" : "m")} in the <b>${facingResult.total}</b> direction.`;
+
+    }
+
+    let cardData = {
+        // dice rolls
+        //rolls: [attackRoll],
+        renderedHitRoll: renderedResult,
+        hitRollText: hitRollText,
+        hitRollValue: result.total,
+        // velocity: options.velocity,
+
+        // data for damage card
+        actor,
+        item,
+        //adjustment,
+        //senseAffecting,
+        ...options,
+        //hitRollData: hitRollData,
+        //effectivestr: options.effectivestr,
+        //targetData: targetData,
+        //targetIds: targetIds,
+
+        // endurance
+        //useEnd: useEnd,
+        //enduranceText: enduranceText,
+
+        // misc
+        tags: tags,
+        attackTags: getAttackTags(item),
+        formData: JSON.stringify(options),
+        dcvTargetNumber,
+        buttonText: (SELECTIVETARGET ? "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)" : "Confirm AOE placement")
+
+    };
+
+    let cardHtml = await renderTemplate(template, cardData)
+    //let token = actor.token;
+    let speaker = ChatMessage.getSpeaker({ actor: actor, token })
+    speaker["alias"] = actor.name;
+
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        roll: result,
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    }
+
+    return ChatMessage.create(chatData)
+}
+
+
+/// ChatMessage showing Attack To Hit
+export async function AttackToHit(item, options) {
+    let template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs"
+
+    if (!item) {
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
+
+    const actor = item.actor
+    const itemId = item._id
+    const itemData = item.system;
+    let tags = []
+
+
+
+    const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
+
+    let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
+
+    let automation = game.settings.get("hero6efoundryvttv2", "automation");
+
+    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment");
+    const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
+
+    // -------------------------------------------------
+    // attack roll
+    // -------------------------------------------------
+    let rollEquation = "11 + " + hitCharacteristic;
+    tags.push({ value: hitCharacteristic.signedString(), name: itemData.uses })
+
+    const ocvMod = parseInt(options.ocvMod) || 0
+    const dcvMod = parseInt(options.dcvMod) || 0
+    if (parseInt(ocvMod) != 0) {
+
+        rollEquation = modifyRollEquation(rollEquation, ocvMod);
+        tags.push({ value: ocvMod.signedString(), name: item.name })
+    }
+
+    // Set +1 OCV
+    const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
+    if (setManeuver) {
+        tags.push({ value: parseInt(setManeuver.system.ocv).signedString(), name: setManeuver.name })
         rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
     }
 
@@ -272,7 +361,7 @@ export async function AttackToHit(item, options) {
         let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty, name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
@@ -294,7 +383,7 @@ export async function AttackToHit(item, options) {
     let csl = CombatSkillLevelsForAttack(item);
     if (csl.ocv || csl.omcv > 0) {
         rollEquation = modifyRollEquation(rollEquation, csl.ocv || csl.omcv);
-        tags.push({ value: csl.ocv || csl.omcv, name: csl.item.name })
+        tags.push({ value: csl.ocv.signedString() || csl.omcv, name: csl.item.name })
     }
 
     let dcv = parseInt(item.system.dcv || 0) + csl.dcv
@@ -351,7 +440,18 @@ export async function AttackToHit(item, options) {
     let noHitLocationsPower = item.system.noHitLocations || false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim && options.aim !== "none" && !noHitLocationsPower) {
         rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[options.aim][3]);
-        tags.push({ value: CONFIG.HERO.hitLocations[options.aim][3], name: options.aim, hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0 })
+        tags.push({ value: CONFIG.HERO.hitLocations[options.aim][3].signedString(), name: options.aim, hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0 })
+
+        // Penalty Skill Levels
+        if (options.usePsl) {
+            const PENALTY_SKILL_LEVELS = actor.items.find(o => o.system.XMLID === "PENALTY_SKILL_LEVELS")
+            if (PENALTY_SKILL_LEVELS) {
+                let pslValue = Math.min(PENALTY_SKILL_LEVELS.system.LEVELS.value, Math.abs(CONFIG.HERO.hitLocations[options.aim][3]))
+                rollEquation = modifyRollEquation(rollEquation, pslValue);
+                tags.push({ value: pslValue.signedString(), name: PENALTY_SKILL_LEVELS.name, title: PENALTY_SKILL_LEVELS.system.description })
+            }
+
+        }
     }
     rollEquation = rollEquation + " - 3D6";
 
@@ -361,6 +461,7 @@ export async function AttackToHit(item, options) {
 
     let hitRollData = result.total;
     let hitRollText = "Hits a " + toHitChar + " of " + hitRollData;
+
 
 
 
@@ -482,6 +583,10 @@ export async function AttackToHit(item, options) {
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
     const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+    const SELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "SELECTIVETARGET") : null;
+    const NONSELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "NONSELECTIVETARGET") : null;
+
+    const AoeAlwaysHit = aoe && !SELECTIVETARGET && !NONSELECTIVETARGET
 
     let targetData = []
     let targetIds = []
@@ -500,7 +605,8 @@ export async function AttackToHit(item, options) {
 
         let hit = "Miss"
         let value = RoundFavorPlayerUp(target.actor.system.characteristics[toHitChar.toLowerCase()].value)
-        if (value <= result.total) {
+
+        if (value <= result.total || AoeAlwaysHit) {
             hit = "Hit"
         }
         let by = result.total - value
@@ -641,6 +747,7 @@ export async function AttackToHit(item, options) {
         hitRollText: hitRollText,
         hitRollValue: result.total,
         velocity: options.velocity,
+        AoeAlwaysHit,
 
         // data for damage card
         actor,
@@ -672,7 +779,7 @@ export async function AttackToHit(item, options) {
     speaker["alias"] = actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        type: (AoeAlwaysHit ? CONST.CHAT_MESSAGE_TYPES.OTHER : CONST.CHAT_MESSAGE_TYPES.ROLL),  // most AOE's are auto hit
         roll: result,
         user: game.user._id,
         content: cardHtml,
@@ -757,6 +864,16 @@ function getAttackTags(item) {
     return attackTags;
 }
 
+
+export async function _onRollAoeDamage(event) {
+    console.log("_onRollAoeDamage");
+    const button = event.currentTarget;
+    button.blur()  // The button remains hilighed for some reason; kluge to fix.
+    const options = { ...button.dataset }
+    const item = fromUuidSync(options.itemid);
+    return AttackToHit(item, JSON.parse(options.formdata))
+}
+
 // Event handler for when the Roll Damage button is 
 // clicked on item-attack-card2.hbs
 // Notice the chatListeners function in this file.
@@ -773,8 +890,8 @@ export async function _onRollDamage(event) {
     }
 
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment");
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
+    const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment");
+    const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
 
     let { dc, tags } = convertToDcFromItem(item, { isAction: true, ...toHitData });
 
@@ -1291,19 +1408,32 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // AID, DRAIN or any adjustmnet powers
     //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    const adjustment = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+    const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense)
     }
-    const senseAffecting = getPowerInfo({xmlid: item.system.XMLID})?.powerType?.includes("sense-affecting")
+    const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense)
+    }
+
+    // AUTOMATION powers related to STUN
+    const CANNOTBESTUNNED = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED")
+    const NOSTUN1 = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1") // AUTOMATION Takes No STUN (loses abilities when takes BODY)
+    const NOSTUN2 = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2") //Takes No STUN
+    if (NOSTUN1) {
+        damageDetail.effects = damageDetail.effects + "Takes No STUN (loses abilities when takes BODY); "
+        damageDetail.stun = 0;
+    }
+    if (NOSTUN2) {
+        damageDetail.effects = damageDetail.effects + "Takes No STUN; "
+        damageDetail.stun = 0;
     }
 
     // check if target is stunned
     if (game.settings.get("hero6efoundryvttv2", "stunned")) {
         // determine if target was Stunned
-        if (damageDetail.stun > token.actor.system.characteristics.con.value) {
+        if (damageDetail.stun > token.actor.system.characteristics.con.value && !CANNOTBESTUNNED) {
 
             damageDetail.effects = damageDetail.effects + "inflicts Stunned; "
 
@@ -1330,6 +1460,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             }
         }
     }
+    effectsFinal = effectsFinal.replace(/; $/,"")
 
     let cardData = {
         item: item,
@@ -1436,10 +1567,10 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
         }
 
-        let costPerPointX = parseFloat(getPowerInfo({xmlid: keyX.toUpperCase(), actor: item.actor})?.cost) * AdjustmentMultiplier(keyX.toUpperCase());
+        let costPerPointX = parseFloat(getPowerInfo({ xmlid: keyX.toUpperCase(), actor: item.actor })?.cost) * AdjustmentMultiplier(keyX.toUpperCase());
         levelsX = parseInt(ActivePoints / costPerPointX)
 
-        let costPerPointY = parseFloat(getPowerInfo({xmlid: keyY.toUpperCase(), actor: item.actor})?.cost) * AdjustmentMultiplier(keyY.toUpperCase());
+        let costPerPointY = parseFloat(getPowerInfo({ xmlid: keyY.toUpperCase(), actor: item.actor })?.cost) * AdjustmentMultiplier(keyY.toUpperCase());
         levelsY = parseInt(ActivePoints / costPerPointY)
 
         // Check for previous ADJUSTMENT from same source
@@ -1874,27 +2005,24 @@ async function _calcDamage(damageResult, item, options) {
     }
 
 
-
-
     let bodyDamage = body;
     let stunDamage = stun;
+
 
     let effects = "";
     if (item.system.EFFECT) {
         effects = item.system.EFFECT + ";"
     }
 
-     // Splits an attack into two equal parts for the purpose of
+    // Splits an attack into two equal parts for the purpose of
     // determining BODY damage and applying it to the target’s
     // defenses (though it’s still resolved with one Attack Roll and
     // treated as a single attack).
     // This is super awkward with the current system.
     // KLUGE: Apply body defense twice.
-    let REDUCEDPENETRATION = item.system.modifiers.find(o=> o.XMLID === "REDUCEDPENETRATION");
-    if (REDUCEDPENETRATION)
-    {
-        if (item.killing)
-        {
+    let REDUCEDPENETRATION = item.system.modifiers.find(o => o.XMLID === "REDUCEDPENETRATION");
+    if (REDUCEDPENETRATION) {
+        if (item.killing) {
             body = Math.max(0, body - options.resistantValue);
         }
         body = Math.max(0, body - options.defenseValue);
@@ -1936,7 +2064,7 @@ async function _calcDamage(damageResult, item, options) {
         }
     }
 
-   
+
 
 
     // -------------------------------------------------

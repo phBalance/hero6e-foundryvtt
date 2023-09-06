@@ -796,3 +796,16 @@ div.dice-standard-effect {
   word-break: break-all;
   margin-bottom: 5px;
 }
+
+[data-visibility="gm"] {
+  background-color: rgba(240,240,255,0.9);
+  outline: 1px solid rgba(0, 0, 255, 0.4);
+}
+
+.hexFacing {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  border: 0;
+}

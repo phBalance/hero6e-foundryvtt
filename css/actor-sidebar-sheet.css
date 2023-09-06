@@ -404,11 +404,13 @@ form.item-sheet h1.charname input {
 
 }
 
-.herosystem6e.sheet.item div.description {
+.herosystem6e.sheet.item div.description, form div.attack-card div.description {
   border: 1px dashed rgba(0,0,0,0.5);
   margin: 15px 0;
   padding: 5px;
 }
+
+
 
 .herosystem6e.sheet.item tr.modifierAdder td:first-child {
   padding-left: 10px;

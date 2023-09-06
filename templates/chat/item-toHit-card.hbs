@@ -16,15 +16,16 @@
             <div class="target-dc">
 
                 <span>Target: {{target.name}}</span>
-
-                {{!-- TODO: Make dcv/dmcv visibility based on ownership --}}
-                <span>
+                <span data-visibility="gm">
                     ({{target.toHitChar}} {{target.value}})
                 </span>
                 <br />
                 <span>
-                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span> by <span
-                        class="resultBy">{{target.result.by}}</span>
+                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
+                    {{#if @root.AoeAlwaysHit}} due to AOE
+                    {{else}}
+                    <span data-visibility="gm" class="resultBy">by {{target.result.by}}</span>
+                    {{/if}}
                 </span>
             </div>
             {{/each}}
@@ -43,7 +44,7 @@
 
         <div class="tags">
             {{#each attackTags as |tag id|}}
-                <span class="tag" {{#if tag.title}}title="{{tag.title}}"{{/if}}>{{tag.name}}</span>
+            <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
             {{/each}}
 
             {{!-- <span class="tag">{{item.system.class}}</span>
@@ -72,8 +73,8 @@
         <hr>
         <div class="tags">
             {{#each tags as |tag id|}}
-            <span class="tag tag_transparent">{{tag.name}}
-                {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}
+            <span class="tag tag_transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}
+                {{tag.value}}
             </span>
             {{/each}}
         </div>
@@ -101,15 +102,17 @@
             <div class="description-medium">{{{ hitRollText }}}</div>
         </div>
 
-        <button class="roll-damage" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-knockbackMod="{{knockbackMod}}"
-            data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}" data-effectiveStr="{{effectiveStr}}"
-            data-targetIds="{{targetIds}}" data-velocity="{{velocity}}">
-            {{#if (or adjustment senseAffecting)}}
-            Roll {{item.system.XMLID}}
-            {{else}}
-            Roll Damage
-            {{/if}}
-        </button>
+        <div data-visibility="{{actor.id}}">
+            <button class="roll-damage" data-itemId="{{item.uuid}}" data-aim="{{aim}}"
+                data-knockbackMod="{{knockbackMod}}" data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}"
+                data-effectiveStr="{{effectiveStr}}" data-targetIds="{{targetIds}}" data-velocity="{{velocity}}">
+                {{#if (or adjustment senseAffecting)}}
+                Roll {{item.system.XMLID}}
+                {{else}}
+                Roll Damage
+                {{/if}}
+            </button>
+        </div>
 
 
     </div>
