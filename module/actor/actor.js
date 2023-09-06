@@ -811,7 +811,7 @@ export class HeroSystem6eActor extends Actor {
         for (const powerInfo of powers) {
             let key = powerInfo.key.toLowerCase();
             let characteistic = this.system.characteristics[key];
-            let core = parseInt(characteistic.core) || 0;
+            let core = parseInt(characteistic?.core) || 0;
             let base = this.getCharacteristicBase(key);
             let levels = core - base;
             let cost = Math.round(levels * (powerInfo.cost || 0))

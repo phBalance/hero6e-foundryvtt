@@ -450,7 +450,7 @@ export async function AttackToHit(item, options) {
                 rollEquation = modifyRollEquation(rollEquation, pslValue);
                 tags.push({ value: pslValue.signedString(), name: PENALTY_SKILL_LEVELS.name, title: PENALTY_SKILL_LEVELS.system.description })
             }
-            
+
         }
     }
     rollEquation = rollEquation + " - 3D6";
@@ -463,7 +463,7 @@ export async function AttackToHit(item, options) {
     let hitRollText = "Hits a " + toHitChar + " of " + hitRollData;
 
 
-    
+
 
 
 
@@ -1417,10 +1417,23 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense)
     }
 
+    // AUTOMATION powers related to STUN
+    const CANNOTBESTUNNED = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED")
+    const NOSTUN1 = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1") // AUTOMATION Takes No STUN (loses abilities when takes BODY)
+    const NOSTUN2 = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2") //Takes No STUN
+    if (NOSTUN1) {
+        damageDetail.effects = damageDetail.effects + "Takes No STUN (loses abilities when takes BODY); "
+        damageDetail.stun = 0;
+    }
+    if (NOSTUN2) {
+        damageDetail.effects = damageDetail.effects + "Takes No STUN; "
+        damageDetail.stun = 0;
+    }
+
     // check if target is stunned
     if (game.settings.get("hero6efoundryvttv2", "stunned")) {
         // determine if target was Stunned
-        if (damageDetail.stun > token.actor.system.characteristics.con.value) {
+        if (damageDetail.stun > token.actor.system.characteristics.con.value && !CANNOTBESTUNNED) {
 
             damageDetail.effects = damageDetail.effects + "inflicts Stunned; "
 
@@ -1447,6 +1460,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             }
         }
     }
+    effectsFinal = effectsFinal.replace(/; $/,"")
 
     let cardData = {
         item: item,
@@ -1991,10 +2005,9 @@ async function _calcDamage(damageResult, item, options) {
     }
 
 
-
-
     let bodyDamage = body;
     let stunDamage = stun;
+
 
     let effects = "";
     if (item.system.EFFECT) {

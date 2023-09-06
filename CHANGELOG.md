@@ -6,6 +6,7 @@
 - Initial support for SELECTIVE and NONSELECTIVE. [#322](https://github.com/dmdorman/hero6e-foundryvtt/issues/322)
 - You now have to hold down SHIFT to change turn in combat tracker. [#352](https://github.com/dmdorman/hero6e-foundryvtt/issues/352)
 - Initial support for PENALTY SKILL LEVELS.  Currently limited to Aim Hit Locations.  Shown as a checkbox during attack. [#349](https://github.com/dmdorman/hero6e-foundryvtt/issues/349)
+- Initial support for AUTOMATION and TAKES NO STUN. [#308](https://github.com/dmdorman/hero6e-foundryvtt/issues/308)
 
 # Version 3.0.32
 - Initial REDUCEDPENETRATION support.  Rules as written are to split the attack into two separate dice pools, which is awkward with the current system.  A simplified solution is to apply defenses twice to the body damage. [#313](https://github.com/dmdorman/hero6e-foundryvtt/issues/313)
