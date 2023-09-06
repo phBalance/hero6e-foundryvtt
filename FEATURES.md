@@ -132,7 +132,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | AID | B | Works for characteristics, cannot aid powers, no boost support |
 | BARRIER | C | Implemented like resistant protection, no support for destroying barriers, no placeables for a barrier |
 | BLAST | A ||
-| CANNOT BE STUNNED | D ||
+| CANNOT BE STUNNED | B | Not fully vetted |
 | CHANGE ENVIRONMENT | D ||
 | CHARACTERISTICS | A ||
 | CLAIRSENTIENCE | D ||
@@ -185,7 +185,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | SUMMON | F |  You will have to create a separate HDC file and import that for each duplicate. |
 | SWIMMING | B | non-combat penalties not automated |
 | SWINGING | B | non-combat penalties not automated |
-| TAKES NO STUN | D |  |
+| TAKES NO STUN | B | Not fully vetted |
 | TELEKINESIS | B | TK strength based attacks work.  Multiple TK powers are additive for STR.  Non-attack uses are poorly implemented. |
 | TELEPATHY | D |  |
 | TELEPORTATION | B | non-combat penalties not automated |
