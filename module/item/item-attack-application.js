@@ -1,5 +1,5 @@
 import { CombatSkillLevelsForAttack } from '../utility/damage.js';
-import { _processAttackOptions } from '../item/item-attack.js';
+import { _processAttackOptions, _processAttackAoeOptions} from '../item/item-attack.js';
 
 
 export class ItemAttackFormApplication extends FormApplication {
@@ -7,7 +7,9 @@ export class ItemAttackFormApplication extends FormApplication {
         super();
         this.data = data;
         this.options.title = `${this.data?.item?.actor?.name} roll to hit`
-        const data2 = data;
+
+
+        
 
         Hooks.on("updateItem", function (item, changes, options, userId) {
             if (!this.rendered) return;
@@ -55,6 +57,9 @@ export class ItemAttackFormApplication extends FormApplication {
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
         });
+
+
+
         return options
     }
 
@@ -76,7 +81,6 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
         }
-
 
         data.ocvMod ??= item.system.ocv
         data.dcvMod ??= item.system.dcv
@@ -131,6 +135,13 @@ export class ItemAttackFormApplication extends FormApplication {
         if (event.submitter?.name === "roll") {
             canvas.tokens.activate()
             await this.close();
+            
+            const aoe = this.data.item.system.modifiers.find(o => o.XMLID === "AOE");
+            if (aoe) {
+                return _processAttackAoeOptions(this.data.item, formData);
+            }
+           
+
             return _processAttackOptions(this.data.item, formData);
         }
 
@@ -161,25 +172,6 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
         }
-        //const checked = formData.find(".combat-skill-levels input:checked");
-        //if (csl && checked) {
-        //   let updateRequired = false;
-        //   for (let input of checked) {
-        //     let m = input.name.match(/\.(\w+)\.(\d+)/);
-        //     let name = m[1];
-        //     let idx = m[2];
-
-        //     if (csl.skill.system.csl[idx] != input.value) {
-        //       csl.skill.system.csl[idx] = input.value;
-        //       updateRequired = true;
-        //     }
-        //   }
-        //   if (updateRequired) {
-        //     await csl.skill.update({ 'system.csl': csl.skill.system.csl });
-        //   }
-
-
-        // }
     }
 
     async _spawnAreaOfEffect(event) {

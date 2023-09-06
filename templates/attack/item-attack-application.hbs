@@ -74,7 +74,11 @@
   <footer class="sheet-footer flexrow">
     <button type="submit" name="roll" {{#if rollHide}}disabled 
       title="You must select at least 1 target token, preferabililty by using the AOE template."{{/if}}>
-      Roll to Hit
+        {{#if aoeText}}
+        Roll Placement
+        {{else}}
+        Roll to Hit
+        {{/if}}
     </button>
   </footer>
 </form>

@@ -16,15 +16,16 @@
             <div class="target-dc">
 
                 <span>Target: {{target.name}}</span>
-
-                {{!-- TODO: Make dcv/dmcv visibility based on ownership --}}
                 <span data-visibility="gm">
                     ({{target.toHitChar}} {{target.value}})
                 </span>
                 <br />
                 <span>
-                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span> <span data-visibility="gm"
-                        class="resultBy">by {{target.result.by}}</span>
+                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
+                    {{#if @root.AoeAlwaysHit}} due to AOE
+                    {{else}}
+                    <span data-visibility="gm" class="resultBy">by {{target.result.by}}</span>
+                    {{/if}}
                 </span>
             </div>
             {{/each}}

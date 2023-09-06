@@ -19,6 +19,7 @@ export async function chatListeners(html) {
     // Called by card-helpers.js
     html.on('click', 'button.roll-damage', this._onRollDamage.bind(this));
     html.on('click', 'button.apply-damage', this._onApplyDamage.bind(this));
+    html.on('click', 'button.rollAoe-damage', this._onRollAoeDamage.bind(this));
     //html.on('click', 'button.place-template', this._onPlaceTemplate.bind(this));
 }
 
@@ -35,11 +36,11 @@ export async function onMessageRendered(html) {
         let actorId = element.data("visibility")
         if (actorId) {
             let actor = game.actors.get(actorId)
-            if (!actor.isOwner) {
+            if (actor && !actor.isOwner) {
                 element.remove();
             }
         }
-        console.log(element)
+        //console.log(element)
     }
 }
 
@@ -170,64 +171,99 @@ export async function AttackOptions(item, event) {
 }
 
 export async function _processAttackOptions(item, formData) {
-    // convert form data into json object
-    //const formData = new FormData(form)
-    // let options = {}
-    // for (const [key, value] of formData) {
-    //     options[key] = value
-    // }
-
-    // Combat Skill Levels (update SKILL if changed)
-    // const csl = CombatSkillLevelsForAttack(item);
-    // const checked = form.querySelectorAll(".combat-skill-levels input:checked");
-    // if (csl && checked) {
-    //     let updateRequired = false;
-    //     for (let input of checked) {
-    //         let m = input.name.match(/\.(\w+)\.(\d+)/);
-    //         let name = m[1];
-    //         let idx = m[2];
-
-    //         if (csl.skill.system.csl[idx] != input.value) {
-    //             csl.skill.system.csl[idx] = input.value;
-    //             updateRequired = true;
-    //         }
-    //     }
-    //     if (updateRequired) {
-    //         await csl.skill.update({ 'system.csl': csl.skill.system.csl });
-    //     }
-    // }
-
-
-    // AOE
-    // const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
-    // if (aoe) {
-    //     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-aoe-card.hbs";
-
-    //     const actorId = form.closest("form[data-actor-id]").dataset?.actorId;
-    //     const actor = game.actors.get(actorId);
-    //     const tokenId = form.closest("form[data-token-id]")?.dataset?.tokenId;
-    //     const token = canvas.scene.tokens.get(tokenId) || actor.getActiveTokens()[0];
-
-    //     let cardData = {
-    //         ...options,
-    //         item,
-    //         token,
-    //         actor,
-    //     }
-    //     const html = await renderTemplate(template, cardData)
-    //     const speaker = ChatMessage.getSpeaker({ actor: item.actor })
-    //     const chatData = {
-    //         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-    //         user: game.user._id,
-    //         content: html,
-    //         speaker: speaker,
-    //         whisper: ChatMessage.getWhisperRecipients("GM"),
-    //     }
-    //     return ChatMessage.create(chatData)
-    // }
-
-
     await AttackToHit(item, formData)
+}
+
+export async function _processAttackAoeOptions(item, formData) {
+    await AttackAoeToHit(item, formData)
+}
+
+
+
+export async function AttackAoeToHit(item, options) {
+    let template = "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs"
+
+    const actor = item.actor
+    const hitCharacteristic = actor.system.characteristics.ocv.value;
+    let tags = []
+
+    let rollEquation = "11 + " + hitCharacteristic;
+    tags.push({ value: hitCharacteristic, name: item.system.uses })
+    rollEquation = rollEquation + " - 3D6";
+
+    const ocvMod = parseInt(options.ocvMod) || 0
+    if (parseInt(ocvMod) != 0) {
+
+        rollEquation = modifyRollEquation(rollEquation, ocvMod);
+        tags.push({ value: ocvMod, name: item.name })
+    }
+
+    // Set +1 OCV
+    const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
+    if (setManeuver) {
+        tags.push({ value: parseInt(setManeuver.system.ocv), name: setManeuver.name })
+        rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
+    }
+
+
+    let attackRoll = new Roll(rollEquation, actor.getRollData());
+    let result = await attackRoll.evaluate({ async: true });
+    let renderedResult = await result.render();
+    let hitRollData = result.total;
+    let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollData;
+
+    if (hitRollData < 3) {
+        let missBy = 3 - hitRollData;
+        let facingRoll = new Roll("1d6", actor.getRollData());
+        let facingResult = await facingRoll.evaluate({ async: true });
+        hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${item.actor.system.is5e ? missBy + "\"" : (missBy * 2) + "m"} in the <b>${facingResult.total}</b> direction.`;
+
+    }
+
+    let cardData = {
+        // dice rolls
+        //rolls: [attackRoll],
+        renderedHitRoll: renderedResult,
+        hitRollText: hitRollText,
+        hitRollValue: result.total,
+        // velocity: options.velocity,
+
+        // data for damage card
+        actor,
+        item,
+        //adjustment,
+        //senseAffecting,
+        ...options,
+        //hitRollData: hitRollData,
+        //effectivestr: options.effectivestr,
+        //targetData: targetData,
+        //targetIds: targetIds,
+
+        // endurance
+        //useEnd: useEnd,
+        //enduranceText: enduranceText,
+
+        // misc
+        tags: tags,
+        //attackTags: getAttackTags(item),
+        formData: JSON.stringify(options),
+
+    };
+
+    let cardHtml = await renderTemplate(template, cardData)
+    let token = actor.token;
+    let speaker = ChatMessage.getSpeaker({ actor: actor, token })
+    speaker["alias"] = actor.name;
+
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        roll: result,
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    }
+
+    return ChatMessage.create(chatData)
 }
 
 
@@ -492,6 +528,10 @@ export async function AttackToHit(item, options) {
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
     const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+    const SELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "SELECTIVETARGET") : null;
+    const NONSELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "NONSELECTIVETARGET") : null;
+
+    const AoeAlwaysHit = aoe && !SELECTIVETARGET && !NONSELECTIVETARGET
 
     let targetData = []
     let targetIds = []
@@ -510,7 +550,8 @@ export async function AttackToHit(item, options) {
 
         let hit = "Miss"
         let value = RoundFavorPlayerUp(target.actor.system.characteristics[toHitChar.toLowerCase()].value)
-        if (value <= result.total) {
+
+        if (value <= result.total || AoeAlwaysHit ) {
             hit = "Hit"
         }
         let by = result.total - value
@@ -651,6 +692,7 @@ export async function AttackToHit(item, options) {
         hitRollText: hitRollText,
         hitRollValue: result.total,
         velocity: options.velocity,
+        AoeAlwaysHit,
 
         // data for damage card
         actor,
@@ -765,6 +807,17 @@ function getAttackTags(item) {
     }
 
     return attackTags;
+}
+
+
+export async function _onRollAoeDamage(event)
+{
+    console.log("_onRollAoeDamage");
+    const button = event.currentTarget;
+    button.blur()  // The button remains hilighed for some reason; kluge to fix.
+    const options = { ...button.dataset }
+    const item = fromUuidSync(options.itemid);
+    return AttackToHit(item, JSON.parse(options.formdata))
 }
 
 // Event handler for when the Roll Damage button is 

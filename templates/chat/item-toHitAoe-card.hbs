@@ -1,0 +1,72 @@
+{{ log 'HEROSYS item-toHitAoe-card' this }}
+<div class="hero chat-card item-card toHit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+    tokenId}}data-token-id="{{tokenId}}" {{/if}}>
+
+    <span class="flavor-text">
+
+        {{!-- Attack Name --}}
+        <header class="card-header attack flexrow">
+            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
+            <h3 class="item-name">{{item.name}}</h3>
+        </header>
+
+        {{!-- Show Target, if any --}}
+        <div class="target-dc-result">
+            {{#each targetData as |target|}}
+            <div class="target-dc">
+
+                <span>Target: {{target.name}}</span>
+
+                {{!-- TODO: Make dcv/dmcv visibility based on ownership --}}
+                <span>
+                    ({{target.toHitChar}} {{target.value}})
+                </span>
+                <br />
+                <span>
+                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span> <span data-visibility="gm"
+                        class="resultBy">by {{target.result.by}}</span>
+                </span>
+            </div>
+            {{/each}}
+
+
+        </div>
+
+        <div class="tags">
+            {{#each attackTags as |tag id|}}
+            <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+            {{/each}}
+        </div>
+        <hr>
+        <div class="tags">
+            {{#each tags as |tag id|}}
+            <span class="tag tag_transparent">{{tag.name}}
+                {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}
+            </span>
+            {{/each}}
+        </div>
+
+
+        <hr>
+    </span>
+
+    <div class="hit-roll">
+
+        <div class="card-section">
+            <div class="description-tiny">AOE Template Placement (DCV 3)</div>
+            <div class="hit-roll">{{{ renderedHitRoll }}}</div>
+            <div class="description-medium">{{{ hitRollText }}}</div>
+            {{#if (lt hitRollValue 3)}}
+            <img class="hexFacing" src="systems/hero6efoundryvttv2/icons/HexFacing.svg">
+            {{/if}}
+        </div>
+
+        <div data-visibility="{{actor.id}}">
+            <button class="rollAoe-damage" data-itemId="{{item.uuid}}" data-formData="{{formData}}">
+                Confirm AOE placement
+            </button>
+        </div>
+
+    </div>
+
+</div>
