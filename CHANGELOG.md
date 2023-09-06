@@ -1,9 +1,11 @@
 # Version 3.0.33
 - Target DCV and "hit by" are now hidden from players. GM's will see a white-ish background and blue outline for items hidden from players in chat messages. [#351](https://github.com/dmdorman/hero6e-foundryvtt/issues/351)
 - The "Roll Damage" button is now only shown for token owners.
-- Improved AOE workflow to use DCV 3 for template placement. [#354](https://github.com/dmdorman/hero6e-foundryvtt/issues/354) 
+- Improved AOE workflow to use DCV 3 for template placement. [#354](https://github.com/dmdorman/hero6e-foundryvtt/issues/354)
+- HitLocations no loger valid for AOE attacks.
 - Initial support for SELECTIVE and NONSELECTIVE. [#322](https://github.com/dmdorman/hero6e-foundryvtt/issues/322)
 - You now have to hold down SHIFT to change turn in combat tracker. [#352](https://github.com/dmdorman/hero6e-foundryvtt/issues/352)
+- Initial support for PENALTY SKILL LEVELS.  Currently limited to Aim Hit Locations.  Shown as a checkbox during attack. [#349](https://github.com/dmdorman/hero6e-foundryvtt/issues/349)
 
 # Version 3.0.32
 - Initial REDUCEDPENETRATION support.  Rules as written are to split the attack into two separate dice pools, which is awkward with the current system.  A simplified solution is to apply defenses twice to the body damage. [#313](https://github.com/dmdorman/hero6e-foundryvtt/issues/313)

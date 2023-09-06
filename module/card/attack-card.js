@@ -108,41 +108,41 @@ export class HeroSystem6eAttackCard extends HeroSystem6eCard {
         await HeroSystem6eToHitCard.createFromAttackCard(item, data, actor, game.user.targets)
     }
 
-    static async _renderInternal(item, actor, stateData, itemId) {
-        // Render the chat card template
-        const token = actor.token
+    // static async _renderInternal(item, actor, stateData, itemId) {
+    //     // Render the chat card template
+    //     const token = actor.token
 
-        if (game.settings.get("hero6efoundryvttv2", "hit locations")) {
-            stateData['useHitLoc'] = true;
-            stateData['hitLoc'] = CONFIG.HERO.hitLocations;
-        }
+    //     if (game.settings.get("hero6efoundryvttv2", "hit locations")) {
+    //         stateData['useHitLoc'] = true;
+    //         stateData['hitLoc'] = CONFIG.HERO.hitLocations;
+    //     }
 
-        if (game.settings.get("hero6efoundryvttv2", "knockback")) {
-            stateData['useKnockback'] = true;
-        }
+    //     if (game.settings.get("hero6efoundryvttv2", "knockback")) {
+    //         stateData['useKnockback'] = true;
+    //     }
 
-        if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
-            stateData['useEnd'] = true;
-        }
+    //     if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
+    //         stateData['useEnd'] = true;
+    //     }
 
-        let targetActorChars = actor.system.characteristics;
-        stateData["str"] = targetActorChars.str.value;
+    //     let targetActorChars = actor.system.characteristics;
+    //     stateData["str"] = targetActorChars.str.value;
 
-        stateData["useStr"] = item.system.usesStrength;
+    //     stateData["useStr"] = item.system.usesStrength;
 
-        stateData["itemId"] = itemId;
+    //     stateData["itemId"] = itemId;
 
-        const templateData = {
-            actor: actor.system,
-            tokenId: token?.uuid || null,
-            item: item,
-            state: stateData,
-        };
+    //     const templateData = {
+    //         actor: actor.system,
+    //         tokenId: token?.uuid || null,
+    //         item: item,
+    //         state: stateData,
+    //     };
 
-        var path = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs";
+    //     var path = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs";
 
-        return await renderTemplate(path, templateData);
-    }
+    //     return await renderTemplate(path, templateData);
+    // }
 
     async render() {
         return await HeroSystem6eAttackCard._renderInternal(this.item, this.actor, this.message.data.flags["state"]);

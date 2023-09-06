@@ -114,10 +114,20 @@ export async function AttackOptions(item, event) {
 
     }
 
-    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations) {
+    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+
+    if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations && !aoe) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
+
+        // Penalty Skill Levels
+        const PENALTY_SKILL_LEVELS = actor.items.find(o => o.system.XMLID === "PENALTY_SKILL_LEVELS")
+        if (PENALTY_SKILL_LEVELS) {
+            data.PENALTY_SKILL_LEVELS = PENALTY_SKILL_LEVELS
+        }
     }
+
+
 
     // Combat Skill Levels
     const csl = CombatSkillLevelsForAttack(item);
@@ -240,7 +250,7 @@ export async function AttackAoeToHit(item, options) {
         let missBy = dcvTargetNumber - hitRollData;
         let facingRoll = new Roll("1d6", actor.getRollData());
         let facingResult = await facingRoll.evaluate({ async: true });
-        let moveDistance = RoundFavorPlayerDown(Math.min(distanceToken/2, (item.actor.system.is5e ? missBy : missBy * 2)))
+        let moveDistance = RoundFavorPlayerDown(Math.min(distanceToken / 2, (item.actor.system.is5e ? missBy : missBy * 2)))
         hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${moveDistance + (item.actor.system.is5e ? "\"" : "m")} in the <b>${facingResult.total}</b> direction.`;
 
     }
@@ -273,7 +283,7 @@ export async function AttackAoeToHit(item, options) {
         attackTags: getAttackTags(item),
         formData: JSON.stringify(options),
         dcvTargetNumber,
-        buttonText: (SELECTIVETARGET ? "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)" :  "Confirm AOE placement")
+        buttonText: (SELECTIVETARGET ? "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)" : "Confirm AOE placement")
 
     };
 
@@ -283,7 +293,7 @@ export async function AttackAoeToHit(item, options) {
     speaker["alias"] = actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL, 
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
         roll: result,
         user: game.user._id,
         content: cardHtml,
@@ -301,13 +311,13 @@ export async function AttackToHit(item, options) {
     if (!item) {
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
-    
+
     const actor = item.actor
     const itemId = item._id
     const itemData = item.system;
     let tags = []
 
-    
+
 
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
@@ -323,20 +333,20 @@ export async function AttackToHit(item, options) {
     // attack roll
     // -------------------------------------------------
     let rollEquation = "11 + " + hitCharacteristic;
-    tags.push({ value: hitCharacteristic, name: itemData.uses })
+    tags.push({ value: hitCharacteristic.signedString(), name: itemData.uses })
 
     const ocvMod = parseInt(options.ocvMod) || 0
     const dcvMod = parseInt(options.dcvMod) || 0
     if (parseInt(ocvMod) != 0) {
 
         rollEquation = modifyRollEquation(rollEquation, ocvMod);
-        tags.push({ value: ocvMod, name: item.name })
+        tags.push({ value: ocvMod.signedString(), name: item.name })
     }
 
     // Set +1 OCV
     const setManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Set' && o.system.active)
     if (setManeuver) {
-        tags.push({ value: parseInt(setManeuver.system.ocv), name: setManeuver.name })
+        tags.push({ value: parseInt(setManeuver.system.ocv).signedString(), name: setManeuver.name })
         rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
     }
 
@@ -351,7 +361,7 @@ export async function AttackToHit(item, options) {
         let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty, name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
@@ -373,7 +383,7 @@ export async function AttackToHit(item, options) {
     let csl = CombatSkillLevelsForAttack(item);
     if (csl.ocv || csl.omcv > 0) {
         rollEquation = modifyRollEquation(rollEquation, csl.ocv || csl.omcv);
-        tags.push({ value: csl.ocv || csl.omcv, name: csl.item.name })
+        tags.push({ value: csl.ocv.signedString() || csl.omcv, name: csl.item.name })
     }
 
     let dcv = parseInt(item.system.dcv || 0) + csl.dcv
@@ -430,7 +440,18 @@ export async function AttackToHit(item, options) {
     let noHitLocationsPower = item.system.noHitLocations || false;
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && options.aim && options.aim !== "none" && !noHitLocationsPower) {
         rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[options.aim][3]);
-        tags.push({ value: CONFIG.HERO.hitLocations[options.aim][3], name: options.aim, hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0 })
+        tags.push({ value: CONFIG.HERO.hitLocations[options.aim][3].signedString(), name: options.aim, hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0 })
+
+        // Penalty Skill Levels
+        if (options.usePsl) {
+            const PENALTY_SKILL_LEVELS = actor.items.find(o => o.system.XMLID === "PENALTY_SKILL_LEVELS")
+            if (PENALTY_SKILL_LEVELS) {
+                let pslValue = Math.min(PENALTY_SKILL_LEVELS.system.LEVELS.value, Math.abs(CONFIG.HERO.hitLocations[options.aim][3]))
+                rollEquation = modifyRollEquation(rollEquation, pslValue);
+                tags.push({ value: pslValue.signedString(), name: PENALTY_SKILL_LEVELS.name, title: PENALTY_SKILL_LEVELS.system.description })
+            }
+            
+        }
     }
     rollEquation = rollEquation + " - 3D6";
 
@@ -442,6 +463,7 @@ export async function AttackToHit(item, options) {
     let hitRollText = "Hits a " + toHitChar + " of " + hitRollData;
 
 
+    
 
 
 
@@ -757,7 +779,7 @@ export async function AttackToHit(item, options) {
     speaker["alias"] = actor.name;
 
     const chatData = {
-        type: (AoeAlwaysHit ? CONST.CHAT_MESSAGE_TYPES.OTHER :  CONST.CHAT_MESSAGE_TYPES.ROLL),  // most AOE's are auto hit
+        type: (AoeAlwaysHit ? CONST.CHAT_MESSAGE_TYPES.OTHER : CONST.CHAT_MESSAGE_TYPES.ROLL),  // most AOE's are auto hit
         roll: result,
         user: game.user._id,
         content: cardHtml,
