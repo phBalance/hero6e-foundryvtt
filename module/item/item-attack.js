@@ -179,11 +179,34 @@ export async function _processAttackAoeOptions(item, formData) {
 }
 
 
-
 export async function AttackAoeToHit(item, options) {
     let template = "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs"
 
     const actor = item.actor
+    if (!actor) {
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
+
+    const token = actor.getActiveTokens()[0]
+    if (!token) {
+        return ui.notifications.error(`Token was not found.`);
+    }
+
+    const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
+        game.scenes.current.templates.find(o => o.user.id === game.user.id);
+    if (!aoeTemplate) {
+        return ui.notifications.error(`Attack AOE template was not found.`);
+    }
+
+    let distanceToken = canvas.grid.measureDistance(aoeTemplate, token, { gridSpaces: true });
+    let dcvTargetNumber = 0
+    if (distanceToken > (actor.system.is5e ? 1 : 2)) {
+        dcvTargetNumber = 3
+    }
+
+    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const SELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "SELECTIVETARGET") : null;
+
     const hitCharacteristic = actor.system.characteristics.ocv.value;
     let tags = []
 
@@ -206,17 +229,19 @@ export async function AttackAoeToHit(item, options) {
     }
 
 
+
     let attackRoll = new Roll(rollEquation, actor.getRollData());
     let result = await attackRoll.evaluate({ async: true });
     let renderedResult = await result.render();
     let hitRollData = result.total;
     let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollData;
 
-    if (hitRollData < 3) {
-        let missBy = 3 - hitRollData;
+    if (hitRollData < dcvTargetNumber) {
+        let missBy = dcvTargetNumber - hitRollData;
         let facingRoll = new Roll("1d6", actor.getRollData());
         let facingResult = await facingRoll.evaluate({ async: true });
-        hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${item.actor.system.is5e ? missBy + "\"" : (missBy * 2) + "m"} in the <b>${facingResult.total}</b> direction.`;
+        let moveDistance = RoundFavorPlayerDown(Math.min(distanceToken/2, (item.actor.system.is5e ? missBy : missBy * 2)))
+        hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${moveDistance + (item.actor.system.is5e ? "\"" : "m")} in the <b>${facingResult.total}</b> direction.`;
 
     }
 
@@ -245,18 +270,20 @@ export async function AttackAoeToHit(item, options) {
 
         // misc
         tags: tags,
-        //attackTags: getAttackTags(item),
+        attackTags: getAttackTags(item),
         formData: JSON.stringify(options),
+        dcvTargetNumber,
+        buttonText: (SELECTIVETARGET ? "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)" :  "Confirm AOE placement")
 
     };
 
     let cardHtml = await renderTemplate(template, cardData)
-    let token = actor.token;
+    //let token = actor.token;
     let speaker = ChatMessage.getSpeaker({ actor: actor, token })
     speaker["alias"] = actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL, 
         roll: result,
         user: game.user._id,
         content: cardHtml,
@@ -271,10 +298,16 @@ export async function AttackAoeToHit(item, options) {
 export async function AttackToHit(item, options) {
     let template = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs"
 
+    if (!item) {
+        return ui.notifications.error(`Attack details are no longer availble.`);
+    }
+    
     const actor = item.actor
     const itemId = item._id
     const itemData = item.system;
     let tags = []
+
+    
 
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
@@ -551,7 +584,7 @@ export async function AttackToHit(item, options) {
         let hit = "Miss"
         let value = RoundFavorPlayerUp(target.actor.system.characteristics[toHitChar.toLowerCase()].value)
 
-        if (value <= result.total || AoeAlwaysHit ) {
+        if (value <= result.total || AoeAlwaysHit) {
             hit = "Hit"
         }
         let by = result.total - value
@@ -724,7 +757,7 @@ export async function AttackToHit(item, options) {
     speaker["alias"] = actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        type: (AoeAlwaysHit ? CONST.CHAT_MESSAGE_TYPES.OTHER :  CONST.CHAT_MESSAGE_TYPES.ROLL),  // most AOE's are auto hit
         roll: result,
         user: game.user._id,
         content: cardHtml,
@@ -810,8 +843,7 @@ function getAttackTags(item) {
 }
 
 
-export async function _onRollAoeDamage(event)
-{
+export async function _onRollAoeDamage(event) {
     console.log("_onRollAoeDamage");
     const button = event.currentTarget;
     button.blur()  // The button remains hilighed for some reason; kluge to fix.
