@@ -208,13 +208,19 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static underwaterEffect = {
         id: "underwater",
         name: "Underwater",
-        icon: "systems/hero6efoundryvttv2/icons/underwater.svg"
+        icon: "systems/hero6efoundryvttv2/icons/underwater.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: -2, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+        ]
     };
 
     static standingInWaterEffect = {
         id: "standingInWater",
         name: "Standing In Water",
-        icon: "systems/hero6efoundryvttv2/icons/standingInWater.svg"
+        icon: "systems/hero6efoundryvttv2/icons/standingInWater.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: -2, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+        ]
     };
 
     static holdingBreathEffect = {

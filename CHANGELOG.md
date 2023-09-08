@@ -1,5 +1,6 @@
 # Version 3.0.34
-- Initial support for HOLDING BREATH. 
+- Initial support for HOLDING BREATH.  Disallows recovery.  No check ensure 1 END is spent per phase. [#364](https://github.com/dmdorman/hero6e-foundryvtt/issues/364)
+- Initial support for UNDERWATER and STANDING IN WATER. If either status -2 DCV.  UNDERWATER also includes -2 DC.  No check for SCUBA or breakfall. [#363](https://github.com/dmdorman/hero6e-foundryvtt/issues/363)
 
 # Version 3.0.33
 - Target DCV and "hit by" are now hidden from players. GM's will see a white-ish background and blue outline for items hidden from players in chat messages. [#351](https://github.com/dmdorman/hero6e-foundryvtt/issues/351)
