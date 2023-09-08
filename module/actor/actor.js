@@ -301,6 +301,25 @@ export class HeroSystem6eActor extends Actor {
         // to turn off Powers, and Persistent Powers that don’t cost END
         // remain in effect.
 
+        let token = this.token
+        let speaker = ChatMessage.getSpeaker({ actor: this, token })
+        speaker["alias"] = this.name
+
+        // A character who holds his breath does not get to Recover (even
+        // on Post-Segment 12)
+        if (this.statuses.has("holdingBreath")) {
+            const content = this.name + " <i>is holding their breath</i>."
+            if (asAction) {
+                const chatData = {
+                    user: game.user._id,
+                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    content: content,
+                    speaker: speaker
+                }
+                await ChatMessage.create(chatData)
+            }
+            return content
+        }
 
         const chars = this.system.characteristics
 
@@ -330,9 +349,7 @@ export class HeroSystem6eActor extends Actor {
             'system.characteristics.end.value': newEnd
         }, { hideChatMessage: true })
 
-        let token = this.token
-        let speaker = ChatMessage.getSpeaker({ actor: this, token })
-        speaker["alias"] = this.name
+
 
         // let content = this.name + ` <span title="
         // Recovering is a Full Phase Action and occurs at the end of

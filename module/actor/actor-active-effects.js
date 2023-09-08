@@ -205,6 +205,23 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         icon: "systems/hero6efoundryvttv2/icons/aborted.svg"
     };
 
+    static underwaterEffect = {
+        id: "underwater",
+        name: "Underwater",
+        icon: "systems/hero6efoundryvttv2/icons/underwater.svg"
+    };
+
+    static standingInWaterEffect = {
+        id: "standingInWater",
+        name: "Standing In Water",
+        icon: "systems/hero6efoundryvttv2/icons/standingInWater.svg"
+    };
+
+    static holdingBreathEffect = {
+        id: "holdingBreath",
+        name: "Holding Breath",
+        icon: "systems/hero6efoundryvttv2/icons/holdingBreath.svg"
+    };
 
 
     /** @override */
