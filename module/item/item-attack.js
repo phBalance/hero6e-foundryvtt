@@ -114,7 +114,7 @@ export async function AttackOptions(item, event) {
 
     }
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
 
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations && !aoe) {
         data.useHitLoc = true;
@@ -214,7 +214,7 @@ export async function AttackAoeToHit(item, options) {
         dcvTargetNumber = 3
     }
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
     const SELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "SELECTIVETARGET") : null;
 
     const hitCharacteristic = actor.system.characteristics.ocv.value;
@@ -579,7 +579,7 @@ export async function AttackToHit(item, options) {
 
     }
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
     const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
@@ -637,7 +637,7 @@ export async function AttackToHit(item, options) {
     }
 
     // AUTOFIRE
-    const autofire = item.system.modifiers.find(o => o.XMLID === "AUTOFIRE")
+    const autofire = item.findModsByXmlid("AUTOFIRE")
     const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0
     if (autofire) {
         hitRollText = `Autofire ${autofire.OPTION_ALIAS.toLowerCase()}<br>` + hitRollText;
@@ -712,7 +712,7 @@ export async function AttackToHit(item, options) {
         return ChatMessage.create(chatData)
     }
 
-    //const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    //const aoe = item.findModsByXmlid("AOE");
     //const explosion = aoe?.adders ? aoe.adders.find(o=> o.XMLID === "EXPLOSION") : null;
 
     // Attack Tags
@@ -937,7 +937,7 @@ export async function _onRollDamage(event) {
 
     const damageDetail = await _calcDamage(damageResult, item, toHitData)
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
     const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
@@ -1084,7 +1084,7 @@ export async function _onApplyDamage(event) {
         let targetsArray = toHitData.targetIds.split(',');
 
         // If AOE then sort by distance from center
-        const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+        const aoe = item.findModsByXmlid("AOE");
         const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
             game.scenes.current.templates.find(o => o.user.id === game.user.id);
         const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
@@ -1143,7 +1143,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     let newTerms = JSON.parse(damageData.terms);
 
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
     const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
@@ -1255,9 +1255,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.INPUT === "Mental") option.checked = true;
 
                 // Damage Negation
-                if (avad.INPUT.toUpperCase() == "PD" && defense.system.adders.find(o => o.XMLID === "PHYSICAL")) option.checked = true;
-                if (avad.INPUT.toUpperCase() == "ED" && defense.system.adders.find(o => o.XMLID === "ENERGY")) option.checked = true;
-                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.adders.find(o => o.XMLID === "MENTAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "PD" && defense.findModsByXmlid("PHYSICAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED" && defense.findModsByXmlid("ENERGY")) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.findModsByXmlid("MENTAL")) option.checked = true;
 
                 // Flash Defense
                 if (avad.INPUT.match(/flash/i) && defense.system.XMLID === "FLASHDEFENSE") option.checked = true;
@@ -1460,7 +1460,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             }
         }
     }
-    effectsFinal = effectsFinal.replace(/; $/,"")
+    effectsFinal = effectsFinal.replace(/; $/, "")
 
     let cardData = {
         item: item,
@@ -1521,7 +1521,29 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         await token.actor.update(changes);
     }
 
-    return ChatMessage.create(chatData);
+    await ChatMessage.create(chatData);
+
+
+    // Powers with Concentration limitation turn off when actor takes attack damage.
+    if (damageDetail.stun > 0 || damageDetail.body > 0) {
+        const concentrationItems = token.actor.items.filter(o => o.system.active && o.system.modifiers.find(p => p.XMLID === "CONCENTRATION"))
+        if (concentrationItems.length > 0) {
+            let content = `The following powers have the CONCENTRATION limitation and turn off because ${token.actor.name} 
+                took damage from an attack power:<ul>`
+            for (const concentrationItem of concentrationItems) {
+                await concentrationItem.toggle()
+                content += `<li>${concentrationItem.name}</li>` 
+            }
+            content += "</ul>"
+            const chatData = {
+                user: game.user._id,
+                content: content,
+                speaker: speaker,
+            }
+            await ChatMessage.create(chatData);
+        }
+        
+    }
 
 }
 
@@ -1648,7 +1670,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             }
 
             // DELAYEDRETURNRATE
-            let delayedReurnRate = item.system.modifiers.find(o => o.XMLID === "DELAYEDRETURNRATE");
+            let delayedReurnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
             if (delayedReurnRate) {
                 switch (delayedReurnRate.OPTIONID) {
                     case "MINUTE": activeEffect.duration.seconds = 60; break;
@@ -2020,7 +2042,7 @@ async function _calcDamage(damageResult, item, options) {
     // treated as a single attack).
     // This is super awkward with the current system.
     // KLUGE: Apply body defense twice.
-    let REDUCEDPENETRATION = item.system.modifiers.find(o => o.XMLID === "REDUCEDPENETRATION");
+    let REDUCEDPENETRATION = item.findModsByXmlid("REDUCEDPENETRATION");
     if (REDUCEDPENETRATION) {
         if (item.killing) {
             body = Math.max(0, body - options.resistantValue);

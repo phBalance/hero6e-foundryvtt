@@ -1,7 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.js"
 import { HeroSystem6eItem } from '../item/item.js'
 import { HEROSYS } from "../herosystem6e.js";
-import { updateItemDescription } from "../utility/upload_hdc.js";
+import { updateItemDescription, CalcActorRealAndActivePoints } from "../utility/upload_hdc.js";
 import { getPowerInfo, getCharactersticInfoArrayForActor } from "../utility/util.js"
 
 /**
@@ -49,8 +49,6 @@ export class HeroSystem6eActor extends Actor {
 
         // Bar3 is a flag
         //await this.prototypeToken.setFlag(game.system.id, "bar3", { "attribute": "characteristics.end" })
-
-
 
     }
 
@@ -484,7 +482,7 @@ export class HeroSystem6eActor extends Actor {
     strDetails() {
         let strLiftText = '0';
         let strThrow = 0;
-        let value = this.system.characteristics.str.value;
+        let value = this.system?.characteristics?.str?.value;
         if (value >= 1) { strLiftText = '8kg'; strThrow = 2 }
         if (value >= 2) { strLiftText = '16kg'; strThrow = 3 }
         if (value >= 3) { strLiftText = '25kg'; strThrow = 4 }
@@ -832,7 +830,7 @@ export class HeroSystem6eActor extends Actor {
             let base = this.getCharacteristicBase(key);
             let levels = core - base;
             let cost = Math.round(levels * (powerInfo.cost || 0))
-           
+
             // 5e hack for fractional speed
             if (key === 'spd' && cost < 0) {
                 cost = Math.ceil(cost / 10);
@@ -851,6 +849,179 @@ export class HeroSystem6eActor extends Actor {
         return
     }
 
+    systemHero = new HeroSystem6eActorSystem(this)
+
+    async uploadFromXml(xml) {
+
+        // Remove all existing effects
+        await this.deleteEmbeddedDocuments("ActiveEffect", this.effects.map(o => o.id))
+
+        // Remove all items from
+        await this.deleteEmbeddedDocuments("Item", Array.from(this.items.keys()))
+
+        // Convert XML into JSON
+        const heroJson = {};
+        this._xmlToJsonNode(heroJson, xml.children)
+
+        let changes = {}
+
+        // CHARACTERISTICS
+        if (heroJson.CHARACTER?.CHARACTERISTICS) {
+            for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
+                //console.log(key, value)
+                changes[`system.characteristics.${key.toLowerCase()}`] = value
+            }
+            delete heroJson.CHARACTER.CHARACTERISTICS
+        }
+
+        // ITEMS
+        for (let itemTag of HeroSystem6eItem.ItemXmlTags) {
+            if (heroJson.CHARACTER[itemTag]) {
+                for (let system of heroJson.CHARACTER[itemTag]) {
+                    //let system = Object.values(itemJson)[0]
+                    let itemData = {
+                        name: system?.ALIAS || system?.XMLID || itemTag,  // simplistic name for now
+                        type: itemTag.toLowerCase().replace(/s$/, ''),
+                        system: system,
+                    }
+                    const item = await HeroSystem6eItem.create(itemData, { parent: this })
+                    await item._postUpload()
+                }
+                delete heroJson.CHARACTER[itemTag]
+            }
+        }
+
+        // Actor Image
+        if (heroJson.CHARACTER.IMAGE) {
+            const filename = heroJson.CHARACTER.IMAGE?.FileName
+            try {
+                const extension = filename.split('.').pop()
+                const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName('IMAGE')[0].textContent
+                const path = "worlds/" + game.world.id + "/tokens"
+                try {
+                    await FilePicker.createDirectory("user", path)
+                } catch (e) {
+                    //console.log(e)
+                }
+                let oldImage = null
+                try {
+                    //let files = (await FilePicker.browse("user", path)).files
+                    oldImage = (await FilePicker.browse("user", path)).files.includes(encodeURI(path + "/" + filename))
+                } catch (e) {
+                    //console.log(e)
+                }
+                if (!oldImage) { //this.img.indexOf(filename) == -1) {
+                    await ImageHelper.uploadBase64(base64, filename, path)
+                    changes['img'] = path + '/' + filename
+
+                    // Update any tokens images that might exist
+                    for(const token of this.getActiveTokens()) {
+                        await token.document.update({ 'texture.src': path + '/' + filename})
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+                ui.notifications.warn(`${this.name} failed to upload ${filename}.`);
+            }
+            delete heroJson.CHARACTER.IMAGE
+        }
+
+
+        // Non ITEMS stuff in CHARACTER
+        changes = {
+            ...changes,
+            'system.CHARACTER': heroJson.CHARACTER,
+            'system.versionHeroSystem6eUpload': game.system.version,
+            'name': heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME
+        }
+
+        if (this.prototypeToken) {
+            changes[`prototypeToken.name`] = changes.name
+            changes[`prototypeToken.img`] = changes.img
+        }
+
+
+
+
+
+
+        // Save all our changes
+        await this.update(changes)
+
+        // Set base values to HDC LEVELs and calculate costs of things.
+        await this._resetCharacteristicsFromHdc()
+        await this.calcCharacteristicsCost();
+        await CalcActorRealAndActivePoints(this) // move to Actor?
+
+
+        console.log(heroJson)
+
+
+    }
+
+
+    _xmlToJsonNode(json, children) {
+
+        if (children.length === 0) return;
+
+
+        for (const child of children) {
+            const tagName = child.tagName
+            //console.log(tagName, child?.attributes?.['XMLID']?.value ?? "")
+
+            let jsonChild = {}
+            if (child.childElementCount == 0 && child.attributes.length == 0) {
+                jsonChild = child.textContent
+            }
+            if (HeroSystem6eItem.ItemXmlTags.includes(child.tagName)) {
+                // || 
+                //(HeroSystem6eItem.ItemXmlChildTags.includes(child.tagName) && !HeroSystem6eItem.ItemXmlTags.includes(child.parentElement.tagName) )) {
+                jsonChild = []
+            } else {
+                for (const attribute of child.attributes) {
+                    jsonChild[attribute.name] = attribute.value
+                }
+            }
+
+            if (child.children.length > 0) {
+                this._xmlToJsonNode(jsonChild, child.children)
+            }
+
+            //console.log(tagName, child?.attributes?.['XMLID']?.value ?? "")
+            //if (HeroSystem6eActor.ItemXmlTags.includes(child.parentElement?.tagName)) {
+            if (HeroSystem6eItem.ItemXmlChildTags.includes(child.tagName) && !HeroSystem6eItem.ItemXmlTags.includes(child.parentElement?.tagName)) {
+                json[tagName] ??= []
+                json[tagName].push(jsonChild)
+            } else if (Array.isArray(json)) {
+                //if (isEmpty(json)) json = [] //json[child.parentElement.tagName] ??= []
+                json.push(jsonChild)
+            } else {
+                json[tagName] = jsonChild
+            }
+        }
+    }
+
+    async _resetCharacteristicsFromHdc() {
+        const changes = {}
+        for (const [key, char] of Object.entries(this.system.characteristics)) {
+            let powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
+            let value = parseInt(char.LEVELS || 0) + parseInt(powerInfo.base || 0)
+            changes[`system.characteristics.${key.toLowerCase()}.core`] = value
+
+            changes[`system.characteristics.${key.toLowerCase()}.max`] = value
+            changes[`system.characteristics.${key.toLowerCase()}.value`] = value
+        }
+        await this.update(changes)
+    }
+
+
+}
+
+
+class HeroSystem6eActorSystem {
+    constructor(actor) {
+        this.actor = actor;
+    }
 }
 
 

@@ -109,7 +109,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 if (item.system.USESTANDARDEFFECT) {
                     let stun = parseInt(item.system.LEVELS?.value * 3)
                     let body = parseInt(item.system.LEVELS?.value)
-                    if (item.system.adders.find(o => o.XMLID === "PLUSONEHALFDIE") || item.system.adders.find(o => o.XMLID === "PLUSONEPIP")) {
+                    if (item.findModsByXmlid("PLUSONEHALFDIE") || item.findModsByXmlid("PLUSONEPIP")) {
                         stun += 1;
                         body += 1;
                     }
@@ -245,7 +245,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             // Charges
             if (parseInt(item.system.charges?.max || 0) > 0) {
-                const costsEnd = item.system.modifiers.find(o => o.XMLID == "COSTSEND")
+                const costsEnd = item.findModsByXmlid("COSTSEND")
                 if (item.system.endEstimate === 0 || !costsEnd) item.system.endEstimate = "";
                 item.system.endEstimate += ` [${parseInt(item.system.charges?.value || 0)}${item.system.charges?.recoverable ? "rc" : ""}]`;
                 item.system.endEstimate = item.system.endEstimate.trim();
@@ -310,7 +310,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             //     continue;
             // }
 
-            let characteristic = { ...data.actor.system.characteristics[powerInfo.key.toLowerCase()] }
+            let characteristic = { ...data.actor.system?.characteristics?.[powerInfo.key.toLowerCase()] }
 
             // Automation has no EGO, OMCV, or DMCV
             //if (item.actor.type === "automaton" && ["ego", "omcv", "dmcv"].includes(key)) continue;
@@ -701,7 +701,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         const characteristics = ['body', 'stun', 'end'];
         for (const characteristic of characteristics) {
-            if (expandedData.Xsystem.characteristics[characteristic].value !== this.actor.system.characteristics[characteristic].value) {
+            if (expandedData.Xsystem.characteristics[characteristic].value !== (this.actor.system?.characteristics?.[characteristic].value ?? null)) {
                 expandedData.system.characteristics[characteristic].value = expandedData.Xsystem.characteristics[characteristic].value;
             }
         }
@@ -967,7 +967,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             const parser = new DOMParser()
             const xmlDoc = parser.parseFromString(contents, 'text/xml')
-            applyCharacterSheet.bind(this)(xmlDoc)
+            this.actor.uploadFromXml(xmlDoc)
+            //applyCharacterSheet.bind(this)(xmlDoc)
         }.bind(this)
         reader.readAsText(file)
     }

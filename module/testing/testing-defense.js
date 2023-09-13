@@ -12,13 +12,31 @@ export function registerDefenseTests(quench) {
 
 
 
-            describe("Resistant Protection", function () {
-
+            describe("Resistant Protection", async function () {
+                let actor = await HeroSystem6eActor.create({
+                    name: 'Test Actor',
+                    type: 'pc',
+                }, { temporary: true })
                 const contents = `
                     <POWER XMLID="FORCEFIELD" ID="1686527339658" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="2" MDLEVELS="3" POWDLEVELS="4">
                     <NOTES />
                     </POWER>
                 `;
+                // let item = await actor.createEmbeddedDocuments("Item", [{
+                //     name: 'Test Item',
+                //     type: 'power',
+                // }], { parent: actor, temporary: true })
+                let item = await HeroSystem6eItem.create({
+                    name: 'Test Item',
+                    type: 'power',
+                }, { parent: actor, temporary: true })
+                let item2 = await actor.createEmbeddedDocuments("Item", [
+                    {
+                        name: 'Foo',
+                        type: 'power',
+                    }
+                ], {temporary: true })
+
                 const parser = new DOMParser()
                 const xmlDoc = parser.parseFromString(contents, 'text/xml')
                 const itemDefense = XmlToItemData(xmlDoc.children[0], "power")
@@ -26,7 +44,7 @@ export function registerDefenseTests(quench) {
                 itemDefense.system.active = true
 
                 // Actor
-                let actor = {
+                let actor2 = {
                     system: {
                         characteristics: {
                             pd: {
