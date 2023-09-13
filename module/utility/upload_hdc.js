@@ -667,65 +667,6 @@ export async function CalcActorRealAndActivePoints(actor) {
 }
 
 
-// For some reason some MODIFIERS/ADDERs have a 0 value.
-// We will override those values as necessary.
-function uploadFixActorCosts(actor) {
-    for (let item of actor.items) {
-        uploadFixItemCosts(item)
-    }
-}
-
-function uploadFixItemCosts(item) {
-    // if (CONFIG.HERO.ModifierOverride[_childData.XMLID]?.BASECOST) {
-    //     _childData.BASECOST = CONFIG.HERO.ModifierOverride[_childData.XMLID]?.BASECOST || _childData.BASECOST
-    // }
-    uploadFixItemChildCosts(item.system.powers)
-    uploadFixItemChildCosts(item.system.adders)
-    uploadFixItemChildCosts(item.system.modifiers)
-}
-
-function uploadFixItemChildCosts(node) {
-    console.log(node.XMLID)
-    uploadFixItemChildCosts(node.powers)
-    uploadFixItemChildCosts(node.system.adders)
-    uploadFixItemChildCosts(node.system.modifiers)
-}
-
-
-function parseRecursiveXML(systemData, array, xml) {
-    if (!xml?.attributes) return
-
-    if (array) {
-        let _childData = {}
-        for (const attribute of xml.attributes) {
-            switch (attribute.value.toUpperCase()) {
-                case "YES":
-                    _childData[attribute.name] = true;
-                    break;
-                case "NO":
-                    _childData[attribute.name] = false;
-                    break;
-                default:
-                    _childData[attribute.name] = attribute.value
-            }
-        }
-
-        parseRecursiveXML(systemData, _childData.powers, xml.querySelectorAll(":scope > POWER"))
-        parseRecursiveXML(systemData, _childData.adders, xml.querySelectorAll(":scope > ADDER"))
-        parseRecursiveXML(systemData, _childData.modifiers, xml.querySelectorAll(":scope > MODIFIER"))
-
-        array ??= []
-        array.push(_childData)
-    }
-    else {
-        parseRecursiveXML(systemData, systemData.powers, xml.querySelectorAll(":scope > POWER"))
-        parseRecursiveXML(systemData, systemData.adders, xml.querySelectorAll(":scope > ADDER"))
-        parseRecursiveXML(systemData, systemData.modifiers, xml.querySelectorAll(":scope > MODIFIER"))
-    }
-
-
-}
-
 export function XmlToItemData(xml, type) {
 
     const xmlid = xml.getAttribute('XMLID')
@@ -746,21 +687,18 @@ export function XmlToItemData(xml, type) {
         powers: [],
     }
 
-
-
-
     // Add XML attributes to ItemData.
-    // const relevantFields = [
-    //     'XMLID', 'BASECOST', 'LEVELS', 'ALIAS', 'MULTIPLIER', 'NAME', 'OPTION_ALIAS', 'SFX',
-    //     'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
-    //     'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
-    //     "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
-    //     "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_PRIMARY", "AFFECTS_TOTAL",
-    //     "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE",
-    //     "USE_END_RESERVE", "ULTRA_SLOT", "USESTANDARDEFFECT"
-    // ]
+    const relevantFields = [
+        'XMLID', 'BASECOST', 'LEVELS', 'ALIAS', 'MULTIPLIER', 'NAME', 'OPTION_ALIAS', 'SFX',
+        'PDLEVELS', 'EDLEVELS', 'MDLEVELS', 'INPUT', 'OPTION', 'OPTIONID', 'BASECOST',
+        'PRIVATE', 'EVERYMAN', 'CHARACTERISTIC', 'NATIVE_TONGUE', 'POWDLEVELS',
+        "WEIGHT", "PRICE", "CARRIED", "LENGTHLEVELS", "HEIGHTLEVELS", "WIDTHLEVELS",
+        "BODYLEVELS", "ID", "PARENTID", "POSITION", "AFFECTS_PRIMARY", "AFFECTS_TOTAL",
+        "CATEGORY", "PHASE", "OCV", "DCV", "DC", "EFFECT", "ADD_MODIFIERS_TO_BASE",
+        "USE_END_RESERVE", "ULTRA_SLOT", "USESTANDARDEFFECT"
+    ]
     for (const attribute of xml.attributes) {
-        if (true) { //relevantFields.includes(attribute.name)) {
+        if (relevantFields.includes(attribute.name)) {
 
             switch (attribute.name) {
                 case "CARRIED":
@@ -886,209 +824,176 @@ export function XmlToItemData(xml, type) {
         }
     }
 
-    parseRecursiveXML(systemData, null, xml)
-
-
-
     // POWERS (sub power like ENDURANCERESERVEREC )
-    // for (let POWER2 of xml.querySelectorAll(":scope > POWER")) {
-    //     let _power = {}
-    //     for (const attribute of POWER2.attributes) {
-    //         switch (attribute.value.toUpperCase()) {
-    //             case "YES":
-    //                 _power[attribute.name] = true;
-    //                 break;
-    //             case "NO":
-    //                 _power[attribute.name] = false;
-    //                 break;
-    //             default:
-    //                 _power[attribute.name] = attribute.value
-    //         }
-    //     }
+    for (let POWER2 of xml.querySelectorAll(":scope > POWER")) {
+        let _power = {}
+        for (const attribute of POWER2.attributes) {
+            switch (attribute.value.toUpperCase()) {
+                case "YES":
+                    _power[attribute.name] = true;
+                    break;
+                case "NO":
+                    _power[attribute.name] = false;
+                    break;
+                default:
+                    _power[attribute.name] = attribute.value
+            }
+        }
 
-    //     // For some reason some ADDERs have a 0 value.
-    //     // We will override those values as necessary.
-    //     if (CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST) {
-    //         _power.BASECOST = CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST || _power.BASECOST
-    //     }
+        // For some reason some ADDERs have a 0 value.
+        // We will override those values as necessary.
+        if (CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST) {
+            _power.BASECOST = CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST || _power.BASECOST
+        }
 
-    //     systemData.powers.push(_power)
-    // }
+        systemData.powers.push(_power)
+    }
 
-    // // ADDERS
-    // for (let ADDER of xml.querySelectorAll(":scope > ADDER")) {
-    //     let _adder = { adders: [] }
-    //     for (const attribute of ADDER.attributes) {
-    //         switch (attribute.value.toUpperCase()) {
-    //             case "YES":
-    //                 _adder[attribute.name] = true;
-    //                 break;
-    //             case "NO":
-    //                 _adder[attribute.name] = false;
-    //                 break;
-    //             default:
-    //                 _adder[attribute.name] = attribute.value
-    //         }
+    // ADDERS
+    for (let ADDER of xml.querySelectorAll(":scope > ADDER")) {
+        let _adder = { adders: [] }
+        for (const attribute of ADDER.attributes) {
+            switch (attribute.value.toUpperCase()) {
+                case "YES":
+                    _adder[attribute.name] = true;
+                    break;
+                case "NO":
+                    _adder[attribute.name] = false;
+                    break;
+                default:
+                    _adder[attribute.name] = attribute.value
+            }
 
-    //     }
+        }
 
-    //     // For some reason some ADDERs have a 0 value.
-    //     // We will override those values as necessary.
-    //     if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST) {
-    //         _adder.BASECOST = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST || _adder.BASECOST
-    //     }
+        // For some reason some ADDERs have a 0 value.
+        // We will override those values as necessary.
+        if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST) {
+            _adder.BASECOST = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST || _adder.BASECOST
+        }
 
-    //     // ADDERs can have ADDERs.
-    //     // And sometimes MODIFIERs, which we will coerce into an ADDER (CONTINUOUSCONCENTRATION).
-    //     for (let ADDER2 of ADDER.querySelectorAll(":scope > ADDER, :scope > ADDER")) {
-    //         let _adder2 = {}
-    //         for (const attribute of ADDER2.attributes) {
-    //             switch (attribute.value.toUpperCase()) {
-    //                 case "YES":
-    //                     _adder2[attribute.name] = true;
-    //                     break;
-    //                 case "NO":
-    //                     _adder2[attribute.name] = false;
-    //                     break;
-    //                 default:
-    //                     _adder2[attribute.name] = attribute.value
-    //             }
-    //         }
+        // ADDERs can have ADDERs.
+        // And sometimes MODIFIERs, which we will coerce into an ADDER (CONTINUOUSCONCENTRATION).
+        for (let ADDER2 of ADDER.querySelectorAll(":scope > ADDER, :scope > ADDER")) {
+            let _adder2 = {}
+            for (const attribute of ADDER2.attributes) {
+                switch (attribute.value.toUpperCase()) {
+                    case "YES":
+                        _adder2[attribute.name] = true;
+                        break;
+                    case "NO":
+                        _adder2[attribute.name] = false;
+                        break;
+                    default:
+                        _adder2[attribute.name] = attribute.value
+                }
+            }
 
-    //         // For some reason some ADDERs have a 0 value.
-    //         // We will override those values as necessary.
-    //         if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST != undefined) {
-    //             _adder2.BASECOST = CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST
-    //         }
-    //         if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER) {
-    //             _adder2.MULTIPLIER = CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER || _adder2.MULTIPLIER
-    //         }
+            // For some reason some ADDERs have a 0 value.
+            // We will override those values as necessary.
+            if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST != undefined) {
+                _adder2.BASECOST = CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST
+            }
+            if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER) {
+                _adder2.MULTIPLIER = CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER || _adder2.MULTIPLIER
+            }
 
-    //         _adder.adders.push(_adder2)
-    //     }
+            _adder.adders.push(_adder2)
+        }
 
-    //     systemData.adders.push(_adder)
-    // }
+        systemData.adders.push(_adder)
+    }
 
-    // // MODIFIERS (which can have ADDERS as well)
-    // for (let MODIFIER of xml.querySelectorAll(":scope > MODIFIER")) {
-    //     let _mod = { adders: [] }
-    //     for (const attribute of MODIFIER.attributes) {
+    // MODIFIERS (which can have ADDERS as well)
+    for (let MODIFIER of xml.querySelectorAll(":scope > MODIFIER")) {
+        let _mod = { adders: [] }
+        for (const attribute of MODIFIER.attributes) {
 
-    //         switch (attribute.value.toUpperCase()) {
-    //             case "YES":
-    //                 _mod[attribute.name] = true;
-    //                 break;
-    //             case "NO":
-    //                 _mod[attribute.name] = false;
-    //                 break;
-    //             default:
-    //                 _mod[attribute.name] = attribute.value
-    //         }
-    //     }
+            switch (attribute.value.toUpperCase()) {
+                case "YES":
+                    _mod[attribute.name] = true;
+                    break;
+                case "NO":
+                    _mod[attribute.name] = false;
+                    break;
+                default:
+                    _mod[attribute.name] = attribute.value
+            }
+        }
 
-    //     // For some reason some MODIFIERs have a 0 value.
-    //     // We will override those values as necessary.
-    //     if (CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST) {
-    //         _mod.BASECOST = CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST || _mod.BASECOST
-    //     }
+        // For some reason some MODIFIERs have a 0 value.
+        // We will override those values as necessary.
+        if (CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST) {
+            _mod.BASECOST = CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST || _mod.BASECOST
+        }
 
-    //     // AOE BASECOST is also missing from HDC
-    //     if (_mod.XMLID == "AOE" && parseFloat(_mod.BASECOST) == 0) {
-    //         if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 32) _mod.BASECOST = 1.0
-    //         if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 0.75
-    //         if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.50
-    //         if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 4) _mod.BASECOST = 0.25
+        // AOE BASECOST is also missing from HDC
+        if (_mod.XMLID == "AOE" && parseFloat(_mod.BASECOST) == 0) {
+            if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 32) _mod.BASECOST = 1.0
+            if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 0.75
+            if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.50
+            if (_mod.OPTION == "RADIUS" && parseInt(_mod.LEVELS) <= 4) _mod.BASECOST = 0.25
 
-    //         if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 64) _mod.BASECOST = 1.0
-    //         if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 32) _mod.BASECOST = 0.75
-    //         if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 0.50
-    //         if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.25
+            if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 64) _mod.BASECOST = 1.0
+            if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 32) _mod.BASECOST = 0.75
+            if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 0.50
+            if (_mod.OPTION == "CONE" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.25
 
-    //         if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 125) _mod.BASECOST = 1.0
-    //         if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 64) _mod.BASECOST = 0.75
-    //         if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 32) _mod.BASECOST = 0.50
-    //         if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 0.25
+            if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 125) _mod.BASECOST = 1.0
+            if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 64) _mod.BASECOST = 0.75
+            if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 32) _mod.BASECOST = 0.50
+            if (_mod.OPTION == "LINE" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 0.25
 
-    //         if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 1.0
-    //         if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.75
-    //         if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 4) _mod.BASECOST = 0.50
-    //         if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 2) _mod.BASECOST = 0.25
+            if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 1.0
+            if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.75
+            if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 4) _mod.BASECOST = 0.50
+            if (_mod.OPTION == "SURFACE" && parseInt(_mod.LEVELS) <= 2) _mod.BASECOST = 0.25
 
-    //         if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 1.0
-    //         if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.75
-    //         if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 4) _mod.BASECOST = 0.50
-    //         if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 2) _mod.BASECOST = 0.25
-    //     }
+            if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 16) _mod.BASECOST = 1.0
+            if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 8) _mod.BASECOST = 0.75
+            if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 4) _mod.BASECOST = 0.50
+            if (_mod.OPTION == "AREA" && parseInt(_mod.LEVELS) <= 2) _mod.BASECOST = 0.25
+        }
 
-    //     if (_mod.XMLID == "REQUIRESASKILLROLL") {
-    //         // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-    //         // This is a limitation not an advantage, not sure why it is positive.  Force it negative.
-    //         _mod.BASECOST = - Math.abs(parseFloat(_mod.BASECOST))
-    //     }
-
-
+        if (_mod.XMLID == "REQUIRESASKILLROLL") {
+            // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            // This is a limitation not an advantage, not sure why it is positive.  Force it negative.
+            _mod.BASECOST = - Math.abs(parseFloat(_mod.BASECOST))
+        }
 
 
-    //     // MODIFIERs can have ADDERs.
-    //     // And sometimes MODIFIERs, which we will coerce into an ADDER (CONTINUOUSCONCENTRATION).
-    //     for (let ADDER of MODIFIER.querySelectorAll(":scope > ADDER, :scope > MODIFIER")) {
-    //         let _adder = {}
-    //         for (const attribute of ADDER.attributes) {
-    //             switch (attribute.value.toUpperCase()) {
-    //                 case "YES":
-    //                     _adder[attribute.name] = true;
-    //                     break;
-    //                 case "NO":
-    //                     _adder[attribute.name] = false;
-    //                     break;
-    //                 default:
-    //                     _adder[attribute.name] = attribute.value
-    //             }
-    //         }
 
-    //         // For some reason some ADDERs have a 0 value.
-    //         // We will override those values as necessary.
-    //         if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST != undefined) {
-    //             _adder.BASECOST = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST
-    //         }
-    //         if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER) {
-    //             _adder.MULTIPLIER = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER || _adder.MULTIPLIER
-    //         }
 
-    //         _mod.adders.push(_adder)
-    //     }
+        // MODIFIERs can have ADDERs.
+        // And sometimes MODIFIERs, which we will coerce into an ADDER (CONTINUOUSCONCENTRATION).
+        for (let ADDER of MODIFIER.querySelectorAll(":scope > ADDER, :scope > MODIFIER")) {
+            let _adder = {}
+            for (const attribute of ADDER.attributes) {
+                switch (attribute.value.toUpperCase()) {
+                    case "YES":
+                        _adder[attribute.name] = true;
+                        break;
+                    case "NO":
+                        _adder[attribute.name] = false;
+                        break;
+                    default:
+                        _adder[attribute.name] = attribute.value
+                }
+            }
 
-    //     // MODIFIERs can have ADDERs.
-    //     // And sometimes MODIFIERs, which we will coerce into an ADDER (CONTINUOUSCONCENTRATION).
-    //     for (let ADDER of MODIFIER.querySelectorAll(":scope > ADDER, :scope > MODIFIER")) {
-    //         let _adder = {}
-    //         for (const attribute of ADDER.attributes) {
-    //             switch (attribute.value.toUpperCase()) {
-    //                 case "YES":
-    //                     _adder[attribute.name] = true;
-    //                     break;
-    //                 case "NO":
-    //                     _adder[attribute.name] = false;
-    //                     break;
-    //                 default:
-    //                     _adder[attribute.name] = attribute.value
-    //             }
-    //         }
+            // For some reason some ADDERs have a 0 value.
+            // We will override those values as necessary.
+            if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST != undefined) {
+                _adder.BASECOST = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST
+            }
+            if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER) {
+                _adder.MULTIPLIER = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER || _adder.MULTIPLIER
+            }
 
-    //         // For some reason some ADDERs have a 0 value.
-    //         // We will override those values as necessary.
-    //         if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST != undefined) {
-    //             _adder.BASECOST = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST
-    //         }
-    //         if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER) {
-    //             _adder.MULTIPLIER = CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER || _adder.MULTIPLIER
-    //         }
-
-    //         _mod.adders.push(_adder)
-    //     }
-    //     systemData.modifiers.push(_mod)
-    // }
+            _mod.adders.push(_adder)
+        }
+        systemData.modifiers.push(_mod)
+    }
 
     // Charges do not typically use Endurance
     const charges = systemData.modifiers.find(o => o.XMLID == "CHARGES")
@@ -1636,7 +1541,6 @@ export async function uploadPower(power, type) {
 
 // TODO: Can this be reworked to take only ITEM as a property?
 export function updateItemDescription(item) {
-    return;
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
     // so when the power is modified in foundry, the power
@@ -1775,7 +1679,7 @@ export function updateItemDescription(item) {
 
         case "ENTANGLE":
             // Entangle 2d6, 7 PD/2 ED
-            let pd_entangle = parseInt(system.LEVELS?.value || 0) + parseInt(findModsByXmlid("ADDITIONALPD")?.LEVELS || 0)
+            let pd_entangle = parseInt(system.LEVELS?.value || 0) + parseInt(system.adders.find(o => o.XMLID === "ADDITIONALPD")?.LEVELS || 0)
             let ed_entangle = parseInt(system.LEVELS?.value || 0) + parseInt(system.adders.find(o => o.XMLID === "ADDITIONALED")?.LEVELS || 0)
             system.description = `${system.ALIAS} ${system.LEVELS?.value}d6, ${pd_entangle} PD/${ed_entangle} ED`
             break;
@@ -2107,7 +2011,7 @@ export function updateItemDescription(item) {
         let stun = parseInt(system.LEVELS?.value * 3)
         let body = parseInt(system.LEVELS?.value)
 
-        if (item.findModsByXmlid("PLUSONEHALFDIE") || item.findModsByXmlid("PLUSONEPIP")) { 
+        if (system.adders.find(o => o.XMLID === "PLUSONEHALFDIE") || system.adders.find(o => o.XMLID === "PLUSONEPIP")) {
             stun += 1;
             body += 1;
         }
@@ -2147,14 +2051,14 @@ export function updateItemDescription(item) {
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
-    const costsEnd = item.findModsByXmlid("COSTSEND") 
-    const increasedEnd = item.findModsByXmlid("INCREASEDEND") 
+    const costsEnd = system.modifiers.find(o => o.XMLID == "COSTSEND")
+    const increasedEnd = system.modifiers.find(o => o.XMLID == "INCREASEDEND")
     if (increasedEnd) {
         system.end *= parseInt(increasedEnd.OPTION.replace('x', ''))
     }
 
-    const reducedEnd = item.findModsByXmlid("REDUCEDEND")
-    //   (parent && parent.system.modifiers.find(o => o.XMLID == "REDUCEDEND"))
+    const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND") ||
+        (parent && parent.system.modifiers.find(o => o.XMLID == "REDUCEDEND"))
     if (reducedEnd && reducedEnd.OPTION === 'HALFEND') {
         system.end = RoundFavorPlayerDown((system._activePointsWithoutEndMods || system.activePoints) / 10)
         system.end = Math.max(1, RoundFavorPlayerDown(system.end / 2));
@@ -2599,7 +2503,7 @@ export async function makeAttack(item) {
     }
 
     // AVAD
-    const avad = item.system?.modifiers ? item.findModsByXmlid("AVAD") : null;
+    const avad = item.system?.modifiers ? item.system.modifiers.find(o => o.XMLID === "AVAD") : null;
     if (avad) {
         changes[`system.class`] = 'avad'
     }
@@ -3065,33 +2969,6 @@ export async function createEffects(itemData, actor) {
         return
     }
 
-    // CONTINUOUSCONCENTRATION
-    const CONCENTRATION = itemData.findModsByXmlid("CONCENTRATION")
-    if (CONCENTRATION) {
-        console.log(CONCENTRATION)
-    }
-    let CONTINUOUSCONCENTRATION = CONCENTRATION?.adders?.find(o => o.XMLID === "CONTINUOUSCONCENTRATION")
-    if (CONTINUOUSCONCENTRATION) {
-        let activeEffect =
-        {
-            name: itemData.name,
-            icon: 'icons/svg/upgrade.svg',
-            changes: [
-                itemData.effects ? itemData.effects[0].changes : []
-            ],
-            transfer: true,
-        }
-
-
-        activeEffect.changes.push({
-            key: "system.characteristics.ocv.value",
-            value: (CONCENTRATION.OPTION === "ZERO" ? 0 : 0.5),
-            mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLIER
-        })
-
-        itemData.effects[activeEffect]
-
-    }
 }
 
 export async function updateItemSubTypes(actor, removeDups) {

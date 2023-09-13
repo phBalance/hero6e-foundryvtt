@@ -8,8 +8,218 @@
             "computer",
             "automaton",
             "ai"
-        ]
-        
+        ],
+        "templates": {
+            "base": {},
+            "characterTemplate": {
+                "templates": [
+                    "base"
+                ],
+                "biography": "",
+                "attributes": {
+                    "points": {
+                        "value": 175
+                    }
+                },
+                "characteristics": {
+                    "str": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "rollable"
+                    },
+                    "dex": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "rollable"
+                    },
+                    "con": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "rollable"
+                    },
+                    "int": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "rollable"
+                    },
+                    "ego": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "rollable"
+                    },
+                    "pre": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "rollable"
+                    },
+                    "com": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "rollable"
+                    },
+                    "ocv": {
+                        "max": 3,
+                        "autoMod": "0",
+                        "userMod": "0",
+                        "value": 3,
+                        "modifier": 1,
+                        "type": "combat"
+                    },
+                    "dcv": {
+                        "max": 3,
+                        "autoMod": "0",
+                        "userMod": "0",
+                        "value": 3,
+                        "modifier": 1,
+                        "type": "combat"
+                    },
+                    "omcv": {
+                        "max": 3,
+                        "autoMod": "0",
+                        "userMod": "0",
+                        "value": 3,
+                        "modifier": 1,
+                        "type": "combat"
+                    },
+                    "dmcv": {
+                        "max": 3,
+                        "autoMod": "0",
+                        "userMod": "0",
+                        "value": 3,
+                        "modifier": 1,
+                        "type": "combat"
+                    },
+                    "spd": {
+                        "value": 2,
+                        "max": 2,
+                        "type": "other"
+                    },
+                    "pd": {
+                        "value": 2,
+                        "max": 2,
+                        "type": "defense"
+                    },
+                    "ed": {
+                        "value": 2,
+                        "max": 2,
+                        "type": "defense"
+                    },
+                    "rec": {
+                        "value": 4,
+                        "max": 4,
+                        "type": "other"
+                    },
+                    "body": {
+                        "value": 10,
+                        "max": 10,
+                        "type": "resource",
+                        "loc": {
+                            "Head": 0,
+                            "Left Hand": 0,
+                            "Right Hand": 0,
+                            "Left Shoulder": 0,
+                            "Right Shoulder": 0,
+                            "Left Arm": 0,
+                            "Right Arm": 0,
+                            "Chest": 0,
+                            "Stomach": 0,
+                            "Vitals": 0,
+                            "Left Thigh": 0,
+                            "Right Thigh": 0,
+                            "Left Leg": 0,
+                            "Right Leg": 0,
+                            "Left Foot": 0,
+                            "Right Foot": 0
+                        }
+                    },
+                    "stun": {
+                        "value": 20,
+                        "max": 20,
+                        "type": "resource"
+                    },
+                    "end": {
+                        "value": 20,
+                        "max": 20,
+                        "type": "resource"
+                    },
+                    "size": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "resource"
+                    },
+                    "running": {
+                        "value": 12,
+                        "max": 12,
+                        "type": "movement"
+                    },
+                    "swimming": {
+                        "value": 4,
+                        "max": 4,
+                        "type": "movement"
+                    },
+                    "leaping": {
+                        "value": 4,
+                        "max": 4,
+                        "type": "movement"
+                    },
+                    "flight": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "movement"
+                    },
+                    "swinging": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "movement"
+                    },
+                    "teleportation": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "movement"
+                    },
+                    "tunneling": {
+                        "value": 0,
+                        "max": 0,
+                        "type": "movement"
+                    }
+                }
+            }
+        },
+        "pc": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "npc": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "vehicle": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "base2": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "automaton": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "computer": {
+            "templates": [
+                "characterTemplate"
+            ]
+        },
+        "ai": {
+            "templates": [
+                "characterTemplate"
+            ]
+        }
     },
     "Item": {
         "types": [
@@ -19,14 +229,148 @@
             "martialart",
             "power",
             "complication",
-            "disadvantage",
             "equipment",
             "attack",
             "defense",
             "maneuver",
             "movement",
             "misc"
-        ]
-        
+        ],
+        "templates": {
+            "base": {
+                "description": "",
+                "rules": "",
+                "effect": "",
+                "cost": 0,
+                "modifiers": [],
+                "hdcid": "",
+                "parentid": ""
+            },
+            "power": {
+                "description": "",
+                "cost": 0,
+                "modifiers": [],
+                "hdcid": "",
+                "parentid": "",
+                "type": "blast",
+                "effect": 0,
+                "levels": 0,
+                "end": 0
+            }
+        },
+        "skill": {
+            "templates": [
+                "base"
+            ],
+            "characteristic": "general",
+            "levels": 0,
+            "state": "untrained",
+            "roll": "6-"
+        },
+        "power": {
+            "templates": [
+                "power"
+            ],
+            "rules": "Power Description",
+            "active": "false"
+        },
+        "equipment": {
+            "templates": [
+                "power"
+            ],
+            "quantity": 1,
+            "weight": 0,
+            "rules": "Equipment Description"
+        },
+        "attack": {
+            "templates": [
+                "base"
+            ],
+            "defense": "pd",
+            "killing": 0,
+            "piercing": 0,
+            "penetrating": 0,
+            "advantages": 0,
+            "dice": 0,
+            "toHitMod": 0,
+            "extraDice": "zero",
+            "uses": "ocv",
+            "targets": "dcv",
+            "end": 0,
+            "stunX": 0,
+            "class": "physical",
+            "areaOfEffect": {
+                "type": "none",
+                "value": 0
+            },
+            "stunBodyDamage": "stunbody"
+        },
+        "defense": {
+            "templates": [
+                "base"
+            ],
+            "defenseType": "pd",
+            "active": "false",
+            "resistant": "false",
+            "hardened": 0,
+            "impenetrable": 0,
+            "value": 0
+        },
+        "maneuver": {
+            "templates": [
+                "base"
+            ],
+            "phase": 0,
+            "ocv": "+0",
+            "dcv": "+0",
+            "active": false
+        },
+        "movement": {
+            "templates": [
+                "base"
+            ],
+            "class": "Running",
+            "editable": true,
+            "base": 0,
+            "value": 0,
+            "mod": 0,
+            "velBase": 0,
+            "velValue": 0
+        },
+        "perk": {
+            "templates": [
+                "base"
+            ],
+            "id": "",
+            "rules": "Perk Description",
+            "other": {}
+        },
+        "talent": {
+            "templates": [
+                "base"
+            ],
+            "id": "",
+            "rules": "Talent Description",
+            "other": {}
+        },
+        "complication": {
+            "templates": [
+                "base"
+            ],
+            "id": "",
+            "rules": "Complication Description",
+            "other": {
+                "levels": 0,
+                "option_alias": ""
+            }
+        },
+        "martialart": {
+            "templates": [
+                "base"
+            ],
+            "id": "",
+            "rules": "Martial Art Description",
+            "other": {}
+        }
     }
 }

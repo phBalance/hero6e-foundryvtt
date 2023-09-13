@@ -225,7 +225,7 @@ export class HeroSystem6eItem extends Item {
 
             if (!this.actor.canAct(true)) return;
 
-            const costEndOnlyToActivate = item.findModsByXmlid("COSTSEND" && o.OPTION === "ACTIVATE");
+            const costEndOnlyToActivate = item.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (costEndOnlyToActivate) {
                 let end = parseInt(this.system.end);
                 let value = parseInt(this.actor.system.characteristics.end.value);
@@ -376,151 +376,6 @@ export class HeroSystem6eItem extends Item {
     //     }
     // }
 
-    static ItemXmlTags = ["SKILLS", "PERKS", "TALENTS", "MARTIALARTS", "POWERS", "DISADVANTAGES", "EQUIPMENT"]
-    static ItemXmlChildTags = ["ADDER", "MODIFIER", "POWER"]
-
-    findModsByXmlid(xmlid) {
-        for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-            if (this.system?.[key]) {
-                const value = this.system[key].find(o => o.XMLID === xmlid)
-                if (value) {
-                    return value;
-                }
-            }
-        }
-
-
-        // TODO: Delete support for old format
-        for (const key of ['adders', 'modifiers', 'power']) {
-            if (this.system?.[key]) {
-                const value = this.system[key].find(o => o.XMLID === xmlid)
-                if (value) {
-                    return value;
-                }
-            }
-        }
-
-        // Powerframework may include this modifier
-        if (this.system.PARENTID) {
-            const parent = this.actor.items.find(o => o.system.ID == this.system.PARENTID)
-            if (parent) {
-                return parent.findModsByXmlid(xmlid)
-            }
-        }
-
-        return null
-    }
-
-    _calcBaseCost(child) {
-        let newValue = parseFloat(CONFIG.HERO.ModifierOverride[child.XMLID]?.BASECOST || child.BASECOST || 0)
-
-        switch (child.XMLID) {
-            case "AOE":
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 32) return 1.0
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 16) return 0.75
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 8) return 0.50
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 4) return 0.25
-
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 64) return 1.0
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 32) return 0.75
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 16) return 0.50
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 8) return 0.25
-
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 125) return 1.0
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 64) return 0.75
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 32) return 0.50
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 16) return 0.25
-
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 16) return 1.0
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 8) return 0.75
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 4) return 0.50
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 2) return 0.25
-
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 16) return 1.0
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 8) return 0.75
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 4) return 0.50
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 2) return 0.25
-        }
-
-        return newValue
-    }
-
-    async _postUpload() {
-
-        let changed = false;
-
-        // BASECOST
-        for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-            if (this.system[key]) {
-                for (const child of this.system[key]) {
-                    let newValue = parseFloat(CONFIG.HERO.ModifierOverride[child.XMLID]?.BASECOST || child.BASECOST || 0)
-
-                    switch (child.XMLID) {
-                        case "AOE":
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 32) newValue = 1.0
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 16) newValue = 0.75
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 8) newValue = 0.50
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 4) newValue = 0.25
-
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 64) newValue = 1.0
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 32) newValue = 0.75
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 16) newValue = 0.50
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 8) newValue = 0.25
-
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 125) newValue = 1.0
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 64) newValue = 0.75
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 32) newValue = 0.50
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 16) newValue = 0.25
-
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 16) newValue = 1.0
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 8) newValue = 0.75
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 4) newValue = 0.50
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 2) newValue = 0.25
-
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 16) newValue = 1.0
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 8) newValue = 0.75
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 4) newValue = 0.50
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 2) newValue = 0.25
-                    }
-
-                    if (child.baseCost != newValue) {
-                        child.baseCost = newValue
-                        changed = true
-                    }
-                }
-            }
-        }
-
-        // DESCRIPTION
-        for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-            if (this.system[key]) {
-                for (const child of this.system[key]) {
-                    let newValue = child.ALIAS
-
-                    switch (child.XMLID) {
-                        case "AOE":
-                            newValue += ` (${this.system.is5e ? (child.LEVELS + "\"") : ((child.LEVELS * 2) + "m")} ${child.OPTION.titleCase()})`
-                            break;
-
-                    }
-
-                    if (child.description != newValue) {
-                        child.description = newValue
-                        changed = true
-                    }
-                }
-            }
-        }
-
-
-        // Save changes
-        if (changed) {
-            await this.update({ 'system': this.system })
-        }
-
-        return changed
-    }
-
 }
 
 export function getItem(id) {
@@ -543,7 +398,7 @@ export async function RequiresASkillRollCheck(item) {
     if (item.system?.active === true) return true;
 
 
-    let rar = item.findModsByXmlid("REQUIRESASKILLROLL") || item.findModsByXmlid("ACTIVATIONROLL")
+    let rar = item.system.modifiers.find(o => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (rar) {
 
         let rollEquation = "3d6";

@@ -67,7 +67,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const data = this.data;
         const item = data.item;
 
-        const aoe = item.system.findModsByXmlid("AOE");
+        const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
         if (aoe) {
             data.aoeText = aoe.OPTION_ALIAS
             if (aoe.LEVELS) {
@@ -136,7 +136,7 @@ export class ItemAttackFormApplication extends FormApplication {
             canvas.tokens.activate()
             await this.close();
             
-            const aoe = this.data.item.findModsByXmlid("AOE");
+            const aoe = this.data.item.system.modifiers.find(o => o.XMLID === "AOE");
             if (aoe) {
                 return _processAttackAoeOptions(this.data.item, formData);
             }
@@ -176,7 +176,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     async _spawnAreaOfEffect(event) {
         const item = this.data.item
-        const aoe = item.system.findModsByXmlid("AOE");
+        const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
         if (!aoe) return;
 
         const aoeType = aoe.OPTION.toLowerCase();

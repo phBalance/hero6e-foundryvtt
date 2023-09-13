@@ -1,6 +1,5 @@
 import { calcItemPoints, updateItemDescription, CalcActorRealAndActivePoints } from "./utility/upload_hdc.js"
 import { RoundFavorPlayerDown } from "./utility/round.js"
-import { HeroSystem6eItem } from "./item/item.js";
 
 export async function migrateWorld() {
     const lastMigration = game.settings.get(game.system.id, 'lastMigration')
@@ -180,119 +179,42 @@ export async function migrateWorld() {
     }
 
 
-    // if lastMigration < 3.0.34
-    // adders, modifiers
-    if (foundry.utils.isNewerVersion('3.0.34', lastMigration)) {
-        await ui.notifications.info(`Migragrating actor data  3.0.34`)
-        let countRemaining = game.actors.contents.length
-        let lastUiNotice = new Date()
-        for (let actor of game.actors.contents) {
-            try {
-                countRemaining--
-                for (let item of actor.items) {
-                    let changed = false;
-
-                    for (const keyNew1 of HeroSystem6eItem.ItemXmlChildTags) {
-                        const keyOld1 = keyNew1.toLowerCase() + "s"
-                        if (item.system?.[keyOld1] && !item.system?.[keyNew1]) {
-                            item.system[keyNew1] = item.system[keyOld1]
-                            delete item.system[keyOld1]
-                            if (!isEmpty(item.system[keyOld1])) {
-                                item.system[keyOld1]._postUpload()
-                            }
-                            changed = true
-
-                            const child2 = item.system[keyNew1]
-                            if (!isEmpty(child2)) {
-                                for (const keyNew2 of HeroSystem6eItem.ItemXmlChildTags) {
-                                    const keyOld2 = keyNew2.toLowerCase() + "s"
-                                    if (child2?.[keyOld2] && !child2?.[keyNew2]) {
-                                        child2[keyNew2] = child2[keyOld2]
-                                        if (!isEmpty(item.system[keyOld2])) {
-                                            console.log(item.system[keyOld2])
-                                        }
-                                        delete child2[keyOld2]
-
-                                        const child3 = item.system[keyNew2]
-                                        if (!isEmpty(child3)) {
-                                            for (const keyNew3 of HeroSystem6eItem.ItemXmlChildTags) {
-                                                const keyOld3 = keyNew3.toLowerCase() + "s"
-                                                if (child3?.[keyOld3] && !child3?.[keyNew3]) {
-                                                    child3[keyNew3] = child3[keyOld3]
-                                                    if (!isEmpty(item.system[keyOld3])) {
-                                                        console.log(item.system[keyOld3])
-                                                    }
-                                                    delete child3[keyOld3]
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-
-                    if (changed) {
-                        await item.update({ 'system': item.system }, { hideChatMessage: true })
-                        //await ui.notifications.info(`Migragrated ${actor.name}`)
-                    }
-
-                }
-                //await ui.notifications.info(`Migragrated ${actor.name}`)
-                if (new Date() - lastUiNotice > 3000) {
-                    await ui.notifications.info(`Migrations remaining ${countRemaining}`)
-                    lastUiNotice = new Date()
-                }
-                console.log(countRemaining)
-            } catch (e) {
-                console.log(e);
-            }
-
-        }
-    }
-
-
     // Reparse all items (description, cost, etc) on every migration
+
+
     if (true) {
-        //await ui.notifications.info(`Migragrating actor data (Updating costs, END, and descriptions)`)
-
-        let countRemaining = game.actors.contents.length
-        let lastUiNotice = new Date()
-
+        await ui.notifications.info(`Migragrating actor data (Updating costs, END, and descriptions)`)
         for (let actor of game.actors.contents) {
             try {
                 let itemsChanged = false;
                 for (let item of actor.items) {
-                    countRemaining--
                     let changes = {};
-                    itemsChanged = await item._postUpload() || itemsChanged
 
                     // Calculate RealCost, ActivePoints, and END
-                    // if (await calcItemPoints(item)) {
-                    //     if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
-                    //         changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
-                    //         changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
-                    //         changes['system.realCost'] = item.system.realCost;
-                    //     }
-                    // }
+                    if (await calcItemPoints(item)) {
+                        if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
+                            changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+                            changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+                            changes['system.realCost'] = item.system.realCost;
+                        }
+                    }
 
-                    // if (parseInt(item.system.activePoints) > 0) {
-                    //     let _oldDescription = item.system.description;
-                    //     let _oldEnd = parseInt(item.system.end || 0);
-                    //     updateItemDescription(item);
-                    //     if (_oldDescription != item.system.description) {
-                    //         changes['system.description'] = item.system.description;
-                    //     }
-                    //     if (_oldEnd != parseInt(item.system.end)) {
-                    //         changes['system.end'] = item.system.end;
-                    //     }
-                    // }
+                    if (parseInt(item.system.activePoints) > 0) {
+                        let _oldDescription = item.system.description;
+                        let _oldEnd = parseInt(item.system.end || 0);
+                        updateItemDescription(item);
+                        if (_oldDescription != item.system.description) {
+                            changes['system.description'] = item.system.description;
+                        }
+                        if (_oldEnd != parseInt(item.system.end)) {
+                            changes['system.end'] = item.system.end;
+                        }
+                    }
 
-                    // if (Object.keys(changes).length > 0) {
-                    //     await item.update(changes, { hideChatMessage: true })
-                    //     itemsChanged = true;
-                    // }
+                    if (Object.keys(changes).length > 0) {
+                        await item.update(changes, { hideChatMessage: true })
+                        itemsChanged = true;
+                    }
                 }
 
                 if (itemsChanged) {
@@ -305,12 +227,6 @@ export async function migrateWorld() {
                 if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
                     await ui.notifications.warn(`Migragtion failed for ${actor.name}. Recommend re-uploading from HDC.`)
                 }
-            }
-
-
-            if (new Date() - lastUiNotice > 3000) {
-                await ui.notifications.info(`Migrations remaining ${countRemaining}`)
-                lastUiNotice = new Date()
             }
 
         }
