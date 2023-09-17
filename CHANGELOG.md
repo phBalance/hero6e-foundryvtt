@@ -5,7 +5,8 @@
 - Fix for Characteristic rolls that were not working. [#331](https://github.com/dmdorman/hero6e-foundryvtt/issues/331)
 - Fix for incorrect REC base. [#371](https://github.com/dmdorman/hero6e-foundryvtt/issues/371)
 - Initial support for GRABBED status. [#370](https://github.com/dmdorman/hero6e-foundryvtt/issues/370)
-- Improved ENTANGLE status. 0 DCV. 1/2 OCV. 
+- Improved ENTANGLE status. 0 DCV. 1/2 OCV.
+- Initial support for STUNONLY modifier. [#374](https://github.com/dmdorman/hero6e-foundryvtt/issues/374)
 
 
 # Version 3.0.33

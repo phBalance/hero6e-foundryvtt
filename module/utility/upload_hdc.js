@@ -2652,6 +2652,11 @@ export async function makeAttack(item) {
         changes[`system.usesStrength`] = false;
     }
 
+    const stunOnly = item.system.modifiers.find(o => o.XMLID == "STUNONLY")
+    if (stunOnly) {
+        changes['system.stunBodyDamage'] = "stunonly"
+    }
+
     if (item._id) {
         await item.update(changes, { hideChatMessage: true })
     }
