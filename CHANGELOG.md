@@ -3,6 +3,7 @@
 - Initial support for UNDERWATER and STANDING IN WATER. If either status -2 DCV.  UNDERWATER also includes -2 DC.  No check for SCUBA or breakfall. [#363](https://github.com/dmdorman/hero6e-foundryvtt/issues/363)
 - Fix 5e OCV/DCV HDC upload [#376](https://github.com/dmdorman/hero6e-foundryvtt/issues/376)
 - Fix for Characteristic rolls that were not working. [#331](https://github.com/dmdorman/hero6e-foundryvtt/issues/331)
+- Fix for incorrect REC base. [#371](https://github.com/dmdorman/hero6e-foundryvtt/issues/371)
 
 # Version 3.0.33
 - Target DCV and "hit by" are now hidden from players. GM's will see a white-ish background and blue outline for items hidden from players in chat messages. [#351](https://github.com/dmdorman/hero6e-foundryvtt/issues/351)
