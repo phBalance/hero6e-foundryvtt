@@ -750,7 +750,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 result.toMessage({
                     speaker: ChatMessage.getSpeaker({ actor }),
-                    flavor: content + dataset.label.toUpperCase() + ' roll ' + (margin >= 0 ? 'succeeded' : 'failed') + ' by ' + Math.abs(margin),
+                    flavor: dataset.label.toUpperCase() + ` (${charRoll}-) roll ` + (margin >= 0 ? 'succeeded' : 'failed') + ' by ' + Math.abs(margin),
                     borderColor: margin >= 0 ? 0x00FF00 : 0xFF0000
                 })
             })

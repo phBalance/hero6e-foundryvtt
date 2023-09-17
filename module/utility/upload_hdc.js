@@ -4,6 +4,7 @@ import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
 import { getPowerInfo, getModifierInfo, getCharactersticInfoArrayForActor } from '../utility/util.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
 import { convertToDcFromItem, convertFromDC } from "./damage.js";
+import { HeroSystem6eActor } from "../actor/actor.js"
 
 
 export async function applyCharacterSheet(xmlDoc) {
@@ -66,7 +67,18 @@ export async function applyCharacterSheet(xmlDoc) {
     // Remove all items from
     await this.actor.deleteEmbeddedDocuments("Item", Array.from(this.actor.items.keys()))
 
-
+    // Remove properties that are not part of the default template
+    const _actor = await HeroSystem6eActor.create({
+        name: 'Test Actor',
+        type: this.actor.type,
+    }, { temporary: true })
+    const _system = _actor.system
+    const schemaKeys = Object.keys(_system)
+    for (const key of schemaKeys) {
+        if (!Object.keys(this.actor.system).includes(key)) {
+            changes[`system.-=${key}`] = null
+        }
+    }
 
     // 6e vs 5e
     if (!characterTemplate) {
@@ -180,6 +192,7 @@ export async function applyCharacterSheet(xmlDoc) {
         changes[`system.characteristics.${key}.value`] = value
         changes[`system.characteristics.${key}.max`] = value
         changes[`system.characteristics.${key}.core`] = value
+        this.actor.system.characteristics[key].core = value
         // let cost = Math.round(levels * characteristicCosts[key])
         // changes[`system.characteristics.${key}.basePointsPlusAdders`] = cost
         // changes[`system.characteristics.${key}.realCost`] = cost
@@ -206,6 +219,22 @@ export async function applyCharacterSheet(xmlDoc) {
         //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
         // }
     }
+    
+    if (this.actor.system.is5e) {
+        // Base OCV & DCV = Attacker’s DEX/3
+        let value = Math.round(this.actor.system.characteristics.dex.max / 3)
+        changes[`system.characteristics.ocv.value`] = value
+        changes[`system.characteristics.ocv.max`] = value
+        changes[`system.characteristics.dcv.value`] = value
+        changes[`system.characteristics.dcv.max`] = value
+
+        //Base Ego Combat Value = EGO/3
+        value = Math.round(this.actor.system.characteristics.ego.max / 3)
+        changes[`system.characteristics.omcv.value`] = value
+        changes[`system.characteristics.omcv.max`] = value
+        changes[`system.characteristics.dmcv.value`] = value
+        changes[`system.characteristics.dmcv.max`] = value
+    }
 
     await this.actor.update(changes, { render: false })
     //changes = {}
@@ -220,7 +249,7 @@ export async function applyCharacterSheet(xmlDoc) {
     //     // One major difference between 5E and 6E is figured characteristics.
 
     //     // Physical Defense (PD) STR/5
-    //     const pdLevels = this.actor.system.characteristics.pd.max - CONFIG.HERO.characteristicDefaults5e.pd;
+    //     const pdLevels = this.actor.system.characteristics.pd.max - getPowerInfo({ xmlid: "PD", actor: this.actor }).base //CONFIG.HERO.characteristicDefaults5e.pd;
     //     const pdFigured = Math.round(this.actor.system.characteristics.str.max / 5)
     //     figuredChanges[`system.characteristics.pd.max`] = pdLevels + pdFigured
     //     figuredChanges[`system.characteristics.pd.value`] = pdLevels + pdFigured
@@ -229,7 +258,7 @@ export async function applyCharacterSheet(xmlDoc) {
     //     figuredChanges[`system.characteristics.pd.figured`] = pdFigured
 
     //     // Energy Defense (ED) CON/5
-    //     const edLevels = this.actor.system.characteristics.ed.max - CONFIG.HERO.characteristicDefaults5e.ed;
+    //     const edLevels = this.actor.system.characteristics.ed.max - getPowerInfo({ xmlid: "ED", actor: this.actor }).base //CONFIG.HERO.characteristicDefaults5e.ed;
     //     const edFigured = Math.round(this.actor.system.characteristics.con.max / 5)
     //     figuredChanges[`system.characteristics.ed.max`] = edLevels + edFigured
     //     figuredChanges[`system.characteristics.ed.value`] = edLevels + edFigured
@@ -239,28 +268,28 @@ export async function applyCharacterSheet(xmlDoc) {
 
 
     //     // Speed (SPD) 1 + (DEX/10)   can be fractional
-    //     const spdLevels = this.actor.system.characteristics.spd.max - CONFIG.HERO.characteristicDefaults5e.spd;
+    //     const spdLevels = this.actor.system.characteristics.spd.max - getPowerInfo({ xmlid: "SPD", actor: this.actor }).base //CONFIG.HERO.characteristicDefaults5e.spd;
     //     const spdFigured = 1 + parseFloat(parseFloat(this.actor.system.characteristics.dex.max / 10).toFixed(1))
     //     figuredChanges[`system.characteristics.spd.max`] = Math.floor(spdLevels + spdFigured)
     //     figuredChanges[`system.characteristics.spd.value`] = Math.floor(spdLevels + spdFigured)
     //     figuredChanges[`system.characteristics.spd.base`] = spdFigured //this.actor.system.characteristics.spd.base + spdFigured
     //     figuredChanges[`system.characteristics.spd.core`] = Math.floor(spdLevels + spdFigured)
     //     figuredChanges[`system.characteristics.spd.figured`] = spdFigured
-    //     figuredChanges[`system.characteristics.spd.realCost`] = Math.ceil((this.actor.system.characteristics.spd.max - spdFigured) * CONFIG.HERO.characteristicCosts5e.spd)
+    //     figuredChanges[`system.characteristics.spd.realCost`] = Math.ceil((this.actor.system.characteristics.spd.max - spdFigured) * getPowerInfo({ xmlid: "SPD", actor: this.actor }).cost) //CONFIG.HERO.characteristicCosts5e.spd)
 
 
     //     // Recovery (REC) (STR/5) + (CON/5)
-    //     const recLevels = this.actor.system.characteristics.rec.max - CONFIG.HERO.characteristicDefaults5e.rec;
+    //     const recLevels = this.actor.system.characteristics.rec.max - getPowerInfo({ xmlid: "REC", actor: this.actor }).base //CONFIG.HERO.characteristicDefaults5e.rec;
     //     const recFigured = Math.round(this.actor.system.characteristics.str.max / 5) + Math.round(this.actor.system.characteristics.con.max / 5)
     //     figuredChanges[`system.characteristics.rec.max`] = recLevels + recFigured
     //     figuredChanges[`system.characteristics.rec.value`] = recLevels + recFigured
     //     figuredChanges[`system.characteristics.rec.base`] = recFigured //this.actor.system.characteristics.rec.base + recFigured
     //     figuredChanges[`system.characteristics.rec.core`] = recLevels + recFigured
     //     figuredChanges[`system.characteristics.rec.figured`] = recFigured
-    //     figuredChanges[`system.characteristics.red.realCost`] = recLevels * CONFIG.HERO.characteristicCosts5e.red
+    //     figuredChanges[`system.characteristics.red.realCost`] = recLevels * getPowerInfo({ xmlid: "REC", actor: this.actor }).cost //CONFIG.HERO.characteristicCosts5e.red
 
     //     // Endurance (END) 2 x CON
-    //     const endLevels = this.actor.system.characteristics.end.max - CONFIG.HERO.characteristicDefaults5e.end;
+    //     const endLevels = this.actor.system.characteristics.end.max - getPowerInfo({ xmlid: "END", actor: this.actor }).base //CONFIG.HERO.characteristicDefaults5e.end;
     //     const endFigured = Math.round(this.actor.system.characteristics.con.max * 2)
     //     figuredChanges[`system.characteristics.end.max`] = endLevels + endFigured
     //     figuredChanges[`system.characteristics.end.value`] = endLevels + endFigured
@@ -270,14 +299,14 @@ export async function applyCharacterSheet(xmlDoc) {
 
 
     //     // Stun (STUN) BODY+(STR/2)+(CON/2) 
-    //     const stunLevels = this.actor.system.characteristics.stun.max - CONFIG.HERO.characteristicDefaults5e.stun;
+    //     const stunLevels = this.actor.system.characteristics.stun.max - getPowerInfo({ xmlid: "STUN", actor: this.actor }).base // CONFIG.HERO.characteristicDefaults5e.stun;
     //     const stunFigured = this.actor.system.characteristics.body.max + Math.round(this.actor.system.characteristics.str.max / 2) + Math.round(this.actor.system.characteristics.con.max / 2)
     //     figuredChanges[`system.characteristics.stun.max`] = stunLevels + stunFigured
     //     figuredChanges[`system.characteristics.stun.value`] = stunLevels + stunFigured
     //     figuredChanges[`system.characteristics.stun.base`] = stunFigured //this.actor.system.characteristics.stun.base + stunFigured
     //     figuredChanges[`system.characteristics.stun.core`] = stunLevels + stunFigured
     //     figuredChanges[`system.characteristics.stun.figured`] = stunFigured
-    //     figuredChanges[`system.characteristics.stun.realCost`] = stunLevels * CONFIG.HERO.characteristicCosts5e.stun
+    //     figuredChanges[`system.characteristics.stun.realCost`] = stunLevels * getPowerInfo({ xmlid: "STUN", actor: this.actor }).cost //CONFIG.HERO.characteristicCosts5e.stun
 
 
     //     // Base OCV & DCV = Attacker’s DEX/3
