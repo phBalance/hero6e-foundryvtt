@@ -847,7 +847,7 @@ HERO.powers = [
         "name": "Density Increase",
         "powerType": [
             "body-affecting",
-            "standard"
+            "standard", "defense"
         ],
         "perceivability": "obvious",
         "duration": "constant",
