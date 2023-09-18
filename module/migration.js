@@ -225,7 +225,7 @@ export async function migrateWorld() {
             } catch (e) {
                 console.log(e);
                 if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
-                    await ui.notifications.warn(`Migragtion failed for ${actor.name}.`)
+                    await ui.notifications.warn(`Migragtion failed for ${actor.name}. Recommend re-uploading from HDC.`)
                 }
             }
 

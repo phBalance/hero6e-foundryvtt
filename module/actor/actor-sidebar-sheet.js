@@ -394,7 +394,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
 
                 if (powerInfo.key.toLowerCase() == 'ed') {
-                    characteristic.notes = '5e figured STR/5'
+                    characteristic.notes = '5e figured CON/5'
                 }
 
                 if (powerInfo.key.toLowerCase() == 'spd') {
@@ -598,8 +598,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         // Get all applicable effects (from actor and all items)
         data.allTemporaryEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.duration.duration > 0 || o.statuses.size).sort((a, b) => a.name.localeCompare(b.name))
-        data.allConstantEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && (!o.flags?.XMLID || getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
-        data.allPersistentEffects = Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && o.flags?.XMLID && getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
+        data.allConstantEffects = this.actor.getConstantEffects() //Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && (!o.flags?.XMLID || getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
+        data.allPersistentEffects = this.actor.getPersistentEffects() //Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && o.flags?.XMLID && getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
 
 
         // Add defenses (without active effects) to actorEffects.
@@ -750,7 +750,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 result.toMessage({
                     speaker: ChatMessage.getSpeaker({ actor }),
-                    flavor: content + dataset.label.toUpperCase() + ' roll ' + (margin >= 0 ? 'succeeded' : 'failed') + ' by ' + Math.abs(margin),
+                    flavor: dataset.label.toUpperCase() + ` (${charRoll}-) roll ` + (margin >= 0 ? 'succeeded' : 'failed') + ' by ' + Math.abs(margin),
                     borderColor: margin >= 0 ? 0x00FF00 : 0xFF0000
                 })
             })

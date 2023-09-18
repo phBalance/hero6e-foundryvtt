@@ -416,43 +416,6 @@ async function migrateActorDefenseMovementData(actor) {
     return (itemsToDelete.length > 0)
 }
 
-// async function migrateWorld()
-// {
-//   for (let actor of game.actors.contents) {
-//     const updateData = migrateActorData(actor.system);
-//     if (!foundry.utils.isEmpty(updateData)) {
-//       HEROSYS.log(false, `Migrating Actor entity ${actor.name}.`);
-//       await actor.update(updateData);
-//     }
-//   }
-// }
-
-// function migrateActorData(actor)
-// {
-//   let updateData = {};
-//   //updateData["system.type"] = 'complication';
-//   return updateData;
-// }
-
-// Change Actor type from "character" to "pc"
-// async function migrateActorTypes() {
-//     const updates = [];
-//     for (let actor of game.actors) {
-//         if (actor.type !== "character") continue;
-
-//         if (actor.prototypeToken.disposition == CONST.TOKEN_DISPOSITIONS.FRIENDLY) {
-//             updates.push({ _id: actor.id, type: "pc" });
-//         }
-//         else {
-//             updates.push({ _id: actor.id, type: "npc" });
-//         }
-
-//     }
-//     if (updates.length > 0) {
-//         await Actor.updateDocuments(updates);
-//         ui.notifications.info(`${updates.length} actors migrated.`)
-//     }
-// }
 
 // Change Attack knockback to knockbackMultiplier
 async function migrateKnockback() {

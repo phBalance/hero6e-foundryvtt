@@ -143,13 +143,13 @@ export function convertToDcFromItem(item, options) {
                 dc += 2;
                 break
         }
-        tags.push({ value: `${dc}DC`, name: item.name })
+        tags.push({ value: `${dc.signedString()}DC`, name: item.name })
     } else
 
     // Normal Attack
     {
         dc += parseInt(item.system.dice);
-        let _tag = `${dc}DC`
+        let _tag = `${dc.signedString()}DC`
         switch (item.system.extraDice) {
             case 'pip':
                 dc += 0.2;
@@ -176,7 +176,7 @@ export function convertToDcFromItem(item, options) {
         // dc += (csl.dc * dcPerAp);
         // console.log(dcPerAp, dc, csl.dc)
 
-        tags.push({ value: `${csl.dc}DC`, name: csl.item.name })
+        tags.push({ value: `${csl.dc.signedString()}DC`, name: csl.item.name })
     }
 
     // Move By (add in velocity)
@@ -204,7 +204,7 @@ export function convertToDcFromItem(item, options) {
         velocityDC = Math.floor(options.velocity / divisor);
         if (velocityDC > 0) {
             dc += velocityDC;
-            tags.push({ value: `${velocityDC}DC`, name: 'Velocity', title: `Velocity (${options.velocity}) / ${divisor}` })
+            tags.push({ value: `${velocityDC.signedString()}DC`, name: 'Velocity', title: `Velocity (${options.velocity}) / ${divisor}` })
         }
     }
 
@@ -220,7 +220,7 @@ export function convertToDcFromItem(item, options) {
         let str5 = Math.floor(str / 5)
         dc += str5
         end += Math.max(1, Math.round(str / 10))
-        tags.push({ value: `${str5}DC`, name: 'STR', title: (item.system.XMLID === "MOVEBY") ? 'MoveBy is half STR' : '' })
+        tags.push({ value: `${str5.signedString()}DC`, name: 'STR', title: (item.system.XMLID === "MOVEBY") ? 'MoveBy is half STR' : '' })
 
     }
 
@@ -235,7 +235,7 @@ export function convertToDcFromItem(item, options) {
         let str5 = Math.floor(str / 5)
         dc += str5
         end += Math.max(1, Math.round(str / 10))
-        tags.push({ value: `${str5}DC`, name: 'TK' })
+        tags.push({ value: `${str5.signedString()}DC`, name: 'TK' })
     }
 
 
@@ -258,10 +258,10 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
-
-
-
-
+    if (item.actor?.statuses?.has("underwater")){
+        dc = Math.max(0, dc - 2);
+        tags.push({ value: `-2DC`, name: 'Underwater' });
+    }
 
     return { dc: dc, tags: tags, end: end };
 }

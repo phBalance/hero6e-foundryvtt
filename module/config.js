@@ -591,7 +591,7 @@ HERO.powers = [
     {
         "key": "REC",
         name: "Recovery",
-        base: 20,
+        base: 4,
         cost: 1,
         "powerType": [
             "characteristic"
@@ -847,7 +847,7 @@ HERO.powers = [
         "name": "Density Increase",
         "powerType": [
             "body-affecting",
-            "standard"
+            "standard", "defense"
         ],
         "perceivability": "obvious",
         "duration": "constant",

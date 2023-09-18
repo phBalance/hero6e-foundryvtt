@@ -696,6 +696,7 @@
                         <th class="left">{{localize "ActorSheet.Talent"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
+                        <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create talent" data-type="talent">
                                 <i class="fas fa-plus"></i> Add Talent</a>
@@ -711,6 +712,10 @@
                         <td class="left">{{item.name}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td class="left">{{item.system.description}}</td>
+                        <td>
+                            <input class="item-toggle" type="checkbox" {{checked item.system.active}}
+                                data-dtype="Boolean" />
+                        </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>

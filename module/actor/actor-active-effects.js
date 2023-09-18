@@ -117,7 +117,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static entangledEffect = {
         id: "entangled",
         name: "Entangled",
-        icon: "icons/svg/net.svg"
+        icon: "icons/svg/net.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: 0, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+            { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+        ]
     };
 
     static paralysisEffect = {
@@ -205,6 +209,47 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         icon: "systems/hero6efoundryvttv2/icons/aborted.svg"
     };
 
+    static underwaterEffect = {
+        id: "underwater",
+        name: "Underwater",
+        icon: "systems/hero6efoundryvttv2/icons/underwater.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: -2, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+        ]
+    };
+
+    static standingInWaterEffect = {
+        id: "standingInWater",
+        name: "Standing In Water",
+        icon: "systems/hero6efoundryvttv2/icons/standingInWater.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: -2, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+        ]
+    };
+
+    static holdingBreathEffect = {
+        id: "holdingBreath",
+        name: "Holding Breath",
+        icon: "systems/hero6efoundryvttv2/icons/holdingBreath.svg"
+    };
+
+    static grabEffect = {
+        id: "grab",
+        name: "Grabbed",
+        icon: "systems/hero6efoundryvttv2/icons/noun-wrestling-1061808.svg",
+        changes: [
+            { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
+        ]
+    };
+
+    // static entangledEffect = {
+    //     id: "entangled",
+    //     name: "Entangled",
+    //     icon: "systems/hero6efoundryvttv2/icons/noun-cuffs-5229404.svg",
+    //     changes: [
+    //         { key: "system.characteristics.dcv.value", value: -2, mode: CONST.ACTIVE_EFFECT_MODES.ADD },
+    //     ]
+    // };
 
 
     /** @override */
