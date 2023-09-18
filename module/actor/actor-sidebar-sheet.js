@@ -394,7 +394,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
 
                 if (powerInfo.key.toLowerCase() == 'ed') {
-                    characteristic.notes = '5e figured STR/5'
+                    characteristic.notes = '5e figured CON/5'
                 }
 
                 if (powerInfo.key.toLowerCase() == 'spd') {

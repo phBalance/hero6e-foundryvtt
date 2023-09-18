@@ -222,14 +222,14 @@ export async function applyCharacterSheet(xmlDoc) {
     
     if (this.actor.system.is5e) {
         // Base OCV & DCV = Attacker’s DEX/3
-        let value = Math.round(this.actor.system.characteristics.dex.max / 3)
+        let value = this.actor.getCharacteristicBase("OCV") 
         changes[`system.characteristics.ocv.value`] = value
         changes[`system.characteristics.ocv.max`] = value
         changes[`system.characteristics.dcv.value`] = value
         changes[`system.characteristics.dcv.max`] = value
 
         //Base Ego Combat Value = EGO/3
-        value = Math.round(this.actor.system.characteristics.ego.max / 3)
+        value = this.actor.getCharacteristicBase("OMCV") 
         changes[`system.characteristics.omcv.value`] = value
         changes[`system.characteristics.omcv.max`] = value
         changes[`system.characteristics.dmcv.value`] = value
@@ -651,7 +651,7 @@ export async function applyCharacterSheet(xmlDoc) {
     Hooks.call('hdcUpload')
 }
 
-
+// Move to Actor?
 export async function CalcActorRealAndActivePoints(actor) {
     // Calculate realCost & Active Points for bought as characteristics
     let realCost = 0;
@@ -692,7 +692,12 @@ export async function CalcActorRealAndActivePoints(actor) {
         _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
     }
     //HEROSYS.log(false, _splitCost)
-    await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false }, { hideChatMessage: true });
+    actor.system.realCost = realCost
+    actor.system.activePoints = activePoints
+    if (actor.id) {
+        await actor.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false }, { hideChatMessage: true });
+    }
+    
 }
 
 

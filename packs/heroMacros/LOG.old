@@ -1,7 +1,5 @@
-2023/09/17-20:28:55.434 29b0 Recovering log #596
-2023/09/17-20:28:55.440 29b0 Delete type=0 #596
-2023/09/17-20:28:55.440 29b0 Delete type=3 #595
-2023/09/17-20:37:52.206 80cc Level-0 table #600: started
-2023/09/17-20:37:52.206 80cc Level-0 table #600: 0 bytes OK
-2023/09/17-20:37:52.208 80cc Delete type=0 #598
-2023/09/17-20:37:52.208 80cc Manual compaction at level-0 from '!macros!54Q339fVYcYayFcH' @ 72057594037927935 : 1 .. '!macros!BE4ew1ACTogrkjWi' @ 0 : 0; will stop at (end)
+2023/09/18-09:26:35.776 87c4 Log #603: 0 ops saved to Table #604 OK
+2023/09/18-09:26:35.776 87c4 Archiving C:\Users\aaron\AppData\Local\FoundryVTT-dev\Data\systems\hero6efoundryvttv2\packs\heroMacros/000603.log: OK
+2023/09/18-09:26:35.786 87c4 Table #552: 2 entries OK
+2023/09/18-09:26:35.786 87c4 Archiving C:\Users\aaron\AppData\Local\FoundryVTT-dev\Data\systems\hero6efoundryvttv2\packs\heroMacros/MANIFEST-000601: OK
+2023/09/18-09:26:35.786 87c4 **** Repaired leveldb C:\Users\aaron\AppData\Local\FoundryVTT-dev\Data\systems\hero6efoundryvttv2\packs\heroMacros; recovered 1 files; 1829 bytes. Some data may have been lost. ****
