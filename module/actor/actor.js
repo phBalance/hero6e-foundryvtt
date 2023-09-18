@@ -55,7 +55,8 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async removeActiveEffect(activeEffect) {
-        const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id));
+        //const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id));
+        const existingEffect = Array.from(this.allApplicableEffects()).find(o => o.id === activeEffect.id)
         if (existingEffect) {
 
             if (activeEffect.id == "knockedOut") {
@@ -102,7 +103,6 @@ export class HeroSystem6eActor extends Actor {
             // Knocked Out overrides Stunned
             await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
         }
-
 
     }
 
@@ -832,7 +832,7 @@ export class HeroSystem6eActor extends Actor {
             let base = this.getCharacteristicBase(key);
             let levels = core - base;
             let cost = Math.round(levels * (powerInfo.cost || 0))
-           
+
             // 5e hack for fractional speed
             if (key === 'spd' && cost < 0) {
                 cost = Math.ceil(cost / 10);
@@ -849,6 +849,31 @@ export class HeroSystem6eActor extends Actor {
             await this.update(changes);
         }
         return
+    }
+
+    getActiveConstantItems() {
+        let results = []
+        for (let item of this.items.filter(o => o.system.active)) {
+            let duration = getPowerInfo({ xmlid: item.system.XMLID, actor: this })?.duration
+            if (duration === "constant") {
+                results.push(item)
+            } else {
+                const NONPERSISTENT = item.system.modifiers.find(o => o.XMLID === "NONPERSISTENT")
+                if (NONPERSISTENT) {
+                    results.push(item)
+                }
+            }
+
+        }
+        return results
+    }
+
+    getConstantEffects() {
+        return Array.from(this.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && (!o.flags?.XMLID || getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    getPersistentEffects() {
+        return Array.from(this.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && o.flags?.XMLID && getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
     }
 
 }

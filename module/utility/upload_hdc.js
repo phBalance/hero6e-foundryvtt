@@ -2917,6 +2917,7 @@ export async function createEffects(itemData, actor) {
         let activeEffect =
         {
             name: `${key.toUpperCase()}+${levels}`,
+            origin: itemData.uuid,
             //id: newPower.system.rules,
             icon: 'icons/svg/upgrade.svg',
             changes: [

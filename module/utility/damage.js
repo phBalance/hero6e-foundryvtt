@@ -258,7 +258,7 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
-    if (item.actor.statuses.has("underwater")){
+    if (item.actor?.statuses?.has("underwater")){
         dc = Math.max(0, dc - 2);
         tags.push({ value: `-2DC`, name: 'Underwater' });
     }

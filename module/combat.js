@@ -551,8 +551,21 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndTurn(combatant) {
-        //console.log("_onStartTurn", combatant.name)
+        console.log("_onStartTurn", combatant.name)
+
         super._onEndTurn(combatant)
+
+        // At the end of the Segment, any non-Persistent Powers, and any Skill Levels of any type, turn off for STUNNED actors.
+        if (this.turns?.[this.turn]?.segment != this.turns?.[this.turn - 1]?.segment) {
+            console.log("next segment")
+            for (let _combatant of this.combatants) {
+                if (_combatant.actor.statuses.has("stunned") || _combatant.actor.statuses.has("knockedout")) {
+                    for (const item of _combatant.actor.getActiveConstantItems()) {
+                        await item.toggle()
+                    }
+                }
+            }
+        }
 
         if (combatant.actor.statuses.has('stunned')) {
             const effect = combatant.actor.effects.contents.find(o => o.statuses.has('stunned'))
@@ -585,14 +598,18 @@ export class HeroSystem6eCombat extends Combat {
    * @protected
    */
     async _onEndRound() {
-        console.log("_onEndRound")
+        //console.log("_onEndRound")
+
+
         super._onEndRound();
+
+
 
         // Make really sure we only call at the end of the round
         if (this.current.round > 1 && this.current.turn === 0) {
             return this.PostSegment12();
         }
-        
+
 
     }
 

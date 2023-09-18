@@ -7,6 +7,7 @@
 - Initial support for GRABBED status. [#370](https://github.com/dmdorman/hero6e-foundryvtt/issues/370)
 - Improved ENTANGLE status. 0 DCV. 1/2 OCV.
 - Initial support for STUNONLY modifier. [#374](https://github.com/dmdorman/hero6e-foundryvtt/issues/374)
+- At the end of the Segment, any non-Persistent (Constant) Powers turn off for stunned actors. 
 
 
 # Version 3.0.33
