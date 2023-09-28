@@ -310,7 +310,7 @@ async function migrateActor_3_0_35(actor) {
             let changes = {};
 
             // LEVELS is now the raw number from HDC file and value/max are working numbers
-            if (item.system.LEVELS?.value) {
+            if (item.system.LEVELS?.value || item.system.LEVELS?.value === 0) {
                 changes['system.value'] = item.system.LEVELS.value
                 changes['system.max'] = item.system.LEVELS.max
                 changes['system.LEVELS'] = item.system.LEVELS.max

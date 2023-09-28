@@ -203,7 +203,7 @@ export class HeroSystem6eItem extends Item {
         if (this.system.end) {
             content += ` Estimated End: ${this.system.end}.`
         }
-        if (this.system.realCost) {
+        if (this.system.realCost && !isNaN(this.system.realCost)) {
             content += ` Total Cost: ${this.system.realCost} CP.`
         }
         content += `</div>`
@@ -1243,7 +1243,9 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
 
             case "HANDTOHANDATTACK":
-                system.description = `${system.ALIAS} ${system.value}d6`
+                const value1 = convertFromDC(this, convertToDcFromItem(this).dc)
+                //system.description = `${system.ALIAS} ${system.value}d6`
+                system.description = `${system.ALIAS} ${value1}`
                 break;
 
             case "KBRESISTANCE":
@@ -1451,6 +1453,13 @@ export class HeroSystem6eItem extends Item {
                 //     _desc = _desc.replace(re, "").trim();
                 // }
                 system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
+                
+                
+                const value2 = convertFromDC(this, convertToDcFromItem(this).dc)
+                if (value2) {
+                    system.description = ` ${value2} ${system.class || ""}`
+                }
+                
 
                 // Skill Roll?
                 if (type == 'skill') {
@@ -1608,7 +1617,9 @@ export class HeroSystem6eItem extends Item {
 
         // Active Points
         if (parseInt(system.realCost) != parseInt(system.activePoints) || this.getHdcParent()) {
-            system.description += " (" + system.activePoints + " Active Points);"
+            if (system.activePoints) {
+                system.description += " (" + system.activePoints + " Active Points);"
+            }
         }
 
         // MULTIPOWER slots typically include limitations
