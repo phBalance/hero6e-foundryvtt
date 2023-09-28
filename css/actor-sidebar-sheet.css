@@ -408,10 +408,15 @@ form.item-sheet h1.charname input {
   border: 1px dashed rgba(0,0,0,0.5);
   margin: 15px 0;
   padding: 5px;
+  max-width: 100%;
 }
 
 
 
 .herosystem6e.sheet.item tr.modifierAdder td:first-child {
   padding-left: 10px;
+}
+
+#item-attack-form-application {
+  max-width: 50%;
 }

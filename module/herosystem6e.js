@@ -352,12 +352,10 @@ Hooks.once("ready", async function () {
 
     if (foundry.utils.isNewerVersion(game.system.version.replace("-alpha", ""), lastMigration)) {
 
-        // Update lastMigration
-        await game.settings.set(game.system.id, 'lastMigration', game.system.version.replace("-alpha", ""))
-
         migrateWorld()
 
-        
+        // Update lastMigration
+        await game.settings.set(game.system.id, 'lastMigration', game.system.version.replace("-alpha", ""))
 
     }
 

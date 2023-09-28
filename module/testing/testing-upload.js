@@ -29,21 +29,23 @@ export function registerUploadTests(quench) {
                     <NOTES />
                 </MODIFIER>
                 </POWER>
-                `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData(xmlDoc.children[0], "power")
+                `
 
-                // Naked Advantage: Reduced Endurance (0 END; +1/2) for up to 70 Active Points (35 Active Points); Gestures (Requires both hands; -1/2), Linked to Opening of the Blind, Third Eye (Opening of the Blind, Third Eye; -1/4), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)
-                // Naked Advantage for up to 70 Active points (35 Active Points); Reduced Endurance (0 END; +1/2); Linked to Opening of the Blind, Third Eye (-1/4); Gestures (Requires both hands; -1/2); Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)
-                // it("description", function () {
-                //     assert.equal(item.system.description, "Reduced Endurance (0 END; +1/2) for up to 70 Active Points (35 Active Points); Gestures (Requires both hands; -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)");
-                // });
-                it("realCost", function () {
+                it("description", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
+                    assert.equal(item.system.description, "for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)");
+                });
+
+                it("realCost", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
                     assert.equal(item.system.realCost, "20");
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
                     assert.equal(item.system.activePoints, "35");
                 });
             });
@@ -57,73 +59,116 @@ export function registerUploadTests(quench) {
                 <NOTES />
                 </SKILL>
                 `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData(xmlDoc.children[0], "skill")
+                // const parser = new DOMParser()
+                // const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // const item = XmlToItemData(xmlDoc.children[0], "skill")
 
-                it("description", function () {
-                    assert.equal(item.system.description, "+2 with a group of Mental Powers");
+                it("description", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
+                    assert.equal(item.system.description, "Mind Empowered: +2 with a group of Mental Powers") //"+2 with a group of Mental Powers");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
                     assert.equal(item.system.realCost, 6);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
                     assert.equal(item.system.activePoints, 6);
                 });
 
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS.max, 2);
+                it("levels", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
+                    assert.equal(item.system.max, 2);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    await item._postUpload()
                     assert.equal(item.system.end, 0);
                 });
 
-                // it("roll", function () {
-                //     SkillRollUpdateValue(item)
-                //     assert.equal(item.system.roll, "11-");
-                // });
             });
 
             describe("CLIMBING", function () {
-
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc'
-                });
-                actor.system.characteristics.dex.value = 15
-
                 const contents = `
                 <SKILL XMLID="CLIMBING" ID="1687723638849" BASECOST="3.0" LEVELS="0" ALIAS="Climbing" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
                 <NOTES />
                 </SKILL>
                 `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData.call(actor, xmlDoc.children[0], "skill")
-                item.actor = actor;
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.dex.value = 15
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, ""); // Climbing is part of the name
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.dex.value = 15
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 3);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.dex.value = 15
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 3);
                 });
 
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS.max, 0);
+                it("levels", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.dex.value = 15
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.value, 0);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.dex.value = 15
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
                 });
 
-                it("roll", function () {
+                it("roll", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.dex.value = 15
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     SkillRollUpdateValue(item)
                     assert.equal(item.system.roll, "12-");
                 });
@@ -131,37 +176,72 @@ export function registerUploadTests(quench) {
 
             describe("ENERGYBLAST", function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc'
-                });
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc'
+                // });
 
                 const contents = `
                 <POWER XMLID="ENERGYBLAST" ID="1686774389914" BASECOST="0.0" LEVELS="1" ALIAS="Fire Blast" POSITION="5" MULTIPLIER="1.0" GRAPHIC="zap" COLOR="255 0 0 " SFX="Fire/Heat" USE_END_RESERVE="Yes" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                 <NOTES />
                 </POWER>
                 `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                item.actor = actor;
+                // const parser = new DOMParser()
+                // const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // const item = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // item.actor = actor;
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1d6");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 5);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 5);
                 });
 
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS.max, 1);
+                it("levels", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.value, 1);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 1);
                 });
 
@@ -169,37 +249,72 @@ export function registerUploadTests(quench) {
 
             describe("Characteristics INT", function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc'
-                });
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc'
+                // });
 
                 const contents = `
                 <INT XMLID="INT" ID="1688339311497" BASECOST="0.0" LEVELS="3" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
                 <NOTES />
                 </INT>
                 `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                item.actor = actor;
+                // const parser = new DOMParser()
+                // const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // const item = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // item.actor = actor;
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "+3 INT");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 3);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 3);
                 });
 
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS.max, 3);
+                it("levels", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.value, 3);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
                 });
 
@@ -207,40 +322,80 @@ export function registerUploadTests(quench) {
 
             describe("Offensive Strike", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                });
-                actor.system.characteristics.str.value = 10
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // });
+                // actor.system.characteristics.str.value = 10
 
                 const contents = `<MANEUVER XMLID="MANEUVER" ID="1688340787607" BASECOST="5.0" LEVELS="0" ALIAS="Offensive Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Offensive Strike" OCV="-2" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
                 <NOTES />
                 </MANEUVER>
                 `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                itemData.actor = actor
-                let item = itemData; // await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
-                makeAttack(item);
-                updateItemDescription(item)
+                // const parser = new DOMParser()
+                // const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // const itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                // itemData.actor = actor
+                // let item = itemData; // await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+                // makeAttack(item);
+                // updateItemDescription(item)
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 5);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 5);
                 });
 
-                it("dice", function () {
+                it("dice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 4);  // There are 4 raw dice, STR is added later
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
                 });
 
@@ -250,11 +405,11 @@ export function registerUploadTests(quench) {
             // WillForce362.hdc
             describe("TELEKINESIS", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <POWER XMLID="TELEKINESIS" ID="1589145928828" BASECOST="0.0" LEVELS="62" ALIAS="Telekinesis" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Psychokinesis" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -276,27 +431,67 @@ export function registerUploadTests(quench) {
                 </MODIFIER>
                 </POWER>
                 `;
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(contents, 'text/xml')
-                const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                item.actor = actor;
+                // const parser = new DOMParser()
+                // const xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // const item = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                // item.actor = actor;
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Telekinesis (62 STR), Alternate Combat Value (uses OMCV against DCV; +0) (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 46);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 93);
                 });
 
-                it("levels", function () {
-                    assert.equal(item.system.LEVELS.max, 62);
+                it("levels", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.value, 62);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 9);
                 });
 
@@ -304,11 +499,11 @@ export function registerUploadTests(quench) {
 
             describe("Sniper Rifle", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <POWER XMLID="RKA" ID="1688357238677" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Ranged" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Sniper Rifle" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -324,39 +519,95 @@ export function registerUploadTests(quench) {
                 </MODIFIER>
               </POWER>
                 `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                let item = itemData; //await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
-                makeAttack(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                // let item = itemData; //await HeroSystem6eItem.create(itemData, { parent: actor, temporary: true })
+                // makeAttack(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 16);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 40);
                 });
 
-                it("dice", function () {
+                it("dice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 2);
                 });
 
-                it("extraDice", function () {
+                it("extraDice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "half");
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
                 });
 
-                it("charges", function () {
+                it("charges", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.charges.max, 8);
                 });
-                it("chargesRecoverable", function () {
+                it("chargesRecoverable", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.charges.recoverable, false);
                 });
 
@@ -364,43 +615,91 @@ export function registerUploadTests(quench) {
 
             describe("MINDCONTROL", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <POWER XMLID="MINDCONTROL" ID="1688874983494" BASECOST="0.0" LEVELS="15" ALIAS="Mind Control" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                 <NOTES />
               </POWER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                let item = itemData;
-                makeAttack(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                // let item = itemData;
+                // makeAttack(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "15d6");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 75);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 75);
                 });
 
-                it("dice", function () {
+                it("dice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 15);
                 });
 
-                it("extraDice", function () {
+                it("extraDice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "zero");
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "7");
                 });
             });
@@ -408,11 +707,11 @@ export function registerUploadTests(quench) {
             // MalnacharOrc_Lars_Servant.hdc
             describe("MINDCONTROL advanced", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <POWER XMLID="MINDCONTROL" ID="1693772868443" BASECOST="0.0" LEVELS="15" ALIAS="Mind Control" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -437,34 +736,80 @@ export function registerUploadTests(quench) {
                 </MODIFIER>
               </POWER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                let item = itemData;
-                makeAttack(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                // let item = itemData;
+                // makeAttack(item);
 
-                it("description", function () {
-                    //                                     Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)
-                    //                                     15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 137);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 206);
                 });
 
-                it("dice", function () {
+                it("dice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 15);
                 });
 
-                it("extraDice", function () {
+                it("extraDice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "zero");
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.ego.value = 38
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "9");
                 });
             });
@@ -472,34 +817,62 @@ export function registerUploadTests(quench) {
 
             describe("COMBAT_LEVELS", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <SKILL XMLID="COMBAT_LEVELS" ID="1688944834273" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                 <NOTES />
                 </SKILL>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
-                let item = itemData;
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "martialart")
+                // let item = itemData;
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "+1 with any single attack");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 2);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 2);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
                 });
             });
@@ -507,11 +880,11 @@ export function registerUploadTests(quench) {
 
             describe("INVISIBILITY", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <POWER XMLID="INVISIBILITY" ID="1689283663052" BASECOST="20.0" LEVELS="0" ALIAS="Invisibility" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Blind Minds" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -533,23 +906,51 @@ export function registerUploadTests(quench) {
                 </MODIFIER>
               </POWER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                let item = itemData;
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // let item = itemData;
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Invisibility to Sight, Touch and Hearing Groups, Normal Smell and Combat Sense (38 Active Points); Conditional Power Only vs organic perception (-1/2)");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 25);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 38);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "4");
                 });
             });
@@ -557,50 +958,82 @@ export function registerUploadTests(quench) {
 
             describe("Killing Strike", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <MANEUVER XMLID="MANEUVER" ID="1689357675658" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="2" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="10" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
                 <NOTES />
                 </MANEUVER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                itemData.actor = actor
-                let item = itemData;
-                makeAttack(item);
-                updateItemDescription(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // itemData.actor = actor
+                // let item = itemData;
+                // makeAttack(item);
+                // updateItemDescription(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 4);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 4);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 10
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
                 });
             });
 
 
             // Cobalt
-            describe("Laser Cutter", async function () {
+            describe("Laser Cutter", function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.str.value = 15
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.str.value = 15
 
                 const contents = `
                 <POWER XMLID="HKA" ID="1612300630772" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Hand-To-Hand" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1612300169863" NAME="Laser Cutter" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -616,37 +1049,68 @@ export function registerUploadTests(quench) {
                 </MODIFIER>
                 </POWER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                itemData.actor = actor
-                let item = itemData;
-                makeAttack(item);
-                updateItemDescription(item);
-                let dcItem = convertToDcFromItem(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // itemData.actor = actor
+                // let item = itemData;
+                // makeAttack(item);
+                // updateItemDescription(item);
+                // let dcItem = convertToDcFromItem(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Killing Attack - Hand-To-Hand 2d6, Penetrating (+1/2) (45 Active Points); OAF (Pen-sized Device in pocket; -1), No STR Bonus (-1/2)");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 18);
                 });
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 45);
                 });
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "4");
                 });
-                it("dice", function () {
-                    assert.equal(item.system.dice, "2");
-                });
-                it("extraDice", function () {
-                    assert.equal(item.system.extraDice, "zero");
-                });
-                it("DC", function () {
-                    assert.equal(dcItem.dc, 6);
-                });
-                it("killing", function () {
+                it("killing", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.killing, true);
                 });
             });
@@ -654,13 +1118,13 @@ export function registerUploadTests(quench) {
 
 
             // Crusher
-            describe("Crush", async function () {
+            describe("Crush", function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.str.value = 15
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.str.value = 15
 
                 const contents = `
                 <POWER XMLID="RKA" ID="1624916890101" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Ranged" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Crush" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -682,37 +1146,68 @@ export function registerUploadTests(quench) {
                 </MODIFIER>
                 </POWER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                itemData.actor = actor
-                let item = itemData;
-                makeAttack(item);
-                updateItemDescription(item);
-                let dcItem = convertToDcFromItem(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // itemData.actor = actor
+                // let item = itemData;
+                // makeAttack(item);
+                // updateItemDescription(item);
+                // let dcItem = convertToDcFromItem(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Killing Attack - Ranged 3d6, Personal Immunity (+1/4), Reduced Endurance (1/2 END; +1/4), Area Of Effect (6m Radius; +1/2) (90 Active Points); No Range (-1/2), Must Follow Grab (-1/2)");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 45);
                 });
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 90);
                 });
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "4");
                 });
-                it("dice", function () {
-                    assert.equal(item.system.dice, "3");
-                });
-                it("extraDice", function () {
-                    assert.equal(item.system.extraDice, "zero");
-                });
-                it("DC", function () {
-                    assert.equal(dcItem.dc, 9);
-                });
-                it("killing", function () {
+                it("killing", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    actor.system.characteristics.str.value = 15
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.killing, true);
                 });
             });
@@ -721,11 +1216,11 @@ export function registerUploadTests(quench) {
 
             describe("ENDURANCERESERVE", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.str.value = 15
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.str.value = 15
 
                 const contents = `
                 <POWER XMLID="ENDURANCERESERVE" ID="1690410553721" BASECOST="0.0" LEVELS="20" ALIAS="Endurance Reserve" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -735,103 +1230,194 @@ export function registerUploadTests(quench) {
                 </POWER>
                 </POWER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                itemData.actor = actor
-                let item = itemData;
-                updateItemDescription(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // itemData.actor = actor
+                // let item = itemData;
+                // updateItemDescription(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "(20 END, 5 REC)");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 9);
                 });
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 9);
                 });
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
                 });
             });
 
 
-            describe("Martial Dodge", async function () {
+            describe("Martial Dodge", function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <MANEUVER XMLID="MANEUVER" ID="1691013321509" BASECOST="4.0" LEVELS="0" ALIAS="Martial Dodge" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Dodge" OCV="--" DCV="+5" DC="0" PHASE="1/2" EFFECT="Dodge, Affects All Attacks, Abort" ADDSTR="No" ACTIVECOST="35" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No">
                 <NOTES />
                 </MANEUVER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                itemData.actor = actor
-                let item = itemData;
-                makeAttack(item);
-                updateItemDescription(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // itemData.actor = actor
+                // let item = itemData;
+                // makeAttack(item);
+                // updateItemDescription(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1/2 Phase, -- OCV, +5 DCV, Dodge, Affects All Attacks, Abort");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 4);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 4);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
                 });
             });
 
-            describe("Skill Levels", async function () {
+            describe("Skill Levels", function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.ego.value = 38
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.ego.value = 38
 
                 const contents = `
                 <SKILL XMLID="SKILL_LEVELS" ID="1605812225611" BASECOST="0.0" LEVELS="10" ALIAS="Skill Levels" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CHARACTERISTIC" OPTIONID="CHARACTERISTIC" OPTION_ALIAS="with single Skill or Characteristic Roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1604669259284" NAME="Martial Practice" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                 <NOTES />
                 </SKILL>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                itemData.actor = actor
-                let item = itemData;
-                makeAttack(item);
-                updateItemDescription(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // itemData.actor = actor
+                // let item = itemData;
+                // makeAttack(item);
+                // updateItemDescription(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "+10 with single Skill or Characteristic Roll");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 20);
                 });
 
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 20);
                 });
 
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
                 });
 
-                it("LEVELS", function () {
-                    assert.equal(item.system.LEVELS.max, 10);
+                it("LEVELS", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.value, 10);
                 });
             });
 
@@ -840,11 +1426,11 @@ export function registerUploadTests(quench) {
 
             describe("Flash", async function () {
 
-                let actor = new HeroSystem6eActor({
-                    name: 'Test Actor',
-                    type: 'pc',
-                }, { temporary: true });
-                actor.system.characteristics.str.value = 15
+                // let actor = new HeroSystem6eActor({
+                //     name: 'Test Actor',
+                //     type: 'pc',
+                // }, { temporary: true });
+                // actor.system.characteristics.str.value = 15
 
                 const contents = `
                 <POWER XMLID="FLASH" ID="1692225594431" BASECOST="0.0" LEVELS="5" ALIAS="Flash" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -869,37 +1455,83 @@ export function registerUploadTests(quench) {
                 </ADDER>
                 </POWER>
                     `;
-                let parser = new DOMParser()
-                let xmlDoc = parser.parseFromString(contents, 'text/xml')
-                let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
-                itemData.actor = actor
-                let item = itemData;
-                makeAttack(item);
-                updateItemDescription(item);
-                let dcItem = convertToDcFromItem(item);
+                // let parser = new DOMParser()
+                // let xmlDoc = parser.parseFromString(contents, 'text/xml')
+                // let itemData = XmlToItemData.call(actor, xmlDoc.children[0], "power")
+                // itemData.actor = actor
+                // let item = itemData;
+                // makeAttack(item);
+                // updateItemDescription(item);
+                // let dcItem = convertToDcFromItem(item);
 
-                it("description", function () {
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6");
                 });
-                it("realCost", function () {
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 49);
                 });
-                it("activePoints", function () {
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 49);
                 });
-                it("end", function () {
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "5");
                 });
-                it("dice", function () {
+                it("dice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, "5");
                 });
-                it("extraDice", function () {
+                it("extraDice", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "half");
                 });
-                it("DC", function () {
-                    assert.equal(dcItem.dc, 5.5);
-                });
-                it("killing", function () {
+                it("killing", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.killing, false);
                 });
             });

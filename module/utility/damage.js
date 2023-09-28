@@ -135,6 +135,7 @@ export function convertToDcFromItem(item, options) {
     // Killing Attack
     if (item.system.killing) {
         dc += parseInt(item.system.dice) * 3;
+        //dc += parseInt(item.system.DC) || (parseInt(item.system.value) * 3)
         switch (item.system.extraDice) {
             case 'pip':
                 dc += 1;
@@ -143,6 +144,13 @@ export function convertToDcFromItem(item, options) {
                 dc += 2;
                 break
         }
+        // if (item.findModsByXmlid("PLUSONEPIP")) {
+        //     dc += 1;
+        // }
+
+        // if (item.findModsByXmlid("PLUSONEHALFDIE")) {
+        //     dc += 2;
+        // }
         tags.push({ value: `${dc.signedString()}DC`, name: item.name })
     } else
 

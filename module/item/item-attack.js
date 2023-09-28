@@ -114,7 +114,7 @@ export async function AttackOptions(item, event) {
 
     }
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
 
     if (game.settings.get("hero6efoundryvttv2", "hit locations") && !item.system.noHitLocations && !aoe) {
         data.useHitLoc = true;
@@ -214,8 +214,8 @@ export async function AttackAoeToHit(item, options) {
         dcvTargetNumber = 3
     }
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
-    const SELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "SELECTIVETARGET") : null;
+    const aoe = item.findModsByXmlid("AOE");
+    const SELECTIVETARGET = aoe?.adders ? aoe.ADDER.find(o => o.XMLID === "SELECTIVETARGET") : null;
 
     const hitCharacteristic = actor.system.characteristics.ocv.value;
     let tags = []
@@ -579,12 +579,12 @@ export async function AttackToHit(item, options) {
 
     }
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
-    const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
-    const SELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "SELECTIVETARGET") : null;
-    const NONSELECTIVETARGET = aoe?.adders ? aoe.adders.find(o => o.XMLID === "NONSELECTIVETARGET") : null;
+    const explosion = aoe?.adders ? aoe.ADDER.find(o => o.XMLID === "EXPLOSION") : null;
+    const SELECTIVETARGET = aoe?.adders ? aoe.ADDER.find(o => o.XMLID === "SELECTIVETARGET") : null;
+    const NONSELECTIVETARGET = aoe?.adders ? aoe.ADDER.find(o => o.XMLID === "NONSELECTIVETARGET") : null;
 
     const AoeAlwaysHit = aoe && !SELECTIVETARGET && !NONSELECTIVETARGET
 
@@ -637,7 +637,7 @@ export async function AttackToHit(item, options) {
     }
 
     // AUTOFIRE
-    const autofire = item.system.modifiers.find(o => o.XMLID === "AUTOFIRE")
+    const autofire = item.findModsByXmlid("AUTOFIRE")
     const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0
     if (autofire) {
         hitRollText = `Autofire ${autofire.OPTION_ALIAS.toLowerCase()}<br>` + hitRollText;
@@ -829,7 +829,7 @@ function getAttackTags(item) {
         attackTags.push({ name: item.system.OPTION_ALIAS })
     }
 
-    for (let mod of item.system.modifiers) {
+    for (let mod of (item.system.MODIFIER || [])) {
         switch (mod.XMLID) {
             case "AUTOFIRE":
                 const autoFireShots = parseInt(mod.OPTION_ALIAS.match(/\d+/))
@@ -849,7 +849,7 @@ function getAttackTags(item) {
                 attackTags.push({ name: `${mod.ALIAS || mod.XMLID}`, title: `${mod.OPTION_ALIAS || mod.XMLID}` });
         }
 
-        for (let adder of mod.adders) {
+        for (let adder of (mod.ADDER || [])) {
             switch (adder.XMLID) {
                 case "CONTINUOUSCONCENTRATION":
                     attackTags.push({ name: `Continuous`, title: `${adder.ALIAS || ""}` });
@@ -937,10 +937,10 @@ export async function _onRollDamage(event) {
 
     const damageDetail = await _calcDamage(damageResult, item, toHitData)
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
-    const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+    const explosion = aoe?.ADDER ? aoe.ADDER.find(o => o.XMLID === "EXPLOSION") : null;
 
 
     // Apply Damage button for specific targets
@@ -1084,10 +1084,10 @@ export async function _onApplyDamage(event) {
         let targetsArray = toHitData.targetIds.split(',');
 
         // If AOE then sort by distance from center
-        const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+        const aoe = item.findModsByXmlid("AOE");
         const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
             game.scenes.current.templates.find(o => o.user.id === game.user.id);
-        const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+        const explosion = aoe?.ADDER ? aoe.ADDER.find(o => o.XMLID === "EXPLOSION") : null;
 
         if (explosion) {
 
@@ -1143,10 +1143,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     let newTerms = JSON.parse(damageData.terms);
 
 
-    const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
+    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate = game.scenes.current.templates.find(o => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find(o => o.user.id === game.user.id);
-    const explosion = aoe?.adders ? aoe.adders.find(o => o.XMLID === "EXPLOSION") : null;
+    const explosion = aoe?.ADDER ? aoe.ADDER.find(o => o.XMLID === "EXPLOSION") : null;
 
     // Explosion
     if (explosion) {
@@ -1217,14 +1217,14 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
 
 
-    const avad = item.system.modifiers.find(q => q.XMLID === "AVAD");
+    const avad = item.findModsByXmlid( "AVAD");
 
     // Check for conditional defenses
     let ignoreDefenseIds = []
     const conditionalDefenses = token.actor.items.filter(o => (o.system.subType || o.system.type) === "defense" &&
         (o.system.active || o.effects.find(o => true)?.disabled === false) &&
         (
-            o.system.modifiers.find(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID)) ||
+            (o.system.MODIFIER || []).find(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID)) ||
             avad
         )
     )
@@ -1255,9 +1255,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.INPUT === "Mental") option.checked = true;
 
                 // Damage Negation
-                if (avad.INPUT.toUpperCase() == "PD" && defense.system.adders.find(o => o.XMLID === "PHYSICAL")) option.checked = true;
-                if (avad.INPUT.toUpperCase() == "ED" && defense.system.adders.find(o => o.XMLID === "ENERGY")) option.checked = true;
-                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.system.adders.find(o => o.XMLID === "MENTAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "PD" && defense.findModsByXmlid("PHYSICAL")) option.checked = true;
+                if (avad.INPUT.toUpperCase() == "ED" && defense.findModsByXmlid("ENERGY")) option.checked = true;
+                if (avad.INPUT.replace("Mental Defense", "MD").toUpperCase() == "MD" && defense.findModsByXmlid("MENTAL")) option.checked = true;
 
                 // Flash Defense
                 if (avad.INPUT.match(/flash/i) && defense.system.XMLID === "FLASHDEFENSE") option.checked = true;
@@ -1385,7 +1385,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // AVAD All or Nothing
     if (avad) {
-        const nnd = avad.adders.find(o => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
+        const nnd = avad.ADDER.find(o => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
         if (nnd && (damageData.defenseAvad === 0)) {
 
             // render card
@@ -1648,7 +1648,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
             }
 
             // DELAYEDRETURNRATE
-            let delayedReurnRate = item.system.modifiers.find(o => o.XMLID === "DELAYEDRETURNRATE");
+            let delayedReurnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
             if (delayedReurnRate) {
                 switch (delayedReurnRate.OPTIONID) {
                     case "MINUTE": activeEffect.duration.seconds = 60; break;
@@ -2020,7 +2020,7 @@ async function _calcDamage(damageResult, item, options) {
     // treated as a single attack).
     // This is super awkward with the current system.
     // KLUGE: Apply body defense twice.
-    let REDUCEDPENETRATION = item.system.modifiers.find(o => o.XMLID === "REDUCEDPENETRATION");
+    let REDUCEDPENETRATION = item.findModsByXmlid("REDUCEDPENETRATION");
     if (REDUCEDPENETRATION) {
         if (item.killing) {
             body = Math.max(0, body - options.resistantValue);
