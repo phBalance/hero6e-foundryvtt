@@ -34,6 +34,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     async getData() {
         const data = super.getData()
 
+        const equipmentWeightPercentage = (parseInt(game.settings.get(game.system.id, 'equipmentWeightPercentage'))) / 100.0
+
         // Alpha Testing (use to show/hide effects)
         data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
@@ -107,9 +109,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 // Standard Effect
                 if (item.system.USESTANDARDEFFECT) {
-                    let stun = parseInt(item.system.LEVELS?.value * 3)
-                    let body = parseInt(item.system.LEVELS?.value)
-                    if (item.system.adders.find(o => o.XMLID === "PLUSONEHALFDIE") || item.system.adders.find(o => o.XMLID === "PLUSONEPIP")) {
+                    let stun = parseInt(item.system.value * 3)
+                    let body = parseInt(item.system.value)
+                    if (item.findModsByXmlid("PLUSONEHALFDIE") || item.findModsByXmlid("PLUSONEPIP")) {
                         stun += 1;
                         body += 1;
                     }
@@ -219,11 +221,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             if (item.type == 'equipment') {
                 data.hasEquipment = true
+
+                item.system.weight = (parseFloat(item.system.WEIGHT || 0) * equipmentWeightPercentage).toFixed(1)
+                
                 if (item.system.active) {
-                    weightTotal += parseFloat(item.system.WEIGHT || 0)
+                    weightTotal += parseFloat(item.system.weight || 0)
                 }
-                if (parseFloat(item.system.WEIGHT || 0) > 0) {
-                    item.system.WEIGHTtext = parseFloat(item.system.WEIGHT) + "kg"
+                if (parseFloat(item.system.weight || 0) > 0) {
+                    item.system.WEIGHTtext = parseFloat(item.system.weight) + "kg"
                 }
                 else {
                     item.system.WEIGHTtext = ""
@@ -245,7 +250,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             // Charges
             if (parseInt(item.system.charges?.max || 0) > 0) {
-                const costsEnd = item.system.modifiers.find(o => o.XMLID == "COSTSEND")
+                const costsEnd = item.findModsByXmlid("COSTSEND")
                 if (item.system.endEstimate === 0 || !costsEnd) item.system.endEstimate = "";
                 item.system.endEstimate += ` [${parseInt(item.system.charges?.value || 0)}${item.system.charges?.recoverable ? "rc" : ""}]`;
                 item.system.endEstimate = item.system.endEstimate.trim();
@@ -470,11 +475,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         let defense = {}
 
         // Defense PD
-        let pdAttack = {
-            system: {
-                class: "physical"
-            }
-        }
+        const pdContentsAttack = `
+            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            </POWER>
+        `
+        const pdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack), { temporary: true })
+        await pdAttack._postUpload()
+
         let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTagsP] = determineDefense.call(this, this.actor, pdAttack)
         defense.PD = defenseValue
         defense.rPD = resistantValue
@@ -505,11 +512,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
         // Defense ED
-        let edAttack = {
-            system: {
-                class: "energy"
-            }
-        }
+        const edContentsAttack = `
+            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            </POWER>
+        `
+        const edAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edContentsAttack), { temporary: true })
+        await edAttack._postUpload()
+
         let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
         defense.ED = defenseValueE
         defense.rED = resistantValueE
@@ -540,11 +549,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
         // Defense MD
-        let mdAttack = {
-            system: {
-                class: "mental"
-            }
-        }
+        const mdContentsAttack = `
+            <POWER XMLID="EGOATTACK" ID="1695575160315" BASECOST="0.0" LEVELS="1" ALIAS="Mental Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <NOTES />
+            </POWER>
+        `
+        const mdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mdContentsAttack), { temporary: true })
+        await mdAttack._postUpload()
+
         let [defenseValueM, resistantValueM, impenetrableValueM, damageReductionValueM, damageNegationValueM, knockbackResistanceM, defenseTagsM] = determineDefense.call(this, this.actor, mdAttack)
         defense.MD = defenseValueM
         defense.rMD = resistantValueM
@@ -575,11 +587,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
 
         // Defense POWD
-        let drainAttack = {
-            system: {
-                class: "drain"
-            }
-        }
+        const drainContentsAttack = `
+            <POWER XMLID="FORCEFIELD" ID="1686527339658" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="2" MDLEVELS="3" POWDLEVELS="4">
+            <NOTES />
+            </POWER>
+        `
+        const drainAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(drainContentsAttack), { temporary: true })
+        await drainAttack._postUpload()
+
         let [defenseValuePOWD, resistantValuePOWD, impenetrableValuePOWD, damageReductionValuePOWD, damageNegationValuePOWD, knockbackResistancePOWD, defenseTagsPOWD] = determineDefense.call(this, this.actor, drainAttack)
         defense.POWD = defenseValuePOWD
         defense.rPOWD = resistantValuePOWD
@@ -934,11 +949,10 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 perceivable.push(`<b>${item.name}</b> ${item.system.description}`);
             }
         }
-        if (perceivable.length > 0)
-        {
+        if (perceivable.length > 0) {
             perceivable.sort();
             content += "<ul>";
-            for(let p of perceivable) {
+            for (let p of perceivable) {
                 content += `<li>${p}</li>`
             }
             content += "</ul>";
@@ -962,12 +976,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             return
         }
         const reader = new FileReader()
-        reader.onload = function (event) {
+        reader.onload = async function (event) {
             const contents = event.target.result
 
             const parser = new DOMParser()
             const xmlDoc = parser.parseFromString(contents, 'text/xml')
-            applyCharacterSheet.bind(this)(xmlDoc)
+            await this.actor.uploadFromXml(xmlDoc)
+            //applyCharacterSheet.bind(this)(xmlDoc)
+            ui.notifications.info(`${this.actor.name} upload complete`)
         }.bind(this)
         reader.readAsText(file)
     }

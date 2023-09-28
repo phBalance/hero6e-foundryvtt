@@ -116,10 +116,10 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         // Do not add to Totals: AFFECTS_PRIMARY="No" AFFECTS_TOTAL="No" 
 
         // For some reason updating LEVELS.value to a numeric 0 results in [object object].
-        if (formData['system.LEVELS.value'] ) {
-            formData['system.LEVELS.value'] = (parseInt(formData['system.LEVELS.value']) || 0).toString();
-            formData['system.LEVELS.max'] = (parseInt(formData['system.LEVELS.max']) || 0).toString();
-        }
+        // if (formData['system.LEVELS'] ) {
+        //     formData['system.LEVELS.value'] = (parseInt(formData['system.LEVELS.value']) || 0).toString();
+        //     formData['system.LEVELS.max'] = (parseInt(formData['system.LEVELS.max']) || 0).toString();
+        // }
 
         // The description may have changed
         //let description = this.item.system.description;
@@ -133,23 +133,22 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         //     this.item.update({ 'system.description': this.item.system.description })
         // }
 
+        await this.item._postUpload()
+
         // Recalc Item cost
-        let item = this.item;
-        if (await calcItemPoints(item)) {
-            if (item.system.realCost) { // Some items like Perception have NaN for cost (TODO: fix)
-                let changes = {}
-                changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
-                changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
-                changes['system.realCost'] = RoundFavorPlayerDown(item.system.realCost);
-                await this.item.update(changes);
-            }
-        }
-
-        updateItemDescription(this.item);
-        item.update({ 'system.description': item.system.description })
-
-        // Recalc Actor points
-        //CalcActorRealAndActivePoints(this.actor)
+        // let item = this.item;
+        // if (await this.item._postUpload()) {
+        //     let changes = {}
+        //     changes['system.description'] = item.system.description;
+        //     if (item.system.realCost) { // Some items like Perception have NaN for cost (TODO: fix)
+                
+        //         changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+        //         changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+        //         changes['system.realCost'] = RoundFavorPlayerDown(item.system.realCost);
+                
+        //     }
+        //     await this.item.update(changes);
+        // }
 
     }
 

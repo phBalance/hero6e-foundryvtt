@@ -179,60 +179,187 @@ export async function migrateWorld() {
     }
 
 
+    // if lastMigration < 3.0.35
+    // Overhaul of data structure.  Raw HDC upload (all uppercase props)
+    if (foundry.utils.isNewerVersion('3.0.35', lastMigration)) {
+        let d = new Date()
+        let queue = []
+
+        ui.notifications.info(`Migragrating actor data 3.0.35`)
+        for (const actor of game.actors.contents) {
+            queue.push(actor)
+        }
+
+        for (const scene of game.scenes.contents) {
+            for (const token of scene.tokens) {
+                if (!token.actorLink) {
+                    queue.push(token.actor)
+                }
+            }
+        }
+
+        while (queue.length > 0) {
+            if ((new Date() - d) > 4000) {
+                ui.notifications.info(`Migragrating actor data 3.0.35 (${queue.length} remaining)`)
+                d = new Date()
+            }
+            const actor = queue.pop()
+            await migrateActor_3_0_35(actor)
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
 
 
     if (true) {
-        await ui.notifications.info(`Migragrating actor data (Updating costs, END, and descriptions)`)
-        for (let actor of game.actors.contents) {
-            try {
-                let itemsChanged = false;
-                for (let item of actor.items) {
-                    let changes = {};
+        let d = new Date()
+        let queue = []
 
-                    // Calculate RealCost, ActivePoints, and END
-                    if (await calcItemPoints(item)) {
-                        if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
-                            changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
-                            changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
-                            changes['system.realCost'] = item.system.realCost;
-                        }
-                    }
+        ui.notifications.info(`Migragrating actor data`)
+        for (const actor of game.actors.contents) {
+            queue.push(actor)
+        }
 
-                    if (parseInt(item.system.activePoints) > 0) {
-                        let _oldDescription = item.system.description;
-                        let _oldEnd = parseInt(item.system.end || 0);
-                        updateItemDescription(item);
-                        if (_oldDescription != item.system.description) {
-                            changes['system.description'] = item.system.description;
-                        }
-                        if (_oldEnd != parseInt(item.system.end)) {
-                            changes['system.end'] = item.system.end;
-                        }
-                    }
-
-                    if (Object.keys(changes).length > 0) {
-                        await item.update(changes, { hideChatMessage: true })
-                        itemsChanged = true;
-                    }
-                }
-
-                if (itemsChanged) {
-                    await CalcActorRealAndActivePoints(actor);
-                }
-
-
-            } catch (e) {
-                console.log(e);
-                if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
-                    await ui.notifications.warn(`Migragtion failed for ${actor.name}. Recommend re-uploading from HDC.`)
+        for (const scene of game.scenes.contents) {
+            for (const token of scene.tokens) {
+                if (!token.actorLink) {
+                    queue.push(token.actor)
                 }
             }
+        }
 
+        while (queue.length > 0) {
+            if ((new Date() - d) > 4000) {
+                ui.notifications.info(`Migragrating actor data (${queue.length} remaining)`)
+                d = new Date()
+            }
+            const actor = queue.pop()
+            await migrateActorCostDescription(actor)
         }
 
     }
     await ui.notifications.info(`Migragtion complete.`)
+}
+
+async function migrateActorCostDescription(actor) {
+    try {
+        if (!actor) return false;
+        let itemsChanged = false;
+        for (let item of actor.items) {
+            let changes = {};
+
+            if (item.name === "Strike" && actor.name === "Kaden Monk") {
+                console.log(item)
+            }
+
+            let _oldDescription = item.system.description;
+            let _oldEnd = parseInt(item.system.end || 0);
+            let _oldActivePoints = item.system.activePoints
+
+            // Calculate RealCost, ActivePoints, and END
+            if (await item._postUpload() || !_oldActivePoints) { //calcItemPoints(item)) {
+                if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
+                    changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+                    changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+                    changes['system.realCost'] = item.system.realCost;
+                }
+            }
+
+            if (parseInt(item.system.activePoints) > 0) {
+                //let _oldDescription = item.system.description;
+                //let _oldEnd = parseInt(item.system.end || 0);
+
+                //updateItemDescription(item);
+
+                if (_oldDescription != item.system.description) {
+                    changes['system.description'] = item.system.description;
+                }
+                if (_oldEnd != parseInt(item.system.end)) {
+                    changes['system.end'] = item.system.end;
+                }
+            }
+
+            if (Object.keys(changes).length > 0) {
+                await item.update(changes, { hideChatMessage: true })
+                itemsChanged = true;
+            }
+        }
+
+        if (itemsChanged) {
+            await CalcActorRealAndActivePoints(actor);
+        }
+
+
+    } catch (e) {
+        console.log(e);
+        if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            await ui.notifications.warn(`Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`)
+        }
+    }
+}
+
+async function migrateActor_3_0_35(actor) {
+    try {
+        if (!actor) return
+        for (let item of actor.items) {
+
+            if (item.name === "Strike" && actor.name === "Kaden Monk") {
+                console.log(item)
+            }
+
+            let changes = {};
+
+            // LEVELS is now the raw number from HDC file and value/max are working numbers
+            if (item.system.LEVELS?.value || item.system.LEVELS?.value === 0) {
+                changes['system.value'] = item.system.LEVELS.value
+                changes['system.max'] = item.system.LEVELS.max
+                changes['system.LEVELS'] = item.system.LEVELS.max
+            }
+
+            // POWER, MODIFIER, ADDER
+            if (item.system.powers) {
+                for (const m of item.system.powers) {
+                    if (m.modifiers) {
+                        m.MODIFIER = m.modifiers
+                    }
+                    if (m.adders) {
+                        m.ADDER = m.adders
+                    }
+                }
+                changes['system.POWER'] = item.system.powers
+            }
+            if (item.system.modifiers) {
+                for (const m of item.system.modifiers) {
+                    if (m.modifiers) {
+                        m.MODIFIER = m.modifiers
+                    }
+                    if (m.adders) {
+                        m.ADDER = m.adders
+                    }
+                }
+                changes['system.MODIFIER'] = item.system.modifiers
+            }
+            if (item.system.adders) {
+                for (const m of item.system.adders) {
+                    if (m.modifiers) {
+                        m.MODIFIER = m.modifiers
+                    }
+                    if (m.adders) {
+                        m.ADDER = m.adders
+                    }
+                }
+                changes['system.ADDER'] = item.system.adders
+            }
+
+            await item.update(changes, { hideChatMessage: true })
+        }
+    }
+    catch (e) {
+        console.log(e);
+        if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            await ui.notifications.warn(`Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`)
+        }
+    }
 }
 
 async function migrateRemoveDuplicateDefenseMovementItems() {

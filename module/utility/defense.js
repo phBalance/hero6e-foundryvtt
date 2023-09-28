@@ -2,10 +2,13 @@ import { HEROSYS } from "../herosystem6e.js";
 import { getPowerInfo } from './util.js'
 
 function determineDefense(targetActor, attackItem, options) {
-    const avad = attackItem.system?.modifiers ? attackItem.system.modifiers.find(o => o.XMLID === "AVAD") : null;
+    if (!attackItem.findModsByXmlid) {
+        console.error("Invalid attackItem", attackItem)
+    }
+    const avad = attackItem.findModsByXmlid("AVAD")
     const attackType = avad ? "avad" : attackItem.system.class;
-    const piericng = parseInt(attackItem.system.piercing) || 0
-    const penetrating = parseInt(attackItem.system.penetrating) || 0
+    const piericng = parseInt(attackItem.system.piercing) || attackItem.findModsByXmlid("ARMORPIERCING")
+    const penetrating = parseInt(attackItem.system.penetrating) || attackItem.findModsByXmlid("PENETRATING")
 
     // The defenses that are active
     const activeDefenses = targetActor.items.filter(o => (o.system.subType === 'defense' || o.type === 'defense')
@@ -52,13 +55,13 @@ function determineDefense(targetActor, attackItem, options) {
 
     // PD bought as resistant
     for (const item of activeDefenses.filter(o => o.system.XMLID == "PD")) {
-        if (item.system.modifiers.find(o => o.XMLID == 'RESISTANT')) {
+        if (item.findModsByXmlid('RESISTANT')) {
             const levels = parseInt(item.system.LEVELS.value) || 0
             PD -= levels
             rPD += levels
         }
 
-        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes") {
+        if (item.system.ADD_MODIFIERS_TO_BASE) { //=== "Yes") {
             PD -= targetActor.system.characteristics.pd.core;
             rPD += targetActor.system.characteristics.pd.core;
         }
@@ -66,7 +69,7 @@ function determineDefense(targetActor, attackItem, options) {
 
     // ED bought as resistant
     for (const item of activeDefenses.filter(o => o.system.XMLID == "ED")) {
-        if (item.system.modifiers.find(o => o.XMLID == 'RESISTANT')) {
+        if (item.findModsByXmlid('RESISTANT')) {
             const levels = parseInt(item.system.LEVELS.value) || 0
             ED -= levels
             rED += levels
@@ -120,8 +123,8 @@ function determineDefense(targetActor, attackItem, options) {
 
         const xmlid = i.system.XMLID
 
-        // Newer solution is to use POWER item, instead of a sepearete defense item
-        if (!value && ["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
+        // Resistant Defenses
+        if (["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
             switch (attackType) {
                 case 'physical':
                     value = parseInt(i.system.PDLEVELS) || 0
@@ -220,10 +223,7 @@ function determineDefense(targetActor, attackItem, options) {
         let valueImp = 0
 
         // Hardened
-        let hardened = parseInt(i.system.hardened) || 0
-        if (!hardened) {
-            hardened = parseInt(i.system.modifiers.find(o => o.XMLID == "HARDENED")?.LEVELS) || 0
-        }
+        let hardened = parseInt(i.system.hardened || i.findModsByXmlid("HARDENED")?.LEVELS || 0)
 
 
         // Armor Piercing
@@ -232,10 +232,7 @@ function determineDefense(targetActor, attackItem, options) {
         }
 
         // Impenetrable
-        let impenetrable = parseInt(i.system.impenetrable) || 0
-        if (!impenetrable) {
-            impenetrable = parseInt(i.system.modifiers.find(o => o.XMLID == "IMPENETRABLE")?.LEVELS) || 0
-        }
+        let impenetrable = parseInt(i.system.impenetrable || i.findModsByXmlid("IMPENETRABLE")?.LEVELS || 0)
 
         // Penetrating
         if (penetrating <= impenetrable) {

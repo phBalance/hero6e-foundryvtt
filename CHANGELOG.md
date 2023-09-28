@@ -1,3 +1,8 @@
+# Version 3.0.35
+- Overhauled internal data structures.  This is an important step toward improved editing.  The previous editing is likely broken.
+- Fix for 5e HDC uploads and incorrect characteristics. [#382](https://github.com/dmdorman/hero6e-foundryvtt/issues/382) [#381](https://github.com/dmdorman/hero6e-foundryvtt/issues/381)
+- Encumbrance percentage [#388](https://github.com/dmdorman/hero6e-foundryvtt/issues/388)
+
 # Version 3.0.34
 - Initial support for HOLDING BREATH.  Disallows recovery.  No check ensure 1 END is spent per phase. [#364](https://github.com/dmdorman/hero6e-foundryvtt/issues/364) [#310](https://github.com/dmdorman/hero6e-foundryvtt/issues/310) 
 - Initial support for UNDERWATER and STANDING IN WATER. If either status -2 DCV.  UNDERWATER also includes -2 DC.  No check for SCUBA or breakfall. [#363](https://github.com/dmdorman/hero6e-foundryvtt/issues/363)
@@ -8,7 +13,7 @@
 - Improved ENTANGLE status. 0 DCV. 1/2 OCV.
 - Initial support for STUNONLY modifier. [#374](https://github.com/dmdorman/hero6e-foundryvtt/issues/374)
 - At the end of the Segment, any non-Persistent (Constant) Powers turn off for stunned actors.
-- Talents can now be toggled.  This was speficially implmented for Combat Luck. [#312](https://github.com/dmdorman/hero6e-foundryvtt/issues/312)
+- Talents can now be toggled.  This was specifically implemented for Combat Luck. [#312](https://github.com/dmdorman/hero6e-foundryvtt/issues/312)
 
 
 # Version 3.0.33

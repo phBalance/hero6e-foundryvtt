@@ -18,13 +18,18 @@
       </select>
     </div>
 
+
+    {{#if PENALTY_SKILL_LEVELS}}
     <div class="description"><b>{{PENALTY_SKILL_LEVELS.name}}
         {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
-      </b>: {{PENALTY_SKILL_LEVELS.system.description}}</div>
+      </b>: {{PENALTY_SKILL_LEVELS.system.description}}
+    </div>
+
     <div class="form-group">
       <label>Use Penalty Skill Levels</label>
-      <input class="item-toggle" name = "usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
+      <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
     </div>
+    {{/if}}
 
 
     {{/if}}

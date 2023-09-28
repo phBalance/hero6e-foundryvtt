@@ -1575,6 +1575,9 @@ export async function uploadPower(power, type) {
 
 // TODO: Can this be reworked to take only ITEM as a property?
 export function updateItemDescription(item) {
+    ui.notifications.warn(`Old updateItemDescription(${item.name}) called.`);
+    item.updateItemDescription()
+    return
     // Description (eventual goal is to largely match Hero Designer)
     // TODO: This should probably be moved to the sheets code
     // so when the power is modified in foundry, the power
@@ -1836,10 +1839,10 @@ export function updateItemDescription(item) {
             if (system.powers) {
                 const power = system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
                 if (power) {
-                    if (parseInt(system.LEVELS.value) === parseInt(system.LEVELS.max)) {
-                        system.description += ` (${system.LEVELS.max} END, ${power.LEVELS} REC)`
+                    if (parseInt(system.value) === parseInt(system.max)) {
+                        system.description += ` (${system.max} END, ${power.LEVELS} REC)`
                     } else {
-                        system.description += ` (${system.LEVELS.value}/${system.LEVELS.max} END, ${power.LEVELS} REC)`
+                        system.description += ` (${system.value}/${system.max} END, ${power.LEVELS} REC)`
                     }
                 }
             }
@@ -2085,13 +2088,13 @@ export function updateItemDescription(item) {
 
     // Endurance
     system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
-    const costsEnd = system.modifiers.find(o => o.XMLID == "COSTSEND")
-    const increasedEnd = system.modifiers.find(o => o.XMLID == "INCREASEDEND")
+    const costsEnd = item.findModsByXmlid("COSTSEND")
+    const increasedEnd = item.findModsByXmlid("INCREASEDEND")
     if (increasedEnd) {
         system.end *= parseInt(increasedEnd.OPTION.replace('x', ''))
     }
 
-    const reducedEnd = system.modifiers.find(o => o.XMLID == "REDUCEDEND") ||
+    const reducedEnd = item.findModsByXmlid("REDUCEDEND") ||
         (parent && parent.system.modifiers.find(o => o.XMLID == "REDUCEDEND"))
     if (reducedEnd && reducedEnd.OPTION === 'HALFEND') {
         system.end = RoundFavorPlayerDown((system._activePointsWithoutEndMods || system.activePoints) / 10)
@@ -2355,6 +2358,8 @@ function createPowerDescriptionModifier(modifier, item) {
 }
 
 export async function makeAttack(item) {
+    ui.notifications.warn(`Old makeAttack(${item.name}) called.`);
+
     const xmlid = item.system.XMLID || item.system.xmlid || item.system.rules
 
     // Confirm this is an attack
@@ -3057,6 +3062,11 @@ export async function updateItem(item) {
 
     // Guards
     if (!item) return;
+
+    await item._postUpload()
+
+    ui.notifications.warn(`Item editing may be limited.`);
+    return;
 
 
     let changed = false;

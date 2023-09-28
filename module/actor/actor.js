@@ -376,8 +376,8 @@ export class HeroSystem6eActor extends Actor {
         if (!asAction) {
             const enduranceReserve = this.items.find(o => o.system.XMLID === "ENDURANCERESERVE");
             if (enduranceReserve) {
-                let erValue = parseInt(enduranceReserve.system.LEVELS.value);
-                let erMax = parseInt(enduranceReserve.system.LEVELS.max);
+                let erValue = parseInt(enduranceReserve.system.value);
+                let erMax = parseInt(enduranceReserve.system.max);
                 if (enduranceReserve.system.powers) {
                     const power = enduranceReserve.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
                     if (power) {
@@ -542,6 +542,10 @@ export class HeroSystem6eActor extends Actor {
             for (const item of itemsWithWeight) {
                 encumbrance += parseFloat(item.system.WEIGHT);
             }
+
+            // encumbrancePercentage
+            const equipmentWeightPercentage = (parseInt(game.settings.get(game.system.id, 'equipmentWeightPercentage'))) / 100.0
+            encumbrance *= equipmentWeightPercentage
 
             // Is actor encumbered?
             let dcvDex = 0;
@@ -882,7 +886,7 @@ export class HeroSystem6eActor extends Actor {
     async uploadFromXml(xml) {
 
         // Convert xml string to xml document (if necessary)
-        if (typeof "xml" === "string") {
+        if (typeof xml === "string") {
             const parser = new DOMParser()
             xml = parser.parseFromString(xml.trim(), 'text/xml')
         }
@@ -907,11 +911,15 @@ export class HeroSystem6eActor extends Actor {
 
         const schemaKeys = Object.keys(_system)
 
-        for (const key of schemaKeys) {
-            if (!Object.keys(this.system).includes(key)) {
+        for (const key of Object.keys(this.system)) {
+            if (!schemaKeys.includes(key)) {
                 changes[`system.-=${key}`] = null
             }
         }
+        if (this.id) {
+            await this.update(changes)
+        }
+        changes = {}
 
         // Convert XML into JSON
         const heroJson = {};
@@ -921,7 +929,7 @@ export class HeroSystem6eActor extends Actor {
         // CHARACTERISTICS
         if (heroJson.CHARACTER?.CHARACTERISTICS) {
             for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
-                changes[`system.${key} `] = value
+                changes[`system.${key}`] = value
                 this.system[key] = value
                 //changes[`system.characteristics.${ key.toLowerCase() } `] = value
             }
@@ -934,14 +942,56 @@ export class HeroSystem6eActor extends Actor {
                 for (let system of heroJson.CHARACTER[itemTag]) {
                     //let system = Object.values(itemJson)[0]
                     let itemData = {
-                        name: system?.ALIAS || system?.XMLID || itemTag,  // simplistic name for now
+                        name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                         type: itemTag.toLowerCase().replace(/s$/, ''),
                         system: system,
                     }
-                    const item = await HeroSystem6eItem.create(itemData, { parent: this })
-                    await item._postUpload()
+                    if (this.id) {
+                        const item = await HeroSystem6eItem.create(itemData, { parent: this })
+                        await item._postUpload()
+                    } else {
+
+                        const item = await HeroSystem6eItem.create(itemData, { temporary: true, parent: this })
+                        //item.id = item.system.XMLID + item.system.POSITION
+                        this.items.set(item.system.XMLID + item.system.POSITION, item)
+                        await item._postUpload()
+                    }
+
                 }
                 delete heroJson.CHARACTER[itemTag]
+            }
+        }
+
+        // MANEUVERS
+        for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
+            const name = entry[0];
+            const v = entry[1];
+            const PHASE = v[0];
+            const OCV = v[1];
+            const DCV = v[2];
+            const EFFECT = v[3];
+            const attack = v[4];
+            const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
+            const itemData = {
+                name,
+                type: 'maneuver',
+                system: {
+                    PHASE,
+                    OCV,
+                    DCV,
+                    EFFECT,
+                    active: false,
+                    description: EFFECT,
+                    XMLID,
+                }
+            }
+
+            if (this.id) { // Skip if tempoary actor (Quench)
+                const item = await HeroSystem6eItem.create(itemData, { parent: this })
+                if (attack) {
+                    await item.makeAttack()
+                }
+                await item._postUpload()
             }
         }
 
@@ -1123,8 +1173,109 @@ export class HeroSystem6eActor extends Actor {
             await this.update(changes)
         }
 
+
+
+
+        // Combat Skill Levels - Enumerate attacks that use OCV
+        for (let cslItem of this.items.filter(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID))) {
+            let _ocv = 'ocv'
+            if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                _ocv = 'omcv'
+            }
+
+            let attacks = {}
+            let checkedCount = 0;
+
+            for (let attack of this.items.filter(o =>
+                (o.type == 'attack' || o.system.subType == 'attack') &&
+                o.system.uses === _ocv
+            )) {
+                let checked = false;
+
+                // Attempt to determine if attack should be checked
+                if (cslItem.system.OPTION_ALIAS.toLowerCase().indexOf(attack.name.toLowerCase()) > -1) {
+                    checked = true;
+                }
+
+                if (cslItem.system.OPTION === "HTH" && (
+                    attack.system.XMLID === "HTH" ||
+                    attack.system.XMLID === "HANDTOHANDATTACK" ||
+                    attack.system.XMLID === "HKA" ||
+                    attack.system.XMLID === "MANEUVER" ||
+                    (attack.type === "maneuver" && !attack.system.EFFECT?.match(/throw/i))
+                )
+                ) {
+                    checked = true;
+                }
+
+                if (cslItem.system.OPTION === "RANGED" && (
+                    attack.system.XMLID === "BLAST" ||
+                    attack.system.XMLID === "RKA"
+                )
+                ) {
+                    checked = true;
+                }
+
+                if (cslItem.system.OPTION === "ALL") {
+                    checked = true;
+                }
+
+                if (cslItem.system.OPTION === "TIGHT") {
+
+                    // up to three
+                    if (cslItem.system.XMLID === "COMBAT_LEVELS" && attack.type != "maneuver" && checkedCount < 3) {
+                        checked = true;
+                    }
+
+                    // up to three
+                    if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS" && checkedCount < 3) {
+                        checked = true;
+                    }
+                }
+
+
+                if (cslItem.system.OPTION === "BROAD") {
+
+                    // A large group is more than 3 but less than ALL (whatever that means).
+                    // For now just assume all (non maneuvers).
+                    if (cslItem.system.XMLID === "COMBAT_LEVELS" && attack.type != "maneuver") {
+                        checked = true;
+                    }
+
+                    // For mental BROAD is actuallyl equal to ALL
+                    if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+                        checked = true;
+                    }
+                }
+
+                attacks[attack.id] = checked;
+
+                if (checked) checkedCount++;
+
+            }
+
+            // Make sure at least one attacked is checked
+            // if (checkedCount === 0 && Object.keys(attacks).length > 0) {
+            //     attacks[Object.keys(attacks)[0]] = true;
+            // }
+
+            if (cslItem._id) {
+                await cslItem.update({ 'system.attacks': attacks }, { hideChatMessage: true });
+            }
+        }
+
+
         await this.calcCharacteristicsCost()
         await CalcActorRealAndActivePoints(this)
+
+        this.render()
+
+        // Update actor sidebar (needed when name is changed)
+        ui.actors.render()
+
+        //ui.notifications.info(`${this.name} upload complete`)
+
+        //Hooks.call('hdcUpload')
 
         return changed
 

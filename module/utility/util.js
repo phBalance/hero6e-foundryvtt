@@ -43,7 +43,8 @@ export function getPowerInfo(options) {
 
 
     if (powerInfo) {
-        powerInfo.xmlid = xmlid;
+        powerInfo.xmlid = xmlid
+        powerInfo.XMLID = xmlid
     }
 
     // LowerCase

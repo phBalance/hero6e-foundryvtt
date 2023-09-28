@@ -100,7 +100,7 @@
             {{!-- <th>Add</th> --}}
             </td>
         </tr>
-        {{#each item.system.adders as |adder XMLID|}}
+        {{#each item.system.ADDER as |adder XMLID|}}
         <tr>
             <td class="left">{{adder.ALIAS}}</td>
             <td>{{adder.BASECOST}}</td>
@@ -113,12 +113,12 @@
             <th>Cost</th>
             {{!-- <th>Add</th> --}}
         </tr>
-        {{#each item.system.modifiers as |mod id|}}
+        {{#each item.system.MODIFIER as |mod id|}}
         <tr>
             <td class="left">{{mod.ALIAS}}</td>
             <td>{{mod.BASECOST}}</td>
         </tr>
-        {{#each mod.adders as |adder id|}}
+        {{#each mod.ADDER as |adder id|}}
         <tr class="modifierAdder">
             <td class="left">{{adder.ALIAS}}</td>
             <td>{{adder.BASECOST}}</td>
