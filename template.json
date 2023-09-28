@@ -24,31 +24,38 @@
                 "characteristics": {
                     "str": {
                         "value": 10,
-                        "max": 10
+                        "max": 10,
+                        "type": "rollable"
                     },
                     "dex": {
                         "value": 10,
-                        "max": 10
+                        "max": 10,
+                        "type": "rollable"
                     },
                     "con": {
                         "value": 10,
-                        "max": 10
+                        "max": 10,
+                        "type": "rollable"
                     },
                     "int": {
                         "value": 10,
-                        "max": 10
+                        "max": 10,
+                        "type": "rollable"
                     },
                     "ego": {
                         "value": 10,
-                        "max": 10
+                        "max": 10,
+                        "type": "rollable"
                     },
                     "pre": {
                         "value": 10,
-                        "max": 10
+                        "max": 10,
+                        "type": "rollable"
                     },
                     "com": {
                         "value": 10,
-                        "max": 10
+                        "max": 10,
+                        "type": "rollable"
                     },
                     "ocv": {
                         "max": 3,
