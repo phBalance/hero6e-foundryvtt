@@ -228,7 +228,7 @@ export class HeroSystem6eItem extends Item {
 
             if (!this.actor.canAct(true)) return;
 
-            const costEndOnlyToActivate = item.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
+            const costEndOnlyToActivate = item.system.MODIFIER.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (costEndOnlyToActivate) {
                 let end = parseInt(this.system.end);
                 let value = parseInt(this.actor.system.characteristics.end.value);
@@ -468,6 +468,9 @@ export class HeroSystem6eItem extends Item {
             changed = true
         }
 
+        
+
+
         // CHARGES
         let CHARGES = this.findModsByXmlid("CHARGES")
         if (CHARGES) {
@@ -683,6 +686,8 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+
+        
 
 
 
@@ -1453,13 +1458,13 @@ export class HeroSystem6eItem extends Item {
                 //     _desc = _desc.replace(re, "").trim();
                 // }
                 system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
-                
-                
+
+
                 const value2 = convertFromDC(this, convertToDcFromItem(this).dc)
-                if (value2) {
+                if (value2 && !isNaN(value2)) {
                     system.description = ` ${value2} ${system.class || ""}`
                 }
-                
+
 
                 // Skill Roll?
                 if (type == 'skill') {
