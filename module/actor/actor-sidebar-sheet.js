@@ -34,6 +34,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     async getData() {
         const data = super.getData()
 
+        const equipmentWeightPercentage = (parseInt(game.settings.get(game.system.id, 'equipmentWeightPercentage'))) / 100.0
+
         // Alpha Testing (use to show/hide effects)
         data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
 
@@ -219,11 +221,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
             if (item.type == 'equipment') {
                 data.hasEquipment = true
+
+                item.system.weight = (parseFloat(item.system.WEIGHT || 0) * equipmentWeightPercentage).toFixed(1)
+                
                 if (item.system.active) {
-                    weightTotal += parseFloat(item.system.WEIGHT || 0)
+                    weightTotal += parseFloat(item.system.weight || 0)
                 }
-                if (parseFloat(item.system.WEIGHT || 0) > 0) {
-                    item.system.WEIGHTtext = parseFloat(item.system.WEIGHT) + "kg"
+                if (parseFloat(item.system.weight || 0) > 0) {
+                    item.system.WEIGHTtext = parseFloat(item.system.weight) + "kg"
                 }
                 else {
                     item.system.WEIGHTtext = ""

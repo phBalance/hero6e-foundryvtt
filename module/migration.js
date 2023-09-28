@@ -190,9 +190,8 @@ export async function migrateWorld() {
             queue.push(actor)
         }
 
-        for (const scene of game.scenes.contents)
-        {
-            for(const token of scene.tokens) {
+        for (const scene of game.scenes.contents) {
+            for (const token of scene.tokens) {
                 if (!token.actorLink) {
                     queue.push(token.actor)
                 }
@@ -200,7 +199,7 @@ export async function migrateWorld() {
         }
 
         while (queue.length > 0) {
-            if ( ( new Date() - d) > 4000) {
+            if ((new Date() - d) > 4000) {
                 ui.notifications.info(`Migragrating actor data 3.0.35 (${queue.length} remaining)`)
                 d = new Date()
             }
@@ -213,71 +212,94 @@ export async function migrateWorld() {
 
 
     if (true) {
-        await ui.notifications.info(`Migragrating actor data (Updating costs, END, and descriptions)`)
-        for (let actor of game.actors.contents) {
-            try {
-                let itemsChanged = false;
-                for (let item of actor.items) {
-                    let changes = {};
+        let d = new Date()
+        let queue = []
 
-                    let _oldDescription = item.system.description;
-                    let _oldEnd = parseInt(item.system.end || 0);
-                    let _oldActivePoints = item.system.activePoints
+        ui.notifications.info(`Migragrating actor data`)
+        for (const actor of game.actors.contents) {
+            queue.push(actor)
+        }
 
-                    // Calculate RealCost, ActivePoints, and END
-                    if (await item._postUpload() || !_oldActivePoints) { //calcItemPoints(item)) {
-                        if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
-                            changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
-                            changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
-                            changes['system.realCost'] = item.system.realCost;
-                        }
-                    }
-
-                    if (parseInt(item.system.activePoints) > 0) {
-                        //let _oldDescription = item.system.description;
-                        //let _oldEnd = parseInt(item.system.end || 0);
-
-                        //updateItemDescription(item);
-
-                        if (_oldDescription != item.system.description) {
-                            changes['system.description'] = item.system.description;
-                        }
-                        if (_oldEnd != parseInt(item.system.end)) {
-                            changes['system.end'] = item.system.end;
-                        }
-                    }
-
-                    if (Object.keys(changes).length > 0) {
-                        await item.update(changes, { hideChatMessage: true })
-                        itemsChanged = true;
-                    }
-                }
-
-                if (itemsChanged) {
-                    await CalcActorRealAndActivePoints(actor);
-                }
-
-
-            } catch (e) {
-                console.log(e);
-                if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
-                    await ui.notifications.warn(`Migragtion failed for ${actor.name}. Recommend re-uploading from HDC.`)
+        for (const scene of game.scenes.contents) {
+            for (const token of scene.tokens) {
+                if (!token.actorLink) {
+                    queue.push(token.actor)
                 }
             }
+        }
 
+        while (queue.length > 0) {
+            if ((new Date() - d) > 4000) {
+                ui.notifications.info(`Migragrating actor data (${queue.length} remaining)`)
+                d = new Date()
+            }
+            const actor = queue.pop()
+            await migrateActorCostDescription(actor)
         }
 
     }
     await ui.notifications.info(`Migragtion complete.`)
 }
 
+async function migrateActorCostDescription(actor) {
+    try {
+        let itemsChanged = false;
+        for (let item of actor.items) {
+            let changes = {};
+
+            if (item.name === "Offensive Strike" && actor.name === "Real Steel") {
+                console.log(item)
+            }
+
+            let _oldDescription = item.system.description;
+            let _oldEnd = parseInt(item.system.end || 0);
+            let _oldActivePoints = item.system.activePoints
+
+            // Calculate RealCost, ActivePoints, and END
+            if (await item._postUpload() || !_oldActivePoints) { //calcItemPoints(item)) {
+                if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
+                    changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+                    changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+                    changes['system.realCost'] = item.system.realCost;
+                }
+            }
+
+            if (parseInt(item.system.activePoints) > 0) {
+                //let _oldDescription = item.system.description;
+                //let _oldEnd = parseInt(item.system.end || 0);
+
+                //updateItemDescription(item);
+
+                if (_oldDescription != item.system.description) {
+                    changes['system.description'] = item.system.description;
+                }
+                if (_oldEnd != parseInt(item.system.end)) {
+                    changes['system.end'] = item.system.end;
+                }
+            }
+
+            if (Object.keys(changes).length > 0) {
+                await item.update(changes, { hideChatMessage: true })
+                itemsChanged = true;
+            }
+        }
+
+        if (itemsChanged) {
+            await CalcActorRealAndActivePoints(actor);
+        }
+
+
+    } catch (e) {
+        console.log(e);
+        if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            await ui.notifications.warn(`Migragtion failed for ${actor.name}. Recommend re-uploading from HDC.`)
+        }
+    }
+}
+
 async function migrateActor_3_0_35(actor) {
     try {
         for (let item of actor.items) {
-
-            if (item.name === "Into Its Body") {
-                console.log("Into Its Body")
-            }
 
             let changes = {};
 
@@ -292,7 +314,7 @@ async function migrateActor_3_0_35(actor) {
             if (item.system.powers) {
                 for (const m of item.system.powers) {
                     if (m.modifiers) {
-                       m.MODIFIER = m.modifiers
+                        m.MODIFIER = m.modifiers
                     }
                     if (m.adders) {
                         m.ADDER = m.adders
@@ -303,7 +325,7 @@ async function migrateActor_3_0_35(actor) {
             if (item.system.modifiers) {
                 for (const m of item.system.modifiers) {
                     if (m.modifiers) {
-                       m.MODIFIER = m.modifiers
+                        m.MODIFIER = m.modifiers
                     }
                     if (m.adders) {
                         m.ADDER = m.adders
@@ -314,7 +336,7 @@ async function migrateActor_3_0_35(actor) {
             if (item.system.adders) {
                 for (const m of item.system.adders) {
                     if (m.modifiers) {
-                       m.MODIFIER = m.modifiers
+                        m.MODIFIER = m.modifiers
                     }
                     if (m.adders) {
                         m.ADDER = m.adders

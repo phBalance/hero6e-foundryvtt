@@ -559,10 +559,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (this.name === "Offensive Strike") {
-            console.log("Offensive Strike")
-        }
-
         // ATTACK
         if (configPowerInfo && configPowerInfo.powerType?.includes("attack")) {
             let newValue = 'attack'
@@ -861,7 +857,7 @@ export class HeroSystem6eItem extends Item {
             costPerLevel = parseFloat(configPowerInfo?.costPerLevel)
         }
 
-        let levels = parseInt(system.LEVELS || 0)
+        let levels = parseInt(system.value) || 0
 
         let subCost = costPerLevel * levels
 

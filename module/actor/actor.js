@@ -543,6 +543,10 @@ export class HeroSystem6eActor extends Actor {
                 encumbrance += parseFloat(item.system.WEIGHT);
             }
 
+            // encumbrancePercentage
+            const equipmentWeightPercentage = (parseInt(game.settings.get(game.system.id, 'equipmentWeightPercentage'))) / 100.0
+            encumbrance *= equipmentWeightPercentage
+
             // Is actor encumbered?
             let dcvDex = 0;
             let move = 0;
