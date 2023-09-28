@@ -1,3 +1,6 @@
+# Version 3.0.37
+- Fixed requires a roll.
+
 # Version 3.0.36
 - Fixed characteristic roll.
 - Fixed requires a roll.

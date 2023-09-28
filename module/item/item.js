@@ -2324,6 +2324,7 @@ export async function RequiresASkillRollCheck(item) {
                     }
                 }
                 if (char) {
+                    item.actor.updateRollable(OPTION_ALIAS.toLowerCase())
                     value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
                     OPTION_ALIAS += ` ${value}-`;
                 } else {
