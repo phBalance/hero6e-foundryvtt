@@ -314,6 +314,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(this.actor.type)) {
             //     continue;
             // }
+            
+            this.actor.updateRollable(powerInfo.key.toLowerCase())
 
             let characteristic = { ...data.actor.system.characteristics[powerInfo.key.toLowerCase()] }
 
@@ -323,6 +325,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // if (!characteristic) {
             //     characteristic = {}
             // }
+
+            
 
             characteristic.key = powerInfo.key.toLowerCase();
             characteristic.value = parseInt(characteristic.value) || 0;
@@ -352,35 +356,35 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // if (isNaN(characteristic.cost)) {
             //     //characteristic.cost = "";
             // }
-            if (characteristic.type === 'rollable') {
-                if (characteristic.value === 0) {
-                    characteristic.roll = 8
-                } else if (characteristic.value <= 2) {
-                    characteristic.roll = 9
-                } else if (characteristic.value <= 7) {
-                    characteristic.roll = 10
-                } else if (characteristic.value <= 12) {
-                    characteristic.roll = 11
-                } else if (characteristic.value <= 17) {
-                    characteristic.roll = 12
-                } else if (characteristic.value <= 22) {
-                    characteristic.roll = 13
-                } else if (characteristic.value <= 27) {
-                    characteristic.roll = 14
-                } else if (characteristic.value <= 32) {
-                    characteristic.roll = 15
-                } else if (characteristic.value <= 37) {
-                    characteristic.roll = 16
-                } else if (characteristic.value <= 42) {
-                    characteristic.roll = 17
-                } else if (characteristic.value <= 47) {
-                    characteristic.roll = 18
-                } else if (characteristic.value <= 52) {
-                    characteristic.roll = 19
-                } else {
-                    characteristic.roll = 20
-                }
-            }
+            // if (characteristic.type === 'rollable') {
+            //     if (characteristic.value === 0) {
+            //         characteristic.roll = 8
+            //     } else if (characteristic.value <= 2) {
+            //         characteristic.roll = 9
+            //     } else if (characteristic.value <= 7) {
+            //         characteristic.roll = 10
+            //     } else if (characteristic.value <= 12) {
+            //         characteristic.roll = 11
+            //     } else if (characteristic.value <= 17) {
+            //         characteristic.roll = 12
+            //     } else if (characteristic.value <= 22) {
+            //         characteristic.roll = 13
+            //     } else if (characteristic.value <= 27) {
+            //         characteristic.roll = 14
+            //     } else if (characteristic.value <= 32) {
+            //         characteristic.roll = 15
+            //     } else if (characteristic.value <= 37) {
+            //         characteristic.roll = 16
+            //     } else if (characteristic.value <= 42) {
+            //         characteristic.roll = 17
+            //     } else if (characteristic.value <= 47) {
+            //         characteristic.roll = 18
+            //     } else if (characteristic.value <= 52) {
+            //         characteristic.roll = 19
+            //     } else {
+            //         characteristic.roll = 20
+            //     }
+            // }
 
             // Notes
             if (powerInfo.key === 'STR') {
