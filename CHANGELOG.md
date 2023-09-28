@@ -1,6 +1,6 @@
 # Version 3.0.35
 - Overhauled internal data structures.  This is an important step toward impoved editing.  The previous editing is likey broken.
-- Fix for 5e HDC uploads and incorrect characteristics. [#382](https://github.com/dmdorman/hero6e-foundryvtt/issues/382) 
+- Fix for 5e HDC uploads and incorrect characteristics. [#382](https://github.com/dmdorman/hero6e-foundryvtt/issues/382) [#381](https://github.com/dmdorman/hero6e-foundryvtt/issues/381)
 
 # Version 3.0.34
 - Initial support for HOLDING BREATH.  Disallows recovery.  No check ensure 1 END is spent per phase. [#364](https://github.com/dmdorman/hero6e-foundryvtt/issues/364) [#310](https://github.com/dmdorman/hero6e-foundryvtt/issues/310) 
