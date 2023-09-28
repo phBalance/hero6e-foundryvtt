@@ -243,11 +243,12 @@ export async function migrateWorld() {
 
 async function migrateActorCostDescription(actor) {
     try {
+        if (!actor) return false;
         let itemsChanged = false;
         for (let item of actor.items) {
             let changes = {};
 
-            if (item.name === "Offensive Strike" && actor.name === "Real Steel") {
+            if (item.name === "Strike" && actor.name === "Kaden Monk") {
                 console.log(item)
             }
 
@@ -292,14 +293,19 @@ async function migrateActorCostDescription(actor) {
     } catch (e) {
         console.log(e);
         if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
-            await ui.notifications.warn(`Migragtion failed for ${actor.name}. Recommend re-uploading from HDC.`)
+            await ui.notifications.warn(`Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`)
         }
     }
 }
 
 async function migrateActor_3_0_35(actor) {
     try {
+        if (!actor) return
         for (let item of actor.items) {
+
+            if (item.name === "Strike" && actor.name === "Kaden Monk") {
+                console.log(item)
+            }
 
             let changes = {};
 
@@ -350,6 +356,9 @@ async function migrateActor_3_0_35(actor) {
     }
     catch (e) {
         console.log(e);
+        if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            await ui.notifications.warn(`Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`)
+        }
     }
 }
 

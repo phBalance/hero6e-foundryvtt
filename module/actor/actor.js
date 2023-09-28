@@ -376,8 +376,8 @@ export class HeroSystem6eActor extends Actor {
         if (!asAction) {
             const enduranceReserve = this.items.find(o => o.system.XMLID === "ENDURANCERESERVE");
             if (enduranceReserve) {
-                let erValue = parseInt(enduranceReserve.system.LEVELS.value);
-                let erMax = parseInt(enduranceReserve.system.LEVELS.max);
+                let erValue = parseInt(enduranceReserve.system.value);
+                let erMax = parseInt(enduranceReserve.system.max);
                 if (enduranceReserve.system.powers) {
                     const power = enduranceReserve.system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
                     if (power) {

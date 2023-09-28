@@ -1839,10 +1839,10 @@ export function updateItemDescription(item) {
             if (system.powers) {
                 const power = system.powers.find(o => o.XMLID === "ENDURANCERESERVEREC");
                 if (power) {
-                    if (parseInt(system.LEVELS.value) === parseInt(system.LEVELS.max)) {
-                        system.description += ` (${system.LEVELS.max} END, ${power.LEVELS} REC)`
+                    if (parseInt(system.value) === parseInt(system.max)) {
+                        system.description += ` (${system.max} END, ${power.LEVELS} REC)`
                     } else {
-                        system.description += ` (${system.LEVELS.value}/${system.LEVELS.max} END, ${power.LEVELS} REC)`
+                        system.description += ` (${system.value}/${system.max} END, ${power.LEVELS} REC)`
                     }
                 }
             }
@@ -3062,6 +3062,11 @@ export async function updateItem(item) {
 
     // Guards
     if (!item) return;
+
+    await item._postUpload()
+
+    ui.notifications.warn(`Item editing may be limited.`);
+    return;
 
 
     let changed = false;

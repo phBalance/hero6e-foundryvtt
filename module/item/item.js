@@ -2108,18 +2108,18 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Double Knockback
-        let DOUBLEKB = this.findModsByXmlid("DOUBLEKB")
+        const DOUBLEKB = this.findModsByXmlid("DOUBLEKB")
         if (DOUBLEKB) {
             this.system.knockbackMultiplier = 2
         }
 
         // Explosion
-        let EXPLOSION = this.findModsByXmlid("EXPLOSION")
-        if (EXPLOSION) {
-            if (game.settings.get(game.system.id, 'alphaTesting')) {
-                ui.notifications.warn(`EXPLOSION not implemented during HDC upload of ${item.actor.name}`)
-            }
-        }
+        const EXPLOSION = this.findModsByXmlid("EXPLOSION")
+        // if (EXPLOSION) {
+        //     if (game.settings.get(game.system.id, 'alphaTesting')) {
+        //         ui.notifications.warn(`EXPLOSION not implemented during HDC upload of ${this.actor.name}`)
+        //     }
+        // }
 
         // Alternate Combat Value (uses OMCV against DCV)
         let ACV = this.findModsByXmlid("ACV")

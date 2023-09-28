@@ -23,7 +23,7 @@
     {{#if item.system.killing}}
     <span class="tag">killing</span>
     {{/if}}
-    {{#if (ne item.system.stunBodyDamage 'stunbody')}}
+    {{#if (and item.system.stunBodyDamage (ne item.system.stunBodyDamage 'stunbody'))}}
     <span class="tag">{{item.system.stunBodyDamage}}</span>
     {{/if}}
     {{#if item.system.piercing}}

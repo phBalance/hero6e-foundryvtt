@@ -170,7 +170,7 @@
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack")))
                     }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -271,7 +271,7 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "defense") (eq item.system.subType "defense")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -440,7 +440,7 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "movement")(eq item.system.subType "movement")) }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                    <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -495,7 +495,7 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                    <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -555,7 +555,7 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (eq item.type "equipment") }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.LEVELS.max)}} overMax{{/if}}{{#if (lt item.system.LEVELS.value item.system.LEVELS.max)}} underMax{{/if}}"
+                    <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
