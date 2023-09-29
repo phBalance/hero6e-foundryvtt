@@ -1,7 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.js"
 import { HeroSystem6eItem } from '../item/item.js'
 import { HEROSYS } from "../herosystem6e.js";
-import { updateItemDescription, CalcActorRealAndActivePoints } from "../utility/upload_hdc.js";
+import { updateItemDescription } from "../utility/upload_hdc.js";
 import { getPowerInfo, getCharactersticInfoArrayForActor } from "../utility/util.js"
 
 /**
@@ -1084,9 +1084,11 @@ export class HeroSystem6eActor extends Actor {
                 for (const attribute of child.attributes) {
                     switch (attribute.value) {
                         case "Yes":
+                        case "YES":
                             jsonChild[attribute.name] = true
                             break;
                         case "No":
+                        case "NO":
                             jsonChild[attribute.name] = false
                             break;
                         default:
@@ -1169,7 +1171,7 @@ export class HeroSystem6eActor extends Actor {
 
             // Rollable Characteristics
             this.updateRollable(key.toLowerCase())
-            
+
         }
 
         // Save changes
@@ -1270,8 +1272,8 @@ export class HeroSystem6eActor extends Actor {
 
 
         await this.calcCharacteristicsCost()
-        await CalcActorRealAndActivePoints(this)
-        //await this.CalcActorRealAndActivePoints()
+        //await CalcActorRealAndActivePoints(this)
+        await this.CalcActorRealAndActivePoints()
 
         this.render()
 
@@ -1324,33 +1326,48 @@ export class HeroSystem6eActor extends Actor {
         // Calculate realCost & Active Points for bought as characteristics
         let realCost = 0;
         let activePoints = 0;
-              
+
+        this.system.pointsDetail = {
+        }
+
         const powers = getCharactersticInfoArrayForActor(this);
         for (const powerInfo of powers) {
             realCost += parseInt(this.system.characteristics[powerInfo.key.toLowerCase()]?.realCost || 0);
         }
+        this.system.pointsDetail.characteristics = realCost
 
         activePoints = realCost
 
         // Add in costs for items
-        let _splitCost = {}
+        // let _splitCost = {}
         for (let item of this.items.filter(o => o.type != 'attack' && o.type != 'defense' && o.type != 'movement' && o.type != 'complication' && !o.system.duplicate)) {
-    
+
             // Equipment is typically purchased with money, not character points
             if (item.type != 'equipment') {
-                realCost += parseInt(item.system?.realCost || 0);
+                const _realCost = parseInt(item.system?.realCost || 0);
+
+                if (_realCost != 0) {
+                    realCost += _realCost
+                    this.system.pointsDetail[item.type] ??= 0
+                    this.system.pointsDetail[item.type] += parseInt(item.system?.realCost || 0);
+                }
+
             }
             activePoints += parseInt(item.system?.activePoints || 0);
-    
-            _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
+
+            //_splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
         }
-        
+
         this.system.realCost = realCost
         this.system.activePoints = activePoints
         if (this.id) {
-            await this.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false }, { hideChatMessage: true });
+            await this.update({
+                'system.points': realCost,
+                'system.activePoints': activePoints,
+                'system.pointsDetail': this.system.pointsDetail
+            }, { render: false }, { hideChatMessage: true });
         }
-        
+
     }
 
 }

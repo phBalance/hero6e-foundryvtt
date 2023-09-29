@@ -1,5 +1,9 @@
 # Version 3.0.38
 - Fix for multipower HDC upload
+- Added CP breakdown tooltip when you hover over CP.
+- Fix OMCV/DMCV cost to be 3.
+- Fix TRANSPORT_FAMILIARITY costs.
+
 
 # Version 3.0.37
 - Fixed requires a roll.

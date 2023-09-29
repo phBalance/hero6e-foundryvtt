@@ -519,7 +519,7 @@ HERO.powers = [
         "key": "OMCV",
         name: "Offensive Mental Combat Value",
         base: 3,
-        cost: 5,
+        cost: 3,
         "powerType": [
             "characteristic"
         ],
@@ -534,7 +534,7 @@ HERO.powers = [
         "key": "DMCV",
         name: "Defensive Mental Combat Value",
         base: 3,
-        cost: 5,
+        cost: 3,
         "powerType": [
             "characteristic"
         ],
@@ -1842,7 +1842,8 @@ HERO.powers = [
         "key": "TRANSPORT_FAMILIARITY",
         "powerType": [
             "skill"
-        ]
+        ],
+        "rollable": false
     },
     {
         "key": "TWO_WEAPON_FIGHTING_HTH",

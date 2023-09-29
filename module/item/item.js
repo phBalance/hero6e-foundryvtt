@@ -468,7 +468,7 @@ export class HeroSystem6eItem extends Item {
             changed = true
         }
 
-        
+
 
 
         // CHARGES
@@ -687,7 +687,7 @@ export class HeroSystem6eItem extends Item {
         }
 
 
-        
+
 
 
 
@@ -805,20 +805,19 @@ export class HeroSystem6eItem extends Item {
         if (!system.XMLID)
             return 0
 
-        // if (system.XMLID == "RKA")
-        //     HEROSYS.log(false, system.XMLID)
+
 
 
         // Everyman skills are free
         if (system.EVERYMAN) {
             system.basePointsPlusAdders = 0;
-            return { changed: old === system.basePointsPlusAdders };
+            return { changed: old != system.basePointsPlusAdders };
         }
 
         // Native Tongue
         if (system.NATIVE_TONGUE) {
             system.basePointsPlusAdders = 0;
-            return { changed: old === system.basePointsPlusAdders };
+            return { changed: old != system.basePointsPlusAdders };
         }
 
         // Check if we have CONFIG info about this power
@@ -884,18 +883,30 @@ export class HeroSystem6eItem extends Item {
         // Start adding up the costs
         let cost = baseCost + subCost
 
-
+        if (system.XMLID == "TRANSPORT_FAMILIARITY")
+            HEROSYS.log(false, system.XMLID)
 
         // ADDERS
         let adderCost = 0
-        if (system.ADDER) {
-            for (let adder of system.ADDER.filter(o => o.SELECTED)) {
-                let adderBaseCost = adder.baseCost //parseFloat(adder.BASECOST)
+        for (let adder of (system.ADDER || [])) {
+            let adderBaseCost = adder.baseCost //parseFloat(adder.BASECOST)
 
+            if (adder.SELECTED != false) { //TRANSPORT_FAMILIARITY
                 let adderLevels = Math.max(1, parseInt(adder.LEVELS))
                 adderCost += Math.ceil(adderBaseCost * adderLevels)  // ceil is for ENTANGLE +5 PD
             }
+
+            for (let adder2 of (adder.ADDER || [])) {
+                let adderBaseCost = adder2.baseCost
+
+                if (adder2.SELECTED != false) {
+                    let adderLevels = Math.max(1, parseInt(adder2.LEVELS))
+                    adderCost += Math.ceil(adderBaseCost * adderLevels)
+                }
+            }
+
         }
+
 
         // Categorized skills cost 2 per catory and +1 per each subcategory.
         // If no catagories selected then assume 3 pts
