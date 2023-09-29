@@ -815,7 +815,8 @@ export class HeroSystem6eItem extends Item {
             return 0
 
 
-
+        if (this.name === "Living Flame")
+            console.log(this.name)
 
         // Everyman skills are free
         if (system.EVERYMAN) {
@@ -1004,8 +1005,8 @@ export class HeroSystem6eItem extends Item {
                 }
             }
 
-            // No negative advantages
-            advantages += Math.max(0, _myAdvantage)
+            // No negative advantages and minimum is 1/4
+            advantages += Math.max(0.25, _myAdvantage)
             modifier.BASECOST_total = _myAdvantage
 
 

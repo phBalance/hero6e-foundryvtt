@@ -5,6 +5,8 @@
 - Fix TRANSPORT_FAMILIARITY costs.
 - Fix STRIKING_APPEARANCE (all) cost.
 - Fix MULTIPOWER costs and slots.
+- Fix minimum advantage cost +1/4.
+
 
 
 
