@@ -1271,6 +1271,7 @@ export class HeroSystem6eActor extends Actor {
 
         await this.calcCharacteristicsCost()
         await CalcActorRealAndActivePoints(this)
+        //await this.CalcActorRealAndActivePoints()
 
         this.render()
 
@@ -1316,6 +1317,40 @@ export class HeroSystem6eActor extends Actor {
                 characteristic.roll = 20
             }
         }
+    }
+
+
+    async CalcActorRealAndActivePoints() {
+        // Calculate realCost & Active Points for bought as characteristics
+        let realCost = 0;
+        let activePoints = 0;
+              
+        const powers = getCharactersticInfoArrayForActor(this);
+        for (const powerInfo of powers) {
+            realCost += parseInt(this.system.characteristics[powerInfo.key.toLowerCase()]?.realCost || 0);
+        }
+
+        activePoints = realCost
+
+        // Add in costs for items
+        let _splitCost = {}
+        for (let item of this.items.filter(o => o.type != 'attack' && o.type != 'defense' && o.type != 'movement' && o.type != 'complication' && !o.system.duplicate)) {
+    
+            // Equipment is typically purchased with money, not character points
+            if (item.type != 'equipment') {
+                realCost += parseInt(item.system?.realCost || 0);
+            }
+            activePoints += parseInt(item.system?.activePoints || 0);
+    
+            _splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
+        }
+        
+        this.system.realCost = realCost
+        this.system.activePoints = activePoints
+        if (this.id) {
+            await this.update({ 'system.points': realCost, 'system.activePoints': activePoints }, { render: false }, { hideChatMessage: true });
+        }
+        
     }
 
 }

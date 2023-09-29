@@ -1,3 +1,6 @@
+# Version 3.0.38
+- Fix for multipower HDC upload
+
 # Version 3.0.37
 - Fixed requires a roll.
 

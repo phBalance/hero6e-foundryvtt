@@ -1630,7 +1630,7 @@ export class HeroSystem6eItem extends Item {
         // MULTIPOWER slots typically include limitations
         let modifiers = (system.MODIFIER || []).filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })
         if (this.getHdcParent()) {
-            modifiers.push(...this.getHdcParent().system.modifiers.filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
+            modifiers.push(...this.getHdcParent().system.MODIFIER.filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
         }
 
         // Disadvantages sorted low to high
