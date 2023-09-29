@@ -228,7 +228,7 @@ export class HeroSystem6eItem extends Item {
 
             if (!this.actor.canAct(true)) return;
 
-            const costEndOnlyToActivate = item.system.MODIFIER.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
+            const costEndOnlyToActivate = (item.system.MODIFIER || []).find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (costEndOnlyToActivate) {
                 let end = parseInt(this.system.end);
                 let value = parseInt(this.actor.system.characteristics.end.value);
@@ -562,6 +562,13 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        if (this.system.XMLID == "STRIKING_APPEARANCE") {
+            switch (this.system.OPTION) {
+                case "ALL": this.system.costPerLevel = 3; break;
+                default: this.system.costPerLevel = 2;
+            }
+        }
+
         // ATTACK
         if (configPowerInfo && configPowerInfo.powerType?.includes("attack")) {
             let newValue = 'attack'
@@ -622,6 +629,8 @@ export class HeroSystem6eItem extends Item {
             changed = true
         }
 
+
+
         // BASECOST (children)
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
             if (this.system[key]) {
@@ -663,6 +672,7 @@ export class HeroSystem6eItem extends Item {
                             newValue = - Math.abs(parseFloat(child.BASECOST))
                             break;
 
+
                     }
 
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
@@ -685,7 +695,6 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-
 
 
 
@@ -883,9 +892,6 @@ export class HeroSystem6eItem extends Item {
         // Start adding up the costs
         let cost = baseCost + subCost
 
-        if (system.XMLID == "TRANSPORT_FAMILIARITY")
-            HEROSYS.log(false, system.XMLID)
-
         // ADDERS
         let adderCost = 0
         for (let adder of (system.ADDER || [])) {
@@ -942,7 +948,7 @@ export class HeroSystem6eItem extends Item {
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
         if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
             let advantages = 0
-            for (let modifier of system.MODIFIER.filter(o => !o.PRIVATE)) {
+            for (let modifier of (system.MODIFIER || []).filter(o => !o.PRIVATE)) {
                 advantages += modifier.baseCost //parseFloat(modifier.BASECOST)
             }
             cost = cost * advantages
@@ -1096,6 +1102,8 @@ export class HeroSystem6eItem extends Item {
         let _realCost = system.activePoints / (1 + limitations)
 
 
+        if (this.name === "Meteor Strike")
+            console.log(this.system.XMLID)
 
 
         // MULTIPOWER
@@ -1641,7 +1649,7 @@ export class HeroSystem6eItem extends Item {
         // MULTIPOWER slots typically include limitations
         let modifiers = (system.MODIFIER || []).filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })
         if (this.getHdcParent()) {
-            modifiers.push(...this.getHdcParent().system.MODIFIER.filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
+            modifiers.push(...(this.getHdcParent().system.MODIFIER || []).filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
         }
 
         // Disadvantages sorted low to high

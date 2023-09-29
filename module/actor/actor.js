@@ -1091,6 +1091,9 @@ export class HeroSystem6eActor extends Actor {
                         case "NO":
                             jsonChild[attribute.name] = false
                             break;
+                        case "GENERIC_OBJECT":
+                            jsonChild[attribute.name] = child.tagName.toUpperCase() // e.g. MULTIPOWER
+                            break;
                         default:
                             jsonChild[attribute.name] = attribute.value
                     }
