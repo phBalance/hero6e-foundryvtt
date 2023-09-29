@@ -1095,7 +1095,7 @@ export class HeroSystem6eActor extends Actor {
                             jsonChild[attribute.name] = child.tagName.toUpperCase() // e.g. MULTIPOWER
                             break;
                         default:
-                            jsonChild[attribute.name] = attribute.value
+                            jsonChild[attribute.name] = attribute.value.trim()
                     }
 
                 }

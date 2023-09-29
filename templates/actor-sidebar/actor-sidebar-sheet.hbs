@@ -170,7 +170,7 @@
                     {{#each items as |item id|}}
                     {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack")))
                     }}
-                    <tr class="item {{#if (gt item.system.LEVELS.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
+                    <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td>
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -495,6 +495,16 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
+                    {{#if (eq item.system.XMLID "LIST")}}
+                     <tr class="item">
+                        <td height="24"></td>
+                        <td></td>
+                        <td class="left">{{item.system.ALIAS}}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        </tr>
+                    {{else}}
                     <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                         data-item-id="{{item._id}}">
                         <td>
@@ -522,6 +532,7 @@
                             </a>
                         </td>
                     </tr>
+                    {{/if}}
                     {{/if}}
                     {{/each}}
 
