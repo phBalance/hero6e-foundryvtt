@@ -6,6 +6,7 @@
 - Fix STRIKING_APPEARANCE (all) cost.
 - Fix MULTIPOWER costs and slots.
 - Fix minimum advantage cost +1/4.
+- Fix cost for characteristics as a power.
 
 
 

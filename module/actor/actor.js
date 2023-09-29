@@ -1327,10 +1327,11 @@ export class HeroSystem6eActor extends Actor {
 
     async CalcActorRealAndActivePoints() {
         // Calculate realCost & Active Points for bought as characteristics
-        let realCost = 0;
-        let activePoints = 0;
+        let realCost = -parseInt(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        let activePoints = realCost;
 
         this.system.pointsDetail = {
+            DISAD_POINTS: realCost
         }
 
         const powers = getCharactersticInfoArrayForActor(this);

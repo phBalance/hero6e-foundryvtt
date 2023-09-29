@@ -622,8 +622,12 @@ export class HeroSystem6eItem extends Item {
 
         }
 
+        if (this.name === "Living Flame") {
+            console.log(this.name)
+        }
+
         // BASECOST
-        newValue = parseFloat(CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST || this.system.BASECOST || 0)
+        newValue = parseFloat(CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST || this.system.BASECOST || 0) // || parseFloat(configPowerInfo?.cost || 0)
         if (this.system.baseCost != newValue) {
             this.system.baseCost = newValue
             changed = true
@@ -851,7 +855,7 @@ export class HeroSystem6eItem extends Item {
         //const characteristicCosts = actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
         let costPerLevel = parseFloat(
             configPowerInfo?.costPerLevel ||
-            //characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
+            configPowerInfo?.cost ||
             system.costPerLevel ||
             baseCost
             || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
