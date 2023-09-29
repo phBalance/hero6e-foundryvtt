@@ -34,7 +34,7 @@ export function registerUploadTests(quench) {
                 it("description", async function () {
                     const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
                     await item._postUpload()
-                    assert.equal(item.system.description, "for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.  ; -1/4)");
+                    assert.equal(item.system.description, "for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)");
                 });
 
                 it("realCost", async function () {

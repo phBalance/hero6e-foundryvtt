@@ -17,7 +17,7 @@ export function registerFullTests(quench) {
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
-                    <CHARACTER_INFO CHARACTER_NAME="5e superhero" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                    <CHARACTER_INFO CHARACTER_NAME="5e superhero simple" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
                         <BACKGROUND />
                         <PERSONALITY />
                         <QUOTE />
@@ -102,7 +102,7 @@ export function registerFullTests(quench) {
                 it("name", async function () {
                     console.log("name")
                     await actor.uploadFromXml(contents)
-                    assert.equal(actor.name, "5e superhero");
+                    assert.equal(actor.name, "5e superhero simple");
                 });
 
                 it("str.max", async function () {

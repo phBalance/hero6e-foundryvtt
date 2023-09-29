@@ -1327,11 +1327,15 @@ export class HeroSystem6eActor extends Actor {
 
     async CalcActorRealAndActivePoints() {
         // Calculate realCost & Active Points for bought as characteristics
-        let realCost = -parseInt(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        let realCost = 0;
         let activePoints = realCost;
 
         this.system.pointsDetail = {
-            DISAD_POINTS: realCost
+            
+        }
+
+        if (this.name === "5e superhero simple") {
+            console.log(this.name)
         }
 
         const powers = getCharactersticInfoArrayForActor(this);
@@ -1361,6 +1365,10 @@ export class HeroSystem6eActor extends Actor {
 
             //_splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
         }
+
+        // DISAD_POINTS: realCost
+        const DISAD_POINTS = parseInt(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        this.system.pointsDetail.DISAD_POINTS = Math.min(DISAD_POINTS, this.system.pointsDetail?.complications || 0)
 
         this.system.realCost = realCost
         this.system.activePoints = activePoints

@@ -819,7 +819,7 @@ export class HeroSystem6eItem extends Item {
             return 0
 
 
-        if (this.name === "Living Flame")
+        if (this.system.XMLID === "TELEKINESIS")
             console.log(this.name)
 
         // Everyman skills are free
@@ -896,6 +896,9 @@ export class HeroSystem6eItem extends Item {
 
         // Start adding up the costs
         let cost = baseCost + subCost
+
+        if (this.system.XMLID === "TELEKINESIS")
+            console.log(this.name)
 
         // ADDERS
         let adderCost = 0
@@ -975,6 +978,10 @@ export class HeroSystem6eItem extends Item {
 
         let advantages = 0;
         let advantagesDC = 0;
+        let minAdvantage = 0;
+
+        if (this.system.XMLID === "TELEKINESIS")
+            console.log(this.name)
 
         for (let modifier of (system.MODIFIER || []).filter(o =>
             (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE)
@@ -1002,15 +1009,13 @@ export class HeroSystem6eItem extends Item {
             if (adders.length) {
                 for (let adder of adders) {
                     const adderBaseCost = parseFloat(adder.baseCost || 0)
-                    //if (adderBaseCost > 0) {
                     _myAdvantage += adderBaseCost;
-                    //HEROSYS.log(false, adder.XMLID, adderBaseCost)
-                    //}
+                    minAdvantage = 0.25
                 }
             }
 
             // No negative advantages and minimum is 1/4
-            advantages += Math.max(0.25, _myAdvantage)
+            advantages += Math.max(minAdvantage, _myAdvantage)
             modifier.BASECOST_total = _myAdvantage
 
 
@@ -1155,6 +1160,9 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
+        if (this.name === "Sniper Rifle") {
+            console.log(this.name)
+        }
 
         // This may be a slot in a framework if so get parent
         //const parent = this.parent()
@@ -1272,7 +1280,7 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
 
             case "HANDTOHANDATTACK":
-                const value1 = convertFromDC(this, convertToDcFromItem(this).dc)
+                const value1 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
                 //system.description = `${system.ALIAS} ${system.value}d6`
                 system.description = `${system.ALIAS} ${value1}`
                 break;
@@ -1465,7 +1473,10 @@ export class HeroSystem6eItem extends Item {
                     system.description += " and " + _singles.slice(-1);
                 }
 
-                system.description += ` ${system.ALIAS} ${system.value}d6 `;
+                const value3 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                system.description += ` ${system.ALIAS} ${value3}`
+
+                //system.description += ` ${system.ALIAS} ${system.value}d6 `;
                 break;
 
 
@@ -1486,7 +1497,9 @@ export class HeroSystem6eItem extends Item {
 
                 const value2 = convertFromDC(this, convertToDcFromItem(this).dc)
                 if (value2 && !isNaN(value2)) {
-                    system.description = ` ${value2} ${system.class || ""}`
+                    if (system.description.indexOf(value2) === -1) {
+                        system.description = ` ${value2} ${system.class || ""}`
+                    }
                 }
 
 
@@ -1562,7 +1575,7 @@ export class HeroSystem6eItem extends Item {
                         }
                         break;
                     case "PLUSONEHALFDIE":
-                        system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
+                        //system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
                         break;
                     case "RIDINGANIMALS":
                         if (adder.SELECTED) {
