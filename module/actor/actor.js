@@ -948,13 +948,13 @@ export class HeroSystem6eActor extends Actor {
                     }
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, { parent: this })
-                        await item._postUpload()
+                        await item._postUpload(true)
                     } else {
 
                         const item = await HeroSystem6eItem.create(itemData, { temporary: true, parent: this })
                         //item.id = item.system.XMLID + item.system.POSITION
                         this.items.set(item.system.XMLID + item.system.POSITION, item)
-                        await item._postUpload()
+                        await item._postUpload(true)
                     }
 
                 }
@@ -991,7 +991,7 @@ export class HeroSystem6eActor extends Actor {
                 if (attack) {
                     await item.makeAttack()
                 }
-                await item._postUpload()
+                await item._postUpload(true)
             }
         }
 
@@ -1055,7 +1055,7 @@ export class HeroSystem6eActor extends Actor {
 
 
         // Set base values to HDC LEVELs and calculate costs of things.
-        await this._postUpload()
+        await this._postUpload(true)
         //await this._resetCharacteristicsFromHdc()
         //await this.calcCharacteristicsCost();
         //await CalcActorRealAndActivePoints(this) // move to Actor?
@@ -1132,7 +1132,7 @@ export class HeroSystem6eActor extends Actor {
         await this.update(changes)
     }
 
-    async _postUpload() {
+    async _postUpload(overrideValues) {
         const changes = {}
         let changed = false;
 
@@ -1153,20 +1153,31 @@ export class HeroSystem6eActor extends Actor {
         }
 
         for (const key of Object.keys(this.system.characteristics)) {
+            if (key === "running")
+                console.log(key)
             const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0)
             newValue += this.getCharacteristicBase(key)
             if (this.system.characteristics[key].max != newValue) {
-                changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
-                this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue)
+                if (this.id) {
+                    //changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
+                    await this.update({ [`system.characteristics.${key.toLowerCase()}.max`]: Math.floor(newValue) })
+                } else {
+                    this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue)
+                }
+
                 changed = true
             }
-            if (this.system.characteristics[key].value != newValue) {
-                changes[`system.characteristics.${key.toLowerCase()}.value`] = Math.floor(newValue)
-                this.system.characteristics[key.toLowerCase()].value = Math.floor(newValue)
+            if (this.system.characteristics[key].value != this.system.characteristics[key.toLowerCase()].max && overrideValues) {
+                if (this.id) {
+                    await this.update({ [`system.characteristics.${key.toLowerCase()}.value`]: this.system.characteristics[key.toLowerCase()].max })
+                    //changes[`system.characteristics.${key.toLowerCase()}.value`] = this.system.characteristics[key.toLowerCase()].max
+                } else {
+                    this.system.characteristics[key.toLowerCase()].value = this.system.characteristics[key.toLowerCase()].max
+                }
                 changed = true
             }
-            if (this.system.characteristics[key].core != newValue) {
+            if (this.system.characteristics[key].core != newValue && overrideValues) {
                 changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue
                 this.system.characteristics[key.toLowerCase()].core = newValue
                 changed = true
@@ -1181,6 +1192,11 @@ export class HeroSystem6eActor extends Actor {
         if (changed && this.id) {
             await this.update(changes)
         }
+
+        // Item Effects
+        // for (const item of this.items.contents) {
+        //     createEffects(item)
+        // }
 
 
 
@@ -1331,7 +1347,7 @@ export class HeroSystem6eActor extends Actor {
         let activePoints = realCost;
 
         this.system.pointsDetail = {
-            
+
         }
 
         if (this.name === "5e superhero simple") {

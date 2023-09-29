@@ -8,6 +8,9 @@
 - Fix minimum advantage cost +1/4.
 - Fix cost for characteristics as a power.
 - Fix LIST preventing HDC upload and improved layout within powers. [#318](https://github.com/dmdorman/hero6e-foundryvtt/issues/318)
+- Fix 5e COMBAT_LEVELS costs.
+- Fixed some of the 5e meters vs inches descriptions.
+- Fixed ActiveEffects for Characteristics, Movement, and Density Increase.
 
 
 # Version 3.0.37

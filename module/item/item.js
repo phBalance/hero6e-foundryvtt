@@ -487,6 +487,7 @@ export class HeroSystem6eItem extends Item {
             let newValue = 'defense'
             if (this.system.subType != newValue) {
                 this.system.subType = newValue
+                this.system.showToggle = true
                 changed = true
 
                 if (this.system.charges?.value > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
@@ -502,8 +503,12 @@ export class HeroSystem6eItem extends Item {
             let newValue = 'movement'
             if (this.system.subType != newValue) {
                 this.system.subType = newValue
+                this.system.showToggle = true
                 changed = true
             }
+
+
+
         }
 
         // SKILLS
@@ -524,14 +529,26 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
-            switch (this.system.OPTION) {
-                case "SINGLE": this.system.costPerLevel = 2; break;
-                case "TIGHT": this.system.costPerLevel = 3; break;
-                case "BROAD": this.system.costPerLevel = 5; break;
-                case "HTH": this.system.costPerLevel = 8; break;
-                case "RANGED": this.system.costPerLevel = 8; break;
-                case "ALL": this.system.costPerLevel = 10; break;
+            if (this?.actor?.system?.is5e) {
+                switch (this.system.OPTION) {
+                    case "SINGLE": this.system.costPerLevel = 2; break;
+                    case "TIGHT": this.system.costPerLevel = 3; break;
+                    case "DCV": this.system.costPerLevel = 5; break;
+                    case "HTH": this.system.costPerLevel = 5; break;
+                    case "RANGED": this.system.costPerLevel = 5; break;
+                    case "ALL": this.system.costPerLevel = 8; break;
+                }
+            } else {
+                switch (this.system.OPTION) {
+                    case "SINGLE": this.system.costPerLevel = 2; break;
+                    case "TIGHT": this.system.costPerLevel = 3; break;
+                    case "BROAD": this.system.costPerLevel = 5; break;
+                    case "HTH": this.system.costPerLevel = 8; break;
+                    case "RANGED": this.system.costPerLevel = 8; break;
+                    case "ALL": this.system.costPerLevel = 10; break;
+                }
             }
+
 
             // Make sure CSL's are defined
             this.system.csl = {}
@@ -735,7 +752,95 @@ export class HeroSystem6eItem extends Item {
         // Save changes
         if (changed && this.id) {
             await this.update({ 'system': this.system })
+
+
         }
+
+        // ACTIVE EFFECTS
+
+        if (configPowerInfo && configPowerInfo.powerType?.includes("movement") && this.id) {
+            let activeEffect = Array.from(this.effects)?.[0] || {}
+            activeEffect.name = `${this.system.XMLID} +${this.system.value}`
+            activeEffect.icon = 'icons/svg/upgrade.svg'
+            activeEffect.changes = [
+                {
+                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                    value: this.system.value,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+            ]
+            activeEffect.transfer = true
+
+            if (activeEffect.update) {
+                await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
+                await this.actor.update({ [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max })
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+            }
+        }
+
+
+        if (configPowerInfo?.powerType?.includes("characteristic") && this.id) {
+            let activeEffect = Array.from(this.effects)?.[0] || {}
+            activeEffect.name = `${this.system.XMLID} +${this.system.value}`
+            activeEffect.icon = 'icons/svg/upgrade.svg'
+            activeEffect.changes = [
+                {
+                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                    value: this.system.value,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+            ]
+            activeEffect.transfer = true
+
+            if (activeEffect.update) {
+                await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
+                await this.actor.update({ [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max })
+
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+            }
+        }
+
+        if (this.system.XMLID === "DENSITYINCREASE" && this.id) {
+            const strAdd = Math.floor(this.system.value) * 5
+            const pdAdd = Math.floor(this.system.value)
+            const edAdd = Math.floor(this.system.value)
+
+            let activeEffect = Array.from(this.effects)?.[0] || {}
+            activeEffect.name = `${this.system.XMLID} ${this.system.value}`
+            activeEffect.icon = 'icons/svg/upgrade.svg'
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.str.max",
+                    value: strAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.pd.max",
+                    value: pdAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.ed.max",
+                    value: edAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                }
+            ]
+            activeEffect.transfer = true
+
+            if (activeEffect.update) {
+                await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
+                await this.actor.update({ [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max })
+                await this.actor.update({ [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max })
+                await this.actor.update({ [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max })
+
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+            }
+
+        }
+
 
 
 
@@ -819,7 +924,7 @@ export class HeroSystem6eItem extends Item {
             return 0
 
 
-        if (this.system.XMLID === "TELEKINESIS")
+        if (this.system.XMLID === "RUNNING")
             console.log(this.name)
 
         // Everyman skills are free
@@ -896,6 +1001,12 @@ export class HeroSystem6eItem extends Item {
 
         // Start adding up the costs
         let cost = baseCost + subCost
+
+        if (system.XMLID === "FOLLOWER") {
+            cost = Math.ceil(parseInt(system.BASEPOINTS) / 5)
+            let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER))) + 1
+            cost *= multiplier
+        }
 
         if (this.system.XMLID === "TELEKINESIS")
             console.log(this.name)
@@ -1220,7 +1331,7 @@ export class HeroSystem6eItem extends Item {
             case "LEAPING":
             case "TELEPORTATION":
                 // Running +25m (12m/37m total)
-                system.description = system.ALIAS + " +" + system.value + "m"
+                system.description = system.ALIAS + " +" + system.value + (this.actor?.system?.is5e ? '"' : 'm')
                 break;
 
             case "TUNNELING":
@@ -1832,7 +1943,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                 }
 
-                const DOUBLEAREA = modifier?.adders.find(o => o.XMLID === "DOUBLEAREA");
+                const DOUBLEAREA = modifier?.ADDR.find(o => o.XMLID === "DOUBLEAREA");
                 if (DOUBLEAREA) {
                     levels *= (parseInt(DOUBLEAREA.LEVELS) * 2)
                 }
@@ -2280,6 +2391,8 @@ export class HeroSystem6eItem extends Item {
         // }
 
     }
+
+
 
 
 }

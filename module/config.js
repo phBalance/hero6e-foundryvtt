@@ -660,7 +660,6 @@ HERO.powers = [
             "movement"
         ],
         "costEnd": true,
-        "costPerLevel": 1,
         "ignoreFor": [
             "base2",
             "computer",
@@ -1398,6 +1397,14 @@ HERO.powers = [
         "name": "Positive Reputation",
         "costPerLevel": 0
     },
+    {
+        "key": "FOLLOWER",
+        "powerType": [
+            "talent"
+        ],
+        "name": "Follower",
+    },
+
     {
         "key": "CONTACT",
         "powerType": [
