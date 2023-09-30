@@ -484,8 +484,6 @@ export class HeroSystem6eItem extends Item {
 
         // DEFENSES
         if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
-            if (this.system.XMLID === "COMBAT_LUCK")
-                console.log(this.system.XMLID)
             let newValue = 'defense'
             if (this.system.subType != newValue) {
                 this.system.subType = newValue
@@ -932,8 +930,8 @@ export class HeroSystem6eItem extends Item {
             return 0
 
 
-        if (this.system.XMLID === "RUNNING")
-            console.log(this.name)
+        // if (this.system.XMLID === "RUNNING")
+        //     console.log(this.name)
 
         // Everyman skills are free
         if (system.EVERYMAN) {
@@ -1954,7 +1952,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                 }
 
-                const DOUBLEAREA = modifier?.ADDR.find(o => o.XMLID === "DOUBLEAREA");
+                const DOUBLEAREA = (modifier?.ADDER || []).find(o => o.XMLID === "DOUBLEAREA");
                 if (DOUBLEAREA) {
                     levels *= (parseInt(DOUBLEAREA.LEVELS) * 2)
                 }
