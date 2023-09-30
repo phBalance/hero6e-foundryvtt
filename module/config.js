@@ -519,7 +519,7 @@ HERO.powers = [
         "key": "OMCV",
         name: "Offensive Mental Combat Value",
         base: 3,
-        cost: 5,
+        cost: 3,
         "powerType": [
             "characteristic"
         ],
@@ -534,7 +534,7 @@ HERO.powers = [
         "key": "DMCV",
         name: "Defensive Mental Combat Value",
         base: 3,
-        cost: 5,
+        cost: 3,
         "powerType": [
             "characteristic"
         ],
@@ -660,7 +660,6 @@ HERO.powers = [
             "movement"
         ],
         "costEnd": true,
-        "costPerLevel": 1,
         "ignoreFor": [
             "base2",
             "computer",
@@ -1399,9 +1398,17 @@ HERO.powers = [
         "costPerLevel": 0
     },
     {
-        "key": "CONTACT",
+        "key": "FOLLOWER",
         "powerType": [
             "talent"
+        ],
+        "name": "Follower",
+    },
+
+    {
+        "key": "CONTACT",
+        "powerType": [
+            "perk"
         ],
         "name": "Contact",
         "costPerLevel": 1
@@ -1842,7 +1849,8 @@ HERO.powers = [
         "key": "TRANSPORT_FAMILIARITY",
         "powerType": [
             "skill"
-        ]
+        ],
+        "rollable": false
     },
     {
         "key": "TWO_WEAPON_FIGHTING_HTH",
@@ -2099,6 +2107,13 @@ HERO.powers5e = [
         duration: "Constant",
         costEnd: true,
         costPerLevel: 3 / 2
+    },
+
+    {
+        "key": "UNLUCK",
+        powerType: ["disadvantage"],
+        name: "Unluck",
+        costPerLevel: 5
     },
 
     

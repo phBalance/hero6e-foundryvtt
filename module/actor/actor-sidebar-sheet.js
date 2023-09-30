@@ -58,6 +58,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         let weightTotal = 0
         let priceTotal = 0
 
+        data.pointsTitle = ""
+        if (data.actor.system.pointsDetail) {
+            for (let [key, value] of Object.entries(data.actor.system.pointsDetail)) {
+                data.pointsTitle += `${key}: ${value}\n`
+            }
+        }
+
         // override actor.items (which is a map) to an array with some custom properties
         let items = []
         for (let item of data.actor.items) {
@@ -223,7 +230,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 data.hasEquipment = true
 
                 item.system.weight = (parseFloat(item.system.WEIGHT || 0) * equipmentWeightPercentage).toFixed(1)
-                
+
                 if (item.system.active) {
                     weightTotal += parseFloat(item.system.weight || 0)
                 }
@@ -314,7 +321,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             // if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(this.actor.type)) {
             //     continue;
             // }
-            
+
             this.actor.updateRollable(powerInfo.key.toLowerCase())
 
             let characteristic = { ...data.actor.system.characteristics[powerInfo.key.toLowerCase()] }
@@ -326,7 +333,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             //     characteristic = {}
             // }
 
-            
+
 
             characteristic.key = powerInfo.key.toLowerCase();
             characteristic.value = parseInt(characteristic.value) || 0;

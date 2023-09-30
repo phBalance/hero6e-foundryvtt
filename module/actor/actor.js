@@ -1,7 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.js"
 import { HeroSystem6eItem } from '../item/item.js'
 import { HEROSYS } from "../herosystem6e.js";
-import { updateItemDescription, CalcActorRealAndActivePoints } from "../utility/upload_hdc.js";
+import { updateItemDescription } from "../utility/upload_hdc.js";
 import { getPowerInfo, getCharactersticInfoArrayForActor } from "../utility/util.js"
 
 /**
@@ -946,15 +946,19 @@ export class HeroSystem6eActor extends Actor {
                         type: itemTag.toLowerCase().replace(/s$/, ''),
                         system: system,
                     }
+                    switch (system.XMLID) {
+                        case "FOLLOWER":
+                            itemData.name = "Followers"; break;
+                    }
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, { parent: this })
-                        await item._postUpload()
+                        await item._postUpload(true)
                     } else {
 
                         const item = await HeroSystem6eItem.create(itemData, { temporary: true, parent: this })
                         //item.id = item.system.XMLID + item.system.POSITION
                         this.items.set(item.system.XMLID + item.system.POSITION, item)
-                        await item._postUpload()
+                        await item._postUpload(true)
                     }
 
                 }
@@ -991,7 +995,7 @@ export class HeroSystem6eActor extends Actor {
                 if (attack) {
                     await item.makeAttack()
                 }
-                await item._postUpload()
+                await item._postUpload(true)
             }
         }
 
@@ -1055,7 +1059,7 @@ export class HeroSystem6eActor extends Actor {
 
 
         // Set base values to HDC LEVELs and calculate costs of things.
-        await this._postUpload()
+        await this._postUpload(true)
         //await this._resetCharacteristicsFromHdc()
         //await this.calcCharacteristicsCost();
         //await CalcActorRealAndActivePoints(this) // move to Actor?
@@ -1084,13 +1088,18 @@ export class HeroSystem6eActor extends Actor {
                 for (const attribute of child.attributes) {
                     switch (attribute.value) {
                         case "Yes":
+                        case "YES":
                             jsonChild[attribute.name] = true
                             break;
                         case "No":
+                        case "NO":
                             jsonChild[attribute.name] = false
                             break;
+                        case "GENERIC_OBJECT":
+                            jsonChild[attribute.name] = child.tagName.toUpperCase() // e.g. MULTIPOWER
+                            break;
                         default:
-                            jsonChild[attribute.name] = attribute.value
+                            jsonChild[attribute.name] = attribute.value.trim()
                     }
 
                 }
@@ -1127,7 +1136,7 @@ export class HeroSystem6eActor extends Actor {
         await this.update(changes)
     }
 
-    async _postUpload() {
+    async _postUpload(overrideValues) {
         const changes = {}
         let changed = false;
 
@@ -1148,20 +1157,31 @@ export class HeroSystem6eActor extends Actor {
         }
 
         for (const key of Object.keys(this.system.characteristics)) {
+            if (key === "running")
+                console.log(key)
             const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0)
             newValue += this.getCharacteristicBase(key)
             if (this.system.characteristics[key].max != newValue) {
-                changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
-                this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue)
+                if (this.id) {
+                    //changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
+                    await this.update({ [`system.characteristics.${key.toLowerCase()}.max`]: Math.floor(newValue) })
+                } else {
+                    this.system.characteristics[key.toLowerCase()].max = Math.floor(newValue)
+                }
+
                 changed = true
             }
-            if (this.system.characteristics[key].value != newValue) {
-                changes[`system.characteristics.${key.toLowerCase()}.value`] = Math.floor(newValue)
-                this.system.characteristics[key.toLowerCase()].value = Math.floor(newValue)
+            if (this.system.characteristics[key].value != this.system.characteristics[key.toLowerCase()].max && overrideValues) {
+                if (this.id) {
+                    await this.update({ [`system.characteristics.${key.toLowerCase()}.value`]: this.system.characteristics[key.toLowerCase()].max })
+                    //changes[`system.characteristics.${key.toLowerCase()}.value`] = this.system.characteristics[key.toLowerCase()].max
+                } else {
+                    this.system.characteristics[key.toLowerCase()].value = this.system.characteristics[key.toLowerCase()].max
+                }
                 changed = true
             }
-            if (this.system.characteristics[key].core != newValue) {
+            if (this.system.characteristics[key].core != newValue && overrideValues) {
                 changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue
                 this.system.characteristics[key.toLowerCase()].core = newValue
                 changed = true
@@ -1169,13 +1189,18 @@ export class HeroSystem6eActor extends Actor {
 
             // Rollable Characteristics
             this.updateRollable(key.toLowerCase())
-            
+
         }
 
         // Save changes
         if (changed && this.id) {
             await this.update(changes)
         }
+
+        // Item Effects
+        // for (const item of this.items.contents) {
+        //     createEffects(item)
+        // }
 
 
 
@@ -1270,7 +1295,8 @@ export class HeroSystem6eActor extends Actor {
 
 
         await this.calcCharacteristicsCost()
-        await CalcActorRealAndActivePoints(this)
+        //await CalcActorRealAndActivePoints(this)
+        await this.CalcActorRealAndActivePoints()
 
         this.render()
 
@@ -1316,6 +1342,70 @@ export class HeroSystem6eActor extends Actor {
                 characteristic.roll = 20
             }
         }
+    }
+
+
+    async CalcActorRealAndActivePoints() {
+        // Calculate realCost & Active Points for bought as characteristics
+        let realCost = 0;
+        let activePoints = realCost;
+
+        this.system.pointsDetail = {
+
+        }
+
+        if (this.name === "5e superhero simple") {
+            console.log(this.name)
+        }
+
+        const powers = getCharactersticInfoArrayForActor(this);
+        for (const powerInfo of powers) {
+            realCost += parseInt(this.system.characteristics[powerInfo.key.toLowerCase()]?.realCost || 0);
+        }
+        this.system.pointsDetail.characteristics = realCost
+
+        activePoints = realCost
+
+        // Add in costs for items
+        // let _splitCost = {}
+        for (let item of this.items.filter(o => o.type != 'attack' && o.type != 'defense' && o.type != 'movement' && o.type != 'complication' && !o.system.duplicate)) {
+
+            // Equipment is typically purchased with money, not character points
+            if (item.type != 'equipment') {
+                const _realCost = parseInt(item.system?.realCost || 0);
+
+                if (_realCost != 0) {
+                    realCost += _realCost
+                    this.system.pointsDetail[item.type] ??= 0
+                    this.system.pointsDetail[item.type] += parseInt(item.system?.realCost || 0);
+                }
+
+            }
+
+            activePoints += parseInt(item.system?.activePoints || 0);
+
+            //_splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
+        }
+
+        // DISAD_POINTS: realCost
+        const DISAD_POINTS = parseInt(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
+        const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0)
+        if (_disadPoints != 0) {
+            this.system.pointsDetail.MatchingDisads = -_disadPoints
+            realCost -= _disadPoints
+        }
+        
+
+        this.system.realCost = realCost
+        this.system.activePoints = activePoints
+        if (this.id) {
+            await this.update({
+                'system.points': realCost,
+                'system.activePoints': activePoints,
+                'system.pointsDetail': this.system.pointsDetail
+            }, { render: false }, { hideChatMessage: true });
+        }
+
     }
 
 }

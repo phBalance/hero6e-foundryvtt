@@ -228,7 +228,7 @@ export class HeroSystem6eItem extends Item {
 
             if (!this.actor.canAct(true)) return;
 
-            const costEndOnlyToActivate = item.system.MODIFIER.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
+            const costEndOnlyToActivate = (item.system.MODIFIER || []).find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (costEndOnlyToActivate) {
                 let end = parseInt(this.system.end);
                 let value = parseInt(this.actor.system.characteristics.end.value);
@@ -468,7 +468,7 @@ export class HeroSystem6eItem extends Item {
             changed = true
         }
 
-        
+
 
 
         // CHARGES
@@ -484,9 +484,12 @@ export class HeroSystem6eItem extends Item {
 
         // DEFENSES
         if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
+            if (this.system.XMLID === "COMBAT_LUCK")
+                console.log(this.system.XMLID)
             let newValue = 'defense'
             if (this.system.subType != newValue) {
                 this.system.subType = newValue
+                this.system.showToggle = true
                 changed = true
 
                 if (this.system.charges?.value > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
@@ -502,9 +505,18 @@ export class HeroSystem6eItem extends Item {
             let newValue = 'movement'
             if (this.system.subType != newValue) {
                 this.system.subType = newValue
+                this.system.showToggle = true
                 changed = true
             }
         }
+
+        // TALENTS
+        // if (this.type === "talent" || this.system.XMLID === "COMBAT_LUCK") {
+        //     if (this.system.active === undefined) {
+        //         this.system.active = true
+        //         changed = true
+        //     }
+        // }
 
         // SKILLS
         if (configPowerInfo && configPowerInfo.powerType?.includes("skill")) {
@@ -524,14 +536,26 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
-            switch (this.system.OPTION) {
-                case "SINGLE": this.system.costPerLevel = 2; break;
-                case "TIGHT": this.system.costPerLevel = 3; break;
-                case "BROAD": this.system.costPerLevel = 5; break;
-                case "HTH": this.system.costPerLevel = 8; break;
-                case "RANGED": this.system.costPerLevel = 8; break;
-                case "ALL": this.system.costPerLevel = 10; break;
+            if (this?.actor?.system?.is5e) {
+                switch (this.system.OPTION) {
+                    case "SINGLE": this.system.costPerLevel = 2; break;
+                    case "TIGHT": this.system.costPerLevel = 3; break;
+                    case "DCV": this.system.costPerLevel = 5; break;
+                    case "HTH": this.system.costPerLevel = 5; break;
+                    case "RANGED": this.system.costPerLevel = 5; break;
+                    case "ALL": this.system.costPerLevel = 8; break;
+                }
+            } else {
+                switch (this.system.OPTION) {
+                    case "SINGLE": this.system.costPerLevel = 2; break;
+                    case "TIGHT": this.system.costPerLevel = 3; break;
+                    case "BROAD": this.system.costPerLevel = 5; break;
+                    case "HTH": this.system.costPerLevel = 8; break;
+                    case "RANGED": this.system.costPerLevel = 8; break;
+                    case "ALL": this.system.costPerLevel = 10; break;
+                }
             }
+
 
             // Make sure CSL's are defined
             this.system.csl = {}
@@ -559,6 +583,13 @@ export class HeroSystem6eItem extends Item {
                 case "SINGLEMOVEMENT": this.system.costPerLevel = 2; break;
                 case "ALLMOVEMENT": this.system.costPerLevel = 3; break;
                 case "OVERALL": this.system.costPerLevel = 12; break;
+            }
+        }
+
+        if (this.system.XMLID == "STRIKING_APPEARANCE") {
+            switch (this.system.OPTION) {
+                case "ALL": this.system.costPerLevel = 3; break;
+                default: this.system.costPerLevel = 2;
             }
         }
 
@@ -615,12 +646,18 @@ export class HeroSystem6eItem extends Item {
 
         }
 
+        if (this.name === "Living Flame") {
+            console.log(this.name)
+        }
+
         // BASECOST
-        newValue = parseFloat(CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST || this.system.BASECOST || 0)
+        newValue = parseFloat(CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST || this.system.BASECOST || 0) // || parseFloat(configPowerInfo?.cost || 0)
         if (this.system.baseCost != newValue) {
             this.system.baseCost = newValue
             changed = true
         }
+
+
 
         // BASECOST (children)
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
@@ -663,6 +700,7 @@ export class HeroSystem6eItem extends Item {
                             newValue = - Math.abs(parseFloat(child.BASECOST))
                             break;
 
+
                     }
 
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
@@ -687,7 +725,6 @@ export class HeroSystem6eItem extends Item {
         }
 
 
-        
 
 
 
@@ -722,7 +759,95 @@ export class HeroSystem6eItem extends Item {
         // Save changes
         if (changed && this.id) {
             await this.update({ 'system': this.system })
+
+
         }
+
+        // ACTIVE EFFECTS
+
+        if (configPowerInfo && configPowerInfo.powerType?.includes("movement") && this.id) {
+            let activeEffect = Array.from(this.effects)?.[0] || {}
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`
+            activeEffect.icon = 'icons/svg/upgrade.svg'
+            activeEffect.changes = [
+                {
+                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                    value: this.system.value,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+            ]
+            activeEffect.transfer = true
+
+            if (activeEffect.update) {
+                await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
+                await this.actor.update({ [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max })
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+            }
+        }
+
+
+        if (configPowerInfo?.powerType?.includes("characteristic") && this.id) {
+            let activeEffect = Array.from(this.effects)?.[0] || {}
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`
+            activeEffect.icon = 'icons/svg/upgrade.svg'
+            activeEffect.changes = [
+                {
+                    key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
+                    value: this.system.value,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+            ]
+            activeEffect.transfer = true
+
+            if (activeEffect.update) {
+                await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
+                await this.actor.update({ [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max })
+
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+            }
+        }
+
+        if (this.system.XMLID === "DENSITYINCREASE" && this.id) {
+            const strAdd = Math.floor(this.system.value) * 5
+            const pdAdd = Math.floor(this.system.value)
+            const edAdd = Math.floor(this.system.value)
+
+            let activeEffect = Array.from(this.effects)?.[0] || {}
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`
+            activeEffect.icon = 'icons/svg/upgrade.svg'
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.str.max",
+                    value: strAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.pd.max",
+                    value: pdAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.ed.max",
+                    value: edAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                }
+            ]
+            activeEffect.transfer = true
+
+            if (activeEffect.update) {
+                await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
+                await this.actor.update({ [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max })
+                await this.actor.update({ [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max })
+                await this.actor.update({ [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max })
+
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+            }
+
+        }
+
 
 
 
@@ -773,6 +898,7 @@ export class HeroSystem6eItem extends Item {
                         type: CONFIG.HERO.powers.filter(o => o.powerType?.includes("characteristic")).map(o => o.key) ? "power" : itemTag.toLowerCase().replace(/s$/, ''),
                         system: system,
                     }
+
                     return itemData
                 }
             }
@@ -805,20 +931,20 @@ export class HeroSystem6eItem extends Item {
         if (!system.XMLID)
             return 0
 
-        // if (system.XMLID == "RKA")
-        //     HEROSYS.log(false, system.XMLID)
 
+        if (this.system.XMLID === "RUNNING")
+            console.log(this.name)
 
         // Everyman skills are free
         if (system.EVERYMAN) {
             system.basePointsPlusAdders = 0;
-            return { changed: old === system.basePointsPlusAdders };
+            return { changed: old != system.basePointsPlusAdders };
         }
 
         // Native Tongue
         if (system.NATIVE_TONGUE) {
             system.basePointsPlusAdders = 0;
-            return { changed: old === system.basePointsPlusAdders };
+            return { changed: old != system.basePointsPlusAdders };
         }
 
         // Check if we have CONFIG info about this power
@@ -842,7 +968,7 @@ export class HeroSystem6eItem extends Item {
         //const characteristicCosts = actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
         let costPerLevel = parseFloat(
             configPowerInfo?.costPerLevel ||
-            //characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
+            configPowerInfo?.cost ||
             system.costPerLevel ||
             baseCost
             || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
@@ -884,18 +1010,36 @@ export class HeroSystem6eItem extends Item {
         // Start adding up the costs
         let cost = baseCost + subCost
 
+        if (system.XMLID === "FOLLOWER") {
+            cost = Math.ceil(parseInt(system.BASEPOINTS) / 5)
+            let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER))) + 1
+            cost *= multiplier
+        }
 
+        if (this.system.XMLID === "TELEKINESIS")
+            console.log(this.name)
 
         // ADDERS
         let adderCost = 0
-        if (system.ADDER) {
-            for (let adder of system.ADDER.filter(o => o.SELECTED)) {
-                let adderBaseCost = adder.baseCost //parseFloat(adder.BASECOST)
+        for (let adder of (system.ADDER || [])) {
+            let adderBaseCost = adder.baseCost //parseFloat(adder.BASECOST)
 
+            if (adder.SELECTED != false) { //TRANSPORT_FAMILIARITY
                 let adderLevels = Math.max(1, parseInt(adder.LEVELS))
                 adderCost += Math.ceil(adderBaseCost * adderLevels)  // ceil is for ENTANGLE +5 PD
             }
+
+            for (let adder2 of (adder.ADDER || [])) {
+                let adderBaseCost = adder2.baseCost
+
+                if (adder2.SELECTED != false) {
+                    let adderLevels = Math.max(1, parseInt(adder2.LEVELS))
+                    adderCost += Math.ceil(adderBaseCost * adderLevels)
+                }
+            }
+
         }
+
 
         // Categorized skills cost 2 per catory and +1 per each subcategory.
         // If no catagories selected then assume 3 pts
@@ -931,7 +1075,7 @@ export class HeroSystem6eItem extends Item {
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
         if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
             let advantages = 0
-            for (let modifier of system.MODIFIER.filter(o => !o.PRIVATE)) {
+            for (let modifier of (system.MODIFIER || []).filter(o => !o.PRIVATE)) {
                 advantages += modifier.baseCost //parseFloat(modifier.BASECOST)
             }
             cost = cost * advantages
@@ -953,6 +1097,10 @@ export class HeroSystem6eItem extends Item {
 
         let advantages = 0;
         let advantagesDC = 0;
+        let minAdvantage = 0;
+
+        if (this.system.XMLID === "TELEKINESIS")
+            console.log(this.name)
 
         for (let modifier of (system.MODIFIER || []).filter(o =>
             (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE)
@@ -980,15 +1128,13 @@ export class HeroSystem6eItem extends Item {
             if (adders.length) {
                 for (let adder of adders) {
                     const adderBaseCost = parseFloat(adder.baseCost || 0)
-                    //if (adderBaseCost > 0) {
                     _myAdvantage += adderBaseCost;
-                    //HEROSYS.log(false, adder.XMLID, adderBaseCost)
-                    //}
+                    minAdvantage = 0.25
                 }
             }
 
-            // No negative advantages
-            advantages += Math.max(0, _myAdvantage)
+            // No negative advantages and minimum is 1/4
+            advantages += Math.max(minAdvantage, _myAdvantage)
             modifier.BASECOST_total = _myAdvantage
 
 
@@ -1085,6 +1231,8 @@ export class HeroSystem6eItem extends Item {
         let _realCost = system.activePoints / (1 + limitations)
 
 
+        if (this.name === "Meteor Strike")
+            console.log(this.system.XMLID)
 
 
         // MULTIPOWER
@@ -1131,11 +1279,17 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
+        if (this.name === "Sniper Rifle") {
+            console.log(this.name)
+        }
 
         // This may be a slot in a framework if so get parent
         //const parent = this.parent()
 
         switch (configPowerInfo?.xmlid || system.XMLID) {
+            case "FOLLOWER":
+                system.description = system.ALIAS.replace("Followers: ", "")
+                break;
 
             case "Mind Scan":
                 system.description = levels + "d6 Mind Scan (" +
@@ -1188,7 +1342,7 @@ export class HeroSystem6eItem extends Item {
             case "LEAPING":
             case "TELEPORTATION":
                 // Running +25m (12m/37m total)
-                system.description = system.ALIAS + " +" + system.value + "m"
+                system.description = system.ALIAS + " +" + system.value + (this.actor?.system?.is5e ? '"' : 'm')
                 break;
 
             case "TUNNELING":
@@ -1248,7 +1402,7 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
 
             case "HANDTOHANDATTACK":
-                const value1 = convertFromDC(this, convertToDcFromItem(this).dc)
+                const value1 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
                 //system.description = `${system.ALIAS} ${system.value}d6`
                 system.description = `${system.ALIAS} ${value1}`
                 break;
@@ -1441,7 +1595,10 @@ export class HeroSystem6eItem extends Item {
                     system.description += " and " + _singles.slice(-1);
                 }
 
-                system.description += ` ${system.ALIAS} ${system.value}d6 `;
+                const value3 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                system.description += ` ${system.ALIAS} ${value3}`
+
+                //system.description += ` ${system.ALIAS} ${system.value}d6 `;
                 break;
 
 
@@ -1462,7 +1619,9 @@ export class HeroSystem6eItem extends Item {
 
                 const value2 = convertFromDC(this, convertToDcFromItem(this).dc)
                 if (value2 && !isNaN(value2)) {
-                    system.description = ` ${value2} ${system.class || ""}`
+                    if (system.description.indexOf(value2) === -1) {
+                        system.description = ` ${value2} ${system.class || ""}`
+                    }
                 }
 
 
@@ -1538,7 +1697,7 @@ export class HeroSystem6eItem extends Item {
                         }
                         break;
                     case "PLUSONEHALFDIE":
-                        system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
+                        //system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
                         break;
                     case "RIDINGANIMALS":
                         if (adder.SELECTED) {
@@ -1630,7 +1789,7 @@ export class HeroSystem6eItem extends Item {
         // MULTIPOWER slots typically include limitations
         let modifiers = (system.MODIFIER || []).filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })
         if (this.getHdcParent()) {
-            modifiers.push(...this.getHdcParent().system.modifiers.filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
+            modifiers.push(...(this.getHdcParent().system.MODIFIER || []).filter(o => o.baseCost < 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total }))
         }
 
         // Disadvantages sorted low to high
@@ -1795,7 +1954,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                 }
 
-                const DOUBLEAREA = modifier?.adders.find(o => o.XMLID === "DOUBLEAREA");
+                const DOUBLEAREA = modifier?.ADDR.find(o => o.XMLID === "DOUBLEAREA");
                 if (DOUBLEAREA) {
                     levels *= (parseInt(DOUBLEAREA.LEVELS) * 2)
                 }
@@ -2243,6 +2402,8 @@ export class HeroSystem6eItem extends Item {
         // }
 
     }
+
+
 
 
 }
