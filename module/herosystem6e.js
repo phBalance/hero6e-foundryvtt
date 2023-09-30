@@ -531,7 +531,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
     // All actors plus any unlinked actors in active scene
     let actors = Array.from(game.actors);
-    for (let token of game.scenes.current.tokens) {
+    for (let token of game.scenes.current?.tokens) {
         if (token.actor && !actors.find(o => o.id === token.actor.id)) {
             actors.push(token.actor);
         }

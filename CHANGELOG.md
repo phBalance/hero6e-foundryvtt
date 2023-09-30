@@ -1,3 +1,7 @@
+# Version 3.0.40
+- Fix for older 5e HDC uploads.
+- Fix for CHANGEENVIRONMENT preventing HDC uploads.
+
 # Version 3.0.39
 - Fix for DOUBLEAREA preventing migration
 

@@ -2243,7 +2243,7 @@ export class HeroSystem6eItem extends Item {
 
         // CHANGEENVIRONMENT
         if (xmlid == "CHANGEENVIRONMENT") {
-            cthis.system.class = 'change enviro'
+            this.system.class = 'change enviro'
             this.system.usesStrength = false
             this.system.noHitLocations = true
         }

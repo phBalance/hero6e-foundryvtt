@@ -653,6 +653,9 @@ export async function applyCharacterSheet(xmlDoc) {
 
 // Move to Actor?
 export async function CalcActorRealAndActivePoints(actor) {
+    await ui.warn.info(`called old CalcActorRealAndActivePoints`)
+    return actor.CalcActorRealAndActivePoints()
+
     // Calculate realCost & Active Points for bought as characteristics
     let realCost = 0;
     let activePoints = 0;
