@@ -1408,7 +1408,7 @@ HERO.powers = [
     {
         "key": "CONTACT",
         "powerType": [
-            "talent"
+            "perk"
         ],
         "name": "Contact",
         "costPerLevel": 1
@@ -2107,6 +2107,13 @@ HERO.powers5e = [
         duration: "Constant",
         costEnd: true,
         costPerLevel: 3 / 2
+    },
+
+    {
+        "key": "UNLUCK",
+        powerType: ["disadvantage"],
+        name: "Unluck",
+        costPerLevel: 5
     },
 
     

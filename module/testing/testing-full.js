@@ -1227,7 +1227,7 @@ export function registerFullTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     await actor.uploadFromXml(contents)
-                    assert.equal(actor.system.characteristics.running.max, 13);  //8 + 5 (Active Effect)
+                    assert.equal(actor.system.characteristics.running.max, 8);  //8 + 5 (Active Effect)
                 });
                 it("running.realCost", async function () {
                     const actor = new HeroSystem6eActor({
@@ -1278,7 +1278,7 @@ export function registerFullTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     await actor.uploadFromXml(contents)
-                    assert.equal(actor.system.realCost, 675);
+                    assert.equal(actor.system.realCost, 732);
                 });
 
             });

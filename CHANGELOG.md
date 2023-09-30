@@ -1,17 +1,17 @@
 # Version 3.0.38
 - Fix for multipower HDC upload
 - Added CP breakdown tooltip when you hover over CP.
-- Fix OMCV/DMCV cost to be 3.
-- Fix TRANSPORT_FAMILIARITY costs.
-- Fix STRIKING_APPEARANCE (all) cost.
-- Fix MULTIPOWER costs and slots.
-- Fix minimum advantage cost +1/4.
-- Fix cost for characteristics as a power.
-- Fix LIST preventing HDC upload and improved layout within powers. [#318](https://github.com/dmdorman/hero6e-foundryvtt/issues/318)
+- Fixed OMCV/DMCV cost to be 3.
+- Fixed TRANSPORT_FAMILIARITY costs.
+- Fixed STRIKING_APPEARANCE (all) cost.
+- Fixed FOLLOWER costs.
+- Fixed MULTIPOWER costs and slots.
+- Fixed minimum advantage cost +1/4.
+- Fixed cost for characteristics as a power.
+- Fixed LIST preventing HDC upload and improved layout within powers. [#318](https://github.com/dmdorman/hero6e-foundryvtt/issues/318)
 - Fix 5e COMBAT_LEVELS costs.
 - Fixed some of the 5e meters vs inches descriptions.
 - Fixed ActiveEffects for Characteristics, Movement, and Density Increase.
-
 
 # Version 3.0.37
 - Fixed requires a roll.

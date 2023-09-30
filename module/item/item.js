@@ -484,6 +484,8 @@ export class HeroSystem6eItem extends Item {
 
         // DEFENSES
         if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
+            if (this.system.XMLID === "COMBAT_LUCK")
+                console.log(this.system.XMLID)
             let newValue = 'defense'
             if (this.system.subType != newValue) {
                 this.system.subType = newValue
@@ -506,10 +508,15 @@ export class HeroSystem6eItem extends Item {
                 this.system.showToggle = true
                 changed = true
             }
-
-
-
         }
+
+        // TALENTS
+        // if (this.type === "talent" || this.system.XMLID === "COMBAT_LUCK") {
+        //     if (this.system.active === undefined) {
+        //         this.system.active = true
+        //         changed = true
+        //     }
+        // }
 
         // SKILLS
         if (configPowerInfo && configPowerInfo.powerType?.includes("skill")) {
@@ -760,7 +767,7 @@ export class HeroSystem6eItem extends Item {
 
         if (configPowerInfo && configPowerInfo.powerType?.includes("movement") && this.id) {
             let activeEffect = Array.from(this.effects)?.[0] || {}
-            activeEffect.name = `${this.system.XMLID} +${this.system.value}`
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`
             activeEffect.icon = 'icons/svg/upgrade.svg'
             activeEffect.changes = [
                 {
@@ -782,7 +789,7 @@ export class HeroSystem6eItem extends Item {
 
         if (configPowerInfo?.powerType?.includes("characteristic") && this.id) {
             let activeEffect = Array.from(this.effects)?.[0] || {}
-            activeEffect.name = `${this.system.XMLID} +${this.system.value}`
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`
             activeEffect.icon = 'icons/svg/upgrade.svg'
             activeEffect.changes = [
                 {
@@ -808,7 +815,7 @@ export class HeroSystem6eItem extends Item {
             const edAdd = Math.floor(this.system.value)
 
             let activeEffect = Array.from(this.effects)?.[0] || {}
-            activeEffect.name = `${this.system.XMLID} ${this.system.value}`
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`
             activeEffect.icon = 'icons/svg/upgrade.svg'
             activeEffect.changes = [
                 {
@@ -891,6 +898,7 @@ export class HeroSystem6eItem extends Item {
                         type: CONFIG.HERO.powers.filter(o => o.powerType?.includes("characteristic")).map(o => o.key) ? "power" : itemTag.toLowerCase().replace(/s$/, ''),
                         system: system,
                     }
+
                     return itemData
                 }
             }
@@ -1279,6 +1287,9 @@ export class HeroSystem6eItem extends Item {
         //const parent = this.parent()
 
         switch (configPowerInfo?.xmlid || system.XMLID) {
+            case "FOLLOWER":
+                system.description = system.ALIAS.replace("Followers: ", "")
+                break;
 
             case "Mind Scan":
                 system.description = levels + "d6 Mind Scan (" +

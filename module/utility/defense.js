@@ -155,7 +155,7 @@ function determineDefense(targetActor, attackItem, options) {
                 case 'drain':
                 case 'transfer':
                     i.system.defenseType = "powd"
-                    value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                    value = parseInt(i.system.value ) || 0
                     break;
             }
         }
@@ -165,7 +165,7 @@ function determineDefense(targetActor, attackItem, options) {
             switch (attackType) {
                 case 'mental':
                     i.system.defenseType = "md"
-                    value = parseInt(i.system.LEVELS?.value || i.system.LEVELS) || 0
+                    value = parseInt(i.system.value) || 0
                     break;
             }
         }
@@ -191,29 +191,29 @@ function determineDefense(targetActor, attackItem, options) {
             switch (attackType) {
                 case 'physical':
                     i.system.defenseType = "dnp"
-                    value = parseInt(i.system.adders.find(o => o.XMLID == "PHYSICAL")?.LEVELS) || 0
+                    value = parseInt(i.system.ADDER.find(o => o.XMLID == "PHYSICAL")?.LEVELS) || 0
                     break;
                 case 'energy':
                     i.system.defenseType = "dne"
-                    value = parseInt(i.system.adders.find(o => o.XMLID == "ENERGY")?.LEVELS) || 0
+                    value = parseInt(i.system.ADDER.find(o => o.XMLID == "ENERGY")?.LEVELS) || 0
                     break;
                 case 'mental':
                     i.system.defenseType = "dnm"
-                    value = parseInt(i.system.adders.find(o => o.XMLID == "MENTAL")?.LEVELS) || 0
+                    value = parseInt(i.system.ADDER.find(o => o.XMLID == "MENTAL")?.LEVELS) || 0
                     break;
             }
         }
 
-        if (!value && ["COMBAT_LUCK"].includes(xmlid)) {
+        if (["COMBAT_LUCK"].includes(xmlid)) { //!value && 
             switch (attackType) {
                 case 'physical':
                     i.system.defenseType = "pd"
-                    value = (parseInt(i.system.LEVELS.value) || 0) * 3
+                    value = (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
                 case 'energy':
                     i.system.defenseType = "ed"
-                    value = (parseInt(i.system.LEVELS.value) || 0) * 3
+                    value = (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
             }

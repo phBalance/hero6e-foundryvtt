@@ -667,9 +667,8 @@
                 <table>
                     <tr>
                         <th></th>
-                        <th class="left">{{localize "ActorSheet.Perk"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
-                        <th class="left">{{localize "ActorSheet.Description"}}</th>
+                        <th class="left">{{localize "ActorSheet.Perk"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create perk" data-type="perk">
                                 <i class="fas fa-plus"></i> Add Perk</a>
@@ -682,9 +681,11 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
                         <td>{{item.system.realCost}}</td>
-                        <td class="left">{{item.system.description}}</td>
+                        <td class="left">
+                            <i>{{item.name}}</i>
+                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                        </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>
@@ -704,9 +705,8 @@
                 <table>
                     <tr>
                         <th></th>
-                        <th class="left">{{localize "ActorSheet.Talent"}}</th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
-                        <th class="left">{{localize "ActorSheet.Description"}}</th>
+                        <th class="left">{{localize "ActorSheet.Talent"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create talent" data-type="talent">
@@ -720,9 +720,11 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
                         <td>{{item.system.realCost}}</td>
-                        <td class="left">{{item.system.description}}</td>
+                        <td class="left">
+                            <i>{{item.name}}</i>
+                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                        </td>
                         <td>
                             <input class="item-toggle" type="checkbox" {{checked item.system.active}}
                                 data-dtype="Boolean" />
@@ -746,22 +748,25 @@
                 <table>
                     <tr>
                         <th></th>
+                        <th>{{localize "ActorSheet.Cost"}}</th>
                         <th class="left">{{localize "ActorSheet.Complication"}}</th>
-                        <th class="left">{{localize "ActorSheet.Description"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create complication" data-type="complication">
                                 <i class="fas fa-plus"></i> Add Complication</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (eq item.type "complication") }}
+                    {{#if (or (eq item.type "complication") (eq item.type "disadvantage"))  }}
                     <tr class="item" data-item-id="{{item._id}}">
                         <td style="min-width: 24px">
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
-                        <td class="left">{{item.system.description}}</td>
+                        <td>{{item.system.realCost}}</td>
+                        <td class="left">
+                            <i>{{item.name}}</i>
+                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                        </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>

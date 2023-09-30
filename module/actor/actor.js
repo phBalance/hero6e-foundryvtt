@@ -946,6 +946,10 @@ export class HeroSystem6eActor extends Actor {
                         type: itemTag.toLowerCase().replace(/s$/, ''),
                         system: system,
                     }
+                    switch (system.XMLID) {
+                        case "FOLLOWER":
+                            itemData.name = "Followers"; break;
+                    }
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, { parent: this })
                         await item._postUpload(true)
@@ -1377,6 +1381,7 @@ export class HeroSystem6eActor extends Actor {
                 }
 
             }
+
             activePoints += parseInt(item.system?.activePoints || 0);
 
             //_splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
@@ -1384,7 +1389,12 @@ export class HeroSystem6eActor extends Actor {
 
         // DISAD_POINTS: realCost
         const DISAD_POINTS = parseInt(this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0);
-        this.system.pointsDetail.DISAD_POINTS = Math.min(DISAD_POINTS, this.system.pointsDetail?.complications || 0)
+        const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0)
+        if (_disadPoints != 0) {
+            this.system.pointsDetail.MatchingDisads = -_disadPoints
+            realCost -= _disadPoints
+        }
+        
 
         this.system.realCost = realCost
         this.system.activePoints = activePoints
