@@ -739,7 +739,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         if (expandedData.system.characteristics) {
             await this.actor.calcCharacteristicsCost();
-            await CalcActorRealAndActivePoints(this.actor)
+            await this.actor.CalcActorRealAndActivePoints()
         }
 
         this.render();

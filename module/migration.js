@@ -285,8 +285,17 @@ async function migrateActorCostDescription(actor) {
             }
         }
 
-        if (itemsChanged) {
-            await CalcActorRealAndActivePoints(actor);
+
+        if (itemsChanged || !actor.system.pointsDetail) {
+            const oldPointsDetail = actor.system.pointsDetail
+            await actor.CalcActorRealAndActivePoints();
+            if (oldPointsDetail != actor.system.pointsDetail) {
+                await actor.update({
+                    'system.points': actor.system.points,
+                    'system.activePoints': actor.system.activePoints,
+                    'system.pointsDetail': actor.system.pointsDetail,
+                }, { render: false }, { hideChatMessage: true });
+            }
         }
 
 

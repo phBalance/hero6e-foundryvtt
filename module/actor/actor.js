@@ -1141,7 +1141,7 @@ export class HeroSystem6eActor extends Actor {
         let changed = false;
 
         // is5e
-        if (this.system.CHARACTER?.TEMPLATE) {
+        if (typeof this.system.CHARACTER?.TEMPLATE == 'string') {
             if (this.system.CHARACTER.TEMPLATE.includes("builtIn.") && !this.system.CHARACTER.TEMPLATE.includes("6E.") && !this.system.is5e) {
                 changes[`system.is5e`] = true
                 this.system.is5e = true
@@ -1368,7 +1368,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Add in costs for items
         // let _splitCost = {}
-        for (let item of this.items.filter(o => o.type != 'attack' && o.type != 'defense' && o.type != 'movement' && o.type != 'complication' && !o.system.duplicate)) {
+        for (let item of this.items.filter(o => o.type != 'attack' && o.type != 'defense' && o.type != 'movement')) {
 
             // Equipment is typically purchased with money, not character points
             if (item.type != 'equipment') {
