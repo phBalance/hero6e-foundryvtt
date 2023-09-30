@@ -1372,12 +1372,12 @@ export class HeroSystem6eActor extends Actor {
 
             // Equipment is typically purchased with money, not character points
             if (item.type != 'equipment') {
-                const _realCost = parseInt(item.system?.realCost || 0);
+                const _realCost = parseInt(item.system?.realCost) || 0
 
                 if (_realCost != 0) {
                     realCost += _realCost
                     this.system.pointsDetail[item.type] ??= 0
-                    this.system.pointsDetail[item.type] += parseInt(item.system?.realCost || 0);
+                    this.system.pointsDetail[item.type] += _realCost;
                 }
 
             }
