@@ -1,3 +1,6 @@
+# Version 3.0.39
+- Fix for DOUBLEAREA preventing migration
+
 # Version 3.0.38
 - Fix for multipower HDC upload
 - Added CP breakdown tooltip when you hover over CP.
