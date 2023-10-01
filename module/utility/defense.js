@@ -56,7 +56,7 @@ function determineDefense(targetActor, attackItem, options) {
     // PD bought as resistant
     for (const item of activeDefenses.filter(o => o.system.XMLID == "PD")) {
         if (item.findModsByXmlid('RESISTANT')) {
-            const levels = parseInt(item.system.LEVELS.value) || 0
+            const levels = parseInt(item.system.value) || 0
             PD -= levels
             rPD += levels
         }
@@ -161,11 +161,12 @@ function determineDefense(targetActor, attackItem, options) {
         }
 
 
-        if (!value && ["MENTALDEFENSE"].includes(xmlid)) {
+        if (["MENTALDEFENSE"].includes(xmlid)) {
             switch (attackType) {
                 case 'mental':
                     i.system.defenseType = "md"
-                    value = parseInt(i.system.value) || 0
+                    //value += parseInt(i.system.value) || 0
+                    //defenseTags.push({ name: 'MD', value: i.system.value, resistant: false, title: i.name})
                     break;
             }
         }
@@ -208,12 +209,12 @@ function determineDefense(targetActor, attackItem, options) {
             switch (attackType) {
                 case 'physical':
                     i.system.defenseType = "pd"
-                    value = (parseInt(i.system.value) || 0) * 3
+                    value += (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
                 case 'energy':
                     i.system.defenseType = "ed"
-                    value = (parseInt(i.system.value) || 0) * 3
+                    value += (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
             }

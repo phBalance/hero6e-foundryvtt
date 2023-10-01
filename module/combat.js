@@ -484,7 +484,7 @@ export class HeroSystem6eCombat extends Combat {
             (o.system.subType || o.type) != "attack"
         )) {
 
-            const costEndOnlyToActivate = powerUsingEnd.system.modifiers.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
+            const costEndOnlyToActivate = powerUsingEnd.system.MODIFIER.find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (!costEndOnlyToActivate) {
                 let end = parseInt(powerUsingEnd.system.end);
                 spentEnd += end;

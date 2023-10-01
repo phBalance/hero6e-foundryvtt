@@ -312,14 +312,14 @@ export class HeroSystem6eItem extends Item {
             return false;
 
         // FOCUS
-        let FOCUS = this.system.modifiers?.find(o => o.XMLID === "FOCUS")
+        let FOCUS = this.system.MODIFIER?.find(o => o.XMLID === "FOCUS")
         if (FOCUS) {
             if (FOCUS?.OPTION?.startsWith("O")) return true;
             if (FOCUS?.OPTION?.startsWith("I")) return perceptionSuccess;
         }
 
 
-        let VISIBLE = this.system.modifiers?.find(o => o.XMLID === "VISIBLE")
+        let VISIBLE = this.system.MODIFIER?.find(o => o.XMLID === "VISIBLE")
         if (VISIBLE) {
             if (VISIBLE?.OPTION?.endsWith("OBVIOUS")) return true;
             if (VISIBLE?.OPTION?.endsWith("INOBVIOUS")) return perceptionSuccess;
@@ -329,7 +329,7 @@ export class HeroSystem6eItem extends Item {
         // PARENT?
         let PARENT = this.actor.items.find(o => o.system.ID === (this.system.PARENTID || 'null'))
         if (PARENT) {
-            let VISIBLE = PARENT.system.modifiers?.find(o => o.XMLID === "VISIBLE")
+            let VISIBLE = PARENT.system.MODIFIER?.find(o => o.XMLID === "VISIBLE")
             if (VISIBLE) {
                 if (VISIBLE?.OPTION.endsWith("OBVIOUS")) return true;
                 if (VISIBLE?.OPTION.endsWith("INOBVIOUS")) return perceptionSuccess;
@@ -727,38 +727,17 @@ export class HeroSystem6eItem extends Item {
 
 
 
-        this.calcItemPoints()
+        changed = this.calcItemPoints() || changed
 
         // DESCRIPTION
+        const oldDescription = this.system.description
         this.updateItemDescription()
-        // for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-        //     if (this.system[key]) {
-        //         for (const child of this.system[key]) {
-        //             let newValue = child.ALIAS
-
-        //             switch (child.XMLID) {
-        //                 case "AOE":
-        //                     newValue += ` (${this.system.is5e ? (child.LEVELS + "\"") : ((child.LEVELS * 2) + "m")} ${child.OPTION.titleCase()})`
-        //                     break;
-
-        //             }
-
-        //             if (child.description != newValue) {
-        //                 child.description = newValue
-        //                 changed = true
-        //             }
-        //         }
-        //     }
-        // }
-
-
+        changed = (oldDescription != this.system.description) || changed
 
 
         // Save changes
         if (changed && this.id) {
             await this.update({ 'system': this.system })
-
-
         }
 
         // ACTIVE EFFECTS
@@ -1009,13 +988,10 @@ export class HeroSystem6eItem extends Item {
         let cost = baseCost + subCost
 
         if (system.XMLID === "FOLLOWER") {
-            cost = Math.ceil(parseInt(system.BASEPOINTS) / 5)
-            let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER))) + 1
+            cost = Math.ceil((parseInt(system.BASEPOINTS) || 5) / 5)
+            let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER) || 0)) + 1
             cost *= multiplier
         }
-
-        if (this.system.XMLID === "TELEKINESIS")
-            console.log(this.name)
 
         // ADDERS
         let adderCost = 0
@@ -1097,8 +1073,8 @@ export class HeroSystem6eItem extends Item {
         let advantagesDC = 0;
         let minAdvantage = 0;
 
-        if (this.system.XMLID === "TELEKINESIS")
-            console.log(this.name)
+        // if (this.system.XMLID === "TELEKINESIS")
+        //     console.log(this.name)
 
         for (let modifier of (system.MODIFIER || []).filter(o =>
             (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE)
@@ -1229,10 +1205,6 @@ export class HeroSystem6eItem extends Item {
         let _realCost = system.activePoints / (1 + limitations)
 
 
-        if (this.name === "Meteor Strike")
-            console.log(this.system.XMLID)
-
-
         // MULTIPOWER
         let costSuffix = "";
         if (parent && parent.system.XMLID === "MULTIPOWER") {
@@ -1285,6 +1257,9 @@ export class HeroSystem6eItem extends Item {
         //const parent = this.parent()
 
         switch (configPowerInfo?.xmlid || system.XMLID) {
+            case "MENTALDEFENSE":
+                system.description = `${system.ALIAS} (${system.value} points total)`
+                break;
             case "FOLLOWER":
                 system.description = system.ALIAS.replace("Followers: ", "")
                 break;
@@ -1880,6 +1855,10 @@ export class HeroSystem6eItem extends Item {
                 result += ", " + modifier.ALIAS
                 break;
 
+            case "ABLATIVE":
+                result += `, ${modifier.ALIAS} ${modifier.OPTION_ALIAS}`
+                break;
+
             default:
                 if (modifier.ALIAS) result += ", " + modifier.ALIAS || "?"
 
@@ -1976,7 +1955,7 @@ export class HeroSystem6eItem extends Item {
             result += parseInt(system.value) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; "
         }
 
-        if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES", "AVAD"].includes(modifier.XMLID)) {
+        if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)) {
             result += modifier.OPTION_ALIAS
             switch (modifier.XMLID) {
                 case "EXTRATIME":

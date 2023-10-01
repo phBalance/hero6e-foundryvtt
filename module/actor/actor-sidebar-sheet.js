@@ -953,7 +953,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
     async _onActorDescription(event) {
 
 
-        let content = `${this.actor.system.APPEARANCE}`;
+        let content = `${this.actor.system.APPEARANCE || ""}`;
         let perceivable = []
         for (let item of this.actor.items) {
             if (item.isPerceivable(true)) {
