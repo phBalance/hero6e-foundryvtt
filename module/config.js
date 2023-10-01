@@ -919,7 +919,7 @@ HERO.powers = [
     {
         "key": "TELEPATHY",
         "powerType": [
-            "mental"
+            "mental", "attack"
         ],
         "perceivability": "imperceptible",
         "duration": "instant",

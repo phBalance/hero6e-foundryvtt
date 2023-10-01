@@ -1,3 +1,9 @@
+# Version 3.0.42
+- Fix where previous actor migrations were incomplete.
+- Full Health now resets charges.
+- Fix "Actor Description".
+- Improved Mental Defense description.
+
 # Version 3.0.41
 - CP details fix for older HDC uploads.
 

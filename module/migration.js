@@ -208,6 +208,35 @@ export async function migrateWorld() {
         }
     }
 
+    // if lastMigration < 3.0.42
+    // Overhaul of data structure.  Raw HDC upload (all uppercase props)
+    if (foundry.utils.isNewerVersion('3.0.42', lastMigration)) {
+        let d = new Date()
+        let queue = []
+
+        ui.notifications.info(`Migragrating actor data 3.0.42`)
+        for (const actor of game.actors.contents) {
+            queue.push(actor)
+        }
+
+        for (const scene of game.scenes.contents) {
+            for (const token of scene.tokens) {
+                if (!token.actorLink) {
+                    queue.push(token.actor)
+                }
+            }
+        }
+
+        while (queue.length > 0) {
+            if ((new Date() - d) > 4000) {
+                ui.notifications.info(`Migragrating actor data 3.0.35 (${queue.length} remaining)`)
+                d = new Date()
+            }
+            const actor = queue.pop()
+            await migrateActor_3_0_42(actor)
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
 
 
@@ -244,45 +273,46 @@ export async function migrateWorld() {
 async function migrateActorCostDescription(actor) {
     try {
         if (!actor) return false;
+
         let itemsChanged = false;
         for (let item of actor.items) {
-            let changes = {};
 
-            if (item.name === "Strike" && actor.name === "Kaden Monk") {
-                console.log(item)
-            }
+            let changes = {};
 
             let _oldDescription = item.system.description;
             let _oldEnd = parseInt(item.system.end || 0);
             let _oldActivePoints = item.system.activePoints
 
+            await item._postUpload()
+
             // Calculate RealCost, ActivePoints, and END
-            if (await item._postUpload() || !_oldActivePoints) { //calcItemPoints(item)) {
-                if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
-                    changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
-                    changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
-                    changes['system.realCost'] = item.system.realCost;
-                }
-            }
+            // if (await item._postUpload() || !_oldActivePoints) { //calcItemPoints(item)) {
+            //     if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
+            //         changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
+            //         changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
+            //         changes['system.realCost'] = item.system.realCost;
+            //     }
+            // }
 
-            if (parseInt(item.system.activePoints) > 0) {
-                //let _oldDescription = item.system.description;
-                //let _oldEnd = parseInt(item.system.end || 0);
+            // if (parseInt(item.system.activePoints) > 0) {
+            //     //let _oldDescription = item.system.description;
+            //     //let _oldEnd = parseInt(item.system.end || 0);
 
-                //updateItemDescription(item);
+            //     //updateItemDescription(item);
 
-                if (_oldDescription != item.system.description) {
-                    changes['system.description'] = item.system.description;
-                }
-                if (_oldEnd != parseInt(item.system.end)) {
-                    changes['system.end'] = item.system.end;
-                }
-            }
+            //     if (_oldDescription != item.system.description) {
+            //         changes['system.description'] = item.system.description;
+            //     }
+            //     if (_oldEnd != parseInt(item.system.end)) {
+            //         changes['system.end'] = item.system.end;
+            //     }
+            // }
 
-            if (Object.keys(changes).length > 0) {
-                await item.update(changes, { hideChatMessage: true })
-                itemsChanged = true;
-            }
+            // if (Object.keys(changes).length > 0) {
+            //     await item.update(changes, { hideChatMessage: true })
+            //     itemsChanged = true;
+            // }
+
         }
 
 
@@ -311,10 +341,6 @@ async function migrateActor_3_0_35(actor) {
     try {
         if (!actor) return
         for (let item of actor.items) {
-
-            if (item.name === "Strike" && actor.name === "Kaden Monk") {
-                console.log(item)
-            }
 
             let changes = {};
 
@@ -361,6 +387,72 @@ async function migrateActor_3_0_35(actor) {
             }
 
             await item.update(changes, { hideChatMessage: true })
+        }
+    }
+    catch (e) {
+        console.log(e);
+        if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            await ui.notifications.warn(`Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`)
+        }
+    }
+}
+
+async function migrateActor_3_0_42(actor) {
+    try {
+        if (!actor) return
+        if (actor.name != 'Jack "Iron Shin" Daniels') return
+        for (let item of actor.items) {
+
+
+
+            let changes = {};
+
+            // LEVELS is now the raw number from HDC file and value/max are working numbers
+            if (typeof item.system.LEVELS === "object") {
+                changes['system.value'] = parseInt(item.system.LEVELS.value)
+                changes['system.max'] = parseInt(item.system.LEVELS.max)
+                changes['system.LEVELS'] = item.system.LEVELS.max
+            }
+
+            // POWER, MODIFIER, ADDER
+            if (item.system.powers && !item.system.POWER) {
+                for (const m of item.system.powers) {
+                    if (m.modifiers) {
+                        m.MODIFIER = m.modifiers
+                    }
+                    if (m.adders) {
+                        m.ADDER = m.adders
+                    }
+                }
+                changes['system.POWER'] = item.system.powers
+            }
+            if (item.system.modifiers && !item.system.MODIFIER) {
+                for (const m of item.system.modifiers) {
+                    if (m.modifiers) {
+                        m.MODIFIER = m.modifiers
+                    }
+                    if (m.adders) {
+                        m.ADDER = m.adders
+                    }
+                }
+                changes['system.MODIFIER'] = item.system.modifiers
+            }
+            if (item.system.adders && !item.system.ADDER) {
+                for (const m of item.system.adders) {
+                    if (m.modifiers) {
+                        m.MODIFIER = m.modifiers
+                    }
+                    if (m.adders) {
+                        m.ADDER = m.adders
+                    }
+                }
+                changes['system.ADDER'] = item.system.adders
+            }
+
+            if (changes.length > 0) {
+                await item.update(changes, { hideChatMessage: true })
+            }
+
         }
     }
     catch (e) {

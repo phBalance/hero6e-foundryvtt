@@ -647,6 +647,11 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // Set Charges to max
+        for (let item of this.items.filter(o=> o.system.charges?.max && o.system.charges.value != o.system.charges.max)) {
+            await item.update({ [`system.charges.value`]: item.system.charges.max })
+        }
+
         // We just cleared encumbrance, check if it applies again
         this.applyEncumbrancePenalty();
 

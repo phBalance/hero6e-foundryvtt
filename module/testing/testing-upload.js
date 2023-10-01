@@ -32,19 +32,19 @@ export function registerUploadTests(quench) {
                 `
 
                 it("description", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.description, "for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)");
                 });
 
                 it("realCost", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.realCost, "20");
                 });
 
                 it("activePoints", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.activePoints, "35");
                 });
@@ -64,30 +64,30 @@ export function registerUploadTests(quench) {
                 // const item = XmlToItemData(xmlDoc.children[0], "skill")
 
                 it("description", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.description, "Mind Empowered: +2 with a group of Mental Powers") //"+2 with a group of Mental Powers");
                 });
                 it("realCost", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.realCost, 6);
                 });
 
                 it("activePoints", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.activePoints, 6);
                 });
 
                 it("levels", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.max, 2);
                 });
 
                 it("end", async function () {
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true})
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.end, 0);
                 });
@@ -107,7 +107,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.dex.value = 15
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, ""); // Climbing is part of the name
@@ -118,7 +118,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.dex.value = 15
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 3);
@@ -130,7 +130,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.dex.value = 15
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 3);
@@ -142,7 +142,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.dex.value = 15
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 0);
@@ -154,7 +154,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.dex.value = 15
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
@@ -166,7 +166,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.dex.value = 15
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     SkillRollUpdateValue(item)
@@ -196,7 +196,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1d6");
@@ -206,7 +206,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 5);
@@ -217,7 +217,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 5);
@@ -228,7 +228,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 1);
@@ -239,7 +239,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 1);
@@ -269,7 +269,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "+3 INT");
@@ -279,7 +279,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 3);
@@ -290,7 +290,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 3);
@@ -301,7 +301,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 3);
@@ -312,7 +312,7 @@ export function registerUploadTests(quench) {
                         name: 'Quench Actor',
                         type: 'pc',
                     }, { temporary: true });
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
@@ -346,7 +346,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.str.value = 10
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
@@ -357,7 +357,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.str.value = 10
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 5);
@@ -369,7 +369,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.str.value = 10
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 5);
@@ -381,7 +381,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.str.value = 10
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 4);  // There are 4 raw dice, STR is added later
@@ -393,7 +393,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.str.value = 10
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
@@ -442,7 +442,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.ego.value = 38
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Telekinesis (62 STR), Alternate Combat Value (uses OMCV against DCV; +0) (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)");
@@ -453,7 +453,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.ego.value = 38
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 46);
@@ -465,7 +465,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.ego.value = 38
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 93);
@@ -477,7 +477,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.ego.value = 38
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 62);
@@ -489,7 +489,7 @@ export function registerUploadTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     actor.system.characteristics.ego.value = 38
-                    const item = await new HeroSystem6eItem( HeroSystem6eItem.itemDataFromXml(contents), {temporary: true, parent: actor })
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 9);
@@ -1536,6 +1536,79 @@ export function registerUploadTests(quench) {
                 });
             });
 
+
+            describe("MENTALDEFENSE", async function () {
+                const contents = `
+                <POWER XMLID="MENTALDEFENSE" ID="1576395326670" BASECOST="0.0" LEVELS="39" ALIAS="Mental Defense" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES>Telepathy must overcome.</NOTES>
+                <MODIFIER XMLID="ABLATIVE" ID="1578308761240" BASECOST="-1.0" LEVELS="0" ALIAS="Ablative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BODYORSTUN" OPTIONID="BODYORSTUN" OPTION_ALIAS="BODY or STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="ALWAYSON" ID="1578308761242" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1578308761277" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="CON" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="EXTRATIME" ID="1578308761317" BASECOST="-2.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="20MINUTES" OPTIONID="20MINUTES" OPTION_ALIAS="20 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+                <MODIFIER XMLID="INHERENT" ID="1578308761319" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                  <NOTES />
+                </MODIFIER>
+              </POWER>
+                    `;
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.description, "(39 points total), Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)");
+                });
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.realCost, 9);
+                });
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.activePoints, 49);
+                });
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.end, 0);
+                });
+                it("levels", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.value, 39);
+                });
+            });
 
 
 
