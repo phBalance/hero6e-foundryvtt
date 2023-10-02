@@ -238,7 +238,7 @@ export async function AttackAoeToHit(item, options) {
         rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
     }
 
-    if (true) { //itemData?.uses === "ocv") {
+    if (item.system.uses === "ocv") {
 
         // Educated guess for token
         let factor = actor.system.is5e ? 4 : 8;
