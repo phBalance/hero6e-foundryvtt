@@ -110,6 +110,7 @@ jobs:
       run: echo "MANIFEST_FILE_PATH=system.json" >> $GITHUB_ENV
 
   publish_release:
+    needs: prepare_release
     runs-on: ubuntu-latest
 
     steps:
