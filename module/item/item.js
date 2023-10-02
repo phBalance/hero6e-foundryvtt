@@ -457,18 +457,21 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ item: this })
 
+        if (this.name === `Protective Muscles`)
+            console.log(this.name)
+
         // LEVELS (use value/max instead of LEVELS so we can AID/DRAIN the base power)
         let newValue = parseInt(this.system.LEVELS || 0)
         if (this.system.max != newValue) {
+            let delta = this.system.max - newValue
             this.system.max = newValue
             changed = true
         }
+        //this.system.value ??= this.system.max
         if (this.system.value != newValue) {
             this.system.value = newValue
             changed = true
         }
-
-
 
 
         // CHARGES
@@ -480,6 +483,7 @@ export class HeroSystem6eItem extends Item {
                 recoverable: (CHARGES.ADDER || []).find(o => o.XMLID == "RECOVERABLE") ? true : false,
                 continuing: (CHARGES.ADDER || []).find(o => o.XMLID == "CONTINUING")?.OPTIONID
             }
+            this.system.charges.value ??= this.system.charges.max
         }
 
         // DEFENSES
@@ -491,9 +495,9 @@ export class HeroSystem6eItem extends Item {
                 changed = true
 
                 if (this.system.charges?.value > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
-                    this.system.active = false;
+                    this.system.active ??= false;
                 } else {
-                    this.system.active = true;
+                    this.system.active ??= true;
                 }
             }
         }
@@ -778,8 +782,10 @@ export class HeroSystem6eItem extends Item {
             activeEffect.transfer = true
 
             if (activeEffect.update) {
+                const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max
                 await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
-                await this.actor.update({ [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max })
+                const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax
+                await this.actor.update({ [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax })
 
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
