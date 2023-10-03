@@ -274,6 +274,9 @@ async function migrateActorCostDescription(actor) {
     try {
         if (!actor) return false;
 
+        if (actor.name === `Jack "Iron Shin" Daniels`)
+            console.log.apply(actor.name)
+
         let itemsChanged = false;
         for (let item of actor.items) {
 
@@ -284,34 +287,6 @@ async function migrateActorCostDescription(actor) {
             let _oldActivePoints = item.system.activePoints
 
             await item._postUpload()
-
-            // Calculate RealCost, ActivePoints, and END
-            // if (await item._postUpload() || !_oldActivePoints) { //calcItemPoints(item)) {
-            //     if (parseInt(item.system.activePoints) > 0) { // Some items like Perception have NaN for cost (TODO: fix)
-            //         changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
-            //         changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
-            //         changes['system.realCost'] = item.system.realCost;
-            //     }
-            // }
-
-            // if (parseInt(item.system.activePoints) > 0) {
-            //     //let _oldDescription = item.system.description;
-            //     //let _oldEnd = parseInt(item.system.end || 0);
-
-            //     //updateItemDescription(item);
-
-            //     if (_oldDescription != item.system.description) {
-            //         changes['system.description'] = item.system.description;
-            //     }
-            //     if (_oldEnd != parseInt(item.system.end)) {
-            //         changes['system.end'] = item.system.end;
-            //     }
-            // }
-
-            // if (Object.keys(changes).length > 0) {
-            //     await item.update(changes, { hideChatMessage: true })
-            //     itemsChanged = true;
-            // }
 
         }
 

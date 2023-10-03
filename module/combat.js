@@ -551,7 +551,23 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndTurn(combatant) {
-        console.log("_onStartTurn", combatant.name)
+        console.log("_onEndTurn", combatant.name)
+
+
+        const automation = game.settings.get("hero6efoundryvttv2", "automation");
+
+        // Hover (flight) uses 1 END
+        if ((automation === "all") || (automation === "npcOnly" && combatant.actor.type == 'npc') || (automation === "pcEndOnly" && combatant.actor.type === 'pc')) {
+            if (combatant.actor?.flags?.activeMovement === 'flight') {
+                console.log(combatant.actor)
+                if (dragRuler?.getRangesFromSpeedProvider) {
+                    if (dragRuler.getMovedDistanceFromToken(combatant.token.object) === 0) {
+                        let endValue = parseInt(combatant.actor.system.characteristics.end.value) -1
+                        await combatant.actor.update({ 'system.characteristics.end.value': endValue })
+                    }
+                }
+            }
+        }
 
         super._onEndTurn(combatant)
 

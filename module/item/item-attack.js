@@ -238,6 +238,28 @@ export async function AttackAoeToHit(item, options) {
         rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
     }
 
+    if (item.system.uses === "ocv") {
+
+        // Educated guess for token
+        let factor = actor.system.is5e ? 4 : 8;
+        let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
+
+        if (rangePenalty) {
+            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
+            rollEquation = modifyRollEquation(rollEquation, rangePenalty);
+        }
+
+        // Brace (+2 OCV only to offset the Range Modifier)
+        const braceManeuver = item.actor.items.find(o => o.type == 'maneuver' && o.name === 'Brace' && o.system.active)
+        if (braceManeuver) {
+            let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
+            if (brace > 0) {
+                tags.push({ value: brace, name: braceManeuver.name })
+                rollEquation = modifyRollEquation(rollEquation, brace);
+            }
+
+        }
+    }
 
 
     let attackRoll = new Roll(rollEquation, actor.getRollData());
@@ -350,8 +372,8 @@ export async function AttackToHit(item, options) {
         rollEquation = modifyRollEquation(rollEquation, parseInt(setManeuver.system.ocv));
     }
 
-    // Calc Distance if we have a target
-    if (game.user.targets.length > 0) {
+    // Calc Distance if we have a target (and using ocv; dcv is typically line of sight)
+    if (game.user.targets.size > 0 && itemData?.uses === "ocv") {
 
         // Educated guess for token
         let token = actor.getActiveTokens()[0];

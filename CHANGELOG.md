@@ -1,5 +1,13 @@
+# Version 3.0.43
+- Migrations no longer overwrite Characteristic CURRENT values with MAX when characteristics bought as powers.
+- Fix where range penalty was not included in OCV attack rolls.
+- Fix to apply range penalty to AOE template placement. [#404](https://github.com/dmdorman/hero6e-foundryvtt/issues/404)
+- Fix rPD when PD power bought as RESISTANT and ADD_MODIFIERS_TO_BASE. [#403](https://github.com/dmdorman/hero6e-foundryvtt/issues/403)
+- Fixed missing Perception skill. [#400](https://github.com/dmdorman/hero6e-foundryvtt/issues/400)
+- Flight/hover uses at least 1 END. [#387](https://github.com/dmdorman/hero6e-foundryvtt/issues/387)
+
 # Version 3.0.42
-- Fix where previous actor migrations were incomplete.
+- Fix where previous actor migrations were incomplete. [#399](https://github.com/dmdorman/hero6e-foundryvtt/issues/399)
 - Full Health now resets charges.
 - Fix "Actor Description".
 - Improved Mental Defense description.
