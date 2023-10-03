@@ -59,11 +59,11 @@ function determineDefense(targetActor, attackItem, options) {
             const levels = parseInt(item.system.value) || 0
             PD -= levels
             rPD += levels
-        }
 
-        if (item.system.ADD_MODIFIERS_TO_BASE) { //=== "Yes") {
-            PD -= targetActor.system.characteristics.pd.core;
-            rPD += targetActor.system.characteristics.pd.core;
+            if (item.system.ADD_MODIFIERS_TO_BASE) {
+                PD -= targetActor.system.characteristics.pd.core;
+                rPD += targetActor.system.characteristics.pd.core;
+            }
         }
     }
 
@@ -155,7 +155,7 @@ function determineDefense(targetActor, attackItem, options) {
                 case 'drain':
                 case 'transfer':
                     i.system.defenseType = "powd"
-                    value = parseInt(i.system.value ) || 0
+                    value = parseInt(i.system.value) || 0
                     break;
             }
         }

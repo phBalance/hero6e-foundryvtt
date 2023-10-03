@@ -2,6 +2,7 @@
 - Migrations no longer overwrite Characteristic CURRENT values with MAX when characteristics bought as powers.
 - Fix where range penalty was not included in OCV attack rolls.
 - Fix to apply range penalty to AOE template placement. [#404](https://github.com/dmdorman/hero6e-foundryvtt/issues/404)
+- Fix rPD when PD power bought as RESISTANT and ADD_MODIFIERS_TO_BASE. [#403](https://github.com/dmdorman/hero6e-foundryvtt/issues/403)
 
 # Version 3.0.42
 - Fix where previous actor migrations were incomplete. [#399](https://github.com/dmdorman/hero6e-foundryvtt/issues/399)
