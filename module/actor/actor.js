@@ -971,6 +971,20 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // Perception Skill
+        const itemDataPerception = {
+            name: 'Perception',
+            type: 'skill',
+            system: {
+                XMLID: "PERCEPTION",
+                ALIAS: "Perception",
+                CHARACTERISTIC: "int",
+                state: 'trained',
+                levels: "0"
+            }
+        }
+        await HeroSystem6eItem.create(itemDataPerception, { parent: this })
+
         // MANEUVERS
         for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
             const name = entry[0];
