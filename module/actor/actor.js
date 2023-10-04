@@ -960,9 +960,10 @@ export class HeroSystem6eActor extends Actor {
                         const item = await HeroSystem6eItem.create(itemData, { parent: this })
                         await item._postUpload(true)
 
-                        // Treat like a MULTIPOWER
+                        // Treat like a MULTIPOWER for now
                         if (system.XMLID === "COMPOUNDPOWER") {
-                            let position = 0
+                            // The POSITION of COMPOUNDPOWER items starts at 0 and MULTIPOWER items start at 1
+                            let position = 0 
                             for (let system2 of system.POWER) {
                                 let itemData2 = {
                                     name: system2.NAME || system2.ALIAS || system2.XMLID,
