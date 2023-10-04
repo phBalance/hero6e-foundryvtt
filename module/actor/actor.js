@@ -648,7 +648,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Set Charges to max
-        for (let item of this.items.filter(o=> o.system.charges?.max && o.system.charges.value != o.system.charges.max)) {
+        for (let item of this.items.filter(o => o.system.charges?.max && o.system.charges.value != o.system.charges.max)) {
             await item.update({ [`system.charges.value`]: item.system.charges.max })
         }
 
@@ -953,11 +953,30 @@ export class HeroSystem6eActor extends Actor {
                     }
                     switch (system.XMLID) {
                         case "FOLLOWER":
-                            itemData.name = "Followers"; break;
+                            itemData.name = "Followers";
+                            break;
                     }
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, { parent: this })
                         await item._postUpload(true)
+
+                        // Treat like a MULTIPOWER
+                        if (system.XMLID === "COMPOUNDPOWER") {
+                            let position = 0
+                            for (let system2 of system.POWER) {
+                                let itemData2 = {
+                                    name: system2.NAME || system2.ALIAS || system2.XMLID,
+                                    type: 'power',
+                                    system: {
+                                        ...system2,
+                                        PARENTID: system.ID,
+                                        POSITION: ++position
+                                    }
+                                }
+                                const item2 = await HeroSystem6eItem.create(itemData2, { parent: this })
+                                await item2._postUpload(true)
+                            }
+                        }
                     } else {
 
                         const item = await HeroSystem6eItem.create(itemData, { temporary: true, parent: this })
@@ -1413,7 +1432,7 @@ export class HeroSystem6eActor extends Actor {
             this.system.pointsDetail.MatchingDisads = -_disadPoints
             realCost -= _disadPoints
         }
-        
+
 
         this.system.realCost = realCost
         this.system.activePoints = activePoints
