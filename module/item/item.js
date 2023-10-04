@@ -746,7 +746,7 @@ export class HeroSystem6eItem extends Item {
 
         // ACTIVE EFFECTS
 
-        if (configPowerInfo && configPowerInfo.powerType?.includes("movement") && this.id) {
+        if (changed && this.id && configPowerInfo && configPowerInfo.powerType?.includes("movement")) {
             let activeEffect = Array.from(this.effects)?.[0] || {}
             activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`
             activeEffect.icon = 'icons/svg/upgrade.svg'
@@ -768,7 +768,7 @@ export class HeroSystem6eItem extends Item {
         }
 
 
-        if (configPowerInfo?.powerType?.includes("characteristic") && this.id) {
+        if (changed && this.id && configPowerInfo?.powerType?.includes("characteristic")) {
             let activeEffect = Array.from(this.effects)?.[0] || {}
             activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`
             activeEffect.icon = 'icons/svg/upgrade.svg'
@@ -792,7 +792,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (this.system.XMLID === "DENSITYINCREASE" && this.id) {
+        if (changed && this.id && this.system.XMLID === "DENSITYINCREASE") {
             const strAdd = Math.floor(this.system.value) * 5
             const pdAdd = Math.floor(this.system.value)
             const edAdd = Math.floor(this.system.value)
@@ -830,9 +830,6 @@ export class HeroSystem6eItem extends Item {
             }
 
         }
-
-
-
 
         return changed
     }
@@ -1143,10 +1140,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         let old = system.activePoints;
-        system.activePoints = RoundFavorPlayerDown(_activePoints);
+        system.activePoints = RoundFavorPlayerDown(_activePoints || 0);
 
         //return RoundFavorPlayerDown(_activePoints)
-        return (old != system.activePoints);
+        const changed = old != system.activePoints
+        return changed
     }
 
     calcRealCost() {
@@ -1240,7 +1238,8 @@ export class HeroSystem6eItem extends Item {
         let old = system.realCost;
         system.realCost = _realCost + costSuffix;
 
-        return (old != system.realCost); //_realCost
+        const changed = old != system.realCost
+        return changed
     }
 
     updateItemDescription() {
@@ -2223,6 +2222,17 @@ export class HeroSystem6eItem extends Item {
             this.system.knockbackMultiplier = 0
             this.system.usesStrength = false
             this.system.stunBodyDamage = "stunonly"
+            this.system.noHitLocations = true
+        }
+
+        // TELEPATHY
+        if (xmlid == "TELEPATHY") {
+            this.system.class = 'telepathy'
+            this.system.targets = "dmcv"
+            this.system.uses = "omcv"
+            this.system.knockbackMultiplier = 0
+            this.system.usesStrength = false
+            //this.system.stunBodyDamage = "stunonly"
             this.system.noHitLocations = true
         }
 
