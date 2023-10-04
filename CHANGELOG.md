@@ -1,6 +1,7 @@
 # Version 3.0.44
 - Fix some NaN issues with Maneuvers and ActivePoints that was unnecessarily calling migration scripts for most tokens.  Larger worlds may still experience a long migration for 3.0.44, but future migrations should be much quicker.
-- Partial support for TELEPATHY. [#402](https://github.com/dmdorman/hero6e-foundryvtt/issues/404)
+- Partial support for TELEPATHY. [#402](https://github.com/dmdorman/hero6e-foundryvtt/issues/402)
+- Fix to reset movment history at beginning of token phase.  DragRuler module was only reseting movement history between turns. [#401](https://github.com/dmdorman/hero6e-foundryvtt/issues/401)
 
 # Version 3.0.43
 - Migrations no longer overwrite Characteristic CURRENT values with MAX when characteristics bought as powers.

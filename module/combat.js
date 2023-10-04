@@ -468,6 +468,11 @@ export class HeroSystem6eCombat extends Combat {
         // Guard
         if (!combatant) return;
 
+        // Reset movement history
+        if (dragRuler) {
+            await dragRuler.resetMovementHistory(this, combatant.id)
+        }
+
         // STUNNING
         // The character remains Stunned and can take no
         // Actions (not even Aborting to a defensive action) until his next
@@ -562,7 +567,7 @@ export class HeroSystem6eCombat extends Combat {
                 console.log(combatant.actor)
                 if (dragRuler?.getRangesFromSpeedProvider) {
                     if (dragRuler.getMovedDistanceFromToken(combatant.token.object) === 0) {
-                        let endValue = parseInt(combatant.actor.system.characteristics.end.value) -1
+                        let endValue = parseInt(combatant.actor.system.characteristics.end.value) - 1
                         await combatant.actor.update({ 'system.characteristics.end.value': endValue })
                     }
                 }
