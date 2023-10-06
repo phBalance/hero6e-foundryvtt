@@ -896,6 +896,34 @@ export class HeroSystem6eActor extends Actor {
             xml = parser.parseFromString(xml.trim(), 'text/xml')
         }
 
+        // Ask if BODY damage should be retained
+        let retainDamage = {
+            body: parseInt(this.system.characteristics?.body?.max) - parseInt(this.system.characteristics?.body?.value),
+            stun: parseInt(this.system.characteristics?.stun?.max) - parseInt(this.system.characteristics?.stun?.value),
+            end: parseInt(this.system.characteristics?.end?.max) - parseInt(this.system.characteristics?.end?.value)
+        }
+        if (retainDamage.body || retainDamage.stun || retainDamage.end) {
+            let content = `${this.name} has:<ul>`
+            if (retainDamage.body) content += `<li>${retainDamage.body} BODY damage</li>`
+            if (retainDamage.stun) content += `<li>${retainDamage.stun} STUN damage</li>`
+            if (retainDamage.end) content += `<li>${retainDamage.end} END used</li>`
+            content += `</ul><p>Do you want to apply this damage after the upload?</p>`
+            const confirmed = await Dialog.confirm({
+                title: "Retain damage after upload?", //game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+                content: content
+            })
+            if (confirmed === null) {
+                return ui.notifications.warn(`${this.name} upload cancled.`);
+            }
+            if (!confirmed) {
+                retainDamage = {
+                    body: 0,
+                    stun: 0,
+                    end: 0
+                }
+            }
+        }
+
         // Remove all existing effects
         await this.deleteEmbeddedDocuments("ActiveEffect", this.effects.map(o => o.id))
 
@@ -963,7 +991,7 @@ export class HeroSystem6eActor extends Actor {
                         // Treat like a MULTIPOWER for now
                         if (system.XMLID === "COMPOUNDPOWER") {
                             // The POSITION of COMPOUNDPOWER items starts at 0 and MULTIPOWER items start at 1
-                            let position = 0 
+                            let position = 0
                             for (let system2 of system.POWER) {
                                 let itemData2 = {
                                     name: system2.NAME || system2.ALIAS || system2.XMLID,
@@ -1003,7 +1031,7 @@ export class HeroSystem6eActor extends Actor {
                 levels: "0"
             }
         }
-        await HeroSystem6eItem.create(itemDataPerception, { parent: this })
+        await HeroSystem6eItem.create(itemDataPerception, { temporary: (this.id ? false : true), parent: this })
 
         // MANEUVERS
         for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
@@ -1102,6 +1130,21 @@ export class HeroSystem6eActor extends Actor {
         //await this._resetCharacteristicsFromHdc()
         //await this.calcCharacteristicsCost();
         //await CalcActorRealAndActivePoints(this) // move to Actor?
+
+        // Apply retained damage
+        if (retainDamage.body || retainDamage.stun || retainDamage.end) {
+            this.system.characteristics.body.value -= retainDamage.body
+            this.system.characteristics.stun.value -= retainDamage.stun
+            this.system.characteristics.end.value -= retainDamage.end
+            if (this.id) {
+                await this.update({
+                    'system.characteristics.body.value': this.system.characteristics.body.value,
+                    'system.characteristics.stun.value': this.system.characteristics.stun.value,
+                    'system.characteristics.end.value': this.system.characteristics.end.value,
+                })
+            }
+        }
+
 
     }
 
