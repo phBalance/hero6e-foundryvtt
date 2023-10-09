@@ -1239,7 +1239,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
 
 
-    const avad = item.findModsByXmlid( "AVAD");
+    const avad = item.findModsByXmlid("AVAD");
 
     // Check for conditional defenses
     let ignoreDefenseIds = []
@@ -1439,15 +1439,39 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense)
     }
 
+    // AUTOMATION immune to mental powers
+    if (item.system.class === "mental") {
+        defenseTags.push({
+            "name": "AUTOMATON",
+            "value": "immune",
+            "resistant": false,
+            "title": "Automations are immune to mental powers",
+        })
+        damageDetail.stun = 0
+        damageDetail.body = 0
+    }
+
     // AUTOMATION powers related to STUN
     const CANNOTBESTUNNED = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED")
     const NOSTUN1 = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1") // AUTOMATION Takes No STUN (loses abilities when takes BODY)
     const NOSTUN2 = token.actor.items.find(o => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2") //Takes No STUN
-    if (NOSTUN1) {
+    if (NOSTUN1 && damageDetail.stun > 0) {
+        defenseTags.push({
+            "name": "TAKES NO STUN",
+            "value": "immune",
+            "resistant": false,
+            "title": "Ignore the STUN damage from any attack",
+        })
         damageDetail.effects = damageDetail.effects + "Takes No STUN (loses abilities when takes BODY); "
         damageDetail.stun = 0;
     }
-    if (NOSTUN2) {
+    if (NOSTUN2 && damageDetail.stun > 0) {
+        defenseTags.push({
+            "name": "TAKES NO STUN",
+            "value": "immune",
+            "resistant": false,
+            "title": "Ignore the STUN damage from any attack",
+        })
         damageDetail.effects = damageDetail.effects + "Takes No STUN; "
         damageDetail.stun = 0;
     }
@@ -1482,7 +1506,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             }
         }
     }
-    effectsFinal = effectsFinal.replace(/; $/,"")
+    effectsFinal = effectsFinal.replace(/; $/, "")
 
     let cardData = {
         item: item,
