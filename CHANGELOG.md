@@ -4,6 +4,7 @@
 - Improved layout of DEFENSES tab.
 - Fixed SWIMMING cost per level.
 - Fixed costs for characteristics with ADD_MODIFIERS_TO_BASE. [#412](https://github.com/dmdorman/hero6e-foundryvtt/issues/412)
+- Added RIDING discount for TRANSPORT_FAMILIARITY. [#397](https://github.com/dmdorman/hero6e-foundryvtt/issues/397)
 
 
 # Version 3.0.44
