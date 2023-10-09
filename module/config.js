@@ -675,7 +675,7 @@ HERO.powers = [
             "movement"
         ],
         "costEnd": true,
-        "costPerLevel": 1,
+        "costPerLevel": 1 / 2,
         "ignoreFor": [
             "base2",
             "computer",
@@ -861,7 +861,7 @@ HERO.powers = [
         //"duration": "instant",  // Not true, hack for isPercievable
         "costEnd": true,
         "costPerLevel": 1,
-        
+
     },
     {
         "key": "GROWTH",
@@ -2060,6 +2060,7 @@ HERO.powers5e = [
         "key": "SWIMMING",
         base: 2,
         cost: 1,
+        "costPerLevel": 1,
     },
     {
         "key": "LEAPING",
@@ -2116,7 +2117,7 @@ HERO.powers5e = [
         costPerLevel: 5
     },
 
-    
+
 
 ]
 
@@ -2692,8 +2693,8 @@ HERO.powers5e = [
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
 HERO.ModifierOverride = {
-    "ADDITIONALED": { BASECOST: 5/2 },
-    "ADDITIONALPD": { BASECOST: 5/2 },
+    "ADDITIONALED": { BASECOST: 5 / 2 },
+    "ADDITIONALPD": { BASECOST: 5 / 2 },
     "ALWAYSOCCURS": { BASECOST: 0, MULTIPLIER: 2 },
     "AOE": { dc: true },
     "ARMORPIERCING": { BASECOST: 0.25, dc: true },

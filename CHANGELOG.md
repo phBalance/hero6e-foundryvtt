@@ -2,6 +2,8 @@
 - Fix for Quench Perception Skill tests.
 - Ability to retain BODY/STUN/END damage during HDC upload. [#367](https://github.com/dmdorman/hero6e-foundryvtt/issues/402)
 - Improved layout of DEFENSES tab.
+- Fixed SWIMMING cost per level.
+- Fixed costs for characteristics with ADD_MODIFIERS_TO_BASE. [#412](https://github.com/dmdorman/hero6e-foundryvtt/issues/412)
 
 
 # Version 3.0.44

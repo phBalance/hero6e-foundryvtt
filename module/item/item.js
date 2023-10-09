@@ -912,8 +912,9 @@ export class HeroSystem6eItem extends Item {
             return 0
 
 
-        // if (this.system.XMLID === "RUNNING")
-        //     console.log(this.name)
+        if (this.system.XMLID === "SWIMMING") {
+            console.log(this)
+        }
 
         // Everyman skills are free
         if (system.EVERYMAN) {
@@ -1076,8 +1077,9 @@ export class HeroSystem6eItem extends Item {
         let advantagesDC = 0;
         let minAdvantage = 0;
 
-        // if (this.system.XMLID === "TELEKINESIS")
-        //     console.log(this.name)
+        if (this.system.XMLID === "SWIMMING") {
+            console.log(this)
+        }
 
         for (let modifier of (system.MODIFIER || []).filter(o =>
             (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE)
@@ -1206,7 +1208,20 @@ export class HeroSystem6eItem extends Item {
             limitations += _myLimitation
         }
 
+        if (this.system.XMLID === "SWIMMING") {
+            console.log(this)
+        }
+
         let _realCost = system.activePoints / (1 + limitations)
+
+        // ADD_MODIFIERS_TO_BASE
+        if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
+            const _base = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].core
+            const _cost = getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor }).cost || 1
+            const _baseCost = _base * _cost
+            const _discount = _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations))
+            _realCost -= _discount
+        }
 
 
         // MULTIPOWER
