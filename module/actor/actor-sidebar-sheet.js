@@ -289,14 +289,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
         }
 
-        // Powers hack
-        // let powersArray = []
-        // for (let key of Object.keys(CONFIG.HERO.powers))
-        // {
-        //     powersArray.push({ key, ... CONFIG.HERO.powers[key]});
-        // }
-        // console.log(powersArray)
-
 
         // Characteristics
         const characteristicSet = []
@@ -305,35 +297,13 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         //let characteristics = CONFIG.HERO.characteristics.filter(o=> o[data.actor.system.is5e ? "cost5e" : "cost"] != undefined ) //Object.keys(CONFIG.HERO.characteristicCosts) //Object.entries(data.actor.system.characteristics)
         let powers = getCharactersticInfoArrayForActor(this.actor);
 
-        // Characteristics for 5e
-        // if (data.actor.system.is5e) {
-        //     characteristicKeys = Object.keys(CONFIG.HERO.characteristicCosts5e)
-        // }
 
         for (const powerInfo of powers) {
 
 
-            // Some actor types do not show all characteristics
-            //const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this.actor });
-            // if (powerInfo && powerInfo.ignoreFor && powerInfo.ignoreFor.includes(this.actor.type)) {
-            //     continue;
-            // }
-            // if (powerInfo && powerInfo.onlyFor && !powerInfo.onlyFor.includes(this.actor.type)) {
-            //     continue;
-            // }
-
             this.actor.updateRollable(powerInfo.key.toLowerCase())
 
             let characteristic = { ...data.actor.system.characteristics[powerInfo.key.toLowerCase()] }
-
-            // Automation has no EGO, OMCV, or DMCV
-            //if (item.actor.type === "automaton" && ["ego", "omcv", "dmcv"].includes(key)) continue;
-
-            // if (!characteristic) {
-            //     characteristic = {}
-            // }
-
-
 
             characteristic.key = powerInfo.key.toLowerCase();
             characteristic.value = parseInt(characteristic.value) || 0;

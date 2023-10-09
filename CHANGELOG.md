@@ -1,6 +1,8 @@
 # Version 3.0.45
 - Fix for Quench Perception Skill tests.
 - Ability to retain BODY/STUN/END damage during HDC upload. [#367](https://github.com/dmdorman/hero6e-foundryvtt/issues/402)
+- Improved layout of DEFENSES tab.
+
 
 # Version 3.0.44
 - Fix some NaN issues with Maneuvers and Active Points that was unnecessarily calling migration scripts for most tokens.  Larger worlds may still experience a long migration for 3.0.44, but future migrations should be much quicker.
