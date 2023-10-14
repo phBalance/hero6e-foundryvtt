@@ -1566,7 +1566,7 @@ export function registerUploadTests(quench) {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
-                    assert.equal(item.system.description, "(39 points total), Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)");
+                    assert.equal(item.system.description, "39 points, Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)");
                 });
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({

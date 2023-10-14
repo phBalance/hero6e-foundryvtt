@@ -5,7 +5,12 @@
 - Fixed SWIMMING cost per level.
 - Fixed costs for characteristics with ADD_MODIFIERS_TO_BASE. [#412](https://github.com/dmdorman/hero6e-foundryvtt/issues/412)
 - Added RIDING discount for TRANSPORT_FAMILIARITY. [#397](https://github.com/dmdorman/hero6e-foundryvtt/issues/397)
-- Automations are immune to mental attacks. [#338](https://github.com/dmdorman/hero6e-foundryvtt/issues/338)
+- Automations are now immune to mental attacks. [#338](https://github.com/dmdorman/hero6e-foundryvtt/issues/338)
+- Improved default AID/DRAIN power name.
+- Improved POWERDEFENSE description.
+- Support for INCREASED STUN MULTIPLIER.
+- Fix for Combat Skill Levels that were not working with new HDC uploads.
+
 
 
 # Version 3.0.44

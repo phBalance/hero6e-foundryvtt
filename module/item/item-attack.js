@@ -1460,7 +1460,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             "name": "TAKES NO STUN",
             "value": "immune",
             "resistant": false,
-            "title": "Ignore the STUN damage from any attack",
+            "title": "Ignore the STUN damage from any attack; loses abilities when takes BODY",
         })
         damageDetail.effects = damageDetail.effects + "Takes No STUN (loses abilities when takes BODY); "
         damageDetail.stun = 0;
@@ -1589,7 +1589,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
     }
 
     if (item.actor.id === token.actor.id && ["DRAIN", "TRANSFER"].includes(item.system.XMLID)) {
-        return ui.notifications.error(`${item.system.XMLID} attacker (${item.actor.name}) and defender (${token.actor.name}) cannot be the same.`);
+        await ui.notifications.warn(`${item.system.XMLID} attacker (${item.actor.name}) and defender (${token.actor.name}) are the same.`);
     }
 
 
@@ -1938,7 +1938,11 @@ async function _calcDamage(damageResult, item, options) {
 
     let hasStunMultiplierRoll = false;
     //let renderedStunMultiplierRoll = null;
-    let stunMultiplier = 1;
+
+    const INCREASEDSTUNMULTIPLIER = item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")
+
+    let stunMultiplier = 1 + parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0)
+    
     let noHitLocationsPower = item.system.noHitLocations || false;
 
 
@@ -2018,6 +2022,8 @@ async function _calcDamage(damageResult, item, options) {
         } else {
             stunMultiplier = stunResult.total;
         }
+
+        stunMultiplier += parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0)
 
         if (options.stunmultiplier) {
             stunMultiplier = options.stunmultiplier

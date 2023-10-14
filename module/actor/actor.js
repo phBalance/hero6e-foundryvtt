@@ -983,6 +983,12 @@ export class HeroSystem6eActor extends Actor {
                         case "FOLLOWER":
                             itemData.name = "Followers";
                             break;
+                        case "AID":
+                        case "DRAIN":
+                            if (!system.NAME) {
+                                itemData.name = system?.ALIAS + " " + system?.INPUT
+                            }
+                            break;
                     }
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, { parent: this })

@@ -1019,14 +1019,13 @@ export class HeroSystem6eItem extends Item {
             }
 
             // TRANSPORT_FAMILIARITY checking more than 2 animals costs same as entire category
-            if (!adder.SELECTED && subAdderCost > adderBaseCost)
-            {
+            if (!adder.SELECTED && subAdderCost > adderBaseCost) {
                 subAdderCost = adderBaseCost
             }
 
             // Riding discount
             if (this.system.XMLID === "TRANSPORT_FAMILIARITY" && this.actor && subAdderCost > 0) {
-                if (adder.XMLID === "RIDINGANIMALS" && this.actor.items.find(o=> o.system.XMLID === "RIDING")) {
+                if (adder.XMLID === "RIDINGANIMALS" && this.actor.items.find(o => o.system.XMLID === "RIDING")) {
                     subAdderCost -= 1
                 }
             }
@@ -1295,7 +1294,8 @@ export class HeroSystem6eItem extends Item {
 
         switch (configPowerInfo?.xmlid || system.XMLID) {
             case "MENTALDEFENSE":
-                system.description = `${system.ALIAS} (${system.value} points total)`
+            case "POWERDEFENSE":
+                system.description = `${system.ALIAS} ${system.value} points`
                 break;
             case "FOLLOWER":
                 system.description = system.ALIAS.replace("Followers: ", "")
@@ -2203,6 +2203,7 @@ export class HeroSystem6eItem extends Item {
         // DRAIN (not implemented)
         if (xmlid == "DRAIN") {
             this.system.class = 'drain'
+            this.system.killing = true
             this.system.usesStrength = false
             this.system.noHitLocations = true
         }
