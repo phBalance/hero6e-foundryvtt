@@ -45,7 +45,8 @@ export class HeroSystem6eCombat extends Combat {
             if (!combatant.actor) continue;
 
             // Produce an initiative roll for the Combatant
-            let dexValue = combatant.actor.system.characteristics.dex.value
+            let characteistic = combatant.actor.system?.initiativeCharacteristic || 'dex'
+            let dexValue = combatant.actor.system.characteristics[characteistic].value
             let intValue = combatant.actor.system.characteristics.int.value
             let initativeValue = dexValue + (intValue / 100)
 

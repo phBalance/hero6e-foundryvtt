@@ -1290,8 +1290,13 @@ export class HeroSystem6eActor extends Actor {
         //     createEffects(item)
         // }
 
-
-
+        // Initiative Characteristic
+        if (this.system.initiativeCharacteristic === undefined) {
+            if (this.system.characteristics.ego.value > this.system.characteristics.dex.value &&
+                this.system.characteristics.omcv.value >= this.system.characteristics.ocv.value) {
+                await this.update({ 'system.initiativeCharacteristic': "ego" })
+            }
+        }
 
         // Combat Skill Levels - Enumerate attacks that use OCV
         for (let cslItem of this.items.filter(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID))) {

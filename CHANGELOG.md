@@ -1,3 +1,6 @@
+# Version 3.0.46
+- Ability to use EGO for initiative.  Can be changed on OTHER tab.  New HDC imports will assume EGO when OMCV >= OCV and EGO > DEX. [#419](https://github.com/dmdorman/hero6e-foundryvtt/issues/419)
+
 # Version 3.0.45
 - Fix for Quench Perception Skill tests.
 - Ability to retain BODY/STUN/END damage during HDC upload. [#367](https://github.com/dmdorman/hero6e-foundryvtt/issues/402)
