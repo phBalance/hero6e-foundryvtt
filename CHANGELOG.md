@@ -10,7 +10,7 @@
 - Improved POWERDEFENSE description.
 - Support for INCREASED STUN MULTIPLIER.
 - Fix for Combat Skill Levels that were not working with new HDC uploads.
-
+- Fix for Combat Luck where an extra 3 rPD/rED was added. [#414](https://github.com/dmdorman/hero6e-foundryvtt/issues/414)
 
 
 # Version 3.0.44

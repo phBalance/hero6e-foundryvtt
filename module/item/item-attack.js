@@ -1440,7 +1440,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // AUTOMATION immune to mental powers
-    if (item.system.class === "mental") {
+    if (item.system.class === "mental" && token?.actor?.type === "automaton") {
         defenseTags.push({
             "name": "AUTOMATON",
             "value": "immune",
@@ -1942,7 +1942,7 @@ async function _calcDamage(damageResult, item, options) {
     const INCREASEDSTUNMULTIPLIER = item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")
 
     let stunMultiplier = 1 + parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0)
-    
+
     let noHitLocationsPower = item.system.noHitLocations || false;
 
 

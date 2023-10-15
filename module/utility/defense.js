@@ -209,12 +209,12 @@ function determineDefense(targetActor, attackItem, options) {
             switch (attackType) {
                 case 'physical':
                     i.system.defenseType = "pd"
-                    value += (parseInt(i.system.value) || 0) * 3
+                    value = (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
                 case 'energy':
                     i.system.defenseType = "ed"
-                    value += (parseInt(i.system.value) || 0) * 3
+                    value = (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
             }
