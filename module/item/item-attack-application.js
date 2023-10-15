@@ -101,7 +101,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // CSL radioBoxes names
             data.csl = []
-            for (let c = 0; c < parseInt(csl.skill.system.LEVELS.value); c++) {
+            for (let c = 0; c < parseInt(csl.skill.system.LEVELS) || parseInt(csl.skill.system.LEVELS.value) || 0; c++) {
                 data.csl.push({ name: `system.csl.${c}`, value: csl.skill.system.csl ? csl.skill.system.csl[c] : 'undefined' })
             }
         } else {

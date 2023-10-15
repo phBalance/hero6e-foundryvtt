@@ -1,3 +1,18 @@
+# Version 3.0.45
+- Fix for Quench Perception Skill tests.
+- Ability to retain BODY/STUN/END damage during HDC upload. [#367](https://github.com/dmdorman/hero6e-foundryvtt/issues/402)
+- Improved layout of DEFENSES tab.
+- Fixed SWIMMING cost per level.
+- Fixed costs for characteristics with ADD_MODIFIERS_TO_BASE. [#412](https://github.com/dmdorman/hero6e-foundryvtt/issues/412)
+- Added RIDING discount for TRANSPORT_FAMILIARITY. [#397](https://github.com/dmdorman/hero6e-foundryvtt/issues/397)
+- Automations are now immune to mental attacks. [#338](https://github.com/dmdorman/hero6e-foundryvtt/issues/338)
+- Improved default AID/DRAIN power name.
+- Improved POWERDEFENSE description.
+- Support for INCREASED STUN MULTIPLIER.
+- Fix for Combat Skill Levels that were not working with new HDC uploads.
+- Fix for Combat Luck where an extra 3 rPD/rED was added. [#414](https://github.com/dmdorman/hero6e-foundryvtt/issues/414)
+
+
 # Version 3.0.44
 - Fix some NaN issues with Maneuvers and Active Points that was unnecessarily calling migration scripts for most tokens.  Larger worlds may still experience a long migration for 3.0.44, but future migrations should be much quicker.
 - Partial support for TELEPATHY. [#402](https://github.com/dmdorman/hero6e-foundryvtt/issues/402)

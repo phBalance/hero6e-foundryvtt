@@ -912,8 +912,9 @@ export class HeroSystem6eItem extends Item {
             return 0
 
 
-        // if (this.system.XMLID === "RUNNING")
-        //     console.log(this.name)
+        if (this.system.XMLID === "TRANSPORT_FAMILIARITY") {
+            console.log(this)
+        }
 
         // Everyman skills are free
         if (system.EVERYMAN) {
@@ -1006,27 +1007,43 @@ export class HeroSystem6eItem extends Item {
                 adderCost += Math.ceil(adderBaseCost * adderLevels)  // ceil is for ENTANGLE +5 PD
             }
 
+            let subAdderCost = 0
+
             for (let adder2 of (adder.ADDER || [])) {
                 let adderBaseCost = adder2.baseCost
 
                 if (adder2.SELECTED != false) {
                     let adderLevels = Math.max(1, parseInt(adder2.LEVELS))
-                    adderCost += Math.ceil(adderBaseCost * adderLevels)
+                    subAdderCost += Math.ceil(adderBaseCost * adderLevels)
                 }
             }
+
+            // TRANSPORT_FAMILIARITY checking more than 2 animals costs same as entire category
+            if (!adder.SELECTED && subAdderCost > adderBaseCost) {
+                subAdderCost = adderBaseCost
+            }
+
+            // Riding discount
+            if (this.system.XMLID === "TRANSPORT_FAMILIARITY" && this.actor && subAdderCost > 0) {
+                if (adder.XMLID === "RIDINGANIMALS" && this.actor.items.find(o => o.system.XMLID === "RIDING")) {
+                    subAdderCost -= 1
+                }
+            }
+
+            adderCost += subAdderCost
 
         }
 
 
         // Categorized skills cost 2 per catory and +1 per each subcategory.
         // If no catagories selected then assume 3 pts
-        if (configPowerInfo?.categorized && adderCost >= 4) {
-            if (adderCost == 0) {
-                adderCost = 3
-            } else {
-                adderCost = Math.floor(adderCost / 2) + 1
-            }
-        }
+        // if (configPowerInfo?.categorized && adderCost >= 4) {
+        //     if (adderCost == 0) {
+        //         adderCost = 3
+        //     } else {
+        //         adderCost = Math.floor(adderCost / 2) + 1
+        //     }
+        // }
 
 
 
@@ -1076,8 +1093,9 @@ export class HeroSystem6eItem extends Item {
         let advantagesDC = 0;
         let minAdvantage = 0;
 
-        // if (this.system.XMLID === "TELEKINESIS")
-        //     console.log(this.name)
+        // if (this.system.XMLID === "SWIMMING") {
+        //     console.log(this)
+        // }
 
         for (let modifier of (system.MODIFIER || []).filter(o =>
             (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE)
@@ -1206,7 +1224,20 @@ export class HeroSystem6eItem extends Item {
             limitations += _myLimitation
         }
 
+        // if (this.system.XMLID === "SWIMMING") {
+        //     console.log(this)
+        // }
+
         let _realCost = system.activePoints / (1 + limitations)
+
+        // ADD_MODIFIERS_TO_BASE
+        if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
+            const _base = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].core
+            const _cost = getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor }).cost || 1
+            const _baseCost = _base * _cost
+            const _discount = _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations))
+            _realCost -= _discount
+        }
 
 
         // MULTIPOWER
@@ -1263,7 +1294,8 @@ export class HeroSystem6eItem extends Item {
 
         switch (configPowerInfo?.xmlid || system.XMLID) {
             case "MENTALDEFENSE":
-                system.description = `${system.ALIAS} (${system.value} points total)`
+            case "POWERDEFENSE":
+                system.description = `${system.ALIAS} ${system.value} points`
                 break;
             case "FOLLOWER":
                 system.description = system.ALIAS.replace("Followers: ", "")
@@ -2171,6 +2203,7 @@ export class HeroSystem6eItem extends Item {
         // DRAIN (not implemented)
         if (xmlid == "DRAIN") {
             this.system.class = 'drain'
+            this.system.killing = true
             this.system.usesStrength = false
             this.system.noHitLocations = true
         }

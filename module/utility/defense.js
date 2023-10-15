@@ -150,12 +150,12 @@ function determineDefense(targetActor, attackItem, options) {
             }
         }
 
-        if (!value && ["POWERDEFENSE"].includes(xmlid)) {
+        if ( ["POWERDEFENSE"].includes(xmlid)) {
             switch (attackType) {
                 case 'drain':
                 case 'transfer':
                     i.system.defenseType = "powd"
-                    value = parseInt(i.system.value) || 0
+                    //value += parseInt(i.system.value) || 0
                     break;
             }
         }
@@ -209,12 +209,12 @@ function determineDefense(targetActor, attackItem, options) {
             switch (attackType) {
                 case 'physical':
                     i.system.defenseType = "pd"
-                    value += (parseInt(i.system.value) || 0) * 3
+                    value = (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
                 case 'energy':
                     i.system.defenseType = "ed"
-                    value += (parseInt(i.system.value) || 0) * 3
+                    value = (parseInt(i.system.value) || 0) * 3
                     i.system.resistant = true
                     break;
             }
@@ -350,21 +350,21 @@ function determineDefense(targetActor, attackItem, options) {
         case 'physical':
             defenseValue = PD;
             resistantValue = rPD;
-            impenetrableValue = Math.max(PD, rPD);
+            //impenetrableValue = Math.max(PD, rPD);
             damageReductionValue = DRP;
             damageNegationValue = DNP;
             break;
         case 'energy':
             defenseValue = ED;
             resistantValue = rED;
-            impenetrableValue = Math.max(ED, rED);
+            //impenetrableValue = Math.max(ED, rED);
             damageReductionValue = DRE;
             damageNegationValue = DNE;
             break;
         case 'mental':
             defenseValue = MD;
             resistantValue = rMD;
-            impenetrableValue = Math.max(MD, rMD);
+            //impenetrableValue = Math.max(MD, rMD);
             damageReductionValue = DRM;
             damageNegationValue = DNM;
             break;
@@ -372,15 +372,15 @@ function determineDefense(targetActor, attackItem, options) {
         case 'drain':
         case 'transfer':
             defenseValue = POWD;
-            resistantValue = rPOWD;
-            impenetrableValue = Math.max(POWD, rPOWD);
+            resistantValue = Math.max(POWD, rPOWD);
+            //impenetrableValue = Math.max(POWD, rPOWD);
             damageReductionValue = DRM;
             damageNegationValue = DNM;
             break;
         case 'avad':
             defenseValue = PD + ED + MD + POWD;
             resistantValue = rPD + rED + rMD + rPOWD;
-            impenetrableValue = Math.max(PD, rPD) + Math.max(ED, rED) + Math.max(MD, rMD) + Math.max(POWD, rPOWD);
+            //impenetrableValue = Math.max(PD, rPD) + Math.max(ED, rED) + Math.max(MD, rMD) + Math.max(POWD, rPOWD);
             damageReductionValue = DRM;
             damageNegationValue = DNM;
     }
