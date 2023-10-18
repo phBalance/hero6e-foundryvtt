@@ -246,6 +246,17 @@ export function convertToDcFromItem(item, options) {
         tags.push({ value: `${str5.signedString()}DC`, name: 'TK' })
     }
 
+    // ActiveEffects
+    if (item.actor) {
+        for (const ae of item.actor.appliedEffects.filter(o => !o.disabled && o.flags?.target === item.uuid)) {
+            for (const change of ae.changes.filter(o => o.key === 'system.value' && o.value != 0 && o.mode === 2)) {
+                const _value = parseInt(change.value)
+                dc += _value
+                tags.push({ value: `${_value.signedString()}DC`, name: ae.name })
+            }
+        }
+    }
+
 
     // Add in Haymaker to any non-maneuver attack DCV based attack
     if (item.actor) {
@@ -266,7 +277,7 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
-    if (item.actor?.statuses?.has("underwater")){
+    if (item.actor?.statuses?.has("underwater")) {
         dc = Math.max(0, dc - 2);
         tags.push({ value: `-2DC`, name: 'Underwater' });
     }

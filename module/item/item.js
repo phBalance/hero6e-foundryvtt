@@ -473,6 +473,10 @@ export class HeroSystem6eItem extends Item {
             changed = true
         }
 
+        // ActiveEffects
+        // for (const ae of this.effects.filter(o=> !o.disabled)) {
+        //     console.log(ae)
+        // }
 
         // CHARGES
         let CHARGES = this.findModsByXmlid("CHARGES")

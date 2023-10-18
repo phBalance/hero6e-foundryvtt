@@ -3,6 +3,7 @@ import { HeroSystem6eItem } from '../item/item.js'
 import { HEROSYS } from "../herosystem6e.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
 import { getPowerInfo, getCharactersticInfoArrayForActor } from "../utility/util.js"
+import { AdjustmentSources } from "../utility/adjustment.js"
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -869,7 +870,7 @@ export class HeroSystem6eActor extends Actor {
             if (duration === "constant") {
                 results.push(item)
             } else {
-                const NONPERSISTENT = item.system.modifiers.find(o => o.XMLID === "NONPERSISTENT")
+                const NONPERSISTENT = (item.system.modifiers || []).find(o => o.XMLID === "NONPERSISTENT")
                 if (NONPERSISTENT) {
                     results.push(item)
                 }
@@ -949,6 +950,11 @@ export class HeroSystem6eActor extends Actor {
                 changes[`system.-=${key}`] = null
             }
         }
+        for (const key of Object.keys(this.system.characteristics)) {
+            if (!Object.keys(_system.characteristics).includes(key)) {
+                changes[`system.characteristics.-=${key}`] = null
+            }
+        }
         if (this.id) {
             await this.update(changes)
         }
@@ -1022,6 +1028,17 @@ export class HeroSystem6eActor extends Actor {
 
                 }
                 delete heroJson.CHARACTER[itemTag]
+            }
+        }
+
+        // Check for valid AID targets
+        for (let item of this.items.filter(o => o.system.XMLID === "AID")) {
+
+            for (let input of item.system.INPUT.split(",")) {
+                input = input.toLowerCase().trim()
+                if (!Object.keys(AdjustmentSources(this)).includes(input.toUpperCase())) {
+                    await ui.notifications.warn(`${this.name} has an unsupported ${item.name} property (${input}).  Use characteristic abbreviations or power names seperated by commas.`);
+                }
             }
         }
 
@@ -1294,7 +1311,11 @@ export class HeroSystem6eActor extends Actor {
         if (this.system.initiativeCharacteristic === undefined) {
             if (this.system.characteristics.ego.value > this.system.characteristics.dex.value &&
                 this.system.characteristics.omcv.value >= this.system.characteristics.ocv.value) {
-                await this.update({ 'system.initiativeCharacteristic': "ego" })
+                if (this.id) {
+                    await this.update({ 'system.initiativeCharacteristic': "ego" })
+                } else {
+                    this.system.initiativeCharacteristic = "ego"
+                }
             }
         }
 

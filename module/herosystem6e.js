@@ -609,12 +609,20 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                     let value = parseInt(ae.changes[0].value);
                     let XMLID = ae.flags.XMLID;
                     let target = ae.flags.target;
+                    const powerTargetX = actor.items.find(o => o.uuid === target)
                     let source = ae.flags.source;
-                    let ActivePoints = ae.flags.activePoints;
-                    let costPerPoint = parseFloat(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
+                    let ActivePoints = parseInt(ae.flags.activePoints)
+                    let _value = parseInt(ae.changes[0].value)
+                    let _APtext = _value === ActivePoints ? "" : ` (${ActivePoints}AP)`
+
+                    const powerInfoX = getPowerInfo({ xmlid: target.toUpperCase(), actor: aeActor })
+                    const costPerPointX = (powerTargetX ? parseFloat(powerTargetX.system.activePoints / powerTargetX.system.value) : parseFloat(powerInfoX?.cost || powerInfoX?.costPerLevel)) * AdjustmentMultiplier(target.toUpperCase());
+
+
+                    let costPerPoint = costPerPointX //parseFloat(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
                     let newLevels = parseInt(ActivePoints / costPerPoint);
                     ae.changes[0].value = value < 0 ? -parseInt(newLevels) : parseInt(newLevels);
-                    ae.name = `${XMLID} ${ae.changes[0].value} ${target.toUpperCase()} [${source}]`;
+                    ae.name = `${XMLID} ${parseInt(ae.changes[0].value).signedString()}${_APtext} ${powerTargetX?.name || target.toUpperCase()} [${source}]`;
 
                     // If ActivePoints <= 0 then remove effect
                     if (ae.flags.activePoints <= 0) {
@@ -632,11 +640,11 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                         actor.update({ [`system.characteristics.${target}.value`]: newValue })
                     } else
 
-                    // AID fade (VALUE = max)
-                    {
-                        let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
-                        if (game.user.isGM) actor.update({ [`system.characteristics.${target}.value`]: newValue })
-                    }
+                        // AID fade (VALUE = max)
+                        if (actor.system.characteristics?.[target]) {
+                            let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
+                            if (game.user.isGM) actor.update({ [`system.characteristics.${target}.value`]: newValue })
+                        }
 
                     if (ae.flags.activePoints <= 0) break;
                 }
