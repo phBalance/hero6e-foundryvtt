@@ -3,6 +3,7 @@ import { HeroSystem6eItem } from '../item/item.js'
 import { HEROSYS } from "../herosystem6e.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
 import { getPowerInfo, getCharactersticInfoArrayForActor } from "../utility/util.js"
+import { AdjustmentSources } from "../utility/adjustment.js"
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -869,7 +870,7 @@ export class HeroSystem6eActor extends Actor {
             if (duration === "constant") {
                 results.push(item)
             } else {
-                const NONPERSISTENT = item.system.modifiers.find(o => o.XMLID === "NONPERSISTENT")
+                const NONPERSISTENT = (item.system.modifiers || []).find(o => o.XMLID === "NONPERSISTENT")
                 if (NONPERSISTENT) {
                     results.push(item)
                 }
@@ -949,6 +950,11 @@ export class HeroSystem6eActor extends Actor {
                 changes[`system.-=${key}`] = null
             }
         }
+        for (const key of Object.keys(this.system.characteristics)) {
+            if (!Object.keys(_system.characteristics).includes(key)) {
+                changes[`system.characteristics.-=${key}`] = null
+            }
+        }
         if (this.id) {
             await this.update(changes)
         }
@@ -967,6 +973,26 @@ export class HeroSystem6eActor extends Actor {
                 //changes[`system.characteristics.${ key.toLowerCase() } `] = value
             }
             delete heroJson.CHARACTER.CHARACTERISTICS
+        }
+
+        // is5e
+        if (typeof this.system.CHARACTER?.TEMPLATE == 'string') {
+            if (this.system.CHARACTER.TEMPLATE.includes("builtIn.") && !this.system.CHARACTER.TEMPLATE.includes("6E.") && !this.system.is5e) {
+                //changes[`system.is5e`] = true
+                this.system.is5e = true
+            }
+            if (this.system.CHARACTER.TEMPLATE.includes("builtIn.") && this.system.CHARACTER.TEMPLATE.includes("6E.") && this.system.is5e) {
+                //changes[`system.is5e`] = false
+                this.system.is5e = false
+            }
+        }
+        if (this.system.COM && !this.system.is5e) {
+            //changes[`system.is5e`] = true
+            this.system.is5e = true
+        }
+
+        if (this.system.is5e && this.id) {
+            await this.update({ 'system.is5e': this.system.is5e})
         }
 
         // ITEMS
@@ -1022,6 +1048,17 @@ export class HeroSystem6eActor extends Actor {
 
                 }
                 delete heroJson.CHARACTER[itemTag]
+            }
+        }
+
+        // Check for valid AID targets
+        for (let item of this.items.filter(o => o.system.XMLID === "AID")) {
+
+            for (let input of item.system.INPUT.split(",")) {
+                input = input.toLowerCase().trim()
+                if (!Object.keys(AdjustmentSources(this)).includes(input.toUpperCase())) {
+                    await ui.notifications.warn(`${this.name} has an unsupported ${item.name} property (${input}).  Use characteristic abbreviations or power names seperated by commas.`);
+                }
             }
         }
 
@@ -1244,6 +1281,11 @@ export class HeroSystem6eActor extends Actor {
             this.system.is5e = true
         }
 
+        if (this.system.is5e && this.id) {
+            await this.update({ [`system.is5e`]: this.system.is5e })
+        }
+
+        // Chararacteristics
         for (const key of Object.keys(this.system.characteristics)) {
             if (key === "running")
                 console.log(key)
@@ -1290,8 +1332,17 @@ export class HeroSystem6eActor extends Actor {
         //     createEffects(item)
         // }
 
-
-
+        // Initiative Characteristic
+        if (this.system.initiativeCharacteristic === undefined) {
+            if (this.system.characteristics.ego.value > this.system.characteristics.dex.value &&
+                this.system.characteristics.omcv.value >= this.system.characteristics.ocv.value) {
+                if (this.id) {
+                    await this.update({ 'system.initiativeCharacteristic': "ego" })
+                } else {
+                    this.system.initiativeCharacteristic = "ego"
+                }
+            }
+        }
 
         // Combat Skill Levels - Enumerate attacks that use OCV
         for (let cslItem of this.items.filter(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID))) {

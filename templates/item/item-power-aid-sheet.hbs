@@ -30,14 +30,14 @@
         </div>
 
         <!-- AID (possibly up to 4 depending on modifiers) -->
+        {{#each inputs as |input id|}}
         <div class="form-group">
-            <label>Aid Target</label>
-            
-            <select name="system.INPUT" data-dtype="text" {{#if system.INPUT}}_disabled{{/if}}>
-                {{selectOptions aidSources selected=system.INPUT}}
-                
+            <label>Aid Target {{id}}</label>
+            <select name="inputs.{{id}}" data-dtype="text">
+                {{selectOptions @root/aidSources selected=input}}
             </select>
         </div>
+        {{/each}}
 
 
         <hr>

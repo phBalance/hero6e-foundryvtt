@@ -27,7 +27,7 @@ export function getPowerInfo(options) {
     const actor = options?.item?.actor || options?.actor
     let powerInfo = CONFIG.HERO.powers.find(o => o.key === xmlid); //] || CONFIG.HERO.powers5e[xmlid]
     //let characteristicInfo = CONFIG.HERO.characteristicCosts[xmlid.toLowerCase()] || CONFIG.HERO.characteristicCosts5e[xmlid.toLowerCase()]
-    if (actor?.system?.is5e) {
+    if (powerInfo || actor?.system?.is5e) {
         powerInfo = { ...powerInfo, ...CONFIG.HERO.powers5e.find(o=> o.key === xmlid)}
     }
 

@@ -238,6 +238,12 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // A select list of possible AID from sources
         if (item.system.XMLID == "AID") {
             data.aidSources = AdjustmentSources(this.actor)
+            data.inputs = []
+            const _inputs = item.system.INPUT.split(",")
+            let count = item.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1
+            for (let i = 0; i < count; i++) {
+                data.inputs.push(_inputs?.[i]?.toUpperCase()?.trim() || "")
+            }
         }
 
         // TRANSFER
@@ -428,6 +434,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 power.LEVELS = parseInt(expandedData.rec) || 1;
                 await this.item.update({ 'system.powers': this.item.system.powers });
             }
+        }
+
+        // AID
+        if (expandedData.inputs && this.item.system.XMLID === "AID") {
+            let arry = []
+            for(let i of Object.keys(expandedData.inputs)) {
+                arry.push(expandedData.inputs[i])
+            }
+            await this.item.update({ 'system.INPUT': arry.join(", ")})
         }
 
 

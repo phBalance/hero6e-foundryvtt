@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.js";
-import { getPowerInfo} from '../utility/util.js'
+import { getPowerInfo } from '../utility/util.js'
 
 export function AdjustmentSources(actor) {
 
@@ -11,10 +11,13 @@ export function AdjustmentSources(actor) {
         !o.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
         (!o.onlyFor || o.onlyFor.includes(actor.type))
     );
-    
-    //const characteristics = (!actor || actor.system.is5e) ? CONFIG.HERO.characteristics5e : CONFIG.HERO.characteristics
-    
-    
+
+    // Attack powers
+    for (const item of actor.items.filter(o => o.type === 'power' && o.system.XMLID != 'MULTIPOWER')) {
+        powers.push({ key: item.name })
+    }
+
+
     for (const power of powers) {
         let key = power.key;
         choices[key.toUpperCase()] = key.toUpperCase();
@@ -33,9 +36,8 @@ export function AdjustmentSources(actor) {
     // }
 
     // Add * to defensive powers
-    for(let key of Object.keys(choices))
-    {
-        if (AdjustmentMultiplier(key) > 1) {
+    for (let key of Object.keys(choices)) {
+        if (AdjustmentMultiplier(key, actor) > 1) {
             choices[key] += "*"
         }
     }
@@ -54,10 +56,15 @@ export function AdjustmentSources(actor) {
     return choices;
 }
 
-export function AdjustmentMultiplier(XMLID) {
+export function AdjustmentMultiplier(XMLID, actor) {
     if (!XMLID) return 1;
-    const configPowerInfo = getPowerInfo({ xmlid: XMLID })
-    if (!configPowerInfo) return 1;
+    let configPowerInfo = getPowerInfo({ xmlid: XMLID })
+    if (!configPowerInfo) {
+        if (actor) {
+            configPowerInfo = getPowerInfo({ xmlid: actor.items.find(o => o.name.toUpperCase() === XMLID)?.system?.XMLID })
+        }
+        if (!configPowerInfo) return 1;
+    }
     if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
     if (configPowerInfo.powerType?.includes("defense")) return 2;
     return 1;
