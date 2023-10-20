@@ -1278,7 +1278,7 @@ export function registerFullTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     await actor.uploadFromXml(contents)
-                    assert.equal(actor.system.realCost, 732);
+                    assert.equal(actor.system.realCost, 657);
                 });
 
             });

@@ -835,6 +835,47 @@ export class HeroSystem6eItem extends Item {
 
         }
 
+        // 5e GROWTH
+        // Growth (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
+        if (changed && this.id && this.system.XMLID === "GROWTH") {
+            const strAdd = Math.floor(this.system.value) * 5
+            const bodyAdd = Math.floor(this.system.value)
+            const stunAdd = Math.floor(this.system.value)
+
+            let activeEffect = Array.from(this.effects)?.[0] || {}
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`
+            activeEffect.icon = 'icons/svg/upgrade.svg'
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.str.max",
+                    value: strAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.body.max",
+                    value: bodyAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                },
+                {
+                    key: "system.characteristics.stun.max",
+                    value: stunAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                }
+            ]
+            activeEffect.transfer = true
+
+            if (activeEffect.update) {
+                await activeEffect.update({ 'name': activeEffect.name, 'changes': activeEffect.changes })
+                await this.actor.update({ [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max })
+                await this.actor.update({ [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max })
+                await this.actor.update({ [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max })
+
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+            }
+
+        }
+
         return changed
     }
 
@@ -959,7 +1000,7 @@ export class HeroSystem6eItem extends Item {
             system.costPerLevel ||
             configPowerInfo?.costPerLevel ||
             configPowerInfo?.cost ||
-            (configPowerInfo?.powerType == 'skill' ? 2 : 0) || 
+            (configPowerInfo?.powerType == 'skill' ? 2 : 0) ||
             baseCost ||
             1
         )
@@ -1302,6 +1343,14 @@ export class HeroSystem6eItem extends Item {
         //const parent = this.parent()
 
         switch (configPowerInfo?.xmlid || system.XMLID) {
+            case "DENSITYINCREASE":
+                // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
+                system.description = `${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass, +${system.value * 5} STR, +${system.value} PD/ED, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB)`
+                break;
+            case "GROWTH":
+                //Growth (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide), Reduced Endurance (0 END; +1/2), Persistent (+1/2); Always On (-1/2), IIF (-1/4)
+                system.description = `${system.ALIAS} (+${system.value * 5} STR, +${system.value} BODY, +${system.value} STUN, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB, ${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass)`
+                break;
             case "MENTALDEFENSE":
             case "POWERDEFENSE":
                 system.description = `${system.ALIAS} ${system.value} points`

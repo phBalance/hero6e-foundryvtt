@@ -3,6 +3,9 @@
 - Improved AID to support attack powers and EXPANDEDEFFECT. [#415](https://github.com/dmdorman/hero6e-foundryvtt/issues/419)
 - Fix for 5e ARMOR missing toggle.
 - Fix for TRANSPORT_FAMILIARITY costs.
+- Improved DENSITYINCREASE power description.
+- Fixed 5e DENSITYINCREASE costs.
+- Initial support for 5e GROWTH.
 
 # Version 3.0.45
 - Fix for Quench Perception Skill tests.

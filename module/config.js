@@ -2117,6 +2117,21 @@ HERO.powers5e = [
         costPerLevel: 5
     },
 
+    {
+        "key": "DENSITYINCREASE",
+        "name": "Density Increase",
+        "powerType": [
+            "body-affecting",
+            "standard", "defense"
+        ],
+        "perceivability": "obvious",
+        "duration": "constant",
+        "target": "self only",
+        "range": "self",
+        "costEnd": true,
+        "costPerLevel": 5
+    },
+
 
 
 ]
