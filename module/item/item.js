@@ -947,16 +947,21 @@ export class HeroSystem6eItem extends Item {
         }
 
 
+        if (system.XMLID === "COMBAT_LEVELS") {
+            console.log(this)
+        }
+
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
         //const characteristicCosts = actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
         let costPerLevel = parseFloat(
+            system.costPerLevel ||
             configPowerInfo?.costPerLevel ||
             configPowerInfo?.cost ||
-            system.costPerLevel ||
-            baseCost
-            || (configPowerInfo?.powerType == 'skill' ? 2 : 1)
+            (configPowerInfo?.powerType == 'skill' ? 2 : 0) || 
+            baseCost ||
+            1
         )
 
         // FLASH (target group cost 5 per level, non-targeting costs 3 per level)
@@ -1023,7 +1028,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // TRANSPORT_FAMILIARITY checking more than 2 animals costs same as entire category
-            if (!adder.SELECTED && subAdderCost > adderBaseCost) {
+            if (!adder.SELECTED && subAdderCost > (adderBaseCost || 99)) {
                 subAdderCost = adderBaseCost
             }
 

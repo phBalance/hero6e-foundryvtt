@@ -975,6 +975,26 @@ export class HeroSystem6eActor extends Actor {
             delete heroJson.CHARACTER.CHARACTERISTICS
         }
 
+        // is5e
+        if (typeof this.system.CHARACTER?.TEMPLATE == 'string') {
+            if (this.system.CHARACTER.TEMPLATE.includes("builtIn.") && !this.system.CHARACTER.TEMPLATE.includes("6E.") && !this.system.is5e) {
+                //changes[`system.is5e`] = true
+                this.system.is5e = true
+            }
+            if (this.system.CHARACTER.TEMPLATE.includes("builtIn.") && this.system.CHARACTER.TEMPLATE.includes("6E.") && this.system.is5e) {
+                //changes[`system.is5e`] = false
+                this.system.is5e = false
+            }
+        }
+        if (this.system.COM && !this.system.is5e) {
+            //changes[`system.is5e`] = true
+            this.system.is5e = true
+        }
+
+        if (this.system.is5e && this.id) {
+            await this.update({ 'system.is5e': this.system.is5e})
+        }
+
         // ITEMS
         for (let itemTag of HeroSystem6eItem.ItemXmlTags) {
             if (heroJson.CHARACTER[itemTag]) {
@@ -1261,6 +1281,11 @@ export class HeroSystem6eActor extends Actor {
             this.system.is5e = true
         }
 
+        if (this.system.is5e && this.id) {
+            await this.update({ [`system.is5e`]: this.system.is5e })
+        }
+
+        // Chararacteristics
         for (const key of Object.keys(this.system.characteristics)) {
             if (key === "running")
                 console.log(key)

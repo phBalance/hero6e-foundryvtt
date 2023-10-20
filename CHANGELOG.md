@@ -2,6 +2,7 @@
 - Ability to use EGO for initiative.  Can be changed on OTHER tab.  New HDC imports will assume EGO when OMCV >= OCV and EGO > DEX. [#419](https://github.com/dmdorman/hero6e-foundryvtt/issues/419)
 - Improved AID to support attack powers and EXPANDEDEFFECT. [#415](https://github.com/dmdorman/hero6e-foundryvtt/issues/419)
 - Fix for 5e ARMOR missing toggle.
+- Fix for TRANSPORT_FAMILIARITY costs.
 
 # Version 3.0.45
 - Fix for Quench Perception Skill tests.
