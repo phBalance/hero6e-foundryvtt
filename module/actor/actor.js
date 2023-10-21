@@ -666,45 +666,52 @@ export class HeroSystem6eActor extends Actor {
 
         if (!this.system.is5e) return base;
 
+        let _str = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.str.max")?.value || 0), 0)
+        let _con = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.con.max")?.value || 0), 0)
+        let _dex = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.dex.max")?.value || 0), 0)
+        let _body = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.body.max")?.value || 0), 0)
+        let _ego = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.ego.max")?.value || 0), 0)
+
+
         switch (key.toLowerCase()) {
 
             // Physical Defense (PD) STR/5
             case "pd":
-                return base + Math.round(this.system.characteristics.str.core / 5);
+                return base + Math.round((this.system.characteristics.str.core + _str) / 5);
 
             // Energy Defense (ED) CON/5
             case "ed":
-                return base + Math.round(this.system.characteristics.con.core / 5);
+                return base + Math.round((this.system.characteristics.con.core + _con) / 5);
                 break;
 
             // Speed (SPD) 1 + (DEX/10)   can be fractional
             case "spd":
-                return base + 1 + parseFloat(parseFloat(this.system.characteristics.dex.core / 10).toFixed(1))
+                return base + 1 + parseFloat(parseFloat((this.system.characteristics.dex.core + _dex) / 10).toFixed(1))
 
             // Recovery (REC) (STR/5) + (CON/5)
             case "rec":
-                return base + Math.round(this.system.characteristics.str.core / 5) + Math.round(this.system.characteristics.con.core / 5);
+                return base + Math.round((this.system.characteristics.str.core + _str) / 5) + Math.round((this.system.characteristics.con.core + _con) / 5);
 
             // Endurance (END) 2 x CON
             case "end":
-                return base + Math.round(this.system.characteristics.con.core * 2);
+                return base + Math.round((this.system.characteristics.con.core + _con) * 2);
 
             // Stun (STUN) BODY+(STR/2)+(CON/2) 
             case "stun":
-                return base + Math.round(this.system.characteristics.body.core) + Math.round(this.system.characteristics.str.core / 2) + Math.round(this.system.characteristics.con.core / 2);
+                return base + Math.round(this.system.characteristics.body.core + _body) + Math.round((this.system.characteristics.str.core + _str) / 2) + Math.round((this.system.characteristics.con.core + _con) / 2);
 
             // Base OCV & DCV = Attacker’s DEX/3
             case "ocv":
             case "dcv":
-                return Math.round(this.system.characteristics.dex.core / 3);
+                return Math.round((this.system.characteristics.dex.core + _dex) / 3);
 
             //Base Ego Combat Value = EGO/3
             case "omcv":
             case "dmcv":
-                return Math.round(this.system.characteristics.ego.core / 3);
+                return Math.round((this.system.characteristics.ego.core + _ego) / 3);
 
             case "leaping":
-                const str = parseInt(this.system.characteristics.str.core)
+                const str = parseInt(this.system.characteristics.str.core + _str)
                 let value = 0;
                 if (str >= 3) value = 0.5
                 if (str >= 5) value = 1
@@ -738,97 +745,6 @@ export class HeroSystem6eActor extends Actor {
 
         return base;
 
-        //     const figuredChanges = {}
-        //     figuredChanges[`system.is5e`] = true  // used in item-attack.js to modify killing attack stun multiplier
-
-        //     // One major difference between 5E and 6E is figured characteristics.
-
-        //     // Physical Defense (PD) STR/5
-        //     const pdLevels = this.actor.system.characteristics.pd.max - CONFIG.HERO.characteristicDefaults5e.pd;
-        //     const pdFigured = Math.round(this.actor.system.characteristics.str.max / 5)
-        //     figuredChanges[`system.characteristics.pd.max`] = pdLevels + pdFigured
-        //     figuredChanges[`system.characteristics.pd.value`] = pdLevels + pdFigured
-        //     figuredChanges[`system.characteristics.pd.base`] = pdFigured //this.actor.system.characteristics.pd.base + pdFigured
-        //     figuredChanges[`system.characteristics.pd.core`] = pdLevels + pdFigured
-        //     figuredChanges[`system.characteristics.pd.figured`] = pdFigured
-
-        //     // Energy Defense (ED) CON/5
-        //     const edLevels = this.actor.system.characteristics.ed.max - CONFIG.HERO.characteristicDefaults5e.ed;
-        //     const edFigured = Math.round(this.actor.system.characteristics.con.max / 5)
-        //     figuredChanges[`system.characteristics.ed.max`] = edLevels + edFigured
-        //     figuredChanges[`system.characteristics.ed.value`] = edLevels + edFigured
-        //     figuredChanges[`system.characteristics.ed.base`] = edFigured //this.actor.system.characteristics.ed.base + edFigured
-        //     figuredChanges[`system.characteristics.ed.core`] = edLevels + edFigured
-        //     figuredChanges[`system.characteristics.ed.figured`] = edFigured
-
-
-        //     // Speed (SPD) 1 + (DEX/10)   can be fractional
-        //     const spdLevels = this.actor.system.characteristics.spd.max - CONFIG.HERO.characteristicDefaults5e.spd;
-        //     const spdFigured = 1 + parseFloat(parseFloat(this.actor.system.characteristics.dex.max / 10).toFixed(1))
-        //     figuredChanges[`system.characteristics.spd.max`] = Math.floor(spdLevels + spdFigured)
-        //     figuredChanges[`system.characteristics.spd.value`] = Math.floor(spdLevels + spdFigured)
-        //     figuredChanges[`system.characteristics.spd.base`] = spdFigured //this.actor.system.characteristics.spd.base + spdFigured
-        //     figuredChanges[`system.characteristics.spd.core`] = Math.floor(spdLevels + spdFigured)
-        //     figuredChanges[`system.characteristics.spd.figured`] = spdFigured
-        //     figuredChanges[`system.characteristics.spd.realCost`] = Math.ceil((this.actor.system.characteristics.spd.max - spdFigured) * CONFIG.HERO.characteristicCosts5e.spd)
-
-
-        //     // Recovery (REC) (STR/5) + (CON/5)
-        //     const recLevels = this.actor.system.characteristics.rec.max - CONFIG.HERO.characteristicDefaults5e.rec;
-        //     const recFigured = Math.round(this.actor.system.characteristics.str.max / 5) + Math.round(this.actor.system.characteristics.con.max / 5)
-        //     figuredChanges[`system.characteristics.rec.max`] = recLevels + recFigured
-        //     figuredChanges[`system.characteristics.rec.value`] = recLevels + recFigured
-        //     figuredChanges[`system.characteristics.rec.base`] = recFigured //this.actor.system.characteristics.rec.base + recFigured
-        //     figuredChanges[`system.characteristics.rec.core`] = recLevels + recFigured
-        //     figuredChanges[`system.characteristics.rec.figured`] = recFigured
-        //     figuredChanges[`system.characteristics.red.realCost`] = recLevels * CONFIG.HERO.characteristicCosts5e.red
-
-        //     // Endurance (END) 2 x CON
-        //     const endLevels = this.actor.system.characteristics.end.max - CONFIG.HERO.characteristicDefaults5e.end;
-        //     const endFigured = Math.round(this.actor.system.characteristics.con.max * 2)
-        //     figuredChanges[`system.characteristics.end.max`] = endLevels + endFigured
-        //     figuredChanges[`system.characteristics.end.value`] = endLevels + endFigured
-        //     figuredChanges[`system.characteristics.end.base`] = endFigured //this.actor.system.characteristics.end.base + endFigured
-        //     figuredChanges[`system.characteristics.end.core`] = endLevels + endFigured
-        //     figuredChanges[`system.characteristics.end.figured`] = endFigured
-
-
-        //     // Stun (STUN) BODY+(STR/2)+(CON/2) 
-        //     const stunLevels = this.actor.system.characteristics.stun.max - CONFIG.HERO.characteristicDefaults5e.stun;
-        //     const stunFigured = this.actor.system.characteristics.body.max + Math.round(this.actor.system.characteristics.str.max / 2) + Math.round(this.actor.system.characteristics.con.max / 2)
-        //     figuredChanges[`system.characteristics.stun.max`] = stunLevels + stunFigured
-        //     figuredChanges[`system.characteristics.stun.value`] = stunLevels + stunFigured
-        //     figuredChanges[`system.characteristics.stun.base`] = stunFigured //this.actor.system.characteristics.stun.base + stunFigured
-        //     figuredChanges[`system.characteristics.stun.core`] = stunLevels + stunFigured
-        //     figuredChanges[`system.characteristics.stun.figured`] = stunFigured
-        //     figuredChanges[`system.characteristics.stun.realCost`] = stunLevels * CONFIG.HERO.characteristicCosts5e.stun
-
-
-        //     // Base OCV & DCV = Attacker’s DEX/3
-        //     const baseCv = Math.round(this.actor.system.characteristics.dex.max / 3)
-        //     figuredChanges[`system.characteristics.ocv.max`] = baseCv // + this.actor.system.characteristics.ocv.max - this.actor.system.characteristics.ocv.base
-        //     figuredChanges[`system.characteristics.ocv.value`] = baseCv // + this.actor.system.characteristics.ocv.max - this.actor.system.characteristics.ocv.base
-        //     figuredChanges[`system.characteristics.ocv.base`] = 0 //baseCv + this.actor.system.characteristics.ocv.max - this.actor.system.characteristics.ocv.base
-        //     figuredChanges[`system.characteristics.dcv.max`] = baseCv // + this.actor.system.characteristics.dcv.max - this.actor.system.characteristics.dcv.base
-        //     figuredChanges[`system.characteristics.dcv.value`] = baseCv //+ this.actor.system.characteristics.dcv.max - this.actor.system.characteristics.dcv.base
-        //     figuredChanges[`system.characteristics.dcv.base`] = 0 //baseCv + this.actor.system.characteristics.dcv.max - this.actor.system.characteristics.dcv.base
-        //     figuredChanges[`system.characteristics.ocv.realCost`] = 0
-        //     figuredChanges[`system.characteristics.dcv.realCost`] = 0
-
-        //     //Base Ego Combat Value = EGO/3
-        //     const baseEcv = Math.round(this.actor.system.characteristics.ego.max / 3)
-        //     figuredChanges[`system.characteristics.omcv.max`] = baseEcv //+ this.actor.system.characteristics.omcv.max - this.actor.system.characteristics.omcv.base
-        //     figuredChanges[`system.characteristics.omcv.value`] = baseEcv //+ this.actor.system.characteristics.omcv.max - this.actor.system.characteristics.omcv.base
-        //     figuredChanges[`system.characteristics.omcv.base`] = 0 //baseEcv + this.actor.system.characteristics.omcv.max - this.actor.system.characteristics.omcv.base
-        //     figuredChanges[`system.characteristics.dmcv.max`] = baseEcv //+ this.actor.system.characteristics.dmcv.max - this.actor.system.characteristics.dmcv.base
-        //     figuredChanges[`system.characteristics.dmcv.value`] = baseEcv //+ this.actor.system.characteristics.dmcv.max - this.actor.system.characteristics.dmcv.base
-        //     figuredChanges[`system.characteristics.dmcv.base`] = 0 //baseEcv + this.actor.system.characteristics.dmcv.max - this.actor.system.characteristics.dmcv.base
-        //     figuredChanges[`system.characteristics.omcv.realCost`] = 0
-        //     figuredChanges[`system.characteristics.dmcv.realCost`] = 0
-
-        //     await this.actor.update(figuredChanges, { render: false }, { hideChatMessage: true })
-        //}
-
 
     }
 
@@ -840,6 +756,7 @@ export class HeroSystem6eActor extends Actor {
             let key = powerInfo.key.toLowerCase();
             let characteistic = this.system.characteristics[key];
             let core = parseInt(characteistic?.core) || 0;
+
             let base = this.getCharacteristicBase(key);
             let levels = core - base;
             let cost = Math.round(levels * (powerInfo.cost || 0))
@@ -992,7 +909,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (this.system.is5e && this.id) {
-            await this.update({ 'system.is5e': this.system.is5e})
+            await this.update({ 'system.is5e': this.system.is5e })
         }
 
         // ITEMS
