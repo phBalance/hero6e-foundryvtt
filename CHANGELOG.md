@@ -1,7 +1,7 @@
 # Version 3.0.47
 - Fix for 5e GROWTH missing toggle and not showing on defense tab.
 - Initial support for Knockback Modifiers (Air, Underwater, Killing, Martial) [#365](https://github.com/dmdorman/hero6e-foundryvtt/issues/365) [#386](https://github.com/dmdorman/hero6e-foundryvtt/issues/386) [#346](https://github.com/dmdorman/hero6e-foundryvtt/issues/346)
-- Initial support for Knockback Resistance including Density Increase & Growth. [#423](https://github.com/dmdorman/hero6e-foundryvtt/issues/423)
+- Initial support for Knockback Resistance (including Density Increase & Growth). [#423](https://github.com/dmdorman/hero6e-foundryvtt/issues/423)
 - Improvement for 5e figured characteristics when purchased as powers. [#422](https://github.com/dmdorman/hero6e-foundryvtt/issues/422)
 
 # Version 3.0.46
