@@ -1404,6 +1404,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     damageData.damageNegationValue = damageNegationValue
     damageData.knockbackResistance = knockbackResistance
     damageData.defenseAvad = defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue + knockbackResistance;
+    damageData.targetToken = token
 
     // AVAD All or Nothing
     if (avad) {
@@ -1538,6 +1539,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         knockbackMessage: damageDetail.knockbackMessage,
         useKnockBack: damageDetail.useKnockBack,
         knockbackRenderedResult: damageDetail.knockbackRenderedResult,
+        knockbackTags: damageDetail.knockbackTags,
 
         // misc
         tags: defenseTags,
@@ -2120,11 +2122,44 @@ async function _calcDamage(damageResult, item, options) {
     let knockbackMessage = "";
     let knockbackRenderedResult = null;
     let knockbackMultiplier = parseInt(itemData.knockbackMultiplier)
+    let knockbackTags = []
     if (game.settings.get("hero6efoundryvttv2", "knockback") && knockbackMultiplier) {
         useKnockBack = true;
         // body - 2d6 m
 
-        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + " - 2D6"
+        let knockbackDice = 2
+
+        // Target is in the air -1d6
+        if (options.targetToken?.actor?.flags?.activeMovement === "flight") {
+            knockbackDice -= 1
+            knockbackTags.push({ value: "-1d6KB", name: "target is in the air", title: "Knockback Modifier" })
+        }
+
+        // Target Rolled With A Punch -1d6
+        // Target is in zero gravity -1d6
+
+        // Target is underwater +1d6
+        if (options.targetToken?.actor?.statuses?.has("underwater")) {
+            knockbackDice += 1
+            knockbackTags.push({ value: "+1d6KB", name: "target is underwater", title: "Knockback Modifier" })
+        }
+
+        // Target is using Clinging +1d6
+
+        // Attack did Killing Damage +1d6
+        if (item.system.killing) {
+            knockbackDice += 1
+            knockbackTags.push({ value: "+1d6KB", name: "attack did Killing Damage", title: "Knockback Modifier" })
+        }
+        
+        // Attack used a Martial Maneuver +1d6
+        if (["martialart", "martial"].includes(item.type)) {
+            knockbackDice += 1
+            knockbackTags.push({ value: "+1d6", name: "attack used a Martial Maneuver", title: "Knockback Modifier" })
+        }
+
+
+        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + ` - ${Math.max(0, knockbackDice)}D6`
         // knockback modifier added on an attack by attack basis
         const knockbackMod = parseInt(options.knockbackMod || options.knockbadmod || 0)
         if (knockbackMod != 0) {
@@ -2256,6 +2291,7 @@ async function _calcDamage(damageResult, item, options) {
     damageDetail.knockbackMessage = knockbackMessage
     damageDetail.useKnockBack = useKnockBack
     damageDetail.knockbackRenderedResult = knockbackRenderedResult
+    damageDetail.knockbackTags = knockbackTags
 
 
     return damageDetail

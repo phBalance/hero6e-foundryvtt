@@ -44,6 +44,9 @@
     {{#each tags as |tag id|}}
     <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} +{{tag.value}}</span>
     {{/each}}
+    {{#each knockbackTags as | tag id|}}
+    <span class="tag tag_knockback" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
+    {{/each}}
   </div>
 
   {{#if damageNegationValue}}

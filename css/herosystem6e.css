@@ -683,6 +683,17 @@ div.tags {
   padding: .1em .25em;
 }
 
+.tags .tag.tag_knockback {
+  background-color: transparent;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 255 / 50%);
+  color: rgb(75, 74, 68);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5;
+  padding: .1em .25em;
+}
+
 .tags .tag.area-effect-tag {
   background-color: #d06fa2;
   /* cursor: pointer; */

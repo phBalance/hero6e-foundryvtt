@@ -868,6 +868,7 @@ HERO.powers = [
         "name": "Growth",
         "powerType": [
             "body-affecting",
+            "defense",
             "size"
         ],
         "perceivability": "obvious",
