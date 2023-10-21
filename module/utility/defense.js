@@ -230,7 +230,6 @@ function determineDefense(targetActor, attackItem, options) {
                 defenseTags.push({ value: _value, name: "KB", title: i.name })
             }
 
-
         }
 
 
