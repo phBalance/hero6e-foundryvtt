@@ -1,3 +1,6 @@
+# Version 3.0.48
+- Fix for 5e where actor sheets failed to open with active statuses.
+
 # Version 3.0.47
 - Fix for 5e GROWTH missing toggle and not showing on defense tab.
 - Initial support for Knockback Modifiers (Air, Underwater, Killing, Martial) [#365](https://github.com/dmdorman/hero6e-foundryvtt/issues/365) [#386](https://github.com/dmdorman/hero6e-foundryvtt/issues/386) [#346](https://github.com/dmdorman/hero6e-foundryvtt/issues/346)

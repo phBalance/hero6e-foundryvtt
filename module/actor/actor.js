@@ -666,11 +666,11 @@ export class HeroSystem6eActor extends Actor {
 
         if (!this.system.is5e) return base;
 
-        let _str = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.str.max")?.value || 0), 0)
-        let _con = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.con.max")?.value || 0), 0)
-        let _dex = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.dex.max")?.value || 0), 0)
-        let _body = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.body.max")?.value || 0), 0)
-        let _ego = this.appliedEffects.filter(o => !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.ego.max")?.value || 0), 0)
+        let _str = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.str.max")?.value || 0), 0)
+        let _con = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.con.max")?.value || 0), 0)
+        let _dex = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.dex.max")?.value || 0), 0)
+        let _body = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.body.max")?.value || 0), 0)
+        let _ego = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.ego.max")?.value || 0), 0)
 
 
         switch (key.toLowerCase()) {
