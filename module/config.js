@@ -856,6 +856,21 @@ HERO.powers = [
         "costPerLevel": 4
     },
     {
+        "key": "DEFLECTION",
+        "name": "Deflectsion",
+        "powerType": [
+            "defense",
+            "standard"
+        ],
+        "perceivability": "Inobvious",
+        "duration": "Instant",
+        "target": "Target’s OCV (see text)",
+        "range": "Standard",
+        "costEnd": true,
+        //"cost": 20,
+
+    },
+    {
         "key": "NAKEDMODIFIER",
         "powerType": ["special"],
         //"duration": "instant",  // Not true, hack for isPercievable
@@ -988,7 +1003,8 @@ HERO.powers = [
         "key": "CLAIRSENTIENCE",
         "powerType": [
             "sense"
-        ]
+        ],
+        "range": "standard",
     },
     {
         "key": "NIGHTVISION",
@@ -1048,6 +1064,7 @@ HERO.powers = [
         "powerType": [
             "attack"
         ],
+        "range": "no range",
         "costPerLevel": 5
     },
     {
@@ -1055,6 +1072,7 @@ HERO.powers = [
         "powerType": [
             "attack"
         ],
+        "range": "no range",
         "costPerLevel": 15,
         "costEnd": true
     },
@@ -1063,6 +1081,7 @@ HERO.powers = [
         "powerType": [
             "attack"
         ],
+        "range": "standard",
         "costEnd": true,
         "costPerLevel": 1.5
     },
@@ -1071,6 +1090,7 @@ HERO.powers = [
         "powerType": [
             "attack"
         ],
+        "range": "standard",
         "costPerLevel": 15,
         "costEnd": true,
         "sheet": {
@@ -1088,6 +1108,7 @@ HERO.powers = [
         "powerType": [
             "attack"
         ],
+        "range": "standard",
         "costPerLevel": 5,
         "costEnd": true
     },
@@ -1097,7 +1118,8 @@ HERO.powers = [
             "sense-affecting",
             "attack",
             "standard"
-        ]
+        ],
+        "range": "standard",
     },
     {
         "key": "DISPEL",
@@ -1105,6 +1127,7 @@ HERO.powers = [
             "attack",
             "standard"
         ],
+        "range": "standard",
         "costPerLevel": 3
     },
     {
@@ -1113,6 +1136,7 @@ HERO.powers = [
             "attack",
             "standard"
         ],
+        "range": "standard",
         "costPerLevel": 10,
         "costEnd": true
     },
@@ -1196,6 +1220,7 @@ HERO.powers = [
         ],
         "name": "Barrier",
         "duration": "Instant",
+        "range": "standard",
         "costEnd": true,
         "costPerLevel": 1.5
     },
@@ -2083,6 +2108,17 @@ HERO.powers5e = [
         range: "no range",
         costEnd: true,
         costPerLevel: 15,
+    },
+    {
+        "key": "TRANSFORM",
+        name: "Transform",
+        powerType: ["attack", "standard"],
+        perceivability: "obvious",
+        duration: "Instant",
+        target: "target's DCV",
+        range: "Standard",
+        costEnd: true,
+        //cost: See Transform Table
     },
     {
         "key": "ARMOR",

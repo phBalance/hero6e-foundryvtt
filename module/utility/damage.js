@@ -199,16 +199,19 @@ export function convertToDcFromItem(item, options) {
     //
     // Currently assuming token starts at 0 velocity and ends at 0 velocity.
     // Under this assumption the max velocity is half the speed.
+
     let velocityDC = 0;
-    if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+    // [NORMALDC] +v/5 Strike, FMove
+    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
+    if ((item.system.EFFECT || "").match(/v\/\d/)){ //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
         if (!options) {
             options = {};
         }
         options.velocity = parseInt(options?.velocity || 0);
-        let divisor = 10;
-        if (item.system.XMLID === "MOVETHROUGH") {
-            divisor = 6;
-        }
+        let divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]) //10;
+        // if (item.system.XMLID === "MOVETHROUGH") {
+        //     divisor = 6;
+        // }
         velocityDC = Math.floor(options.velocity / divisor);
         if (velocityDC > 0) {
             dc += velocityDC;

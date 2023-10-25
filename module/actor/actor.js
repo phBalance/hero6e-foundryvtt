@@ -1000,7 +1000,11 @@ export class HeroSystem6eActor extends Actor {
             const PHASE = v[0];
             const OCV = v[1];
             const DCV = v[2];
-            const EFFECT = v[3];
+            let EFFECT = v[3];
+            if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
+                let divisor = EFFECT.match(/v\/(\d+)/)[1]
+                EFFECT = EFFECT.replace( `v/${divisor}`, `v/${divisor / 2}`)
+            } 
             const attack = v[4];
             const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
             const itemData = {

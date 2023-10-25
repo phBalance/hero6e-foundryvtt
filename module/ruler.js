@@ -61,6 +61,10 @@ export class HeroRuler {
                         for (let tokenObj of tokens) {
                             let token = tokenObj.document;
                             let actor = token.actor;
+
+                            // Only consume endurance on token's phase, allowing for Knockback movement (which does not consume END)
+                            if (game.combat.combatant.actorId != actor.id) continue;
+
                             let combatant = game.combat.combatants.find(o => o.actorId === actor.id);
                             if (combatant) {
                                 let spentEnd = parseInt(combatant.flags.dragRuler.spentEnd || 0);

@@ -81,7 +81,7 @@ export default class SettingsHelpers {
                 }
                 for (const scene of game.scenes.contents) {
                     for (const token of scene.tokens) {
-                        if (!token.actorLink) {
+                        if (!token.actorLink && token.actor) {
                             token.actor.applyEncumbrancePenalty()
                         }
                     }

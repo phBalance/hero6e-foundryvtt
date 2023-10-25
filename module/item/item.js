@@ -200,12 +200,40 @@ export class HeroSystem6eItem extends Item {
 
         content += "."
 
+        // Powers have one of four Ranges: Self; No Range; Standard
+        // Range; and Line of Sight (LOS).
+        const configPowerInfo = getPowerInfo({ item: this })
+        switch (configPowerInfo?.range?.toLowerCase()) {
+            case "standard":
+                let range = this.system.basePointsPlusAdders * 10
+                if (this.actor?.system?.is5e) {
+                    range = Math.floor(range / 2)
+                }
+                content += ` Maximum Range ${range}${this.actor?.system?.is5e ? '"' : "m"}.`
+                break
+            case "los":
+                content += ` Line of Sight.`
+                break
+            case "no range":
+                content += ` No Range.`
+                break
+            default: {
+                if (configPowerInfo?.range?.toLowerCase()) {
+                    content += ` ${configPowerInfo?.range?.toLowerCase()}`
+                }
+            }
+        }
+
+
         if (this.system.end) {
             content += ` Estimated End: ${this.system.end}.`
         }
         if (this.system.realCost && !isNaN(this.system.realCost)) {
             content += ` Total Cost: ${this.system.realCost} CP.`
         }
+
+
+
         content += `</div>`
 
         const chatData = {
