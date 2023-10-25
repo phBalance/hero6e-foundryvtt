@@ -1,3 +1,6 @@
+# Version 3.0.49
+- Movement only consumes endurance when it is that token's phase.  Allows for improved knockback workflow. [#420](https://github.com/dmdorman/hero6e-foundryvtt/issues/420)
+
 # Version 3.0.48
 - Fix for 5e where actor sheets failed to open with active statuses.
 
