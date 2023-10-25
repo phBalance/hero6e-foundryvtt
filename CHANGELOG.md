@@ -1,6 +1,7 @@
 # Version 3.0.49
 - Movement only consumes endurance when it is that token's phase.  Allows for improved knockback workflow. [#420](https://github.com/dmdorman/hero6e-foundryvtt/issues/420)
 - Improved velocity detection and implmentation with Maneuvers. [#425](https://github.com/dmdorman/hero6e-foundryvtt/issues/425)
+- 5e Move By maneuver shows knockback details in chat card. [#347](https://github.com/dmdorman/hero6e-foundryvtt/issues/347)
 
 # Version 3.0.48
 - Fix for 5e where actor sheets failed to open with active statuses.
