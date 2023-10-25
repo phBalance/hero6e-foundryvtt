@@ -96,7 +96,7 @@ export async function migrateWorld() {
                             }
 
                             if (attack) {
-                                await makeAttack(item)
+                                await item.makeAttack()
                             }
                             changes['system'] = item.system;
 
@@ -237,9 +237,39 @@ export async function migrateWorld() {
         }
     }
 
+
+    // if lastMigration < 3.0.49
+    // 5e maneuvers with velocity are half of 6e
+    if (foundry.utils.isNewerVersion('3.0.49', lastMigration)) {
+        let d = new Date()
+        let queue = []
+
+        ui.notifications.info(`Migragrating actor data 3.0.49`)
+        for (const actor of game.actors.contents) {
+            queue.push(actor)
+        }
+
+        for (const scene of game.scenes.contents) {
+            for (const token of scene.tokens) {
+                if (!token.actorLink) {
+                    queue.push(token.actor)
+                }
+            }
+        }
+
+        while (queue.length > 0) {
+            if ((new Date() - d) > 4000) {
+                ui.notifications.info(`Migragrating actor data 3.0.49 (${queue.length} remaining)`)
+                d = new Date()
+            }
+            const actor = queue.pop()
+            await migrateActor_3_0_49(actor)
+        }
+    }
+
+
+
     // Reparse all items (description, cost, etc) on every migration
-
-
     if (true) {
         let d = new Date()
         let queue = []
@@ -312,6 +342,7 @@ async function migrateActorCostDescription(actor) {
     }
 }
 
+
 async function migrateActor_3_0_35(actor) {
     try {
         if (!actor) return
@@ -375,10 +406,8 @@ async function migrateActor_3_0_35(actor) {
 async function migrateActor_3_0_42(actor) {
     try {
         if (!actor) return
-        if (actor.name != 'Jack "Iron Shin" Daniels') return
+
         for (let item of actor.items) {
-
-
 
             let changes = {};
 
@@ -437,6 +466,61 @@ async function migrateActor_3_0_42(actor) {
         }
     }
 }
+
+
+async function migrateActor_3_0_49(actor) {
+    try {
+        if (!actor) return
+        if (!actor.system.is5e) return
+
+        for (let item of actor.items.filter(o => o.type === 'maneuver')) {
+
+            let entry = CONFIG.HERO.combatManeuvers[item.name];
+            if (!entry) {
+                for (let key of Object.keys(CONFIG.HERO.combatManeuvers)) {
+                    if (key.toUpperCase().replace(" ", "") === item.name.toUpperCase().replace(" ", "")) {
+                        entry = CONFIG.HERO.combatManeuvers[key]
+                        await item.update({ 'name': key })
+                        break
+                    }
+                }
+            }
+            if (entry) {
+                const EFFECT = entry[3];
+                let newEffect = EFFECT
+                if (EFFECT.match(/v\/(\d+)/)) {
+                    let divisor = EFFECT.match(/v\/(\d+)/)[1]
+                    newEffect = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`)
+                }
+                if (item.system.EFFECT != newEffect) {
+                    await item.update({ 'system.EFFECT': newEffect })
+                }
+                const attack = entry[4];
+                if (attack && item.system.subType != 'attack') {
+                    await item.makeAttack()
+                }
+
+
+            } else {
+                if (["Multiple Attack", "Other Attacks"].includes(item.name)) {
+                    await item.delete()
+                } else {
+                    if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+                        await ui.notifications.warn(`Migragtion failed for ${actor?.name}. ${item.name} not recognized.`)
+                    }
+                }
+
+            }
+        }
+    }
+    catch (e) {
+        console.log(e);
+        if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
+            await ui.notifications.warn(`Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`)
+        }
+    }
+}
+
 
 async function migrateRemoveDuplicateDefenseMovementItems() {
 
