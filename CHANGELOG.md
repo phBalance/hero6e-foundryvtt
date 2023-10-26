@@ -1,3 +1,6 @@
+# Version 3.0.50
+- Fix for 6e HDC import where some 5e values were incorrectly being used. [#430](https://github.com/dmdorman/hero6e-foundryvtt/issues/430)
+
 # Version 3.0.49
 - Movement only consumes endurance when it is that token's phase.  Allows for improved knockback workflow. [#420](https://github.com/dmdorman/hero6e-foundryvtt/issues/420)
 - Improved velocity detection and implementation with Maneuvers. [#425](https://github.com/dmdorman/hero6e-foundryvtt/issues/425)
