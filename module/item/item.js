@@ -425,11 +425,22 @@ export class HeroSystem6eItem extends Item {
 
 
         // TODO: Delete support for old format
-        for (const key of ['adders', 'modifiers', 'power']) {
+        for (const key of ['ADDER', 'MODIFIER', 'POWER']) { //'adders', 'modifiers', 'power', 
             if (this.system?.[key]) {
                 const value = this.system[key].find(o => o.XMLID === xmlid)
                 if (value) {
                     return value;
+                }
+
+                for (const subMod of this.system[key]) {
+                    for (const key2 of ['ADDER', 'MODIFIER', 'POWER']) {
+                        if (subMod[key2]) {
+                            const value = subMod[key2].find(o => o.XMLID === xmlid)
+                            if (value) {
+                                return value;
+                            }
+                        }
+                    }
                 }
             }
         }

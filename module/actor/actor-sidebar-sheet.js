@@ -647,7 +647,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 data.activePointSummary.push({ name: powerInfo.name || key, activePoints: activePoints })
             }
         }
-        for (const item of this.actor.items) {
+        for (const item of this.actor.items.filter(o => o.type != 'maneuver')) {
             let powerInfo = getPowerInfo({ xmlid: item.system.XMLID, actor: this.actor })
 
             let activePoints = item.system.activePoints
@@ -655,10 +655,19 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             if (item.type == 'attack' || item.system.subType === 'attack' || item.system.XMLID === 'martialart') {
                 const csl = CombatSkillLevelsForAttack(item)
                 let { dc } = convertToDcFromItem(item)
-                dc += Math.floor((csl.ocv + csl.dcv) /2) // Assume CSL are converted to DCs
+                dc += Math.floor((csl.ocv + csl.dcv) / 2) // Assume CSL are converted to DCs
+
                 if (dc > 0) {
                     let costPerDice = item.system.targets === 'dcv' ? 5 : 10
-                    activePoints = Math.max(activePoints, dc * costPerDice)
+                    let ap = dc * costPerDice
+
+                    const charges = item.findModsByXmlid("CHARGES")
+                    if (charges) {
+                        const boostable = item.findModsByXmlid("BOOSTABLE")
+                        ap += (parseInt(charges.OPTION_ALIAS) - 1) * 5
+                    }
+
+                    activePoints = Math.max(activePoints, ap)
                 }
             }
 
@@ -672,7 +681,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
         data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints)
         let topActivePoints = data.activePointSummary[0].activePoints
-        data.activePointSummary = data.activePointSummary.filter(o => o.activePoints >= topActivePoints * 0.5)
+        data.activePointSummary = data.activePointSummary.filter(o => o.activePoints >= topActivePoints * 0.5 && o.activePoints > 20)
 
         return data
     }

@@ -1,5 +1,6 @@
 # Version 3.0.51
 - The OTHERS tab now has a summary of the top active point powers. [#343](https://github.com/dmdorman/hero6e-foundryvtt/issues/343)
+- Fix for power modifiers being ignored (such as reduce endurance).
 
 # Version 3.0.50
 - Fix for 6e HDC import where some 5e values were incorrectly being used. [#430](https://github.com/dmdorman/hero6e-foundryvtt/issues/430)
