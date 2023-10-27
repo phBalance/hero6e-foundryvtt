@@ -171,6 +171,13 @@ export function convertToDcFromItem(item, options) {
         tags.push({ value: _tag, name: item.name })
     }
 
+    // Boostable Charges
+    if (options?.boostableCharges) {
+        const _value = parseInt(options.boostableCharges)
+        dc += _value
+        tags.push({ value: `${_value.signedString()}DC`, name: "boostable" })
+    }
+
     // Combat Skill Levels
     const csl = CombatSkillLevelsForAttack(item)
     if (csl && csl.dc > 0) {
@@ -203,7 +210,7 @@ export function convertToDcFromItem(item, options) {
     let velocityDC = 0;
     // [NORMALDC] +v/5 Strike, FMove
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    if ((item.system.EFFECT || "").match(/v\/\d/)){ //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+    if ((item.system.EFFECT || "").match(/v\/\d/)) { //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
         if (!options) {
             options = {};
         }
@@ -259,6 +266,8 @@ export function convertToDcFromItem(item, options) {
             }
         }
     }
+
+
 
 
     // Add in Haymaker to any non-maneuver attack DCV based attack

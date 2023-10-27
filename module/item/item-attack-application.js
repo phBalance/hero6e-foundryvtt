@@ -1,5 +1,5 @@
 import { CombatSkillLevelsForAttack } from '../utility/damage.js';
-import { _processAttackOptions, _processAttackAoeOptions} from '../item/item-attack.js';
+import { _processAttackOptions, _processAttackAoeOptions } from '../item/item-attack.js';
 
 
 export class ItemAttackFormApplication extends FormApplication {
@@ -9,7 +9,7 @@ export class ItemAttackFormApplication extends FormApplication {
         this.options.title = `${this.data?.item?.actor?.name} roll to hit`
 
 
-        
+
 
         Hooks.on("updateItem", function (item, changes, options, userId) {
             if (!this.rendered) return;
@@ -86,6 +86,12 @@ export class ItemAttackFormApplication extends FormApplication {
         data.dcvMod ??= item.system.dcv
         data.effectiveStr ??= data.str;
 
+        // Boostable Charges
+        const charges = item.findModsByXmlid("CHARGES")
+        if (item.system.charges?.value > 1) {
+            data.boostableCharges = (item.system.charges.value - 1)
+        }
+
         // Combat Skill Levels
         const csl = CombatSkillLevelsForAttack(item);
         if (csl && csl.skill) {
@@ -135,12 +141,12 @@ export class ItemAttackFormApplication extends FormApplication {
         if (event.submitter?.name === "roll") {
             canvas.tokens.activate()
             await this.close();
-            
+
             const aoe = this.data.item.findModsByXmlid("AOE");
             if (aoe) {
                 return _processAttackAoeOptions(this.data.item, formData);
             }
-           
+
 
             return _processAttackOptions(this.data.item, formData);
         }
@@ -155,7 +161,7 @@ export class ItemAttackFormApplication extends FormApplication {
         this.data.ocvMod = formData.ocvMod;
         this.data.dcvMod = formData.dcvMod;
         this.data.effectiveStr = formData.effectiveStr;
-
+        this.data.boostableCharges = Math.max(0, Math.min(parseInt(formData.boostableCharges), this.data.item.charges?.value -1))
 
     }
 

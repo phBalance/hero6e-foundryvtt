@@ -681,7 +681,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
         data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints)
         let topActivePoints = data.activePointSummary[0].activePoints
-        data.activePointSummary = data.activePointSummary.filter(o => o.activePoints >= topActivePoints * 0.5 && o.activePoints > 20)
+        data.activePointSummary = data.activePointSummary.filter(o => o.activePoints >= topActivePoints * 0.5) // && o.activePoints > 20)
 
         return data
     }
