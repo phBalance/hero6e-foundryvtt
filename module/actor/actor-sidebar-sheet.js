@@ -655,10 +655,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             if (item.type == 'attack' || item.system.subType === 'attack' || item.system.XMLID === 'martialart') {
                 const csl = CombatSkillLevelsForAttack(item)
                 let { dc } = convertToDcFromItem(item)
-                dc += Math.floor((csl.ocv + csl.dcv) / 2) // Assume CSL are converted to DCs
+                
 
                 if (dc > 0) {
-                    let costPerDice = item.system.targets === 'dcv' ? 5 : 10
+                    let costPerDice = Math.max(Math.floor((item.system.activePoints || 0) / dc) || powerInfo.costPerLevel) || (item.system.targets === 'dcv' ? 5 : 10)
+                    dc += csl.dc + Math.floor((csl.ocv + csl.dcv) / 2) // Assume CSL are converted to DCs
                     let ap = dc * costPerDice
 
                     const charges = item.findModsByXmlid("CHARGES")
