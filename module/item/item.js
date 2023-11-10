@@ -2422,18 +2422,24 @@ export class HeroSystem6eItem extends Item {
         // Alternate Combat Value (uses OMCV against DCV)
         let ACV = this.findModsByXmlid("ACV")
         if (ACV) {
-            if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
-                this.system.uses = 'omcv'
-                this.system.targets = 'dcv'
-            }
-            if (ACV.OPTION_ALIAS === "uses OCV against DMCV") {
-                this.system.uses = 'ocv'
-                this.system.targets = 'dmcv'
-            }
-            if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
-                this.system.uses = 'omcv'
-                this.system.targets = 'dcv'
-            }
+            this.system.uses = (ACV.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses).toLowerCase()
+            this.system.targets = (ACV.OPTION_ALIAS.match(/against (\w+)/)?.[1] || this.system.targets).toLowerCase()
+            // if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            //     this.system.uses = 'omcv'
+            //     this.system.targets = 'dcv'
+            // }
+            // if (ACV.OPTION_ALIAS === "uses OCV against DMCV") {
+            //     this.system.uses = 'ocv'
+            //     this.system.targets = 'dmcv'
+            // }
+            // if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            //     this.system.uses = 'omcv'
+            //     this.system.targets = 'dcv'
+            // }
+            // if (ACV.OPTION_ALIAS === "uses OMCV against DMCV") {
+            //     this.system.uses = 'omcv'
+            //     this.system.targets = 'dcv'
+            // }
         }
 
 

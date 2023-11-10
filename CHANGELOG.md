@@ -6,6 +6,7 @@
 - Improved range pentaly tags and associated tooltips.
 - Fixed error for cone placement.
 - Fixed range penalty when distance is 2 or fewer hexes. [#437](https://github.com/dmdorman/hero6e-foundryvtt/issues/437)
+- Improved ALTERNATE COMBAT VALUE upload. [#439](https://github.com/dmdorman/hero6e-foundryvtt/issues/439)
 
 
 # Version 3.0.50
