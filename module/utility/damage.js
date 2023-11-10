@@ -171,6 +171,13 @@ export function convertToDcFromItem(item, options) {
         tags.push({ value: _tag, name: item.name })
     }
 
+    // Boostable Charges
+    if (options?.boostableCharges) {
+        const _value = parseInt(options.boostableCharges)
+        dc += _value
+        tags.push({ value: `${_value.signedString()}DC`, name: "boostable" })
+    }
+
     // Combat Skill Levels
     const csl = CombatSkillLevelsForAttack(item)
     if (csl && csl.dc > 0) {
@@ -203,7 +210,7 @@ export function convertToDcFromItem(item, options) {
     let velocityDC = 0;
     // [NORMALDC] +v/5 Strike, FMove
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    if ((item.system.EFFECT || "").match(/v\/\d/)){ //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+    if ((item.system.EFFECT || "").match(/v\/\d/)) { //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
         if (!options) {
             options = {};
         }
@@ -259,6 +266,8 @@ export function convertToDcFromItem(item, options) {
             }
         }
     }
+
+
 
 
     // Add in Haymaker to any non-maneuver attack DCV based attack
@@ -446,7 +455,7 @@ export function CombatSkillLevelsForAttack(item) {
 
     result.skill = item.actor.items.find(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) && o.system.attacks && o.system.attacks[item.id])
     if (result.skill && result.skill.system.csl) {
-        for (let i = 0; i < parseInt(result.skill.system.LEVELS) || parseInt(result.skill.system.LEVELS.value) || 0; i++) {
+        for (let i = 0; i < parseInt(result.skill.system.LEVELS || 0); i++) {
             result[result.skill.system.csl[i]] = (result[result.skill.system.csl[i]] || 0) + 1;
         }
         result.item = result.skill;

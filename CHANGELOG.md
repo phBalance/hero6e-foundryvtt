@@ -1,3 +1,14 @@
+# Version 3.0.51
+- The OTHERS tab now has a summary of the top active point powers. [#343](https://github.com/dmdorman/hero6e-foundryvtt/issues/343)
+- Fix for power modifiers being ignored (such as reduce endurance).
+- Initial support for BOOSTABLE CHARGES.  Associated burnout is not implemented.  Does not account for reducing the DC increase for powers with advantages. [#432](https://github.com/dmdorman/hero6e-foundryvtt/issues/432)
+- Fix for Combat Skill Levels where edit sheet did not allow for changing values.
+- Improved range pentaly tags and associated tooltips.
+- Fixed error for cone placement.
+- Fixed range penalty when distance is 2 or fewer hexes. [#437](https://github.com/dmdorman/hero6e-foundryvtt/issues/437)
+- Improved ALTERNATE COMBAT VALUE upload. [#439](https://github.com/dmdorman/hero6e-foundryvtt/issues/439)
+
+
 # Version 3.0.50
 - Fix for 6e HDC import where some 5e values were incorrectly being used. [#430](https://github.com/dmdorman/hero6e-foundryvtt/issues/430)
 

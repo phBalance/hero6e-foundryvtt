@@ -425,11 +425,22 @@ export class HeroSystem6eItem extends Item {
 
 
         // TODO: Delete support for old format
-        for (const key of ['adders', 'modifiers', 'power']) {
+        for (const key of ['ADDER', 'MODIFIER', 'POWER']) { //'adders', 'modifiers', 'power', 
             if (this.system?.[key]) {
                 const value = this.system[key].find(o => o.XMLID === xmlid)
                 if (value) {
                     return value;
+                }
+
+                for (const subMod of this.system[key]) {
+                    for (const key2 of ['ADDER', 'MODIFIER', 'POWER']) {
+                        if (subMod[key2]) {
+                            const value = subMod[key2].find(o => o.XMLID === xmlid)
+                            if (value) {
+                                return value;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -2411,18 +2422,24 @@ export class HeroSystem6eItem extends Item {
         // Alternate Combat Value (uses OMCV against DCV)
         let ACV = this.findModsByXmlid("ACV")
         if (ACV) {
-            if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
-                this.system.uses = 'omcv'
-                this.system.targets = 'dcv'
-            }
-            if (ACV.OPTION_ALIAS === "uses OCV against DMCV") {
-                this.system.uses = 'ocv'
-                this.system.targets = 'dmcv'
-            }
-            if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
-                this.system.uses = 'omcv'
-                this.system.targets = 'dcv'
-            }
+            this.system.uses = (ACV.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses).toLowerCase()
+            this.system.targets = (ACV.OPTION_ALIAS.match(/against (\w+)/)?.[1] || this.system.targets).toLowerCase()
+            // if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            //     this.system.uses = 'omcv'
+            //     this.system.targets = 'dcv'
+            // }
+            // if (ACV.OPTION_ALIAS === "uses OCV against DMCV") {
+            //     this.system.uses = 'ocv'
+            //     this.system.targets = 'dmcv'
+            // }
+            // if (ACV.OPTION_ALIAS === "uses OMCV against DCV") {
+            //     this.system.uses = 'omcv'
+            //     this.system.targets = 'dcv'
+            // }
+            // if (ACV.OPTION_ALIAS === "uses OMCV against DMCV") {
+            //     this.system.uses = 'omcv'
+            //     this.system.targets = 'dcv'
+            // }
         }
 
 

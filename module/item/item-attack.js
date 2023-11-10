@@ -77,7 +77,7 @@ export async function AttackOptions(item, event) {
 
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
-    if ((item.system.EFFECT || "").match(/v\/\d/)){ //["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+    if ((item.system.EFFECT || "").match(/v\/\d/)) { //["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
         data.showVelocity = true;
         data.velocity = 0;
 
@@ -242,12 +242,12 @@ export async function AttackAoeToHit(item, options) {
 
     if (item.system.uses === "ocv") {
 
-        // Educated guess for token
         let factor = actor.system.is5e ? 4 : 8;
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
+        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "AOE range penalty", title: `${distanceToken}${actor.system.is5e ? "'" : "m"}` })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
@@ -383,9 +383,10 @@ export async function AttackToHit(item, options) {
         let distance = canvas.grid.measureDistance(token, target, { gridSpaces: true });
         let factor = actor.system.is5e ? 4 : 8;
         let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
+        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "range penalty", title: `${distance}${actor.system.is5e ? "'" : "m"}` })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
@@ -588,18 +589,20 @@ export async function AttackToHit(item, options) {
     }
 
     // Charges
-    let spentCharges = 0;
+
     if (item.system.charges?.max > 0) {
         let charges = parseInt(item.system.charges?.value || 0);
         if (charges <= 0) {
             return ui.notifications.error(`${item.name} has no more charges.`);
         }
+        options.boostableCharges = Math.clamped(parseInt(options.boostableCharges) || 0, 0, Math.min(charges - 1, 4))  // Maximum of 4
+        let spentCharges = 1 + options.boostableCharges
         if (enduranceText === "") {
-            enduranceText = "Spent 1 charge";
+            enduranceText = `Spent ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
         } else {
-            enduranceText += " and 1 charge";
+            enduranceText += ` and ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
         }
-        item.update({ "system.charges.value": charges - 1 })
+        item.update({ "system.charges.value": charges - spentCharges })
 
     }
 
@@ -913,7 +916,6 @@ export async function _onRollDamage(event) {
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
 
-    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment");
     const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
 
@@ -2153,7 +2155,7 @@ async function _calcDamage(damageResult, item, options) {
             knockbackDice += 1
             knockbackTags.push({ value: "+1d6KB", name: "attack did Killing Damage", title: "Knockback Modifier" })
         }
-        
+
         // Attack used a Martial Maneuver +1d6
         if (["martialart", "martial"].includes(item.type)) {
             knockbackDice += 1

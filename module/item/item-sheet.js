@@ -274,7 +274,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             // Make sure CSL's are defined
             if (!item.system.csl) {
                 item.system.csl = {}
-                for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
+                for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
                     item.system.csl[c] = _ocv;
                 }
                 item.update({ "system.csl": item.system.csl })
@@ -282,7 +282,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
             // CSL radioBoxes names
             data.csl = []
-            for (let c = 0; c < parseInt(item.system.LEVELS.value); c++) {
+            for (let c = 0; c < parseInt(item.system.LEVELS || 0); c++) {
                 data.csl.push({ name: `system.csl.${c}`, value: item.system.csl[c] })
             }
 
