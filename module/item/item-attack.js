@@ -242,9 +242,9 @@ export async function AttackAoeToHit(item, options) {
 
     if (item.system.uses === "ocv") {
 
-        // Educated guess for token
         let factor = actor.system.is5e ? 4 : 8;
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
+        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
             tags.push({ value: rangePenalty.signedString(), name: "AOE range penalty", title: `${distanceToken}${actor.system.is5e ? "'" : "m"}` })
@@ -383,6 +383,7 @@ export async function AttackToHit(item, options) {
         let distance = canvas.grid.measureDistance(token, target, { gridSpaces: true });
         let factor = actor.system.is5e ? 4 : 8;
         let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
+        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
             tags.push({ value: rangePenalty.signedString(), name: "range penalty", title: `${distance}${actor.system.is5e ? "'" : "m"}` })

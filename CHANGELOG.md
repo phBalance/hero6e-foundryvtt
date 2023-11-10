@@ -5,6 +5,7 @@
 - Fix for Combat Skill Levels where edit sheet did not allow for changing values.
 - Improved range pentaly tags and associated tooltips.
 - Fixed error for cone placement.
+- Fixed range penalty when distance is 2 or fewer hexes. [#437](https://github.com/dmdorman/hero6e-foundryvtt/issues/437)
 
 
 # Version 3.0.50
