@@ -226,7 +226,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 break;
             }
             case ("cone"): {
-                if (aoe.adders.find(o => o.XMLID === "THINCONE")) {
+                if ((aoe.adders || []).find(o => o.XMLID === "THINCONE")) {
                     templateData.angle = 31;
                 } else {
                     templateData.angle = 61; // 60 has odd rounding error
