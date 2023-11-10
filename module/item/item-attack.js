@@ -247,7 +247,7 @@ export async function AttackAoeToHit(item, options) {
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "AOE range penalty", title: `${distanceToken}${actor.system.is5e ? "'" : "m"}` })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
@@ -385,7 +385,7 @@ export async function AttackToHit(item, options) {
         let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "range penalty", title: `${distance}${actor.system.is5e ? "'" : "m"}` })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 

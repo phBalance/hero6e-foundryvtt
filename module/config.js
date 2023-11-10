@@ -753,7 +753,7 @@ HERO.powers = [
     {
         "key": "HEALING",
         "powerType": [
-            "adjustment"
+            "adjustment", "attack"
         ],
         "perceivability": "obvious",
         "duration": "instant",
