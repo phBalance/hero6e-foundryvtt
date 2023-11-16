@@ -12,7 +12,7 @@ Star Hero © 2003, 2011 by DOJ, Inc. d/b/a Hero Games. All rights reserved.
 All DOJ trademarks and copyrights used with permission.
 For further information about Hero Games and the HERO System, visit www.herogames.com.
 
-Support can be found by creating a [new issue](https://github.com/dmdorman/hero6e-foundryvtt/issues), starting a [new discussion](https://github.com/dmdorman/hero6e-foundryvtt/discussions) or on the Hero-Champions-RPG (unofficial) Foundry-vtt [Discord Channal](https://discord.com/channels/609528652878839828/770825017729482772).
+Support can be found by creating a [new issue](https://github.com/dmdorman/hero6e-foundryvtt/issues), starting a [new discussion](https://github.com/dmdorman/hero6e-foundryvtt/discussions) or on the Hero-Champions-RPG (unofficial) Foundry-vtt [Discord Channel](https://discord.com/channels/609528652878839828/770825017729482772).
 
 ## Functionality
 
@@ -116,7 +116,7 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
    - Try uploading the HDC file again.
 2. How do you set a toggle power to default to off after HDC upload?
    - In HD set "Totaling Options" to "Do not add to Totals".
-3. How do you get automation to destermine hit or miss?
+3. How do you get automation to determine hit or miss?
    - Click the target of your attack.  Press 't' to select target.  Open attacker's character sheet.  Click dice icon next to attack.  The chat cards should show a hit/miss.  If it is a hit then the damage card will have a button to apply damage to your target.
    - You can select multiple targets with shift-t.
 4. I'm unable to change a Characteristics Max number.
@@ -125,8 +125,8 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
    - You can change it scene by scene by opening the scene settings -> grid then edit 'Grid Scale'
 6. Marking a token as dead marks all identical tokens as dead. [#247](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
    - You need to turn off *Link Actor Data* in the actor Prototype Token or Token screen.
-   - Named actors can have tokens on several scenes, and by default their properies are linked to the master actor.  So as you move from scene to scene their STUN/BODY/Statuses and all other properties remain the same.
-   - Generic actors should have their link actor data unchecked, which allows you to make distinct changes to the tokens, those changes do not affect the master actor.  There are also options on the Prototype token to add a number or adjetive to the token name.
+   - Named actors can have tokens on several scenes, and by default their properties are linked to the master actor.  So as you move from scene to scene their STUN/BODY/Statuses and all other properties remain the same.
+   - Generic actors should have their link actor data unchecked, which allows you to make distinct changes to the tokens, those changes do not affect the master actor.  There are also options on the Prototype token to add a number or adjective to the token name.
 
 ## Screenshots
 
