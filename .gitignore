@@ -1,18 +1,14 @@
 # IDE
 .idea/
 .vs/
+.vscode/
 
 # Node Modules
 node_modules/
 npm-debug.log
 
-# Gulp
-gulpfile.js
-package-lock.json
-package.json
-
 # Foundry
 *.lock
 
-#private
+# Private stuff in the repo
 private
