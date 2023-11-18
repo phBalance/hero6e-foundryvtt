@@ -1033,15 +1033,15 @@ export class HeroSystem6eActor extends Actor {
         // Images
         if (heroJson.CHARACTER.IMAGE) {
             const filename = heroJson.CHARACTER.IMAGE?.FileName
-                const path = "worlds/" + game.world.id + "/tokens"
+            const path = "worlds/" + game.world.id + "/tokens"
             const relativePathName = path + "/" + filename
 
             // Create a directory if it doesn't already exist
-                try {
-                    await FilePicker.createDirectory("user", path)
-                } catch (e) {
+            try {
+                await FilePicker.createDirectory("user", path)
+            } catch (e) {
                 //console.error(e)
-                }
+            }
 
             // Set the image, uploading if not already in the file system
             try {
@@ -1208,11 +1208,10 @@ export class HeroSystem6eActor extends Actor {
             await this.update({ [`system.is5e`]: this.system.is5e })
         }
 
-        // Chararacteristics
+        // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
             if (key === "running")
                 console.log(key)
-            const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0)
             newValue += this.getCharacteristicBase(key)
             if (this.system.characteristics[key].max != newValue) {
