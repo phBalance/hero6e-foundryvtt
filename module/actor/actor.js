@@ -1065,6 +1065,9 @@ export class HeroSystem6eActor extends Actor {
             }
 
             delete heroJson.CHARACTER.IMAGE
+        } else {
+            // No image provided. Make sure we're using the default token.
+            changes['img'] = CONST.DEFAULT_TOKEN
         }
 
 
