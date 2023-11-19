@@ -31,25 +31,23 @@ export function registerUploadTests(quench) {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.description, "for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)");
-                });
+                })
 
                 it("realCost", async function () {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.realCost, "20");
-                });
+                })
 
                 it("activePoints", async function () {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.activePoints, "35");
-                });
-            });
+                })
+            })
 
             // https://discord.com/channels/609528652878839828/770825017729482772/1122607244035493888
             describe("MENTAL_COMBAT_LEVELS", function () {
-
-
                 const contents = `
                     <SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1687721775906" BASECOST="0.0" LEVELS="2" ALIAS="Mental Combat Skill Levels" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TIGHT" OPTIONID="TIGHT" OPTION_ALIAS="with a group of Mental Powers" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Mind Empowered" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                     <NOTES />
@@ -60,32 +58,32 @@ export function registerUploadTests(quench) {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.description, "Mind Empowered: +2 with a group of Mental Powers") //"+2 with a group of Mental Powers");
-                });
+                })
+
                 it("realCost", async function () {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.realCost, 6);
-                });
+                })
 
                 it("activePoints", async function () {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.activePoints, 6);
-                });
+                })
 
                 it("levels", async function () {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.max, 2);
-                });
+                })
 
                 it("end", async function () {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
                     await item._postUpload()
                     assert.equal(item.system.end, 0);
-                });
-
-            });
+                })
+            })
 
             describe("CLIMBING", function () {
                 const contents = `
@@ -104,7 +102,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, ""); // Climbing is part of the name
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -115,7 +114,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 3);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -127,7 +126,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 3);
-                });
+                })
 
                 it("levels", async function () {
                     const actor = new HeroSystem6eActor({
@@ -139,7 +138,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 0);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -151,7 +150,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
-                });
+                })
 
                 it("roll", async function () {
                     const actor = new HeroSystem6eActor({
@@ -164,8 +163,8 @@ export function registerUploadTests(quench) {
                     actor.items.set(item.system.XMLID, item)
                     SkillRollUpdateValue(item)
                     assert.equal(item.system.roll, "12-");
-                });
-            });
+                })
+            })
 
             describe("ENERGYBLAST", function () {
                 const contents = `
@@ -183,7 +182,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1d6");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -193,7 +193,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 5);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -204,7 +204,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 5);
-                });
+                })
 
                 it("levels", async function () {
                     const actor = new HeroSystem6eActor({
@@ -215,7 +215,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 1);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -226,9 +226,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 1);
-                });
-
-            });
+                })
+            })
 
             describe("Characteristics INT", function () {
                 const contents = `
@@ -246,7 +245,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "+3 INT");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -256,7 +256,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 3);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -267,7 +267,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 3);
-                });
+                })
 
                 it("levels", async function () {
                     const actor = new HeroSystem6eActor({
@@ -278,7 +278,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 3);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -289,9 +289,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
-                });
-
-            });
+                })
+            })
 
             describe("Offensive Strike", async function () {
                 const contents = `
@@ -310,7 +309,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -321,7 +321,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 5);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -333,7 +333,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 5);
-                });
+                })
 
                 it("dice", async function () {
                     const actor = new HeroSystem6eActor({
@@ -345,7 +345,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 4);  // There are 4 raw dice, STR is added later
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -357,10 +357,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
-                });
-
+                })
             });
-
 
             // WillForce362.hdc
             describe("TELEKINESIS", async function () {
@@ -395,7 +393,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Telekinesis (62 STR), Alternate Combat Value (uses OMCV against DCV; +0) (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -406,7 +405,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 46);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -418,7 +417,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 93);
-                });
+                })
 
                 it("levels", async function () {
                     const actor = new HeroSystem6eActor({
@@ -430,7 +429,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 62);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -442,9 +441,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 9);
-                });
-
-            });
+                })
+            })
 
             describe("Sniper Rifle", async function () {
                 const contents = `
@@ -471,7 +469,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -481,7 +480,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 16);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -492,7 +491,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 40);
-                });
+                })
 
                 it("dice", async function () {
                     const actor = new HeroSystem6eActor({
@@ -503,7 +502,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 2);
-                });
+                })
 
                 it("extraDice", async function () {
                     const actor = new HeroSystem6eActor({
@@ -514,7 +513,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "half");
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -525,7 +524,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
-                });
+                })
 
                 it("charges", async function () {
                     const actor = new HeroSystem6eActor({
@@ -536,7 +535,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.charges.max, 8);
-                });
+                })
+
                 it("chargesRecoverable", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -546,9 +546,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.charges.recoverable, false);
-                });
-
-            });
+                })
+            })
 
             describe("MINDCONTROL", async function () {
                 const contents = `
@@ -567,7 +566,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "15d6");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -578,7 +578,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 75);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -590,7 +590,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 75);
-                });
+                })
 
                 it("dice", async function () {
                     const actor = new HeroSystem6eActor({
@@ -602,7 +602,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 15);
-                });
+                })
 
                 it("extraDice", async function () {
                     const actor = new HeroSystem6eActor({
@@ -614,7 +614,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "zero");
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -626,8 +626,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "7");
-                });
-            });
+                })
+            })
 
             // MalnacharOrc_Lars_Servant.hdc
             describe("MINDCONTROL advanced", async function () {
@@ -665,7 +665,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -676,7 +677,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 137);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -688,7 +689,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 206);
-                });
+                })
 
                 it("dice", async function () {
                     const actor = new HeroSystem6eActor({
@@ -700,7 +701,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, 15);
-                });
+                })
 
                 it("extraDice", async function () {
                     const actor = new HeroSystem6eActor({
@@ -712,7 +713,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "zero");
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -724,8 +725,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "9");
-                });
-            });
+                })
+            })
 
             describe("COMBAT_LEVELS", async function () {
                 const contents = `
@@ -743,7 +744,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "+1 with any single attack");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -753,7 +755,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 2);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -764,7 +766,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 2);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -775,9 +777,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
-                });
-            });
-
+                })
+            })
 
             describe("INVISIBILITY", async function () {
                 const contents = `
@@ -809,7 +810,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Invisibility to Sight, Touch and Hearing Groups, Normal Smell and Combat Sense (38 Active Points); Conditional Power Only vs organic perception (-1/2)");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -819,7 +821,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 25);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -830,7 +832,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 38);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -841,9 +843,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "4");
-                });
-            });
-
+                })
+            })
 
             describe("Killing Strike", async function () {
                 const contents = `
@@ -862,7 +863,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -873,7 +875,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 4);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -885,7 +887,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 4);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -897,9 +899,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
-                });
-            });
-
+                })
+            })
 
             // Cobalt
             describe("Laser Cutter", function () {
@@ -928,7 +929,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Killing Attack - Hand-To-Hand 2d6, Penetrating (+1/2) (45 Active Points); OAF (Pen-sized Device in pocket; -1), No STR Bonus (-1/2)");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -939,7 +941,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 18);
-                });
+                })
+
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -950,7 +953,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 45);
-                });
+                })
+
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -961,7 +965,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "4");
-                });
+                })
+
                 it("killing", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -972,9 +977,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.killing, true);
-                });
-            });
-
+                })
+            })
 
             // Crusher
             describe("Crush", function () {
@@ -1079,7 +1083,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "(20 END, 5 REC)");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1089,7 +1094,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 9);
-                });
+                })
+
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1099,7 +1105,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 9);
-                });
+                })
+
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1109,9 +1116,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
-                });
-            });
-
+                })
+            })
 
             describe("Martial Dodge", function () {
                 const contents = `
@@ -1129,7 +1135,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "1/2 Phase, -- OCV, +5 DCV, Dodge, Affects All Attacks, Abort");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1139,7 +1146,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 4);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -1150,7 +1157,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 4);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -1161,8 +1168,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
-                });
-            });
+                })
+            })
 
             describe("Skill Levels", function () {
                 const contents = `
@@ -1180,7 +1187,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "+10 with single Skill or Characteristic Roll");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1190,7 +1198,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 20);
-                });
+                })
 
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
@@ -1201,7 +1209,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 20);
-                });
+                })
 
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
@@ -1212,7 +1220,7 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "0");
-                });
+                })
 
                 it("LEVELS", async function () {
                     const actor = new HeroSystem6eActor({
@@ -1223,11 +1231,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 10);
-                });
-            });
-
-
-
+                })
+            })
 
             describe("Flash", async function () {
                 const contents = `
@@ -1263,7 +1268,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1273,7 +1279,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 49);
-                });
+                })
+
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1283,7 +1290,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 49);
-                });
+                })
+
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1293,7 +1301,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, "5");
-                });
+                })
+
                 it("dice", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1303,7 +1312,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.dice, "5");
-                });
+                })
+
                 it("extraDice", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1313,7 +1323,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.extraDice, "half");
-                });
+                })
+
                 it("killing", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1323,9 +1334,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.killing, false);
-                });
-            });
-
+                })
+            })
 
             describe("MENTALDEFENSE", async function () {
                 const contents = `
@@ -1358,7 +1368,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.description, "39 points, Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)");
-                });
+                })
+
                 it("realCost", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1368,7 +1379,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.realCost, 9);
-                });
+                })
+
                 it("activePoints", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1378,7 +1390,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.activePoints, 49);
-                });
+                })
+
                 it("end", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1388,7 +1401,8 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.end, 0);
-                });
+                })
+
                 it("levels", async function () {
                     const actor = new HeroSystem6eActor({
                         name: 'Quench Actor',
@@ -1398,9 +1412,9 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 39);
-                });
-            });
+                })
+            })
         },
         { displayName: "HERO: Upload" }
-    );
+    )
 }
