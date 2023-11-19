@@ -1,0 +1,415 @@
+/* Minimim size of actor sheet */
+.actor-sidebar-sheet {
+  min-height: 310px;
+  min-width: 500px;
+}
+
+/* minimal padding around window content */
+.actor-sidebar-sheet .window-content {
+  padding: 1px;
+}
+
+/* Setup Grid */
+.actor-sidebar-sheet form {
+    display: grid;
+    grid: 
+      "sidebar header" 75px 
+      "sidebar nav" minmax(min-content, max-content) 
+      "sidebar content" 1fr/100px 1fr;
+    /* height: 100%; */
+    /* background-color: red; */
+}
+
+/* Sidebar */
+.actor-sidebar-sheet aside {
+  display: flex;
+  flex-direction: column;
+  grid-area: sidebar;
+  /* background-color: lightgreen; */
+  border-right: thin solid darkgrey
+}
+
+/* .actor-sidebar-sheet header {
+  grid-area: header;
+  padding: 0 2px 0 2px;
+  background-color: blue;
+} */
+
+.actor-sidebar-sheet .sidebar {
+    overflow: hidden scroll;
+    padding: 0 2px 2px 8px;
+    /* background-color: lavender; */
+}
+
+.actor-sidebar-sheet .char-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* background-color: lightgoldenrodyellow; */
+}
+
+.actor-sidebar-sheet nav.sheet-navigation {
+  align-items: center;
+  border-bottom: 1px solid black;
+  border-top: 1px solid black;
+  display: inline-flex;
+  justify-content: center;
+  position: relative;
+  transition: all .1s ease-out;
+  grid-area: nav;
+  /* background-color: lightcyan; */
+}
+
+.actor-sidebar-sheet .sheet-body, .sheet.item .sheet-body {
+  grid-area: content;
+  position: relative;
+  overflow: hidden scroll;
+  /* background-color: steelblue; */
+}
+
+.actor-sidebar-sheet .sheet-content, .sheet.item .sheet-content {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 100%;
+  /* background-color: red; */
+}
+
+
+.actor-sidebar-sheet ul.attributes {
+  list-style: none;
+  padding: 0;
+}
+
+.actor-sidebar-sheet .attributes .attribute {
+  position: relative;
+  margin: 0;
+  border: none;
+  border-top: 2px groove #eeede0;
+  border-radius: 0;
+}
+
+.actor-sidebar-sheet .attributes .attribute-name  {
+  position: relative;
+}
+
+.actor-sidebar-sheet h4.box-title {
+  height: 18px;
+  line-height: 16px;
+  margin: 4px 8px 2px;
+  border-bottom: 1px solid #c9c7b8;
+  
+  white-space: nowrap;
+}
+
+.actor-sidebar-sheet ul.attributes li.attribute {
+  text-align: center;
+}
+
+.actor-sidebar-sheet .attributes input[type="text"]
+{
+  width: 35px;
+  min-width: 20px;
+  padding: 1px 3px;
+  margin: 3px 0px;
+  /* border-color: transparent; */
+}
+
+.actor-sidebar-sheet input[type="text"]:focus {
+  border-color: black;
+}
+
+.actor-sidebar-sheet input[type="text"]:hover {
+  border-color: black;
+}
+
+.actor-sidebar-sheet span.sep {
+  flex: none;
+  margin: 0 1px;
+  display: inline;
+  position: relative;
+  color: #7a7971;
+}
+
+.actor-sidebar-sheet .profile-img {
+  object-fit: contain;
+}
+
+.actor-sidebar-sheet nav a {
+  margin: 0.25em;
+  padding: 0.25em;
+  text-align: center;
+  border: thin solid black;
+  border-radius: .5em;
+}
+
+.actor-sidebar-sheet nav a.active {
+  background: black;
+  color: white;
+}
+
+.actor-sidebar-sheet .sheet-header {
+  margin-left: 0.5em;
+}
+
+.actor-sidebar-sheet .sheet-body {
+  margin-left: 0.5em;
+}
+
+.actor-sidebar-sheet table tr:first-child, .actor-sidebar-sheet table tr.activeEffects {
+  box-shadow: inset 0 -1px 0 darkgray;
+  background-color: #CFCEC3;
+}
+
+.actor-sidebar-sheet table tr.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1; /* pesky checkboxes */
+  background-color: #CFCEC3;
+}
+
+.actor-sidebar-sheet table tr.sticky2 {
+  position: sticky;
+  top: 33px;
+  z-index: 1; /* pesky checkboxes */
+  background-color: #CFCEC3;
+  box-shadow: inset 0 -1px 0 darkgray;
+}
+
+.actor-sidebar-sheet table {
+  border-top: 0;
+  margin-top: 0;
+}
+
+/* .actor-sidebar-sheet table tr td.left, .actor-sidebar-sheet table tr th.left { */
+th.left, td.left {
+  text-align: left;
+}
+
+input.left {
+  text-align: left;
+}
+
+.actor-sidebar-sheet table tr td.right, .actor-sidebar-sheet table tr th.right {
+  text-align: right;
+  padding-right: 2px;
+}
+
+.actor-sidebar-sheet table tr td.right, .actor-sidebar-sheet table tr th.right {
+  text-align: right;
+}
+
+.actor-sidebar-sheet .item-image {
+  margin-right: 5px;
+  min-width: 24px;
+}
+
+.actor-sidebar-sheet .item-image img {
+  display: block;
+}
+
+.actor-sidebar-sheet table tr  {
+  height: auto;
+  line-height: 24px;
+  padding: 3px 0;
+}
+
+.actor-sidebar-sheet table tr td  {
+  padding: 3px 0;
+  max-width: 300px; /* power description can be a bit too big; alternatives pct or flexbox */
+}
+
+.actor-sidebar-sheet table tr td button {
+  height: 24px;
+  line-height: normal;
+}
+
+.actor-sidebar-sheet table tr.characteristic td button.rollable {
+  width: 40px;
+}
+
+.actor-sidebar-sheet table tr td input {
+  vertical-align: middle;
+}
+
+.actor-sidebar-sheet table tr.characteristic td input {
+  width: 40px;
+}
+
+.actor-sidebar-sheet input[type="file"] {
+  display: none;
+}
+
+/* TokenHud */
+.hero-attribute {
+  display: flex;
+  flex-direction: column;
+  gap: 6px 0;
+  justify-content: center;
+  width: 100px;
+}
+
+.hero-attribute.compact {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  width: 40px;
+}
+
+.col.middle .hero-attribute {
+  width: unset;
+}
+
+.hero-attribute.compact input[type="text"] {
+  width: 40%;
+  height: 30px;
+  font-size: 20px;
+  margin: 2px;
+  min-width: 40px;
+}
+
+.hero-attribute input:disabled {
+  color: #aaa;
+}
+
+.actor-sidebar-sheet input.underMax
+{
+  background-color: rgba(255,200,200,0.5)
+}
+
+.actor-sidebar-sheet input.overMax, .actor-sidebar-sheet tr.overMax
+{
+  background-color: rgba(200,255,200,0.5)
+}
+
+.actor-sidebar-sheet .sidebar-actions {
+  padding: 0;
+  border: none;
+}
+
+.actor-sidebar-sheet .sidebar-actions button {
+  line-height: normal;
+  margin: 2px 0px;
+}
+
+.actor-sidebar-sheet div.points {
+  border: 1px solid rgb(0 0 0 / 30%);
+  border-radius: 8px;
+  height: 24px;
+  padding: 2px 4px;
+  font-size:14px;
+  /* margin-top: 2px; */
+  margin: 5px 5px;
+  text-align: center;
+}
+
+.actor-sidebar-sheet .warn
+{
+  background-color: rgba(255,255,200,0.5)
+}
+
+.actor-sidebar-sheet table tr td.item-framework-child-name {
+  padding-left: 10px;
+}
+
+.actor-sidebar-sheet header span {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+ul.left li {
+  text-align: left;
+}
+
+.form-group div {
+  display: flex;
+  flex-direction: row;
+}
+
+.form-group div span {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.editor-content {
+  min-height: 36px;
+  border-radius: 5px;
+  border: 1px dashed rgba(0,0,0,0.3);
+}
+
+.actor-sidebar-sheet .sidebar section ul li>span {
+  position: relative;
+  left: -5px;
+}
+
+.actor-sidebar-sheet .sidebar section .defenses {
+  border-top: 2px groove #eeede0;
+  padding-top: 5px;
+}
+
+.conditional-defense-card div.description {
+  border: 1px dashed rgba(0,0,0,0.5);
+  margin: 15px 0;
+  padding: 5px;
+}
+
+td.characteristic-locked > input {
+  cursor: pointer;
+}
+
+div.aoe-button {
+  margin-bottom: 3px;
+}
+
+div.applyDamageAmount {
+  border-top: 1px solid var(--color-underline-header);
+  border-bottom: 1px solid var(--color-underline-header);
+  text-align: center;
+  font-size: var(--font-size-20);
+  line-height: 24px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+div.xmlid {
+  margin-left: 8px;
+}
+
+form.item-sheet h1.charname input {
+ margin-top: 0px;
+}
+
+.herosystem6e.sheet.item .form-group > div {
+  margin-left: -5px;
+}
+
+.herosystem6e.sheet.item .right {
+  text-align: right;
+}
+
+.herosystem6e.sheet.item .center {
+  text-align: center;
+}
+
+.herosystem6e.sheet.item li.summaryBreak {
+  margin-top: 5px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border-light-tertiary);
+  border-bottom: 1px solid var(--color-border-light-tertiary);
+
+}
+
+.herosystem6e.sheet.item div.description, form div.attack-card div.description {
+  border: 1px dashed rgba(0,0,0,0.5);
+  margin: 15px 0;
+  padding: 5px;
+  max-width: 100%;
+}
+
+.herosystem6e.sheet.item tr.modifierAdder td:first-child {
+  padding-left: 10px;
+}
+
+#item-attack-form-application {
+  max-width: 50%;
+}
