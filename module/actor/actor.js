@@ -664,54 +664,59 @@ export class HeroSystem6eActor extends Actor {
 
         let base = parseInt(powerInfo?.base) || 0;
 
-        if (!this.system.is5e) return base;
+        if (!this.system.is5e) return base
 
-        let _str = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.str.max")?.value || 0), 0)
-        let _con = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.con.max")?.value || 0), 0)
-        let _dex = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.dex.max")?.value || 0), 0)
-        let _body = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.body.max")?.value || 0), 0)
-        let _ego = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.ego.max")?.value || 0), 0)
+        const _str = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.str.max")?.value || 0), 0)
+        const _con = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.con.max")?.value || 0), 0)
+        const _dex = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.dex.max")?.value || 0), 0)
+        const _body = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.body.max")?.value || 0), 0)
+        const _ego = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.ego.max")?.value || 0), 0)
 
+        // FIXME: This is, but should never be, called with this.system[characteristic] being undefined. Need to reorder the loading
+        //        mechanism to ensure that we do something more similar to a load, transform, and extract pipeline so that we
+        //        not invoked way too many times and way too early.
+        const charBase = (characteristicUpperCase) => {
+            return parseInt(this.system[characteristicUpperCase]?.LEVELS) + (parseInt(getPowerInfo({ xmlid: characteristicUpperCase, actor: this})?.base) || 0)
+        }
 
         switch (key.toLowerCase()) {
 
             // Physical Defense (PD) STR/5
             case "pd":
-                return base + Math.round((this.system.characteristics.str.core + _str) / 5);
+                return base + Math.round((charBase("STR") + _str) / 5);
 
             // Energy Defense (ED) CON/5
             case "ed":
-                return base + Math.round((this.system.characteristics.con.core + _con) / 5);
-                break;
+                return base + Math.round((charBase("CON") + _con) / 5);
 
             // Speed (SPD) 1 + (DEX/10)   can be fractional
             case "spd":
-                return base + 1 + parseFloat(parseFloat((this.system.characteristics.dex.core + _dex) / 10).toFixed(1))
+                return base + 1 + parseFloat(parseFloat((charBase("DEX") + _dex) / 10).toFixed(1))
 
             // Recovery (REC) (STR/5) + (CON/5)
             case "rec":
-                return base + Math.round((this.system.characteristics.str.core + _str) / 5) + Math.round((this.system.characteristics.con.core + _con) / 5);
+                return base + Math.round((charBase("STR") + _str) / 5) + Math.round((charBase("CON") + _con) / 5)
 
             // Endurance (END) 2 x CON
             case "end":
-                return base + Math.round((this.system.characteristics.con.core + _con) * 2);
+                return base + Math.round((charBase("CON") + _con) * 2)
 
             // Stun (STUN) BODY+(STR/2)+(CON/2) 
             case "stun":
-                return base + Math.round(this.system.characteristics.body.core + _body) + Math.round((this.system.characteristics.str.core + _str) / 2) + Math.round((this.system.characteristics.con.core + _con) / 2);
+                return base + Math.round(charBase("BODY") + _body) + Math.round((charBase("STR") + _str) / 2) + Math.round((charBase("CON") + _con) / 2);
 
             // Base OCV & DCV = Attacker’s DEX/3
             case "ocv":
             case "dcv":
-                return Math.round((this.system.characteristics.dex.core + _dex) / 3);
+                return Math.round((charBase("DEX") + _dex) / 3);
 
             //Base Ego Combat Value = EGO/3
             case "omcv":
             case "dmcv":
-                return Math.round((this.system.characteristics.ego.core + _ego) / 3);
+                return Math.round((charBase("EGO") + _ego) / 3);
 
             case "leaping":
-                const str = parseInt(this.system.characteristics.str.core + _str)
+                const str = parseInt(charBase("STR") + _str)
                 let value = 0;
                 if (str >= 3) value = 0.5
                 if (str >= 5) value = 1
@@ -740,7 +745,6 @@ export class HeroSystem6eActor extends Actor {
                 if (str >= 95) value = 19
                 if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
                 return value;
-
         }
 
         return base;
@@ -1208,11 +1212,17 @@ export class HeroSystem6eActor extends Actor {
 
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
-            if (key === "running")
+            if (key === "running") {
                 console.log(key)
-            const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
+            }
+
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0)
             newValue += this.getCharacteristicBase(key)
+            if(this.system.is5e && (key === "spd")) {
+                // SPD is always an integer, but in 5e due to figured characteristics, the base can be fractional.
+                newValue = Math.floor(newValue)
+            }
+
             if (this.system.characteristics[key].max != newValue) {
                 if (this.id) {
                     //changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
