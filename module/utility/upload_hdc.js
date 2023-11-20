@@ -25,7 +25,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
     // let elementsToLoad = ["POWERS", "PERKS", "TALENTS", "MARTIALARTS", "DISADVANTAGES"]
 
-    // Individual changes to the actor are not very effecient.
+    // Individual changes to the actor are not very efficient.
     // Instead save all the changes and perform a bulk update.
     let changes = {}
     changes[`system.characterTemplate`] = characterTemplate
@@ -350,7 +350,7 @@ export async function applyCharacterSheet(xmlDoc) {
 
 
 
-    // EXTRA DC's from martial arts
+    // EXTRA DCs from martial arts
     // let extraDc = 0
     // const _extraDc = martialarts.getElementsByTagName('EXTRADC')[0]
     // if (_extraDc) {
