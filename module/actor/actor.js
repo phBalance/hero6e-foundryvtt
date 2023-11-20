@@ -754,8 +754,8 @@ export class HeroSystem6eActor extends Actor {
         let changes = {};
         for (const powerInfo of powers) {
             let key = powerInfo.key.toLowerCase();
-            let characteistic = this.system.characteristics[key];
-            let core = parseInt(characteistic?.core) || 0;
+            let characteristic = this.system.characteristics[key];
+            let core = parseInt(characteristic?.core) || 0;
 
             let base = this.getCharacteristicBase(key);
             let levels = core - base;
@@ -766,7 +766,7 @@ export class HeroSystem6eActor extends Actor {
                 cost = Math.ceil(cost / 10);
             }
 
-            if (characteistic.realCost != cost) {
+            if (characteristic.realCost != cost) {
                 changes[`system.characteristics.${key}.realCost`] = cost;
                 this.system.characteristics[key].realCost = cost;
             }
@@ -853,7 +853,7 @@ export class HeroSystem6eActor extends Actor {
         let changes = {}
 
 
-        // Reset system propety to default
+        // Reset system property to default
         const _actor = await HeroSystem6eActor.create({
             name: 'Test Actor',
             type: this.type,
@@ -1021,7 +1021,7 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
-            if (this.id) { // Skip if tempoary actor (Quench)
+            if (this.id) { // Skip if temporary actor (Quench)
                 const item = await HeroSystem6eItem.create(itemData, { parent: this })
                 if (attack) {
                     await item.makeAttack()
@@ -1206,7 +1206,7 @@ export class HeroSystem6eActor extends Actor {
             await this.update({ [`system.is5e`]: this.system.is5e })
         }
 
-        // Chararacteristics
+        // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
             if (key === "running")
                 console.log(key)
