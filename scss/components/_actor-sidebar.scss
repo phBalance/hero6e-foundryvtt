@@ -1,5 +1,5 @@
 /* Minimim size of actor sheet */
-.actor-sidebar-sheet  {
+.actor-sidebar-sheet {
   min-height: 310px;
   min-width: 500px;
 }
@@ -11,7 +11,7 @@
 
 /* Setup Grid */
 .actor-sidebar-sheet form {
-    display:grid;
+    display: grid;
     grid: 
       "sidebar header" 75px 
       "sidebar nav" minmax(min-content, max-content) 
@@ -131,13 +131,9 @@
   color: #7a7971;
 }
 
-
-
-
 .actor-sidebar-sheet .profile-img {
   object-fit: contain;
 }
-
 
 .actor-sidebar-sheet nav a {
   margin: 0.25em;
@@ -286,7 +282,6 @@ input.left {
   background-color: rgba(200,255,200,0.5)
 }
 
-
 .actor-sidebar-sheet .sidebar-actions {
   padding: 0;
   border: none;
@@ -410,8 +405,6 @@ form.item-sheet h1.charname input {
   padding: 5px;
   max-width: 100%;
 }
-
-
 
 .herosystem6e.sheet.item tr.modifierAdder td:first-child {
   padding-left: 10px;

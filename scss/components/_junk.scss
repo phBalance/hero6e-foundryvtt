@@ -1,0 +1,167 @@
+div.tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tag {
+  margin-right: 4px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+}
+
+.tags .tag {
+  background-color: #5e0000;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 50%);
+  color: #fff;
+  padding: 0.1em 0.25em;
+}
+
+.tags .tag.tag_transparent {
+  background-color: transparent;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 30%);
+  color: rgb(75, 74, 68);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5;
+  padding: 0.1em 0.25em;
+}
+
+.tags .tag.tag_knockback {
+  background-color: transparent;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 255 / 50%);
+  color: rgb(75, 74, 68);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5;
+  padding: 0.1em 0.25em;
+}
+
+.tags .tag.area-effect-tag {
+  background-color: #d06fa2;
+  /* cursor: pointer; */
+}
+
+td {
+  text-align: center;
+}
+
+div.fifthEd {
+  background-color: lightsteelblue;
+  border: 1px solid rgb(0 0 0 / 30%);
+  border-radius: 8px;
+  height: 24px;
+  padding: 2px 4px;
+  font-size: 14px;
+  /* margin-top: 2px; */
+  margin: 5px 5px;
+}
+
+.toHit-card .target-dc-result .Miss {
+  color: red;
+}
+
+.toHit-card .target-dc-result .Hit {
+  color: blue;
+}
+
+.toHit-card .target-dc {
+  border-bottom: 2px groove #FFF;
+  margin-bottom: 4px;
+}
+
+.radio-container {
+  margin-left: 90px;
+  width: 200px;
+  font-size: 14px;
+  position: absolute;
+  top: 120px;
+  left: 15px;
+  width: 200px;
+  pointer-events: none;
+}
+
+.radio {
+  margin: 0.5rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  opacity: 80%;
+}
+
+.radio label {
+  color: #fff;
+  font-weight: 500;
+  /* text-shadow: 0 0 10px #494848; */
+  text-shadow: 1px 1px 2px black, 0 0 1em #494848, 0 0 0.2em #494848;
+
+}
+
+.radio input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+
+}
+
+.radio input[type="radio"]+.radio-label:before {
+  content: '';
+  background: #494848;
+  border-radius: 100%;
+  border: 1px solid #000000;
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  position: relative;
+  top: 5px;
+  margin-right: 1em;
+  vertical-align: center;
+  cursor: pointer;
+  text-align: center;
+  transition: all 250ms ease;
+  pointer-events: auto;
+}
+
+.radio input[type="radio"]:checked+.radio-label:before {
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 4px #494848;
+}
+
+.radio input[type="radio"]+.radio-label:empty:before {
+  margin-right: 0;
+}
+
+div.item-chat {
+  color: darkgreen;
+  font-weight: 100;
+}
+
+div.csl-attack-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+div.dice-standard-effect {
+  line-height: 24px;
+  text-align: center;
+  background: rgba(0,0,0,0.1);
+  border: 1px solid var(--color-border-light-2);
+  border-radius: 3px;
+  box-shadow: 0 0 2px #fff inset;
+  word-break: break-all;
+  margin-bottom: 5px;
+}
+
+[data-visibility="gm"] {
+  background-color: rgba(240,240,255,0.9);
+  outline: 1px solid rgba(0, 0, 255, 0.4);
+}
+
+.hexFacing {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  border: 0;
+}
