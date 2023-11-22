@@ -1375,10 +1375,6 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
-        if (this.name === "Sniper Rifle") {
-            console.log(this.name)
-        }
-
         // This may be a slot in a framework if so get parent
         //const parent = this.parent()
 
@@ -1387,14 +1383,21 @@ export class HeroSystem6eItem extends Item {
                 // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
                 system.description = `${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass, +${system.value * 5} STR, +${system.value} PD/ED, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB)`
                 break;
+
             case "GROWTH":
                 //Growth (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide), Reduced Endurance (0 END; +1/2), Persistent (+1/2); Always On (-1/2), IIF (-1/4)
                 system.description = `${system.ALIAS} (+${system.value * 5} STR, +${system.value} BODY, +${system.value} STUN, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB, ${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass)`
                 break;
+
             case "MENTALDEFENSE":
             case "POWERDEFENSE":
                 system.description = `${system.ALIAS} ${system.value} points`
                 break;
+
+            case "FLASHDEFENSE":
+                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} points)`
+                break;
+
             case "FOLLOWER":
                 system.description = system.ALIAS.replace("Followers: ", "")
                 break;
@@ -1403,6 +1406,7 @@ export class HeroSystem6eItem extends Item {
                 system.description = levels + "d6 Mind Scan (" +
                     input + " class of minds)";
                 break;
+
             case "FORCEFIELD":
             case "ARMOR":
             case "DAMAGERESISTANCE":
@@ -1473,7 +1477,6 @@ export class HeroSystem6eItem extends Item {
                 system.description = system.ALIAS + " " + system.OPTION_ALIAS
                 break;
 
-
             case "LANGUAGES":
                 //English:  Language (basic conversation) (1 Active Points)
                 system.description = (system.INPUT || system.ALIAS)
@@ -1492,6 +1495,7 @@ export class HeroSystem6eItem extends Item {
                 if (system.INPUT) system.description += `: ${system.INPUT}`;
 
                 break;
+
             case "TRANSPORT_FAMILIARITY":
                 //TF:  Custom Adder, Small Motorized Ground Vehicles
                 //TF:  Equines, Small Motorized Ground Vehicles
@@ -1508,7 +1512,6 @@ export class HeroSystem6eItem extends Item {
             case "ENERGYBLAST": //Energy Blast 1d6
             case "EGOATTACK":
             case "MINDCONTROL":
-
             case "HANDTOHANDATTACK":
                 const value1 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
                 //system.description = `${system.ALIAS} ${system.value}d6`
@@ -1668,8 +1671,6 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}, ${parseInt(system.baseCost)}-point reserve`
                 break;
 
-
-
             case "FLASH":
                 //Sight and Hearing Groups Flash 5 1/2d6
                 //Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6
@@ -1709,8 +1710,6 @@ export class HeroSystem6eItem extends Item {
                 //system.description += ` ${system.ALIAS} ${system.value}d6 `;
                 break;
 
-
-
             default:
                 if (configPowerInfo && configPowerInfo.powerType?.includes("characteristic")) {
                     system.description = "+" + system.value + " " + system.ALIAS;
@@ -1744,12 +1743,9 @@ export class HeroSystem6eItem extends Item {
                     //     system.description += ` ${system.roll}`
                     // }
                 }
-
         }
 
-
-
-        // Remove duplicate name from descripton and related cleanup
+        // Remove duplicate name from description and related cleanup
         let _rawName = this.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         try {
             let re = new RegExp(`^${_rawName}`, 'i')
