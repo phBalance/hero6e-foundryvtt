@@ -307,9 +307,12 @@ export function convertFromDC(item, DC) {
 
     // Normal Attack
     if (!item.system.killing) {
+        // NOTE: This is ugly because with floating point calculations we need to use epsilon comparisons (see https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ for instance)
         d6Count = Math.floor(DC)
-        d3Count = DC % 1 >= 0.5 ? 1 : 0
-        constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
+        // d3Count = DC % 1 >= 0.5 ? 1 : 0
+        d3Count = (DC % 1 - 0.5 >= -Number.EPSILON) ? 1 : 0
+        // constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
+        constant = ((DC % 1 - 0.2 >= -Number.EPSILON) && (DC % 1 - 0.5 < -Number.EPSILON)) ? 1 : 0
         //return DC.toString() + "d6"; 
     } else
 
