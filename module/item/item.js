@@ -1379,16 +1379,18 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FLASHDEFENSE":
-                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} points)`
+                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} point${ system.value > 1 ? "s" : ""})` // PH: FIXME: Not happy with this kludgy singular vs plural.
                 break;
 
             case "FOLLOWER":
                 system.description = system.ALIAS.replace("Followers: ", "")
                 break;
 
-            case "Mind Scan":
-                system.description = levels + "d6 Mind Scan (" +
-                    input + " class of minds)";
+            case "MINDSCAN":
+                {
+                    const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                    system.description = `${dice} ${system.ALIAS}`
+                }
                 break;
 
             case "FORCEFIELD":
@@ -1497,9 +1499,10 @@ export class HeroSystem6eItem extends Item {
             case "EGOATTACK":
             case "MINDCONTROL":
             case "HANDTOHANDATTACK":
-                const value1 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
-                //system.description = `${system.ALIAS} ${system.value}d6`
-                system.description = `${system.ALIAS} ${value1}`
+                {
+                    const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                    system.description = `${system.ALIAS} ${dice}`
+                }
                 break;
 
             case "KBRESISTANCE":
@@ -1536,7 +1539,7 @@ export class HeroSystem6eItem extends Item {
                 //     console.log(system);
                 // }
 
-                // Martial attacks tyipcally add STR to description
+                // Martial attacks typically add STR to description
                 // let fullDice = system.dice;
                 // let extraDice = 0;
                 // switch (system.extraDice) {
@@ -1752,6 +1755,13 @@ export class HeroSystem6eItem extends Item {
         if (system.XMLID === "INVISIBILITY") {
             _adderArray.push(system.OPTION_ALIAS)
         }
+
+        // The INPUT field isn't always displayed in HD so that is not strictly compatible, but it does mean that we will show things
+        // like a ranged killing attack being ED vs PD in the power description.
+        if(system?.INPUT) {
+            _adderArray.push(system.INPUT)
+        }
+
         if (system?.ADDER?.length > 0) {
             for (let adder of system.ADDER) {
                 switch (adder.XMLID) {
@@ -1846,11 +1856,12 @@ export class HeroSystem6eItem extends Item {
 
                     case "FLASH":
                         // The senses are already in the description
-                        system.description += "(" + _adderArray.filter(o => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i)).join("; ") + ")"
+                        system.description += " (" + _adderArray.filter(o => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i)).join("; ") + ")"
                         system.description = system.description.replace("()", "");
                         break
 
                     default:
+                        system.description += " (" + _adderArray.join("; ") + ")"
                         break
                 }
             }
