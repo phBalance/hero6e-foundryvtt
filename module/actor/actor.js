@@ -1034,39 +1034,44 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // Actor Image
+        // Images
         if (heroJson.CHARACTER.IMAGE) {
             const filename = heroJson.CHARACTER.IMAGE?.FileName
+            const path = "worlds/" + game.world.id + "/tokens"
+            const relativePathName = path + "/" + filename
+
+            // Create a directory if it doesn't already exist
             try {
-                const extension = filename.split('.').pop()
-                const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName('IMAGE')[0].textContent
-                const path = "worlds/" + game.world.id + "/tokens"
-                try {
-                    await FilePicker.createDirectory("user", path)
-                } catch (e) {
-                    //console.log(e)
-                }
-                let oldImage = null
-                try {
-                    //let files = (await FilePicker.browse("user", path)).files
-                    oldImage = (await FilePicker.browse("user", path)).files.includes(encodeURI(path + "/" + filename))
-                } catch (e) {
-                    //console.log(e)
-                }
-                if (!oldImage) { //this.img.indexOf(filename) == -1) {
+                await FilePicker.createDirectory("user", path)
+            } catch (e) {
+                //console.error(e)
+            }
+
+            // Set the image, uploading if not already in the file system
+            try {
+                const imageFileExists = (await FilePicker.browse("user", path)).files.includes(encodeURI(relativePathName))
+                if (!imageFileExists) {
+                    const extension = filename.split('.').pop()
+                    const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName('IMAGE')[0].textContent
+
                     await ImageHelper.uploadBase64(base64, filename, path)
-                    changes['img'] = path + '/' + filename
 
                     // Update any tokens images that might exist
                     for (const token of this.getActiveTokens()) {
-                        await token.document.update({ 'texture.src': path + '/' + filename })
+                        await token.document.update({ 'texture.src': relativePathName })
                     }
                 }
+
+                changes['img'] = relativePathName
             } catch (e) {
-                console.log(e)
-                ui.notifications.warn(`${this.name} failed to upload ${filename}.`);
+                console.error(e)
+                ui.notifications.warn(`${this.name} failed to upload ${filename}.`)
             }
+
             delete heroJson.CHARACTER.IMAGE
+        } else {
+            // No image provided. Make sure we're using the default token.
+            changes['img'] = CONST.DEFAULT_TOKEN
         }
 
 
@@ -1087,7 +1092,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
 
-        // Save all our changes (unless tempoary actor/quench)
+        // Save all our changes (unless temporary actor/quench)
         if (this.id) {
             await this.update(changes)
         }

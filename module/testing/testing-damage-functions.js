@@ -283,64 +283,88 @@ export function registerDamageFunctionTests(quench) {
             });
 
             describe("convertFromDC", function () {
-                const item = new HeroSystem6eItem({
-                    name: 'Test',
-                    type: 'attack',
-                    system: {
-                        killing: true
-                    },
-                    parent: actor
-                });
+                describe("invalid inputs", function () {
+                    const item = new HeroSystem6eItem({
+                        name: 'Test',
+                        type: 'attack',
+                        system: {
+                            killing: true
+                        },
+                        parent: actor
+                    });
 
-                const item_nk = new HeroSystem6eItem({
-                    name: 'Test',
-                    type: 'attack',
-                    parent: actor
-                });
+                    it("\"\"", function () {
+                        assert.equal(convertFromDC(item, 0), "");
+                    });
+                })
 
-                it("\"\"", function () {
-                    assert.equal(convertFromDC(item, 0), "");
-                });
+                describe("killing attacks", function () {
+                    const killingItem = new HeroSystem6eItem({
+                        name: 'Test',
+                        type: 'attack',
+                        system: {
+                            killing: true
+                        },
+                        parent: actor
+                    });
 
-                it("(Killing) 1", function () {
-                    assert.equal(convertFromDC(item, 1), "1");
-                });
+                    it("1", function () {
+                        assert.equal(convertFromDC(killingItem, 1), "1");
+                    });
 
-                it("(Killing) 2", function () {
-                    assert.equal(convertFromDC(item, 2), "1d3");
-                });
+                    it("2", function () {
+                        assert.equal(convertFromDC(killingItem, 2), "1d3");
+                    });
 
-                it("(Killing) 3", function () {
-                    assert.equal(convertFromDC(item, 3), "1d6");
-                });
+                    it("3", function () {
+                        assert.equal(convertFromDC(killingItem, 3), "1d6");
+                    });
 
-                it("(Killing) 4", function () {
-                    assert.equal(convertFromDC(item, 4), "1d6 + 1");
-                });
+                    it("4", function () {
+                        assert.equal(convertFromDC(killingItem, 4), "1d6 + 1");
+                    });
 
-                it("(Killing) 5", function () {
-                    assert.equal(convertFromDC(item, 5), "1d6 + 1d3");
-                });
+                    it("5", function () {
+                        assert.equal(convertFromDC(killingItem, 5), "1d6 + 1d3");
+                    });
 
-                it("(Killing) 6", function () {
-                    assert.equal(convertFromDC(item, 6), "2d6");
-                });
+                    it("6", function () {
+                        assert.equal(convertFromDC(killingItem, 6), "2d6");
+                    });
 
-                it("(Killing) 7", function () {
-                    assert.equal(convertFromDC(item, 7), "2d6 + 1");
-                });
+                    it("7", function () {
+                        assert.equal(convertFromDC(killingItem, 7), "2d6 + 1");
+                    });
+                        
+                })
 
-                it("(Non-Killing) 0", function () {
-                    assert.equal(convertFromDC(item_nk, 0), "");
-                });
+                describe("Non killing attacks", function () {
+                    const nonKillingItem = new HeroSystem6eItem({
+                        name: 'Test',
+                        type: 'attack',
+                        parent: actor
+                    });
 
-                it("(Non-Killing) 1", function () {
-                    assert.equal(convertFromDC(item_nk, 1), "1d6");
-                });
+                    it("0", function () {
+                        assert.equal(convertFromDC(nonKillingItem, 0), "");
+                    });
 
-                it("(Non-Killing) 20", function () {
-                    assert.equal(convertFromDC(item_nk, 20), "20d6");
-                });
+                    it("1", function () {
+                        assert.equal(convertFromDC(nonKillingItem, 1), "1d6");
+                    });
+
+                    it("1.2", function () {
+                        assert.equal(convertFromDC(nonKillingItem, 1.2), "1d6 + 1");
+                    });
+
+                    it("1.5", function () {
+                        assert.equal(convertFromDC(nonKillingItem, 1.5), "1d6 + 1d3");
+                    });
+
+                    it("20", function () {
+                        assert.equal(convertFromDC(nonKillingItem, 20), "20d6");
+                    });
+                })
             });
 
             describe("Add Terms", function () {

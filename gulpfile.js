@@ -1,7 +1,7 @@
-const gulp = require('gulp');
-const prefix = require('gulp-autoprefixer');
-const sourcemaps = require('gulp-sourcemaps');
-const sass = require('gulp-sass');
+const gulp = require('gulp')
+const prefix = require('gulp-autoprefixer')
+const sourcemaps = require('gulp-sourcemaps')
+const sass = require('gulp-sass')(require('sass'))
 
 /* ----------------------------------------- */
 /*  Compile Sass
@@ -9,16 +9,16 @@ const sass = require('gulp-sass');
 
 // Small error handler helper function.
 function handleError(err) {
-  console.log(err.toString());
-  this.emit('end');
+  console.log(err.toString())
+  this.emit('end')
 }
 
-const SYSTEM_SCSS = ["scss/**/*.scss"];
+const SYSTEM_SCSS = ["scss/**/*.scss"]
 function compileScss() {
   // Configure options for sass output. For example, 'expanded' or 'nested'
   let options = {
     outputStyle: 'expanded'
-  };
+  }
   return gulp.src(SYSTEM_SCSS)
     .pipe(
       sass(options)
@@ -29,14 +29,14 @@ function compileScss() {
     }))
     .pipe(gulp.dest("./css"))
 }
-const css = gulp.series(compileScss);
+const css = gulp.series(compileScss)
 
 /* ----------------------------------------- */
 /*  Watch Updates
 /* ----------------------------------------- */
 
 function watchUpdates() {
-  gulp.watch(SYSTEM_SCSS, css);
+  gulp.watch(SYSTEM_SCSS, css)
 }
 
 /* ----------------------------------------- */
@@ -46,5 +46,5 @@ function watchUpdates() {
 exports.default = gulp.series(
   compileScss,
   watchUpdates
-);
-exports.css = css;
+)
+exports.css = css

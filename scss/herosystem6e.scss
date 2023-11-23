@@ -5,6 +5,7 @@
 @import 'utils/variables';
 
 /* Global styles */
+@import 'global/colors';
 @import 'global/window';
 @import 'global/grid';
 @import 'global/flex';
@@ -15,4 +16,23 @@
   @import 'components/resource';
   @import 'components/tabs';
   @import 'components/items';
+  @import 'components/chat';
+  @import 'components/rollable-skill';
 }
+
+/* Styles for dice */
+.dice-roll {
+  @import 'components/dice';
+}
+
+/* Styles for time tracking */
+@import 'components/time';
+
+/* Styles for uploading */
+@import 'components/upload';
+
+/* Styles for power cards */
+@import 'components/power-cards';
+
+/* Stuff that doesn't have a distinct home - should go away */
+@import 'components/junk';
