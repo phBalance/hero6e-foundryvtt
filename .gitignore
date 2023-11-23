@@ -12,3 +12,7 @@ npm-debug.log
 
 # Private stuff in the repo
 private
+
+# CSS files are generated from SCSS
+css/
+
