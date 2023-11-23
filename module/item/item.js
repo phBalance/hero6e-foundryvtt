@@ -1089,7 +1089,8 @@ export class HeroSystem6eItem extends Item {
         // ADDERS
         let adderCost = 0
         for (let adder of (system.ADDER || [])) {
-            let adderBaseCost = adder.baseCost //parseFloat(adder.BASECOST)
+            // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
+            const adderBaseCost = adder.baseCost || parseInt(adder.LVLCOST)
 
             if (adder.SELECTED != false) { //TRANSPORT_FAMILIARITY
                 let adderLevels = Math.max(1, parseInt(adder.LEVELS))
@@ -1099,11 +1100,11 @@ export class HeroSystem6eItem extends Item {
             let subAdderCost = 0
 
             for (let adder2 of (adder.ADDER || [])) {
-                let adderBaseCost = adder2.baseCost
+                const adder2BaseCost = adder2.baseCost
 
                 if (adder2.SELECTED != false) {
                     let adderLevels = Math.max(1, parseInt(adder2.LEVELS))
-                    subAdderCost += Math.ceil(adderBaseCost * adderLevels)
+                    subAdderCost += Math.ceil(adder2BaseCost * adderLevels)
                 }
             }
 
