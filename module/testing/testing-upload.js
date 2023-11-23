@@ -468,7 +468,7 @@ export function registerUploadTests(quench) {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
-                    assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
+                    assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (ED) (40 Active Points); OAF (-1), 8 Charges (-1/2)");
                 })
 
                 it("realCost", async function () {
