@@ -1074,7 +1074,7 @@ export class HeroSystem6eItem extends Item {
         let adderCost = 0
         for (let adder of (system.ADDER || [])) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
-            const adderBaseCost = adder.baseCost || parseInt(adder.LVLCOST)
+            const adderBaseCost = adder.baseCost || (parseInt(adder.LVLCOST) || 0)
 
             if (adder.SELECTED != false) { //TRANSPORT_FAMILIARITY
                 let adderLevels = Math.max(1, parseInt(adder.LEVELS))
@@ -1177,19 +1177,18 @@ export class HeroSystem6eItem extends Item {
         )) {
             let _myAdvantage = 0
             const modifierBaseCost = parseFloat(modifier.baseCost || 0)
-            const costPerLevel = parseFloat(modifier.costPerLevel || 0)
-            const levels = Math.max(1, parseFloat(modifier.LEVELS))
             switch (modifier.XMLID) {
                 case "AOE":
                     _myAdvantage += modifierBaseCost;
                     break;
 
                 case "CUMULATIVE":
-                    _myAdvantage += modifierBaseCost + (levels * 0.25);
+                     // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
+                    _myAdvantage += modifierBaseCost + (parseInt(modifier.LEVELS) * 0.25)
                     break;
 
                 default:
-                    _myAdvantage += modifierBaseCost * levels;
+                    _myAdvantage += modifierBaseCost * Math.max(1, parseInt(modifier.LEVELS))
             }
 
             // Some modifiers may have ADDERS
