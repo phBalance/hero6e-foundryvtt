@@ -1378,7 +1378,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FLASHDEFENSE":
-                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} point${ system.value > 1 ? "s" : ""})` // PH: FIXME: Not happy with this kludgy singular vs plural.
+                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} point${ system.value > 1 ? "s" : ""})`
                 break;
 
             case "FOLLOWER":
