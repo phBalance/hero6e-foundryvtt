@@ -1884,9 +1884,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // if (system.XMLID === "MINDCONTROL")
-        //     HEROSYS.log(false, system.XMLID);
-
         // Advantages sorted low to high
         for (let modifier of (system.MODIFIER || []).filter(o => o.baseCost >= 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })) {
             system.description += this.createPowerDescriptionModifier(modifier)
