@@ -1,5 +1,15 @@
 # Releases
 
+## Version 3.0.52
+
+- Calculate adder costs for ECVBONUS (and others without BASECOST) by using LVLCOST [#451](https://github.com/dmdorman/hero6e-foundryvtt/pull/451).
+- Account for floating point operations in dice from DC calculations [#449](https://github.com/dmdorman/hero6e-foundryvtt/pull/449).
+- Calculate 5e figured characteristics correctly on initial HDC file upload [#448](https://github.com/dmdorman/hero6e-foundryvtt/pull/448).
+- Images should now display on HDC upload even if they already have been previously uploaded [#445](https://github.com/dmdorman/hero6e-foundryvtt/pull/445).
+- Formatting and spelling corrections [#446](https://github.com/dmdorman/hero6e-foundryvtt/pull/446).
+- Build process formalization with instructions in CONTRIBUTING.md [#443](https://github.com/dmdorman/hero6e-foundryvtt/pull/443), [#444](https://github.com/dmdorman/hero6e-foundryvtt/pull/444) and restoring CSS autogeneration [#447](https://github.com/dmdorman/hero6e-foundryvtt/pull/447), [#450](https://github.com/dmdorman/hero6e-foundryvtt/pull/450).
+- Spelling fixes and lint README.md [#441](https://github.com/dmdorman/hero6e-foundryvtt/pull/441).
+
 ## Version 3.0.51
 
 - The OTHERS tab now has a summary of the top active point powers. [#343](https://github.com/dmdorman/hero6e-foundryvtt/issues/343)
