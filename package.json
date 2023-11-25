@@ -16,6 +16,7 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^1.4.1",
     "eslint": "^8.54.0",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^7.0.1",

@@ -9,7 +9,7 @@ const gulpEslintNew = require('gulp-eslint-new')
 
 function validateFilesForLint() {
   return gulp.src(['**/*.js','!node_modules/**'])
-    .pipe(gulpEslintNew({ configFile: './.eslintrc.json' }))
+    .pipe(gulpEslintNew({ overrideConfigFile: './.eslintrc.json' }))
     .pipe(gulpEslintNew.formatEach('compact', process.stderr))
     .pipe(gulpEslintNew.failAfterError())
 }
@@ -49,7 +49,7 @@ const css = gulp.series(compileScss)
 /* ----------------------------------------- */
 
 function watchUpdates() {
-  gulp.watch(SYSTEM_SCSS, css, validateFilesForLint)
+  gulp.watch(SYSTEM_SCSS, css)
 }
 
 /* ----------------------------------------- */
@@ -57,8 +57,7 @@ function watchUpdates() {
 /* ----------------------------------------- */
 
 exports.default = gulp.series(
-  compileScss,
-  validateFilesForLint,
+  gulp.parallel(compileScss),
   watchUpdates
 )
 exports.css = css
