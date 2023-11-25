@@ -1,6 +1,8 @@
 import { HeroSystem6eCombat } from "./combat.js";
 import { HEROSYS } from "./herosystem6e.js";
 
+const scrollIntoViewOptions = {}
+
 export class HeroSystem6eCombatTracker extends CombatTracker {
     static get defaultOptions() {
         var path = "systems/hero6efoundryvttv2/templates/combat/combat-tracker.hbs";
@@ -66,9 +68,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         }
 
         return context;
-
     }
-
 
     /**
    * Scroll the combat log container to ensure the current Combatant turn is centered vertically
@@ -76,21 +76,26 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
     scrollToTurn() {
         //console.log("scrollToTurn");
         const combat = this.viewed;
-        if (!combat || (combat.turn === null)) return;
-        let active = this.element.find(".active")[0];
-        if (!active)
+        if (!combat || (combat.turn === null)) {
             return;
-        let container = active.closest("ol.directory-list");
+        }
+
+        const active = this.element.find(".active")[0];
+        if (!active) {
+            return
+        }
+
+        const container = active.closest("ol.directory-list");      
 
         // Collapse all segments except for the one with the active combatant.
-        // Scroll to sement header because it would be nice if it was in view.
-        let segment = combat.turns[combat.turn].segment;
+        // Scroll to segment header because it would be nice if it was in view.
+        const segment = combat.turns[combat.turn].segment;
         for (let s = 1; s <= 12; s++) {
             let el = container.querySelector(`[data-segment-id="${s}"]`);
             if (el) {
                 if (s === segment) {
                     el.style.display = "block";
-                    el.parentElement.querySelector("h3").scrollIntoViewIfNeeded()
+                    el.parentElement.querySelector("h3").scrollIntoView(scrollIntoViewOptions)
                 } else {
                     el.style.display = "none";
                 }
@@ -100,7 +105,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         // Scroll active combatant into view.
         let el = container.querySelector(`[data-turn-id="${combat.turn}"]`)
         if (el) {
-            el.scrollIntoViewIfNeeded();
+            el.scrollIntoView(scrollIntoViewOptions)
         }
     }
 }
