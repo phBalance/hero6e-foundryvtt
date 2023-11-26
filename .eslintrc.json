@@ -17,6 +17,8 @@
         "CONFIG": "writable",
         "CONST": "readable",
         "Dialog": "readable",
+        "Die": "readable",
+        "dragRuler": "readable",
         "FilePicker": "readable",
         "fromUuid": "readable",
         "foundry": "readable",

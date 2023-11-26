@@ -1,6 +1,6 @@
 import { getItem, HeroSystem6eItem } from "../item/item.js";
 
-async function editSubItem(event, item) {
+export async function editSubItem(event, item) {
     event.preventDefault();
 
     const clickedElement = $(event.currentTarget);
@@ -19,7 +19,7 @@ async function editSubItem(event, item) {
     return await tempItem.sheet.render(true);
 }
 
-async function deleteSubItem(event, item) {
+export async function deleteSubItem(event, item) {
     event.preventDefault();
 
     const clickedElement = $(event.currentTarget);
@@ -35,7 +35,7 @@ async function deleteSubItem(event, item) {
     return await item.update(keyDeletion);   
 }
 
-function getItemCategory(id, actor = null) {
+export function getItemCategory(id) {
     const [powerItemId, subItemId] = splitPowerId(id)
 
     const powerItem = getItem(powerItemId)
@@ -51,16 +51,14 @@ function getItemCategory(id, actor = null) {
     }
 }
 
-function isPowerSubItem(id) {
+export function isPowerSubItem(id) {
     if (!id.includes('-')) { return false; }
 
     return true
 }
 
-function splitPowerId(id) {
+export function splitPowerId(id) {
     const [powerItemId, subItemId] = id.split('-')
 
     return [powerItemId, subItemId]
 }
-
-export { editSubItem, deleteSubItem, getItemCategory, isPowerSubItem, splitPowerId };

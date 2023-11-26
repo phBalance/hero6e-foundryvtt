@@ -31,8 +31,8 @@ export function registerDefenseTests(quench) {
                     const itemAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack), { temporary: true })
                     await itemAttack._postUpload()
 
-                    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(actor, itemAttack)
-                    assert.equal(resistantValue, 1);
+                    const defense = determineDefense(actor, itemAttack)
+                    assert.equal(defense[1], 1);
                 });
 
                 it("rED 2", async function () {
@@ -57,8 +57,8 @@ export function registerDefenseTests(quench) {
                     const itemAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack), { temporary: true })
                     await itemAttack._postUpload()
 
-                    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(actor, itemAttack)
-                    assert.equal(resistantValue, 2);
+                    const defense = determineDefense(actor, itemAttack)
+                    assert.equal(defense[1], 2);
                 });
 
                 it("rMD 3", async function () {
@@ -85,8 +85,8 @@ export function registerDefenseTests(quench) {
                     const itemAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack), { temporary: true })
                     await itemAttack._postUpload()
 
-                    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(actor, itemAttack)
-                    assert.equal(resistantValue, 3);
+                    const defense = determineDefense(actor, itemAttack)
+                    assert.equal(defense[1], 3);
                 });
 
                 it("Power Defense 4", async function () {
@@ -113,8 +113,8 @@ export function registerDefenseTests(quench) {
 
                     await itemAttack._postUpload()
 
-                    let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags] = determineDefense(actor, itemAttack)
-                    assert.equal(resistantValue, 4);
+                    const defense = determineDefense(actor, itemAttack)
+                    assert.equal(defense[1], 4);
                 });
 
 

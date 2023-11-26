@@ -91,7 +91,7 @@ export class HeroSystem6eToken extends Token {
         // //gfx.endFill()
     }
 
-    getData(options) {
+    getData() {
         let data = super.getData();
         data.bar3 = this.token.flags.bar3; //this.token.getBarAttribute?.("bar3")
         return data

@@ -4,7 +4,7 @@ function determineDefense(targetActor, attackItem, options) {
     }
     const avad = attackItem.findModsByXmlid("AVAD")
     const attackType = avad ? "avad" : attackItem.system.class;
-    const piericng = parseInt(attackItem.system.piercing) || attackItem.findModsByXmlid("ARMORPIERCING")
+    const piercing = parseInt(attackItem.system.piercing) || attackItem.findModsByXmlid("ARMORPIERCING")
     const penetrating = parseInt(attackItem.system.penetrating) || attackItem.findModsByXmlid("PENETRATING")
 
     // The defenses that are active
@@ -80,7 +80,7 @@ function determineDefense(targetActor, attackItem, options) {
 
 
     // Armor Piercing of natural PD and ED
-    if (piericng) {
+    if (piercing) {
         PD = Math.round(PD / 2)
         ED = Math.round(ED / 2)
     }
@@ -233,7 +233,7 @@ function determineDefense(targetActor, attackItem, options) {
 
 
         // Armor Piercing
-        if (piericng > hardened) {
+        if (piercing > hardened) {
             valueAp = Math.round(valueAp / 2)
         }
 
