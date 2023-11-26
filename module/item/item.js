@@ -1,14 +1,11 @@
-import { HeroSystem6eAttackCard } from "../card/attack-card.js";
-import { HeroSystem6eCard } from "../card/card.js";
 import { HEROSYS } from "../herosystem6e.js";
-import * as Dice from "../dice.js"
 import * as Attack from "../item/item-attack.js"
 import { createSkillPopOutFromItem } from '../item/skill.js'
 import { enforceManeuverLimits } from '../item/manuever.js'
-import { SkillRollUpdateValue, updateItem } from '../utility/upload_hdc.js'
+import { SkillRollUpdateValue } from '../utility/upload_hdc.js'
 import { onActiveEffectToggle } from '../utility/effects.js'
 import { getPowerInfo, getModifierInfo } from '../utility/util.js'
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
+import { RoundFavorPlayerDown } from "../utility/round.js"
 import { HeroSystem6eActor } from "../actor/actor.js"
 import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
 
@@ -149,7 +146,6 @@ export class HeroSystem6eItem extends Item {
                     case "EGOATTACK":
                     case "AID":
                     case "DRAIN":
-                    case "AID":
                     case "STRIKE":
                     case "FLASH":
                     case undefined:
@@ -166,11 +162,14 @@ export class HeroSystem6eItem extends Item {
 
             case "defense":
                 return this.toggle()
+
             case "skill":
                 SkillRollUpdateValue(this)
                 if (!await RequiresASkillRollCheck(this)) return;
                 return createSkillPopOutFromItem(this, this.actor)
-            default: ui.notifications.warn(`${this.name} roll is not supported`)
+
+            default:
+                ui.notifications.warn(`${this.name} roll is not supported`)
         }
 
     }
@@ -1366,56 +1365,65 @@ export class HeroSystem6eItem extends Item {
             case "DENSITYINCREASE":
                 // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
                 system.description = `${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass, +${system.value * 5} STR, +${system.value} PD/ED, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB)`
-                break;
+                break
 
             case "GROWTH":
                 //Growth (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide), Reduced Endurance (0 END; +1/2), Persistent (+1/2); Always On (-1/2), IIF (-1/4)
                 system.description = `${system.ALIAS} (+${system.value * 5} STR, +${system.value} BODY, +${system.value} STUN, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB, ${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass)`
-                break;
+                break
 
             case "MENTALDEFENSE":
             case "POWERDEFENSE":
                 system.description = `${system.ALIAS} ${system.value} points`
-                break;
+                break
+
 
             case "FLASHDEFENSE":
                 system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} point${ system.value > 1 ? "s" : ""})`
-                break;
+                break
 
             case "FOLLOWER":
                 system.description = system.ALIAS.replace("Followers: ", "")
-                break;
+                break
 
             case "MINDSCAN":
                 {
                     const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
                     system.description = `${dice} ${system.ALIAS}`
                 }
-                break;
+                break
 
             case "FORCEFIELD":
             case "ARMOR":
             case "DAMAGERESISTANCE":
-                system.description = system.ALIAS + " ("
-                let ary = []
-                if (parseInt(system.PDLEVELS)) ary.push(system.PDLEVELS + " PD")
-                if (parseInt(system.EDLEVELS)) ary.push(system.EDLEVELS + " ED")
-                if (parseInt(system.MDLEVELS)) ary.push(system.MDLEVELS + " MD")
-                if (parseInt(system.POWDLEVELS)) ary.push(system.POWDLEVELS + " POW")
-                system.description += ary.join("/") + ")"
-                break;
+                {
+                    system.description = system.ALIAS + " ("
+
+                    let ary = []
+                    if (parseInt(system.PDLEVELS)) ary.push(system.PDLEVELS + " PD")
+                    if (parseInt(system.EDLEVELS)) ary.push(system.EDLEVELS + " ED")
+                    if (parseInt(system.MDLEVELS)) ary.push(system.MDLEVELS + " MD")
+                    if (parseInt(system.POWDLEVELS)) ary.push(system.POWDLEVELS + " POW")
+
+                    system.description += ary.join("/") + ")"
+                }
+                break
 
             case "FORCEWALL":
-                system.description = system.ALIAS + " "
-                let aryFW = []
-                if (parseInt(system.PDLEVELS)) aryFW.push(system.PDLEVELS + " PD")
-                if (parseInt(system.EDLEVELS)) aryFW.push(system.EDLEVELS + " ED")
-                if (parseInt(system.MDLEVELS)) aryFW.push(system.MDLEVELS + " MD")
-                if (parseInt(system.POWDLEVELS)) aryFW.push(system.POWDLEVELS + " POW")
-                if (parseInt(system.BODYLEVELS)) aryFW.push(system.BODYLEVELS + " BODY")
-                system.description += aryFW.join("/")
-                system.description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${parseInt(system.HEIGHTLEVELS) + 1}m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`
-                break;
+                {
+                    system.description = system.ALIAS + " "
+
+                    let aryFW = []
+                    if (parseInt(system.PDLEVELS)) aryFW.push(system.PDLEVELS + " PD")
+                    if (parseInt(system.EDLEVELS)) aryFW.push(system.EDLEVELS + " ED")
+                    if (parseInt(system.MDLEVELS)) aryFW.push(system.MDLEVELS + " MD")
+                    if (parseInt(system.POWDLEVELS)) aryFW.push(system.POWDLEVELS + " POW")
+                    if (parseInt(system.BODYLEVELS)) aryFW.push(system.BODYLEVELS + " BODY")
+
+                    system.description += aryFW.join("/")
+                    system.description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${parseInt(system.HEIGHTLEVELS) + 1}m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`
+                }
+                break
 
             case "TRANSFER":
             case "DRAIN":
@@ -1429,11 +1437,11 @@ export class HeroSystem6eItem extends Item {
                 //     this.name = `${system.ALIAS} ${system.INPUT}`
                 //     this.update({ name: item.name });
                 // }
-                break;
+                break
 
             case "STRETCHING":
                 system.description = system.ALIAS + " " + system.value + "m"
-                break;
+                break
 
             case "RUNNING":
             case "SWIMMING":
@@ -1441,14 +1449,14 @@ export class HeroSystem6eItem extends Item {
             case "TELEPORTATION":
                 // Running +25m (12m/37m total)
                 system.description = system.ALIAS + " +" + system.value + (this.actor?.system?.is5e ? '"' : 'm')
-                break;
+                break
 
             case "TUNNELING":
                 // Tunneling 22m through 10 PD materials
                 let defbonus = (system.ADDER || []).find(o => o.XMLID == "DEFBONUS")
                 let pd = 1 + parseInt(defbonus?.LEVELS || 0)
                 system.description = `${system.ALIAS} +${system.value}m through ${pd} PD materials`
-                break;
+                break
 
             case "NAKEDMODIFIER":
                 // Area Of Effect (8m Radius; +1/2) for up to 53 Active Points of STR
@@ -1457,11 +1465,11 @@ export class HeroSystem6eItem extends Item {
                 if (system.INPUT) {
                     system.description += ` of ${system.INPUT}`
                 }
-                break;
+                break
 
             case "DEFENSE_MANEUVER":
                 system.description = system.ALIAS + " " + system.OPTION_ALIAS
-                break;
+                break
 
             case "LANGUAGES":
                 //English:  Language (basic conversation) (1 Active Points)
@@ -1469,7 +1477,7 @@ export class HeroSystem6eItem extends Item {
                 if (system.OPTION_ALIAS) {
                     system.description += " (" + system.OPTION_ALIAS + ")"
                 }
-                break;
+                break
 
             case "KNOWLEDGE_SKILL":
 
@@ -1480,18 +1488,18 @@ export class HeroSystem6eItem extends Item {
                 if (system.description.indexOf(system.ALIAS) === -1) system.description += system.ALIAS;
                 if (system.INPUT) system.description += `: ${system.INPUT}`;
 
-                break;
+                break
 
             case "TRANSPORT_FAMILIARITY":
                 //TF:  Custom Adder, Small Motorized Ground Vehicles
                 //TF:  Equines, Small Motorized Ground Vehicles
                 system.description = system.ALIAS + ": "
-                break;
+                break
 
             case "MENTAL_COMBAT_LEVELS":
             case "PENALTY_SKILL_LEVELS":
                 system.description = system.NAME + ": +" + system.value + " " + system.OPTION_ALIAS
-                break;
+                break
 
             case "RKA":
             case "HKA":
@@ -1503,29 +1511,29 @@ export class HeroSystem6eItem extends Item {
                     const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
                     system.description = `${system.ALIAS} ${dice}`
                 }
-                break;
+                break
 
             case "KBRESISTANCE":
                 system.description = (system.INPUT ? system.INPUT + " " : "") + (system.OPTION_ALIAS || system.ALIAS)
                     + ` -${system.value}m`
-                break;
+                break
 
             case "ENTANGLE":
                 // Entangle 2d6, 7 PD/2 ED
                 let pd_entangle = parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0)
                 let ed_entangle = parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0)
                 system.description = `${system.ALIAS} ${system.value}d6, ${pd_entangle} PD/${ed_entangle} ED`
-                break;
+                break
 
             case "ELEMENTAL_CONTROL":
                 // Elemental Control, 12-point powers
                 system.description = `${system.ALIAS}, ${parseInt(system.baseCost) * 2}-point powers`
-                break;
+                break
 
             case "FLIGHT":
                 // Flight 5m
                 system.description = `${system.ALIAS} ${system.value}m`
-                break;
+                break
 
             case "MANEUVER":
 
@@ -1611,25 +1619,24 @@ export class HeroSystem6eItem extends Item {
                     }
 
                 }
-                break;
+                break
 
             case "TELEKINESIS":
                 //Psychokinesis:  Telekinesis (62 STR), Alternate Combat Value (uses OMCV against DCV; +0) 
                 // (93 Active Points); Limited Range (-1/4), Only In Alternate Identity (-1/4), 
                 // Extra Time (Delayed Phase, -1/4), Requires A Roll (14- roll; -1/4)
                 system.description = `${system.ALIAS} (${system.value} STR)`
-                break;
+                break
 
-            case "MENTAL_COMBAT_LEVELS":
             case "COMBAT_LEVELS":
                 // +1 with any single attack
                 system.description = `+${system.value} ${system.OPTION_ALIAS}`;
-                break;
+                break
 
             case "INVISIBILITY":
                 // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
                 system.description = `${system.ALIAS}`;
-                break;
+                break
 
             case "ENDURANCERESERVE":
                 // Endurance Reserve  (20 END, 5 REC) (9 Active Points)
@@ -1643,96 +1650,78 @@ export class HeroSystem6eItem extends Item {
                         system.description += ` (${system.value}/${system.max} END, ${ENDURANCERESERVEREC.LEVELS} REC)`
                     }
                 }
-                break;
+                break
 
             case "SKILL_LEVELS":
                 //<i>Martial Practice:</i>  +10 with single Skill or Characteristic Roll
                 system.description = `${parseInt(system.value).signedString()} ${system.OPTION_ALIAS}`;
-                break;
+                break
 
             case "VPP":
-            case "ELEMENTAL_CONTROL":
             case "MULTIPOWER":
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
-                let _descMultiPower = (system.OPTION_ALIAS || system.ALIAS || "")
                 system.description = `${system.ALIAS}, ${parseInt(system.baseCost)}-point reserve`
-                break;
+                break
 
             case "FLASH":
-                //Sight and Hearing Groups Flash 5 1/2d6
-                //Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6
-                // Groups
-                let _groups = [system.OPTION_ALIAS]
-                for (let addr of (system.ADDER || []).filter(o => o.XMLID.indexOf("GROUP") > -1)) {
-                    _groups.push(addr.ALIAS)
+                {
+                    //Sight and Hearing Groups Flash 5 1/2d6
+                    //Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6
+                    // Groups
+                    let _groups = [system.OPTION_ALIAS]
+                    for (let addr of (system.ADDER || []).filter(o => o.XMLID.indexOf("GROUP") > -1)) {
+                        _groups.push(addr.ALIAS)
+                    }
+                    if (_groups.length === 1) {
+                        system.description = _groups[0];
+                    } else {
+                        system.description = _groups.slice(0, -1).join(", ").replace(/ Group/g, "");
+                        system.description += " and " + _groups.slice(-1) + "s";
+                    }
+
+                    // singles
+                    let _singles = [];
+                    for (let addr of (system.ADDER || []).filter(o => o.XMLID.indexOf("GROUP") === -1 && o.XMLID.match(/(NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/))) {
+                        _singles.push(addr.ALIAS);
+                    }
+                    if (_singles.length === 1) {
+                        system.description += ", " + _singles[0];
+                    } else {
+                        system.description += ", " + _singles.slice(0, -1).join(", ");
+                        system.description += " and " + _singles.slice(-1);
+                    }
+
+                    const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                    system.description += ` ${system.ALIAS} ${dice}`
                 }
-                if (_groups.length === 1) {
-                    system.description = _groups[0];
-                } else {
-                    system.description = _groups.slice(0, -1).join(", ").replace(/ Group/g, "");
-                    system.description += " and " + _groups.slice(-1) + "s";
-                }
-
-
-                // spacing
-                // if (_groups.length > 1) {
-                //     system.description += ", ";
-                // }
-
-                // singles
-                let _singles = [];
-                for (let addr of (system.ADDER || []).filter(o => o.XMLID.indexOf("GROUP") === -1 && o.XMLID.match(/(NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/))) {
-                    _singles.push(addr.ALIAS);
-                }
-                if (_singles.length === 1) {
-                    system.description += ", " + _singles[0];
-                } else {
-                    system.description += ", " + _singles.slice(0, -1).join(", ");
-                    system.description += " and " + _singles.slice(-1);
-                }
-
-                const value3 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
-                system.description += ` ${system.ALIAS} ${value3}`
-
-                //system.description += ` ${system.ALIAS} ${system.value}d6 `;
-                break;
+                break
 
             default:
-                if (configPowerInfo && configPowerInfo.powerType?.includes("characteristic")) {
-                    system.description = "+" + system.value + " " + system.ALIAS;
-                    break;
-                }
+                {
+                    if (configPowerInfo && configPowerInfo.powerType?.includes("characteristic")) {
+                        system.description = "+" + system.value + " " + system.ALIAS;
+                        break;
+                    }
 
-                let _desc = (system.OPTION_ALIAS || system.ALIAS || system.EFFECT || "")
-                // if (system.INPUT) {
-                //     const re = new RegExp(`^${system.INPUT}`, 'i')
-                //     _desc = _desc.replace(re, "").trim();
-                // }
-                system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
+                    const _desc = (system.OPTION_ALIAS || system.ALIAS || system.EFFECT || "")
+                    // if (system.INPUT) {
+                    //     const re = new RegExp(`^${system.INPUT}`, 'i')
+                    //     _desc = _desc.replace(re, "").trim();
+                    // }
+                    system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
 
 
-                const value2 = convertFromDC(this, convertToDcFromItem(this).dc)
-                if (value2 && !isNaN(value2)) {
-                    if (system.description.indexOf(value2) === -1) {
-                        system.description = ` ${value2} ${system.class || ""}`
+                    const value2 = convertFromDC(this, convertToDcFromItem(this).dc)
+                    if (value2 && !isNaN(value2)) {
+                        if (system.description.indexOf(value2) === -1) {
+                            system.description = ` ${value2} ${system.class || ""}`
+                        }
                     }
                 }
-
-
-                // Skill Roll?
-                if (type == 'skill') {
-                    // let item = {
-                    //     actor: this?.actor || this,
-                    //     system: system
-                    // }
-                    // SkillRollUpdateValue(item)
-                    // if (system.roll) {
-                    //     system.description += ` ${system.roll}`
-                    // }
-                }
+                break
         }
 
-        // Remove duplicate name from description and related cleanup
+        // Remove duplicate name from descripton and related cleanup
         let _rawName = this.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         try {
             let re = new RegExp(`^${_rawName}`, 'i')
@@ -1828,28 +1817,30 @@ export class HeroSystem6eItem extends Item {
                         break
 
                     case "INVISIBILITY":
-                        system.description += system.ALIAS + " to ";
-                        // Groups
-                        let _groups = _adderArray.filter(o => o.indexOf("Group") > -1);
-                        if (_groups.length === 1) {
-                            system.description += _groups[0];
-                        } else {
-                            system.description += _groups.slice(0, -1).join(", ").replace(/ Group/g, "");
-                            system.description += " and " + _groups.slice(-1) + "s";
-                        }
+                        {
+                            system.description += system.ALIAS + " to ";
+                            // Groups
+                            let _groups = _adderArray.filter(o => o.indexOf("Group") > -1);
+                            if (_groups.length === 1) {
+                                system.description += _groups[0];
+                            } else {
+                                system.description += _groups.slice(0, -1).join(", ").replace(/ Group/g, "");
+                                system.description += " and " + _groups.slice(-1) + "s";
+                            }
 
-                        // spacing
-                        if (_groups.length > 0) {
-                            system.description += ", ";
-                        }
+                            // spacing
+                            if (_groups.length > 0) {
+                                system.description += ", ";
+                            }
 
-                        // singles
-                        let _singles = _adderArray.filter(o => o.indexOf("Group") === -1);
-                        if (_singles.length === 1) {
-                            system.description += _singles[0];
-                        } else {
-                            system.description += _singles.slice(0, -1).join(", ");
-                            system.description += " and " + _singles.slice(-1);
+                            // singles
+                            let _singles = _adderArray.filter(o => o.indexOf("Group") === -1);
+                            if (_singles.length === 1) {
+                                system.description += _singles[0];
+                            } else {
+                                system.description += _singles.slice(0, -1).join(", ");
+                                system.description += " and " + _singles.slice(-1);
+                            }
                         }
 
                         break
@@ -1911,7 +1902,6 @@ export class HeroSystem6eItem extends Item {
 
         // Endurance
         system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0)
-        const costsEnd = this.findModsByXmlid("COSTSEND")
         const increasedEnd = this.findModsByXmlid("INCREASEDEND")
         if (increasedEnd) {
             system.end *= parseInt(increasedEnd.OPTION.replace('x', ''))
@@ -1960,45 +1950,46 @@ export class HeroSystem6eItem extends Item {
     }
 
     createPowerDescriptionModifier(modifier) {
-
-        let item = this
-
-        let system = item.system
+        const item = this
+        const system = item.system
         let result = ""
 
         switch (modifier.XMLID) {
             case "CHARGES":
-                // 1 Recoverable Continuing Charge lasting 1 Minute
-                result += ", " + modifier.OPTION_ALIAS
+                {
+                    // 1 Recoverable Continuing Charge lasting 1 Minute
+                    result += ", " + modifier.OPTION_ALIAS
 
-                let recoverable = (modifier.ADDER || []).find(o => o.XMLID == "RECOVERABLE")
-                if (recoverable) {
-                    result += " " + recoverable.ALIAS
+                    let recoverable = (modifier.ADDER || []).find(o => o.XMLID == "RECOVERABLE")
+                    if (recoverable) {
+                        result += " " + recoverable.ALIAS
+                    }
+
+                    let continuing = (modifier.ADDER || []).find(o => o.XMLID == "CONTINUING")
+                    if (continuing) {
+                        result += " " + continuing.ALIAS
+                    }
+
+                    result += parseInt(modifier.OPTION_ALIAS) > 1 ? " Charges" : " Charge"
+
+                    if (continuing) {
+                        result += " lasting " + continuing.OPTION_ALIAS
+                    }
                 }
 
-                let continuing = (modifier.ADDER || []).find(o => o.XMLID == "CONTINUING")
-                if (continuing) {
-                    result += " " + continuing.ALIAS
-                }
+                break
 
-                result += parseInt(modifier.OPTION_ALIAS) > 1 ? " Charges" : " Charge"
-
-                if (continuing) {
-                    result += " lasting " + continuing.OPTION_ALIAS
-                }
-
-                break;
             case "FOCUS":
                 result += ", " + modifier.ALIAS
-                break;
+                break
 
             case "ABLATIVE":
                 result += `, ${modifier.ALIAS} ${modifier.OPTION_ALIAS}`
-                break;
+                break
 
             default:
                 if (modifier.ALIAS) result += ", " + modifier.ALIAS || "?"
-
+                break
 
         }
 
@@ -2415,7 +2406,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Explosion
-        const EXPLOSION = this.findModsByXmlid("EXPLOSION")
+        // const EXPLOSION = this.findModsByXmlid("EXPLOSION")
         // if (EXPLOSION) {
         //     if (game.settings.get(game.system.id, 'alphaTesting')) {
         //         ui.notifications.warn(`EXPLOSION not implemented during HDC upload of ${this.actor.name}`)
@@ -2577,55 +2568,56 @@ export async function RequiresASkillRollCheck(item) {
             case "SKILL":
             case "SKILL1PER5":
             case "SKILL1PER20":
-                OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
-                let skill = item.actor.items.find(o => (o.system.subType || o.system.type) === 'skill' &&
-                    (o.system.XMLID === OPTION_ALIAS.toUpperCase() || o.name.toUpperCase() === OPTION_ALIAS.toUpperCase())
-                );
-                if (!skill && rar.COMMENTS) {
-                    skill = item.actor.items.find(o => (o.system.subType || o.system.type) === 'skill' &&
-                        (o.system.XMLID === rar.COMMENTS.toUpperCase() || o.name.toUpperCase() === rar.COMMENTS.toUpperCase())
+                {
+                    OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
+                    let skill = item.actor.items.find(o => (o.system.subType || o.system.type) === 'skill' &&
+                        (o.system.XMLID === OPTION_ALIAS.toUpperCase() || o.name.toUpperCase() === OPTION_ALIAS.toUpperCase())
                     );
+                    if (!skill && rar.COMMENTS) {
+                        skill = item.actor.items.find(o => (o.system.subType || o.system.type) === 'skill' &&
+                            (o.system.XMLID === rar.COMMENTS.toUpperCase() || o.name.toUpperCase() === rar.COMMENTS.toUpperCase())
+                        );
+                        if (skill) {
+                            OPTION_ALIAS = rar.COMMENTS;
+                        }
+                    }
+                    if (!skill && rar.COMMENTS) {
+                        let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                        if (char) {
+                            ui.notifications.warn(`${item.name} incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`);
+                        }
+                    }
                     if (skill) {
-                        OPTION_ALIAS = rar.COMMENTS;
-                    }
-                }
-                if (!skill && rar.COMMENTS) {
-                    let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
-                    if (char) {
-                        ui.notifications.warn(`${item.name} incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`);
-                    }
-                }
-                if (skill) {
-                    value = parseInt(skill.system.roll);
-                    if (rar.OPTIONID === "SKILL1PER5") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 5))
-                    if (rar.OPTIONID === "SKILL1PER20") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 20))
+                        value = parseInt(skill.system.roll);
+                        if (rar.OPTIONID === "SKILL1PER5") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 5))
+                        if (rar.OPTIONID === "SKILL1PER20") value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 20))
 
-                    OPTION_ALIAS += ` ${value}-`;
-                } else {
-                    ui.notifications.warn(`Expecting 'SKILL roll', where SKILL is the name of an owned skill.`);
+                        OPTION_ALIAS += ` ${value}-`;
+                    } else {
+                        ui.notifications.warn(`Expecting 'SKILL roll', where SKILL is the name of an owned skill.`);
+                    }
                 }
                 break;
-
 
             case "CHAR":
-                OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
-                let char = item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
-                if (!char && rar.COMMENTS) {
-                    char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                {
+                    OPTION_ALIAS = OPTION_ALIAS?.split(',')[0].replace(/roll/i, "").trim();
+                    let char = item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
+                    if (!char && rar.COMMENTS) {
+                        char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
+                        if (char) {
+                            OPTION_ALIAS = rar.COMMENTS;
+                        }
+                    }
                     if (char) {
-                        OPTION_ALIAS = rar.COMMENTS;
+                        item.actor.updateRollable(OPTION_ALIAS.toLowerCase())
+                        value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
+                        OPTION_ALIAS += ` ${value}-`;
+                    } else {
+                        ui.notifications.warn(`Expecting 'CHAR roll', where CHAR is the name of a characteristic.`);
                     }
                 }
-                if (char) {
-                    item.actor.updateRollable(OPTION_ALIAS.toLowerCase())
-                    value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
-                    OPTION_ALIAS += ` ${value}-`;
-                } else {
-                    ui.notifications.warn(`Expecting 'CHAR roll', where CHAR is the name of a characteristic.`);
-                }
                 break;
-
-
 
             default:
                 if (!value) {
