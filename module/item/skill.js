@@ -1,6 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
-import { modifyRollEquation } from "../utility/util.js"
-
 async function _renderSkillForm(item, actor, stateData) {
 	const token = actor.token;
 
@@ -45,8 +42,8 @@ async function createSkillPopOutFromItem(item, actor) {
 			close: () => resolve({})
 		}
 
-		new Dialog(data, options).render(true);;
-	});
+		new Dialog(data, options).render(true)
+	})
 }
 
 async function skillRoll(item, actor, html) {

@@ -50,8 +50,8 @@ async function presenceAttackPopOut(actor) {
             close: () => resolve({})
         }
 
-        new Dialog(data, options).render(true);;
-    });
+        new Dialog(data, options).render(true)
+    })
 }
 
 export { presenceAttackPopOut }

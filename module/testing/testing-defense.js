@@ -1,5 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
-import { XmlToItemData } from "../utility/upload_hdc.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { determineDefense } from "../utility/defense.js"
@@ -10,14 +8,7 @@ export function registerDefenseTests(quench) {
         (context) => {
             const { describe, it, assert } = context
 
-
-
-
-
             describe("Resistant Protection", function () {
-
-
-
                 it("rPD 1", async function () {
                     const contents = `
                         <POWER XMLID="FORCEFIELD" ID="1686527339658" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="2" MDLEVELS="3" POWDLEVELS="4">

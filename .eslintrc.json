@@ -17,6 +17,7 @@
         "CONST": "readable",
         "Dialog": "readable",
         "FilePicker": "readable",
+        "fromUuid": "readable",
         "foundry": "readable",
         "game": "readable",
         "Hooks": "readable",

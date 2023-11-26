@@ -1,4 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
 import { getPowerInfo } from '../utility/util.js'
 
 export function AdjustmentSources(actor) {
