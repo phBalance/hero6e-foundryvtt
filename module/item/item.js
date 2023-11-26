@@ -496,13 +496,8 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ item: this })
 
-        if (this.name === `Protective Muscles`)
-            console.log(this.name)
-
         // LEVELS (use value/max instead of LEVELS so we can AID/DRAIN the base power)
-        let newValue = parseInt(this.system.LEVELS || 0)
-        if (this.system.max != newValue) {
-            let delta = this.system.max - newValue
+        const newValue = parseInt(this.system.LEVELS || 0)
             this.system.max = newValue
             changed = true
         }
@@ -518,7 +513,7 @@ export class HeroSystem6eItem extends Item {
         // }
 
         // CHARGES
-        let CHARGES = this.findModsByXmlid("CHARGES")
+        const CHARGES = this.findModsByXmlid("CHARGES")
         if (CHARGES) {
             this.system.charges = {
                 value: parseInt(CHARGES.OPTION_ALIAS),
@@ -531,14 +526,14 @@ export class HeroSystem6eItem extends Item {
 
         // DEFENSES
         if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
-            let newValue = 'defense'
-            if (this.system.subType != newValue) {
-                this.system.subType = newValue
+            const newDefenseValue = 'defense'
+            if (this.system.subType != newDefenseValue) {
+                this.system.subType = newDefenseValue
                 this.system.showToggle = true
                 changed = true
 
-                if (this.system.charges?.value > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
-                    this.system.active ??= false;
+                const numCharges = this.system.charges?.value || 0;
+                if (numCharges > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
                 } else {
                     this.system.active ??= true;
                 }
@@ -547,9 +542,9 @@ export class HeroSystem6eItem extends Item {
 
         // MOVEMENT
         if (configPowerInfo && configPowerInfo.powerType?.includes("movement")) {
-            let newValue = 'movement'
-            if (this.system.subType != newValue) {
-                this.system.subType = newValue
+            const movement = 'movement'
+            if (this.system.subType != movement) {
+                this.system.subType = movement
                 this.system.showToggle = true
                 changed = true
             }
@@ -565,9 +560,9 @@ export class HeroSystem6eItem extends Item {
 
         // SKILLS
         if (configPowerInfo && configPowerInfo.powerType?.includes("skill")) {
-            let newValue = 'skill'
-            if (this.system.subType != newValue) {
-                this.system.subType = newValue
+            const skill = 'skill'
+            if (this.system.subType != skill) {
+                this.system.subType = skill
                 changed = true
             }
         }
@@ -640,9 +635,9 @@ export class HeroSystem6eItem extends Item {
 
         // ATTACK
         if (configPowerInfo && configPowerInfo.powerType?.includes("attack")) {
-            let newValue = 'attack'
-            if (this.system.subType != newValue) {
-                this.system.subType = newValue
+            const attack = 'attack'
+            if (this.system.subType != attack) {
+                this.system.subType = attack
                 changed = true
                 this.makeAttack()
             }
@@ -691,69 +686,65 @@ export class HeroSystem6eItem extends Item {
 
         }
 
-        if (this.name === "Living Flame") {
-            console.log(this.name)
-        }
-
         // BASECOST
-        newValue = parseFloat(CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST || this.system.BASECOST || 0) // || parseFloat(configPowerInfo?.cost || 0)
-        if (this.system.baseCost != newValue) {
-            this.system.baseCost = newValue
+        const newBaseValue = parseFloat(CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST || this.system.BASECOST || 0) // || parseFloat(configPowerInfo?.cost || 0)
+        if (this.system.baseCost != newBaseValue) {
+            this.system.baseCost = newBaseValue
             changed = true
         }
-
-
 
         // BASECOST (children)
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
             if (this.system[key]) {
                 for (const child of this.system[key]) {
-                    let newValue = parseFloat(CONFIG.HERO.ModifierOverride[child.XMLID]?.BASECOST || child.BASECOST || 0)
+                    let newChildValue
 
                     switch (child.XMLID) {
                         case "AOE":
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 32) newValue = 1.0
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 16) newValue = 0.75
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 8) newValue = 0.50
-                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 4) newValue = 0.25
+                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 32) newChildValue = 1.0
+                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 16) newChildValue = 0.75
+                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 8) newChildValue = 0.50
+                            if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 4) newChildValue = 0.25
 
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 64) newValue = 1.0
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 32) newValue = 0.75
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 16) newValue = 0.50
-                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 8) newValue = 0.25
+                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 64) newChildValue = 1.0
+                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 32) newChildValue = 0.75
+                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 16) newChildValue = 0.50
+                            if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 8) newChildValue = 0.25
 
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 125) newValue = 1.0
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 64) newValue = 0.75
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 32) newValue = 0.50
-                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 16) newValue = 0.25
+                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 125) newChildValue = 1.0
+                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 64) newChildValue = 0.75
+                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 32) newChildValue = 0.50
+                            if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 16) newChildValue = 0.25
 
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 16) newValue = 1.0
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 8) newValue = 0.75
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 4) newValue = 0.50
-                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 2) newValue = 0.25
+                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 16) newChildValue = 1.0
+                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 8) newChildValue = 0.75
+                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 4) newChildValue = 0.50
+                            if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 2) newChildValue = 0.25
 
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 16) newValue = 1.0
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 8) newValue = 0.75
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 4) newValue = 0.50
-                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 2) newValue = 0.25
+                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 16) newChildValue = 1.0
+                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 8) newChildValue = 0.75
+                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 4) newChildValue = 0.50
+                            if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 2) newChildValue = 0.25
 
                             break;
 
                         case "REQUIRESASKILLROLL":
                             // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                             // This is a limitation not an advantage, not sure why it is positive.  Force it negative.
-                            newValue = - Math.abs(parseFloat(child.BASECOST))
+                            newChildValue = - Math.abs(parseFloat(child.BASECOST))
                             break;
 
-
+                        default:
+                            newChildValue = parseFloat(CONFIG.HERO.ModifierOverride[child.XMLID]?.BASECOST || child.BASECOST || 0)
+                            break;
                     }
 
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
                         if (child[key]) {
                             for (const child2 of child[key]) {
-                                let newValue2 = parseFloat(CONFIG.HERO.ModifierOverride[child.XMLID]?.BASECOST || child2.BASECOST || 0)
-                                if (child2.baseCost != newValue2) {
-                                    child2.baseCost = newValue2
+                                const newChild2Value = parseFloat(CONFIG.HERO.ModifierOverride[child.XMLID]?.BASECOST || child2.BASECOST || 0)
+                                if (child2.baseCost != newChild2Value) {
+                                    child2.baseCost = newChild2Value
                                     changed = true
                                 }
                             }
@@ -769,11 +760,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-
-
-
-
-
         changed = this.calcItemPoints() || changed
 
         // DESCRIPTION
@@ -781,14 +767,12 @@ export class HeroSystem6eItem extends Item {
         this.updateItemDescription()
         changed = (oldDescription != this.system.description) || changed
 
-
         // Save changes
         if (changed && this.id) {
             await this.update({ 'system': this.system })
         }
 
         // ACTIVE EFFECTS
-
         if (changed && this.id && configPowerInfo && configPowerInfo.powerType?.includes("movement")) {
             let activeEffect = Array.from(this.effects)?.[0] || {}
             activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`
@@ -1090,7 +1074,7 @@ export class HeroSystem6eItem extends Item {
         let adderCost = 0
         for (let adder of (system.ADDER || [])) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
-            const adderBaseCost = adder.baseCost || parseInt(adder.LVLCOST)
+            const adderBaseCost = adder.baseCost || (parseInt(adder.LVLCOST) || 0)
 
             if (adder.SELECTED != false) { //TRANSPORT_FAMILIARITY
                 let adderLevels = Math.max(1, parseInt(adder.LEVELS))
@@ -1193,19 +1177,18 @@ export class HeroSystem6eItem extends Item {
         )) {
             let _myAdvantage = 0
             const modifierBaseCost = parseFloat(modifier.baseCost || 0)
-            const costPerLevel = parseFloat(modifier.costPerLevel || 0)
-            const levels = Math.max(1, parseFloat(modifier.LEVELS))
             switch (modifier.XMLID) {
                 case "AOE":
                     _myAdvantage += modifierBaseCost;
                     break;
 
                 case "CUMULATIVE":
-                    _myAdvantage += modifierBaseCost + (levels * 0.25);
+                     // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
+                    _myAdvantage += modifierBaseCost + (parseInt(modifier.LEVELS) * 0.25)
                     break;
 
                 default:
-                    _myAdvantage += modifierBaseCost * levels;
+                    _myAdvantage += modifierBaseCost * Math.max(1, parseInt(modifier.LEVELS))
             }
 
             // Some modifiers may have ADDERS
@@ -1375,10 +1358,6 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
-        if (this.name === "Sniper Rifle") {
-            console.log(this.name)
-        }
-
         // This may be a slot in a framework if so get parent
         //const parent = this.parent()
 
@@ -1387,22 +1366,32 @@ export class HeroSystem6eItem extends Item {
                 // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
                 system.description = `${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass, +${system.value * 5} STR, +${system.value} PD/ED, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB)`
                 break;
+
             case "GROWTH":
                 //Growth (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide), Reduced Endurance (0 END; +1/2), Persistent (+1/2); Always On (-1/2), IIF (-1/4)
                 system.description = `${system.ALIAS} (+${system.value * 5} STR, +${system.value} BODY, +${system.value} STUN, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB, ${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass)`
                 break;
+
             case "MENTALDEFENSE":
             case "POWERDEFENSE":
                 system.description = `${system.ALIAS} ${system.value} points`
                 break;
+
+            case "FLASHDEFENSE":
+                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} point${ system.value > 1 ? "s" : ""})`
+                break;
+
             case "FOLLOWER":
                 system.description = system.ALIAS.replace("Followers: ", "")
                 break;
 
-            case "Mind Scan":
-                system.description = levels + "d6 Mind Scan (" +
-                    input + " class of minds)";
+            case "MINDSCAN":
+                {
+                    const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                    system.description = `${dice} ${system.ALIAS}`
+                }
                 break;
+
             case "FORCEFIELD":
             case "ARMOR":
             case "DAMAGERESISTANCE":
@@ -1473,7 +1462,6 @@ export class HeroSystem6eItem extends Item {
                 system.description = system.ALIAS + " " + system.OPTION_ALIAS
                 break;
 
-
             case "LANGUAGES":
                 //English:  Language (basic conversation) (1 Active Points)
                 system.description = (system.INPUT || system.ALIAS)
@@ -1492,6 +1480,7 @@ export class HeroSystem6eItem extends Item {
                 if (system.INPUT) system.description += `: ${system.INPUT}`;
 
                 break;
+
             case "TRANSPORT_FAMILIARITY":
                 //TF:  Custom Adder, Small Motorized Ground Vehicles
                 //TF:  Equines, Small Motorized Ground Vehicles
@@ -1505,14 +1494,14 @@ export class HeroSystem6eItem extends Item {
 
             case "RKA":
             case "HKA":
-            case "ENERGYBLAST": //Energy Blast 1d6
+            case "ENERGYBLAST":
             case "EGOATTACK":
             case "MINDCONTROL":
-
             case "HANDTOHANDATTACK":
-                const value1 = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
-                //system.description = `${system.ALIAS} ${system.value}d6`
-                system.description = `${system.ALIAS} ${value1}`
+                {
+                    const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                    system.description = `${system.ALIAS} ${dice}`
+                }
                 break;
 
             case "KBRESISTANCE":
@@ -1549,7 +1538,7 @@ export class HeroSystem6eItem extends Item {
                 //     console.log(system);
                 // }
 
-                // Martial attacks tyipcally add STR to description
+                // Martial attacks typically add STR to description
                 // let fullDice = system.dice;
                 // let extraDice = 0;
                 // switch (system.extraDice) {
@@ -1668,8 +1657,6 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}, ${parseInt(system.baseCost)}-point reserve`
                 break;
 
-
-
             case "FLASH":
                 //Sight and Hearing Groups Flash 5 1/2d6
                 //Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6
@@ -1709,8 +1696,6 @@ export class HeroSystem6eItem extends Item {
                 //system.description += ` ${system.ALIAS} ${system.value}d6 `;
                 break;
 
-
-
             default:
                 if (configPowerInfo && configPowerInfo.powerType?.includes("characteristic")) {
                     system.description = "+" + system.value + " " + system.ALIAS;
@@ -1744,12 +1729,9 @@ export class HeroSystem6eItem extends Item {
                     //     system.description += ` ${system.roll}`
                     // }
                 }
-
         }
 
-
-
-        // Remove duplicate name from descripton and related cleanup
+        // Remove duplicate name from description and related cleanup
         let _rawName = this.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         try {
             let re = new RegExp(`^${_rawName}`, 'i')
@@ -1768,23 +1750,33 @@ export class HeroSystem6eItem extends Item {
 
         // ADDRS
         let _adderArray = []
+
         if (system.XMLID === "INVISIBILITY") {
             _adderArray.push(system.OPTION_ALIAS)
         }
+
+        // The INPUT field isn't always displayed in HD so that is not strictly compatible, but it does mean that we will show things
+        // like a ranged killing attack being ED vs PD in the power description.
+        if(system?.INPUT) {
+            _adderArray.push(system.INPUT)
+        }
+
         if (system?.ADDER?.length > 0) {
             for (let adder of system.ADDER) {
                 switch (adder.XMLID) {
                     case "DIMENSIONS":
                         system.description += ", " + adder.ALIAS
-                        break;
+                        break
 
                     case "ADDITIONALPD":
                     case "ADDITIONALED":
                     case "DEFBONUS":
                         break
+
                     case "EXTENDEDBREATHING":
                         system.description += adder.ALIAS + " " + adder.OPTION_ALIAS
                         break
+
                     case "CONCEALABILITY":
                     case "REACTION":
                     case "SENSING":
@@ -1793,7 +1785,8 @@ export class HeroSystem6eItem extends Item {
                     case "EFFECTS":
                     case "OCCUR":
                         _adderArray.push(adder.OPTION_ALIAS.replace("(", ""))
-                        break;
+                        break
+
                     case "PHYSICAL":
                     case "ENERGY":
                     case "MENTAL":
@@ -1803,10 +1796,12 @@ export class HeroSystem6eItem extends Item {
                         } else {
                             if (parseInt(adder.LEVELS) != 0) _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS)
                         }
-                        break;
+                        break
+
                     case "PLUSONEHALFDIE":
                         //system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
-                        break;
+                        break
+
                     case "RIDINGANIMALS":
                         if (adder.SELECTED) {
                             _adderArray.push(adder.ALIAS)
@@ -1815,8 +1810,13 @@ export class HeroSystem6eItem extends Item {
                                 _adderArray.push(adder2.ALIAS)
                             }
                         }
-                        break;
-                    default: if (adder.ALIAS.trim()) _adderArray.push(adder.ALIAS)
+                        break
+
+                    default:
+                        if (adder.ALIAS.trim()) {
+                            _adderArray.push(adder.ALIAS)
+                        }
+                        break
                 }
             }
 
@@ -1824,7 +1824,8 @@ export class HeroSystem6eItem extends Item {
                 switch (system.XMLID) {
                     case "TRANSPORT_FAMILIARITY":
                         system.description += _adderArray.join("; ")
-                        break;
+                        break
+
                     case "INVISIBILITY":
                         system.description += system.ALIAS + " to ";
                         // Groups
@@ -1850,14 +1851,17 @@ export class HeroSystem6eItem extends Item {
                             system.description += " and " + _singles.slice(-1);
                         }
 
-                        break;
+                        break
+
                     case "FLASH":
                         // The senses are already in the description
-                        system.description += "(" + _adderArray.filter(o => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i)).join("; ") + ")"
+                        system.description += " (" + _adderArray.filter(o => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i)).join("; ") + ")"
                         system.description = system.description.replace("()", "");
-                        break;
+                        break
+
                     default:
-                        system.description += "(" + _adderArray.join("; ") + ")"
+                        system.description += " (" + _adderArray.join("; ") + ")"
+                        break
                 }
             }
         }
@@ -1878,9 +1882,6 @@ export class HeroSystem6eItem extends Item {
                 system.description += ` (standard effect: ${stun} STUN, ${body} BODY)`;
             }
         }
-
-        // if (system.XMLID === "MINDCONTROL")
-        //     HEROSYS.log(false, system.XMLID);
 
         // Advantages sorted low to high
         for (let modifier of (system.MODIFIER || []).filter(o => o.baseCost >= 0).sort((a, b) => { return a.BASECOST_total - b.BASECOST_total })) {

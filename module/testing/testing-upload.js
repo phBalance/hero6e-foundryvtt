@@ -468,7 +468,7 @@ export function registerUploadTests(quench) {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
-                    assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (40 Active Points); OAF (-1), 8 Charges (-1/2)");
+                    assert.equal(item.system.description, "Killing Attack - Ranged 2 1/2d6 (ED) (40 Active Points); OAF (-1), 8 Charges (-1/2)");
                 })
 
                 it("realCost", async function () {
@@ -1337,6 +1337,142 @@ export function registerUploadTests(quench) {
                 })
             })
 
+            describe("FLASHDEFENSE", async function () {
+                describe("11 levels", async function () {
+                    const contents = `
+                        <POWER XMLID="FLASHDEFENSE" ID="1700628009410" BASECOST="0.0" LEVELS="11" ALIAS="Flash Defense" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES/>
+                            <MODIFIER XMLID="HARDENED" ID="1700628130373" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES/>
+                            </MODIFIER>
+                        </POWER>
+                    `
+
+                    it("description", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.description, "Hearing Group Flash Defense (11 points), Hardened (+1/4)");
+                    })
+
+                    it("realCost", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.realCost, 14);
+                    })
+
+                    it("activePoints", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.activePoints, 14);
+                    })
+
+                    it("end", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.end, 0);
+                    })
+
+                    it("levels", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.value, 11);
+                    })
+                        
+                }),
+
+                describe("1 level", async function () {
+                    const contents = `
+                    <POWER XMLID="FLASHDEFENSE" ID="1700628009410" BASECOST="0.0" LEVELS="1" ALIAS="Flash Defense" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES/>
+                        <MODIFIER XMLID="HARDENED" ID="1700628130373" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                    `
+
+                    it("description", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.description, "Hearing Group Flash Defense (1 point), Hardened (+1/4)");
+                    })
+
+                    it("realCost", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.realCost, 1);
+                    })
+
+                    it("activePoints", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.activePoints, 1);
+                    })
+
+                    it("end", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.end, 0);
+                    })
+
+                    it("levels", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        assert.equal(item.system.value, 1);
+                    })
+                        
+                })
+            }),
+
             describe("MENTALDEFENSE", async function () {
                 const contents = `
                     <POWER XMLID="MENTALDEFENSE" ID="1576395326670" BASECOST="0.0" LEVELS="39" ALIAS="Mental Defense" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -1412,6 +1548,90 @@ export function registerUploadTests(quench) {
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
                     assert.equal(item.system.value, 39);
+                })
+            }),
+
+            describe("MINDSCAN", async function () {
+                const contents = `
+                    <POWER XMLID="MINDSCAN" ID="1700619562891" BASECOST="0.0" LEVELS="1" ALIAS="Mind Scan" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="MIND SCAN" INPUT="Animal" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES/>
+                        <ADDER XMLID="PLUSONEPIP" ID="1700708893537" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <ADDER XMLID="ECVBONUS" ID="1700708893538" BASECOST="0.0" LEVELS="9" ALIAS="+9 OMCV" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="2.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <ADDER XMLID="MULTIPLECLASSES" ID="1700708893539" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <ADDER XMLID="MULTIPLECLASSES" ID="1700708893540" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <ADDER XMLID="MULTIPLECLASSES" ID="1700708893541" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <MODIFIER XMLID="CUMULATIVE" ID="1700708899538" BASECOST="0.5" LEVELS="0" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="CANNOTATTACK" ID="1700709064472" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Attack Through Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMUNICATE" OPTIONID="COMMUNICATE" OPTION_ALIAS="neither the character nor his target can use the link to attack each other mentally, but they can communicate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                `
+
+                it("description", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.description, "1d6 + 1 Mind Scan (Animal; +1 pip; +9 OMCV; Additional Class Of Minds; Additional Class Of Minds; Additional Class Of Minds), Cumulative (+1/2) (60 Active Points); Cannot Attack Through Link (neither the character nor his target can use the link to attack each other mentally, but they can communicate; -1/2)");
+                })
+
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.realCost, 40);
+                })
+
+                it("activePoints", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.activePoints, 60);
+                })
+
+                it("end", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.end, 6);
+                })
+
+                it("levels", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                    await item._postUpload()
+                    actor.items.set(item.system.XMLID, item)
+                    assert.equal(item.system.value, 1);
                 })
             })
         },
