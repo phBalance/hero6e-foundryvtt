@@ -498,6 +498,7 @@ export class HeroSystem6eItem extends Item {
 
         // LEVELS (use value/max instead of LEVELS so we can AID/DRAIN the base power)
         const newValue = parseInt(this.system.LEVELS || 0)
+        if (this.system.max != newValue) {
             this.system.max = newValue
             changed = true
         }
