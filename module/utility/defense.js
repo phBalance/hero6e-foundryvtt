@@ -1,6 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
-import { getPowerInfo } from './util.js'
-
 function determineDefense(targetActor, attackItem, options) {
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem)
@@ -12,7 +9,7 @@ function determineDefense(targetActor, attackItem, options) {
 
     // The defenses that are active
     const activeDefenses = targetActor.items.filter(o => (o.system.subType === 'defense' || o.type === 'defense')
-        && (o.system.active || o.effects.find(o => true)?.disabled === false)
+        && (o.system.active || o.effects.find(() => true)?.disabled === false)
         && !(options?.ignoreDefenseIds || []).includes(o.id)
     );
 
@@ -33,7 +30,6 @@ function determineDefense(targetActor, attackItem, options) {
     let DNE = 0; // damage negation energy
     let DNM = 0; // damage negation mental
     let knockbackResistance = 0;
-    let knockbackResistanceTags = []
 
     // DAMAGERESISTANCE (converts PD to rPD)
     for (const item of activeDefenses.filter(o => o.system.XMLID == "DAMAGERESISTANCE")) {
@@ -83,7 +79,7 @@ function determineDefense(targetActor, attackItem, options) {
     }
 
 
-    // Armor Piericng of natural PD and ED
+    // Armor Piercing of natural PD and ED
     if (piericng) {
         PD = Math.round(PD / 2)
         ED = Math.round(ED / 2)
@@ -113,13 +109,6 @@ function determineDefense(targetActor, attackItem, options) {
 
     //if ((targetActor.items.size || targetActor.items.length) > 0) {
     for (let i of activeDefenses) {
-
-        const configPowerInfo = getPowerInfo({ item: i })
-        // if (configPowerInfo && configPowerInfo.powerType.includes("defense")) {
-        //     i.subType = 'defense'
-        // }
-
-        //if ((i.system.subType || i.type) === "defense" && i.system.active) {
         let value = parseInt(i.system.value) || 0;
 
         const xmlid = i.system.XMLID
@@ -132,16 +121,19 @@ function determineDefense(targetActor, attackItem, options) {
                     i.system.defenseType = "pd"
                     i.system.resistant = true
                     break;
+
                 case 'energy':
                     value = parseInt(i.system.EDLEVELS) || 0
                     i.system.defenseType = "ed"
                     i.system.resistant = true
                     break;
+
                 case 'mental':
                     i.system.defenseType = "md"
                     value = parseInt(i.system.MDLEVELS) || 0
                     i.system.resistant = true
                     break;
+
                 case 'drain':
                 case 'transfer':
                     i.system.defenseType = "powd"

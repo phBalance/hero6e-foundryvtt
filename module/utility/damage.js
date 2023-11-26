@@ -1,9 +1,4 @@
-import { HERO } from "../config.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { RoundFavorPlayerDown } from "./round.js";
-import { HeroRuler } from "../ruler.js";
-
-
 
 // DAMAGE CLASS (DC)
 //

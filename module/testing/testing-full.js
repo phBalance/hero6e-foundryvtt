@@ -1,8 +1,4 @@
-import { HeroSystem6eActor } from "../actor/actor.js"
-import { HeroSystem6eItem } from "../item/item.js"
-import { HEROSYS } from "../herosystem6e.js"
-import { XmlToItemData, SkillRollUpdateValue, makeAttack, updateItemDescription } from "../utility/upload_hdc.js"
-import { convertToDcFromItem } from "../utility/damage.js"
+import { HeroSystem6eActor } from "../actor/actor.js";
 
 export function registerFullTests(quench) {
     quench.registerBatch(

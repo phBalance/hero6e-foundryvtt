@@ -75,7 +75,7 @@ export default class SettingsHelpers {
                 step: 10
             },
             default: 100,
-            onChange: value => {
+            onChange: () => {
                 for (let actor of game.actors.contents) {
                     actor.applyEncumbrancePenalty()
                 }

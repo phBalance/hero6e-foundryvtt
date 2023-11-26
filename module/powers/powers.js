@@ -1,5 +1,3 @@
-import { HERO } from "../config.js";
-import { HEROSYS } from "../herosystem6e.js";
 import { getItem, HeroSystem6eItem } from "../item/item.js";
 
 async function editSubItem(event, item) {

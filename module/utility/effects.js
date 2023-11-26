@@ -113,8 +113,6 @@ export async function onActiveEffectToggle(effect, newState) {
         await item.update({ 'system.active': newState })
     }
 
-    let updates = [];
-
     // Characteristic VALUE should change when toggled on
     for (let change of effect.changes) {
         // system.characteristics.stun.max
@@ -127,25 +125,4 @@ export async function onActiveEffectToggle(effect, newState) {
             })
         }
     }
-    //}
-
-    // Characteristic VALUE should not exceed MAX
-    // for (let char of Object.keys(actor.system.characteristics)) {
-    //     if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
-    //         await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
-    //         //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
-    //     }
-    // }
-
-    //await actor.update(changes);
-    //await actor.update(updates);
-
-    // Re-render all open HeroSystem6eItemSheets.
-    // TODO: Limit to just updating the ItemSheets associated with this actor or ActiveEffect
-    // for (const w of Object.values(ui.windows)) {
-    //     //if (w instanceof HeroSystem6eItemSheet) {
-    //     w.render()
-    //     //}
-    // }
-    // return
 }
