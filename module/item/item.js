@@ -533,10 +533,10 @@ export class HeroSystem6eItem extends Item {
                 this.system.showToggle = true
                 changed = true
 
-                const numCharges = this.system.charges?.value || 0;
-                if (numCharges > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
+                if (this.system.charges?.value > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
+                    this.system.active ??= false
                 } else {
-                    this.system.active ??= true;
+                    this.system.active ??= true
                 }
             }
         }
@@ -753,8 +753,8 @@ export class HeroSystem6eItem extends Item {
                         }
                     }
 
-                    if (child.baseCost != newValue) {
-                        child.baseCost = newValue
+                    if (child.baseCost != newChildValue) {
+                        child.baseCost = newChildValue
                         changed = true
                     }
                 }
