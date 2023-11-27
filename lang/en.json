@@ -63,7 +63,7 @@
         "Max": "Max",
         "MaxTitle": "Maximum value including all powers and effects.",
         "Core": "Core",
-        "CoreTitle": "Paid for characterictics.\nDoes not include powers or effects.",
+        "CoreTitle": "Paid for characteristics.\nDoes not include powers or effects.",
         "Perk": "Perk",
         "Talent": "Talent",
         "Complication": "Complication",
@@ -95,8 +95,8 @@
             "Active": "Drag Ruler module is not activated. Please activate."
         },
         "Quench": {
-            "Install": "Hey, HERO system develeoper, please install the Quench module.",
-            "Active": "Hey, HERO system develeoper, please set the Quench module to active."
+            "Install": "Hey, HERO system developer, please install the Quench module.",
+            "Active": "Hey, HERO system developer, please set the Quench module to active."
         }
     },
     "Movement": {

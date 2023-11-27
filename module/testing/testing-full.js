@@ -97,7 +97,7 @@ export function registerFullTests(quench) {
                     type: 'pc',
                 }, { temporary: true });
 
-                
+
 
                 it("name", async function () {
                     console.log("name")
@@ -903,7 +903,7 @@ export function registerFullTests(quench) {
 
 
                 `;
-                
+
                 //await actor.uploadFromXml(contents)
 
                 it("name", async function () {
@@ -1278,12 +1278,464 @@ export function registerFullTests(quench) {
                         type: 'pc',
                     }, { temporary: true });
                     await actor.uploadFromXml(contents)
-                    assert.equal(actor.system.realCost, 732);
+                    assert.equal(actor.system.realCost, 657);
                 });
 
             });
 
 
+
+            describe("civilian6e", function () {
+
+                const contents = `
+                <?xml version="1.0" encoding="UTF-16"?>
+                <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
+                <BASIC_CONFIGURATION BASE_POINTS="175" DISAD_POINTS="50" EXPERIENCE="0" />
+                <CHARACTER_INFO CHARACTER_NAME="civilian6e" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                    <BACKGROUND />
+                    <PERSONALITY />
+                    <QUOTE />
+                    <TACTICS />
+                    <CAMPAIGN_USE />
+                    <APPEARANCE />
+                    <NOTES1 />
+                    <NOTES2 />
+                    <NOTES3 />
+                    <NOTES4 />
+                    <NOTES5 />
+                </CHARACTER_INFO>
+                <CHARACTERISTICS>
+                    <STR XMLID="STR" ID="1698337460103" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </STR>
+                    <DEX XMLID="DEX" ID="1698337460774" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </DEX>
+                    <CON XMLID="CON" ID="1698337460480" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </CON>
+                    <INT XMLID="INT" ID="1698337460801" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </INT>
+                    <EGO XMLID="EGO" ID="1698337460800" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </EGO>
+                    <PRE XMLID="PRE" ID="1698337460238" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </PRE>
+                    <OCV XMLID="OCV" ID="1698337720439" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </OCV>
+                    <DCV XMLID="DCV" ID="1698337720495" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </DCV>
+                    <OMCV XMLID="OMCV" ID="1698337720823" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </OMCV>
+                    <DMCV XMLID="DMCV" ID="1698337720787" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </DMCV>
+                    <SPD XMLID="SPD" ID="1698337460757" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </SPD>
+                    <PD XMLID="PD" ID="1698337460831" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </PD>
+                    <ED XMLID="ED" ID="1698337460370" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </ED>
+                    <REC XMLID="REC" ID="1698337460800" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </REC>
+                    <END XMLID="END" ID="1698337460286" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </END>
+                    <BODY XMLID="BODY" ID="1698337460679" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </BODY>
+                    <STUN XMLID="STUN" ID="1698337459991" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </STUN>
+                    <RUNNING XMLID="RUNNING" ID="1698337460783" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </RUNNING>
+                    <SWIMMING XMLID="SWIMMING" ID="1698337460402" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </SWIMMING>
+                    <LEAPING XMLID="LEAPING" ID="1698337460611" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </LEAPING>
+                </CHARACTERISTICS>
+                <SKILLS />
+                <PERKS />
+                <TALENTS />
+                <MARTIALARTS />
+                <POWERS />
+                <DISADVANTAGES />
+                <EQUIPMENT />
+                <RULES name="HoTA" path="civilian6e.hdc" BASEPOINTS="175" DISADPOINTS="50" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="57" ATTACKAPMAXRESPONSE="1" DEFENSEAPMAXVALUE="35" DEFENSEAPMAXRESPONSE="1" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="1" AVAILDISADPOINTSRESPONSE="1" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="No" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
+                </CHARACTER>
+                `;
+
+                it("name", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.name, "civilian6e");
+                });
+
+                it("str.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.str.max, 10);
+                });
+                it("str.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.str.realCost, 0);
+                });
+
+                it("dex.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.dex.max, 10);
+                });
+                it("dex.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.dex.realCost, 0);
+                });
+
+                it("con.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.con.max, 10);
+                });
+                it("con.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.con.realCost, 0);
+                });
+
+                it("body.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.body.max, 10);
+                });
+                it("body.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.body.realCost, 0);
+                });
+
+                it("int.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.int.max, 10);
+                });
+                it("int.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.int.realCost, 0);
+                });
+
+                it("ego.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.ego.max, 10);
+                });
+                it("ego.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.ego.realCost, 0);
+                });
+
+                it("pre.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.pre.max, 10);
+                });
+                it("pre.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.pre.realCost, 0);
+                });
+
+                it("pd.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.pd.max, 2);
+                });
+                it("pd.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.pd.realCost, 0);
+                });
+
+                it("ed.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.ed.max, 2);
+                });
+                it("ed.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.ed.realCost, 0);
+                });
+
+                it("spd.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.spd.max, 2);
+                });
+                it("spd.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.spd.realCost, 0);
+                });
+
+                it("rec.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.rec.max, 4);
+                });
+                it("rec.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.rec.realCost, 0);
+                });
+
+                it("end.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.end.max, 20);
+                });
+                it("end.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.end.realCost, 0);
+                });
+
+                it("stun.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.stun.max, 20);
+                });
+                it("stun.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.stun.realCost, 0);
+                });
+
+                it("ocv.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.ocv.max, 3);
+                });
+                it("ocv.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                });
+
+                it("dcv.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.dcv.max, 3);
+                });
+                it("dcv.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                });
+
+                it("omcv.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.omcv.max, 3);
+                });
+                it("omcv.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                });
+
+                it("dmcv.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.dmcv.max, 3);
+                });
+                it("dmcv.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                });
+
+                it("running.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.running.max, 12); 
+                });
+                it("running.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.running.realCost, 0);
+                });
+
+                it("swimming.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.swimming.max, 4);
+                });
+                it("swimming.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.swimming.realCost, 0);
+                });
+
+                it("leaping.max", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.leaping.max, 4);
+                });
+                it("leaping.realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.characteristics.leaping.realCost, 0);
+                });
+
+                it("realCost", async function () {
+                    const actor = new HeroSystem6eActor({
+                        name: 'Quench Actor',
+                        type: 'pc',
+                    }, { temporary: true });
+                    await actor.uploadFromXml(contents)
+                    assert.equal(actor.system.realCost, 0);
+                });
+
+            });
 
         },
         { displayName: "HERO: Full Character Tests" }

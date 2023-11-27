@@ -171,6 +171,13 @@ export function convertToDcFromItem(item, options) {
         tags.push({ value: _tag, name: item.name })
     }
 
+    // Boostable Charges
+    if (options?.boostableCharges) {
+        const _value = parseInt(options.boostableCharges)
+        dc += _value
+        tags.push({ value: `${_value.signedString()}DC`, name: "boostable" })
+    }
+
     // Combat Skill Levels
     const csl = CombatSkillLevelsForAttack(item)
     if (csl && csl.dc > 0) {
@@ -199,16 +206,19 @@ export function convertToDcFromItem(item, options) {
     //
     // Currently assuming token starts at 0 velocity and ends at 0 velocity.
     // Under this assumption the max velocity is half the speed.
+
     let velocityDC = 0;
-    if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+    // [NORMALDC] +v/5 Strike, FMove
+    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
+    if ((item.system.EFFECT || "").match(/v\/\d/)) { //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
         if (!options) {
             options = {};
         }
         options.velocity = parseInt(options?.velocity || 0);
-        let divisor = 10;
-        if (item.system.XMLID === "MOVETHROUGH") {
-            divisor = 6;
-        }
+        let divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]) //10;
+        // if (item.system.XMLID === "MOVETHROUGH") {
+        //     divisor = 6;
+        // }
         velocityDC = Math.floor(options.velocity / divisor);
         if (velocityDC > 0) {
             dc += velocityDC;
@@ -246,6 +256,19 @@ export function convertToDcFromItem(item, options) {
         tags.push({ value: `${str5.signedString()}DC`, name: 'TK' })
     }
 
+    // ActiveEffects
+    if (item.actor) {
+        for (const ae of item.actor.appliedEffects.filter(o => !o.disabled && o.flags?.target === item.uuid)) {
+            for (const change of ae.changes.filter(o => o.key === 'system.value' && o.value != 0 && o.mode === 2)) {
+                const _value = parseInt(change.value)
+                dc += _value
+                tags.push({ value: `${_value.signedString()}DC`, name: ae.name })
+            }
+        }
+    }
+
+
+
 
     // Add in Haymaker to any non-maneuver attack DCV based attack
     if (item.actor) {
@@ -266,7 +289,7 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
-    if (item.actor?.statuses?.has("underwater")){
+    if (item.actor?.statuses?.has("underwater")) {
         dc = Math.max(0, dc - 2);
         tags.push({ value: `-2DC`, name: 'Underwater' });
     }
@@ -284,9 +307,12 @@ export function convertFromDC(item, DC) {
 
     // Normal Attack
     if (!item.system.killing) {
+        // NOTE: This is ugly because with floating point calculations we need to use epsilon comparisons (see https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ for instance)
         d6Count = Math.floor(DC)
-        d3Count = DC % 1 >= 0.5 ? 1 : 0
-        constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
+        // d3Count = DC % 1 >= 0.5 ? 1 : 0
+        d3Count = (DC % 1 - 0.5 >= -Number.EPSILON) ? 1 : 0
+        // constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
+        constant = ((DC % 1 - 0.2 >= -Number.EPSILON) && (DC % 1 - 0.5 < -Number.EPSILON)) ? 1 : 0
         //return DC.toString() + "d6"; 
     } else
 
@@ -432,7 +458,7 @@ export function CombatSkillLevelsForAttack(item) {
 
     result.skill = item.actor.items.find(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) && o.system.attacks && o.system.attacks[item.id])
     if (result.skill && result.skill.system.csl) {
-        for (let i = 0; i < parseInt(result.skill.system.LEVELS) || parseInt(result.skill.system.LEVELS.value) || 0; i++) {
+        for (let i = 0; i < parseInt(result.skill.system.LEVELS || 0); i++) {
             result[result.skill.system.csl[i]] = (result[result.skill.system.csl[i]] || 0) + 1;
         }
         result.item = result.skill;

@@ -3,6 +3,7 @@ import { HeroSystem6eItem } from '../item/item.js'
 import { HEROSYS } from "../herosystem6e.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
 import { getPowerInfo, getCharactersticInfoArrayForActor } from "../utility/util.js"
+import { AdjustmentSources } from "../utility/adjustment.js"
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -663,47 +664,59 @@ export class HeroSystem6eActor extends Actor {
 
         let base = parseInt(powerInfo?.base) || 0;
 
-        if (!this.system.is5e) return base;
+        if (!this.system.is5e) return base
+
+        const _str = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.str.max")?.value || 0), 0)
+        const _con = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.con.max")?.value || 0), 0)
+        const _dex = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.dex.max")?.value || 0), 0)
+        const _body = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.body.max")?.value || 0), 0)
+        const _ego = this.appliedEffects.filter(o => o.parent instanceof HeroSystem6eItem && !["DENSITYINCREASE", "GROWTH"].includes(o.parent.system.XMLID) && !o.parent.findModsByXmlid("NOFIGURED")).reduce((partialSum, a) => partialSum + parseInt(a.changes.find(o => o.key === "system.characteristics.ego.max")?.value || 0), 0)
+
+        // FIXME: This is, but should never be, called with this.system[characteristic] being undefined. Need to reorder the loading
+        //        mechanism to ensure that we do something more similar to a load, transform, and extract pipeline so that we
+        //        not invoked way too many times and way too early.
+        const charBase = (characteristicUpperCase) => {
+            return parseInt(this.system[characteristicUpperCase]?.LEVELS) + (parseInt(getPowerInfo({ xmlid: characteristicUpperCase, actor: this})?.base) || 0)
+        }
 
         switch (key.toLowerCase()) {
 
             // Physical Defense (PD) STR/5
             case "pd":
-                return base + Math.round(this.system.characteristics.str.core / 5);
+                return base + Math.round((charBase("STR") + _str) / 5);
 
             // Energy Defense (ED) CON/5
             case "ed":
-                return base + Math.round(this.system.characteristics.con.core / 5);
-                break;
+                return base + Math.round((charBase("CON") + _con) / 5);
 
             // Speed (SPD) 1 + (DEX/10)   can be fractional
             case "spd":
-                return base + 1 + parseFloat(parseFloat(this.system.characteristics.dex.core / 10).toFixed(1))
+                return base + 1 + parseFloat(parseFloat((charBase("DEX") + _dex) / 10).toFixed(1))
 
             // Recovery (REC) (STR/5) + (CON/5)
             case "rec":
-                return base + Math.round(this.system.characteristics.str.core / 5) + Math.round(this.system.characteristics.con.core / 5);
+                return base + Math.round((charBase("STR") + _str) / 5) + Math.round((charBase("CON") + _con) / 5)
 
             // Endurance (END) 2 x CON
             case "end":
-                return base + Math.round(this.system.characteristics.con.core * 2);
+                return base + Math.round((charBase("CON") + _con) * 2)
 
             // Stun (STUN) BODY+(STR/2)+(CON/2) 
             case "stun":
-                return base + Math.round(this.system.characteristics.body.core) + Math.round(this.system.characteristics.str.core / 2) + Math.round(this.system.characteristics.con.core / 2);
+                return base + Math.round(charBase("BODY") + _body) + Math.round((charBase("STR") + _str) / 2) + Math.round((charBase("CON") + _con) / 2);
 
             // Base OCV & DCV = Attacker’s DEX/3
             case "ocv":
             case "dcv":
-                return Math.round(this.system.characteristics.dex.core / 3);
+                return Math.round((charBase("DEX") + _dex) / 3);
 
             //Base Ego Combat Value = EGO/3
             case "omcv":
             case "dmcv":
-                return Math.round(this.system.characteristics.ego.core / 3);
+                return Math.round((charBase("EGO") + _ego) / 3);
 
             case "leaping":
-                const str = parseInt(this.system.characteristics.str.core)
+                const str = parseInt(charBase("STR") + _str)
                 let value = 0;
                 if (str >= 3) value = 0.5
                 if (str >= 5) value = 1
@@ -732,101 +745,9 @@ export class HeroSystem6eActor extends Actor {
                 if (str >= 95) value = 19
                 if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
                 return value;
-
         }
 
         return base;
-
-        //     const figuredChanges = {}
-        //     figuredChanges[`system.is5e`] = true  // used in item-attack.js to modify killing attack stun multiplier
-
-        //     // One major difference between 5E and 6E is figured characteristics.
-
-        //     // Physical Defense (PD) STR/5
-        //     const pdLevels = this.actor.system.characteristics.pd.max - CONFIG.HERO.characteristicDefaults5e.pd;
-        //     const pdFigured = Math.round(this.actor.system.characteristics.str.max / 5)
-        //     figuredChanges[`system.characteristics.pd.max`] = pdLevels + pdFigured
-        //     figuredChanges[`system.characteristics.pd.value`] = pdLevels + pdFigured
-        //     figuredChanges[`system.characteristics.pd.base`] = pdFigured //this.actor.system.characteristics.pd.base + pdFigured
-        //     figuredChanges[`system.characteristics.pd.core`] = pdLevels + pdFigured
-        //     figuredChanges[`system.characteristics.pd.figured`] = pdFigured
-
-        //     // Energy Defense (ED) CON/5
-        //     const edLevels = this.actor.system.characteristics.ed.max - CONFIG.HERO.characteristicDefaults5e.ed;
-        //     const edFigured = Math.round(this.actor.system.characteristics.con.max / 5)
-        //     figuredChanges[`system.characteristics.ed.max`] = edLevels + edFigured
-        //     figuredChanges[`system.characteristics.ed.value`] = edLevels + edFigured
-        //     figuredChanges[`system.characteristics.ed.base`] = edFigured //this.actor.system.characteristics.ed.base + edFigured
-        //     figuredChanges[`system.characteristics.ed.core`] = edLevels + edFigured
-        //     figuredChanges[`system.characteristics.ed.figured`] = edFigured
-
-
-        //     // Speed (SPD) 1 + (DEX/10)   can be fractional
-        //     const spdLevels = this.actor.system.characteristics.spd.max - CONFIG.HERO.characteristicDefaults5e.spd;
-        //     const spdFigured = 1 + parseFloat(parseFloat(this.actor.system.characteristics.dex.max / 10).toFixed(1))
-        //     figuredChanges[`system.characteristics.spd.max`] = Math.floor(spdLevels + spdFigured)
-        //     figuredChanges[`system.characteristics.spd.value`] = Math.floor(spdLevels + spdFigured)
-        //     figuredChanges[`system.characteristics.spd.base`] = spdFigured //this.actor.system.characteristics.spd.base + spdFigured
-        //     figuredChanges[`system.characteristics.spd.core`] = Math.floor(spdLevels + spdFigured)
-        //     figuredChanges[`system.characteristics.spd.figured`] = spdFigured
-        //     figuredChanges[`system.characteristics.spd.realCost`] = Math.ceil((this.actor.system.characteristics.spd.max - spdFigured) * CONFIG.HERO.characteristicCosts5e.spd)
-
-
-        //     // Recovery (REC) (STR/5) + (CON/5)
-        //     const recLevels = this.actor.system.characteristics.rec.max - CONFIG.HERO.characteristicDefaults5e.rec;
-        //     const recFigured = Math.round(this.actor.system.characteristics.str.max / 5) + Math.round(this.actor.system.characteristics.con.max / 5)
-        //     figuredChanges[`system.characteristics.rec.max`] = recLevels + recFigured
-        //     figuredChanges[`system.characteristics.rec.value`] = recLevels + recFigured
-        //     figuredChanges[`system.characteristics.rec.base`] = recFigured //this.actor.system.characteristics.rec.base + recFigured
-        //     figuredChanges[`system.characteristics.rec.core`] = recLevels + recFigured
-        //     figuredChanges[`system.characteristics.rec.figured`] = recFigured
-        //     figuredChanges[`system.characteristics.red.realCost`] = recLevels * CONFIG.HERO.characteristicCosts5e.red
-
-        //     // Endurance (END) 2 x CON
-        //     const endLevels = this.actor.system.characteristics.end.max - CONFIG.HERO.characteristicDefaults5e.end;
-        //     const endFigured = Math.round(this.actor.system.characteristics.con.max * 2)
-        //     figuredChanges[`system.characteristics.end.max`] = endLevels + endFigured
-        //     figuredChanges[`system.characteristics.end.value`] = endLevels + endFigured
-        //     figuredChanges[`system.characteristics.end.base`] = endFigured //this.actor.system.characteristics.end.base + endFigured
-        //     figuredChanges[`system.characteristics.end.core`] = endLevels + endFigured
-        //     figuredChanges[`system.characteristics.end.figured`] = endFigured
-
-
-        //     // Stun (STUN) BODY+(STR/2)+(CON/2) 
-        //     const stunLevels = this.actor.system.characteristics.stun.max - CONFIG.HERO.characteristicDefaults5e.stun;
-        //     const stunFigured = this.actor.system.characteristics.body.max + Math.round(this.actor.system.characteristics.str.max / 2) + Math.round(this.actor.system.characteristics.con.max / 2)
-        //     figuredChanges[`system.characteristics.stun.max`] = stunLevels + stunFigured
-        //     figuredChanges[`system.characteristics.stun.value`] = stunLevels + stunFigured
-        //     figuredChanges[`system.characteristics.stun.base`] = stunFigured //this.actor.system.characteristics.stun.base + stunFigured
-        //     figuredChanges[`system.characteristics.stun.core`] = stunLevels + stunFigured
-        //     figuredChanges[`system.characteristics.stun.figured`] = stunFigured
-        //     figuredChanges[`system.characteristics.stun.realCost`] = stunLevels * CONFIG.HERO.characteristicCosts5e.stun
-
-
-        //     // Base OCV & DCV = Attacker’s DEX/3
-        //     const baseCv = Math.round(this.actor.system.characteristics.dex.max / 3)
-        //     figuredChanges[`system.characteristics.ocv.max`] = baseCv // + this.actor.system.characteristics.ocv.max - this.actor.system.characteristics.ocv.base
-        //     figuredChanges[`system.characteristics.ocv.value`] = baseCv // + this.actor.system.characteristics.ocv.max - this.actor.system.characteristics.ocv.base
-        //     figuredChanges[`system.characteristics.ocv.base`] = 0 //baseCv + this.actor.system.characteristics.ocv.max - this.actor.system.characteristics.ocv.base
-        //     figuredChanges[`system.characteristics.dcv.max`] = baseCv // + this.actor.system.characteristics.dcv.max - this.actor.system.characteristics.dcv.base
-        //     figuredChanges[`system.characteristics.dcv.value`] = baseCv //+ this.actor.system.characteristics.dcv.max - this.actor.system.characteristics.dcv.base
-        //     figuredChanges[`system.characteristics.dcv.base`] = 0 //baseCv + this.actor.system.characteristics.dcv.max - this.actor.system.characteristics.dcv.base
-        //     figuredChanges[`system.characteristics.ocv.realCost`] = 0
-        //     figuredChanges[`system.characteristics.dcv.realCost`] = 0
-
-        //     //Base Ego Combat Value = EGO/3
-        //     const baseEcv = Math.round(this.actor.system.characteristics.ego.max / 3)
-        //     figuredChanges[`system.characteristics.omcv.max`] = baseEcv //+ this.actor.system.characteristics.omcv.max - this.actor.system.characteristics.omcv.base
-        //     figuredChanges[`system.characteristics.omcv.value`] = baseEcv //+ this.actor.system.characteristics.omcv.max - this.actor.system.characteristics.omcv.base
-        //     figuredChanges[`system.characteristics.omcv.base`] = 0 //baseEcv + this.actor.system.characteristics.omcv.max - this.actor.system.characteristics.omcv.base
-        //     figuredChanges[`system.characteristics.dmcv.max`] = baseEcv //+ this.actor.system.characteristics.dmcv.max - this.actor.system.characteristics.dmcv.base
-        //     figuredChanges[`system.characteristics.dmcv.value`] = baseEcv //+ this.actor.system.characteristics.dmcv.max - this.actor.system.characteristics.dmcv.base
-        //     figuredChanges[`system.characteristics.dmcv.base`] = 0 //baseEcv + this.actor.system.characteristics.dmcv.max - this.actor.system.characteristics.dmcv.base
-        //     figuredChanges[`system.characteristics.omcv.realCost`] = 0
-        //     figuredChanges[`system.characteristics.dmcv.realCost`] = 0
-
-        //     await this.actor.update(figuredChanges, { render: false }, { hideChatMessage: true })
-        //}
 
 
     }
@@ -837,8 +758,9 @@ export class HeroSystem6eActor extends Actor {
         let changes = {};
         for (const powerInfo of powers) {
             let key = powerInfo.key.toLowerCase();
-            let characteistic = this.system.characteristics[key];
-            let core = parseInt(characteistic?.core) || 0;
+            let characteristic = this.system.characteristics[key];
+            let core = parseInt(characteristic?.core) || 0;
+
             let base = this.getCharacteristicBase(key);
             let levels = core - base;
             let cost = Math.round(levels * (powerInfo.cost || 0))
@@ -848,7 +770,7 @@ export class HeroSystem6eActor extends Actor {
                 cost = Math.ceil(cost / 10);
             }
 
-            if (characteistic.realCost != cost) {
+            if (characteristic.realCost != cost) {
                 changes[`system.characteristics.${key}.realCost`] = cost;
                 this.system.characteristics[key].realCost = cost;
             }
@@ -869,7 +791,7 @@ export class HeroSystem6eActor extends Actor {
             if (duration === "constant") {
                 results.push(item)
             } else {
-                const NONPERSISTENT = item.system.modifiers.find(o => o.XMLID === "NONPERSISTENT")
+                const NONPERSISTENT = (item.system.modifiers || []).find(o => o.XMLID === "NONPERSISTENT")
                 if (NONPERSISTENT) {
                     results.push(item)
                 }
@@ -935,7 +857,7 @@ export class HeroSystem6eActor extends Actor {
         let changes = {}
 
 
-        // Reset system propety to default
+        // Reset system property to default
         const _actor = await HeroSystem6eActor.create({
             name: 'Test Actor',
             type: this.type,
@@ -947,6 +869,11 @@ export class HeroSystem6eActor extends Actor {
         for (const key of Object.keys(this.system)) {
             if (!schemaKeys.includes(key)) {
                 changes[`system.-=${key}`] = null
+            }
+        }
+        for (const key of Object.keys(this.system.characteristics)) {
+            if (!Object.keys(_system.characteristics).includes(key)) {
+                changes[`system.characteristics.-=${key}`] = null
             }
         }
         if (this.id) {
@@ -967,6 +894,26 @@ export class HeroSystem6eActor extends Actor {
                 //changes[`system.characteristics.${ key.toLowerCase() } `] = value
             }
             delete heroJson.CHARACTER.CHARACTERISTICS
+        }
+
+        // is5e
+        if (typeof this.system.CHARACTER?.TEMPLATE == 'string') {
+            if (this.system.CHARACTER.TEMPLATE.includes("builtIn.") && !this.system.CHARACTER.TEMPLATE.includes("6E.") && !this.system.is5e) {
+                //changes[`system.is5e`] = true
+                this.system.is5e = true
+            }
+            if (this.system.CHARACTER.TEMPLATE.includes("builtIn.") && this.system.CHARACTER.TEMPLATE.includes("6E.") && this.system.is5e) {
+                //changes[`system.is5e`] = false
+                this.system.is5e = false
+            }
+        }
+        if (this.system.COM && !this.system.is5e) {
+            //changes[`system.is5e`] = true
+            this.system.is5e = true
+        }
+
+        if (this.system.is5e && this.id) {
+            await this.update({ 'system.is5e': this.system.is5e })
         }
 
         // ITEMS
@@ -1025,6 +972,17 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // Check for valid AID targets
+        for (let item of this.items.filter(o => o.system.XMLID === "AID")) {
+
+            for (let input of item.system.INPUT.split(",")) {
+                input = input.toLowerCase().trim()
+                if (!Object.keys(AdjustmentSources(this)).includes(input.toUpperCase())) {
+                    await ui.notifications.warn(`${this.name} has an unsupported ${item.name} property (${input}).  Use characteristic abbreviations or power names seperated by commas.`);
+                }
+            }
+        }
+
         // Perception Skill
         const itemDataPerception = {
             name: 'Perception',
@@ -1046,7 +1004,11 @@ export class HeroSystem6eActor extends Actor {
             const PHASE = v[0];
             const OCV = v[1];
             const DCV = v[2];
-            const EFFECT = v[3];
+            let EFFECT = v[3];
+            if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
+                let divisor = EFFECT.match(/v\/(\d+)/)[1]
+                EFFECT = EFFECT.replace( `v/${divisor}`, `v/${divisor / 2}`)
+            } 
             const attack = v[4];
             const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
             const itemData = {
@@ -1063,7 +1025,7 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
 
-            if (this.id) { // Skip if tempoary actor (Quench)
+            if (this.id) { // Skip if temporary actor (Quench)
                 const item = await HeroSystem6eItem.create(itemData, { parent: this })
                 if (attack) {
                     await item.makeAttack()
@@ -1072,39 +1034,44 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // Actor Image
+        // Images
         if (heroJson.CHARACTER.IMAGE) {
             const filename = heroJson.CHARACTER.IMAGE?.FileName
+            const path = "worlds/" + game.world.id + "/tokens"
+            const relativePathName = path + "/" + filename
+
+            // Create a directory if it doesn't already exist
             try {
-                const extension = filename.split('.').pop()
-                const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName('IMAGE')[0].textContent
-                const path = "worlds/" + game.world.id + "/tokens"
-                try {
-                    await FilePicker.createDirectory("user", path)
-                } catch (e) {
-                    //console.log(e)
-                }
-                let oldImage = null
-                try {
-                    //let files = (await FilePicker.browse("user", path)).files
-                    oldImage = (await FilePicker.browse("user", path)).files.includes(encodeURI(path + "/" + filename))
-                } catch (e) {
-                    //console.log(e)
-                }
-                if (!oldImage) { //this.img.indexOf(filename) == -1) {
+                await FilePicker.createDirectory("user", path)
+            } catch (e) {
+                //console.error(e)
+            }
+
+            // Set the image, uploading if not already in the file system
+            try {
+                const imageFileExists = (await FilePicker.browse("user", path)).files.includes(encodeURI(relativePathName))
+                if (!imageFileExists) {
+                    const extension = filename.split('.').pop()
+                    const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName('IMAGE')[0].textContent
+
                     await ImageHelper.uploadBase64(base64, filename, path)
-                    changes['img'] = path + '/' + filename
 
                     // Update any tokens images that might exist
                     for (const token of this.getActiveTokens()) {
-                        await token.document.update({ 'texture.src': path + '/' + filename })
+                        await token.document.update({ 'texture.src': relativePathName })
                     }
                 }
+
+                changes['img'] = relativePathName
             } catch (e) {
-                console.log(e)
-                ui.notifications.warn(`${this.name} failed to upload ${filename}.`);
+                console.error(e)
+                ui.notifications.warn(`${this.name} failed to upload ${filename}.`)
             }
+
             delete heroJson.CHARACTER.IMAGE
+        } else {
+            // No image provided. Make sure we're using the default token.
+            changes['img'] = CONST.DEFAULT_TOKEN
         }
 
 
@@ -1125,7 +1092,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
 
-        // Save all our changes (unless tempoary actor/quench)
+        // Save all our changes (unless temporary actor/quench)
         if (this.id) {
             await this.update(changes)
         }
@@ -1244,12 +1211,23 @@ export class HeroSystem6eActor extends Actor {
             this.system.is5e = true
         }
 
+        if (this.system.is5e && this.id) {
+            await this.update({ [`system.is5e`]: this.system.is5e })
+        }
+
+        // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
-            if (key === "running")
+            if (key === "running") {
                 console.log(key)
-            const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
+            }
+
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0)
             newValue += this.getCharacteristicBase(key)
+            if(this.system.is5e && (key === "spd")) {
+                // SPD is always an integer, but in 5e due to figured characteristics, the base can be fractional.
+                newValue = Math.floor(newValue)
+            }
+
             if (this.system.characteristics[key].max != newValue) {
                 if (this.id) {
                     //changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
@@ -1290,8 +1268,17 @@ export class HeroSystem6eActor extends Actor {
         //     createEffects(item)
         // }
 
-
-
+        // Initiative Characteristic
+        if (this.system.initiativeCharacteristic === undefined) {
+            if (this.system.characteristics.ego.value > this.system.characteristics.dex.value &&
+                this.system.characteristics.omcv.value >= this.system.characteristics.ocv.value) {
+                if (this.id) {
+                    await this.update({ 'system.initiativeCharacteristic': "ego" })
+                } else {
+                    this.system.initiativeCharacteristic = "ego"
+                }
+            }
+        }
 
         // Combat Skill Levels - Enumerate attacks that use OCV
         for (let cslItem of this.items.filter(o => ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID))) {

@@ -61,6 +61,14 @@
     </div>
     {{/if}}
 
+    {{#if boostableCharges}}
+    <div class="form-group">
+      <label>Boostable ({{boostableCharges}})</label>
+      <input type="text" name="boostableCharges" value="0" />
+      
+    </div>
+    {{/if}}
+
     {{#if cslChoices}}
     <div class="form-group">
       <label>Combat Skill Levels</label>

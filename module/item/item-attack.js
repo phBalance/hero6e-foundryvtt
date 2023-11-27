@@ -75,7 +75,9 @@ export async function AttackOptions(item, event) {
         }
     }
 
-    if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+    // Maneuvers and Martial attacks may include velocity
+    // [NORMALDC] +v/5 Strike, FMove
+    if ((item.system.EFFECT || "").match(/v\/\d/)) { //["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
         data.showVelocity = true;
         data.velocity = 0;
 
@@ -240,12 +242,12 @@ export async function AttackAoeToHit(item, options) {
 
     if (item.system.uses === "ocv") {
 
-        // Educated guess for token
         let factor = actor.system.is5e ? 4 : 8;
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
+        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "AOE range penalty", title: `${distanceToken}${actor.system.is5e ? "'" : "m"}` })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
@@ -381,9 +383,10 @@ export async function AttackToHit(item, options) {
         let distance = canvas.grid.measureDistance(token, target, { gridSpaces: true });
         let factor = actor.system.is5e ? 4 : 8;
         let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
+        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
-            tags.push({ value: rangePenalty.signedString(), name: "range penalty" })
+            tags.push({ value: rangePenalty.signedString(), name: "range penalty", title: `${distance}${actor.system.is5e ? "'" : "m"}` })
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
 
@@ -586,18 +589,20 @@ export async function AttackToHit(item, options) {
     }
 
     // Charges
-    let spentCharges = 0;
+
     if (item.system.charges?.max > 0) {
         let charges = parseInt(item.system.charges?.value || 0);
         if (charges <= 0) {
             return ui.notifications.error(`${item.name} has no more charges.`);
         }
+        options.boostableCharges = Math.clamped(parseInt(options.boostableCharges) || 0, 0, Math.min(charges - 1, 4))  // Maximum of 4
+        let spentCharges = 1 + options.boostableCharges
         if (enduranceText === "") {
-            enduranceText = "Spent 1 charge";
+            enduranceText = `Spent ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
         } else {
-            enduranceText += " and 1 charge";
+            enduranceText += ` and ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
         }
-        item.update({ "system.charges.value": charges - 1 })
+        item.update({ "system.charges.value": charges - spentCharges })
 
     }
 
@@ -911,7 +916,6 @@ export async function _onRollDamage(event) {
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
 
-    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("adjustment");
     const senseAffecting = getPowerInfo({ xmlid: item.system.XMLID })?.powerType?.includes("sense-affecting")
 
@@ -1404,6 +1408,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     damageData.damageNegationValue = damageNegationValue
     damageData.knockbackResistance = knockbackResistance
     damageData.defenseAvad = defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue + knockbackResistance;
+    damageData.targetToken = token
 
     // AVAD All or Nothing
     if (avad) {
@@ -1538,6 +1543,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         knockbackMessage: damageDetail.knockbackMessage,
         useKnockBack: damageDetail.useKnockBack,
         knockbackRenderedResult: damageDetail.knockbackRenderedResult,
+        knockbackTags: damageDetail.knockbackTags,
 
         // misc
         tags: defenseTags,
@@ -1597,182 +1603,217 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
     let levelsY = 0
     let ActivePoints = parseInt(damageData.stundamage);
 
-    // TRANSFER X to Y  (AID and DRAIN only have X)
-    let xmlidX = item.system.INPUT.match(/\w+/)[0];
-    let xmlidY = (item.system.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
-
-    // Apply the ADJUSTMENT to a CHARACTERISTIC
-    let keyX = (xmlidX).toLowerCase()
-    let keyY = (xmlidY).toLowerCase()
-    if (keyX && token.actor.system.characteristics[keyX]) {
-        const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
+    const _inputs = item.system.INPUT.split(",")
+    let count = item.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1
+    for (let i = 0; i < count; i++) {
+        const input = _inputs?.[i]?.toUpperCase()?.trim() || ""
 
 
-        // Power Defense vs DRAIN
-        if (["DRAIN", "TRANSFER"].includes(item.system.XMLID)) {
-            ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
+        // TRANSFER X to Y  (AID and DRAIN only have X)
+        let xmlidX = input.split(" to ")[0]?.trim() || "" //item.system.INPUT.match(/\w+/)[0];
+        let xmlidY = input.split(" to ")[1]?.trim() || "" //(item.system.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
+
+        // Apply the ADJUSTMENT to a CHARACTERISTIC
+        let keyX = (xmlidX).toLowerCase()
+        let keyY = (xmlidY).toLowerCase()
+
+        // Or a POWER
+        const powerTargetX = token.actor.items.find(o => o.name.toUpperCase().trim() === keyX.toUpperCase().trim());
+        if (powerTargetX) {
+            keyX = powerTargetX.system.XMLID
         }
 
-        let costPerPointX = parseFloat(getPowerInfo({ xmlid: keyX.toUpperCase(), actor: item.actor })?.cost) * AdjustmentMultiplier(keyX.toUpperCase());
-        levelsX = parseInt(ActivePoints / costPerPointX)
+        if (token.actor.system.characteristics?.[keyX] || powerTargetX) {
+            //const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
 
-        let costPerPointY = parseFloat(getPowerInfo({ xmlid: keyY.toUpperCase(), actor: item.actor })?.cost) * AdjustmentMultiplier(keyY.toUpperCase());
-        levelsY = parseInt(ActivePoints / costPerPointY)
 
-        // Check for previous ADJUSTMENT from same source
-        // TODO: Variable Effect may result in multiple changes on same AE.
-        let prevEffectX = token.actor.effects.find(o => o.flags?.XMLID === item.system.XMLID && o.flags?.keyX === keyX)
-        let prevEffectY = item.actor.effects.find(o => o.flags?.XMLID === item.system.XMLID && o.flags?.keyY === keyY)
-        if (prevEffectX) {
-
-            // Maximum Effect (ActivePoints)
-            let maxEffect = 0
-            for (let term of JSON.parse(damageData.terms)) {
-                maxEffect += (parseInt(term.faces) * parseInt(term.number) || 0)
-            }
-            //maxEffect = parseInt(maxEffect / costPerPoint);
-
-            let newActivePoints = (prevEffectX.flags?.activePoints || 0) + ActivePoints;
-            if (newActivePoints > maxEffect) {
-                ActivePoints = maxEffect - prevEffectX.flags.activePoints;
-                newActivePoints = maxEffect;
+            // Power Defense vs DRAIN
+            if (["DRAIN", "TRANSFER"].includes(item.system.XMLID)) {
+                ActivePoints = Math.max(0, ActivePoints - (damageData.defenseValue + damageData.resistantValue));
             }
 
-            let newLevelsX = newActivePoints / costPerPointX;
-            levelsX = newLevelsX - Math.abs(parseInt(prevEffectX.changes[0].value));
+            const powerInfoX = getPowerInfo({ xmlid: keyX.toUpperCase(), actor: item.actor })
+            let costPerPointX = (powerTargetX ? parseFloat(powerTargetX.system.activePoints / powerTargetX.system.value) : parseFloat(powerInfoX?.cost || powerInfoX?.costPerLevel)) * AdjustmentMultiplier(keyX.toUpperCase());
+            levelsX = parseInt(ActivePoints / costPerPointX)
 
+            const powerInfoY = getPowerInfo({ xmlid: keyY.toUpperCase(), actor: item.actor })
+            let costPerPointY = parseFloat(powerInfoY?.cost || powerInfoY?.costPerLevel) * AdjustmentMultiplier(keyY.toUpperCase());
+            levelsY = parseInt(ActivePoints / costPerPointY)
 
+            let _APtext = levelsX === ActivePoints ? "" : ` (${ActivePoints}AP)`
 
-            prevEffectX.changes[0].value = ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(newLevelsX) : parseInt(newLevelsX);
-            prevEffectX.name = `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(newLevelsX) : parseInt(newLevelsX).signedString()} ${keyX.toUpperCase()} [${item.actor.name}]`;
-            prevEffectX.flags.activePoints = newActivePoints;
+            // Check for previous ADJUSTMENT from same source
+            // TODO: Variable Effect may result in multiple changes on same AE.
+            let prevEffectX = token.actor.effects.find(o => o.origin === item.uuid && o.flags.target === (powerTargetX?.uuid || keyX)) //   || o.flags?.XMLID === item.system.XMLID && o.flags?.keyX === keyX)
+            let prevEffectY = item.actor.effects.find(o => o.flags?.XMLID === item.system.XMLID && o.flags?.keyY === keyY)
+            if (prevEffectX) { //&& token.actor.system.characteristics?.[keyX]
 
-            await prevEffectX.update({ name: prevEffectX.name, changes: prevEffectX.changes, flags: prevEffectX.flags })
-
-            if (item.system.XMLID === "TRANSFER" && keyY && prevEffectY) {
-
-                let newLevelsY = newActivePoints / costPerPointY;
-                levelsY = newLevelsY - Math.abs(parseInt(prevEffectY.changes[0].value));
-
-                prevEffectY.changes[0].value = parseInt(newLevelsY);
-                prevEffectY.name = `${item.system.XMLID} +${parseInt(newLevelsY)} ${keyY.toUpperCase()} [${item.actor.name}]`;
-                prevEffectY.flags.activePoints = newActivePoints;
-                await prevEffectY.update({ name: prevEffectY.name, changes: prevEffectY.changes, flags: prevEffectY.flags })
-
-                let newValueY = item.actor.system.characteristics[keyY].value + parseInt(levelsY);
-                await item.actor.update({ [`system.characteristics.${keyY}.value`]: newValueY })
-            }
-
-
-
-        } else {
-            // Create new ActiveEffect
-            let activeEffect =
-            {
-                name: `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX).signedString()} ${keyX.toUpperCase()} [${item.actor.name}]`,
-                id: `${item.system.XMLID}.${item.id}.${keyX}`,
-                icon: item.img,
-                changes: [
-                    {
-                        key: "system.characteristics." + keyX + ".max",
-                        value: ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX),
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD
-                    }
-                ],
-                duration: {
-                    seconds: 12,
-                },
-                flags: {
-                    activePoints: ActivePoints,
-                    XMLID: item.system.XMLID,
-                    source: item.actor.name,
-                    target: keyX,
-                    keyX: keyX,
-                    keyY: keyY,
-                },
-                origin: item.uuid
-            }
-
-            // DELAYEDRETURNRATE
-            let delayedReurnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
-            if (delayedReurnRate) {
-                switch (delayedReurnRate.OPTIONID) {
-                    case "MINUTE": activeEffect.duration.seconds = 60; break;
-                    case "FIVEMINUTES": activeEffect.duration.seconds = 60 * 5; break;
-                    case "20MINUTES": activeEffect.duration.seconds = 60 * 20; break;
-                    case "HOUR": activeEffect.duration.seconds = 60 * 60; break;
-                    case "6HOURS": activeEffect.duration.seconds = 60 * 60 * 6; break;
-                    case "DAY": activeEffect.duration.seconds = 60 * 60 * 24; break;
-                    case "WEEK": activeEffect.duration.seconds = 604800; break;
-                    case "MONTH": activeEffect.duration.seconds = 2.628e+6; break;
-                    case "SEASON": activeEffect.duration.seconds = 2.628e+6 * 3; break;
-                    case "YEAR": activeEffect.duration.seconds = 3.154e+7; break;
-                    case "FIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 5; break;
-                    case "TWENTYFIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 25; break;
-                    case "CENTURY": activeEffect.duration.seconds = 3.154e+7 * 100; break;
-                    default: await ui.notifications.error(`DELAYEDRETURNRATE has unhandled option ${delayedReurnRate?.OPTIONID}`);
+                // Maximum Effect (ActivePoints)
+                let maxEffect = 0
+                for (let term of JSON.parse(damageData.terms)) {
+                    maxEffect += (parseInt(term.faces) * parseInt(term.number) || 0)
                 }
-            }
+                //maxEffect = parseInt(maxEffect / costPerPoint);
 
-            if (ActivePoints > 0) {
-                await token.actor.addActiveEffect(activeEffect);
+                let newActivePoints = (prevEffectX.flags?.activePoints || 0) + ActivePoints;
+                if (newActivePoints > maxEffect) {
+                    ActivePoints = maxEffect - prevEffectX.flags.activePoints;
+                    newActivePoints = maxEffect;
+                }
 
-                if (item.system.XMLID === "TRANSFER" && keyY) {
-                    let activeEffectY = deepClone(activeEffect);
-                    activeEffectY.id = `${item.system.XMLID}.${item.id}.${keyY}`;
-                    activeEffectY.name = `${item.system.XMLID} +${parseInt(levelsY)} ${keyY.toUpperCase()} [${item.actor.name}]`;
-                    activeEffectY.changes[0].key = "system.characteristics." + keyY + ".max";
-                    activeEffectY.changes[0].value = parseInt(levelsY);
-                    activeEffectY.flags.target = keyY;
-                    await item.actor.addActiveEffect(activeEffectY);
+                let newLevelsX = newActivePoints / costPerPointX;
+                levelsX = newLevelsX - Math.abs(parseInt(prevEffectX.changes[0].value));
+
+                _APtext = newLevelsX === newActivePoints ? "" : ` (${newActivePoints}AP)`
+
+                prevEffectX.changes[0].value = ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(newLevelsX) : parseInt(newLevelsX);
+                prevEffectX.name = (`${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(newLevelsX) : parseInt(newLevelsX).signedString()}${_APtext}`)
+                    + (token.actor.system.characteristics?.[keyX] ? ` ${keyX.toUpperCase()}` : ` ${powerTargetX.name}`)
+                    + ` [${item.actor.name}]`,
+                    prevEffectX.flags.activePoints = newActivePoints;
+
+                await prevEffectX.update({ name: prevEffectX.name, changes: prevEffectX.changes, flags: prevEffectX.flags })
+
+                if (item.system.XMLID === "TRANSFER" && keyY && prevEffectY) {
+
+                    let newLevelsY = newActivePoints / costPerPointY;
+                    levelsY = newLevelsY - Math.abs(parseInt(prevEffectY.changes[0].value));
+
+                    prevEffectY.changes[0].value = parseInt(newLevelsY);
+                    prevEffectY.name = `${item.system.XMLID} +${parseInt(newLevelsY)} ${keyY.toUpperCase()} [${item.actor.name}]`;
+                    prevEffectY.flags.activePoints = newActivePoints;
+                    await prevEffectY.update({ name: prevEffectY.name, changes: prevEffectY.changes, flags: prevEffectY.flags })
 
                     let newValueY = item.actor.system.characteristics[keyY].value + parseInt(levelsY);
                     await item.actor.update({ [`system.characteristics.${keyY}.value`]: newValueY })
                 }
+
+
+
+            } else {
+                // Create new ActiveEffect
+                let activeEffect =
+                {
+                    //name: (token.actor.system.characteristics?.[keyX]) ? `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX).signedString()} ${keyX.toUpperCase()} [${item.actor.name}]` : `${item.system.XMLID} ${parseInt(levelsX).signedString()} ${powerTargetX.name} [${item.actor.name}]`,
+                    name: (`${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX).signedString()}${_APtext}`)
+                        + (token.actor.system.characteristics?.[keyX] ? ` ${keyX.toUpperCase()}` : ` ${powerTargetX.name}`)
+                        + ` [${item.actor.name}]`,
+                    id: `${item.system.XMLID}.${item.id}.${powerTargetX?.name || keyX}`,
+                    icon: item.img,
+                    changes: [
+                        {
+                            // system.value is transferred to the actor, so not very useful, 
+                            // but we can enumerate via item.effects when determining value.
+                            key: (token.actor.system.characteristics?.[keyX]) ? "system.characteristics." + keyX + ".max" : "system.value",
+                            value: ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX),
+                            mode: CONST.ACTIVE_EFFECT_MODES.ADD
+                        }
+                    ],
+                    duration: {
+                        seconds: 12,
+                    },
+                    flags: {
+                        activePoints: ActivePoints,
+                        XMLID: item.system.XMLID,
+                        source: item.actor.name,
+                        target: powerTargetX?.uuid || keyX,
+                        keyX: keyX,
+                        keyY: keyY,
+                    },
+                    origin: item.uuid
+                }
+
+                // DELAYEDRETURNRATE
+                let delayedReurnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
+                if (delayedReurnRate) {
+                    switch (delayedReurnRate.OPTIONID) {
+                        case "MINUTE": activeEffect.duration.seconds = 60; break;
+                        case "FIVEMINUTES": activeEffect.duration.seconds = 60 * 5; break;
+                        case "20MINUTES": activeEffect.duration.seconds = 60 * 20; break;
+                        case "HOUR": activeEffect.duration.seconds = 60 * 60; break;
+                        case "6HOURS": activeEffect.duration.seconds = 60 * 60 * 6; break;
+                        case "DAY": activeEffect.duration.seconds = 60 * 60 * 24; break;
+                        case "WEEK": activeEffect.duration.seconds = 604800; break;
+                        case "MONTH": activeEffect.duration.seconds = 2.628e+6; break;
+                        case "SEASON": activeEffect.duration.seconds = 2.628e+6 * 3; break;
+                        case "YEAR": activeEffect.duration.seconds = 3.154e+7; break;
+                        case "FIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 5; break;
+                        case "TWENTYFIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 25; break;
+                        case "CENTURY": activeEffect.duration.seconds = 3.154e+7 * 100; break;
+                        default: await ui.notifications.error(`DELAYEDRETURNRATE has unhandled option ${delayedReurnRate?.OPTIONID}`);
+                    }
+                }
+
+                if (ActivePoints > 0) {
+                    //if ((token.actor.system.characteristics?.[keyX])) {
+                    await token.actor.addActiveEffect(activeEffect);
+                    //}
+                    // else {
+                    //     await powerTargetX.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+                    // }
+
+                    if (item.system.XMLID === "TRANSFER" && keyY) {
+                        let activeEffectY = deepClone(activeEffect);
+                        activeEffectY.id = `${item.system.XMLID}.${item.id}.${keyY}`;
+                        activeEffectY.name = `${item.system.XMLID} +${parseInt(levelsY)} ${keyY.toUpperCase()} [${item.actor.name}]`;
+                        activeEffectY.changes[0].key = "system.characteristics." + keyY + ".max";
+                        activeEffectY.changes[0].value = parseInt(levelsY);
+                        activeEffectY.flags.target = keyY;
+                        await item.actor.addActiveEffect(activeEffectY);
+
+                        let newValueY = item.actor.system.characteristics[keyY].value + parseInt(levelsY);
+                        if ((token.actor.system.characteristics?.[keyX])) {
+                            await item.actor.update({ [`system.characteristics.${keyY}.value`]: newValueY })
+                        }
+
+                    }
+                }
+
             }
 
+            // Add levels to value
+            if (token.actor.system.characteristics?.[keyX]) {
+                let newValue = token.actor.system.characteristics[keyX].value + (["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX));
+                await token.actor.update({ [`system.characteristics.${keyX}.value`]: newValue })
+            }
         }
 
-        // Add levels to value
-        let newValue = token.actor.system.characteristics[keyX].value + (["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX));
-        await token.actor.update({ [`system.characteristics.${keyX}.value`]: newValue })
 
+
+        let cardData = {
+            item: item,
+            // dice rolls
+
+            // stun
+            stunDamage: ActivePoints,
+            levelsX: ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX),
+            levelsY: parseInt(levelsY),
+            xmlidX: xmlidX,
+            xmlidY: xmlidY,
+
+            // effects
+            //effects: effectsFinal,
+
+
+            // defense
+            defense: defense,
+
+            // misc
+            targetToken: token
+        };
+
+        // render card
+        let cardHtml = await renderTemplate(template, cardData)
+        let speaker = ChatMessage.getSpeaker({ actor: item.actor })
+
+        const chatData = {
+            user: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        }
+
+        await ChatMessage.create(chatData);
     }
-
-
-    let cardData = {
-        item: item,
-        // dice rolls
-
-        // stun
-        stunDamage: ActivePoints,
-        levelsX: ["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX),
-        levelsY: parseInt(levelsY),
-        xmlidX: xmlidX,
-        xmlidY: xmlidY,
-
-        // effects
-        //effects: effectsFinal,
-
-
-        // defense
-        defense: defense,
-
-        // misc
-        targetToken: token
-    };
-
-    // render card
-    let cardHtml = await renderTemplate(template, cardData)
-    let speaker = ChatMessage.getSpeaker({ actor: item.actor })
-
-    const chatData = {
-        user: game.user._id,
-        content: cardHtml,
-        speaker: speaker,
-    }
-
-    return ChatMessage.create(chatData);
 }
 
 async function _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense) {
@@ -2085,11 +2126,44 @@ async function _calcDamage(damageResult, item, options) {
     let knockbackMessage = "";
     let knockbackRenderedResult = null;
     let knockbackMultiplier = parseInt(itemData.knockbackMultiplier)
+    let knockbackTags = []
     if (game.settings.get("hero6efoundryvttv2", "knockback") && knockbackMultiplier) {
         useKnockBack = true;
         // body - 2d6 m
 
-        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + " - 2D6"
+        let knockbackDice = 2
+
+        // Target is in the air -1d6
+        if (options.targetToken?.actor?.flags?.activeMovement === "flight") {
+            knockbackDice -= 1
+            knockbackTags.push({ value: "-1d6KB", name: "target is in the air", title: "Knockback Modifier" })
+        }
+
+        // Target Rolled With A Punch -1d6
+        // Target is in zero gravity -1d6
+
+        // Target is underwater +1d6
+        if (options.targetToken?.actor?.statuses?.has("underwater")) {
+            knockbackDice += 1
+            knockbackTags.push({ value: "+1d6KB", name: "target is underwater", title: "Knockback Modifier" })
+        }
+
+        // Target is using Clinging +1d6
+
+        // Attack did Killing Damage +1d6
+        if (item.system.killing) {
+            knockbackDice += 1
+            knockbackTags.push({ value: "+1d6KB", name: "attack did Killing Damage", title: "Knockback Modifier" })
+        }
+
+        // Attack used a Martial Maneuver +1d6
+        if (["martialart", "martial"].includes(item.type)) {
+            knockbackDice += 1
+            knockbackTags.push({ value: "+1d6", name: "attack used a Martial Maneuver", title: "Knockback Modifier" })
+        }
+
+
+        let knockBackEquation = body + (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") + ` - ${Math.max(0, knockbackDice)}D6`
         // knockback modifier added on an attack by attack basis
         const knockbackMod = parseInt(options.knockbackMod || options.knockbadmod || 0)
         if (knockbackMod != 0) {
@@ -2221,6 +2295,7 @@ async function _calcDamage(damageResult, item, options) {
     damageDetail.knockbackMessage = knockbackMessage
     damageDetail.useKnockBack = useKnockBack
     damageDetail.knockbackRenderedResult = knockbackRenderedResult
+    damageDetail.knockbackTags = knockbackTags
 
 
     return damageDetail

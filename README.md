@@ -12,16 +12,16 @@ Star Hero © 2003, 2011 by DOJ, Inc. d/b/a Hero Games. All rights reserved.
 All DOJ trademarks and copyrights used with permission.
 For further information about Hero Games and the HERO System, visit www.herogames.com.
 
-Support can be found by creating a [new issue](https://github.com/dmdorman/hero6e-foundryvtt/issues), starting a [new discussion](https://github.com/dmdorman/hero6e-foundryvtt/discussions) or on the Hero-Champions-RPG (unofficial) Foundry-vtt [Discord Channal](https://discord.com/channels/609528652878839828/770825017729482772).
+Support can be found by creating a [new issue](https://github.com/dmdorman/hero6e-foundryvtt/issues), starting a [new discussion](https://github.com/dmdorman/hero6e-foundryvtt/discussions) or on the Hero-Champions-RPG (unofficial) Foundry-vtt [Discord Channel](https://discord.com/channels/609528652878839828/770825017729482772).
 
 ## Functionality
 
 This system is a work in progress. The following features are supported
 
-* A proper Turn/Phase/Segment initiative tracking system
-* A character sheet that you can upload a .HDC file to
-* Attack automation
-* Support for [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
+- A proper Turn/Phase/Segment initiative tracking system
+- A character sheet that you can upload a .HDC file to
+- Attack automation
+- Support for [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
 
 ### Character Sheet
 
@@ -45,6 +45,7 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
 - You can drag attacks (or any power) from character sheet to quick bar.
 
 ### Other Automation
+
 - END and Charges are spent for each attack. 
 - END can be spent from personal endurance or from an endurance reserve.
 - Post Segment 12 recovery: Endurance and Stun
@@ -64,12 +65,6 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
 - Velocity estimations for move by and move through based on current movement type.  Drag Ruler (optional module) improves velocity estimation.
 - Range penalties included in calculations.
 
-
-
-
-
-
-
 ## System Options
 
 - Use Stunned : whether or not attacks can inflict stunned
@@ -85,6 +80,7 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
     PCs and NPCs: attack card will update stun, body, and end for all tokens/actors
 
 ## Known Limitations
+
 - The upload of a .HDC file from Hero Designer is practically a requirement.  You can't create powers, skills, or equipment from scratch.  Character editing is limited within the system.  Some power modifiers are supported, some are not, character sheets do not clearly show power modifiers.  You can click the chat icon next to a power to see the full description.
 - Untested/limited support for vehicles, automations, computers, etc.
 - Power frameworks are partially supported.
@@ -102,21 +98,25 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
   - See the [FEATURES](FEATURES.md) list which includes a support rating.
 
 ## Modules
+
 The following modules have been successfully tested for compatibility.  They are also recommended.
-  - [Dice so nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice)
-  - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
-  - [Simple Calendar](https://github.com/vigoren/foundryvtt-simple-calendar)
-  - [About Face](https://foundryvtt.com/packages/about-face)
+
+- [Dice so nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice)
+- [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
+- [Simple Calendar](https://github.com/vigoren/foundryvtt-simple-calendar)
+- [About Face](https://foundryvtt.com/packages/about-face)
 
 ## 5th Edition Support
+
 This is a 6E framework, however 5E is very similar to 6E and with a few minor changes you may be able to play a 5E game.  A 5E character is detected when you upload a HDC file using one of the 5E Hero Designer character templates.
 
 ## Frequently Asked Questions and GM suggestions
+
 1. The Actor Sheet doesn't match HD.
    - Try uploading the HDC file again.
 2. How do you set a toggle power to default to off after HDC upload?
    - In HD set "Totaling Options" to "Do not add to Totals".
-3. How do you get automation to destermine hit or miss?
+3. How do you get automation to determine hit or miss?
    - Click the target of your attack.  Press 't' to select target.  Open attacker's character sheet.  Click dice icon next to attack.  The chat cards should show a hit/miss.  If it is a hit then the damage card will have a button to apply damage to your target.
    - You can select multiple targets with shift-t.
 4. I'm unable to change a Characteristics Max number.
@@ -125,8 +125,8 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
    - You can change it scene by scene by opening the scene settings -> grid then edit 'Grid Scale'
 6. Marking a token as dead marks all identical tokens as dead. [#247](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
    - You need to turn off *Link Actor Data* in the actor Prototype Token or Token screen.
-   - Named actors can have tokens on several scenes, and by default their properies are linked to the master actor.  So as you move from scene to scene their STUN/BODY/Statuses and all other properties remain the same.
-   - Generic actors should have their link actor data unchecked, which allows you to make distinct changes to the tokens, those changes do not affect the master actor.  There are also options on the Prototype token to add a number or adjetive to the token name.
+   - Named actors can have tokens on several scenes, and by default their properties are linked to the master actor.  So as you move from scene to scene their STUN/BODY/Statuses and all other properties remain the same.
+   - Generic actors should have their link actor data unchecked, which allows you to make distinct changes to the tokens, those changes do not affect the master actor.  There are also options on the Prototype token to add a number or adjective to the token name.
 
 ## Screenshots
 

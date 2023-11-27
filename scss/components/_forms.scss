@@ -2,19 +2,31 @@
   font-family: $font-primary;
 }
 
+&.actor-sheet {
+  overflow: auto;
+}
+
+.sheet-mode {
+  flex: 0;
+}
+
 .sheet-header {
-  flex: 0 0 210px;
+  flex: 0 0 130px;
   overflow: hidden;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
-  margin-bottom: 10px;
 
   .profile-img {
     flex: 0 0 100px;
     height: 100px;
+    object-fit: contain;
     margin-right: 10px;
+
+    &.borderless {
+      border: none;
+    }
   }
 
   .header-fields {
@@ -23,13 +35,18 @@
 
   h1.charname {
     height: 50px;
-    padding: 0px;
-    margin: 5px 0;
+    padding: 0;
+    margin: 0;
     border-bottom: 0;
+
     input {
-      width: 100%;
+      width: 94%;
       height: 100%;
       margin: 0;
+    }
+
+    a {
+      align-self: center;
     }
   }
 }
@@ -38,10 +55,18 @@
   flex: 0;
 }
 
-.sheet-body,
-.sheet-body .tab,
-.sheet-body .tab .editor {
-  height: 100%;
+.characteristic {
+  border: none;
+  height: 50px;
+}
+
+.characteristic-roll {
+  border-radius: 20px;
+  margin-left: 4px;
+}
+
+.characteristic-group {
+  border: 1px solid #999;
 }
 
 .tox {

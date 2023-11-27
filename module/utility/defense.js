@@ -33,6 +33,7 @@ function determineDefense(targetActor, attackItem, options) {
     let DNE = 0; // damage negation energy
     let DNM = 0; // damage negation mental
     let knockbackResistance = 0;
+    let knockbackResistanceTags = []
 
     // DAMAGERESISTANCE (converts PD to rPD)
     for (const item of activeDefenses.filter(o => o.system.XMLID == "DAMAGERESISTANCE")) {
@@ -150,7 +151,7 @@ function determineDefense(targetActor, attackItem, options) {
             }
         }
 
-        if ( ["POWERDEFENSE"].includes(xmlid)) {
+        if (["POWERDEFENSE"].includes(xmlid)) {
             switch (attackType) {
                 case 'drain':
                 case 'transfer':
@@ -219,6 +220,18 @@ function determineDefense(targetActor, attackItem, options) {
                     break;
             }
         }
+
+        // Knockback Resistance
+        if (game.settings.get("hero6efoundryvttv2", "knockback") && attackItem.system.knockbackMultiplier) {
+
+            if (["KBRESISTANCE", "DENSITYINCREASE", "GROWTH"].includes(xmlid)) {
+                let _value = value * (targetActor.system.is5e ? 1 : 2)
+                knockbackResistance += _value
+                defenseTags.push({ value: _value, name: "KB", title: i.name })
+            }
+
+        }
+
 
         let valueAp = value
         let valueImp = 0
@@ -382,7 +395,7 @@ function determineDefense(targetActor, attackItem, options) {
             resistantValue = rPD + rED + rMD + rPOWD;
             //impenetrableValue = Math.max(PD, rPD) + Math.max(ED, rED) + Math.max(MD, rMD) + Math.max(POWD, rPOWD);
             damageReductionValue = DRM;
-            damageNegationValue = DNM;
+            damageNegationValue = DNM; defenseTags
     }
 
     return [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTags];

@@ -635,7 +635,9 @@
                                 null)}}disabled{{/if}}>
                             {{/unless}}
                         </td>
-                        <td title="{{characteristic.name}}">{{toUpperCase characteristic.key}}</td>
+                        <td title="{{characteristic.name}}">
+                            {{toUpperCase characteristic.key}}
+                        </td>
                         <td>
                             {{#if characteristic.base}}
                             {{characteristic.base}}
@@ -665,6 +667,16 @@
 
             {{!-- Other Tab --}}
             <div class="tab tab-body" data-group="primary" data-tab="other">
+                <div class="form-group">
+                    <label>Initiative Characteristic</label>
+                    <select name="system.initiativeCharacteristic" data-dtype="text">
+                        <option value="dex">DEX</option>
+                        <option value="ego" {{#if (eq actor.system.initiativeCharacteristic 'ego' )}}selected{{/if}}>EGO
+                        </option>
+                    </select>
+                </div>
+                <br>
+
                 <table>
                     <tr>
                         <th></th>
@@ -885,6 +897,22 @@
 
                 </table>
                 {{!-- {{/if}} --}}
+
+                <br />
+
+                <table>
+                    <tr>
+                        <th class="left">Top Active Point Powers</th>
+                        <th>AP</th>
+                    </tr>
+                    {{#each activePointSummary as |item id|}}
+                    <tr class="item">
+                        <td class="left">{{item.name}}</td>
+                        <td>{{item.activePoints}}</td>
+                    </tr>
+                    {{/each}}
+
+                </table>
 
                 <br />
 

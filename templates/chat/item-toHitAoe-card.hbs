@@ -40,7 +40,7 @@
         <hr>
         <div class="tags">
             {{#each tags as |tag id|}}
-            <span class="tag tag_transparent">{{tag.name}}
+            <span class="tag tag_transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}
                 {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}
             </span>
             {{/each}}

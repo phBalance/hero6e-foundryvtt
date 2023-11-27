@@ -636,6 +636,54 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         }
 
+        // Active Point Summary
+        data.activePointSummary = []
+        for (const key of Object.keys(this.actor.system.characteristics)) {
+            let char = this.actor.system.characteristics[key]
+            let powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this.actor })
+            let valueTop = Math.max(char.value, char.max)
+            let activePoints = valueTop * powerInfo.cost
+            if (activePoints > 0) {
+                data.activePointSummary.push({ name: powerInfo.name || key, activePoints: activePoints })
+            }
+        }
+        for (const item of this.actor.items.filter(o => o.type != 'maneuver')) {
+            let powerInfo = getPowerInfo({ xmlid: item.system.XMLID, actor: this.actor })
+
+            let activePoints = item.system.activePoints
+
+            if (item.type == 'attack' || item.system.subType === 'attack' || item.system.XMLID === 'martialart') {
+                const csl = CombatSkillLevelsForAttack(item)
+                let { dc } = convertToDcFromItem(item)
+                
+
+                if (dc > 0) {
+                    let costPerDice = Math.max(Math.floor((item.system.activePoints || 0) / dc) || powerInfo.costPerLevel) || (item.system.targets === 'dcv' ? 5 : 10)
+                    dc += csl.dc + Math.floor((csl.ocv + csl.dcv) / 2) // Assume CSL are converted to DCs
+                    let ap = dc * costPerDice
+
+                    const charges = item.findModsByXmlid("CHARGES")
+                    if (charges) {
+                        const boostable = item.findModsByXmlid("BOOSTABLE")
+                        ap += (parseInt(charges.OPTION_ALIAS) - 1) * 5
+                    }
+
+                    activePoints = Math.max(activePoints, ap)
+                }
+            }
+
+            if (activePoints > 0) {
+                let name = item.name
+                if (item.name.toUpperCase().indexOf(item.system.XMLID) == -1) {
+                    name += ` (${item.system.XMLID})`
+                }
+                data.activePointSummary.push({ name: name || key, activePoints: activePoints })
+            }
+        }
+        data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints)
+        let topActivePoints = data.activePointSummary[0].activePoints
+        data.activePointSummary = data.activePointSummary.filter(o => o.activePoints >= topActivePoints * 0.5) // && o.activePoints > 20)
+
         return data
     }
 
