@@ -1,7 +1,7 @@
 import { HeroSystem6eCombat } from "./combat.js";
 import { HEROSYS } from "./herosystem6e.js";
 
-const scrollIntoViewOptions = {}
+const scrollIntoViewOptions = { block: "center" }
 
 export class HeroSystem6eCombatTracker extends CombatTracker {
     static get defaultOptions() {

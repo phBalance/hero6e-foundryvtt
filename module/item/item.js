@@ -498,6 +498,7 @@ export class HeroSystem6eItem extends Item {
 
         // LEVELS (use value/max instead of LEVELS so we can AID/DRAIN the base power)
         const newValue = parseInt(this.system.LEVELS || 0)
+        if (this.system.max != newValue) {
             this.system.max = newValue
             changed = true
         }
@@ -532,10 +533,10 @@ export class HeroSystem6eItem extends Item {
                 this.system.showToggle = true
                 changed = true
 
-                const numCharges = this.system.charges?.value || 0;
-                if (numCharges > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
+                if (this.system.charges?.value > 0 || this.system.AFFECTS_TOTAL === false || configPowerInfo.duration === "instant") {
+                    this.system.active ??= false
                 } else {
-                    this.system.active ??= true;
+                    this.system.active ??= true
                 }
             }
         }
@@ -752,8 +753,8 @@ export class HeroSystem6eItem extends Item {
                         }
                     }
 
-                    if (child.baseCost != newValue) {
-                        child.baseCost = newValue
+                    if (child.baseCost != newChildValue) {
+                        child.baseCost = newChildValue
                         changed = true
                     }
                 }
@@ -1171,7 +1172,7 @@ export class HeroSystem6eItem extends Item {
         //     console.log(this)
         // }
 
-        for (let modifier of (system.MODIFIER || []).filter(o =>
+        for (const modifier of (system.MODIFIER || []).filter(o =>
             (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE)
             && parseFloat(o.baseCost) >= 0
         )) {
@@ -1194,7 +1195,7 @@ export class HeroSystem6eItem extends Item {
             // Some modifiers may have ADDERS
             const adders = (modifier.ADDER || []) //modifier.getElementsByTagName("ADDER")
             if (adders.length) {
-                for (let adder of adders) {
+                for (const adder of adders) {
                     const adderBaseCost = parseFloat(adder.baseCost || 0)
                     _myAdvantage += adderBaseCost;
                     minAdvantage = 0.25
@@ -1209,8 +1210,8 @@ export class HeroSystem6eItem extends Item {
             // For attacks with Advantages, determine the DCs by
             // making a special Active Point calculation that only counts
             // Advantages that directly affect how the victim takes damage.
-            let powerInfo = getPowerInfo({ xmlid: system.XMLID })
-            let modifierInfo = getModifierInfo({ xmlid: modifier.XMLID })
+            const powerInfo = getPowerInfo({ xmlid: system.XMLID })
+            const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID })
             if (powerInfo && powerInfo.powerType?.includes("attack")) {
                 if (modifierInfo && modifierInfo.dc) {
                     advantagesDC += Math.max(0, _myAdvantage)
