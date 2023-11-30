@@ -1,6 +1,6 @@
 import { getItem, HeroSystem6eItem } from "../item/item.js";
 
-export async function editSubItem(event, item) {
+export async function editSubItem(event) {
     event.preventDefault();
 
     const clickedElement = $(event.currentTarget);

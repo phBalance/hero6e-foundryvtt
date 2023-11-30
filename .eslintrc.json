@@ -17,6 +17,8 @@
         "ActorSheet": "readable",
         "canvas": "readable",
         "ChatMessage": "readable",
+        "Combat": "readable",
+        "Combatant": "readable",
         "CombatTracker": "readable",
         "CONFIG": "writable",
         "CONST": "readable",

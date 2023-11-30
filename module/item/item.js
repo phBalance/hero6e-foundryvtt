@@ -204,23 +204,28 @@ export class HeroSystem6eItem extends Item {
         const configPowerInfo = getPowerInfo({ item: this })
         switch (configPowerInfo?.range?.toLowerCase()) {
             case "standard":
-                let range = this.system.basePointsPlusAdders * 10
-                if (this.actor?.system?.is5e) {
-                    range = Math.floor(range / 2)
+                {
+                    let range = this.system.basePointsPlusAdders * 10
+                    if (this.actor?.system?.is5e) {
+                        range = Math.floor(range / 2)
+                    }
+                    content += ` Maximum Range ${range}${this.actor?.system?.is5e ? '"' : "m"}.`
                 }
-                content += ` Maximum Range ${range}${this.actor?.system?.is5e ? '"' : "m"}.`
                 break
+
             case "los":
                 content += ` Line of Sight.`
                 break
+
             case "no range":
                 content += ` No Range.`
                 break
-            default: {
+
+            default:
                 if (configPowerInfo?.range?.toLowerCase()) {
                     content += ` ${configPowerInfo?.range?.toLowerCase()}`
                 }
-            }
+                break
         }
 
 
@@ -248,12 +253,10 @@ export class HeroSystem6eItem extends Item {
     async toggle() {
         let item = this;
 
-
-
         if (!item.system.active) {
-
-
-            if (!this.actor.canAct(true)) return;
+            if (!this.actor.canAct(true)) {
+                return
+            }
 
             const costEndOnlyToActivate = (item.system.MODIFIER || []).find(o => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE");
             if (costEndOnlyToActivate) {
@@ -287,42 +290,47 @@ export class HeroSystem6eItem extends Item {
 
 
         const attr = 'system.active'
-        const newValue = !getProperty(item, attr)
-        // await item.update({ [attr]: newValue })
+        const newValue = !foundry.utils.getProperty(item, attr)
 
-        const firstAE = item.effects.find(o => true) || item.actor.effects.find(o => o.origin === item.uuid)
+        const firstAE = item.effects[0] || item.actor.effects.find(o => o.origin === item.uuid)
 
         switch (this.type) {
             case "defense":
                 await item.update({ [attr]: newValue })
-                break;
+                break
 
             case "power":
             case "equipment":
-                // Is this a defense power?  If so toggle active state
-                const configPowerInfo = getPowerInfo({ item: item })
-                if ((configPowerInfo && configPowerInfo.powerType.includes("defense")) || item.type === "equipment") {
-                    await item.update({ [attr]: newValue })
-                }
+                {
+                    // Is this a defense power?  If so toggle active state
+                    const configPowerInfo = getPowerInfo({ item: item })
+                    if ((configPowerInfo && configPowerInfo.powerType.includes("defense")) || item.type === "equipment") {
+                        await item.update({ [attr]: newValue })
+                    }
 
-                if (firstAE) {
-                    const newState = !newValue
-                    await item.update({ [attr]: newState })
-                    let effects = item.effects.filter(o => true).concat(item.actor.effects.filter(o => o.origin === item.uuid))
-                    for (const activeEffect of effects) {
-                        await onActiveEffectToggle(activeEffect, newState)
+                    if (firstAE) {
+                        const newState = !newValue
+                        await item.update({ [attr]: newState })
+                        let effects = item.effects.filter(() => true).concat(item.actor.effects.filter(o => o.origin === item.uuid))
+                        for (const activeEffect of effects) {
+                            await onActiveEffectToggle(activeEffect, newState)
+                        }
                     }
                 }
-                break;
+                break
+
             case "maneuver":
                 await enforceManeuverLimits(this.actor, item.id, item.name)
                 //await updateCombatAutoMod(item.actor, item)
-                break;
+                break
 
             case "talent": // COMBAT_LUCK
                 await item.update({ [attr]: newValue })
-                break;
-            default: ui.notifications.warn(`${this.name} toggle may be incompmlete`)
+                break
+
+            default:
+                ui.notifications.warn(`${this.name} toggle may be incomplete`)
+                break
         }
     }
 
@@ -1358,9 +1366,6 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
 
-        // This may be a slot in a framework if so get parent
-        //const parent = this.parent()
-
         switch (configPowerInfo?.xmlid || system.XMLID) {
             case "DENSITYINCREASE":
                 // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
@@ -1430,13 +1435,6 @@ export class HeroSystem6eItem extends Item {
             case "AID":
                 // Aid  STR 5d6 (standard effect: 15 points)
                 system.description = system.ALIAS + (system.INPUT ? " " + system.INPUT : "") + " " + system.value + "d6"
-
-
-                // Overwrite Name if equals the ALIAS
-                // if (this.update && system.INPUT && this.name === system.ALIAS) {
-                //     this.name = `${system.ALIAS} ${system.INPUT}`
-                //     this.update({ name: item.name });
-                // }
                 break
 
             case "STRETCHING":
@@ -1452,10 +1450,12 @@ export class HeroSystem6eItem extends Item {
                 break
 
             case "TUNNELING":
-                // Tunneling 22m through 10 PD materials
-                let defbonus = (system.ADDER || []).find(o => o.XMLID == "DEFBONUS")
-                let pd = 1 + parseInt(defbonus?.LEVELS || 0)
-                system.description = `${system.ALIAS} +${system.value}m through ${pd} PD materials`
+                {
+                    // Tunneling 22m through 10 PD materials
+                    const defbonus = (system.ADDER || []).find(o => o.XMLID == "DEFBONUS")
+                    const pd = 1 + parseInt(defbonus?.LEVELS || 0)
+                    system.description = `${system.ALIAS} +${system.value}m through ${pd} PD materials`
+                }
                 break
 
             case "NAKEDMODIFIER":
@@ -1519,10 +1519,12 @@ export class HeroSystem6eItem extends Item {
                 break
 
             case "ENTANGLE":
-                // Entangle 2d6, 7 PD/2 ED
-                let pd_entangle = parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0)
-                let ed_entangle = parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0)
-                system.description = `${system.ALIAS} ${system.value}d6, ${pd_entangle} PD/${ed_entangle} ED`
+                {
+                    // Entangle 2d6, 7 PD/2 ED
+                    const pd_entangle = parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0)
+                    const ed_entangle = parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0)
+                    system.description = `${system.ALIAS} ${system.value}d6, ${pd_entangle} PD/${ed_entangle} ED`
+                }
                 break
 
             case "ELEMENTAL_CONTROL":
@@ -1536,88 +1538,38 @@ export class HeroSystem6eItem extends Item {
                 break
 
             case "MANEUVER":
+                {
+                    system.description = "";
 
-                system.description = "";
-
-
-                // For most maneuvers we can use the EFFECT
-                // if (system.EFFECT) {
-                //     //system.description = system.EFFECT + ", ";
-                //     // BLOCK or DODGE modifiers
-                //     console.log(system);
-                // }
-
-                // Martial attacks typically add STR to description
-                // let fullDice = system.dice;
-                // let extraDice = 0;
-                // switch (system.extraDice) {
-                //     case 'pip':
-                //         extraDice += 1;
-                //         break
-                //     case 'half':
-                //         extraDice += 2;
-                //         break
-                // }
-
-                // if (this.actor) {  // Make sure we have an actor
-                //     // Convert dice to pips
-                //     let pips = system.dice * 3;
-                //     switch (system.extraDice) {
-                //         case 'pip':
-                //             pips += 1;
-                //             break
-                //         case 'half':
-                //             pips += 2;
-                //             break
-                //     }
-
-                //     // Add in STR
-                //     if (system.usesStrength && this.actor) {
-                //         let str = this.actor.system.characteristics.str.value
-                //         let str5 = Math.floor(str / 5)
-                //         if (system.killing) {
-                //             pips += str5
-                //         } else {
-                //             pips += str5 * 3
-                //         }
-                //     }
-
-                //     // Convert pips to DICE
-                //     fullDice = Math.floor(pips / 3)
-                //     extraDice = pips - fullDice * 3
-                // }
-
-                // let DC = convertToDcFromItem(this)
-
-
-                // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
-                // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
-                //`${system.ALIAS}:`
-                if (system.PHASE) system.description += ` ${system.PHASE} Phase`
-                let ocv = parseInt(system.ocv || system.OCV);
-                let dcv = parseInt(system.dcv || system.DCV);
-                if (isNaN(ocv)) {
-                    system.description += `, -- OCV`;
-                } else {
-                    system.description += `, ${ocv.signedString()} OCV`;
-                }
-                system.description += `, ${dcv.signedString()} DCV`
-                if (system.EFFECT) {
-                    let dc = convertToDcFromItem(this).dc;
-                    if (dc) {
-                        let damageDice = convertFromDC(this, dc);
-                        if (damageDice) {
-                            system.description += `,`;
-
-                            if (system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLING") > -1) {
-                                system.description += " HKA";
-                            }
-                            system.description += ` ${system.EFFECT.replace("[NORMALDC]", damageDice).replace("[KILLINGDC]", damageDice.replace("+ 1", "+1"))}`
-                        }
+                    // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
+                    // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
+                    //`${system.ALIAS}:`
+                    if (system.PHASE) system.description += ` ${system.PHASE} Phase`
+                    const ocv = parseInt(system.ocv || system.OCV);
+                    const dcv = parseInt(system.dcv || system.DCV);
+                    if (isNaN(ocv)) {
+                        system.description += `, -- OCV`;
                     } else {
-                        system.description += ", " + system.EFFECT;
+                        system.description += `, ${ocv.signedString()} OCV`;
                     }
+                    system.description += `, ${dcv.signedString()} DCV`
+                    if (system.EFFECT) {
+                        let dc = convertToDcFromItem(this).dc;
+                        if (dc) {
+                            let damageDice = convertFromDC(this, dc);
+                            if (damageDice) {
+                                system.description += `,`;
 
+                                if (system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLING") > -1) {
+                                    system.description += " HKA";
+                                }
+                                system.description += ` ${system.EFFECT.replace("[NORMALDC]", damageDice).replace("[KILLINGDC]", damageDice.replace("+ 1", "+1"))}`
+                            }
+                        } else {
+                            system.description += ", " + system.EFFECT;
+                        }
+
+                    }
                 }
                 break
 
@@ -1639,15 +1591,17 @@ export class HeroSystem6eItem extends Item {
                 break
 
             case "ENDURANCERESERVE":
-                // Endurance Reserve  (20 END, 5 REC) (9 Active Points)
-                system.description = `${system.ALIAS.replace('Endurance Reserve', '')}`;
+                {
+                    // Endurance Reserve  (20 END, 5 REC) (9 Active Points)
+                    system.description = `${system.ALIAS.replace('Endurance Reserve', '')}`;
 
-                const ENDURANCERESERVEREC = this.findModsByXmlid("ENDURANCERESERVEREC")
-                if (ENDURANCERESERVEREC) {
-                    if (parseInt(system.value) === parseInt(system.max)) {
-                        system.description += ` (${system.max} END, ${ENDURANCERESERVEREC.LEVELS} REC)`
-                    } else {
-                        system.description += ` (${system.value}/${system.max} END, ${ENDURANCERESERVEREC.LEVELS} REC)`
+                    const ENDURANCERESERVEREC = this.findModsByXmlid("ENDURANCERESERVEREC")
+                    if (ENDURANCERESERVEREC) {
+                        if (parseInt(system.value) === parseInt(system.max)) {
+                            system.description += ` (${system.max} END, ${ENDURANCERESERVEREC.LEVELS} REC)`
+                        } else {
+                            system.description += ` (${system.value}/${system.max} END, ${ENDURANCERESERVEREC.LEVELS} REC)`
+                        }
                     }
                 }
                 break
@@ -1721,7 +1675,7 @@ export class HeroSystem6eItem extends Item {
                 break
         }
 
-        // Remove duplicate name from descripton and related cleanup
+        // Remove duplicate name from description and related cleanup
         let _rawName = this.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         try {
             let re = new RegExp(`^${_rawName}`, 'i')
@@ -1733,10 +1687,9 @@ export class HeroSystem6eItem extends Item {
             system.description = system.description.replace(/^Damage Reduction: /, "").trim();
 
         } catch (e) {
-            ui.notifications.warn(`${item.actor.name} has item "${item.name.substr(0, 30)}" which failed to update item description`);
+            ui.notifications.warn(`${this.actor?.name} has item "${this.name.substr(0, 30)}" which failed to update item description`);
             console.log(e);
         }
-
 
         // ADDRS
         let _adderArray = []
@@ -2225,7 +2178,7 @@ export class HeroSystem6eItem extends Item {
         // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
         if (this.system.XMLID == "TELEKINESIS") {
             if (this.actor.items.find(o => o.system.XMLID == "WEAPON_ELEMENT" && o.system.ADDER.find(o => o.XMLID == "BAREHAND"))) {
-                let EXTRADC = item.actor.items.find(o => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1)
+                let EXTRADC = this.actor.items.find(o => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1)
                 // Extract +2 HTH Damage Class(es)
                 if (EXTRADC) {
                     let match = EXTRADC.system.ALIAS.match(/\+\d+/)
