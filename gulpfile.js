@@ -22,7 +22,7 @@ const lint = gulp.series(validateFilesForLint)
 
 // Small error handler helper function.
 function handleError(err) {
-  console.log(err.toString())
+  console.error(err.toString())
   this.emit("end")
 }
 
@@ -34,7 +34,8 @@ function compileScss() {
   }
   return gulp.src(SYSTEM_SCSS)
     .pipe(
-      sass(options)
+      sass
+        .sync(options)
         .on("error", handleError)
     )
     .pipe(prefix({
