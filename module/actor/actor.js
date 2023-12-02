@@ -978,12 +978,17 @@ export class HeroSystem6eActor extends Actor {
 
         // Check for valid AID targets
         for (let item of this.items.filter(o => o.system.XMLID === "AID")) {
+            const aidTargets = item.system.INPUT
 
-            for (let input of item.system.INPUT.split(",")) {
-                input = input.toLowerCase().trim()
-                if (!Object.keys(AdjustmentSources(this)).includes(input.toUpperCase())) {
-                    await ui.notifications.warn(`${this.name} has an unsupported ${item.name} property (${input}).  Use characteristic abbreviations or power names seperated by commas.`);
+            if (aidTargets) {
+                for (const rawInput of aidTargets.split(",")) {
+                    const upperCasedInput = rawInput.toUpperCase().trim()
+                    if (!Object.keys(AdjustmentSources(this)).includes(upperCasedInput)) {
+                        await ui.notifications.warn(`${this.name} has an unsupported "${item.name}" property (${rawInput}). Use characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
+                    }
                 }
+            } else {
+                await ui.notifications.warn(`${this.name} has an empty "Aid to" description for "${item.name}". Provide characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
             }
         }
 
