@@ -248,7 +248,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             if (item.system.subType || item.type == 'skill') {
-                item.SkillRollUpdateValue()
+                item.skillRollUpdateValue()
             }
 
             // Charges
