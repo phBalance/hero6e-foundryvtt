@@ -1,16 +1,16 @@
-const gulp = require('gulp')
-const prefix = require('gulp-autoprefixer')
-const sass = require('gulp-sass')(require('sass'))
-const gulpEslintNew = require('gulp-eslint-new')
+const gulp = require("gulp")
+const prefix = require("gulp-autoprefixer")
+const sass = require("gulp-sass")(require("sass"))
+const gulpEslintNew = require("gulp-eslint-new")
 
 /* ----------------------------------------- */
 /*  Lint
 /* ----------------------------------------- */
 
 function validateFilesForLint() {
-  return gulp.src(['**/*.js','!node_modules/**'])
-    .pipe(gulpEslintNew({ overrideConfigFile: './.eslintrc.json' }))
-    .pipe(gulpEslintNew.formatEach('compact', process.stderr))
+  return gulp.src(["**/*.js","!node_modules/**"])
+    .pipe(gulpEslintNew({ overrideConfigFile: "./.eslintrc.json" }))
+    .pipe(gulpEslintNew.formatEach("compact", process.stderr))
     .pipe(gulpEslintNew.failAfterError())
 }
 
@@ -23,19 +23,19 @@ const lint = gulp.series(validateFilesForLint)
 // Small error handler helper function.
 function handleError(err) {
   console.log(err.toString())
-  this.emit('end')
+  this.emit("end")
 }
 
 const SYSTEM_SCSS = ["scss/**/*.scss"]
 function compileScss() {
-  // Configure options for sass output. For example, 'expanded' or 'nested'
+  // Configure options for sass output. For example, "expanded" or "nested"
   let options = {
-    outputStyle: 'expanded'
+    outputStyle: "expanded"
   }
   return gulp.src(SYSTEM_SCSS)
     .pipe(
       sass(options)
-        .on('error', handleError)
+        .on("error", handleError)
     )
     .pipe(prefix({
       cascade: false
