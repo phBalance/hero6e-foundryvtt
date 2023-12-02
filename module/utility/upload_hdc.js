@@ -1873,8 +1873,7 @@ export async function makeAttack(item) {
 // }
 
 export function SkillRollUpdateValue(item) {
-
-    let skillData = item.system
+    const skillData = item.system
 
     skillData.tags = [];
 
@@ -1891,7 +1890,6 @@ export function SkillRollUpdateValue(item) {
     }
 
     const configPowerInfo = getPowerInfo({ xmlid: skillData.XMLID || skillData.rules, actor: item.actor })
-
 
     // Combat Skill Levels are not rollable
     //if (["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "LANGUAGES"].includes(skillData.XMLID)) {
@@ -1916,15 +1914,25 @@ export function SkillRollUpdateValue(item) {
         skillData.characteristic = characteristic
 
         const baseRollValue = skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9
-        const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
+        const characteristicValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
-        const rollAdjustment = Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
-        const rollVal = baseRollValue + rollAdjustment;
+        const characteristicAdjustment = Math.round(characteristicValue / 5)
+        const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0
+        const rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment
 
-        skillData.tags.push({ value: baseRollValue, name: "Skill" })
+        // Provide up to 3 tags to explain how the roll was calculated:
+        // 1. Base skill value without modifier due to characteristics
+        skillData.tags.push({ value: baseRollValue, name: "Base Skill" })
 
-        if (rollAdjustment != 0) {
-            skillData.tags.push({ value: rollAdjustment, name: characteristic })
+        // 2. Adjustment value due to characteristics.
+        //    NOTE: Don't show for things like Knowledge Skills which are GENERAL, not characteristic based, or if we have a 0 adjustment
+        if (skillData.CHARACTERISTIC !== "GENERAL" && characteristicAdjustment) {
+            skillData.tags.push({ value: characteristicAdjustment, name: characteristic })
+        }
+
+        // 3. Adjustments due to level
+        if (levelsAdjustment) {
+            skillData.tags.push({ value: levelsAdjustment, name: "Levels" })
         }
 
         if (item.system.XMLID === "FINDWEAKNESS") {
