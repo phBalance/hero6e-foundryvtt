@@ -1,7 +1,14 @@
-const gulp = require("gulp")
-const prefix = require("gulp-autoprefixer")
-const sass = require("gulp-sass")(require("sass"))
-const gulpEslintNew = require("gulp-eslint-new")
+// const gulp = require("gulp")
+// const prefix = require("gulp-autoprefixer")
+// const sass = require("gulp-sass")(require("sass"))
+// const gulpEslintNew = require("gulp-eslint-new")
+
+import gulp from "gulp"
+import prefix from "gulp-autoprefixer"
+import gulpSass from "gulp-sass"
+import * as dartSass from "sass"
+import gulpEslintNew from "gulp-eslint-new"
+const sass = gulpSass(dartSass)
 
 /* ----------------------------------------- */
 /*  Lint
@@ -54,12 +61,20 @@ function watchUpdates() {
 }
 
 /* ----------------------------------------- */
-/*  Export Tasks
+/*  Default Task
 /* ----------------------------------------- */
 
-exports.default = gulp.series(
+const defaultGulpTask = gulp.series(
   gulp.parallel(compileScss),
   watchUpdates
 )
-exports.css = css
-exports.lint = lint
+
+/* ----------------------------------------- */
+/*  Export Tasks
+/* ----------------------------------------- */
+
+export {
+  defaultGulpTask as default,
+  css,
+  lint,
+}
