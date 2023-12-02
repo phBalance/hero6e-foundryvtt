@@ -1,6 +1,5 @@
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
-import { SkillRollUpdateValue } from "../utility/upload_hdc.js";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
@@ -161,7 +160,7 @@ export function registerUploadTests(quench) {
                     const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                     await item._postUpload()
                     actor.items.set(item.system.XMLID, item)
-                    SkillRollUpdateValue(item)
+                    item.skillRollUpdateValue()
                     assert.equal(item.system.roll, "12-");
                 })
             })
@@ -1652,8 +1651,8 @@ export function registerUploadTests(quench) {
                         const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                         await item._postUpload()
                         actor.items.set(item.system.XMLID, item)
-                        SkillRollUpdateValue(item)
-                        assert.equal(item.system.roll, "11-");
+                        item.skillRollUpdateValue()
+                        assert.equal(item.system.roll, "11-")
                     })
                 })
 
@@ -1673,8 +1672,8 @@ export function registerUploadTests(quench) {
                         const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
                         await item._postUpload()
                         actor.items.set(item.system.XMLID, item)
-                        SkillRollUpdateValue(item)
-                        assert.equal(item.system.roll, "13-");
+                        item.skillRollUpdateValue()
+                        assert.equal(item.system.roll, "13-")
                     })
                 })
             })

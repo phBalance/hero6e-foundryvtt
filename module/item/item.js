@@ -2,7 +2,6 @@ import { HEROSYS } from "../herosystem6e.js";
 import * as Attack from "../item/item-attack.js"
 import { createSkillPopOutFromItem } from '../item/skill.js'
 import { enforceManeuverLimits } from '../item/manuever.js'
-import { SkillRollUpdateValue } from '../utility/upload_hdc.js'
 import { onActiveEffectToggle } from '../utility/effects.js'
 import { getPowerInfo, getModifierInfo } from '../utility/util.js'
 import { RoundFavorPlayerDown } from "../utility/round.js"
@@ -109,7 +108,7 @@ export class HeroSystem6eItem extends Item {
                 return this.toggle()
 
             case "skill":
-                SkillRollUpdateValue(this)
+                this.skillRollUpdateValue()
                 if (!await RequiresASkillRollCheck(this)) return;
                 return createSkillPopOutFromItem(this, this.actor)
 
@@ -2424,9 +2423,95 @@ export class HeroSystem6eItem extends Item {
 
     }
 
-
-
-
+    skillRollUpdateValue() {
+        const skillData = this.system
+    
+        skillData.tags = [];
+    
+        // SKILL LEVELS
+        if (skillData.XMLID === "SKILL_LEVELS") {
+            skillData.roll = null;
+            return;
+        }
+    
+        // No Characteristic = no roll (Skill Enhancers for example) except for FINDWEAKNESS
+        const characteristicBased = skillData.CHARACTERISTIC || skillData.characteristic
+        if (!characteristicBased) {
+            if (skillData.XMLID === "FINDWEAKNESS") {
+                // Provide up to 2 tags to explain how the roll was calculated:
+                // 1. Base skill value without modifier due to characteristics
+                const baseRollValue = 11
+                skillData.tags.push({ value: baseRollValue, name: "Base Skill" })
+    
+                // 2. Adjustments due to level
+                const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0
+                if (levelsAdjustment) {
+                    skillData.tags.push({ value: levelsAdjustment, name: "Levels" })
+                }
+    
+                const rollVal = baseRollValue + levelsAdjustment
+                skillData.roll = rollVal.toString() + '-'
+            } else {
+                skillData.roll = null;
+            }
+    
+            return
+        }
+    
+        const configPowerInfo = getPowerInfo({ xmlid: skillData.XMLID || skillData.rules, actor: this.actor })
+    
+        // Combat Skill Levels are not rollable
+        if (configPowerInfo && configPowerInfo.rollable === false) {
+            skillData.roll = null;
+            return;
+        }
+    
+        if (skillData.EVERYMAN) {
+            skillData.roll = '8-'
+            skillData.tags.push({ value: 8, name: "Everyman" })
+        } else if (skillData.FAMILIARITY) {
+            skillData.roll = '8-'
+            skillData.tags.push({ value: 8, name: "Familiarity" })
+        } else if (skillData.PROFICIENCY) {
+            skillData.roll = '10-'
+            skillData.tags.push({ value: 10, name: "Proficiency" })
+        } else if (characteristicBased) {
+            const characteristic = (skillData.CHARACTERISTIC || skillData.characteristic).toLowerCase()
+    
+            skillData.characteristic = characteristic
+    
+            const baseRollValue = skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9
+            const characteristicValue = ((characteristic !== 'general') && (characteristic != '')) ?
+                this.actor.system.characteristics[`${characteristic}`].value : 0
+            const characteristicAdjustment = Math.round(characteristicValue / 5)
+            const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0
+            const rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment
+    
+            // Provide up to 3 tags to explain how the roll was calculated:
+            // 1. Base skill value without modifier due to characteristics
+            skillData.tags.push({ value: baseRollValue, name: "Base Skill" })
+    
+            // 2. Adjustment value due to characteristics.
+            //    NOTE: Don't show for things like Knowledge Skills which are GENERAL, not characteristic based, or if we have a 0 adjustment
+            if (skillData.CHARACTERISTIC !== "GENERAL" && characteristicAdjustment) {
+                skillData.tags.push({ value: characteristicAdjustment, name: characteristic })
+            }
+    
+            // 3. Adjustments due to level
+            if (levelsAdjustment) {
+                skillData.tags.push({ value: levelsAdjustment, name: "Levels" })
+            }
+    
+            skillData.roll = rollVal.toString() + '-'
+        } else {
+            // This is likely a Skill Enhancer.
+            // Skill Enhancers provide a discount to the purchase of associated skills.
+            // They no not change the roll.
+            // Skip for now.
+            // HEROSYS.log(false, (skillData.XMLID || this.name) + ' was not included in skills.  Likely Skill Enhancer')
+            return
+        }
+    }
 }
 
 export function getItem(id) {
