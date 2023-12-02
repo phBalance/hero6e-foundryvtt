@@ -1,10 +1,6 @@
-import { HERO } from '../config.js'
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eItem } from '../item/item.js'
 import { presenceAttackPopOut } from '../utility/presence-attack.js'
-import { applyCharacterSheet, SkillRollUpdateValue, CalcActorRealAndActivePoints } from '../utility/upload_hdc.js'
-import { RoundFavorPlayerDown } from "../utility/round.js"
-import { HEROSYS } from '../herosystem6e.js';
 import { onManageActiveEffect } from '../utility/effects.js'
 import { getPowerInfo, getCharactersticInfoArrayForActor } from '../utility/util.js'
 import { CombatSkillLevelsForAttack, convertToDcFromItem, convertFromDC } from '../utility/damage.js';
@@ -252,7 +248,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             }
 
             if (item.system.subType || item.type == 'skill') {
-                SkillRollUpdateValue(item)
+                item.SkillRollUpdateValue()
             }
 
             // Charges
