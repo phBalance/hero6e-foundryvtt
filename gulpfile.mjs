@@ -1,13 +1,9 @@
-// const gulp = require("gulp")
-// const prefix = require("gulp-autoprefixer")
-// const sass = require("gulp-sass")(require("sass"))
-// const gulpEslintNew = require("gulp-eslint-new")
-
 import gulp from "gulp"
 import prefix from "gulp-autoprefixer"
+import gulpEslintNew from "gulp-eslint-new"
 import gulpSass from "gulp-sass"
 import * as dartSass from "sass"
-import gulpEslintNew from "gulp-eslint-new"
+
 const sass = gulpSass(dartSass)
 
 /* ----------------------------------------- */
