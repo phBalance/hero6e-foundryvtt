@@ -1,16 +1,19 @@
-const gulp = require('gulp')
-const prefix = require('gulp-autoprefixer')
-const sass = require('gulp-sass')(require('sass'))
-const gulpEslintNew = require('gulp-eslint-new')
+import gulp from "gulp"
+import prefix from "gulp-autoprefixer"
+import gulpEslintNew from "gulp-eslint-new"
+import gulpSass from "gulp-sass"
+import * as dartSass from "sass"
+
+const sass = gulpSass(dartSass)
 
 /* ----------------------------------------- */
 /*  Lint
 /* ----------------------------------------- */
 
 function validateFilesForLint() {
-  return gulp.src(['**/*.js','!node_modules/**'])
-    .pipe(gulpEslintNew({ overrideConfigFile: './.eslintrc.json' }))
-    .pipe(gulpEslintNew.formatEach('compact', process.stderr))
+  return gulp.src(["**/*.js","!node_modules/**"])
+    .pipe(gulpEslintNew({ overrideConfigFile: "./.eslintrc.json" }))
+    .pipe(gulpEslintNew.formatEach("compact", process.stderr))
     .pipe(gulpEslintNew.failAfterError())
 }
 
@@ -22,20 +25,21 @@ const lint = gulp.series(validateFilesForLint)
 
 // Small error handler helper function.
 function handleError(err) {
-  console.log(err.toString())
-  this.emit('end')
+  console.error(err.toString())
+  this.emit("end")
 }
 
 const SYSTEM_SCSS = ["scss/**/*.scss"]
 function compileScss() {
-  // Configure options for sass output. For example, 'expanded' or 'nested'
+  // Configure options for sass output. For example, "expanded" or "nested"
   let options = {
-    outputStyle: 'expanded'
+    outputStyle: "expanded"
   }
   return gulp.src(SYSTEM_SCSS)
     .pipe(
-      sass(options)
-        .on('error', handleError)
+      sass
+        .sync(options)
+        .on("error", handleError)
     )
     .pipe(prefix({
       cascade: false
@@ -53,12 +57,20 @@ function watchUpdates() {
 }
 
 /* ----------------------------------------- */
-/*  Export Tasks
+/*  Default Task
 /* ----------------------------------------- */
 
-exports.default = gulp.series(
+const defaultGulpTask = gulp.series(
   gulp.parallel(compileScss),
   watchUpdates
 )
-exports.css = css
-exports.lint = lint
+
+/* ----------------------------------------- */
+/*  Export Tasks
+/* ----------------------------------------- */
+
+export {
+  defaultGulpTask as default,
+  css,
+  lint,
+}
