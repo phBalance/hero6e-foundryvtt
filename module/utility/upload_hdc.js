@@ -1883,22 +1883,38 @@ export function SkillRollUpdateValue(item) {
         return;
     }
 
-    // No Characteristic = no roll.  Skill Enhancers for example
-    if (!skillData.CHARACTERISTIC && !skillData.characteristic) {//skillData.BASECOST === "3.0" && skillData.LEVELS.max === "0" && ) {
-        skillData.roll = null;
-        return;
+    // No Characteristic = no roll (Skill Enhancers for example) except for FINDWEAKNESS
+    const characteristicBased = skillData.CHARACTERISTIC || skillData.characteristic
+    if (!characteristicBased) {
+        if (skillData.XMLID === "FINDWEAKNESS") {
+            // Provide up to 2 tags to explain how the roll was calculated:
+            // 1. Base skill value without modifier due to characteristics
+            const baseRollValue = 11
+            skillData.tags.push({ value: baseRollValue, name: "Base Skill" })
+
+            // 2. Adjustments due to level
+            const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0
+            if (levelsAdjustment) {
+                skillData.tags.push({ value: levelsAdjustment, name: "Levels" })
+            }
+
+            const rollVal = baseRollValue + levelsAdjustment
+            skillData.roll = rollVal.toString() + '-'
+        } else {
+            skillData.roll = null;
+        }
+
+        return
     }
 
     const configPowerInfo = getPowerInfo({ xmlid: skillData.XMLID || skillData.rules, actor: item.actor })
 
     // Combat Skill Levels are not rollable
-    //if (["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "LANGUAGES"].includes(skillData.XMLID)) {
     if (configPowerInfo && configPowerInfo.rollable === false) {
         skillData.roll = null;
         return;
     }
 
-    //if (skillData.state === 'everyman') {
     if (skillData.EVERYMAN) {
         skillData.roll = '8-'
         skillData.tags.push({ value: 8, name: "Everyman" })
@@ -1908,7 +1924,7 @@ export function SkillRollUpdateValue(item) {
     } else if (skillData.PROFICIENCY) {
         skillData.roll = '10-'
         skillData.tags.push({ value: 10, name: "Proficiency" })
-    } else if (skillData.CHARACTERISTIC || skillData.characteristic) {
+    } else if (characteristicBased) {
         const characteristic = (skillData.CHARACTERISTIC || skillData.characteristic).toLowerCase()
 
         skillData.characteristic = characteristic
@@ -1933,11 +1949,6 @@ export function SkillRollUpdateValue(item) {
         // 3. Adjustments due to level
         if (levelsAdjustment) {
             skillData.tags.push({ value: levelsAdjustment, name: "Levels" })
-        }
-
-        if (item.system.XMLID === "FINDWEAKNESS") {
-            rollVal += 2; // 11-
-            skillData.tags.push({ value: 2, name: "FindWeakness" })
         }
 
         skillData.roll = rollVal.toString() + '-'
