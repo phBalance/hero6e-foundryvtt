@@ -1,7 +1,3 @@
-import { HERO } from "./config.js";
-import { HEROSYS } from "./herosystem6e.js";
-import { onActiveEffectToggle } from "./utility/effects.js"
-
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
 
@@ -35,7 +31,6 @@ export class HeroSystem6eCombat extends Combat {
 
         // Iterate over Combatants, performing an initiative roll for each
         const updates = [];
-        const messages = [];
         for (let [id, value] of this.combatants.entries()) {
             // Get Combatant data (non-strictly)
             const combatant = this.combatants.get(id);
@@ -45,14 +40,14 @@ export class HeroSystem6eCombat extends Combat {
             if (!combatant.actor) continue;
 
             // Produce an initiative roll for the Combatant
-            let characteistic = combatant.actor.system?.initiativeCharacteristic || 'dex'
-            let dexValue = combatant.actor.system.characteristics[characteistic].value
+            let characteristic = combatant.actor.system?.initiativeCharacteristic || 'dex'
+            let dexValue = combatant.actor.system.characteristics[characteristic].value
             let intValue = combatant.actor.system.characteristics.int.value
-            let initativeValue = dexValue + (intValue / 100)
+            let initiativeValue = dexValue + (intValue / 100)
 
             updates.push({
                 _id: id,
-                initiative: initativeValue || 0,
+                initiative: initiativeValue || 0,
             });
         }
         if (!updates.length) return this;
@@ -73,7 +68,6 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     setupTurns() {
-
         // Roll Initiative everytime as DEX/INT/SPD may have changed
         this.rollAll();
 
@@ -85,7 +79,10 @@ export class HeroSystem6eCombat extends Combat {
 
             // Lightning Reflexes
             const actor = game.actors.get(combatant.actorId);
-            if (!actor) continue; // Not sure how this could happen
+            if (!actor) {
+                continue // Not sure how this could happen
+            }
+
             const item = actor.items.find(o => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE");
             if (item) {
                 const levels = item.system.LEVELS?.value || item.system.LEVELS || item.system.levels || item.system.other.levels || 0
@@ -426,31 +423,6 @@ export class HeroSystem6eCombat extends Combat {
     async _manageTurnEvents(adjustedTurn) {
         //console.log("_manageTurnEvents", adjustedTurn)
         await super._manageTurnEvents(adjustedTurn);
-        return;
-
-        if (!game.users.activeGM?.isSelf) return;
-        const prior = this.combatants.get(this.previous.combatantId);
-
-        // Adjust the turn order before proceeding. Used for embedded document workflows
-        if (Number.isNumeric(adjustedTurn)) await this.update({ turn: adjustedTurn }, { turnEvents: false });
-        if (!this.started) return;
-
-        // Identify what progressed
-        const advanceRound = this.current.round > (this.previous.round ?? -1);
-        const advanceTurn = this.current.turn > (this.previous.turn ?? -1);
-        if (!(advanceTurn || advanceRound)) return;
-
-        // Conclude prior turn
-        if (prior) await this._onEndTurn(prior);
-
-        // Conclude prior round
-        if (advanceRound && (this.previous.round !== null)) await this._onEndRound();
-
-        // Begin new round
-        if (advanceRound) await this._onStartRound();
-
-        // Begin a new turn
-        await this._onStartTurn(this.combatant);
     }
 
     /**

@@ -1,4 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import {
@@ -11,7 +10,7 @@ export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
         "quench.damageFunctions",
         (context) => {
-            const { describe, it, assert } = context
+            const { assert, beforeEach, describe, it } = context
 
             const actor = new HeroSystem6eActor({
                 name: 'Test Actor',
@@ -414,13 +413,6 @@ export function registerDamageFunctionTests(quench) {
                     }
                 }
 
-                const plus = {
-                    "_evaluated": true,
-                    "isIntermediate": false,
-                    "operator": "+",
-                    "options": {}
-                }
-
                 const minus = {
                     "_evaluated": true,
                     "isIntermediate": false,
@@ -620,10 +612,6 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("(Killing) DC Negated to 1", async function () {
-                    const newDie = {
-                        "results": []
-                    }
-
                     const expectedDamageResult = {
                         "total": 1
                     }

@@ -1,7 +1,20 @@
 const gulp = require('gulp')
 const prefix = require('gulp-autoprefixer')
-const sourcemaps = require('gulp-sourcemaps')
 const sass = require('gulp-sass')(require('sass'))
+const gulpEslintNew = require('gulp-eslint-new')
+
+/* ----------------------------------------- */
+/*  Lint
+/* ----------------------------------------- */
+
+function validateFilesForLint() {
+  return gulp.src(['**/*.js','!node_modules/**'])
+    .pipe(gulpEslintNew({ overrideConfigFile: './.eslintrc.json' }))
+    .pipe(gulpEslintNew.formatEach('compact', process.stderr))
+    .pipe(gulpEslintNew.failAfterError())
+}
+
+const lint = gulp.series(validateFilesForLint)
 
 /* ----------------------------------------- */
 /*  Compile Sass
@@ -44,7 +57,8 @@ function watchUpdates() {
 /* ----------------------------------------- */
 
 exports.default = gulp.series(
-  compileScss,
+  gulp.parallel(compileScss),
   watchUpdates
 )
 exports.css = css
+exports.lint = lint

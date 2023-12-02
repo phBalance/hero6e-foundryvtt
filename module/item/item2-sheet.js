@@ -1,11 +1,4 @@
-import { HeroSystem6eItem, getItem } from './item.js'
-import { editSubItem, deleteSubItem, isPowerSubItem } from '../powers/powers.js'
-import { HEROSYS } from '../herosystem6e.js'
-import { onManageActiveEffect } from '../utility/effects.js'
-import { AdjustmentSources } from '../utility/adjustment.js'
-import { CalcActorRealAndActivePoints, calcItemPoints, updateItemDescription } from '../utility/upload_hdc.js'
 import { getPowerInfo } from '../utility/util.js'
-import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js"
 
 /**
  * Extend the basic ItemSheet with some very simple modifications

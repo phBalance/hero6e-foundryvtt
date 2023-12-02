@@ -716,35 +716,39 @@ export class HeroSystem6eActor extends Actor {
                 return Math.round((charBase("EGO") + _ego) / 3);
 
             case "leaping":
-                const str = parseInt(charBase("STR") + _str)
-                let value = 0;
-                if (str >= 3) value = 0.5
-                if (str >= 5) value = 1
-                if (str >= 8) value = 1.5
-                if (str >= 10) value = 2
-                if (str >= 13) value = 2.5
-                if (str >= 15) value = 3
-                if (str >= 18) value = 3.5
-                if (str >= 20) value = 4
-                if (str >= 23) value = 4.5
-                if (str >= 25) value = 5
-                if (str >= 28) value = 5.5
-                if (str >= 30) value = 6
-                if (str >= 35) value = 7
-                if (str >= 40) value = 8
-                if (str >= 45) value = 9
-                if (str >= 50) value = 10
-                if (str >= 55) value = 11
-                if (str >= 60) value = 12
-                if (str >= 65) value = 13
-                if (str >= 70) value = 14
-                if (str >= 75) value = 15
-                if (str >= 80) value = 16
-                if (str >= 85) value = 17
-                if (str >= 90) value = 18
-                if (str >= 95) value = 19
-                if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
-                return value;
+                {
+                    const str = parseInt(charBase("STR") + _str)
+                    let value = 0;
+
+                    if (str >= 3) value = 0.5
+                    if (str >= 5) value = 1
+                    if (str >= 8) value = 1.5
+                    if (str >= 10) value = 2
+                    if (str >= 13) value = 2.5
+                    if (str >= 15) value = 3
+                    if (str >= 18) value = 3.5
+                    if (str >= 20) value = 4
+                    if (str >= 23) value = 4.5
+                    if (str >= 25) value = 5
+                    if (str >= 28) value = 5.5
+                    if (str >= 30) value = 6
+                    if (str >= 35) value = 7
+                    if (str >= 40) value = 8
+                    if (str >= 45) value = 9
+                    if (str >= 50) value = 10
+                    if (str >= 55) value = 11
+                    if (str >= 60) value = 12
+                    if (str >= 65) value = 13
+                    if (str >= 70) value = 14
+                    if (str >= 75) value = 15
+                    if (str >= 80) value = 16
+                    if (str >= 85) value = 17
+                    if (str >= 90) value = 18
+                    if (str >= 95) value = 19
+                    if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
+
+                    return value;
+                }
         }
 
         return base;

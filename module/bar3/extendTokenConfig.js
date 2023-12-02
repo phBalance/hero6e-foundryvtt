@@ -30,7 +30,6 @@ export const extendTokenConfig = async function (tokenConfig, html, data) {
     }
 
     async function _onSubmit(event) {
-        const form = event.target.form;
         const bar3 = $(`select[name="bar3.attribute"]`).val();
 
         HEROSYS.log(false, "_onSubmit", bar3)

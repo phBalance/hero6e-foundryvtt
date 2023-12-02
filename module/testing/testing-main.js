@@ -1,4 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
 import { registerHitLocationTests } from "./testing-hit-locations.js";
 import { registerUtilTests } from "./testing-util.js";
 import { registerDamageFunctionTests } from "./testing-damage-functions.js";

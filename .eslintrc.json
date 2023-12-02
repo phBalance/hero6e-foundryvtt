@@ -1,0 +1,61 @@
+{
+    "plugins": [
+        "@stylistic/js"
+    ],
+
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "jquery": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "globals": {
+        "ActiveEffect": "readable",
+        "Actor": "readable",
+        "Actors": "readable",
+        "ActorSheet": "readable",
+        "canvas": "readable",
+        "ChatMessage": "readable",
+        "Combat": "readable",
+        "Combatant": "readable",
+        "CombatTracker": "readable",
+        "CONFIG": "writable",
+        "CONST": "readable",
+        "DefaultTokenConfig": "readable",
+        "Dialog": "readable",
+        "Die": "readable",
+        "dragRuler": "readable",
+        "FilePicker": "readable",
+        "fromUuid": "readable",
+        "fromUuidSync": "readable",
+        "foundry": "readable",
+        "game": "readable",
+        "Handlebars": "readable",
+        "HeroRuler": "readable",
+        "Hooks": "readable",
+        "ImageHelper": "readable",
+        "Item": "readable",
+        "Items": "readable",
+        "ItemSheet": "readable",
+        "NumericTerm": "readable",
+        "MeasuredTemplate": "readable",
+        "mergeObject": "readable",
+        "OperatorTerm": "readable",
+        "PIXI": "readable",
+        "renderTemplate": "readable",
+        "Roll": "readable",
+        "SimpleCalendar": "readable",
+        "TokenDocument": "readable",
+        "ui": "readable"
+    },
+
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+
+    "rules": {
+    },
+    "reportUnusedDisableDirectives": true
+}

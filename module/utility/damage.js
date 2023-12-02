@@ -1,9 +1,4 @@
-import { HERO } from "../config.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { RoundFavorPlayerDown } from "./round.js";
-import { HeroRuler } from "../ruler.js";
-
-
 
 // DAMAGE CLASS (DC)
 //
@@ -446,7 +441,6 @@ export class HeroRoll extends Roll {
 export function CombatSkillLevelsForAttack(item) {
     let result = {
         ocv: 0,
-        omcv: 0,
         dcv: 0,
         dmcv: 0,
         omcv: 0,

@@ -1,4 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
 import { damageRollToTag } from "../utility/tag.js"
 
 export function registerTagTests(quench) {

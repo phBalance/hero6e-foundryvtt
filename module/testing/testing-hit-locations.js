@@ -1,5 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
-
 export function registerHitLocationTests(quench) {
     quench.registerBatch(
         "quench.examples.hitLocations",

@@ -5,8 +5,9 @@
   "scripts": {
     "build": "gulp",
     "compile": "gulp css",
-    "watch": "gulp",
-    "gulp": "gulp"
+    "gulp": "gulp",
+    "lint": "gulp lint",
+    "watch": "gulp"
   },
   "browserslist": [
     "last 3 versions"
@@ -15,10 +16,12 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^1.4.1",
+    "eslint": "^8.54.0",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^7.0.1",
+    "gulp-eslint-new": "^1.8.4",
     "gulp-sass": "^5.1.0",
-    "gulp-sourcemaps": "^2.6.5",
     "sass": "^1.69.5"
   }
 }
