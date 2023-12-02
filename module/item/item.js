@@ -9,6 +9,17 @@ import { RoundFavorPlayerDown } from "../utility/round.js"
 import { HeroSystem6eActor } from "../actor/actor.js"
 import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
 
+const itemTypeToIcon = {
+    "attack": "icons/svg/sword.svg",
+    "movement": "icons/svg/pawprint.svg",
+    "skill": "icons/svg/hanging-sign.svg",
+    "defense": "icons/svg/shield.svg",
+    "power": "icons/svg/aura.svg",
+    "maneuver": "icons/svg/upgrade.svg",
+    "martialart": "icons/svg/downgrade.svg",
+}
+
+
 /**
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
@@ -30,24 +41,13 @@ export class HeroSystem6eItem extends Item {
 
         await super._preCreate(data, options, userId);
 
-        const icons = {
-            "attack": "icons/svg/sword.svg",
-            "movement": "icons/svg/pawprint.svg",
-            "skill": "icons/svg/hanging-sign.svg",
-            "defense": "icons/svg/shield.svg",
-            "power": "icons/svg/aura.svg",
-            "maneuver": "icons/svg/upgrade.svg",
-            "martialart": "icons/svg/downgrade.svg",
-        }
-
         // assign a default image
         if (!data.img || data.img === 'icons/svg/item-bag.svg') {
-            if (icons[this.type]) {
-                this.updateSource({ img: icons[this.type] });
+            if (itemTypeToIcon[this.type]) {
+                this.updateSource({ img: itemTypeToIcon[this.type] });
             }
         }
     }
-
 
     /**
      * Augment the basic Item data model with additional dynamic data.
@@ -55,62 +55,7 @@ export class HeroSystem6eItem extends Item {
 
     prepareData() {
         super.prepareData();
-
-        //updateItem(this)
-
-
-        // Get the Item's data
-        // const itemData = this.data;
-        // const actorData = this.actor ? this.actor.data : {};
-        // const data = itemData.data;
-
-        // if (itemData.type === 'skill') this._prepareSkillData(actorData, itemData);
-
     }
-
-    // _prepareSkillData(actorData, itemData) {
-    //     return
-
-    //     const data = itemData.data;
-
-    //     let roll = 6;
-
-    //     switch (data.state) {
-    //         case "trained":
-    //             let levels = data.levels;
-
-    //             if (!data.characteristic) {
-    //                 roll = undefined;
-    //             } else if (data.characteristic != "general") {
-    //                 if (actorData) {
-    //                     levels += actorData.data.characteristics[data.characteristic].value / 5;
-    //                 }
-    //             }
-    //             else {
-    //                 roll = 11 + levels;
-    //             }
-    //             roll = Math.round(9 + levels);
-    //             break;
-    //         case "proficient":
-    //             roll = 10;
-    //             break;
-    //         case "familiar":
-    //             roll = 8;
-    //             break;
-    //         case "everyman":
-    //             if (data.ps) {
-    //                 roll = 11;
-    //             } else {
-    //                 roll = 8;
-    //             }
-    //             break;
-    //         case "noroll":
-    //             roll = undefined;
-    //             break;
-    //     }
-
-    //     data.roll = Math.round(roll);
-    // }
 
     async _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);

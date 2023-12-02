@@ -1634,6 +1634,50 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.value, 1);
                 })
             })
+
+            describe("General Skills", () => {
+                describe("No Levels", () => {
+                    const contents = `
+                        <SKILL XMLID="KNOWLEDGE_SKILL" ID="1701473559272" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Broken General? Should show 11- on the dice" INPUT="How to Code General Skills" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
+                            <NOTES/>
+                        </SKILL>
+                    `
+
+                    it("roll", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        actor.system.characteristics.dex.value = 15
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        SkillRollUpdateValue(item)
+                        assert.equal(item.system.roll, "11-");
+                    })
+                })
+
+                describe("Some Levels", () => {
+                    const contents = `
+                        <SKILL XMLID="KNOWLEDGE_SKILL" ID="1701473559272" BASECOST="2.0" LEVELS="2" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Broken General? Should show 13- on the dice" INPUT="How to Code General Skills" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
+                            <NOTES/>
+                        </SKILL>
+                    `
+
+                    it("roll", async function () {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        actor.system.characteristics.dex.value = 15
+                        const item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                        SkillRollUpdateValue(item)
+                        assert.equal(item.system.roll, "13-");
+                    })
+                })
+            })
         },
         { displayName: "HERO: Upload" }
     )

@@ -1904,28 +1904,28 @@ export function SkillRollUpdateValue(item) {
     if (skillData.EVERYMAN) {
         skillData.roll = '8-'
         skillData.tags.push({ value: 8, name: "Everyman" })
-        //} else if (skillData.state === 'familiar') {
     } else if (skillData.FAMILIARITY) {
         skillData.roll = '8-'
         skillData.tags.push({ value: 8, name: "Familiarity" })
-        //} else if (skillData.state === 'proficient') {
     } else if (skillData.PROFICIENCY) {
         skillData.roll = '10-'
         skillData.tags.push({ value: 10, name: "Proficiency" })
-        //} else if (skillData.state === 'trained') {
     } else if (skillData.CHARACTERISTIC || skillData.characteristic) {
-        let characteristic = (skillData.CHARACTERISTIC || skillData.characteristic).toLowerCase()
+        const characteristic = (skillData.CHARACTERISTIC || skillData.characteristic).toLowerCase()
+
         skillData.characteristic = characteristic
+
+        const baseRollValue = skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9
         const charValue = ((characteristic !== 'general') && (characteristic != '')) ?
             item.actor.system.characteristics[`${characteristic}`].value : 0
+        const rollAdjustment = Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
+        const rollVal = baseRollValue + rollAdjustment;
 
-        let charNumber = Math.round(charValue / 5) + (parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0)
-        let rollVal = 9 + charNumber;
-        skillData.tags.push({ value: 9, name: "Skill" })
-        if (charNumber != 0) {
-            skillData.tags.push({ value: charNumber, name: characteristic })
+        skillData.tags.push({ value: baseRollValue, name: "Skill" })
+
+        if (rollAdjustment != 0) {
+            skillData.tags.push({ value: rollAdjustment, name: characteristic })
         }
-
 
         if (item.system.XMLID === "FINDWEAKNESS") {
             rollVal += 2; // 11-
@@ -1935,7 +1935,7 @@ export function SkillRollUpdateValue(item) {
         skillData.roll = rollVal.toString() + '-'
     } else {
         // This is likely a Skill Enhancer.
-        // Skill Enahncers provide a discount to the purchase of asssociated skills.
+        // Skill Enhancers provide a discount to the purchase of associated skills.
         // They no not change the roll.
         // Skip for now.
         // HEROSYS.log(false, (skillData.xmlid || item.name) + ' was not included in skills.  Likely Skill Enhancer')
