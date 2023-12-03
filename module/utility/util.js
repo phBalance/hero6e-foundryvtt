@@ -34,7 +34,7 @@ export function getPowerInfo(options) {
     if (!powerInfo && options?.item?.type == "maneuver") {
         powerInfo = {
             powerType: ["maneuver"],
-            percievability: "obvious",
+            perceivability: "obvious",
             duration: "Instant",
             costEnd: false,
             target: "target's dcv",

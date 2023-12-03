@@ -318,9 +318,6 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = getPowerInfo({ item: this })
         if (!configPowerInfo?.perceivability) {
-            // if (!["LIST"].includes(this.system.XMLID) && game.settings.get(game.system.id, 'alphaTesting')) {
-            //     ui.notifications.warn(`${this.system.XMLID} has undetermined percievability`)
-            // }
             return false;
         }
 
@@ -334,7 +331,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (game.settings.get(game.system.id, 'alphaTesting')) {
-            ui.notifications.warn(`${this.name} has undetermined percievability`)
+            ui.notifications.warn(`${this.name} has undetermined perceivability`)
         }
         return false;
     }
