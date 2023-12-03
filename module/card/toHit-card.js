@@ -1,12 +1,8 @@
-import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { HeroSystem6eCard } from "./card.js";
-import { modifyRollEquation, getTokenChar } from "../utility/util.js"
-//import { HeroSystem6eDamageCard2 } from "./damage-card2.js";
-import { HEROSYS } from "../herosystem6e.js";
-import { getItem } from "../item/item.js";
+import { modifyRollEquation } from "../utility/util.js"
 
 export class HeroSystem6eToHitCard extends HeroSystem6eCard {
-    static async chatListeners(html) {
+    static async chatListeners(/* html */) {
         // NOTE: Make sure we are listed in card-helpers.js
 
         // _spawnAreaOfEffect no longer needed as this is now handle in the to hit routines
@@ -14,7 +10,7 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
         
     }
 
-    static onMessageRendered(html) {
+    static onMessageRendered(/* html */) {
 
     }
 

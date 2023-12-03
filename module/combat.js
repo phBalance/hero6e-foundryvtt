@@ -804,8 +804,6 @@ export class HeroSystem6eCombat extends Combat {
         return this.update(updateData, updateOptions);
     }
 
-
-
     /**
    * Advance the combat to the next round
    * @returns {Promise<Combat>}

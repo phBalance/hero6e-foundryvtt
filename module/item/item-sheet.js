@@ -1,9 +1,6 @@
-import { HeroSystem6eItem, getItem } from './item.js'
-import { editSubItem, deleteSubItem, isPowerSubItem } from '../powers/powers.js'
-import { HEROSYS } from '../herosystem6e.js'
-import { onManageActiveEffect } from '../utility/effects.js'
+import { HeroSystem6eItem } from './item.js'
+import { editSubItem, deleteSubItem } from '../powers/powers.js'
 import { AdjustmentSources } from '../utility/adjustment.js'
-import { updateItemDescription } from '../utility/upload_hdc.js'
 import { getPowerInfo } from '../utility/util.js'
 
 /**
@@ -103,7 +100,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         data.sheet = { ...configPowerInfo?.sheet || {} };
 
         // SFX
-        let sfx = [
+        const sfx = [
             "Default",
             "Acid",
             "Alien",
@@ -155,66 +152,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         ]
 
         data.sheet.SFX = {
-            //dataList: sfx
             selectOptions: sfx.reduce( (current, item) => {
                 current[item] = item;
                 return current;
               }, {})
-            // selectOptions: {
-            //     "Default": "Default",
-            //     "Acid": "Acid",
-            //     "Alien": "Alien",
-            //     "Air/Wind": "Air/Wind",
-            //     "Animal": "Animal",
-            //     "Body Control": "Body Control",
-            //     "Chi": "Chi",
-            //     "Cosmic Energy": "Cosmic Energy",
-            //     "Cyberkinesis": "Cyberkinesis",
-            //     "Darkness": "Darkness",
-            //     "Density Alteration": "Density Alteration",
-            //     "Dimensional Manipulation": "Dimensional Manipulation",
-            //     "Earth/Stone": "Earth/Stone",
-            //     "Electricity": "Electricity",
-            //     "Emotion Control": "Emotion Control",
-            //     "Fire/Heat": "Fire/Heat",
-            //     "Force": "Force",
-            //     "Gravity": "Gravity",
-            //     "Ice/Cold": "Ice/Cold",
-            //     "Illusion": "Illusion",
-            //     "Kinetic Energy": "Kinetic Energy",
-            //     "Light": "Light",
-            //     "Luck": "Luck",
-            //     "Magic/Mystic": "Magic/Mystic",
-            //     "Magnetism": "Magnetism",
-            //     "Martial Arts": "Martial Arts",
-            //     "Matter Manipulation": "Matter Manipulation",
-            //     "Mental/Psionic": "Mental/Psionic",
-            //     "Metamorphic": "Metamorphic",
-            //     "Precognition": "Precognition",
-            //     "Radiation": "Radiation",
-            //     "Serum Based": "Serum Based",
-            //     "Shape Alteration": "Shape Alteration",
-            //     "Size Alteration": "Size Alteration",
-            //     "Sleep/Dream": "Sleep/Dream",
-            //     "Solar/Celestial": "Solar/Celestial",
-            //     "Sonic": "Sonic",
-            //     "Speedster": "Speedster",
-            //     "Strength/Toughness": "Strength/Toughness",
-            //     "Stretching": "Stretching",
-            //     "Telekinetic": "Telekinetic",
-            //     "Teleportation": "Teleportation",
-            //     "Time": "Time",
-            //     "Vibration": "Vibration",
-            //     "Water": "Water",
-            //     "Weather": "Weather",
-            //     "Wood/Plant": "Wood/Plant",
-            //     "Miscellaneous": "Miscellaneous",
-            // }
         }
-
-
-
-
 
         // DRAIN
         // A select list of possible DRAIN from sources
@@ -308,19 +250,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         return data
     }
 
-    /* -------------------------------------------- */
-
-    /** @override */
-    // setPosition(options = {}) {
-    //     const position = super.setPosition(options)
-    //     const sheetBody = this.element.find('.sheet-body')
-    //     const bodyHeight = position.height - 192
-    //     sheetBody.css('height', bodyHeight)
-    //     return position
-    // }
-
-    /* -------------------------------------------- */
-
     /** @override */
     activateListeners(html) {
         super.activateListeners(html)
@@ -345,46 +274,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         html.find('.effect-delete').click(this._onEffectDelete.bind(this))
         html.find('.effect-edit').click(this._onEffectEdit.bind(this))
         html.find('.effect-toggle').click(this._onEffectToggle.bind(this))
-
-        // Type
-        //html.find('.configure-type').click(this._onConfigureType.bind(this))
-
-        // Item Description
-        // html.find('.textarea').each((id, inp) => {
-        //     this.changeValue = async function (e) {
-        //         if (e.code === 'Enter' || e.code === 'Tab') {
-        //             if (!'linkId' in this.item.system || this.item.system.linkId === undefined) {
-        //                 const changes = []
-        //                 changes[`${e.target.name}`] = e.target.value
-        //                 await this.item.update(changes)
-        //             } else {
-        //                 const type = this.item.type
-
-        //                 const linkId = this.item.system.linkId
-        //                 const subLinkId = this.item.system.subLinkId
-
-        //                 let item = game.items.get(linkId)
-
-        //                 if (item === undefined) {
-        //                     // item is not a game item / item belongs to an actor
-        //                     // sub items don't know the actor they belong to
-        //                     for (const key of game.actors.keys()) {
-        //                         const actor = game.actors.get(key)
-        //                         if (actor.items.has(linkId)) {
-        //                             item = actor.items.get(linkId)
-        //                         }
-        //                     }
-        //                 }
-
-        //                 const changes = {}
-        //                 changes[`system.subItems.${type}.${subLinkId}.${e.target.name.split(".")[1]}`] = e.target.value
-        //                 await item.update(changes)
-        //             }
-        //         }
-        //     }
-
-        //     inp.addEventListener('keydown', this.changeValue.bind(this))
-        // })
     }
 
     /**
@@ -476,13 +365,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
 
             // Active Effects are quirky.
-            // It apperas in v10 that you cannot createEmbeddedDocuments on an Item already
+            // It appears in v10 that you cannot createEmbeddedDocuments on an Item already
             // embedded in an Actor.
             // If an Item with AEs is added to an actor, all the AEs on that item
-            // are transfered to the actor.
+            // are transferred to the actor.
             // Only AEs on actors are used.
             // If you modify an AE on an item already embedded to an actor
-            // the actor doesn't recieve the upates.  
+            // the actor doesn't receive the updates.  
             // The AEs on actor/item are not linked.
             // There is a work around, by keeping track of the AE origin
 
@@ -506,7 +395,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
 
             return
-
         }
 
         // Prepare the item object.
@@ -525,10 +413,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         changes[`system.subItems.${type}.${id}._id`] = this.item._id + '-' + id
 
         return await this.item.update(changes)
-
-
-
-
     }
 
     async _onEditItem(event) {
@@ -567,15 +451,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         }
     }
 
-    async _onEffectToggle(event) {
-        //onManageActiveEffect(event, this.actor)
+    async _onEffectToggle() {
         return this.item.toggle()
-
-        // event.preventDefault()
-        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        // const effect = this.actor.effects.get(effectId)
-        // await effect.update({ disabled: !effect.disabled });
-        //this.render();
     }
 
     async _onEffectEdit(event) {

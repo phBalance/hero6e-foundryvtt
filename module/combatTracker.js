@@ -1,6 +1,3 @@
-import { HeroSystem6eCombat } from "./combat.js";
-import { HEROSYS } from "./herosystem6e.js";
-
 const scrollIntoViewOptions = { block: "center" }
 
 export class HeroSystem6eCombatTracker extends CombatTracker {
@@ -27,6 +24,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
     _onSegmentToggleContent(event) {
         event.preventDefault();
+
         const header = event.currentTarget;
         const segment = header.closest(".segment-container");
         const content = segment.querySelector(".segment-content");
@@ -34,27 +32,25 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
     }
 
     async getData(options) {
-
-
-        let context = await super.getData(options);
+        const context = await super.getData(options);
 
         // Copy combatants from context.turns to segments.
         // Combatants in context.turns was altered (super) to include CSS, and possibly other stuff.
         for (let i = 1; i <= 12; i++) {
-            //let newSegment = []
-            if (!context.combat?.segments[i]) break;
-            for (let _combatant of context.combat?.segments[i]) {
+            if (!context.combat?.segments[i]) {
+                 break
+            }
 
-                let turn = _combatant.turn;
+            for (const _combatant of context.combat.segments[i]) {
+                const turn = _combatant.turn
 
-                _combatant.css = context.turns[turn].css;
-                _combatant.effects = context.turns[turn].effects;
-                _combatant.canPing = context.turns[turn].canPing;
-                _combatant.active = context.turns[turn].active;
-                _combatant.hidden = context.turns[turn].hidden;
+                _combatant.css = context.turns[turn].css
+                _combatant.effects = context.turns[turn].effects
+                _combatant.canPing = context.turns[turn].canPing
+                _combatant.active = context.turns[turn].active
+                _combatant.hidden = context.turns[turn].hidden
             }
         }
-
 
         if (context.combat) {
 

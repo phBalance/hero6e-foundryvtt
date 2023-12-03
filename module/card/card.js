@@ -2,7 +2,6 @@ import { HeroSystem6eItem } from "../item/item.js";
 
 export class HeroSystem6eCard {
     constructor() {
-        
     }
 
     async init(card) {
@@ -16,10 +15,9 @@ export class HeroSystem6eCard {
         if (!this.actor) return;
 
         // Get the Item from stored flag data or by the item ID on the Actor
-        //const storedData = this.message.data["flags.hero.itemData"];
         const storedData = this.message.flags?.hero?.itemData;
 
-        this.item = storedData ? new HeroSystem6eItem(storedData, { parent: actor }) : this.actor.items.get(this.cardData.dataset.itemId);
+        this.item = storedData ? new HeroSystem6eItem(storedData, { parent: this.actor }) : this.actor.items.get(this.cardData.dataset.itemId);
         if (!this.item) {
             return ui.notifications.error("Error: Item does not exist");
         }
@@ -110,7 +108,7 @@ export class HeroSystem6eCard {
         if (existing) {
             await existing.delete();
             // FIXME: The duplicate call is temporarily needed to de-dupe legacy tokens. Remove in 0.9.0
-            await this.toggleEffect(effectData.icon, { active: false, overlay });
+            await this.toggleEffect(effectData.icon, { active: false });
         }
 
         // Add a new effect

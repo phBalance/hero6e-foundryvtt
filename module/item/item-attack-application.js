@@ -8,17 +8,9 @@ export class ItemAttackFormApplication extends FormApplication {
         this.data = data;
         this.options.title = `${this.data?.item?.actor?.name} roll to hit`
 
-
-
-
         Hooks.on("updateItem", function (item, changes, options, userId) {
             if (!this.rendered) return;
 
-            // if (changes.system.attacks) {
-            //   const key = Object.keys(changes.system.attacks)[0]
-            //   const value = changes.system.attacks[key]
-            //   item.system.attacks[key] = value;
-            // }
             if (item.id === this.data.item.id) {
                 this.updateItem(item, changes, options, userId)
             }
@@ -41,7 +33,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     }
 
-    async updateItem(...args) {
+    async updateItem() {
         this.render();
     }
 
@@ -87,7 +79,6 @@ export class ItemAttackFormApplication extends FormApplication {
         data.effectiveStr ??= data.str;
 
         // Boostable Charges
-        const charges = item.findModsByXmlid("CHARGES")
         if (item.system.charges?.value > 1) {
             data.boostableCharges = (item.system.charges.value - 1)
         }
@@ -180,7 +171,7 @@ export class ItemAttackFormApplication extends FormApplication {
         }
     }
 
-    async _spawnAreaOfEffect(event) {
+    async _spawnAreaOfEffect() {
         const item = this.data.item
         const aoe = item.findModsByXmlid("AOE");
         if (!aoe) return;
@@ -222,34 +213,33 @@ export class ItemAttackFormApplication extends FormApplication {
         };
 
         switch (templateType) {
-            case ("radius"): {
-                break;
-            }
-            case ("cone"): {
+            case "radius":
+                break
+
+            case "cone":
                 if ((aoe.adders || []).find(o => o.XMLID === "THINCONE")) {
                     templateData.angle = 31;
                 } else {
                     templateData.angle = 61; // 60 has odd rounding error
                 }
 
-                break;
-            }
-            case ("ray"): {
+                break
+
+            case "ray":
                 templateData.width = 2; //2m = 1 hex
-                break;
-            }
-            case ("rect"): {
-                const warningMessage = game.i18n.localize("Warning.AreaOfEffectUnsupported")
+                break
 
-                ui.notifications.warn(warningMessage)
+            case "rect":
+                {
+                    const warningMessage = game.i18n.localize("Warning.AreaOfEffectUnsupported")
 
-                return
+                    ui.notifications.warn(warningMessage)
 
-                break;
-            }
-            default: {
-                break;
-            }
+                    return
+                }
+
+            default:
+                break
         }
 
         templateData.x = token.center.x;
