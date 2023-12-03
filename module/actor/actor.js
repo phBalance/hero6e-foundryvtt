@@ -976,19 +976,19 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // Check for valid AID targets
-        for (let item of this.items.filter(o => o.system.XMLID === "AID")) {
-            const aidTargets = item.system.INPUT
+        // Warn about invalid adjustment targets
+        for (const item of this.items.filter(item => getPowerInfo({ item: item }).powerType?.includes("adjustment"))) {
+            const adjustmentTargets = item.system.INPUT
 
-            if (aidTargets) {
-                for (const rawInput of aidTargets.split(",")) {
+            if (adjustmentTargets) {
+                for (const rawInput of adjustmentTargets.split(",")) {
                     const upperCasedInput = rawInput.toUpperCase().trim()
                     if (!Object.keys(AdjustmentSources(this)).includes(upperCasedInput)) {
-                        await ui.notifications.warn(`${this.name} has an unsupported "${item.name}" property (${rawInput}). Use characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
+                        await ui.notifications.warn(`${this.name} has an unsupported target (${rawInput}) for "${item.name}". Use characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
                     }
                 }
             } else {
-                await ui.notifications.warn(`${this.name} has an empty "Aid to" description for "${item.name}". Provide characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
+                await ui.notifications.warn(`${this.name} has no target for "${item.name}". Use characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
             }
         }
 

@@ -25,8 +25,7 @@ export function getTokenChar(token, char, data) {
 export function getPowerInfo(options) {
     const xmlid = options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id
     const actor = options?.item?.actor || options?.actor
-    let powerInfo = CONFIG.HERO.powers.find(o => o.key === xmlid); //] || CONFIG.HERO.powers5e[xmlid]
-    //let characteristicInfo = CONFIG.HERO.characteristicCosts[xmlid.toLowerCase()] || CONFIG.HERO.characteristicCosts5e[xmlid.toLowerCase()]
+    let powerInfo = CONFIG.HERO.powers.find(o => o.key === xmlid);
     if (!powerInfo || actor?.system?.is5e) {
         powerInfo = { ...powerInfo, ...CONFIG.HERO.powers5e.find(o=> o.key === xmlid)}
     }
@@ -40,7 +39,6 @@ export function getPowerInfo(options) {
             target: "target's dcv",
         }
     }
-
 
     if (powerInfo) {
         powerInfo.xmlid = xmlid
