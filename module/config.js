@@ -830,6 +830,20 @@ HERO.powers = [
         "costPerLevel": 10
     },
     {
+        "key": "DISPEL",
+        "name": "Dispel",
+        "powerType": [
+            "adjustment",
+            "attack"
+        ],
+        "perceivability": "obvious",
+        "duration": "instant",
+        "target": "target’s DCV",
+        "range": "standard",
+        "costEnd": true,
+        "costPerLevel": 3
+    },
+    {
         "key": "TRANSFER",
         "name": "Transfer",
         "powerType": [
