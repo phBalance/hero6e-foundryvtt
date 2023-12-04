@@ -1,26 +1,20 @@
-import { modifyRollEquation, getTokenChar, getPowerInfo } from "../utility/util.js";
+import { modifyRollEquation, getPowerInfo } from "../utility/util.js";
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
-import { HEROSYS } from "../herosystem6e.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
 import {
-    determineStrengthDamage, determineExtraDiceDamage,
-    simplifyDamageRoll, convertToDC, handleDamageNegation,
+    simplifyDamageRoll, handleDamageNegation,
     CombatSkillLevelsForAttack, convertToDcFromItem, convertFromDC
 } from "../utility/damage.js";
-import { damageRollToTag } from "../utility/tag.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
-import { isPowerSubItem } from "../powers/powers.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
 import { RequiresASkillRollCheck } from "../item/item.js";
 import { ItemAttackFormApplication } from "../item/item-attack-application.js"
 
 export async function chatListeners(html) {
-    // Called by card-helpers.js
     html.on('click', 'button.roll-damage', this._onRollDamage.bind(this));
     html.on('click', 'button.apply-damage', this._onApplyDamage.bind(this));
     html.on('click', 'button.rollAoe-damage', this._onRollAoeDamage.bind(this));
-    //html.on('click', 'button.place-template', this._onPlaceTemplate.bind(this));
 }
 
 export async function onMessageRendered(html) {

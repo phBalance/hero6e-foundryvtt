@@ -1,6 +1,5 @@
 /** Large portions have been inspired by https://gitlab.com/woodentavern/foundryvtt-bar-brawl */
 
-import { HEROSYS } from "../herosystem6e.js";
 import { getBarExtendedAttribute } from "./extendTokenConfig.js"
 
 // TokenHUD does not appear to be extendable, so hook on renderTokenHUD
@@ -108,16 +107,4 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
 function renderBarInput(bars) {
     const css = bars.length > 1 ? "compact" : ""
     return renderTemplate("systems/hero6efoundryvttv2/module/bar3/resource-hud.hbs", { bars, css });
-}
-
-
-/**
- * Prepares the update of a token (or a prototype token) by removing invalid
- *  resources and synchronizing with FoundryVTT's resource format.
- * @param {TokenDocument} tokenDoc The data to merge the new data into.
- * @param {Object} newData The data to be merged into the token data.
- */
-
-export async function HeroSystem6ePreUpdateToken(tokenDoc, newData) {
-    HEROSYS.log(false, HeroSystem6ePreUpdateToken)
 }

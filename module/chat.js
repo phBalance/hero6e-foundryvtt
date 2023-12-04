@@ -20,22 +20,3 @@ export const displayChatActionButtons = function(message, html, data) {
     });
   }
 };
-
-/* -------------------------------------------- */
-
-/**
- * Apply rolled dice damage to the token or tokens which are currently controlled.
- * This allows for damage to be scaled by a multiplier to account for healing, critical hits, or resistance
- *
- * @param {HTMLElement} li      The chat entry which contains the roll data
- * @param {Number} multiplier   A damage multiplier to apply to the rolled damage.
- * @return {Promise}
- */
-function applyChatCardDamage(li, multiplier) {
-  const message = game.messages.get(li.data("messageId"));
-  const roll = message.roll;
-  return Promise.all(canvas.tokens.controlled.map(t => {
-    const a = t.actor;
-    return a.applyDamage(roll.total, multiplier);
-  }));
-}
