@@ -823,7 +823,7 @@ HERO.powers = [
             "attack"
         ],
         "perceivability": "obvious",
-        "duration": "Instant",
+        "duration": "instant",
         "target": "target’s DCV",
         "range": "standard",
         "costEnd": true,
@@ -837,7 +837,7 @@ HERO.powers = [
             "attack"
         ],
         "perceivability": "obvious",
-        "duration": "Instant",
+        "duration": "instant",
         "target": "target’s DCV",
         "range": "no range",
         "costEnd": true,
@@ -877,7 +877,7 @@ HERO.powers = [
             "standard"
         ],
         "perceivability": "Inobvious",
-        "duration": "Instant",
+        "duration": "instant",
         "target": "Target’s OCV (see text)",
         "range": "Standard",
         "costEnd": true,
@@ -1233,7 +1233,7 @@ HERO.powers = [
             "defense"
         ],
         "name": "Barrier",
-        "duration": "Instant",
+        "duration": "instant",
         "range": "standard",
         "costEnd": true,
         "costPerLevel": 1.5
@@ -2122,7 +2122,7 @@ HERO.powers5e = [
         name: "Transfer",
         powerType: ["adjustment", "attack"],
         perceivability: "obvious",
-        duration: "Instant",
+        duration: "instant",
         target: "target's DCV",
         range: "no range",
         costEnd: true,
@@ -2133,7 +2133,7 @@ HERO.powers5e = [
         name: "Transform",
         powerType: ["attack", "standard"],
         perceivability: "obvious",
-        duration: "Instant",
+        duration: "instant",
         target: "target's DCV",
         range: "Standard",
         costEnd: true,
@@ -2151,7 +2151,7 @@ HERO.powers5e = [
         name: "Damage Resistance",
         powerType: ["defense"],
         //perceivability: "obvious",
-        duration: "Instant",
+        duration: "instant",
         target: "Self Only",
         range: "Self",
         costEnd: false,
