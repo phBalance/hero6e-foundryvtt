@@ -39,13 +39,13 @@ export async function onMessageRendered(html) {
 }
 
 /// Dialog box for AttackOptions
-export async function AttackOptions(item, event) {
-    //const clickedElement = $(event.currentTarget);
-    const actor = item.actor;
-    //const tokenId = clickedElement.closest("form[data-token-id]")?.dataset?.tokenId;
-    const token = actor.getActiveTokens()[0];
+export async function AttackOptions(item) {
+    const actor = item.actor
+    const token = actor.getActiveTokens()[0]
 
-    if (!actor.canAct(true)) return;
+    if (!actor.canAct(true)) {
+        return
+    }
 
     const data = {
         item: item,
@@ -143,37 +143,13 @@ export async function AttackOptions(item, event) {
     }
 
     const template = "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs"
-    const html = await renderTemplate(template, data)
+    await renderTemplate(template, data)
 
 
     // Testing out a replacement for the dialog box.
     // This would allow for more interactive CSL.
     // This may allow better workflow for AOE and placement of templates.
     delete await new ItemAttackFormApplication(data).render(true);
-
-
-    // return new Promise(resolve => {
-    //     const data = {
-    //         title: item.actor.name + " roll to hit",
-    //         content: html,
-    //         buttons: {
-    //             normal: {
-    //                 label: "Roll to Hit",
-    //                 callback: html => resolve(
-    //                     _processAttackOptions(item, html[0].querySelector("form"))
-    //                 )
-    //             },
-    //             // cancel: {
-    //             //   label: "cancel",
-    //             //   callback: html => resolve({canclled: true})
-    //             // }
-    //         },
-    //         default: "normal",
-    //         close: () => resolve({ cancelled: true })
-    //     }
-    //     new Dialog(data, null).render(true)
-    // });
-
 }
 
 export async function _processAttackOptions(item, formData) {
@@ -331,11 +307,8 @@ export async function AttackToHit(item, options) {
     }
 
     const actor = item.actor
-    const itemId = item._id
     const itemData = item.system;
     let tags = []
-
-
 
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
@@ -354,9 +327,7 @@ export async function AttackToHit(item, options) {
     tags.push({ value: hitCharacteristic.signedString(), name: itemData.uses })
 
     const ocvMod = parseInt(options.ocvMod) || 0
-    const dcvMod = parseInt(options.dcvMod) || 0
-    if (parseInt(ocvMod) != 0) {
-
+    if (ocvMod) {
         rollEquation = modifyRollEquation(rollEquation, ocvMod);
         tags.push({ value: ocvMod.signedString(), name: item.name })
     }
@@ -517,7 +488,6 @@ export async function AttackToHit(item, options) {
         if (item.system.USE_END_RESERVE) {
             if (enduranceReserve) {
                 let erValue = parseInt(enduranceReserve.system.value);
-                let erMax = parseInt(enduranceReserve.system.max);
                 if (spentEnd > erValue) {
                     return await ui.notifications.error(`${item.name} needs ${spentEnd} END, but ${enduranceReserve.name} only has ${erValue} END.`);
                 }
@@ -853,10 +823,11 @@ function getAttackTags(item) {
     for (let mod of (item.system.MODIFIER || [])) {
         switch (mod.XMLID) {
             case "AUTOFIRE":
-                const autoFireShots = parseInt(mod.OPTION_ALIAS.match(/\d+/))
-                attackTags.push({ name: `${mod.ALIAS || mod.XMLID}(${autoFireShots})`, title: `${mod.OPTION_ALIAS || ""}` });
-                break;
-
+                {
+                    const autoFireShots = parseInt(mod.OPTION_ALIAS.match(/\d+/))
+                    attackTags.push({ name: `${mod.ALIAS || mod.XMLID}(${autoFireShots})`, title: `${mod.OPTION_ALIAS || ""}` });
+                }
+                break
 
             case "AOE":
                 attackTags.push({ name: `${mod.OPTION_ALIAS}(${mod.LEVELS})`, title: `${mod.XMLID}` });
@@ -1147,14 +1118,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         console.log(damageData.itemid)
         return ui.notifications.error(`Attack details are no longer availble.`);
     }
-    const actor = item.actor
-
-
 
     const template = "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs"
 
     const token = canvas.tokens.get(tokenId)
-
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
@@ -1242,7 +1209,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // Check for conditional defenses
     let ignoreDefenseIds = []
     const conditionalDefenses = token.actor.items.filter(o => (o.system.subType || o.system.type) === "defense" &&
-        (o.system.active || o.effects.find(o => true)?.disabled === false) &&
+        (o.system.active || o.effects.find(() => true)?.disabled === false) &&
         (
             (o.system.MODIFIER || []).find(p => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID)) ||
             avad
@@ -1315,8 +1282,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
         const html = await renderTemplate(template2, data)
 
-        //let cancelled = true;
-
+        // eslint-disable-next-line no-inner-declarations
         async function getDialogOutput() {
             return new Promise(resolve => {
                 const dataConditionalDefenses = {
@@ -1326,15 +1292,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                         normal: {
                             label: "Apply Damage",
                             callback: (html) => { resolve(html.find("form input")) }
-                            // async function (html) {
-                            // //cancelled = false;
-                            // let inputs = html.find("form input");
-                            // return inputs;
-                            // // for (let input of inputs) {
-                            // //     if (input.checked) {
-                            // //         ignoreDefenseIds.push(input.id);
-                            // //     }
-                            // // }
                         },
                         cancel: {
                             label: "cancel",
@@ -1572,8 +1529,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 }
 
 async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, defense) {
-    const button = event.currentTarget;
-    //const damageData = { ...button.dataset }
     const item = fromUuidSync(damageData.itemid)
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
@@ -1718,9 +1673,9 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
                 }
 
                 // DELAYEDRETURNRATE
-                let delayedReurnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
-                if (delayedReurnRate) {
-                    switch (delayedReurnRate.OPTIONID) {
+                let delayedReturnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
+                if (delayedReturnRate) {
+                    switch (delayedReturnRate.OPTIONID) {
                         case "MINUTE": activeEffect.duration.seconds = 60; break;
                         case "FIVEMINUTES": activeEffect.duration.seconds = 60 * 5; break;
                         case "20MINUTES": activeEffect.duration.seconds = 60 * 20; break;
@@ -1734,17 +1689,12 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
                         case "FIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 5; break;
                         case "TWENTYFIVEYEARS": activeEffect.duration.seconds = 3.154e+7 * 25; break;
                         case "CENTURY": activeEffect.duration.seconds = 3.154e+7 * 100; break;
-                        default: await ui.notifications.error(`DELAYEDRETURNRATE has unhandled option ${delayedReurnRate?.OPTIONID}`);
+                        default: await ui.notifications.error(`DELAYEDRETURNRATE has unhandled option ${delayedReturnRate?.OPTIONID}`);
                     }
                 }
 
                 if (ActivePoints > 0) {
-                    //if ((token.actor.system.characteristics?.[keyX])) {
                     await token.actor.addActiveEffect(activeEffect);
-                    //}
-                    // else {
-                    //     await powerTargetX.createEmbeddedDocuments("ActiveEffect", [activeEffect])
-                    // }
 
                     if (item.system.XMLID === "TRANSFER" && keyY) {
                         let activeEffectY = deepClone(activeEffect);
@@ -1759,10 +1709,8 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
                         if ((token.actor.system.characteristics?.[keyX])) {
                             await item.actor.update({ [`system.characteristics.${keyY}.value`]: newValueY })
                         }
-
                     }
                 }
-
             }
 
             // Add levels to value
@@ -1811,8 +1759,6 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData, def
 }
 
 async function _onApplySenseAffectingToSpecificToken(event, tokenId, damageData, defense) {
-    const button = event.currentTarget;
-    //const damageData = { ...button.dataset }
     const item = fromUuidSync(damageData.itemid)
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
@@ -1904,11 +1850,8 @@ async function _calcDamage(damageResult, item, options) {
     let stun = 0;
     let countedBody = 0;
 
-    let pip = 0
-
     // USESTANDARDEFFECT
     if (item.system.USESTANDARDEFFECT) {
-
         // Override term results
         for (let term of damageResult.terms.filter(o => o.number)) {
             if (term.results) {
@@ -1928,12 +1871,7 @@ async function _calcDamage(damageResult, item, options) {
                 body += 1;
             }
         }
-    }
-
-    else {
-
-
-
+    } else {
         // We may have spoofed a roll, so total is missing.
         if (!damageResult.total) {
             damageResult._total = 0
@@ -1962,10 +1900,7 @@ async function _calcDamage(damageResult, item, options) {
                 if (damageResult.terms[2] instanceof NumericTerm) {
                     damageResult._formula += damageResult.terms[2].number
                 }
-
-
             }
-
 
             damageResult._evaluated = true
         }
@@ -2021,7 +1956,7 @@ async function _calcDamage(damageResult, item, options) {
         if (game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all") {
             let sidedLocations = ["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]
             if (sidedLocations.includes(hitLocation)) {
-                let sideRoll = new Roll("1D2", actor.getRollData());
+                let sideRoll = new Roll("1D2", item.actor.getRollData());
                 let sideResult = await sideRoll.roll();
 
                 if (sideResult.result === 1) {

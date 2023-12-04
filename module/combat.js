@@ -25,13 +25,10 @@ export class HeroSystem6eCombat extends Combat {
      * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete. 
      */
 
-    async rollInitiative(ids, { formula = null, updateTurn = true, messageOptions = {} } = {}) {
-        // Structure input data
-        ids = typeof ids === "string" ? [ids] : ids;
-
+    async rollInitiative() {
         // Iterate over Combatants, performing an initiative roll for each
         const updates = [];
-        for (let [id, value] of this.combatants.entries()) {
+        for (let [id /*, value*/] of this.combatants.entries()) {
             // Get Combatant data (non-strictly)
             const combatant = this.combatants.get(id);
             if (!combatant?.isOwner) return this;
@@ -54,7 +51,6 @@ export class HeroSystem6eCombat extends Combat {
 
         // Update multiple combatants
         await this.updateEmbeddedDocuments("Combatant", updates);
-
 
         return this;
     }

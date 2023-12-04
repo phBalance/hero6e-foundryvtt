@@ -1,5 +1,6 @@
-import { calcItemPoints, updateItemDescription, CalcActorRealAndActivePoints } from "./utility/upload_hdc.js"
-import { RoundFavorPlayerDown } from "./utility/round.js"
+import { HeroSystem6eItem } from "./item/item.js"
+import { getPowerInfo } from './utility/util.js'
+import { createEffects } from "./utility/upload_hdc.js"
 
 export async function migrateWorld() {
     const lastMigration = game.settings.get(game.system.id, 'lastMigration')
@@ -9,7 +10,7 @@ export async function migrateWorld() {
 
     // if lastMigration < 2.2.0-alpha
     if (foundry.utils.isNewerVersion('2.2.0', lastMigration)) {
-        await ui.notifications.info(`Migragrating actor data 2.2.0`)
+        await ui.notifications.info(`Migrating actor data 2.2.0`)
         //migrateActorTypes()
         migrateKnockback()
         migrateRemoveDuplicateDefenseMovementItems()
@@ -17,16 +18,16 @@ export async function migrateWorld() {
 
     // if lastMigration < 3.0.0-alpha
     if (foundry.utils.isNewerVersion('3.0.0', lastMigration)) {
-        await ui.notifications.info(`Migragrating actor data 3.0.0`)
+        await ui.notifications.info(`Migrating actor data 3.0.0`)
         for (let actor of game.actors.contents) {
             await updateItemSubTypes(actor, true)
         }
     }
 
     // if lastMigration < 3.0.4
-    // Remove all tranferred effects
+    // Remove all transferred effects
     if (foundry.utils.isNewerVersion('3.0.4', lastMigration)) {
-        await ui.notifications.info(`Migragrating actor data 3.0.4`)
+        await ui.notifications.info(`Migrating actor data 3.0.4`)
         for (let actor of game.actors.contents) {
             for (let effect of actor.effects.filter(o => o.origin)) {
                 await effect.delete();
@@ -37,7 +38,7 @@ export async function migrateWorld() {
     // if lastMigration < 3.0.9
     // Charges
     if (foundry.utils.isNewerVersion('3.0.9', lastMigration)) {
-        await ui.notifications.info(`Migragrating actor data 3.0.9`)
+        await ui.notifications.info(`Migrating actor data 3.0.9`)
         for (let actor of game.actors.contents) {
             for (let item of actor.items.filter(o => (o.system.end || "").toString().indexOf("[") === 0)) {
                 let _end = item.system.end;
@@ -57,7 +58,7 @@ export async function migrateWorld() {
     // if lastMigration < 3.0.15
     // Martial Arts and missing XMLID
     if (foundry.utils.isNewerVersion('3.0.15', lastMigration)) {
-        await ui.notifications.info(`Migragrating actor data  3.0.15`)
+        await ui.notifications.info(`Migrating actor data  3.0.15`)
         for (let actor of game.actors.contents) {
             try {
 
@@ -185,7 +186,7 @@ export async function migrateWorld() {
         let d = new Date()
         let queue = []
 
-        ui.notifications.info(`Migragrating actor data 3.0.35`)
+        ui.notifications.info(`Migrating actor data 3.0.35`)
         for (const actor of game.actors.contents) {
             queue.push(actor)
         }
@@ -200,7 +201,7 @@ export async function migrateWorld() {
 
         while (queue.length > 0) {
             if ((new Date() - d) > 4000) {
-                ui.notifications.info(`Migragrating actor data 3.0.35 (${queue.length} remaining)`)
+                ui.notifications.info(`Migrating actor data 3.0.35 (${queue.length} remaining)`)
                 d = new Date()
             }
             const actor = queue.pop()
@@ -214,7 +215,7 @@ export async function migrateWorld() {
         let d = new Date()
         let queue = []
 
-        ui.notifications.info(`Migragrating actor data 3.0.42`)
+        ui.notifications.info(`Migrating actor data 3.0.42`)
         for (const actor of game.actors.contents) {
             queue.push(actor)
         }
@@ -229,7 +230,7 @@ export async function migrateWorld() {
 
         while (queue.length > 0) {
             if ((new Date() - d) > 4000) {
-                ui.notifications.info(`Migragrating actor data 3.0.35 (${queue.length} remaining)`)
+                ui.notifications.info(`Migrating actor data 3.0.35 (${queue.length} remaining)`)
                 d = new Date()
             }
             const actor = queue.pop()
@@ -244,7 +245,7 @@ export async function migrateWorld() {
         let d = new Date()
         let queue = []
 
-        ui.notifications.info(`Migragrating actor data 3.0.49`)
+        ui.notifications.info(`Migrating actor data 3.0.49`)
         for (const actor of game.actors.contents) {
             queue.push(actor)
         }
@@ -259,7 +260,7 @@ export async function migrateWorld() {
 
         while (queue.length > 0) {
             if ((new Date() - d) > 4000) {
-                ui.notifications.info(`Migragrating actor data 3.0.49 (${queue.length} remaining)`)
+                ui.notifications.info(`Migrating actor data 3.0.49 (${queue.length} remaining)`)
                 d = new Date()
             }
             const actor = queue.pop()
@@ -267,14 +268,12 @@ export async function migrateWorld() {
         }
     }
 
-
-
     // Reparse all items (description, cost, etc) on every migration
-    if (true) {
+    {
         let d = new Date()
         let queue = []
 
-        ui.notifications.info(`Migragrating actor data`)
+        ui.notifications.info(`Migrating actor data`)
         for (const actor of game.actors.contents) {
             queue.push(actor)
         }
@@ -289,7 +288,7 @@ export async function migrateWorld() {
 
         while (queue.length > 0) {
             if ((new Date() - d) > 4000) {
-                ui.notifications.info(`Migragrating actor data (${queue.length} remaining)`)
+                ui.notifications.info(`Migrating actor data (${queue.length} remaining)`)
                 d = new Date()
             }
             const actor = queue.pop()
@@ -297,7 +296,8 @@ export async function migrateWorld() {
         }
 
     }
-    await ui.notifications.info(`Migragtion complete.`)
+
+    await ui.notifications.info(`Migrating complete.`)
 }
 
 async function migrateActorCostDescription(actor) {
@@ -309,17 +309,8 @@ async function migrateActorCostDescription(actor) {
 
         let itemsChanged = false;
         for (let item of actor.items) {
-
-            let changes = {};
-
-            let _oldDescription = item.system.description;
-            let _oldEnd = parseInt(item.system.end || 0);
-            let _oldActivePoints = item.system.activePoints
-
             await item._postUpload()
-
         }
-
 
         if (itemsChanged || !actor.system.pointsDetail) {
             const oldPointsDetail = actor.system.pointsDetail
@@ -332,8 +323,6 @@ async function migrateActorCostDescription(actor) {
                 }, { render: false }, { hideChatMessage: true });
             }
         }
-
-
     } catch (e) {
         console.log(e);
         if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting')) {
@@ -524,7 +513,7 @@ async function migrateActor_3_0_49(actor) {
 
 async function migrateRemoveDuplicateDefenseMovementItems() {
 
-    ui.notifications.info(`Migragrating actor data.`)
+    ui.notifications.info(`Migrating actor data.`)
 
     let count = 0
     for (let actor of game.actors.contents) {

@@ -9,7 +9,6 @@ export const extendTokenConfig = async function (tokenConfig, html, data) {
     let bar3 = getBarExtendedAttribute.bind(tokenConfig.token)("bar3")
     let barAttributes = data.barAttributes["Attribute Bars"]
     let singleValues = data.barAttributes["Single Values"]
-    //$("div[data-tab='resources'] .form-group")[1].cloneNode(true); //
     let bar3FormGroup = await renderTemplate("systems/hero6efoundryvttv2/module/bar3/resource-form-group.hbs", { bar3, barAttributes, singleValues });
     resourceTab.append(bar3FormGroup)
 
@@ -29,11 +28,10 @@ export const extendTokenConfig = async function (tokenConfig, html, data) {
         form.querySelector(`input.${bar}-max`).value = ((attr !== null) && (attr.type === "bar")) ? attr.max : "";
     }
 
-    async function _onSubmit(event) {
+    async function _onSubmit() {
         const bar3 = $(`select[name="bar3.attribute"]`).val();
 
         HEROSYS.log(false, "_onSubmit", bar3)
-        //await this.token.setFlag(game.system.id, "bar3", { "attribute": bar3 } )
         await this.token.update({ bar3: { attribute: bar3 } })
     }
 

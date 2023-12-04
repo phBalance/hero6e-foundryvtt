@@ -12,12 +12,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         return mergeObject(super.defaultOptions, {
             classes: ["actor-sidebar-sheet"],
             template: "systems/hero6efoundryvttv2/templates/actor-sidebar/actor-sidebar-sheet.hbs",
-            //width: 600,
-            //height 600,
             tabs: [{ navSelector: ".sheet-navigation", contentSelector: ".sheet-body", initial: "Attacks" }],
             scrollY: [".sheet-body"],
-            closeOnSubmit: false, // do not close when submitted
-            submitOnChange: true, // submit when any input changes
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
             itemFilters: {}, // used to track item search filters on some tabs
@@ -64,12 +60,11 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         // override actor.items (which is a map) to an array with some custom properties
         let items = []
         for (let item of data.actor.items) {
-
             // showToggle
-            const itemEfffects = item.effects.find(o => true)
-            if (itemEfffects) {
+            const itemEffects = item.effects.find(() => true)
+            if (itemEffects) {
                 item.system.showToggle = true
-                item.system.active = !itemEfffects.disabled
+                item.system.active = !itemEffects.disabled
             }
 
             const actorEffects = data.actor.effects.find(o => o.origin === this.actor.items.get(item._id).uuid)
@@ -79,8 +74,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     item.system.active = !actorEffects.disabled
                 }
             }
-
-
 
             // Framework?
             if (item.system.PARENTID) {
@@ -113,10 +106,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 // Standard Effect
                 if (item.system.USESTANDARDEFFECT) {
                     let stun = parseInt(item.system.value * 3)
-                    let body = parseInt(item.system.value)
                     if (item.findModsByXmlid("PLUSONEHALFDIE") || item.findModsByXmlid("PLUSONEPIP")) {
                         stun += 1;
-                        body += 1;
                     }
                     item.system.damage = stun;
                 }
@@ -132,54 +123,59 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 // Signed OCV and DCV
                 if (item.system.ocv != undefined) {
                     switch (item.system.ocv) {
-                        case "--": item.system.ocvEstimated = ""; break;
+                        case "--":
+                            item.system.ocvEstimated = ""
+                            break
+
                         case "-v/10":
-                            item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-");
+                            {
+                                item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-");
 
-                            let velocity = 0;
+                                let velocity = 0;
 
-                            // Velocity from drag ruler
-                            const tokens = item.actor.getActiveTokens();
-                            const token = tokens[0];
-                            const combatants = game?.combat?.combatants;
-                            if (combatants && typeof dragRuler != 'undefined') {
+                                // Velocity from drag ruler
+                                const tokens = item.actor.getActiveTokens();
+                                const token = tokens[0];
+                                const combatants = game?.combat?.combatants;
+                                if (combatants && typeof dragRuler != 'undefined') {
 
-                                if (token) {
+                                    if (token) {
 
-                                    let distance = dragRuler.getMovedDistanceFromToken(token);
-                                    let ranges = dragRuler.getRangesFromSpeedProvider(token);
-                                    let speed = ranges.length > 1 ? ranges[1].range : 0;
-                                    let delta = distance;
-                                    if (delta > speed / 2) {
-                                        delta = speed - delta;
-                                    }
-                                    velocity = delta * 5;
+                                        let distance = dragRuler.getMovedDistanceFromToken(token);
+                                        let ranges = dragRuler.getRangesFromSpeedProvider(token);
+                                        let speed = ranges.length > 1 ? ranges[1].range : 0;
+                                        let delta = distance;
+                                        if (delta > speed / 2) {
+                                            delta = speed - delta;
+                                        }
+                                        velocity = delta * 5;
 
-                                }
-                            }
-
-                            // Simplistic velocity calc using dragRuler
-                            if (velocity === 0 && token) {
-                                if (typeof dragRuler != 'undefined') {
-                                    if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
-                                        velocity = parseInt(dragRuler.getRangesFromSpeedProvider(token)[1].range || 0);
                                     }
                                 }
+
+                                // Simplistic velocity calc using dragRuler
+                                if (velocity === 0 && token) {
+                                    if (typeof dragRuler != 'undefined') {
+                                        if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
+                                            velocity = parseInt(dragRuler.getRangesFromSpeedProvider(token)[1].range || 0);
+                                        }
+                                    }
+                                }
+
+                                // Simplistic velocity calc using running & flight
+                                if (velocity === 0) {
+                                    velocity = parseInt(item.actor.system.characteristics.running.value || 0);
+                                    velocity = Math.max(velocity, parseInt(item.actor.system.characteristics.flight.value || 0));
+                                }
+
+                                item.system.ocvEstimated = (
+                                    //parseInt(item.actor.system.characteristics.ocv.value) + 
+                                    parseInt(csl.ocv) +
+                                    parseInt(velocity / 10)
+                                ).signedString()
                             }
+                            break
 
-                            // Simplistic velocity calc using running & flight
-                            if (velocity === 0) {
-                                velocity = parseInt(item.actor.system.characteristics.running.value || 0);
-                                velocity = Math.max(velocity, parseInt(item.actor.system.characteristics.flight.value || 0));
-                            }
-
-                            item.system.ocvEstimated = (
-                                //parseInt(item.actor.system.characteristics.ocv.value) + 
-                                parseInt(csl.ocv) +
-                                parseInt(velocity / 10)
-                            ).signedString()
-
-                            break;
                         default:
                             item.system.ocv = parseInt(item.system.ocv).signedString();
                             item.system.ocvEstimated = (
@@ -459,7 +455,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         const pdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack), { temporary: true })
         await pdAttack._postUpload()
 
-        let [defenseValue, resistantValue, impenetrableValue, damageReductionValue, damageNegationValue, knockbackResistance, defenseTagsP] = determineDefense.call(this, this.actor, pdAttack)
+        let [defenseValue, resistantValue, /*impenetrableValue*/, damageReductionValue, damageNegationValue, /*knockbackResistance*/, defenseTagsP] = determineDefense.call(this, this.actor, pdAttack)
         defense.PD = defenseValue
         defense.rPD = resistantValue
         defense.PDtags = "PHYSICAL DEFENSE\n";
@@ -534,7 +530,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         const mdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mdContentsAttack), { temporary: true })
         await mdAttack._postUpload()
 
-        let [defenseValueM, resistantValueM, impenetrableValueM, damageReductionValueM, damageNegationValueM, knockbackResistanceM, defenseTagsM] = determineDefense.call(this, this.actor, mdAttack)
+        let [defenseValueM, resistantValueM, /*impenetrableValueM*/, damageReductionValueM, damageNegationValueM, /*knockbackResistanceM*/, defenseTagsM] = determineDefense.call(this, this.actor, mdAttack)
         defense.MD = defenseValueM
         defense.rMD = resistantValueM
         defense.MDtags = "MENTAL DEFENSE\n";
@@ -572,7 +568,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         const drainAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(drainContentsAttack), { temporary: true })
         await drainAttack._postUpload()
 
-        let [defenseValuePOWD, resistantValuePOWD, impenetrableValuePOWD, damageReductionValuePOWD, damageNegationValuePOWD, knockbackResistancePOWD, defenseTagsPOWD] = determineDefense.call(this, this.actor, drainAttack)
+        let [defenseValuePOWD, resistantValuePOWD, /*impenetrableValuePOWD*/, /*damageReductionValuePOWD*/, /*damageNegationValuePOWD*/, /*knockbackResistancePOWD*/, defenseTagsPOWD] = determineDefense.call(this, this.actor, drainAttack)
         defense.POWD = defenseValuePOWD
         defense.rPOWD = resistantValuePOWD
         defense.POWDtags = "POWER DEFENSE\n";
@@ -590,8 +586,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         // Get all applicable effects (from actor and all items)
         data.allTemporaryEffects = Array.from(this.actor.allApplicableEffects()).filter(o => o.duration.duration > 0 || o.statuses.size).sort((a, b) => a.name.localeCompare(b.name))
-        data.allConstantEffects = this.actor.getConstantEffects() //Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && (!o.flags?.XMLID || getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration != 'persistent')).sort((a, b) => a.name.localeCompare(b.name))
-        data.allPersistentEffects = this.actor.getPersistentEffects() //Array.from(this.actor.allApplicableEffects()).filter(o => !o.duration.duration && o.statuses.size === 0 && o.flags?.XMLID && getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })?.duration === 'persistent').sort((a, b) => a.name.localeCompare(b.name))
+        data.allConstantEffects = this.actor.getConstantEffects()
+        data.allPersistentEffects = this.actor.getPersistentEffects()
 
 
         // Add defenses (without active effects) to actorEffects.
@@ -660,7 +656,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                     const charges = item.findModsByXmlid("CHARGES")
                     if (charges) {
-                        const boostable = item.findModsByXmlid("BOOSTABLE")
                         ap += (parseInt(charges.OPTION_ALIAS) - 1) * 5
                     }
 
@@ -678,7 +673,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
         data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints)
         let topActivePoints = data.activePointSummary[0].activePoints
-        data.activePointSummary = data.activePointSummary.filter(o => o.activePoints >= topActivePoints * 0.5) // && o.activePoints > 20)
+        data.activePointSummary = data.activePointSummary.filter(o => o.activePoints >= topActivePoints * 0.5)
 
         return data
     }
@@ -888,73 +883,17 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
     async _onEffectEdit(event) {
         onManageActiveEffect(event, this.actor)
-        // event.preventDefault()
-        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        // const effect = this.actor.effects.get(effectId)
-        // effect.sheet.render(true)
     }
 
-
-    async _onRecovery(event) {
+    async _onRecovery() {
         this.actor.TakeRecovery({ asAction: true })
-        //         const chars = this.actor.system.characteristics
-
-        //         // Shouldn't happen, but you never know
-        //         if (isNaN(parseInt(chars.stun.value))) {
-        //             chars.stun.value = 0
-        //         }
-        //         if (isNaN(parseInt(chars.end.value))) {
-        //             chars.end.value = 0
-        //         }
-
-        //         let newStun = parseInt(chars.stun.value) + parseInt(chars.rec.value)
-        //         let newEnd = parseInt(chars.end.value) + parseInt(chars.rec.value)
-
-
-
-        //         if (newStun > chars.stun.max) {
-        //             newStun = Math.max(chars.stun.max, parseInt(chars.stun.value)) // possible > MAX (which is OKish)
-        //         }
-        //         let deltaStun = newStun - parseInt(chars.stun.value)
-
-        //         if (newEnd > chars.end.max) {
-        //             newEnd = Math.max(chars.end.max, parseInt(chars.end.value)) // possible > MAX (which is OKish)
-        //         }
-        //         let deltaEnd = newEnd - parseInt(chars.end.value)
-
-        //         await this.actor.update({
-        //             'system.characteristics.stun.value': newStun,
-        //             'system.characteristics.end.value': newEnd
-        //         })
-
-        //         let token = this.actor.token
-        //         let speaker = ChatMessage.getSpeaker({ actor: this.actor, token })
-        //         speaker["alias"] = this.actor.name
-
-        //         const chatData = {
-        //             user: game.user._id,
-        //             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-        //             content: this.actor.name + ` <span title="
-        // Recovering is a Full Phase Action and occurs at the end of
-        // the Segment (after all other characters who have a Phase that
-        // Segment have acted). A character who Recovers during a Phase
-        // may do nothing else. He cannot even maintain a Constant Power
-        // or perform Actions that cost no END or take no time. However,
-        // he may take Zero Phase Actions at the beginning of his Phase
-        // to turn off Powers, and Persistent Powers that don't cost END
-        // remain in effect."><i>Takes a Recovery</i></span>, gaining ${deltaEnd} endurance and ${deltaStun} stun.`,
-        //             speaker: speaker
-        //         }
-
-        //         return ChatMessage.create(chatData)
     }
 
-    async _onPresenseAttack(event) {
+    async _onPresenseAttack() {
         presenceAttackPopOut(this.actor)
     }
 
-    async _onFullHealth(event) {
-
+    async _onFullHealth() {
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
             content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content")
@@ -964,9 +903,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
     }
 
-    async _onActorDescription(event) {
-
-
+    async _onActorDescription() {
         let content = `${this.actor.system.APPEARANCE || ""}`;
         let perceivable = []
         for (let item of this.actor.items) {
