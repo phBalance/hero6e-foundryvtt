@@ -393,7 +393,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Powerframework may include this modifier
+        // Power framework may include this modifier
         if (this.system.PARENTID) {
             const parent = this.actor.items.find(o => o.system.ID == this.system.PARENTID)
             if (parent) {
@@ -590,49 +590,6 @@ export class HeroSystem6eItem extends Item {
                 changed = true
                 this.makeAttack()
             }
-
-            // newValue = undefined
-            // switch (this.system.INPUT) {
-            //     case "PD": newValue = "physical"
-            //         break;
-            //     case "ED": newValue = "energy"
-            //         break;
-            //     // default:
-            //     //     newValue = undefined
-            // }
-            // if (this.system.class != newValue) {
-            //     this.system.class = newValue
-            //     changed = true
-            // }
-
-            // MENTALBLAST
-            // if (configPowerInfo.XMLID === "EGOATTACK") {
-            //     this.system.class = 'mental'
-            //     this.system.targets = "dmcv"
-            //     this.system.uses = "omcv"
-            //     this.system.knockbackMultiplier = 0
-            //     this.system.usesStrength = false
-            //     this.system.stunBodyDamage = "stunonly"
-            //     this.system.noHitLocations = true
-            // }
-
-            // DRAIN
-            // if (configPowerInfo.XMLID === "DRAIN") {
-            //     this.system.class = 'drain'
-            //     this.system.usesStrength = false
-            //     this.system.noHitLocations = true
-            // }
-
-            // AID
-            // if (configPowerInfo.XMLID === "AID") {
-            //     this.system.class = 'aid'
-            //     this.system.usesStrength = false
-            //     this.system.noHitLocations = true
-            // }
-
-            // isKilling
-            //this.system.killing = configPowerInfo?.killing
-
         }
 
         // BASECOST
@@ -1304,10 +1261,12 @@ export class HeroSystem6eItem extends Item {
 
         const system = this.system;
         const type = this.type;
+        const is5e = !!this.actor?.system.is5e
 
         const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: this.actor })
+        const powerXmlId = configPowerInfo?.xmlid || system.XMLID
 
-        switch (configPowerInfo?.xmlid || system.XMLID) {
+        switch (powerXmlId) {
             case "DENSITYINCREASE":
                 // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
                 system.description = `${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass, +${system.value * 5} STR, +${system.value} PD/ED, -${this.actor?.system.is5e ? system.value + "\"" : system.value * 2 + "m"} KB)`
@@ -1368,6 +1327,13 @@ export class HeroSystem6eItem extends Item {
 
                     system.description += aryFW.join("/")
                     system.description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${parseInt(system.HEIGHTLEVELS) + 1}m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`
+                }
+                break
+
+            case "ABSORPTION":
+                {
+                    const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                    system.description = `${system.ALIAS} ${is5e ? `${dice}` : `${system.value} BODY`} (${system.OPTION_ALIAS}) into ${system.INPUT ? system.INPUT : "unknown"}`
                 }
                 break
 
@@ -1642,7 +1608,14 @@ export class HeroSystem6eItem extends Item {
         // The INPUT field isn't always displayed in HD so that is not strictly compatible, but it does mean that we will show things
         // like a ranged killing attack being ED vs PD in the power description.
         if(system?.INPUT) {
-            _adderArray.push(system.INPUT)
+            switch (powerXmlId) {
+                case "ABSORPTION":
+                    break
+
+                default:
+                    _adderArray.push(system.INPUT)
+                    break
+            }
         }
 
         if (system?.ADDER?.length > 0) {
@@ -1705,7 +1678,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             if (_adderArray.length > 0) {
-                switch (system.XMLID) {
+                switch (powerXmlId) {
                     case "TRANSPORT_FAMILIARITY":
                         system.description += _adderArray.join("; ")
                         break
@@ -2079,11 +2052,6 @@ export class HeroSystem6eItem extends Item {
 
         // Confirm this is an attack
         const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor })
-        //if (!configPowerInfo || !configPowerInfo.powerType.includes("attack")) return
-
-        //let changes = {}
-        //changes[`img`] = "icons/svg/sword.svg"
-
 
         // Name
         let description = this.system.ALIAS
@@ -2185,17 +2153,24 @@ export class HeroSystem6eItem extends Item {
             this.system.noHitLocations = true
         }
 
-        // DRAIN (not implemented)
-        if (xmlid == "DRAIN") {
-            this.system.class = 'drain'
-            this.system.killing = true
+        // ABSORPTION
+        if (xmlid == "ABSORPTION") {
+            this.system.class = 'absorb'
             this.system.usesStrength = false
             this.system.noHitLocations = true
         }
-
-        // AID (not implemented)
+        
+        // AID
         if (xmlid == "AID") {
             this.system.class = 'aid'
+            this.system.usesStrength = false
+            this.system.noHitLocations = true
+        }
+        
+        // DRAIN
+        if (xmlid == "DRAIN") {
+            this.system.class = 'drain'
+            this.system.killing = true
             this.system.usesStrength = false
             this.system.noHitLocations = true
         }

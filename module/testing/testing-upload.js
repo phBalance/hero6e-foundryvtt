@@ -5,7 +5,7 @@ export function registerUploadTests(quench) {
     quench.registerBatch(
         "quench.utils.upload",
         (context) => {
-            const { describe, it, assert } = context
+            const { assert, before, describe, it } = context
 
             describe("NAKEDMODIFIER Kaden", function () {
                 const contents = `
@@ -1674,6 +1674,91 @@ export function registerUploadTests(quench) {
                         actor.items.set(item.system.XMLID, item)
                         item.skillRollUpdateValue()
                         assert.equal(item.system.roll, "13-")
+                    })
+                })
+            })
+
+            describe("ABSORPTION", () => {
+                describe("5e", () => {
+                    const contents = `
+                        <POWER XMLID="ABSORPTION" ID="1701632911260" BASECOST="0.0" LEVELS="2" ALIAS="Absorption" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ENERGY" OPTIONID="ENERGY" OPTION_ALIAS="energy" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Absorption missing INPUT" INPUT="STUN" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES/>
+                            <ADDER XMLID="PLUSONEHALFDIE" ID="1701643045288" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                            </ADDER>
+                        </POWER>
+                    `
+                    let item
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true })
+                        actor.system.is5e = true
+                        item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                    })
+
+                    it("description", async function () {
+                        assert.equal(item.system.description, "Absorption 2 1/2d6 (energy) into STUN");
+                    })
+
+                    it("realCost", async function () {
+                        assert.equal(item.system.realCost, 13);
+                    })
+
+                    it("activePoints", async function () {
+                        assert.equal(item.system.activePoints, 13);
+                    })
+
+                    it("end", async function () {
+                        assert.equal(item.system.end, 0);
+                    })
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 2);
+                    })
+                })
+
+                describe("6e", () => {
+                    const contents = `
+                        <POWER XMLID="ABSORPTION" ID="1701641804953" BASECOST="0.0" LEVELS="9" ALIAS="Absorption" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PHYSICAL" OPTIONID="PHYSICAL" OPTION_ALIAS="physical" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="DEX" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES/>
+                        </POWER>
+                    `
+                    let item
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor({
+                            name: 'Quench Actor',
+                            type: 'pc',
+                        }, { temporary: true });
+                        actor.system.is5e = false
+                        item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true, parent: actor })
+                        await item._postUpload()
+                        actor.items.set(item.system.XMLID, item)
+                    })
+
+                    it("description", async function () {
+                        assert.equal(item.system.description, "9 BODY (physical) into DEX");
+                    })
+
+                    it("realCost", async function () {
+                        assert.equal(item.system.realCost, 9);
+                    })
+
+                    it("activePoints", async function () {
+                        assert.equal(item.system.activePoints, 9);
+                    })
+
+                    it("end", async function () {
+                        assert.equal(item.system.end, 0);
+                    })
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 9);
                     })
                 })
             })

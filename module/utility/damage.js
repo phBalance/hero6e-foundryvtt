@@ -147,10 +147,8 @@ export function convertToDcFromItem(item, options) {
         //     dc += 2;
         // }
         tags.push({ value: `${dc.signedString()}DC`, name: item.name })
-    } else
-
-    // Normal Attack
-    {
+    } else {
+        // Normal Attack
         dc += parseInt(item.system.dice);
         let _tag = `${dc.signedString()}DC`
         switch (item.system.extraDice) {
@@ -261,9 +259,6 @@ export function convertToDcFromItem(item, options) {
             }
         }
     }
-
-
-
 
     // Add in Haymaker to any non-maneuver attack DCV based attack
     if (item.actor) {
