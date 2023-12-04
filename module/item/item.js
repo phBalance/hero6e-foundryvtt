@@ -1337,11 +1337,15 @@ export class HeroSystem6eItem extends Item {
                 }
                 break
 
-            case "TRANSFER":
-            case "DRAIN":
             case "AID":
-                // Aid  STR 5d6 (standard effect: 15 points)
-                system.description = system.ALIAS + (system.INPUT ? " " + system.INPUT : "") + " " + system.value + "d6"
+            case "DISPEL":
+            case "DRAIN":
+            case "TRANSFER":
+                {
+                    // Aid  STR 5d6 (standard effect: 15 points)
+                    const dice = convertFromDC(this, convertToDcFromItem(this).dc).replace("d6 + 1d3", " 1/2d6")
+                    system.description = `${system.ALIAS} ${dice} into ${system.INPUT ? system.INPUT : "unknown"}`
+                }
                 break
 
             case "STRETCHING":
@@ -1610,6 +1614,10 @@ export class HeroSystem6eItem extends Item {
         if(system?.INPUT) {
             switch (powerXmlId) {
                 case "ABSORPTION":
+                case "AID":
+                case "DISPEL":
+                case "DRAIN":
+                case "TRANSFER":            
                     break
 
                 default:
@@ -2166,6 +2174,13 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false
             this.system.noHitLocations = true
         }
+
+        // DISPEL
+        if (xmlid == "DISPEL") {
+            this.system.class = 'dispel'
+            this.system.usesStrength = false
+            this.system.noHitLocations = true
+        }        
         
         // DRAIN
         if (xmlid == "DRAIN") {
