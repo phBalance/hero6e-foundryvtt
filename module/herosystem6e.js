@@ -20,17 +20,14 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
-import { createEffects, updateItemDescription, updateItemSubTypes, calcItemPoints, CalcActorRealAndActivePoints, makeAttack } from "./utility/upload_hdc.js"
+import { createEffects, updateItemDescription } from "./utility/upload_hdc.js"
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
-import { HeroVisualEffects } from "./HeroVisualEffects.js"
-import { RoundFavorPlayerDown } from "./utility/round.js"
 import { migrateWorld } from "./migration.js"
 
 Hooks.once('init', async function () {
 
     game.herosystem6e = {
         applications: {
-            // HeroSystem6eActorSheet,
             HeroSystem6eItemSheet,
         },
         entities: {
@@ -39,9 +36,6 @@ Hooks.once('init', async function () {
             HeroSystem6eTokenDocument,
             HeroSystem6eToken
         },
-        // canvas: {
-        //     HeroSystem6eMeasuredTemplate
-        // },
         macros: macros,
         rollItemMacro: rollItemMacro,
         CreateCustomAttack: CreateCustomAttack,
@@ -147,20 +141,18 @@ Hooks.on("renderChatMessage", (app, html, data) => {
     chat.displayChatActionButtons(app, html, data);
     HeroSystem6eCardHelpers.onMessageRendered(html);
 });
-Hooks.on("renderChatLog", (app, html, data) => HeroSystem6eCardHelpers.chatListeners(html));
-Hooks.on("renderChatPopout", (app, html, data) => HeroSystem6eCardHelpers.chatListeners(html));
+Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
+Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 
 // When actor SPD is changed we need to setupTurns again
-Hooks.on("updateActor", (app, html, data) => {
-    //app.sheet._render()
-
+Hooks.on("updateActor", () => {
     for (let combat of game.combats) {
-        combat.setupTurns(); //_onActorDataUpdate();
+        combat.setupTurns()
     }
 });
 
 Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
-    registerPackageDebugFlag(HEROSYS.ID);
+    registerPackageDebugFlag(HEROSYS.ID)
 });
 
 export class HEROSYS {
@@ -230,7 +222,7 @@ async function handleMacroCreation(bar, data, slot, item) {
 
 async function CreateCustomAttack(actor) {
     if (!actor) return ui.notifications.error("You must select token or actor");
-    let myValue = await Dialog.prompt({
+    await Dialog.prompt({
         content: `<h1>${actor.name}</h1><label>Enter Item Data</label><textarea rows="20" cols="200">
 {
     "name": "Custom Attack",
@@ -362,19 +354,6 @@ Hooks.once("ready", async function () {
 });
 
 
-async function migrateRemoveDuplicateDefenseMovementItems() {
-
-    ui.notifications.info(`Migragrating actor data.`)
-
-    let count = 0
-    for (let actor of game.actors.contents) {
-        if (await migrateActorDefenseMovementData(actor)) count++
-    }
-
-    ui.notifications.info(`${count} actors migrated.`)
-
-}
-
 async function migrateActorDefenseMovementData(actor) {
     let itemsToDelete = []
 
@@ -415,29 +394,8 @@ async function migrateActorDefenseMovementData(actor) {
 }
 
 
-// Change Attack knockback to knockbackMultiplier
-async function migrateKnockback() {
-    let updates = [];
-    for (let actor of game.actors) {
-        for (let item of actor.items) {
-            if (item.type === 'attack') {
-                if (item.system.knockback && parseInt(item.system.knockbackMultiplier) == 0) {
-                    updates.push({ _id: item.id, system: { knockbackMultiplier: 1, knockback: null } });
-                }
-            }
-        }
-        if (updates.length > 0) {
-            await Item.updateDocuments(updates, { parent: actor });
-            ui.notifications.info(`${updates.length} attacks migrated for ${actor.name}.`)
-            updates = []
-        }
-    }
-
-}
-
-
 // Remove Character from selectable actor types
-Hooks.on("renderDialog", (dialog, html, data) => {
+Hooks.on("renderDialog", (dialog, html) => {
     if (html[0].querySelector(".window-title").textContent != "Create New Actor") return
     let option = html[0].querySelector("option[value*='character']")
     if (option) option.remove()
@@ -469,11 +427,11 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
 
 })
 
-Hooks.on("renderItemSheet", (dialog, html, data) => {
+Hooks.on("renderItemSheet", (dialog, html) => {
     html.find('header h4').append(`<span>${game.system.version}<span>`)
 })
 
-Hooks.on("getActorDirectoryEntryContext", (dialog, html, data) => {
+Hooks.on("getActorDirectoryEntryContext", (dialog, html) => {
 
     console.log("getActorDirectoryEntryContext")
     const menu = {
@@ -504,11 +462,8 @@ let lastDate = 0;
  * @param {object} options        Options passed from the requesting client where the change was made
  * @param {string} userId         The ID of the User who advanced the time
  */
-Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
-
+Hooks.on('updateWorldTime', async (worldTime, options) => {
     const start = new Date();
-
-
 
     // Guard
     if (!game.user.isGM) return;
@@ -531,17 +486,15 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
     // All actors plus any unlinked actors in active scene
     let actors = Array.from(game.actors);
-    for (let token of game.scenes.current?.tokens) {
+    const currentTokens = game.scenes.current?.tokens || []
+    for (const token of currentTokens) {
         if (token.actor && !actors.find(o => o.id === token.actor.id)) {
             actors.push(token.actor);
         }
     }
 
     for (let actor of actors) {
-        const characteristicCosts = actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
-
         // Create a natural body healing if needed (requires permissions)
-
         const naturalBodyHealing = actor.temporaryEffects.find(o => o.flags.XMLID === "naturalBodyHealing");
         if (actor.type === "pc" && !naturalBodyHealing && parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)) {
             const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
@@ -575,7 +528,7 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
             let fade = 0;
             let name = ae.name;
 
-            // Determein XMLID, ITEM, ACTOR
+            // Determine XMLID, ITEM, ACTOR
             let origin = await fromUuid(ae.origin);
             let item = origin instanceof HeroSystem6eItem ? origin : null;
             let aeActor = origin instanceof HeroSystem6eActor ? origin : item?.actor || actor;
@@ -595,7 +548,6 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
             let d = ae._prepareDuration();
             while (d.remaining != null && d.remaining <= 0) {
                 // Add duration to startTime
-                let x = ae.duration.startTime;
                 ae.duration.startTime += d.duration;
                 d = ae._prepareDuration();
                 if (game.user.isGM) await ae.update({ duration: ae.duration });
@@ -680,7 +632,6 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
 
             }
 
-
             if (fade) {
                 let content = `${actor.name}: ${name} fades by ${fade} active points.`;
                 if (ae.flags.activePoints <= 0) {
@@ -697,9 +648,6 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 //await 
                 ChatMessage.create(chatData)
             }
-
-
-
         }
 
         //game.user.setFlag(game.system.id, "secondsSinceRan", 0)
@@ -732,9 +680,6 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
                 }
             }
         }
-
-
-
 
         // Charges Recover each day
         if (today > lastDate) {
@@ -776,7 +721,6 @@ Hooks.on('updateWorldTime', async (worldTime, options, userId) => {
     if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting') && deltaMs > 100) {
         return ui.notifications.warn(`updateWorldTime took ${deltaMs} ms.  This routine handles AID/DRAIN fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occures on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`);
     }
-
 });
 
 

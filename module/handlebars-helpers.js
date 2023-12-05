@@ -1,9 +1,4 @@
-import { HEROSYS } from "./herosystem6e.js";
-
 export function initializeHandlebarsHelpers() {
-    // handlebars helpers go here
-    // Handlebars.registerHelper('helperName', async function (args) {});
-
     Handlebars.registerHelper('filterItem', function (item, filterString) {
         //console.log("filterItem")
         if (!filterString) return item
@@ -14,15 +9,13 @@ export function initializeHandlebarsHelpers() {
         ) {
             return item
         }
-    });
+    })
 
     Handlebars.registerHelper('indexOf', function (string, searchTerm) {
         return string.indexOf(searchTerm)
-    });
+    })
 
-    Handlebars.registerHelper('abs', function (string) {;
+    Handlebars.registerHelper('abs', function (string) {
         return Math.abs(parseInt(string))
-    });
-    
-
+    })
 }

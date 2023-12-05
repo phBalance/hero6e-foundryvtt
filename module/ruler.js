@@ -40,10 +40,6 @@ export class HeroRuler {
                 }
 
                 getMovementSpeed(token) {
-                    //const relevantMovementItemId = token.actor.flags.activeMovement
-
-                    // const movementValue = parseInt(token.actor.items.get(relevantMovementItemId)?.system.value)
-                    //     || parseInt(token.actor.system.characteristics.running.value)
                     const key = token.actor.flags.activeMovement || "running"
                     const movementValue = parseInt(token.actor.system.characteristics[key].value) || 0
 
@@ -89,7 +85,7 @@ export class HeroRuler {
             setHeroRulerLabel()
         });
 
-        Hooks.on('controlToken', function (token, controlled) {
+        Hooks.on('controlToken', function () {
             if (!game.modules.get('drag-ruler')?.active) { return; }
 
             const sceneControls = ui.controls
@@ -103,7 +99,7 @@ export class HeroRuler {
             movementRadioSelectRender()
         });
 
-        Hooks.on('renderSceneControls', function (sceneControls, html) {
+        Hooks.on('renderSceneControls', function (sceneControls) {
             if (!game.modules.get('drag-ruler')?.active) { return; }
 
             if (sceneControls.activeControl !== "token") { return; }
@@ -117,16 +113,6 @@ export class HeroRuler {
 
             return
         });
-
-        // Hooks.on('updateItem', function (item, args) {
-        //     if (item.type !== 'movement') { return; }
-
-        //     const sceneControls = ui.controls
-        //     if (sceneControls.activeControl !== "token") { return; }
-        //     if (sceneControls.activeTool !== "select") { return; }
-
-        //     movementRadioSelectRender()
-        // });
 
         Hooks.on('updateActor', function (actor, args) {
             const sceneControls = ui.controls
@@ -211,7 +197,7 @@ export class HeroRuler {
 }
 
 function setHeroRulerLabel() {
-    Ruler.prototype._getSegmentLabel = function _getSegmentLabel(segmentDistance, totalDistance, isTotal) {
+    Ruler.prototype._getSegmentLabel = function _getSegmentLabel(segmentDistance, totalDistance) {
         const relevantToken = canvas.tokens.controlled[0]
         let factor = relevantToken?.actor?.system?.is5e ? 4 : 8;
         let rangeMod = Math.ceil(Math.log2(totalDistance / factor)) * 2;
@@ -221,11 +207,9 @@ function setHeroRulerLabel() {
         let label = `[${Math.round(segmentDistance.distance)}${game.scenes.current.grid.units || ''}]`;
 
         if (game.modules.get("drag-ruler")?.active && canvas.tokens.controlled.length > 0) {
-            ;
-
-            // guard
-            if (!relevantToken) return;
-            if (!relevantToken.actor) return;
+            if (!relevantToken || !relevantToken.actor) {
+                return
+            }
 
             //const movementItems = relevantToken.actor.items.filter((e) => e.type === "movement");
             let movementItems = []

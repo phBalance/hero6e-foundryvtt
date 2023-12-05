@@ -26,7 +26,7 @@ export async function deleteSubItem(event, item) {
     const id = clickedElement.parents('[data-id]')?.data().id
     const type = clickedElement.parents('[data-type]')?.data().type
 
-    const [powerItemId, subItemId] = id.split('-')
+    const [ , subItemId] = id.split('-')
 
     const keyDeletion = {
         [`system.subItems.${type}.-=${subItemId}`]: null
