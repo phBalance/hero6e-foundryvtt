@@ -1124,7 +1124,7 @@ function calcBasePointsPlusAdders(item) {
         }
     }
 
-    // Categorized skills cost 2 per catory and +1 per each subcategory.
+    // Categorized skills cost 2 per category and +1 per each subcategory.
     // If no catagories selected then assume 3 pts
     if (configPowerInfo?.categorized && adderCost >= 4) {
         if (adderCost == 0) {

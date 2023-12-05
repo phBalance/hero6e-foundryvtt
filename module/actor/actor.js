@@ -976,19 +976,20 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // Check for valid AID targets
-        for (let item of this.items.filter(o => o.system.XMLID === "AID")) {
-            const aidTargets = item.system.INPUT
-
-            if (aidTargets) {
-                for (const rawInput of aidTargets.split(",")) {
-                    const upperCasedInput = rawInput.toUpperCase().trim()
-                    if (!Object.keys(AdjustmentSources(this)).includes(upperCasedInput)) {
-                        await ui.notifications.warn(`${this.name} has an unsupported "${item.name}" property (${rawInput}). Use characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
+        // Warn about invalid adjustment targets
+        for (const item of this.items.filter(item => getPowerInfo({ item: item }).powerType?.includes("adjustment"))) {
+            const splitTargetsAndSources = item.system.INPUT ? item.system.INPUT.split(" -> ") : []
+            if ((item.XMLID !== "TRANSFER" && splitTargetsAndSources.length === 1 && splitTargetsAndSources[0]) || (item.XMLID === "TRANSFER" && splitTargetsAndSources.length === 2 && splitTargetsAndSources[0] && splitTargetsAndSources[1])) {
+                for (let i = 0; i < splitTargetsAndSources.length; ++i) {
+                    for (const rawAdjustmentSourcesOrTargets of splitTargetsAndSources[i].split(",")) {
+                        const upperCasedInput = rawAdjustmentSourcesOrTargets.toUpperCase().trim()
+                        if (!Object.keys(AdjustmentSources(this)).includes(upperCasedInput)) {
+                            await ui.notifications.warn(`${this.name} has an unsupported source or target (${rawAdjustmentSourcesOrTargets}) for "${item.name}". Use characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
+                        }
                     }
                 }
             } else {
-                await ui.notifications.warn(`${this.name} has an empty "Aid to" description for "${item.name}". Provide characteristic abbreviations or power names separated by commas.`, {console: true, permanent: true});
+                await ui.notifications.warn(`${this.name} has no source or target for "${item.name}". Use characteristic abbreviations or power names separated by commas. ${item.XMLID === "TRANSFER" ? "Sources and targets should be separated by \" -> \"." : "" }`, {console: true, permanent: true});
             }
         }
 
