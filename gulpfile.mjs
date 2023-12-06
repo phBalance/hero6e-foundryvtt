@@ -33,17 +33,15 @@ function autoFixFilesByLint() {
 }
 const lintAutoFix = gulp.series(autoFixFilesByLint)
 
-const prettierDefaultConfig = { config: "./.prettier.json" }
-
 function validateFilesByPrettier() {
   return gulp.src(JAVASCRIPT_FILES)
-    .pipe(gulpPrettier.check(prettierDefaultConfig))
+    .pipe(gulpPrettier.check())
 }
 const prettier = gulp.series(validateFilesByPrettier)
 
 function autoFixFilesByPrettier() {
   return gulp.src(JAVASCRIPT_FILES)
-    .pipe(gulpPrettier(prettierDefaultConfig))
+    .pipe(gulpPrettier())
     .pipe(gulp.dest(file => file.base))
 }
 const prettierAutoFix = gulp.series(autoFixFilesByPrettier)
