@@ -36,7 +36,7 @@ You should be able to find the appropriate labeled tests in the `module/testing`
 
 ## Code Formatting
 
-We are in the process of trying to standardize the look of the code and making it harder to write incorrect code. We are doing this using [eslint](https://eslint.org/) and [prettier](https://prettier.io/). While the code is not yet totally lintified or prettied, every little bit helps. Try to leave the code in a better state than when you started. To validate the code, using eslint and prettier, you can run the following command:
+We are in the process of trying to standardize the look of the code and making it harder to write incorrect code. We are doing this using [eslint](https://eslint.org/) for linting/static analysis and [prettier](https://prettier.io/) for formatting. While the code is not yet totally lintified or prettied, every little bit helps. Try to leave the code in a better state than when you started. To validate the code, using eslint and prettier, you can run the following command:
 
 ```bash
 npm run validate
@@ -44,7 +44,7 @@ npm run validate
 
 ### Lint
 
-Linting does a static analysis on the code to find code mistakes. To check the lint status you can run and check the number of errors provided at the very end.
+Linting does a static analysis on the code to find code mistakes like using a variable name that is not defined. To check the lint status you can run and check the number of errors provided at the very end.
 
 ```bash
 npm run lint
@@ -52,7 +52,7 @@ npm run lint
 
 ### Prettier
 
-Prettier enforces a code standard. To check the status of your files you can run and check the number of errors provided:
+Prettier enforces a coding standard. To check the number of code formatting errors:
 
 ```bash
 npm run prettier
@@ -60,7 +60,7 @@ npm run prettier
 
 #### Prettier in your code editor
 
-Additionally, most likely your code editor will support the prettier enabling you to automatically pretty your code. For instance, with VSCode you can use [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode). It should, out of the box, use the same project settings for its rules. The only thing you will have to do is to setup your editor to auto format your code.
+Additionally, most likely your code editor will support the prettier, via an extension, enabling you to automatically pretty your code as you develop. For instance, with VSCode you can use [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode). The only thing you will have to do is to setup your editor to auto format your code using the configuration in the workspace/directory and you should never have code that is against the standard.
 
 ### Auto Fixing
 
@@ -68,4 +68,11 @@ Eslint and Prettier can do a reasonable job of fixing the formatting of your fil
 
 ```bash
 npm run autoFix
+```
+
+Alternatively you can run one or the other:
+
+```bash
+npm run lint:fix
+npm run prettier:fix
 ```
