@@ -492,7 +492,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         const edAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edContentsAttack), { temporary: true })
         await edAttack._postUpload()
 
-        let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
+        let [defenseValueE, resistantValueE, /* impenetrableValueE */, damageReductionValueE, damageNegationValueE, /* knockbackResistanceE */, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
         defense.ED = defenseValueE
         defense.rED = resistantValueE
         defense.EDtags = "ENERGY DEFENSE\n";

@@ -353,47 +353,6 @@ Hooks.once("ready", async function () {
 
 });
 
-
-async function migrateActorDefenseMovementData(actor) {
-    let itemsToDelete = []
-
-    // Place a migrationTag in the actor with today's date.
-    // This allows us to skip this migration in the future.
-    // Specifically it allows custom defenses to be manually added
-    // without deleting it eveytime world loads.
-    //if (actor.system.migrationTag != migrationTag) {
-    for (let item of actor.items.filter(o => o.type == 'defense' || o.type == 'movement')) {
-
-        // Try not to delete items that have been manually created.
-        // We can make an educated guess by looking for XMLID
-        if (item.system.xmlid || item.system.XMLID || item.system.rules == "COMBAT_LUCK" || item.type == 'movement') {
-            itemsToDelete.push(item.id)
-        }
-    }
-
-    // Apply AE to movement items
-    let itemsToCreate = []
-    for (let item of actor.items) {
-        const configPowerInfo = getPowerInfo({ item: item })
-        if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
-
-            // You can't just add AE to items owned by actor. A flaw in Foundry v10.
-            // So we will create a new item with proper AE, then delete the old item.
-            let itemData = item.toJSON()
-            itemData.system.active = true
-            createEffects(itemData, actor)
-            itemsToCreate.push(itemData)
-            itemsToDelete.push(item.id)
-        }
-    }
-
-    await actor.deleteEmbeddedDocuments("Item", itemsToDelete)
-    await HeroSystem6eItem.create(itemsToCreate, { parent: actor })
-
-    return (itemsToDelete.length > 0)
-}
-
-
 // Remove Character from selectable actor types
 Hooks.on("renderDialog", (dialog, html) => {
     if (html[0].querySelector(".window-title").textContent != "Create New Actor") return

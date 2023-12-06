@@ -172,9 +172,9 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async _preUpdate(changed, options, userId) {
-        let data = await super._preUpdate(changed, options, userId)
+        await super._preUpdate(changed, options, userId)
 
-        // Forwrd changed date to _onUpdate.
+        // Forward changed date to _onUpdate.
         // _preUpdate only seems to run for GM or one user which
         // results in _displayScrollingChange only showing for those users.
         // Where as _onUpdate runs for all users.
@@ -551,29 +551,24 @@ export class HeroSystem6eActor extends Actor {
             // Is actor encumbered?
             let dcvDex = 0;
             let move = 0;
-            let end = 0;
             if (encumbrance / strLiftKg >= 0.1) {
                 dcvDex = -1;
             }
             if (encumbrance / strLiftKg >= 0.25) {
                 dcvDex = -2;
                 move = -2;
-                end = 1;
             }
             if (encumbrance / strLiftKg >= 0.50) {
                 dcvDex = -3;
                 move = -4;
-                end = 2;
             }
             if (encumbrance / strLiftKg >= 0.75) {
                 dcvDex = -4;
                 move = -8;
-                end = 3;
             }
             if (encumbrance / strLiftKg >= 0.90) {
                 dcvDex = -5;
                 move = -16;
-                end = 4;
             }
 
             const name = `Encumbered ${Math.floor(encumbrance / strLiftKg * 100)}%`
