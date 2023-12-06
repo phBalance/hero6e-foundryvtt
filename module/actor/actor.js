@@ -82,7 +82,7 @@ export class HeroSystem6eActor extends Actor {
 
 
 
-        const newEffect = deepClone(activeEffect)
+        const newEffect = foundry.utils.deepClone(activeEffect)
         newEffect.label = `${game.i18n.localize(newEffect.label)}`
 
 

@@ -20,7 +20,7 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from './utility/util.js'
-import { createEffects, updateItemDescription } from "./utility/upload_hdc.js"
+import { updateItemDescription } from "./utility/upload_hdc.js"
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
 import { migrateWorld } from "./migration.js"
 
