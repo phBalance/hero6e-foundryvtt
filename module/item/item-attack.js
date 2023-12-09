@@ -1806,7 +1806,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     let damageRenderedResult = await newRoll.render();
 
     // Attack may have additional effects, such as those from martial arts
-    let effectsFinal = foundry.util.deepClone(damageDetail.effects);
+    let effectsFinal = foundry.utils.deepClone(damageDetail.effects);
     if (item.system.effect) {
         for (const effect of item.system.effect.split(",")) {
             // Do not include [NORMALDC] strike and similar
@@ -2170,7 +2170,7 @@ async function _onApplyAdjustmentToSpecificToken(
 
                     if (item.system.XMLID === "TRANSFER" && keyY) {
                         let activeEffectY =
-                            foundry.util.deepClone(activeEffect);
+                            foundry.utils.deepClone(activeEffect);
                         activeEffectY.id = `${item.system.XMLID}.${item.id}.${keyY}`;
                         activeEffectY.name = `${item.system.XMLID} +${parseInt(
                             levelsY,
