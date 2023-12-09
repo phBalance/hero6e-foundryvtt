@@ -18,6 +18,12 @@ Install the npm packages used for building the project:
 npm ci
 ```
 
+Setup your local git repository to use the `.git-blame-ignore-revs` file so that you can ignore specific changes which made large non functional modifications to the source when using `git blame`. As documented in the `.git-blame-ignore-revs` file you want to run:
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 ## Building the Module
 
 This Foundry VTT system can be built using:
