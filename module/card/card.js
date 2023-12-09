@@ -1,8 +1,7 @@
 import { HeroSystem6eItem } from "../item/item.js";
 
 export class HeroSystem6eCard {
-    constructor() {
-    }
+    constructor() {}
 
     async init(card) {
         this.cardData = card;
@@ -17,14 +16,20 @@ export class HeroSystem6eCard {
         // Get the Item from stored flag data or by the item ID on the Actor
         const storedData = this.message.flags?.hero?.itemData;
 
-        this.item = storedData ? new HeroSystem6eItem(storedData, { parent: this.actor }) : this.actor.items.get(this.cardData.dataset.itemId);
+        this.item = storedData
+            ? new HeroSystem6eItem(storedData, { parent: this.actor })
+            : this.actor.items.get(this.cardData.dataset.itemId);
         if (!this.item) {
             return ui.notifications.error("Error: Item does not exist");
         }
     }
 
     static chatListeners(html) {
-        html.on('click', '.item-name', this._onChatCardToggleContent.bind(this));
+        html.on(
+            "click",
+            ".item-name",
+            this._onChatCardToggleContent.bind(this),
+        );
     }
 
     /**
@@ -37,7 +42,8 @@ export class HeroSystem6eCard {
         const header = event.currentTarget;
         const card = header.closest(".chat-card");
         const content = card.querySelector(".card-content");
-        content.style.display = content.style.display === "none" ? "block" : "none";
+        content.style.display =
+            content.style.display === "none" ? "block" : "none";
     }
 
     /**
@@ -68,8 +74,9 @@ export class HeroSystem6eCard {
      * @private
      */
     static _getChatCardTargets() {
-        let targets = canvas.tokens.controlled.filter(t => !!t.actor);
-        if (!targets.length && game.user.character) targets = targets.concat(game.user.character.getActiveTokens());
+        let targets = canvas.tokens.controlled.filter((t) => !!t.actor);
+        if (!targets.length && game.user.character)
+            targets = targets.concat(game.user.character.getActiveTokens());
         if (!targets.length) ui.notifications.warn("Error: No tokens selected");
         return targets;
     }
@@ -80,7 +87,10 @@ export class HeroSystem6eCard {
 
     async refresh() {
         let html = await this.render();
-        await this.message.update({ content: html, flags: this.message.data.flags });
+        await this.message.update({
+            content: html,
+            flags: this.message.data.flags,
+        });
     }
 
     static async setCardStateAsync(button) {
@@ -88,7 +98,7 @@ export class HeroSystem6eCard {
 
         let actor = await this._getChatCardActor(card);
 
-        if (button.getAttribute('data-action') == 'damage-apply') {
+        if (button.getAttribute("data-action") == "damage-apply") {
             actor = await this._getChatCardTarget(card);
         }
 
@@ -104,7 +114,9 @@ export class HeroSystem6eCard {
         let state = false;
 
         // Remove an existing effect
-        const existing = target.effects.find(e => e.getFlag("core", "statusId") === effectData.id);
+        const existing = target.effects.find(
+            (e) => e.getFlag("core", "statusId") === effectData.id,
+        );
         if (existing) {
             await existing.delete();
             // FIXME: The duplicate call is temporarily needed to de-dupe legacy tokens. Remove in 0.9.0
@@ -129,7 +141,9 @@ export class HeroSystem6eCard {
         let state = false;
 
         // Remove an existing effect
-        const existing = target.effects.find(e => e.getFlag("core", "statusId") === effectData.id);
+        const existing = target.effects.find(
+            (e) => e.getFlag("core", "statusId") === effectData.id,
+        );
         if (existing) {
             await existing.delete();
             // FIXME: The duplicate call is temporarily needed to de-dupe legacy tokens. Remove in 0.9.0
@@ -147,10 +161,14 @@ export class HeroSystem6eCard {
         let state = false;
 
         // Remove an existing effect
-        const existing = target.effects.find(e => e.getFlag("core", "statusId") === effectData.id);
+        const existing = target.effects.find(
+            (e) => e.getFlag("core", "statusId") === effectData.id,
+        );
         if (!existing) {
             const createData = foundry.utils.deepClone(effectData);
-            createData.name = game.i18n.localize(effectData.name || effectData.label);
+            createData.name = game.i18n.localize(
+                effectData.name || effectData.label,
+            );
             createData["flags.core.statusId"] = effectData.id;
             delete createData.id;
             const cls = getDocumentClass("ActiveEffect");

@@ -4,7 +4,7 @@ export function registerFullTests(quench) {
     quench.registerBatch(
         "quench.utils.full",
         (context) => {
-            const { assert, before, describe, it } = context
+            const { assert, before, describe, it } = context;
 
             describe("Characteristics 5e simple", function () {
                 const contents = `
@@ -85,179 +85,191 @@ export function registerFullTests(quench) {
                     <DISADVANTAGES />
                     <EQUIPMENT />
                     </CHARACTER>
-                `
+                `;
 
-                let actor
+                let actor;
 
                 before(async () => {
-                    actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true })
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
-                    await actor.uploadFromXml(contents)
-                })
+                    await actor.uploadFromXml(contents);
+                });
 
                 it("name", async function () {
-                    console.log("name")
-                    assert.equal(actor.name, "5e superhero simple")
-                })
+                    console.log("name");
+                    assert.equal(actor.name, "5e superhero simple");
+                });
 
                 it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 11)
-                })
+                    assert.equal(actor.system.characteristics.str.max, 11);
+                });
                 it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, 1)
-                })
+                    assert.equal(actor.system.characteristics.str.realCost, 1);
+                });
 
                 it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 12)
-                })
+                    assert.equal(actor.system.characteristics.dex.max, 12);
+                });
                 it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, 6)
-                })
+                    assert.equal(actor.system.characteristics.dex.realCost, 6);
+                });
 
                 it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 13)
-                })
+                    assert.equal(actor.system.characteristics.con.max, 13);
+                });
                 it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, 6)
-                })
+                    assert.equal(actor.system.characteristics.con.realCost, 6);
+                });
 
                 it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 14)
-                })
+                    assert.equal(actor.system.characteristics.body.max, 14);
+                });
                 it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, 8)
-                })
+                    assert.equal(actor.system.characteristics.body.realCost, 8);
+                });
 
                 it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 15)
-                })
+                    assert.equal(actor.system.characteristics.int.max, 15);
+                });
                 it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, 5)
-                })
+                    assert.equal(actor.system.characteristics.int.realCost, 5);
+                });
 
                 it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 16)
-                })
+                    assert.equal(actor.system.characteristics.ego.max, 16);
+                });
                 it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, 12)
-                })
+                    assert.equal(actor.system.characteristics.ego.realCost, 12);
+                });
 
                 it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 17)
-                })
+                    assert.equal(actor.system.characteristics.pre.max, 17);
+                });
                 it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, 7)
-                })
+                    assert.equal(actor.system.characteristics.pre.realCost, 7);
+                });
 
                 it("com.max", async function () {
-                    assert.equal(actor.system.characteristics.com.max, 18)
-                })
+                    assert.equal(actor.system.characteristics.com.max, 18);
+                });
                 it("com.realCost", async function () {
-                    assert.equal(actor.system.characteristics.com.realCost, 4)
-                })
+                    assert.equal(actor.system.characteristics.com.realCost, 4);
+                });
 
                 it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.pd.max, 2);
+                });
                 it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.pd.realCost, 0);
+                });
 
                 it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 3)
-                })
+                    assert.equal(actor.system.characteristics.ed.max, 3);
+                });
                 it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.ed.realCost, 0);
+                });
 
                 it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 4)
-                })
+                    assert.equal(actor.system.characteristics.spd.max, 4);
+                });
                 it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 18)
-                })
+                    assert.equal(actor.system.characteristics.spd.realCost, 18);
+                });
 
                 it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.rec.max, 5);
+                });
                 it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.rec.realCost, 0);
+                });
 
                 it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 26)
-                })
+                    assert.equal(actor.system.characteristics.end.max, 26);
+                });
                 it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.end.realCost, 0);
+                });
 
                 it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 27)
-                })
+                    assert.equal(actor.system.characteristics.stun.max, 27);
+                });
                 it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.stun.realCost, 0);
+                });
 
                 it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 4)
-                })
+                    assert.equal(actor.system.characteristics.ocv.max, 4);
+                });
                 it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                });
 
                 it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 4)
-                })
+                    assert.equal(actor.system.characteristics.dcv.max, 4);
+                });
                 it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                });
 
                 it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.omcv.max, 5);
+                });
                 it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                });
 
                 it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.max, 5);
+                });
                 it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                });
 
                 it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 27)
-                })
+                    assert.equal(actor.system.characteristics.running.max, 27);
+                });
                 it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 42)
-                })
+                    assert.equal(
+                        actor.system.characteristics.running.realCost,
+                        42,
+                    );
+                });
 
                 it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 28)
-                })
+                    assert.equal(actor.system.characteristics.swimming.max, 28);
+                });
                 it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 26)
-                })
+                    assert.equal(
+                        actor.system.characteristics.swimming.realCost,
+                        26,
+                    );
+                });
 
                 it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 29)
-                })
+                    assert.equal(actor.system.characteristics.leaping.max, 29);
+                });
                 it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 27)
-                })
+                    assert.equal(
+                        actor.system.characteristics.leaping.realCost,
+                        27,
+                    );
+                });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, 162)
-                })
+                    assert.equal(actor.system.realCost, 162);
+                });
 
                 it("activePoints", async function () {
-                    assert.equal(actor.system.activePoints, 162)
-                })
-            })
+                    assert.equal(actor.system.activePoints, 162);
+                });
+            });
 
             describe("Characteristics 5e buyback", function () {
                 const contents = `
@@ -338,180 +350,202 @@ export function registerFullTests(quench) {
                   <DISADVANTAGES />
                   <EQUIPMENT />
                 </CHARACTER>
-                `
+                `;
 
-                let actor 
-                
+                let actor;
+
                 before(async () => {
-                    actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true })
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
-                    await actor.uploadFromXml(contents)
-                })
+                    await actor.uploadFromXml(contents);
+                });
 
                 it("name", async function () {
-                    assert.equal(actor.name, "5e superhero")
-                })
+                    assert.equal(actor.name, "5e superhero");
+                });
 
                 it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.str.max, 5);
+                });
                 it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, -5)
-                })
+                    assert.equal(actor.system.characteristics.str.realCost, -5);
+                });
 
                 it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.dex.max, 5);
+                });
                 it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, -15)
-                })
+                    assert.equal(
+                        actor.system.characteristics.dex.realCost,
+                        -15,
+                    );
+                });
 
                 it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.con.max, 5);
+                });
                 it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, -10)
-                })
+                    assert.equal(
+                        actor.system.characteristics.con.realCost,
+                        -10,
+                    );
+                });
 
                 it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.body.max, 5);
+                });
                 it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, -10)
-                })
+                    assert.equal(
+                        actor.system.characteristics.body.realCost,
+                        -10,
+                    );
+                });
 
                 it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.int.max, 5);
+                });
                 it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, -5)
-                })
+                    assert.equal(actor.system.characteristics.int.realCost, -5);
+                });
 
                 it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.ego.max, 5);
+                });
                 it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, -10)
-                })
+                    assert.equal(
+                        actor.system.characteristics.ego.realCost,
+                        -10,
+                    );
+                });
 
                 it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.pre.max, 5);
+                });
                 it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, -5)
-                })
+                    assert.equal(actor.system.characteristics.pre.realCost, -5);
+                });
 
                 it("com.max", async function () {
-                    assert.equal(actor.system.characteristics.com.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.com.max, 5);
+                });
                 it("com.realCost", async function () {
-                    assert.equal(actor.system.characteristics.com.realCost, -2)
-                })
+                    assert.equal(actor.system.characteristics.com.realCost, -2);
+                });
 
                 it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 1)
-                })
+                    assert.equal(actor.system.characteristics.pd.max, 1);
+                });
                 it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.pd.realCost, 0);
+                });
 
                 it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 0)
-                })
+                    assert.equal(actor.system.characteristics.ed.max, 0);
+                });
                 it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, -1)
-                })
+                    assert.equal(actor.system.characteristics.ed.realCost, -1);
+                });
 
                 it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 1)
-                })
+                    assert.equal(actor.system.characteristics.spd.max, 1);
+                });
                 it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.spd.realCost, 0);
+                });
 
                 it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.rec.max, 2);
+                });
                 it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.rec.realCost, 0);
+                });
 
                 it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.end.max, 10);
+                });
                 it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.end.realCost, 0);
+                });
 
                 it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 11)
-                })
+                    assert.equal(actor.system.characteristics.stun.max, 11);
+                });
                 it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.stun.realCost, 0);
+                });
 
                 it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.ocv.max, 2);
+                });
                 it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                });
 
                 it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.dcv.max, 2);
+                });
                 it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                });
 
                 it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.omcv.max, 2);
+                });
                 it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                });
 
                 it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.max, 2);
+                });
                 it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                });
 
                 it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 6)
-                })
+                    assert.equal(actor.system.characteristics.running.max, 6);
+                });
                 it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.running.realCost,
+                        0,
+                    );
+                });
 
                 it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.swimming.max, 2);
+                });
                 it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.swimming.realCost,
+                        0,
+                    );
+                });
 
                 it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 1)
-                })
+                    assert.equal(actor.system.characteristics.leaping.max, 1);
+                });
                 it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.leaping.realCost,
+                        0,
+                    );
+                });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, -63)
-                })
+                    assert.equal(actor.system.realCost, -63);
+                });
 
                 it("activePoints", async function () {
-                    assert.equal(actor.system.activePoints, -63)
-                })
-
-            })
-
+                    assert.equal(actor.system.activePoints, -63);
+                });
+            });
 
             describe("Enforcer", function () {
                 const contents = `
@@ -810,176 +844,192 @@ export function registerFullTests(quench) {
                 </DISADVANTAGES>
                 <EQUIPMENT />
                 </CHARACTER>
-                `
+                `;
 
-                let actor
+                let actor;
 
                 before(async () => {
-                    actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true })
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
-                    await actor.uploadFromXml(contents)
-                })
+                    await actor.uploadFromXml(contents);
+                });
 
                 it("name", async function () {
-                    assert.equal(actor.name, "Enforcer")
-                })
+                    assert.equal(actor.name, "Enforcer");
+                });
 
                 it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 55)
-                })
+                    assert.equal(actor.system.characteristics.str.max, 55);
+                });
                 it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, 45)
-                })
+                    assert.equal(actor.system.characteristics.str.realCost, 45);
+                });
 
                 it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 20)
-                })
+                    assert.equal(actor.system.characteristics.dex.max, 20);
+                });
                 it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, 30)
-                })
+                    assert.equal(actor.system.characteristics.dex.realCost, 30);
+                });
 
                 it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 35)
-                })
+                    assert.equal(actor.system.characteristics.con.max, 35);
+                });
                 it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, 50)
-                })
+                    assert.equal(actor.system.characteristics.con.realCost, 50);
+                });
 
                 it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 25)
-                })
+                    assert.equal(actor.system.characteristics.body.max, 25);
+                });
                 it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, 30)
-                })
+                    assert.equal(
+                        actor.system.characteristics.body.realCost,
+                        30,
+                    );
+                });
 
                 it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 15)
-                })
+                    assert.equal(actor.system.characteristics.int.max, 15);
+                });
                 it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, 5)
-                })
+                    assert.equal(actor.system.characteristics.int.realCost, 5);
+                });
 
                 it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 14)
-                })
+                    assert.equal(actor.system.characteristics.ego.max, 14);
+                });
                 it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, 8)
-                })
+                    assert.equal(actor.system.characteristics.ego.realCost, 8);
+                });
 
                 it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 22)
-                })
+                    assert.equal(actor.system.characteristics.pre.max, 22);
+                });
                 it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, 12)
-                })
+                    assert.equal(actor.system.characteristics.pre.realCost, 12);
+                });
 
                 it("com.max", async function () {
-                    assert.equal(actor.system.characteristics.com.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.com.max, 10);
+                });
                 it("com.realCost", async function () {
-                    assert.equal(actor.system.characteristics.com.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.com.realCost, 0);
+                });
 
                 it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 25)
-                })
+                    assert.equal(actor.system.characteristics.pd.max, 25);
+                });
                 it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 14)
-                })
+                    assert.equal(actor.system.characteristics.pd.realCost, 14);
+                });
 
                 it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 20)
-                })
+                    assert.equal(actor.system.characteristics.ed.max, 20);
+                });
                 it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, 13)
-                })
+                    assert.equal(actor.system.characteristics.ed.realCost, 13);
+                });
 
                 it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.spd.max, 5);
+                });
                 it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 20)
-                })
+                    assert.equal(actor.system.characteristics.spd.realCost, 20);
+                });
 
                 it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 21)
-                })
+                    assert.equal(actor.system.characteristics.rec.max, 21);
+                });
                 it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 6)
-                })
+                    assert.equal(actor.system.characteristics.rec.realCost, 6);
+                });
 
                 it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 85)
-                })
+                    assert.equal(actor.system.characteristics.end.max, 85);
+                });
                 it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 8)
-                })
+                    assert.equal(actor.system.characteristics.end.realCost, 8);
+                });
 
                 it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 125)
-                })
+                    assert.equal(actor.system.characteristics.stun.max, 125);
+                });
                 it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 54)
-                })
+                    assert.equal(
+                        actor.system.characteristics.stun.realCost,
+                        54,
+                    );
+                });
 
                 it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 7)
-                })
+                    assert.equal(actor.system.characteristics.ocv.max, 7);
+                });
                 it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                });
 
                 it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 7)
-                })
+                    assert.equal(actor.system.characteristics.dcv.max, 7);
+                });
                 it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                });
 
                 it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.omcv.max, 5);
+                });
                 it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                });
 
                 it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 5)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.max, 5);
+                });
                 it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                });
 
                 it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 8)  //8 + 5 (Active Effect)
-                })
+                    assert.equal(actor.system.characteristics.running.max, 8); //8 + 5 (Active Effect)
+                });
                 it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 4)
-                })
+                    assert.equal(
+                        actor.system.characteristics.running.realCost,
+                        4,
+                    );
+                });
 
                 it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.swimming.max, 2);
+                });
                 it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.swimming.realCost,
+                        0,
+                    );
+                });
 
                 it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 11)
-                })
+                    assert.equal(actor.system.characteristics.leaping.max, 11);
+                });
                 it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.leaping.realCost,
+                        0,
+                    );
+                });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, 657)
-                })
-            })
-
-
+                    assert.equal(actor.system.realCost, 657);
+                });
+            });
 
             describe("civilian6e", function () {
                 const contents = `
@@ -1070,168 +1120,180 @@ export function registerFullTests(quench) {
                 <EQUIPMENT />
                 <RULES name="HoTA" path="civilian6e.hdc" BASEPOINTS="175" DISADPOINTS="50" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="57" ATTACKAPMAXRESPONSE="1" DEFENSEAPMAXVALUE="35" DEFENSEAPMAXRESPONSE="1" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="1" AVAILDISADPOINTSRESPONSE="1" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="No" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
                 </CHARACTER>
-                `
+                `;
 
-                let actor
+                let actor;
 
                 before(async () => {
-                    actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true })
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
-                    await actor.uploadFromXml(contents)
-                })
+                    await actor.uploadFromXml(contents);
+                });
 
                 it("name", async function () {
-                    assert.equal(actor.name, "civilian6e")
-                })
+                    assert.equal(actor.name, "civilian6e");
+                });
 
                 it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.str.max, 10);
+                });
                 it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.str.realCost, 0);
+                });
 
                 it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.dex.max, 10);
+                });
                 it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dex.realCost, 0);
+                });
 
                 it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.con.max, 10);
+                });
                 it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.con.realCost, 0);
+                });
 
                 it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.body.max, 10);
+                });
                 it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.body.realCost, 0);
+                });
 
                 it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.int.max, 10);
+                });
                 it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.int.realCost, 0);
+                });
 
                 it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.ego.max, 10);
+                });
                 it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.ego.realCost, 0);
+                });
 
                 it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 10)
-                })
+                    assert.equal(actor.system.characteristics.pre.max, 10);
+                });
                 it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.pre.realCost, 0);
+                });
 
                 it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.pd.max, 2);
+                });
                 it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.pd.realCost, 0);
+                });
 
                 it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.ed.max, 2);
+                });
                 it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.ed.realCost, 0);
+                });
 
                 it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 2)
-                })
+                    assert.equal(actor.system.characteristics.spd.max, 2);
+                });
                 it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.spd.realCost, 0);
+                });
 
                 it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 4)
-                })
+                    assert.equal(actor.system.characteristics.rec.max, 4);
+                });
                 it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.rec.realCost, 0);
+                });
 
                 it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 20)
-                })
+                    assert.equal(actor.system.characteristics.end.max, 20);
+                });
                 it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.end.realCost, 0);
+                });
 
                 it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 20)
-                })
+                    assert.equal(actor.system.characteristics.stun.max, 20);
+                });
                 it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.stun.realCost, 0);
+                });
 
                 it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 3)
-                })
+                    assert.equal(actor.system.characteristics.ocv.max, 3);
+                });
                 it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                });
 
                 it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 3)
-                })
+                    assert.equal(actor.system.characteristics.dcv.max, 3);
+                });
                 it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                });
 
                 it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 3)
-                })
+                    assert.equal(actor.system.characteristics.omcv.max, 3);
+                });
                 it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                });
 
                 it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 3)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.max, 3);
+                });
                 it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0)
-                })
+                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                });
 
                 it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 12) 
-                })
+                    assert.equal(actor.system.characteristics.running.max, 12);
+                });
                 it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.running.realCost,
+                        0,
+                    );
+                });
 
                 it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 4)
-                })
+                    assert.equal(actor.system.characteristics.swimming.max, 4);
+                });
                 it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.swimming.realCost,
+                        0,
+                    );
+                });
 
                 it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 4)
-                })
+                    assert.equal(actor.system.characteristics.leaping.max, 4);
+                });
                 it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 0)
-                })
+                    assert.equal(
+                        actor.system.characteristics.leaping.realCost,
+                        0,
+                    );
+                });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, 0)
-                })
-            })
+                    assert.equal(actor.system.realCost, 0);
+                });
+            });
         },
-        { displayName: "HERO: Full Character Tests" }
-    )
+        { displayName: "HERO: Full Character Tests" },
+    );
 }

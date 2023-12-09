@@ -1,8 +1,9 @@
-const scrollIntoViewOptions = { block: "center" }
+const scrollIntoViewOptions = { block: "center" };
 
 export class HeroSystem6eCombatTracker extends CombatTracker {
     static get defaultOptions() {
-        var path = "systems/hero6efoundryvttv2/templates/combat/combat-tracker.hbs";
+        var path =
+            "systems/hero6efoundryvttv2/templates/combat/combat-tracker.hbs";
         return foundry.utils.mergeObject(super.defaultOptions, {
             template: path,
         });
@@ -10,16 +11,25 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
     activateListeners(html) {
         super.activateListeners(html);
-        html.find('.segment-active').click(ev => this._onSegmentToggleContent(ev));
+        html.find(".segment-active").click((ev) =>
+            this._onSegmentToggleContent(ev),
+        );
     }
 
     async _onCombatControl(event) {
-        const target = event.target
-        if (["fas fa-step-backward", "fas fa-step-forward"].includes(target.className) && !event.shiftKey) {
-            return await ui.notifications.warn(`Changing turns is unusual. Hold SHIFT to change turn.`);
+        const target = event.target;
+        if (
+            ["fas fa-step-backward", "fas fa-step-forward"].includes(
+                target.className,
+            ) &&
+            !event.shiftKey
+        ) {
+            return await ui.notifications.warn(
+                `Changing turns is unusual. Hold SHIFT to change turn.`,
+            );
         }
 
-        await super._onCombatControl(event)
+        await super._onCombatControl(event);
     }
 
     _onSegmentToggleContent(event) {
@@ -28,7 +38,8 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         const header = event.currentTarget;
         const segment = header.closest(".segment-container");
         const content = segment.querySelector(".segment-content");
-        content.style.display = content.style.display === "none" ? "block" : "none";
+        content.style.display =
+            content.style.display === "none" ? "block" : "none";
     }
 
     async getData(options) {
@@ -38,50 +49,51 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         // Combatants in context.turns was altered (super) to include CSS, and possibly other stuff.
         for (let i = 1; i <= 12; i++) {
             if (!context.combat?.segments[i]) {
-                 break
+                break;
             }
 
             for (const _combatant of context.combat.segments[i]) {
-                const turn = _combatant.turn
+                const turn = _combatant.turn;
 
-                _combatant.css = context.turns[turn].css
-                _combatant.effects = context.turns[turn].effects
-                _combatant.canPing = context.turns[turn].canPing
-                _combatant.active = context.turns[turn].active
-                _combatant.hidden = context.turns[turn].hidden
+                _combatant.css = context.turns[turn].css;
+                _combatant.effects = context.turns[turn].effects;
+                _combatant.canPing = context.turns[turn].canPing;
+                _combatant.active = context.turns[turn].active;
+                _combatant.hidden = context.turns[turn].hidden;
             }
         }
 
         if (context.combat) {
-
             // Active Segment is expanded, all others are collapsed
             context.activeSegments = [];
             for (let i = 1; i <= 12; i++) {
-                context.activeSegments[i] = (context.combat.turn === null && i === 12) || (context.combat?.combatant && context.combat.combatant.segment === i);
+                context.activeSegments[i] =
+                    (context.combat.turn === null && i === 12) ||
+                    (context.combat?.combatant &&
+                        context.combat.combatant.segment === i);
             }
             context.segments = context.combat.segments;
-
         }
 
         return context;
     }
 
     /**
-   * Scroll the combat log container to ensure the current Combatant turn is centered vertically
-   */
+     * Scroll the combat log container to ensure the current Combatant turn is centered vertically
+     */
     scrollToTurn() {
         //console.log("scrollToTurn");
         const combat = this.viewed;
-        if (!combat || (combat.turn === null)) {
+        if (!combat || combat.turn === null) {
             return;
         }
 
         const active = this.element.find(".active")[0];
         if (!active) {
-            return
+            return;
         }
 
-        const container = active.closest("ol.directory-list");      
+        const container = active.closest("ol.directory-list");
 
         // Collapse all segments except for the one with the active combatant.
         // Scroll to segment header because it would be nice if it was in view.
@@ -91,7 +103,9 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             if (el) {
                 if (s === segment) {
                     el.style.display = "block";
-                    el.parentElement.querySelector("h3").scrollIntoView(scrollIntoViewOptions)
+                    el.parentElement
+                        .querySelector("h3")
+                        .scrollIntoView(scrollIntoViewOptions);
                 } else {
                     el.style.display = "none";
                 }
@@ -99,9 +113,9 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         }
 
         // Scroll active combatant into view.
-        let el = container.querySelector(`[data-turn-id="${combat.turn}"]`)
+        let el = container.querySelector(`[data-turn-id="${combat.turn}"]`);
         if (el) {
-            el.scrollIntoView(scrollIntoViewOptions)
+            el.scrollIntoView(scrollIntoViewOptions);
         }
     }
 }

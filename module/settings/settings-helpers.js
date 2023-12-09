@@ -11,7 +11,7 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: true,
-            onChange: value => HEROSYS.log(false, value)
+            onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "use endurance", {
@@ -20,7 +20,7 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: true,
-            onChange: value => HEROSYS.log(false, value)
+            onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "knockback", {
@@ -29,7 +29,7 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            onChange: value => HEROSYS.log(false, value)
+            onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "hit locations", {
@@ -38,7 +38,7 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            onChange: value => HEROSYS.log(false, value)
+            onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "hitLocTracking", {
@@ -48,10 +48,10 @@ export default class SettingsHelpers {
             type: String,
             choices: {
                 none: "Don't track",
-                all: "Track for all"
+                all: "Track for all",
             },
             default: "none",
-            onChange: value => HEROSYS.log(false, value)
+            onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "optionalManeuvers", {
@@ -60,7 +60,7 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            onChange: value => HEROSYS.log(false, value)
+            onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "equipmentWeightPercentage", {
@@ -72,21 +72,21 @@ export default class SettingsHelpers {
             range: {
                 min: 0,
                 max: 200,
-                step: 10
+                step: 10,
             },
             default: 100,
             onChange: () => {
                 for (let actor of game.actors.contents) {
-                    actor.applyEncumbrancePenalty()
+                    actor.applyEncumbrancePenalty();
                 }
                 for (const scene of game.scenes.contents) {
                     for (const token of scene.tokens) {
                         if (!token.actorLink && token.actor) {
-                            token.actor.applyEncumbrancePenalty()
+                            token.actor.applyEncumbrancePenalty();
                         }
                     }
                 }
-            }
+            },
         });
 
         game.settings.register(module, "automation", {
@@ -98,10 +98,10 @@ export default class SettingsHelpers {
                 none: "No Automation",
                 npcOnly: "NPCs Only (end, stun, body)",
                 pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
-                all: "PCs and NPCs (end, stun, body)"
+                all: "PCs and NPCs (end, stun, body)",
             },
             default: "all",
-            onChange: value => HEROSYS.log(false, value)
+            onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "alphaTesting", {
@@ -119,12 +119,10 @@ export default class SettingsHelpers {
         game.settings.register(module, "lastMigration", {
             name: "Last Migration",
             scope: "world",
-            config: game.settings.get(game.system.id, 'alphaTesting'),
+            config: game.settings.get(game.system.id, "alphaTesting"),
             type: String,
-            default: '1.0.0',
+            default: "1.0.0",
             requiresReload: true,
         });
-
     }
 }
-

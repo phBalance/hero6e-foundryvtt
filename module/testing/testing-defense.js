@@ -1,12 +1,12 @@
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
-import { determineDefense } from "../utility/defense.js"
+import { determineDefense } from "../utility/defense.js";
 
 export function registerDefenseTests(quench) {
     quench.registerBatch(
         "quench.utils.defense",
         (context) => {
-            const { describe, it, assert } = context
+            const { describe, it, assert } = context;
 
             describe("Resistant Protection", function () {
                 it("rPD 1", async function () {
@@ -15,23 +15,32 @@ export function registerDefenseTests(quench) {
                         <NOTES />
                         </POWER>
                     `;
-                    let actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true });
+                    let actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
                     const contentsAttack = `
                         <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         </POWER>
-                    `
-                    const itemDefense = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
-                    await itemDefense._postUpload()
-                    actor.items.set(itemDefense.system.XMLID, itemDefense)
+                    `;
+                    const itemDefense = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true },
+                    );
+                    await itemDefense._postUpload();
+                    actor.items.set(itemDefense.system.XMLID, itemDefense);
 
-                    const itemAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack), { temporary: true })
-                    await itemAttack._postUpload()
+                    const itemAttack = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        { temporary: true },
+                    );
+                    await itemAttack._postUpload();
 
-                    const defense = determineDefense(actor, itemAttack)
+                    const defense = determineDefense(actor, itemAttack);
                     assert.equal(defense[1], 1);
                 });
 
@@ -41,23 +50,32 @@ export function registerDefenseTests(quench) {
                         <NOTES />
                         </POWER>
                     `;
-                    let actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true });
+                    let actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
                     const contentsAttack = `
                         <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         </POWER>
-                    `
-                    const itemDefense = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
-                    await itemDefense._postUpload()
-                    actor.items.set(itemDefense.system.XMLID, itemDefense)
+                    `;
+                    const itemDefense = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true },
+                    );
+                    await itemDefense._postUpload();
+                    actor.items.set(itemDefense.system.XMLID, itemDefense);
 
-                    const itemAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack), { temporary: true })
-                    await itemAttack._postUpload()
+                    const itemAttack = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        { temporary: true },
+                    );
+                    await itemAttack._postUpload();
 
-                    const defense = determineDefense(actor, itemAttack)
+                    const defense = determineDefense(actor, itemAttack);
                     assert.equal(defense[1], 2);
                 });
 
@@ -67,25 +85,33 @@ export function registerDefenseTests(quench) {
                         <NOTES />
                         </POWER>
                     `;
-                    let actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true });
+                    let actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
                     const contentsAttack = `
                         <POWER XMLID="EGOATTACK" ID="1695575160315" BASECOST="0.0" LEVELS="1" ALIAS="Mental Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
                         </POWER>
-                    `
-                    const itemDefense = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
-                    await itemDefense._postUpload()
-                    actor.items.set(itemDefense.system.XMLID, itemDefense)
+                    `;
+                    const itemDefense = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true },
+                    );
+                    await itemDefense._postUpload();
+                    actor.items.set(itemDefense.system.XMLID, itemDefense);
 
+                    const itemAttack = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        { temporary: true },
+                    );
+                    await itemAttack._postUpload();
 
-                    const itemAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack), { temporary: true })
-                    await itemAttack._postUpload()
-
-                    const defense = determineDefense(actor, itemAttack)
+                    const defense = determineDefense(actor, itemAttack);
                     assert.equal(defense[1], 3);
                 });
 
@@ -95,31 +121,38 @@ export function registerDefenseTests(quench) {
                     <NOTES />
                     </POWER>
                 `;
-                    let actor = new HeroSystem6eActor({
-                        name: 'Quench Actor',
-                        type: 'pc',
-                    }, { temporary: true });
+                    let actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
 
                     const contentsAttack = `
                     <POWER XMLID="DRAIN" ID="1695576093210" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                     <NOTES />
                     </POWER>
-                `
-                    const itemDefense = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents), { temporary: true })
-                    await itemDefense._postUpload()
-                    actor.items.set(itemDefense.system.XMLID, itemDefense)
+                `;
+                    const itemDefense = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true },
+                    );
+                    await itemDefense._postUpload();
+                    actor.items.set(itemDefense.system.XMLID, itemDefense);
 
-                    const itemAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contentsAttack), { temporary: true })
+                    const itemAttack = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        { temporary: true },
+                    );
 
-                    await itemAttack._postUpload()
+                    await itemAttack._postUpload();
 
-                    const defense = determineDefense(actor, itemAttack)
+                    const defense = determineDefense(actor, itemAttack);
                     assert.equal(defense[1], 4);
                 });
-
-
             });
         },
-        { displayName: "HERO: Defense" }
+        { displayName: "HERO: Defense" },
     );
 }

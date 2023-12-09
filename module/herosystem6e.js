@@ -3,7 +3,10 @@ import { HERO } from "./config.js";
 import { POWERS } from "./powers/powers-rules.js";
 import { HeroSystem6eActor } from "./actor/actor.js";
 import { HeroSystem6eActorSidebarSheet } from "./actor/actor-sidebar-sheet.js";
-import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-token.js";
+import {
+    HeroSystem6eToken,
+    HeroSystem6eTokenDocument,
+} from "./actor/actor-token.js";
 import { HeroSystem6eItem } from "./item/item.js";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.js";
 import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.js";
@@ -13,19 +16,18 @@ import { HeroSystem6eCardHelpers } from "./card/card-helpers.js";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.js";
 import HeroSystem6eMeasuredTemplate from "./measuretemplate.js";
 import { HeroSystem6eCombat } from "./combat.js";
-import { HeroSystem6eCombatTracker } from "./combatTracker.js"
+import { HeroSystem6eCombatTracker } from "./combatTracker.js";
 import SettingsHelpers from "./settings/settings-helpers.js";
 import { HeroSystem6eTokenHud } from "./bar3/tokenHud.js";
 import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
-import { getPowerInfo } from './utility/util.js'
-import { updateItemDescription } from "./utility/upload_hdc.js"
+import { getPowerInfo } from "./utility/util.js";
+import { updateItemDescription } from "./utility/upload_hdc.js";
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
-import { migrateWorld } from "./migration.js"
+import { migrateWorld } from "./migration.js";
 
-Hooks.once('init', async function () {
-
+Hooks.once("init", async function () {
     game.herosystem6e = {
         applications: {
             HeroSystem6eItemSheet,
@@ -34,12 +36,12 @@ Hooks.once('init', async function () {
             HeroSystem6eActor,
             HeroSystem6eItem,
             HeroSystem6eTokenDocument,
-            HeroSystem6eToken
+            HeroSystem6eToken,
         },
         macros: macros,
         rollItemMacro: rollItemMacro,
         CreateCustomAttack: CreateCustomAttack,
-        config: HERO
+        config: HERO,
     };
 
     CONFIG.HERO = HERO;
@@ -54,12 +56,13 @@ Hooks.once('init', async function () {
     CONFIG.ActiveEffect.legacyTransferral = false;
 
     /**
-    * Set an initiative formula for the system
-    * @type {String}
-    */
+     * Set an initiative formula for the system
+     * @type {String}
+     */
     CONFIG.Combat.initiative = {
-        formula: "@characteristics.dex.value + (@characteristics.int.value / 100)",
-        decimals: 2
+        formula:
+            "@characteristics.dex.value + (@characteristics.int.value / 100)",
+        decimals: 2,
     };
 
     // debug
@@ -75,7 +78,7 @@ Hooks.once('init', async function () {
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
-    HeroRuler.initialize()
+    HeroRuler.initialize();
 
     //HeroVisualEffects.initialize()
 
@@ -86,33 +89,39 @@ Hooks.once('init', async function () {
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
     // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheet);
-    Actors.registerSheet("herosystem6e", HeroSystem6eActorSidebarSheet, { makeDefault: true });
+    Actors.registerSheet("herosystem6e", HeroSystem6eActorSidebarSheet, {
+        makeDefault: true,
+    });
     Items.unregisterSheet("core", ItemSheet);
-    Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, { makeDefault: true });
-    Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, { makeDefault: false });
+    Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
+        makeDefault: true,
+    });
+    Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, {
+        makeDefault: false,
+    });
 
     // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheetMini, { makeDefault: false });
 
     // If you need to add Handlebars helpers, here are a few useful examples:
-    Handlebars.registerHelper('concat', function () {
-        var outStr = '';
+    Handlebars.registerHelper("concat", function () {
+        var outStr = "";
         for (var arg in arguments) {
-            if (typeof arguments[arg] != 'object') {
+            if (typeof arguments[arg] != "object") {
                 outStr += arguments[arg];
             }
         }
         return outStr;
     });
 
-    Handlebars.registerHelper('toLowerCase', function (str) {
+    Handlebars.registerHelper("toLowerCase", function (str) {
         return str.toLowerCase();
     });
 
-    Handlebars.registerHelper('toUpperCase', function (str) {
+    Handlebars.registerHelper("toUpperCase", function (str) {
         return str.toUpperCase();
     });
 
-    Handlebars.registerHelper('is_active_segment', function (actives, index) {
+    Handlebars.registerHelper("is_active_segment", function (actives, index) {
         return actives[index];
     });
 
@@ -123,16 +132,27 @@ Hooks.once('init', async function () {
         `systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs`,
         `systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs`,
     ]);
-
 });
 
 Hooks.once("ready", async function () {
     // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
-    Hooks.on("hotbarDrop", (bar, data, slot) => createHeroSystem6eMacro(bar, data, slot));
+    Hooks.on("hotbarDrop", (bar, data, slot) =>
+        createHeroSystem6eMacro(bar, data, slot),
+    );
 
-    if (typeof SimpleCalendar != "undefined" && game.user.isGM && SimpleCalendar.api.getCurrentCalendar().general.gameWorldTimeIntegration != "mixed") {
-        console.log(SimpleCalendar.api.getCurrentCalendar().general.gameWorldTimeIntegration);
-        return ui.notifications.warn(`Recommend setting Simple Calendar GameWorldTimeIntegration = Mixed`);
+    if (
+        typeof SimpleCalendar != "undefined" &&
+        game.user.isGM &&
+        SimpleCalendar.api.getCurrentCalendar().general
+            .gameWorldTimeIntegration != "mixed"
+    ) {
+        console.log(
+            SimpleCalendar.api.getCurrentCalendar().general
+                .gameWorldTimeIntegration,
+        );
+        return ui.notifications.warn(
+            `Recommend setting Simple Calendar GameWorldTimeIntegration = Mixed`,
+        );
     }
 });
 
@@ -141,18 +161,22 @@ Hooks.on("renderChatMessage", (app, html, data) => {
     chat.displayChatActionButtons(app, html, data);
     HeroSystem6eCardHelpers.onMessageRendered(html);
 });
-Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
-Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
+Hooks.on("renderChatLog", (app, html) =>
+    HeroSystem6eCardHelpers.chatListeners(html),
+);
+Hooks.on("renderChatPopout", (app, html) =>
+    HeroSystem6eCardHelpers.chatListeners(html),
+);
 
 // When actor SPD is changed we need to setupTurns again
 Hooks.on("updateActor", () => {
     for (let combat of game.combats) {
-        combat.setupTurns()
+        combat.setupTurns();
     }
 });
 
-Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
-    registerPackageDebugFlag(HEROSYS.ID)
+Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
+    registerPackageDebugFlag(HEROSYS.ID);
 });
 
 export class HEROSYS {
@@ -161,18 +185,20 @@ export class HEROSYS {
     static module = "hero6efoundryvttv2";
 
     static log(force, ...args) {
-        const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
+        const shouldLog =
+            force || game.settings.get(game.system.id, "alphaTesting");
 
         if (shouldLog) {
-            console.log(this.ID, '|', ...args);
+            console.log(this.ID, "|", ...args);
         }
     }
 
     static trace(force, ...args) {
-        const shouldLog = force || game.settings.get(game.system.id, 'alphaTesting')
+        const shouldLog =
+            force || game.settings.get(game.system.id, "alphaTesting");
 
         if (shouldLog) {
-            console.trace(this.ID, '|', ...args);
+            console.trace(this.ID, "|", ...args);
         }
     }
 }
@@ -189,32 +215,34 @@ export class HEROSYS {
  * @returns {Promise}
  */
 function createHeroSystem6eMacro(bar, data, slot) {
-
     // Check if we want to override the default macro (open sheet)
     if (data.type === "Item" && typeof data.uuid === "string") {
         const item = fromUuidSync(data.uuid);
         if (item.isRollable()) {
-            handleMacroCreation(bar, data, slot, item)
-            return false
+            handleMacroCreation(bar, data, slot, item);
+            return false;
         }
     }
 }
 
 async function handleMacroCreation(bar, data, slot, item) {
-    HEROSYS.log(false, "createHeroSystem6eMacro", item)
+    HEROSYS.log(false, "createHeroSystem6eMacro", item);
     if (!item) return;
     if (!item.roll) return;
 
     // Create the macro command
     const command = `game.herosystem6e.rollItemMacro("${item.name}", "${item.type}");`;
-    let macro = game.macros.find(m => m.command === command && m.name === item.name && m.img === item.img);
+    let macro = game.macros.find(
+        (m) =>
+            m.command === command && m.name === item.name && m.img === item.img,
+    );
     if (!macro) {
         macro = await Macro.create({
             name: item.name,
             type: "script",
             img: item.img,
             command: command,
-            flags: { "herosystem6e.itemMacro": true }
+            flags: { "herosystem6e.itemMacro": true },
         });
     }
     game.user.assignHotbarMacro(macro, slot);
@@ -263,26 +291,23 @@ async function CreateCustomAttack(actor) {
 
 </textarea>`,
         callback: async function (html) {
-
-            let value = html.find("textarea").val()
+            let value = html.find("textarea").val();
             try {
-                let json = JSON.parse(value)
+                let json = JSON.parse(value);
                 console.log(json);
-                json.type = 'attack';
+                json.type = "attack";
 
-
-                let item = await Item.create(json, { parent: actor })
+                let item = await Item.create(json, { parent: actor });
                 updateItemDescription(item);
-                return ui.notifications.info(`Added ${item.name} to ${actor.name}`);
-            }
-            catch (e) {
+                return ui.notifications.info(
+                    `Added ${item.name} to ${actor.name}`,
+                );
+            } catch (e) {
                 return ui.notifications.error(e);
             }
-        }
-    })
+        },
+    });
 }
-
-
 
 /**
  * Create a Macro from an Item drop.
@@ -295,40 +320,50 @@ function rollItemMacro(itemName, itemType) {
     let actor;
     if (speaker.token) actor = game.actors.tokens[speaker.token];
     if (!actor) actor = game.actors.get(speaker.actor);
-    let item = actor ? actor.items.find(i =>
-        i.name === itemName &&
-        (!itemType || i.type == itemType || i.system.subType == itemType)
-    ) : null;
+    let item = actor
+        ? actor.items.find(
+              (i) =>
+                  i.name === itemName &&
+                  (!itemType ||
+                      i.type == itemType ||
+                      i.system.subType == itemType),
+          )
+        : null;
 
     // The selected actor does not have an item with this name.
     if (!item) {
-        item = null
+        item = null;
         // Search all owned tokens for this item
         for (let token of canvas.tokens.ownedTokens) {
-            actor = token.actor
-            item = actor.items.find(i =>
-                i.name === itemName &&
-                (!itemType || i.type == itemType || i.system.subType == itemType)
-            )
+            actor = token.actor;
+            item = actor.items.find(
+                (i) =>
+                    i.name === itemName &&
+                    (!itemType ||
+                        i.type == itemType ||
+                        i.system.subType == itemType),
+            );
             if (item) {
                 break;
             }
         }
 
-        if (!item) return ui.notifications.warn(`Your controlled Actor does not have an ${itemType || 'item'} named ${itemName}`);
+        if (!item)
+            return ui.notifications.warn(
+                `Your controlled Actor does not have an ${
+                    itemType || "item"
+                } named ${itemName}`,
+            );
     }
-
 
     // Trigger the item roll
     return item.roll();
 }
 
-
 // The default Foundry cone angle is 53.13 degrees.
 // This will set the default angle to 60 degrees.
 // REF: https://github.com/dmdorman/hero6e-foundryvtt/issues/40
-Hooks.on("setup", () => CONFIG.MeasuredTemplate.defaults.angle = 60);
-
+Hooks.on("setup", () => (CONFIG.MeasuredTemplate.defaults.angle = 60));
 
 // Migration Script
 // For now we will migrate EVERY time
@@ -340,76 +375,80 @@ Hooks.once("ready", async function () {
     }
 
     // Check if we have already migrated
-    const lastMigration = game.settings.get(game.system.id, 'lastMigration')
+    const lastMigration = game.settings.get(game.system.id, "lastMigration");
 
-    if (foundry.utils.isNewerVersion(game.system.version.replace("-alpha", ""), lastMigration)) {
-
-        migrateWorld()
+    if (
+        foundry.utils.isNewerVersion(
+            game.system.version.replace("-alpha", ""),
+            lastMigration,
+        )
+    ) {
+        migrateWorld();
 
         // Update lastMigration
-        await game.settings.set(game.system.id, 'lastMigration', game.system.version.replace("-alpha", ""))
-
+        await game.settings.set(
+            game.system.id,
+            "lastMigration",
+            game.system.version.replace("-alpha", ""),
+        );
     }
-
 });
 
 // Remove Character from selectable actor types
 Hooks.on("renderDialog", (dialog, html) => {
-    if (html[0].querySelector(".window-title").textContent != "Create New Actor") return
-    let option = html[0].querySelector("option[value*='character']")
-    if (option) option.remove()
+    if (
+        html[0].querySelector(".window-title").textContent != "Create New Actor"
+    )
+        return;
+    let option = html[0].querySelector("option[value*='character']");
+    if (option) option.remove();
 
     // rename base2 to base
-    let base2 = html[0].querySelector("option[value*='base2']")
+    let base2 = html[0].querySelector("option[value*='base2']");
     if (base2) base2.text = base2.text.replace("2", "");
-})
+});
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
     //html.find('header h4').append(`<span>${data.actor.type.toUpperCase()}</span>`)
-    html.find('header h4').append(`<span>${game.system.version}</span>`)
+    html.find("header h4").append(`<span>${game.system.version}</span>`);
 
     let element = document.createElement("a");
-    element.setAttribute(`data-id`, data.actor.id)
+    element.setAttribute(`data-id`, data.actor.id);
     element.title = data.actor.type.toUpperCase().replace("2", "");
-    element.addEventListener('click', () => {
-        const actor = game.actors.get(event.target.dataset.id)
-        actor.ChangeType()
+    element.addEventListener("click", () => {
+        const actor = game.actors.get(event.target.dataset.id);
+        actor.ChangeType();
     });
 
-    element.innerHTML = `<i class="fal fa-user-robot"></i>Type`
+    element.innerHTML = `<i class="fal fa-user-robot"></i>Type`;
 
-
-    html.find('header h4').after(element);
+    html.find("header h4").after(element);
     // `<a class="header-button control configure-type" onclick=">
-    // <i class="fal fa-user-robot"></i>Type 
+    // <i class="fal fa-user-robot"></i>Type
     // </a>`)
-
-})
+});
 
 Hooks.on("renderItemSheet", (dialog, html) => {
-    html.find('header h4').append(`<span>${game.system.version}<span>`)
-})
+    html.find("header h4").append(`<span>${game.system.version}<span>`);
+});
 
 Hooks.on("getActorDirectoryEntryContext", (dialog, html) => {
-
-    console.log("getActorDirectoryEntryContext")
+    console.log("getActorDirectoryEntryContext");
     const menu = {
-        "name": "Change Type",
-        "icon": "<i class=\"fas fa-cog\"></i>",
-        "callback": async function (target) {
-            const dataset = { ...target[0].dataset }
-            const actor = game.actors.get(dataset.entryId)
-            return actor.ChangeType()
+        name: "Change Type",
+        icon: '<i class="fas fa-cog"></i>',
+        callback: async function (target) {
+            const dataset = { ...target[0].dataset };
+            const actor = game.actors.get(dataset.entryId);
+            return actor.ChangeType();
         },
-    }
-    html.push(menu)
-})
-
+    };
+    html.push(menu);
+});
 
 //Modify TokenHUD (need 3 bars: end, stun, body)
 Hooks.on("renderTokenHUD", HeroSystem6eTokenHud);
 Hooks.on("renderTokenConfig", extendTokenConfig);
-
 
 // Expire ActiveEffects
 let secondsSinceRecovery = 0;
@@ -421,22 +460,24 @@ let lastDate = 0;
  * @param {object} options        Options passed from the requesting client where the change was made
  * @param {string} userId         The ID of the User who advanced the time
  */
-Hooks.on('updateWorldTime', async (worldTime, options) => {
+Hooks.on("updateWorldTime", async (worldTime, options) => {
     const start = new Date();
 
     // Guard
     if (!game.user.isGM) return;
     if (!lastDate) game.user.getFlag(game.system.id, "lastDate") || 0;
 
-
     let deltaSeconds = parseInt(options || 0);
     secondsSinceRecovery += deltaSeconds;
 
     const multiplier = Math.floor(secondsSinceRecovery / 12);
-    secondsSinceRecovery = Math.max(0, secondsSinceRecovery - secondsSinceRecovery * multiplier);
+    secondsSinceRecovery = Math.max(
+        0,
+        secondsSinceRecovery - secondsSinceRecovery * multiplier,
+    );
 
     // Charges and Body use days
-    const dt = new Date(worldTime * 1000)
+    const dt = new Date(worldTime * 1000);
     dt.setHours(0);
     dt.setMinutes(0);
     dt.setSeconds(0);
@@ -445,61 +486,77 @@ Hooks.on('updateWorldTime', async (worldTime, options) => {
 
     // All actors plus any unlinked actors in active scene
     let actors = Array.from(game.actors);
-    const currentTokens = game.scenes.current?.tokens || []
+    const currentTokens = game.scenes.current?.tokens || [];
     for (const token of currentTokens) {
-        if (token.actor && !actors.find(o => o.id === token.actor.id)) {
+        if (token.actor && !actors.find((o) => o.id === token.actor.id)) {
             actors.push(token.actor);
         }
     }
 
     for (let actor of actors) {
         // Create a natural body healing if needed (requires permissions)
-        const naturalBodyHealing = actor.temporaryEffects.find(o => o.flags.XMLID === "naturalBodyHealing");
-        if (actor.type === "pc" && !naturalBodyHealing && parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)) {
-            const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
-            const secondsPerBody = Math.floor(2.628e+6 / bodyPerMonth);
-            let activeEffect =
-            {
+        const naturalBodyHealing = actor.temporaryEffects.find(
+            (o) => o.flags.XMLID === "naturalBodyHealing",
+        );
+        if (
+            actor.type === "pc" &&
+            !naturalBodyHealing &&
+            parseInt(actor.system.characteristics.body.value) <
+                parseInt(actor.system.characteristics.body.max)
+        ) {
+            const bodyPerMonth = parseInt(
+                actor.system.characteristics.rec.value,
+            );
+            const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
+            let activeEffect = {
                 name: `Natural Body Healing (${bodyPerMonth}/month)`,
-                id: 'naturalBodyHealing',
-                icon: 'systems/hero6efoundryvttv2/icons/heartbeat.svg', //'icons/svg/regen.svg',
+                id: "naturalBodyHealing",
+                icon: "systems/hero6efoundryvttv2/icons/heartbeat.svg", //'icons/svg/regen.svg',
                 duration: {
                     seconds: secondsPerBody,
                 },
                 flags: {
                     XMLID: "naturalBodyHealing",
-                }
-            }
+                },
+            };
             if (game.user.isGM) await actor.addActiveEffect(activeEffect);
         }
-
 
         // Delete natural body healing when body value = max (typically by manual adjustment)
         // if (naturalBodyHealing && parseInt(actor.system.characteristics.body.value) >= parseInt(actor.system.characteristics.body.max)) {
         //     await naturalBodyHealing.delete();
         // }
 
-
         // Active Effects
         for (let ae of actor.temporaryEffects) {
-
-
             let fade = 0;
             let name = ae.name;
 
             // Determine XMLID, ITEM, ACTOR
             let origin = await fromUuid(ae.origin);
             let item = origin instanceof HeroSystem6eItem ? origin : null;
-            let aeActor = origin instanceof HeroSystem6eActor ? origin : item?.actor || actor;
+            let aeActor =
+                origin instanceof HeroSystem6eActor
+                    ? origin
+                    : item?.actor || actor;
             let XMLID = ae.flags.XMLID || item?.system?.XMLID;
 
-            let powerInfo = getPowerInfo({ actor: aeActor, xmlid: XMLID, item: item });
+            let powerInfo = getPowerInfo({
+                actor: aeActor,
+                xmlid: XMLID,
+                item: item,
+            });
 
-            if (!powerInfo && ae.statuses.size === 0 && game.user.isGM &&
-                game.settings.get(game.system.id, 'alphaTesting') &&
-                ae.duration?.seconds < 3.154e+7 * 100
+            if (
+                !powerInfo &&
+                ae.statuses.size === 0 &&
+                game.user.isGM &&
+                game.settings.get(game.system.id, "alphaTesting") &&
+                ae.duration?.seconds < 3.154e7 * 100
             ) {
-                return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
+                return ui.notifications.warn(
+                    `Unable to determine XMLID for ${ae.name} active effect.`,
+                );
             }
 
             // With Simple Calendar you can move time ahead in large steps.
@@ -516,24 +573,47 @@ Hooks.on('updateWorldTime', async (worldTime, options) => {
                 ae.flags.activePoints -= _fade;
                 fade += _fade;
 
-                if (ae.changes.length > 0 && ae.flags.target && powerInfo && powerInfo.powerType.includes("adjustment")) {
+                if (
+                    ae.changes.length > 0 &&
+                    ae.flags.target &&
+                    powerInfo &&
+                    powerInfo.powerType.includes("adjustment")
+                ) {
                     let value = parseInt(ae.changes[0].value);
                     let XMLID = ae.flags.XMLID;
                     let target = ae.flags.target;
-                    const powerTargetX = actor.items.find(o => o.uuid === target)
+                    const powerTargetX = actor.items.find(
+                        (o) => o.uuid === target,
+                    );
                     let source = ae.flags.source;
-                    let ActivePoints = parseInt(ae.flags.activePoints)
-                    let _value = parseInt(ae.changes[0].value)
-                    let _APtext = _value === ActivePoints ? "" : ` (${ActivePoints}AP)`
+                    let ActivePoints = parseInt(ae.flags.activePoints);
+                    let _value = parseInt(ae.changes[0].value);
+                    let _APtext =
+                        _value === ActivePoints ? "" : ` (${ActivePoints}AP)`;
 
-                    const powerInfoX = getPowerInfo({ xmlid: target.toUpperCase(), actor: aeActor })
-                    const costPerPointX = (powerTargetX ? parseFloat(powerTargetX.system.activePoints / powerTargetX.system.value) : parseFloat(powerInfoX?.cost || powerInfoX?.costPerLevel)) * AdjustmentMultiplier(target.toUpperCase());
+                    const powerInfoX = getPowerInfo({
+                        xmlid: target.toUpperCase(),
+                        actor: aeActor,
+                    });
+                    const costPerPointX =
+                        (powerTargetX
+                            ? parseFloat(
+                                  powerTargetX.system.activePoints /
+                                      powerTargetX.system.value,
+                              )
+                            : parseFloat(
+                                  powerInfoX?.cost || powerInfoX?.costPerLevel,
+                              )) * AdjustmentMultiplier(target.toUpperCase());
 
-
-                    let costPerPoint = costPerPointX //parseFloat(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
+                    let costPerPoint = costPerPointX; //parseFloat(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
                     let newLevels = parseInt(ActivePoints / costPerPoint);
-                    ae.changes[0].value = value < 0 ? -parseInt(newLevels) : parseInt(newLevels);
-                    ae.name = `${XMLID} ${parseInt(ae.changes[0].value).signedString()}${_APtext} ${powerTargetX?.name || target.toUpperCase()} [${source}]`;
+                    ae.changes[0].value =
+                        value < 0 ? -parseInt(newLevels) : parseInt(newLevels);
+                    ae.name = `${XMLID} ${parseInt(
+                        ae.changes[0].value,
+                    ).signedString()}${_APtext} ${
+                        powerTargetX?.name || target.toUpperCase()
+                    } [${source}]`;
 
                     // If ActivePoints <= 0 then remove effect
                     if (ae.flags.activePoints <= 0) {
@@ -541,34 +621,62 @@ Hooks.on('updateWorldTime', async (worldTime, options) => {
                         if (game.user.isGM) await ae.delete();
                     } else {
                         //await to make sure MAX is updated before VALUE
-                        if (game.user.isGM) await ae.update({ name: ae.name, changes: ae.changes, flags: ae.flags }); //duration: ae.duration, 
+                        if (game.user.isGM)
+                            await ae.update({
+                                name: ae.name,
+                                changes: ae.changes,
+                                flags: ae.flags,
+                            }); //duration: ae.duration,
                     }
 
                     // DRAIN fade (increase VALUE)
                     if (value < 0) {
                         let delta = -value - newLevels;
-                        let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value) + delta);
-                        actor.update({ [`system.characteristics.${target}.value`]: newValue })
-                    } else
+                        let newValue = Math.min(
+                            parseInt(actor.system.characteristics[target].max),
+                            parseInt(
+                                actor.system.characteristics[target].value,
+                            ) + delta,
+                        );
+                        actor.update({
+                            [`system.characteristics.${target}.value`]:
+                                newValue,
+                        });
+                    }
 
-                        // AID fade (VALUE = max)
-                        if (actor.system.characteristics?.[target]) {
-                            let newValue = Math.min(parseInt(actor.system.characteristics[target].max), parseInt(actor.system.characteristics[target].value));
-                            if (game.user.isGM) actor.update({ [`system.characteristics.${target}.value`]: newValue })
-                        }
+                    // AID fade (VALUE = max)
+                    else if (actor.system.characteristics?.[target]) {
+                        let newValue = Math.min(
+                            parseInt(actor.system.characteristics[target].max),
+                            parseInt(
+                                actor.system.characteristics[target].value,
+                            ),
+                        );
+                        if (game.user.isGM)
+                            actor.update({
+                                [`system.characteristics.${target}.value`]:
+                                    newValue,
+                            });
+                    }
 
                     if (ae.flags.activePoints <= 0) break;
-                }
-                else {
+                } else {
                     // No changes defined
 
                     // Natural Body Healing
                     if (ae.flags.XMLID === "naturalBodyHealing") {
-                        let bodyValue = parseInt(actor.system.characteristics.body.value);
-                        let bodyMax = parseInt(actor.system.characteristics.body.max);
+                        let bodyValue = parseInt(
+                            actor.system.characteristics.body.value,
+                        );
+                        let bodyMax = parseInt(
+                            actor.system.characteristics.body.max,
+                        );
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
-                        // await 
-                        if (game.user.isGM) actor.update({ 'system.characteristics.body.value': bodyValue });
+                        // await
+                        if (game.user.isGM)
+                            actor.update({
+                                "system.characteristics.body.value": bodyValue,
+                            });
 
                         if (bodyValue === bodyMax) {
                             if (game.user.isGM) ae.delete();
@@ -577,18 +685,13 @@ Hooks.on('updateWorldTime', async (worldTime, options) => {
                             //await ae.update({ duration: ae.duration });
                         }
                     } else {
-
                         // Default is to delete the expired AE
                         if (powerInfo) {
                             if (game.user.isGM) await ae.delete();
                             break;
                         }
-
                     }
-
-
                 }
-
             }
 
             if (fade) {
@@ -603,9 +706,9 @@ Hooks.on('updateWorldTime', async (worldTime, options) => {
                     speaker: ChatMessage.getSpeaker({ actor: this }),
                     blind: true,
                     content: content,
-                }
-                //await 
-                ChatMessage.create(chatData)
+                };
+                //await
+                ChatMessage.create(chatData);
             }
         }
 
@@ -613,45 +716,71 @@ Hooks.on('updateWorldTime', async (worldTime, options) => {
 
         // Out of combat recovery.  When SimpleCalendar is used to advance time.
         // This simple routine only handles increments of 12 seconds or more.
-        const automation = game.settings.get("hero6efoundryvttv2", "automation");
-        if ((automation === "all") || (automation === "npcOnly" && actor.type == 'npc') || (automation === "pcEndOnly" && actor.type === 'pc')) {
-
-
-            if (multiplier > 0 && (
-                parseInt(actor.system.characteristics.end.value) < parseInt(actor.system.characteristics.end.max) ||
-                parseInt(actor.system.characteristics.stun.value) < parseInt(actor.system.characteristics.stun.max))
+        const automation = game.settings.get(
+            "hero6efoundryvttv2",
+            "automation",
+        );
+        if (
+            automation === "all" ||
+            (automation === "npcOnly" && actor.type == "npc") ||
+            (automation === "pcEndOnly" && actor.type === "pc")
+        ) {
+            if (
+                multiplier > 0 &&
+                (parseInt(actor.system.characteristics.end.value) <
+                    parseInt(actor.system.characteristics.end.max) ||
+                    parseInt(actor.system.characteristics.stun.value) <
+                        parseInt(actor.system.characteristics.stun.max))
             ) {
-
                 // If this is an NPC and their STUN <= 0 then leave them be.
                 // Typically, you should only use the Recovery Time Table for
                 // PCs. Once an NPC is Knocked Out below the -10 STUN level
                 // he should normally remain unconscious until the fight ends.
-                if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
-                    if (game.user.isGM) await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
-                    let rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
-                    let endValue = Math.min(parseInt(actor.system.characteristics.end.max), parseInt(actor.system.characteristics.end.value) + rec)
-                    let stunValue = Math.min(parseInt(actor.system.characteristics.stun.max), parseInt(actor.system.characteristics.stun.value) + rec)
-                    //await 
-                    if (game.user.isGM) actor.update({
-                        'system.characteristics.end.value': endValue,
-                        'system.characteristics.stun.value': stunValue
-                    }, { 'render': true })
+                if (
+                    actor.type === "pc" ||
+                    parseInt(actor.system.characteristics.stun.value) > -10
+                ) {
+                    if (game.user.isGM)
+                        await actor.removeActiveEffect(
+                            HeroSystem6eActorActiveEffects.stunEffect,
+                        );
+                    let rec =
+                        parseInt(actor.system.characteristics.rec.value) *
+                        multiplier;
+                    let endValue = Math.min(
+                        parseInt(actor.system.characteristics.end.max),
+                        parseInt(actor.system.characteristics.end.value) + rec,
+                    );
+                    let stunValue = Math.min(
+                        parseInt(actor.system.characteristics.stun.max),
+                        parseInt(actor.system.characteristics.stun.value) + rec,
+                    );
+                    //await
+                    if (game.user.isGM)
+                        actor.update(
+                            {
+                                "system.characteristics.end.value": endValue,
+                                "system.characteristics.stun.value": stunValue,
+                            },
+                            { render: true },
+                        );
                 }
             }
         }
 
         // Charges Recover each day
         if (today > lastDate) {
-            const itemsWithCharges = actor.items.filter(o => o.system.charges?.max);
+            const itemsWithCharges = actor.items.filter(
+                (o) => o.system.charges?.max,
+            );
             let content = "";
             for (let item of itemsWithCharges) {
                 let value = parseInt(item.system.charges.value);
                 let max = parseInt(item.system.charges.max);
                 if (value < max) {
                     content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
-                    item.update({ 'system.charges.value': max })
+                    item.update({ "system.charges.value": max });
                 }
-
             }
 
             if (content) {
@@ -661,27 +790,31 @@ Hooks.on('updateWorldTime', async (worldTime, options) => {
                     speaker: ChatMessage.getSpeaker({ actor: actor }),
                     blind: true,
                     content: content,
-                }
-                //await 
-                ChatMessage.create(chatData)
+                };
+                //await
+                ChatMessage.create(chatData);
             }
         }
-
     }
 
     if (today != lastDate) {
-        lastDate = today
-        game.user.setFlag(game.system.id, "lastDate", lastDate)
+        lastDate = today;
+        game.user.setFlag(game.system.id, "lastDate", lastDate);
     }
 
     // If there are lots of actors updateWorldTime may result in performance issues.
     // Notify GM when this is a concern.
-    const deltaMs = new Date() - start
-    if (game.user.isGM && game.settings.get(game.system.id, 'alphaTesting') && deltaMs > 100) {
-        return ui.notifications.warn(`updateWorldTime took ${deltaMs} ms.  This routine handles AID/DRAIN fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occures on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`);
+    const deltaMs = new Date() - start;
+    if (
+        game.user.isGM &&
+        game.settings.get(game.system.id, "alphaTesting") &&
+        deltaMs > 100
+    ) {
+        return ui.notifications.warn(
+            `updateWorldTime took ${deltaMs} ms.  This routine handles AID/DRAIN fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occures on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
+        );
     }
 });
-
 
 // Hooks.on("updateMeasuredTemplate", updateMeasuredTemplateHook);
 // Hooks.on("refreshMeasuredTemplate", refreshMeasuredTemplate);

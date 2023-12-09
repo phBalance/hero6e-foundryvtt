@@ -7,7 +7,8 @@ async function _renderForm(actor, stateData) {
         state: stateData,
     };
 
-    var path = "systems/hero6efoundryvttv2/templates/pop-out/presence-attack-card.hbs";
+    var path =
+        "systems/hero6efoundryvttv2/templates/pop-out/presence-attack-card.hbs";
 
     return await renderTemplate(path, templateData);
 }
@@ -15,15 +16,19 @@ async function _renderForm(actor, stateData) {
 async function presenceAttackRoll(actor, html) {
     let form = html[0].querySelector("form");
 
-    let rollEquation = eval(parseInt(Math.floor(actor.system.characteristics.pre.value / 5)) + parseInt(form.mod.value)).toString() + "D6"
+    let rollEquation =
+        eval(
+            parseInt(Math.floor(actor.system.characteristics.pre.value / 5)) +
+                parseInt(form.mod.value),
+        ).toString() + "D6";
 
     let roll = new Roll(rollEquation, actor.getRollData());
 
-    roll.evaluate({async: true}).then(function(result) {          
+    roll.evaluate({ async: true }).then(function (result) {
         result.toMessage({
             speaker: ChatMessage.getSpeaker({ actor: actor }),
             flavor: "Presence Attack",
-            borderColor: 0x00FF00,	
+            borderColor: 0x00ff00,
         });
     });
 }
@@ -33,25 +38,26 @@ async function presenceAttackPopOut(actor) {
 
     // Attack Card as a Pop Out
     let options = {
-        'width' : 300,
-    }
+        width: 300,
+    };
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         const data = {
             title: "Roll to Hit",
             content: content,
             buttons: {
                 rollToHit: {
-                label: "Roll to Hit",
-                    callback: html => resolve(presenceAttackRoll(actor, html))
+                    label: "Roll to Hit",
+                    callback: (html) =>
+                        resolve(presenceAttackRoll(actor, html)),
                 },
             },
             default: "rollToHit",
-            close: () => resolve({})
-        }
+            close: () => resolve({}),
+        };
 
-        new Dialog(data, options).render(true)
-    })
+        new Dialog(data, options).render(true);
+    });
 }
 
-export { presenceAttackPopOut }
+export { presenceAttackPopOut };

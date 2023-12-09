@@ -1,6 +1,6 @@
 /** Large portions have been inspired by https://gitlab.com/woodentavern/foundryvtt-bar-brawl */
 
-import { getBarExtendedAttribute } from "./extendTokenConfig.js"
+import { getBarExtendedAttribute } from "./extendTokenConfig.js";
 
 // TokenHUD does not appear to be extendable, so hook on renderTokenHUD
 
@@ -11,7 +11,6 @@ import { getBarExtendedAttribute } from "./extendTokenConfig.js"
  * @param {Object} data The data of the token HUD.
  */
 export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
-
     // Make sure were alphaTesting
     // if (!game.settings.get(game.system.id, 'alphaTesting')) {
     //     return html;
@@ -27,36 +26,45 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
     middleColumn.find("div.attribute").remove();
     //html.find(".col.middle .bar1").remove()
 
-    let actor = tokenHud.actor || tokenHud.object.document.actor || tokenHud.object.document.getActor()
-    data.actor = actor
+    let actor =
+        tokenHud.actor ||
+        tokenHud.object.document.actor ||
+        tokenHud.object.document.getActor();
+    data.actor = actor;
 
     // Define bar3data
-    const bar3 = getBarExtendedAttribute.bind(data)("bar3") //tokenHud.object.document.getBarAttribute("bar3")
+    const bar3 = getBarExtendedAttribute.bind(data)("bar3"); //tokenHud.object.document.getBarAttribute("bar3")
     data.bar3Data = bar3;
-    data.displayBar3 = bar3 && (bar3.type !== "none");
+    data.displayBar3 = bar3 && bar3.type !== "none";
 
     // Add top bar3
-    let bars = []
-    bars.push(data.bar3Data || {})
-    bars[0].name = "bar3"
-    bars[0].maxcolor = "blue"
+    let bars = [];
+    bars.push(data.bar3Data || {});
+    bars[0].name = "bar3";
+    bars[0].maxcolor = "blue";
     for (let i = 0; i < bars.length; i++) {
-        bars[i].title = (bars[i].attribute || "").replace("characteristics.", "")
+        bars[i].title = (bars[i].attribute || "").replace(
+            "characteristics.",
+            "",
+        );
     }
-    middleColumn.append(await renderBarInput(bars))
+    middleColumn.append(await renderBarInput(bars));
 
     // Add bottom bar1 & bar2
-    bars = []
-    bars.push(data.bar1Data || {})
-    bars[0].name = "bar1"
-    bars[0].maxcolor = "#CC5500"
-    bars.push(data.bar2Data || {})
-    bars[1].name = "bar2"
-    bars[1].maxcolor = "green"
+    bars = [];
+    bars.push(data.bar1Data || {});
+    bars[0].name = "bar1";
+    bars[0].maxcolor = "#CC5500";
+    bars.push(data.bar2Data || {});
+    bars[1].name = "bar2";
+    bars[1].maxcolor = "green";
     for (let i = 0; i < bars.length; i++) {
-        bars[i].title = (bars[i].attribute || "").replace("characteristics.", "")
+        bars[i].title = (bars[i].attribute || "").replace(
+            "characteristics.",
+            "",
+        );
     }
-    middleColumn.append(await renderBarInput(bars))
+    middleColumn.append(await renderBarInput(bars));
 
     // Add input events (__onAttributeUpdate is broken for bar3)
     html.find(".attribute.hero-attribute input")
@@ -79,24 +87,35 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
         const bar = input.dataset.bar;
         const actor = this.object?.actor;
         if (bar && actor) {
-            const attr = getBarExtendedAttribute.bind(this.object.document)(bar); //this.object.document.getBarAttribute(bar);
-            if (isDelta || (attr.attribute !== value)) {
-                actor.modifyTokenAttribute(attr.attribute, value, isDelta, attr.type === "bar");
+            const attr = getBarExtendedAttribute.bind(this.object.document)(
+                bar,
+            ); //this.object.document.getBarAttribute(bar);
+            if (isDelta || attr.attribute !== value) {
+                actor.modifyTokenAttribute(
+                    attr.attribute,
+                    value,
+                    isDelta,
+                    attr.type === "bar",
+                );
             }
         }
 
         // Otherwise update the Token directly
         else {
-            const current = foundry.utils.getProperty(this.object.document, input.name);
-            this.object.document.update({ [input.name]: isDelta ? current + value : value });
+            const current = foundry.utils.getProperty(
+                this.object.document,
+                input.name,
+            );
+            this.object.document.update({
+                [input.name]: isDelta ? current + value : value,
+            });
         }
 
         // Clear the HUD
         //if ( !this.#hoverControlIcon ) this.clear();
         this.clear();
     }
-
-}
+};
 
 /**
  * Renders the input template for the given bars.
@@ -105,6 +124,9 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
  * @returns {Promise.<string>} A promise representing the rendered inputs as HTML string.
  */
 function renderBarInput(bars) {
-    const css = bars.length > 1 ? "compact" : ""
-    return renderTemplate("systems/hero6efoundryvttv2/module/bar3/resource-hud.hbs", { bars, css });
+    const css = bars.length > 1 ? "compact" : "";
+    return renderTemplate(
+        "systems/hero6efoundryvttv2/module/bar3/resource-hud.hbs",
+        { bars, css },
+    );
 }
