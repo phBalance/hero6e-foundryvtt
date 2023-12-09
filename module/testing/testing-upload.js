@@ -1433,6 +1433,58 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("STRETCHING", async function () {
+                const contents = `
+                    <POWER XMLID="STRETCHING" ID="1698601089811" BASECOST="0.0" LEVELS="9" ALIAS="Stretching" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1698601156260" NAME="Creeping Darkness" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES>Remember up to 3d6 (1d6 for 3") for Velocity - 5" for 1" available</NOTES>
+                        <MODIFIER XMLID="REDUCEDEND" ID="1699217125608" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "9m, Reduced Endurance (1/2 END; +1/4)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 56);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 56);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 2);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 9);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

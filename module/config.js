@@ -692,7 +692,7 @@ HERO.powers = [
         target: "self only",
         range: "self",
         costEnd: true,
-        costPerLevel: 1,
+        costPerLevel: 5,
     },
     {
         key: "LIFESUPPORT",
