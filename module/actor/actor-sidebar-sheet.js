@@ -492,7 +492,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         const edAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edContentsAttack), { temporary: true })
         await edAttack._postUpload()
 
-        let [defenseValueE, resistantValueE, impenetrableValueE, damageReductionValueE, damageNegationValueE, knockbackResistanceE, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
+        let [defenseValueE, resistantValueE, /* impenetrableValueE */, damageReductionValueE, damageNegationValueE, /* knockbackResistanceE */, defenseTagsE] = determineDefense.call(this, this.actor, edAttack)
         defense.ED = defenseValueE
         defense.rED = resistantValueE
         defense.EDtags = "ENERGY DEFENSE\n";
@@ -826,7 +826,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         // Get the type of item to create.
         const type = header.dataset.type
         // Grab any data associated with this control.
-        const data = duplicate(header.dataset)
+        const data = foundry.util.duplicate(header.dataset)
         // Initialize a default name.
         const name = `New ${type.capitalize()}`
 

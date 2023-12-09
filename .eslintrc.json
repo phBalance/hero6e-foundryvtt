@@ -43,6 +43,7 @@
         "Item": "readable",
         "Items": "readable",
         "ItemSheet": "readable",
+        "loadTemplates": "readable",
         "NumericTerm": "readable",
         "Macro": "readable",
         "MeasuredTemplate": "readable",

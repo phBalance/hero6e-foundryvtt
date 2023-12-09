@@ -163,7 +163,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (item.system.XMLID == "DRAIN") {
             let drains = []
             for (const key in this.actor.system.characteristics) {
-                if (this.actor.system.characteristics[key].hasOwnProperty('value')) {
+                if (Object.prototype.hasOwnProperty.call(this.actor.system.characteristics[key], 'value')) {
                     drains.push(key.toUpperCase())
                 }
             }
@@ -354,7 +354,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Get the type of item to create.
         const type = header.dataset.type
         // Grab any data associated with this control.
-        const data = duplicate(header.dataset)
+        const data = foundry.util.duplicate(header.dataset)
         // Initialize a default name.
         const name = `New ${type.capitalize()}`
 

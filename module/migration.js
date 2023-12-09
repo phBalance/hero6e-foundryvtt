@@ -1,6 +1,6 @@
 import { HeroSystem6eItem } from "./item/item.js"
 import { getPowerInfo } from './utility/util.js'
-import { createEffects } from "./utility/upload_hdc.js"
+import { createEffects, updateItemSubTypes } from "./utility/upload_hdc.js"
 
 export async function migrateWorld() {
     const lastMigration = game.settings.get(game.system.id, 'lastMigration')
