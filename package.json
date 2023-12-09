@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "description": "CSS compiler for the Hero System 6e for FoundryVTT",
   "scripts": {
+    "autoFix": "gulp autoFix",
     "build": "gulp",
     "compile": "gulp css",
     "gulp": "gulp",
     "lint": "gulp lint",
+    "lint:fix": "gulp lintAutoFix",
+    "prettier": "gulp prettier",
+    "prettier:fix": "gulp prettierAutoFix",
+    "validate": "gulp validate",
     "watch": "gulp"
   },
   "browserslist": [
@@ -18,9 +23,11 @@
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^1.4.1",
     "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.1.0",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^9.0.0",
     "gulp-eslint-new": "^1.8.4",
+    "gulp-prettier": "^6.0.0",
     "gulp-sass": "^5.1.0",
     "sass": "^1.69.5"
   }

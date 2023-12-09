@@ -1,23 +1,53 @@
 import gulp from "gulp"
-import prefix from "gulp-autoprefixer"
+import gulpAutoprefix from "gulp-autoprefixer"
 import gulpEslintNew from "gulp-eslint-new"
+import gulpPrettier from "gulp-prettier"
 import gulpSass from "gulp-sass"
 import * as dartSass from "sass"
 
 const sass = gulpSass(dartSass)
 
+const SASS_FILES = ["scss/**/*.scss"]
+const JAVASCRIPT_FILES = ["**/*.js","!node_modules/**"]
+
 /* ----------------------------------------- */
-/*  Lint
+/*  Source Code Standard Validation
 /* ----------------------------------------- */
 
-function validateFilesForLint() {
-  return gulp.src(["**/*.js","!node_modules/**"])
-    .pipe(gulpEslintNew({ overrideConfigFile: "./.eslintrc.json" }))
+const eslintDefaultConfig = { overrideConfigFile: "./.eslintrc.json" }
+const eslintFixConfig = { fix: true }
+
+function validateFilesByLint() {
+  return gulp.src(JAVASCRIPT_FILES)
+    .pipe(gulpEslintNew(eslintDefaultConfig))
+    .pipe(gulpEslintNew.formatEach("compact", process.stderr))
+}
+const lint = gulp.series(validateFilesByLint)
+
+function autoFixFilesByLint() {
+  return gulp.src(JAVASCRIPT_FILES)
+    .pipe(gulpEslintNew({...eslintDefaultConfig, ...eslintFixConfig }))
+    .pipe(gulpEslintNew.fix())
     .pipe(gulpEslintNew.formatEach("compact", process.stderr))
     .pipe(gulpEslintNew.failAfterError())
 }
+const lintAutoFix = gulp.series(autoFixFilesByLint)
 
-const lint = gulp.series(validateFilesForLint)
+function validateFilesByPrettier() {
+  return gulp.src(JAVASCRIPT_FILES)
+    .pipe(gulpPrettier.check())
+}
+const prettier = gulp.series(validateFilesByPrettier)
+
+function autoFixFilesByPrettier() {
+  return gulp.src(JAVASCRIPT_FILES)
+    .pipe(gulpPrettier())
+    .pipe(gulp.dest(file => file.base))
+}
+const prettierAutoFix = gulp.series(autoFixFilesByPrettier)
+
+const validate = gulp.parallel(validateFilesByLint, validateFilesByPrettier)
+const autoFix = gulp.series(autoFixFilesByPrettier, autoFixFilesByLint)
 
 /* ----------------------------------------- */
 /*  Compile Sass
@@ -29,31 +59,30 @@ function handleError(err) {
   this.emit("end")
 }
 
-const SYSTEM_SCSS = ["scss/**/*.scss"]
-function compileScss() {
+function compileSass() {
   // Configure options for sass output. For example, "expanded" or "nested"
   let options = {
     outputStyle: "expanded"
   }
-  return gulp.src(SYSTEM_SCSS)
+  return gulp.src(SASS_FILES)
     .pipe(
       sass
         .sync(options)
         .on("error", handleError)
     )
-    .pipe(prefix({
+    .pipe(gulpAutoprefix({
       cascade: false
     }))
     .pipe(gulp.dest("./css"))
 }
-const css = gulp.series(compileScss)
+const css = gulp.series(compileSass)
 
 /* ----------------------------------------- */
 /*  Watch Updates
 /* ----------------------------------------- */
 
 function watchUpdates() {
-  gulp.watch(SYSTEM_SCSS, css)
+  gulp.watch(SASS_FILES, css)
 }
 
 /* ----------------------------------------- */
@@ -61,7 +90,7 @@ function watchUpdates() {
 /* ----------------------------------------- */
 
 const defaultGulpTask = gulp.series(
-  gulp.parallel(compileScss),
+  gulp.parallel(compileSass),
   watchUpdates
 )
 
@@ -71,6 +100,14 @@ const defaultGulpTask = gulp.series(
 
 export {
   defaultGulpTask as default,
+
   css,
+
   lint,
+  prettier,
+  validate,
+
+  autoFix,
+  lintAutoFix,
+  prettierAutoFix,
 }
