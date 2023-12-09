@@ -1771,6 +1771,11 @@ HERO.powers5e = [
         costEnd: true,
         costPerLevel: 5,
     },
+
+    {
+        key: "TELEPORTATION",
+        costPerLevel: 2,
+    },
 ];
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
