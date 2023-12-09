@@ -1598,6 +1598,108 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("FORCEFIELD", async function () {
+                describe("5e", () => {
+                    const contents = `
+                        <POWER XMLID="FORCEFIELD" ID="1702155860391" BASECOST="0.0" LEVELS="21" ALIAS="Force Field" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="10" EDLEVELS="11" MDLEVELS="0" POWDLEVELS="0">
+                            <NOTES/>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "(10 PD/11 ED)");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 21);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 21);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 2);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 21);
+                    });
+                });
+
+                describe("6e", () => {
+                    const contents = `
+                        <POWER XMLID="FORCEFIELD" ID="1702155895918" BASECOST="0.0" LEVELS="21" ALIAS="Resistant Protection" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="11" EDLEVELS="10" MDLEVELS="0" POWDLEVELS="0">
+                            <NOTES/>
+                            <MODIFIER XMLID="COSTSEND" ID="1702156689001" BASECOST="-0.5" LEVELS="0" ALIAS="Costs Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EVERYPHASE" OPTIONID="EVERYPHASE" OPTION_ALIAS="Costs END Every Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES/>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "(11 PD/10 ED) (33 Active Points); Costs Endurance (Costs END Every Phase; -1/2)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 22);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 33);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 3);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 21);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

@@ -1747,10 +1747,10 @@ HERO.powers5e = [
     {
         key: "FORCEFIELD",
         powerType: ["defense"],
-        name: "Resistant Protection",
+        name: "Force Field",
         duration: "Constant",
         costEnd: true,
-        costPerLevel: 3 / 2,
+        costPerLevel: 1,
     },
 
     {
