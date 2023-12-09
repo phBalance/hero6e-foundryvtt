@@ -72,7 +72,7 @@ export function getModifierInfo(options) {
     return CONFIG.HERO.ModifierOverride[xmlid];
 }
 
-export function getCharactersticInfoArrayForActor(actor) {
+export function getCharacteristicInfoArrayForActor(actor) {
     let powers = CONFIG.HERO.powers.filter(
         (o) =>
             (o.powerType?.includes("characteristic") ||

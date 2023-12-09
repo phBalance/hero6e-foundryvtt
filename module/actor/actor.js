@@ -4,7 +4,7 @@ import { HEROSYS } from "../herosystem6e.js";
 import { updateItemDescription } from "../utility/upload_hdc.js";
 import {
     getPowerInfo,
-    getCharactersticInfoArrayForActor,
+    getCharacteristicInfoArrayForActor,
 } from "../utility/util.js";
 import { AdjustmentSources } from "../utility/adjustment.js";
 
@@ -1055,7 +1055,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async calcCharacteristicsCost() {
-        let powers = getCharactersticInfoArrayForActor(this);
+        let powers = getCharacteristicInfoArrayForActor(this);
 
         let changes = {};
         for (const powerInfo of powers) {
@@ -1516,9 +1516,6 @@ export class HeroSystem6eActor extends Actor {
 
         // Set base values to HDC LEVELs and calculate costs of things.
         await this._postUpload(true);
-        //await this._resetCharacteristicsFromHdc()
-        //await this.calcCharacteristicsCost();
-        //await CalcActorRealAndActivePoints(this) // move to Actor?
 
         // Apply retained damage
         if (retainDamage.body || retainDamage.stun || retainDamage.end) {
@@ -1841,7 +1838,6 @@ export class HeroSystem6eActor extends Actor {
         }
 
         await this.calcCharacteristicsCost();
-        //await CalcActorRealAndActivePoints(this)
         await this.CalcActorRealAndActivePoints();
 
         this.render();
@@ -1896,11 +1892,7 @@ export class HeroSystem6eActor extends Actor {
 
         this.system.pointsDetail = {};
 
-        if (this.name === "5e superhero simple") {
-            console.log(this.name);
-        }
-
-        const powers = getCharactersticInfoArrayForActor(this);
+        const powers = getCharacteristicInfoArrayForActor(this);
         for (const powerInfo of powers) {
             realCost += parseInt(
                 this.system.characteristics[powerInfo.key.toLowerCase()]

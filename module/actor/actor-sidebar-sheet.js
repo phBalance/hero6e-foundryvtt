@@ -4,7 +4,7 @@ import { presenceAttackPopOut } from "../utility/presence-attack.js";
 import { onManageActiveEffect } from "../utility/effects.js";
 import {
     getPowerInfo,
-    getCharactersticInfoArrayForActor,
+    getCharacteristicInfoArrayForActor,
 } from "../utility/util.js";
 import {
     CombatSkillLevelsForAttack,
@@ -376,7 +376,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         // Caracteristics for 6e
         //let characteristics = CONFIG.HERO.characteristics.filter(o=> o[data.actor.system.is5e ? "cost5e" : "cost"] != undefined ) //Object.keys(CONFIG.HERO.characteristicCosts) //Object.entries(data.actor.system.characteristics)
-        let powers = getCharactersticInfoArrayForActor(this.actor);
+        let powers = getCharacteristicInfoArrayForActor(this.actor);
 
         for (const powerInfo of powers) {
             this.actor.updateRollable(powerInfo.key.toLowerCase());

@@ -448,7 +448,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     _calcBaseCost(child) {
-        let newValue = child.baseCost; //parseFloat(CONFIG.HERO.ModifierOverride[child.XMLID]?.BASECOST || child.baseCost || 0)
+        let newValue = child.baseCost;
 
         switch (child.XMLID) {
             case "AOE":
@@ -1182,10 +1182,6 @@ export class HeroSystem6eItem extends Item {
 
         if (!system.XMLID) return 0;
 
-        if (this.system.XMLID === "TRANSPORT_FAMILIARITY") {
-            console.log(this);
-        }
-
         // Everyman skills are free
         if (system.EVERYMAN) {
             system.basePointsPlusAdders = 0;
@@ -1217,10 +1213,6 @@ export class HeroSystem6eItem extends Item {
             });
         }
 
-        if (system.XMLID === "COMBAT_LEVELS") {
-            console.log(this);
-        }
-
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
@@ -1249,7 +1241,7 @@ export class HeroSystem6eItem extends Item {
             costPerLevel = parseFloat(configPowerInfo?.costPerLevel);
         }
 
-        let levels = parseInt(system.value) || 0;
+        const levels = parseInt(system.value) || 0;
 
         let subCost = costPerLevel * levels;
 
@@ -1282,7 +1274,7 @@ export class HeroSystem6eItem extends Item {
 
         // ADDERS
         let adderCost = 0;
-        for (let adder of system.ADDER || []) {
+        for (const adder of system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost =
                 adder.baseCost || parseInt(adder.LVLCOST) || 0;
@@ -1295,7 +1287,7 @@ export class HeroSystem6eItem extends Item {
 
             let subAdderCost = 0;
 
-            for (let adder2 of adder.ADDER || []) {
+            for (const adder2 of adder.ADDER || []) {
                 const adder2BaseCost = adder2.baseCost;
 
                 if (adder2.SELECTED != false) {
@@ -1373,20 +1365,13 @@ export class HeroSystem6eItem extends Item {
         return old != system.basePointsPlusAdders;
     }
 
+    // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
     calcActivePoints() {
         let system = this.system;
-        // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
-
-        // if (system.XMLID == "ARMOR")
-        //     HEROSYS.log(false, system.XMLID)
 
         let advantages = 0;
         let advantagesDC = 0;
         let minAdvantage = 0;
-
-        // if (this.system.XMLID === "SWIMMING") {
-        //     console.log(this)
-        // }
 
         for (const modifier of (system.MODIFIER || []).filter(
             (o) =>
@@ -1569,7 +1554,7 @@ export class HeroSystem6eItem extends Item {
 
         _realCost = RoundFavorPlayerDown(_realCost);
 
-        // Minumum cost
+        // Minimum cost
         if (_realCost == 0 && system.activePoints > 0) {
             _realCost = 1;
         }

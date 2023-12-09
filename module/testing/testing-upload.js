@@ -1485,6 +1485,119 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.value, 9);
                 });
             });
+
+            describe("TELEPORTATION", async function () {
+                const contents = `
+                    <POWER XMLID="TELEPORTATION" ID="1698601428642" BASECOST="0.0" LEVELS="15" ALIAS="Teleportation" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1698601156260" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                        <NOTES/>
+                        <ADDER XMLID="NORELATIVEVELOCITY" ID="1699217139176" BASECOST="10.0" LEVELS="0" ALIAS="No Relative Velocity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                        <NOTES/>
+                        </ADDER>
+                        <ADDER XMLID="POSITIONSHIFT" ID="1699217139177" BASECOST="5.0" LEVELS="0" ALIAS="Position Shift" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                        <NOTES/>
+                        </ADDER>
+                        <MODIFIER XMLID="REDUCEDEND" ID="1699217139182" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                `;
+
+                describe("5e", () => {
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            '+15" (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 56);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 56);
+                    });
+
+                    it("end", function () {
+                        assert.equal(
+                            item.system.end,
+                            0 /* FIXME: in the system it shows as 0 but it's up to 2 and would typically be displayed based on the max cost */,
+                        );
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 15);
+                    });
+                });
+
+                describe("6e", () => {
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "+15m (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 37);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 37);
+                    });
+
+                    it("end", function () {
+                        assert.equal(
+                            item.system.end,
+                            0 /* FIXME: in the system it shows as 0 but it's up to 1 and would typically be displayed based on the max cost */,
+                        );
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 15);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
