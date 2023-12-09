@@ -1,7 +1,7 @@
 import { HeroSystem6eCard } from "./card.js";
 import { HeroSystem6eAttackCard } from "./attack-card.js";
-import { HeroSystem6eToHitCard } from "./toHit-card.js"
-import * as Attack from "../item/item-attack.js"
+import { HeroSystem6eToHitCard } from "./toHit-card.js";
+import * as Attack from "../item/item-attack.js";
 
 export class HeroSystem6eCardHelpers {
     static onMessageRendered(html) {

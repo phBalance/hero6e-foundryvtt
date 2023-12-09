@@ -1,18 +1,21 @@
 export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
-
     async _onClickLeft(event) {
         await super._onClickLeft(event);
         //if (game.user.id != this.document.user.id) return;
-        await this.selectObjects()
-        await game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
+        await this.selectObjects();
+        await game.user.broadcastActivity({
+            targets: Array.from(game.user.targets.map((o) => o.id)),
+        });
     }
 
     async _onUpdate(data, options, userId) {
         await super._onUpdate(data, options, userId);
         if (game.user.id != userId) return; //this.document.user.id) return;
         this._computeShape();
-        this.selectObjects({ checkPositions: true, templateData: data })
-        game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
+        this.selectObjects({ checkPositions: true, templateData: data });
+        game.user.broadcastActivity({
+            targets: Array.from(game.user.targets.map((o) => o.id)),
+        });
     }
 
     _onRelease(...args) {
@@ -26,13 +29,14 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         // A tad hacky here.  When template is first rendered we don't want to selectObjects
         if (game.user.id != this.document.user.id) return;
 
-        await this.selectObjects()
-        
+        await this.selectObjects();
+
         if (!this.isPreview) {
-            await game.user.broadcastActivity({ targets: Array.from(game.user.targets.map(o => o.id)) });
+            await game.user.broadcastActivity({
+                targets: Array.from(game.user.targets.map((o) => o.id)),
+            });
         }
     }
-
 
     // Tokens within template
     getTokensInTempalte(options) {
@@ -46,7 +50,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     }
 
     isTokenInside(token, options) {
-        options = { checkShape: true, checkPositions: true, ...options }
+        options = { checkShape: true, checkPositions: true, ...options };
         // Use Shape (but there are rorunding issues; specifically if token and MeasuredTemplate have same hex origin)
         if (options.checkShape) {
             const obj = token?.object;
@@ -57,7 +61,12 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
         // Use positions (but some tokens may not be exctly centered on a 1 hex)
         if (options.checkPositions) {
-            if (this._getGridHighlightPositions().find(o => o.x === token.x && o.y === token.y)) return true;
+            if (
+                this._getGridHighlightPositions().find(
+                    (o) => o.x === token.x && o.y === token.y,
+                )
+            )
+                return true;
         }
 
         return false;
@@ -73,11 +82,11 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
             }
         }
 
-        if (JSON.stringify(targets) != JSON.stringify(Array.from(game.user.targets).map(o => o.id))) {
+        if (
+            JSON.stringify(targets) !=
+            JSON.stringify(Array.from(game.user.targets).map((o) => o.id))
+        ) {
             await game.user.updateTokenTargets(targets);
-
         }
-
     }
-
 }

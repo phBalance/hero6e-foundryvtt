@@ -1,10 +1,10 @@
-import { damageRollToTag } from "../utility/tag.js"
+import { damageRollToTag } from "../utility/tag.js";
 
 export function registerTagTests(quench) {
     quench.registerBatch(
         "quench.utils.tag",
         (context) => {
-            const { describe, it, assert } = context
+            const { describe, it, assert } = context;
 
             describe("Tag Suite", function () {
                 it("1d6", function () {
@@ -18,8 +18,8 @@ export function registerTagTests(quench) {
                 it("+1", function () {
                     assert.equal(damageRollToTag("+1"), "+1");
                 });
-            }); 
+            });
         },
-        { displayName: "HERO: Tag Functions" }
+        { displayName: "HERO: Tag Functions" },
     );
 }

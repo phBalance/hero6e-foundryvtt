@@ -1,4 +1,4 @@
-import { getPowerInfo } from '../utility/util.js'
+import { getPowerInfo } from "../utility/util.js";
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -8,31 +8,29 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
     /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            classes: ['herosystem6e', 'sheet', 'item'],
+            classes: ["herosystem6e", "sheet", "item"],
             width: 520,
             height: 660,
             //tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'description' }],
             scrollY: [".sheet-body"],
-        })
+        });
     }
 
     /** @override */
     get template() {
-        const path = 'systems/hero6efoundryvttv2/templates/item'
+        const path = "systems/hero6efoundryvttv2/templates/item";
         // Return a single sheet for all item types.
-        return `${path}/item-sheet.hbs`
-
+        return `${path}/item-sheet.hbs`;
     }
 
     /* -------------------------------------------- */
 
     /** @override */
     getData() {
-        const data = super.getData()
+        const data = super.getData();
 
-
-        data.config = CONFIG.HERO
-        data.alphaTesting = game.settings.get(game.system.id, 'alphaTesting')
+        data.config = CONFIG.HERO;
+        data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
 
         // Easy reference to ActiveEffects with an origin of this item
         // if (this.actor) {
@@ -41,43 +39,46 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         //     data.effects = this.document.effects
         // }
 
-        
         const item = data.item;
-        const configPowerInfo = getPowerInfo({ xmlid: item.system.XMLID, actor: item?.actor })
-        data.sheet = { ...configPowerInfo?.sheet || {} };
-        data.totalingOptions = configPowerInfo ? configPowerInfo.powerType.includes("characteristic") : null;
+        const configPowerInfo = getPowerInfo({
+            xmlid: item.system.XMLID,
+            actor: item?.actor,
+        });
+        data.sheet = { ...(configPowerInfo?.sheet || {}) };
+        data.totalingOptions = configPowerInfo
+            ? configPowerInfo.powerType.includes("characteristic")
+            : null;
 
         // OPTIONID
         if (item.system.OPTIONID && !data.sheet.OPTIONID?.label) {
             data.sheet.OPTIONID = {
-                label: "OPTIONID"
-            }
+                label: "OPTIONID",
+            };
         }
 
         // INPUT
         if (item.system.INPUT && !data.sheet.INPUT?.label) {
             data.sheet.INPUT = {
-                label: "INPUT"
-            }
+                label: "INPUT",
+            };
         }
 
         // SFX
         data.sheet.SFX = {
             //dataList: sfx
             label: "SFX",
-            selectOptions: CONFIG.HERO.SFX.reduce( (current, item) => {
+            selectOptions: CONFIG.HERO.SFX.reduce((current, item) => {
                 current[item] = item;
                 return current;
-              }, {})
-            
-        }
+            }, {}),
+        };
 
         // LEVELS
         data.sheet.LEVELS = {
-            label: "LEVELS"
-        }
+            label: "LEVELS",
+        };
 
-        return data
+        return data;
     }
 
     /* -------------------------------------------- */
@@ -95,18 +96,17 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
 
     /** @override */
     activateListeners(html) {
-        super.activateListeners(html)
+        super.activateListeners(html);
     }
 
-
     async _updateObject(event, formData) {
-        console.log("_updateObject")
-        event.preventDefault()
+        console.log("_updateObject");
+        event.preventDefault();
 
         // Totaling Options
         // Add to Primary Value: AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"
-        // Add to Secondary Value: AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" 
-        // Do not add to Totals: AFFECTS_PRIMARY="No" AFFECTS_TOTAL="No" 
+        // Add to Secondary Value: AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"
+        // Do not add to Totals: AFFECTS_PRIMARY="No" AFFECTS_TOTAL="No"
 
         // For some reason updating LEVELS.value to a numeric 0 results in [object object].
         // if (formData['system.LEVELS'] ) {
@@ -126,7 +126,7 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         //     this.item.update({ 'system.description': this.item.system.description })
         // }
 
-        await this.item._postUpload()
+        await this.item._postUpload();
 
         // Recalc Item cost
         // let item = this.item;
@@ -134,15 +134,13 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         //     let changes = {}
         //     changes['system.description'] = item.system.description;
         //     if (item.system.realCost) { // Some items like Perception have NaN for cost (TODO: fix)
-                
+
         //         changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
         //         changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
         //         changes['system.realCost'] = RoundFavorPlayerDown(item.system.realCost);
-                
+
         //     }
         //     await this.item.update(changes);
         // }
-
     }
-
 }

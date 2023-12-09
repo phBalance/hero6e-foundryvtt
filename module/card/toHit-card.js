@@ -1,18 +1,14 @@
 import { HeroSystem6eCard } from "./card.js";
-import { modifyRollEquation } from "../utility/util.js"
+import { modifyRollEquation } from "../utility/util.js";
 
 export class HeroSystem6eToHitCard extends HeroSystem6eCard {
     static async chatListeners(/* html */) {
         // NOTE: Make sure we are listed in card-helpers.js
-
         // _spawnAreaOfEffect no longer needed as this is now handle in the to hit routines
         //html.on('click', '.area-effect-tag', this._spawnAreaOfEffect.bind(this))
-        
     }
 
-    static onMessageRendered(/* html */) {
-
-    }
+    static onMessageRendered(/* html */) {}
 
     static async setCardStateAsync(button) {
         const card = button.closest(".chat-card");
@@ -35,16 +31,21 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
             ...stateData,
             actor: actor,
             tokenId: token?.uuid || null,
-            item: item
-        }
+            item: item,
+        };
 
-        var path = "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
+        var path =
+            "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
 
         return await renderTemplate(path, templateData);
     }
 
     async render() {
-        return await HeroSystem6eToHitCard._renderInternal(this.item, this.actor, this.message.flags.state);
+        return await HeroSystem6eToHitCard._renderInternal(
+            this.item,
+            this.actor,
+            this.message.flags.state,
+        );
     }
 
     async init(card) {
@@ -66,10 +67,10 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
     }
 
     static async createFromAttackCard(item, data, actor, targets) {
-
-        let itemId = item._id
+        let itemId = item._id;
         let itemData = item.system;
-        let hitCharacteristic = actor.system.characteristics[itemData.uses].value;
+        let hitCharacteristic =
+            actor.system.characteristics[itemData.uses].value;
         let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
         let automation = game.settings.get("hero6efoundryvttv2", "automation");
@@ -81,13 +82,20 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
         rollEquation = modifyRollEquation(rollEquation, item.system.toHitMod);
         rollEquation = modifyRollEquation(rollEquation, data.toHitModTemp);
         let noHitLocationsPower = false;
-        if (game.settings.get("hero6efoundryvttv2", "hit locations") && data.aim !== "none" && !noHitLocationsPower) {
-            rollEquation = modifyRollEquation(rollEquation, CONFIG.HERO.hitLocations[data.aim][3]);
+        if (
+            game.settings.get("hero6efoundryvttv2", "hit locations") &&
+            data.aim !== "none" &&
+            !noHitLocationsPower
+        ) {
+            rollEquation = modifyRollEquation(
+                rollEquation,
+                CONFIG.HERO.hitLocations[data.aim][3],
+            );
         }
         rollEquation = rollEquation + " - 3D6";
 
         let attackRoll = new Roll(rollEquation, actor.getRollData());
-        let result = await attackRoll.evaluate({async: true});
+        let result = await attackRoll.evaluate({ async: true });
         let renderedResult = await result.render();
 
         // Dice do not roll with Dice so Nice #52
@@ -97,11 +105,10 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
         // a return result to card.js.
         // Not prepared to chase all that down at the moment.
         // A temporary kluge is to call Dice So Dice directly.
-        if (game.dice3d?.showForRoll)
-        {
-            game.dice3d.showForRoll(attackRoll)
+        if (game.dice3d?.showForRoll) {
+            game.dice3d.showForRoll(attackRoll);
         }
-        
+
         let hitRollData = result.total;
         let hitRollText = "Hits a " + toHitChar + " of " + hitRollData;
         // -------------------------------------------------
@@ -110,50 +117,62 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
         let enduranceText = "";
         if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
             useEnd = true;
-            let valueEnd = actor.system.characteristics.end.value
+            let valueEnd = actor.system.characteristics.end.value;
             let itemEnd = item.system.end;
             let newEnd = valueEnd - itemEnd;
             let spentEnd = itemEnd;
 
-            if(itemData.usesStrength) {
-                let strEnd =  Math.round(actor.system.characteristics.str.value / 10);
-                if (data.effectiveStr <= actor.system.characteristics.str.value) {
-                    strEnd =  Math.round(data.effectiveStr / 10);
+            if (itemData.usesStrength) {
+                let strEnd = Math.round(
+                    actor.system.characteristics.str.value / 10,
+                );
+                if (
+                    data.effectiveStr <= actor.system.characteristics.str.value
+                ) {
+                    strEnd = Math.round(data.effectiveStr / 10);
                 }
 
                 newEnd = parseInt(newEnd) - parseInt(strEnd);
                 spentEnd = parseInt(spentEnd) + parseInt(strEnd);
             }
-            
+
             if (newEnd < 0) {
-                enduranceText = 'Spent ' + valueEnd + ' END and ' + Math.abs(newEnd) + ' STUN';
+                enduranceText =
+                    "Spent " +
+                    valueEnd +
+                    " END and " +
+                    Math.abs(newEnd) +
+                    " STUN";
             } else {
-                enduranceText = 'Spent ' + spentEnd + ' END';
+                enduranceText = "Spent " + spentEnd + " END";
             }
 
-            if ((automation === "all") || (automation === "npcOnly" && !actor.hasPlayerOwner) || (automation === "pcEndOnly")) {
+            if (
+                automation === "all" ||
+                (automation === "npcOnly" && !actor.hasPlayerOwner) ||
+                automation === "pcEndOnly"
+            ) {
                 let changes = {};
                 if (newEnd < 0) {
                     changes = {
                         "system.characteristics.end.value": 0,
-                        "system.characteristics.stun.value": parseInt(actor.system.characteristics.stun.value) + parseInt(newEnd),
-                    }
+                        "system.characteristics.stun.value":
+                            parseInt(actor.system.characteristics.stun.value) +
+                            parseInt(newEnd),
+                    };
                 } else {
                     changes = {
                         "system.characteristics.end.value": newEnd,
-                    }
+                    };
                 }
                 await actor.update(changes);
             }
         }
 
-        let targetIds = []
-        for (let target of Array.from(targets))
-        {
-            targetIds.push(target.id)
+        let targetIds = [];
+        for (let target of Array.from(targets)) {
+            targetIds.push(target.id);
         }
-
-
 
         let stateData = {
             // dice rolls
@@ -163,7 +182,7 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
             hitRollValue: result.total,
 
             // data for damage card
-            itemId: itemId, 
+            itemId: itemId,
             aim: data.aim,
             knockbackMod: data.knockbackMod,
             damageMod: data.damageMod,
@@ -181,20 +200,23 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
         };
 
         // render card
-        let cardHtml = await HeroSystem6eToHitCard._renderInternal(item, actor, stateData);
-        
+        let cardHtml = await HeroSystem6eToHitCard._renderInternal(
+            item,
+            actor,
+            stateData,
+        );
+
         let token = actor.token;
 
-        let speaker = ChatMessage.getSpeaker({ actor: actor, token })
+        let speaker = ChatMessage.getSpeaker({ actor: actor, token });
         speaker["alias"] = actor.name;
 
         const chatData = {
-            user:  game.user._id,
+            user: game.user._id,
             content: cardHtml,
-            speaker: speaker
-        }
+            speaker: speaker,
+        };
         return ChatMessage.create(chatData);
-        
     }
 
     // static async _spawnAreaOfEffect(event) {
@@ -253,7 +275,6 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
     //     if (token) {
     //         templateData.x = token.center.x;
     //         templateData.y = token.center.y;
-
 
     //         canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [ templateData ]);
 

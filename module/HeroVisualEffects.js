@@ -4,16 +4,13 @@ export class HeroVisualEffects {
     static initialize() {
         Hooks.once("ready", function () {
             // setHeroRulerLabel()
-
             // if (!game.modules.get("drag-ruler")) {
             //     ui.notifications.warn(game.i18n.localize("Warning.DragRuler.Install"));
             //     return
             // }
-
             // if (!game.modules.get("drag-ruler")?.active) {
             //     ui.notifications.warn(game.i18n.localize("Warning.DragRuler.Active"));
             // }
-
             // Hooks.on('renderTokenConfig', Auras.onConfigRender);
             //Hooks.on('drawToken', HeroVisualEffects.drawVisualEffect);
             // Hooks.on('refreshToken', Auras.onRefreshToken);
@@ -22,8 +19,6 @@ export class HeroVisualEffects {
             //     layer.tokenEffects = layer.addChildAt(new PIXI.Container(), layer.getChildIndex(layer.borders));
             // });
             // Hooks.on('destroyToken', token => token.tokenAuras?.destroy());
-
-
         });
     }
 
@@ -41,10 +36,9 @@ export class HeroVisualEffects {
     //     const [cx, cy] = [token.getBounds().x, token.getBounds().y]
     //     const w = token.w * 2;
     //     const h = token.h * 2;
-        
+
     //     gfx.beginFill(0x000000, 0.5);
     //     gfx.drawEllipse(cx, cy, w, h);
     //     gfx.endFill()
     // }
-    
 }

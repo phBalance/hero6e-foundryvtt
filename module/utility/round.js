@@ -14,11 +14,11 @@ export function RoundFavorPlayerDown(number) {
     // const fraction = Math.floor((number % 1) * 10) / 10
     // (12 / 1.25) % 1 = 0.5999999999999996
     // if ((number % 1) < 0.6) return Math.floor(number)
-    if ( Math.round((number % 1)* 10)/10 < 0.6) return Math.floor(number)
-    return Math.ceil(number)
-  }
-  
-  export function RoundFavorPlayerUp(number) {
+    if (Math.round((number % 1) * 10) / 10 < 0.6) return Math.floor(number);
+    return Math.ceil(number);
+}
+
+export function RoundFavorPlayerUp(number) {
     // ROUND-OFFS AND MINIMUM COST
     // Whenever something in the rules requires multiplication or
     // division, handle round-offs as follows: results ending in .1 to .4
@@ -31,6 +31,6 @@ export function RoundFavorPlayerDown(number) {
     // character’s DCV, it’s to the character’s advantage for his DCV to
     // be as high as possible, so a .5 in that calculation would round
     // up.
-    if ((number % 1) < 0.5) return Math.floor(number)
-    return Math.ceil(number)
-  }
+    if (number % 1 < 0.5) return Math.floor(number);
+    return Math.ceil(number);
+}

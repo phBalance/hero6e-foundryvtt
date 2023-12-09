@@ -1,21 +1,23 @@
-import { getPowerInfo } from '../utility/util.js'
+import { getPowerInfo } from "../utility/util.js";
 
 export function AdjustmentSources(actor) {
+    let choices = {};
 
-    let choices = {}
-
-    let powers = CONFIG.HERO.powers.filter(o =>
-        (o.powerType?.includes("characteristic") || o.powerType?.includes("movement")) &&
-        !o.ignoreFor?.includes(actor.type) &&
-        !o.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
-        (!o.onlyFor || o.onlyFor.includes(actor.type))
+    let powers = CONFIG.HERO.powers.filter(
+        (o) =>
+            (o.powerType?.includes("characteristic") ||
+                o.powerType?.includes("movement")) &&
+            !o.ignoreFor?.includes(actor.type) &&
+            !o.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
+            (!o.onlyFor || o.onlyFor.includes(actor.type)),
     );
 
     // Attack powers
-    for (const item of actor.items.filter(o => o.type === 'power' && o.system.XMLID != 'MULTIPOWER')) {
-        powers.push({ key: item.name })
+    for (const item of actor.items.filter(
+        (o) => o.type === "power" && o.system.XMLID != "MULTIPOWER",
+    )) {
+        powers.push({ key: item.name });
     }
-
 
     for (const power of powers) {
         let key = power.key;
@@ -37,18 +39,17 @@ export function AdjustmentSources(actor) {
     // Add * to defensive powers
     for (let key of Object.keys(choices)) {
         if (AdjustmentMultiplier(key, actor) > 1) {
-            choices[key] += "*"
+            choices[key] += "*";
         }
     }
 
-    choices[""] = "<none>"
-    choices = Object.keys(choices).sort().reduce(
-        (obj, key) => {
+    choices[""] = "<none>";
+    choices = Object.keys(choices)
+        .sort()
+        .reduce((obj, key) => {
             obj[key] = choices[key];
             return obj;
-        },
-        {}
-    );
+        }, {});
 
     //choices = ["none", ...choices]
 
@@ -57,14 +58,30 @@ export function AdjustmentSources(actor) {
 
 export function AdjustmentMultiplier(XMLID, actor) {
     if (!XMLID) return 1;
-    let configPowerInfo = getPowerInfo({ xmlid: XMLID })
+    let configPowerInfo = getPowerInfo({ xmlid: XMLID });
     if (!configPowerInfo) {
         if (actor) {
-            configPowerInfo = getPowerInfo({ xmlid: actor.items.find(o => o.name.toUpperCase() === XMLID)?.system?.XMLID })
+            configPowerInfo = getPowerInfo({
+                xmlid: actor.items.find((o) => o.name.toUpperCase() === XMLID)
+                    ?.system?.XMLID,
+            });
         }
         if (!configPowerInfo) return 1;
     }
-    if (["CON", "DCV", "DMCV", "PD", "ED", "REC", "END", "BODY", "STUN"].includes(XMLID)) return 2;
+    if (
+        [
+            "CON",
+            "DCV",
+            "DMCV",
+            "PD",
+            "ED",
+            "REC",
+            "END",
+            "BODY",
+            "STUN",
+        ].includes(XMLID)
+    )
+        return 2;
     if (configPowerInfo.powerType?.includes("defense")) return 2;
     return 1;
 }
