@@ -1591,6 +1591,18 @@ HERO.powers = [
         costPerLevel: 0.2,
     },
     {
+        key: "MULTIFORM",
+        powerType: ["BodyAffecting", "special"],
+        name: "Multiform",
+        perceivability: "Obvious",
+        duration: "persistent",
+        target: "Self Only",
+        range: "Self",
+        costEnd: false,
+        costPerLevel: 0.2,
+    },
+
+    {
         key: "CUSTOMPOWER",
         powerType: ["custom"],
     },

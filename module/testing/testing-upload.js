@@ -1700,6 +1700,65 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("MULTIFORM", async function () {
+                const contents = `
+                    <POWER XMLID="MULTIFORM" ID="1698462538543" BASECOST="0.0" LEVELS="475" ALIAS="Multiform" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Shadow Gateway" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES>Builds are default 150 base + 75 disadvantage. Custom adder is paying off 250 extra points of disadvantages = 50 extra cost at 1 CP per 5 CP pay off in multiform.</NOTES>
+                        <ADDER XMLID="INCREASENUMBER" ID="1700505945937" BASECOST="0.0" LEVELS="4" ALIAS="x16 Number Of Forms" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <ADDER XMLID="GENERIC_OBJECT" ID="1700505945938" BASECOST="50.0" LEVELS="0" ALIAS="Custom Adder" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <MODIFIER XMLID="ACTIVATIONROLL" ID="1700505945951" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Hates Lack of Control and Different Moral Compass" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "(x16 Number Of Forms; Custom Adder) (165 Active Points); Activation Roll (14-; Hates Lack of Control and Different Moral Compass; -1/2)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 110);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 165);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 475);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
