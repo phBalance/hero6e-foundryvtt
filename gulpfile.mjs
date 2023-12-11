@@ -8,7 +8,7 @@ import * as dartSass from "sass";
 const sass = gulpSass(dartSass);
 
 const SASS_FILES = ["scss/**/*.scss"];
-const JAVASCRIPT_FILES = ["**/*.js", "!node_modules/**"];
+const JAVASCRIPT_FILES = ["**/*.js", "**/*.mjs", "!node_modules/**"];
 
 /* ----------------------------------------- */
 /*  Source Code Standard Validation
@@ -84,13 +84,14 @@ const css = gulp.series(compileSass);
 
 function watchUpdates() {
     gulp.watch(SASS_FILES, css);
+    gulp.watch(JAVASCRIPT_FILES, validate);
 }
 
 /* ----------------------------------------- */
 /*  Default Task
 /* ----------------------------------------- */
 
-const defaultGulpTask = gulp.series(gulp.parallel(compileSass), watchUpdates);
+const defaultGulpTask = gulp.series(compileSass, watchUpdates);
 
 /* ----------------------------------------- */
 /*  Export Tasks
