@@ -80,15 +80,12 @@ Hooks.once("init", async function () {
 
     HeroRuler.initialize();
 
-    //HeroVisualEffects.initialize()
-
     SettingsHelpers.initLevelSettings();
 
     initializeHandlebarsHelpers();
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
-    // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheet);
     Actors.registerSheet("herosystem6e", HeroSystem6eActorSidebarSheet, {
         makeDefault: true,
     });
@@ -99,8 +96,6 @@ Hooks.once("init", async function () {
     Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, {
         makeDefault: false,
     });
-
-    // Actors.registerSheet("herosystem6e", HeroSystem6eActorSheetMini, { makeDefault: false });
 
     // If you need to add Handlebars helpers, here are a few useful examples:
     Handlebars.registerHelper("concat", function () {
@@ -170,7 +165,7 @@ Hooks.on("renderChatPopout", (app, html) =>
 
 // When actor SPD is changed we need to setupTurns again
 Hooks.on("updateActor", () => {
-    for (let combat of game.combats) {
+    for (const combat of game.combats) {
         combat.setupTurns();
     }
 });
@@ -194,10 +189,10 @@ export class HEROSYS {
     }
 
     static trace(force, ...args) {
-        const shouldLog =
+        const shouldTrace =
             force || game.settings.get(game.system.id, "alphaTesting");
 
-        if (shouldLog) {
+        if (shouldTrace) {
             console.trace(this.ID, "|", ...args);
         }
     }
@@ -626,7 +621,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                                 name: ae.name,
                                 changes: ae.changes,
                                 flags: ae.flags,
-                            }); //duration: ae.duration,
+                            });
                     }
 
                     // DRAIN fade (increase VALUE)
@@ -711,8 +706,6 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 ChatMessage.create(chatData);
             }
         }
-
-        //game.user.setFlag(game.system.id, "secondsSinceRan", 0)
 
         // Out of combat recovery.  When SimpleCalendar is used to advance time.
         // This simple routine only handles increments of 12 seconds or more.
@@ -815,14 +808,3 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
         );
     }
 });
-
-// Hooks.on("updateMeasuredTemplate", updateMeasuredTemplateHook);
-// Hooks.on("refreshMeasuredTemplate", refreshMeasuredTemplate);
-
-// async function updateMeasuredTemplateHook(templateD, data, _options, _userId){
-//     console.log("updateMeasuredTemplateHook")
-// }
-
-// async function refreshMeasuredTemplate(templateD, data, _options, _userId){
-//     console.log("refreshMeasuredTemplate")
-// }
