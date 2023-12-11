@@ -51,7 +51,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
         // NPC or PC dropdown
         data.isGM = game.user.isGM;
-        //data.actorTypeChoices = { pc: "PC", npc: "NPC" }
 
         // enrichedData
         for (let field of [
@@ -134,7 +133,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                     end,
                 );
 
-                // text descrdiption of damage
+                // text description of damage
                 item.system.damage = convertFromDC(item, dc).replace(/ /g, "");
 
                 // Standard Effect
@@ -374,8 +373,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         // Characteristics
         const characteristicSet = [];
 
-        // Caracteristics for 6e
-        //let characteristics = CONFIG.HERO.characteristics.filter(o=> o[data.actor.system.is5e ? "cost5e" : "cost"] != undefined ) //Object.keys(CONFIG.HERO.characteristicCosts) //Object.entries(data.actor.system.characteristics)
         let powers = getCharacteristicInfoArrayForActor(this.actor);
 
         for (const powerInfo of powers) {
@@ -399,54 +396,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
             characteristic.costTitle = powerInfo.cost
                 ? `${powerInfo.cost} * (${characteristic.core} - ${characteristic.base})`
                 : null;
-
-            // if (data.actor.system.is5e) {
-            //     if (!CONFIG.HERO.characteristicCosts5e[key]) {
-            //         continue;
-            //     }
-            //     characteristic.name = CONFIG.HERO.characteristics5e[key]
-            //     //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts5e[key])
-
-            // }
-            // else {
-            //     if (!CONFIG.HERO.characteristicCosts[key]) {
-            //         continue;
-            //     }
-            //     characteristic.name = CONFIG.HERO.characteristics[key]
-            //     //characteristic.cost = Math.ceil((characteristic.core - characteristic.base) * CONFIG.HERO.characteristicCosts[key])
-            // }
-            // if (isNaN(characteristic.cost)) {
-            //     //characteristic.cost = "";
-            // }
-            // if (characteristic.type === 'rollable') {
-            //     if (characteristic.value === 0) {
-            //         characteristic.roll = 8
-            //     } else if (characteristic.value <= 2) {
-            //         characteristic.roll = 9
-            //     } else if (characteristic.value <= 7) {
-            //         characteristic.roll = 10
-            //     } else if (characteristic.value <= 12) {
-            //         characteristic.roll = 11
-            //     } else if (characteristic.value <= 17) {
-            //         characteristic.roll = 12
-            //     } else if (characteristic.value <= 22) {
-            //         characteristic.roll = 13
-            //     } else if (characteristic.value <= 27) {
-            //         characteristic.roll = 14
-            //     } else if (characteristic.value <= 32) {
-            //         characteristic.roll = 15
-            //     } else if (characteristic.value <= 37) {
-            //         characteristic.roll = 16
-            //     } else if (characteristic.value <= 42) {
-            //         characteristic.roll = 17
-            //     } else if (characteristic.value <= 47) {
-            //         characteristic.roll = 18
-            //     } else if (characteristic.value <= 52) {
-            //         characteristic.roll = 19
-            //     } else {
-            //         characteristic.roll = 20
-            //     }
-            // }
 
             // Notes
             if (powerInfo.key === "STR") {
@@ -490,14 +439,12 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 }
 
                 if (["ocv", "dcv"].includes(powerInfo.key.toLowerCase())) {
-                    //characteristic.base = ''
                     characteristic.notes = "5e figured DEX/3";
                     characteristic.delta =
                         characteristic.max - characteristic.base;
                 }
 
                 if (["omcv", "dmcv"].includes(powerInfo.key.toLowerCase())) {
-                    //characteristic.base = ''
                     characteristic.notes = "5e figured EGO/3";
                     characteristic.delta =
                         characteristic.max - characteristic.base;
@@ -897,7 +844,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         html.find(".item-delete").click(this._onItemDelete.bind(this));
 
         // Create Items
-        html.find(".item-create").click(this._onItemcreate.bind(this));
+        html.find(".item-create").click(this._onItemCreate.bind(this));
 
         // Upload HDC file
         html.find(".upload-button").change(
@@ -905,7 +852,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         );
 
         html.find(".recovery-button").click(this._onRecovery.bind(this));
-        html.find(".presence-button").click(this._onPresenseAttack.bind(this));
+        html.find(".presence-button").click(this._onPresenceAttack.bind(this));
         html.find(".full-health-button").click(this._onFullHealth.bind(this));
         html.find(".actor-description-button").click(
             this._onActorDescription.bind(this),
@@ -1045,7 +992,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         }
     }
 
-    async _onItemcreate(event) {
+    async _onItemCreate(event) {
         event.preventDefault();
         const header = event.currentTarget;
         // Get the type of item to create.
@@ -1070,39 +1017,14 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
     async _onEffectCreate(event) {
         onManageActiveEffect(event, this.actor);
-        // event.preventDefault()
-        // return await this.actor.createEmbeddedDocuments("ActiveEffect", [{
-        //     label: "New Effect",
-        //     icon: "icons/svg/aura.svg",
-        //     origin: this.actor.uuid,
-        //     //"duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
-        //     disabled: true
-        // }]);
     }
 
     async _onEffectDelete(event) {
         onManageActiveEffect(event, this.actor);
-        // event.preventDefault()
-        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        // const effect = this.actor.effects.get(effectId)
-        // if (!effect) return
-        // const confirmed = await Dialog.confirm({
-        //     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
-        //     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
-        // });
-
-        // if (confirmed) {
-        //     effect.delete()
-        //     this.render();
-        // }
     }
 
     async _onEffectToggle(event) {
         onManageActiveEffect(event, this.actor);
-        // event.preventDefault()
-        // const effectId = $(event.currentTarget).closest("[data-effect-id]").data().effectId
-        // const effect = this.actor.effects.get(effectId)
-        // await effect.update({ disabled: !effect.disabled });
     }
 
     async _onEffectEdit(event) {
@@ -1113,7 +1035,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         this.actor.TakeRecovery({ asAction: true });
     }
 
-    async _onPresenseAttack() {
+    async _onPresenceAttack() {
         presenceAttackPopOut(this.actor);
     }
 
@@ -1217,7 +1139,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 continue;
             }
 
-            // Turn off Perenant powers
+            // Turn off Permanent powers
             if (ae.parent instanceof HeroSystem6eItem) {
                 let confirmed = await Dialog.confirm({
                     title: "Turn off?",
@@ -1226,7 +1148,6 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
 
                 if (confirmed) {
                     await ae.parent.toggle();
-                    //await ae.update({ disabled: true })
                 }
                 continue;
             }
