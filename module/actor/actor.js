@@ -26,13 +26,6 @@ export class HeroSystem6eActor extends Actor {
             // sight: { enabled: true },
             displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
             displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
-            // flags: {
-            //     [game.system.id]: {
-            //         bar3: {
-            //             attribute: "characteristics.end"
-            //         }
-            //     }
-            // }
         };
 
         if (this.type != "npc") {
@@ -46,13 +39,9 @@ export class HeroSystem6eActor extends Actor {
         }
 
         this.updateSource({ prototypeToken });
-
-        // Bar3 is a flag
-        //await this.prototypeToken.setFlag(game.system.id, "bar3", { "attribute": "characteristics.end" })
     }
 
     async removeActiveEffect(activeEffect) {
-        //const existingEffect = this.effects.find(o => o.statuses.has(activeEffect.id));
         const existingEffect = Array.from(this.allApplicableEffects()).find(
             (o) => o.id === activeEffect.id,
         );
@@ -69,10 +58,7 @@ export class HeroSystem6eActor extends Actor {
                 });
             }
 
-            //await existingEffect.update({ disabled: true });
-
             await existingEffect.delete();
-            //await this.deleteEmbeddedDocuments("ActiveEffect", [existingEffect])
         }
     }
 
@@ -128,10 +114,6 @@ export class HeroSystem6eActor extends Actor {
                         label: "Apply",
                         callback: (html) => resolve(_processChangeType(html)),
                     },
-                    // cancel: {
-                    //   label: "cancel",
-                    //   callback: html => resolve({canclled: true})
-                    // }
                 },
                 default: "normal",
                 close: () => resolve({ cancelled: true }),
@@ -196,8 +178,6 @@ export class HeroSystem6eActor extends Actor {
         // Where as _onUpdate runs for all users.
         options.displayScrollingChanges = [];
 
-        //if (!ChatMessage.getWhisperRecipients("GM").map(o => o.id).includes(game.user.id)) return;
-
         let content = "";
 
         if (changed?.system?.characteristics?.stun?.value) {
@@ -233,7 +213,6 @@ export class HeroSystem6eActor extends Actor {
                 content += " (at max)";
             }
 
-            //this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0xFF1111' });
             options.displayScrollingChanges.push({
                 value: valueC - valueT,
                 options: { max: valueM, fill: "0xFF1111" },
@@ -244,7 +223,7 @@ export class HeroSystem6eActor extends Actor {
 
         if (content) {
             const chatData = {
-                user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
+                user: game.user.id,
                 whisper: ChatMessage.getWhisperRecipients("GM"),
                 speaker: ChatMessage.getSpeaker({ actor: this }),
                 blind: true,

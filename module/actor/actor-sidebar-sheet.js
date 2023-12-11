@@ -752,8 +752,8 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
         // Active Point Summary
         data.activePointSummary = [];
         for (const key of Object.keys(this.actor.system.characteristics)) {
-            let char = this.actor.system.characteristics[key];
-            let powerInfo = getPowerInfo({
+            const char = this.actor.system.characteristics[key];
+            const powerInfo = getPowerInfo({
                 xmlid: key.toUpperCase(),
                 actor: this.actor,
             });
@@ -766,6 +766,7 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 });
             }
         }
+
         for (const item of this.actor.items.filter(
             (o) => o.type != "maneuver",
         )) {
@@ -807,8 +808,9 @@ export class HeroSystem6eActorSidebarSheet extends ActorSheet {
                 if (item.name.toUpperCase().indexOf(item.system.XMLID) == -1) {
                     name += ` (${item.system.XMLID})`;
                 }
+
                 data.activePointSummary.push({
-                    name: name || key,
+                    name: name,
                     activePoints: activePoints,
                 });
             }
