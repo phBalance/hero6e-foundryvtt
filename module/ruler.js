@@ -75,20 +75,20 @@ export class HeroRuler {
                 async onMovementHistoryUpdate(tokens) {
                     await super.onMovementHistoryUpdate(tokens);
 
-                    let automation = game.settings.get(
+                    const automation = game.settings.get(
                         "hero6efoundryvttv2",
                         "automation",
                     );
 
-                    if (
-                        automation === "all" ||
-                        (automation === "npcOnly" && actor.type == "npc") ||
-                        (automation === "pcEndOnly" && actor.type === "pc")
-                    ) {
-                        for (let tokenObj of tokens) {
-                            let token = tokenObj.document;
-                            let actor = token.actor;
+                    for (const tokenObj of tokens) {
+                        const token = tokenObj.document;
+                        const actor = token.actor;
 
+                        if (
+                            automation === "all" ||
+                            (automation === "npcOnly" && actor.type == "npc") ||
+                            (automation === "pcEndOnly" && actor.type === "pc")
+                        ) {
                             // Only consume endurance on token's phase, allowing for Knockback movement (which does not consume END)
                             if (game.combat.combatant.actorId != actor.id)
                                 continue;
@@ -219,9 +219,6 @@ export class HeroRuler {
             if (!relevantToken) return;
             if (!relevantToken.actor) return;
 
-            // const movementKeys = Object.keys(relevantToken.actor.system.characteristics)
-            // .filter(o=> CONFIG.HERO.movementPowers[o] )
-            //const movementItems = relevantToken.actor.items.filter((e) => e.type === "movement");
             let movementItems = [];
             for (const key of Object.keys(
                 relevantToken.actor.system.characteristics,
@@ -243,13 +240,6 @@ export class HeroRuler {
                                   o._id ==
                                   relevantToken.actor.flags.activeMovement,
                           )?._id || movementItems[0]._id;
-
-                // const radioOptions = movmentItems.map((item, index) => `
-                //     <div class="radio" data-tool="${item._id}">
-                //         <input id="radio-${index}" name="radio" type="radio" ${activeMovement === item._id ? 'checked' : ''}>
-                //         <label for="radio-${index}" class="radio-label" style="text-shadow: 0 0 8px white;">${item.name} (${item.system.value}m)</label>
-                //     </div>
-                // `).join('');
 
                 const radioOptions = movementItems
                     .map(
