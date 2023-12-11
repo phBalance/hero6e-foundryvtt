@@ -124,16 +124,13 @@ export async function migrateWorld() {
                             item.system.XMLID = item.system.rules;
                             changes["system.XMLID"] = item.system.XMLID;
                         } else if (item.type === "attack") {
+                            // Has been empty for quite some time. Presumably nothing to migrate
+                            // and want to intentionally do nothing.
                         } else {
                             let fakeItem = {
                                 system: foundry.utils.deepClone(item.system),
                             };
                             fakeItem.system.XMLID = item.name.toUpperCase();
-                            // switch (fakeItem.system.XMLID) {
-                            //     case "Combat Skill Levels": fakeItem.system.XMLID = "COMBAT_LEVELS"; break;
-                            //     case "Forensic Medicine": fakeItem.system.XMLID = "FORENSIC_MEDICINE"; break;
-                            //     FORENSIC_MEDICINE
-                            // }
                             let configPowerInfo = getPowerInfo({
                                 item: fakeItem,
                             });
@@ -363,7 +360,7 @@ async function migrateActorCostDescription(actor) {
             game.settings.get(game.system.id, "alphaTesting")
         ) {
             await ui.notifications.warn(
-                `Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`,
+                `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
         }
     }
@@ -426,7 +423,7 @@ async function migrateActor_3_0_35(actor) {
             game.settings.get(game.system.id, "alphaTesting")
         ) {
             await ui.notifications.warn(
-                `Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`,
+                `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
         }
     }
@@ -492,7 +489,7 @@ async function migrateActor_3_0_42(actor) {
             game.settings.get(game.system.id, "alphaTesting")
         ) {
             await ui.notifications.warn(
-                `Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`,
+                `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
         }
     }
@@ -543,7 +540,7 @@ async function migrateActor_3_0_49(actor) {
                         game.settings.get(game.system.id, "alphaTesting")
                     ) {
                         await ui.notifications.warn(
-                            `Migragtion failed for ${actor?.name}. ${item.name} not recognized.`,
+                            `Migration failed for ${actor?.name}. ${item.name} not recognized.`,
                         );
                     }
                 }
@@ -556,7 +553,7 @@ async function migrateActor_3_0_49(actor) {
             game.settings.get(game.system.id, "alphaTesting")
         ) {
             await ui.notifications.warn(
-                `Migragtion failed for ${actor?.name}. Recommend re-uploading from HDC.`,
+                `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
         }
     }
