@@ -1554,8 +1554,6 @@ export class HeroSystem6eActor extends Actor {
                 this._xmlToJsonNode(jsonChild, child.children);
             }
 
-            //console.log(tagName, child?.attributes?.['XMLID']?.value ?? "")
-            //if (HeroSystem6eActor.ItemXmlTags.includes(child.parentElement?.tagName)) {
             if (
                 HeroSystem6eItem.ItemXmlChildTags.includes(child.tagName) &&
                 !HeroSystem6eItem.ItemXmlTags.includes(

@@ -370,23 +370,6 @@ export class HeroSystem6eItem extends Item {
         return false;
     }
 
-    /**
-     * Display the chat card for an Item as a Chat Message
-     * @param {object} options          Options which configure the display of the item chat card
-     * @param {string} rollMode         The message visibility mode to apply to the created card
-     * @param {boolean} createMessage   Whether to automatically create a ChatMessage entity (if true), or only return
-     *                                  the prepared message data (if false)
-     */
-
-    // async displayCard({ rollMode, createMessage = true } = {}) {
-    //     switch (this.data.type) {
-    //         case "attack":
-    //             const attackCard = await HeroSystem6eAttackCard.createChatDataFromItem(this);
-    //             ChatMessage.applyRollMode(attackCard, rollMode || game.settings.get("core", "rollMode"));
-    //             return createMessage ? ChatMessage.create(attackCard) : attackCard;
-    //     }
-    // }
-
     static ItemXmlTags = [
         "SKILLS",
         "PERKS",
