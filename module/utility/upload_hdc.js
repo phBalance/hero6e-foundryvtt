@@ -893,12 +893,11 @@ export function XmlToItemData(xml, type) {
             }
         }
 
-        // For some reason some ADDERs have a 0 value.
+        // For some reason some MODIFIERs have a 0 value.
         // We will override those values as necessary.
-        if (CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST) {
-            _power.BASECOST =
-                CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST ||
-                _power.BASECOST;
+        const modifierInfo = getModifierInfo({ xmlid: _power.XMLID });
+        if (modifierInfo?.BASECOST) {
+            _power.BASECOST = modifierInfo?.BASECOST || _power.BASECOST;
         }
 
         systemData.powers.push(_power);
@@ -922,10 +921,9 @@ export function XmlToItemData(xml, type) {
 
         // For some reason some ADDERs have a 0 value.
         // We will override those values as necessary.
-        if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST) {
-            _adder.BASECOST =
-                CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST ||
-                _adder.BASECOST;
+        const adderInfo = getModifierInfo({ xmlid: _adder.XMLID });
+        if (adderInfo?.BASECOST) {
+            _adder.BASECOST = adderInfo?.BASECOST || _adder.BASECOST;
         }
 
         // ADDERs can have ADDERs.
@@ -949,17 +947,13 @@ export function XmlToItemData(xml, type) {
 
             // For some reason some ADDERs have a 0 value.
             // We will override those values as necessary.
-            if (
-                CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST !=
-                undefined
-            ) {
-                _adder2.BASECOST =
-                    CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST;
+            const adder2Info = getModifierInfo({ xmlid: _adder2.XMLID });
+            if (adder2Info?.BASECOST) {
+                _adder2.BASECOST = adder2Info?.BASECOST || _adder2.BASECOST;
             }
-            if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER) {
+            if (adder2Info?.MULTIPLIER) {
                 _adder2.MULTIPLIER =
-                    CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER ||
-                    _adder2.MULTIPLIER;
+                    adder2Info?.MULTIPLIER || _adder2.MULTIPLIER;
             }
 
             _adder.adders.push(_adder2);
@@ -986,10 +980,9 @@ export function XmlToItemData(xml, type) {
 
         // For some reason some MODIFIERs have a 0 value.
         // We will override those values as necessary.
-        if (CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST) {
-            _mod.BASECOST =
-                CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST ||
-                _mod.BASECOST;
+        const modifierInfo = getModifierInfo({ xmlid: _mod.XMLID });
+        if (modifierInfo?.BASECOST) {
+            _mod.BASECOST = modifierInfo?.BASECOST || _mod.BASECOST;
         }
 
         // AOE BASECOST is also missing from HDC
@@ -1067,17 +1060,12 @@ export function XmlToItemData(xml, type) {
 
             // For some reason some ADDERs have a 0 value.
             // We will override those values as necessary.
-            if (
-                CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST !=
-                undefined
-            ) {
-                _adder.BASECOST =
-                    CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST;
+            const adderInfo = getModifierInfo({ xmlid: _adder.XMLID });
+            if (adderInfo?.BASECOST) {
+                _adder.BASECOST = adderInfo?.BASECOST || _adder.BASECOST;
             }
-            if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER) {
-                _adder.MULTIPLIER =
-                    CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER ||
-                    _adder.MULTIPLIER;
+            if (adderInfo?.MULTIPLIER) {
+                _adder.MULTIPLIER = adderInfo?.MULTIPLIER || _adder.MULTIPLIER;
             }
 
             _mod.adders.push(_adder);
@@ -1216,11 +1204,10 @@ export async function calcItemPoints(item) {
     let changed = false;
 
     // For some reason some ADDERs have a 0 value.
-    for (let adder of item.system?.adders || []) {
-        if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
-            let baseCost =
-                CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST ||
-                adder.BASECOST;
+    for (const adder of item.system?.adders || []) {
+        const adderInfo = getModifierInfo({ xmlid: adder.XMLID });
+        if (adderInfo?.BASECOST) {
+            const baseCost = adderInfo?.BASECOST || adder.BASECOST;
             if (baseCost != adder.BASECOST) {
                 adder.BASECOST = baseCost;
                 await item.update({ "system.adders": item.system.adders });
@@ -1229,21 +1216,19 @@ export async function calcItemPoints(item) {
         }
     }
 
-    for (let modifier of item.system?.modifiers || []) {
-        let baseCost =
-            CONFIG.HERO.ModifierOverride[modifier.XMLID]?.BASECOST ||
-            modifier.BASECOST;
+    for (const modifier of item.system?.modifiers || []) {
+        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
+        let baseCost = modifierInfo?.BASECOST || modifier.BASECOST;
         if (baseCost != modifier.BASECOST) {
             modifier.BASECOST = baseCost;
             await item.update({ "system.modifiers": item.system.modifiers });
             changed = true;
         }
 
-        for (let adder of modifier?.adders || []) {
-            if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
-                let baseCost =
-                    CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST ||
-                    adder.BASECOST;
+        for (const adder of modifier?.adders || []) {
+            const adderInfo = getModifierInfo({ xmlid: adder.XMLID });
+            if (adderInfo?.BASECOST) {
+                let baseCost = adderInfo?.BASECOST || adder.BASECOST;
                 if (baseCost != adder.BASECOST) {
                     adder.BASECOST = baseCost;
                     await item.update({
@@ -1253,10 +1238,6 @@ export async function calcItemPoints(item) {
                 }
             }
         }
-    }
-
-    if (item.name === "Razor Arrow") {
-        console.log(item);
     }
 
     changed = changed || calcBasePointsPlusAdders(item);

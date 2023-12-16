@@ -358,7 +358,6 @@ export async function AttackToHit(item, options) {
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
-    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = getPowerInfo({
         xmlid: item.system.XMLID,
     })?.powerType?.includes("adjustment");

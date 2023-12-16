@@ -720,10 +720,10 @@ export class HeroSystem6eItem extends Item {
 
         // BASECOST
         const newBaseValue = parseFloat(
-            CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST ||
+            getModifierInfo({ item: this })?.BASECOST ||
                 this.system.BASECOST ||
                 0,
-        ); // || parseFloat(configPowerInfo?.cost || 0)
+        );
         if (this.system.baseCost != newBaseValue) {
             this.system.baseCost = newBaseValue;
             changed = true;
@@ -854,7 +854,7 @@ export class HeroSystem6eItem extends Item {
 
                         default:
                             newChildValue = parseFloat(
-                                CONFIG.HERO.ModifierOverride[child.XMLID]
+                                getModifierInfo({ xmlid: child.XMLID })
                                     ?.BASECOST ||
                                     child.BASECOST ||
                                     0,
@@ -866,7 +866,7 @@ export class HeroSystem6eItem extends Item {
                         if (child[key]) {
                             for (const child2 of child[key]) {
                                 const newChild2Value = parseFloat(
-                                    CONFIG.HERO.ModifierOverride[child.XMLID]
+                                    getModifierInfo({ xmlid: child.XMLID })
                                         ?.BASECOST ||
                                         child2.BASECOST ||
                                         0,
@@ -2388,18 +2388,6 @@ export class HeroSystem6eItem extends Item {
                 break;
         }
 
-        // if ((parseInt(modifier.LEVELS) || 0) > 1) {
-        //     if (["HARDENED"].includes(modifier.XMLID)) {
-        //         result += "x" + parseInt(modifier.LEVELS)
-        //     }
-        // }
-
-        // ADDERS
-
-        // if (modifier.comments) powerData.description += "; " + modifier.comments
-        // if (modifier.option) powerData.description += "; " + modifier.option
-        // if (modifier.optionId) powerData.description += "; " + modifier.optionId
-
         if (!["CONDITIONALPOWER"].includes(modifier.XMLID)) {
             result += " (";
         } else {
@@ -2573,7 +2561,6 @@ export class HeroSystem6eItem extends Item {
 
         // Highly summarized
         if (["FOCUS"].includes(modifier.XMLID)) {
-            //result = `, ${modifier.OPTION} (${fraction.trim()})`
             // 'Focus (OAF; Pen-sized Device in pocket; -1)'
             result = result.replace(
                 `Focus (${modifier.OPTION}; `,
@@ -2601,7 +2588,6 @@ export class HeroSystem6eItem extends Item {
 
         // Mind Control Inobvious Power, Invisible to Mental Group
         // Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)
-        // Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points), Extra Time (Full Phase, -1/2)
         result = result.replace("Inobvious Power, Invisible ", "Invisible ");
 
         return result;

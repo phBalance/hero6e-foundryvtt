@@ -33,6 +33,8 @@ export function getPowerInfo(options) {
         options.item?.system?.xmlid ||
         options.item?.system?.id;
     const actor = options?.item?.actor || options?.actor;
+
+    // TODO: This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
     let powerInfo = CONFIG.HERO.powers.find((o) => o.key === xmlid);
     if (!powerInfo || actor?.system?.is5e) {
         powerInfo = {
@@ -69,7 +71,18 @@ export function getModifierInfo(options) {
         options.item?.system?.XMLID ||
         options.item?.system?.xmlid ||
         options.item?.system?.id;
-    return CONFIG.HERO.ModifierOverride[xmlid];
+    const actor = options?.item?.actor || options?.actor;
+
+    // TODO: This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
+    let modifierOverrideInfo = CONFIG.HERO.ModifierOverride[xmlid];
+    if (!modifierOverrideInfo || actor?.system?.is5e) {
+        modifierOverrideInfo = {
+            ...modifierOverrideInfo,
+            ...CONFIG.HERO.ModifierOverride5e[xmlid],
+        };
+    }
+
+    return modifierOverrideInfo;
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {
