@@ -637,12 +637,6 @@ export function XmlToItemData(xml, type) {
     const xmlid = xml.getAttribute("XMLID");
 
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this?.actor });
-    // if (!configPowerInfo)
-    // {
-    //     if (game.settings.get(game.system.id, 'alphaTesting')) {
-    //         ui.notifications.warn(`${this.actor.name} has item ${xmlid} which it not defined in config.js`);
-    //     }
-    // }
 
     let systemData = {
         id: xmlid,
@@ -710,13 +704,6 @@ export function XmlToItemData(xml, type) {
                     ).toFixed(2);
                     break;
                 case "LEVELS":
-                    // case "PDLEVELS":
-                    // case "EDLEVELS":
-                    // case "MDLEVELS":
-                    // case "LENGTHLEVELS":
-                    // case "HEIGHTLEVELS":
-                    // case "WIDTHLEVELS":
-                    // case "BODYLEVELS":
                     systemData[attribute.name] = {
                         value: attribute.value,
                         max: attribute.value,
@@ -895,7 +882,10 @@ export function XmlToItemData(xml, type) {
 
         // For some reason some MODIFIERs have a 0 value.
         // We will override those values as necessary.
-        const modifierInfo = getModifierInfo({ xmlid: _power.XMLID });
+        const modifierInfo = getModifierInfo({
+            xmlid: _power.XMLID,
+            actor: this?.actor,
+        });
         if (modifierInfo?.BASECOST) {
             _power.BASECOST = modifierInfo?.BASECOST || _power.BASECOST;
         }
@@ -921,7 +911,10 @@ export function XmlToItemData(xml, type) {
 
         // For some reason some ADDERs have a 0 value.
         // We will override those values as necessary.
-        const adderInfo = getModifierInfo({ xmlid: _adder.XMLID });
+        const adderInfo = getModifierInfo({
+            xmlid: _adder.XMLID,
+            actor: this?.actor,
+        });
         if (adderInfo?.BASECOST) {
             _adder.BASECOST = adderInfo?.BASECOST || _adder.BASECOST;
         }
@@ -947,7 +940,10 @@ export function XmlToItemData(xml, type) {
 
             // For some reason some ADDERs have a 0 value.
             // We will override those values as necessary.
-            const adder2Info = getModifierInfo({ xmlid: _adder2.XMLID });
+            const adder2Info = getModifierInfo({
+                xmlid: _adder2.XMLID,
+                actor: this?.actor,
+            });
             if (adder2Info?.BASECOST) {
                 _adder2.BASECOST = adder2Info?.BASECOST || _adder2.BASECOST;
             }
@@ -980,7 +976,10 @@ export function XmlToItemData(xml, type) {
 
         // For some reason some MODIFIERs have a 0 value.
         // We will override those values as necessary.
-        const modifierInfo = getModifierInfo({ xmlid: _mod.XMLID });
+        const modifierInfo = getModifierInfo({
+            xmlid: _mod.XMLID,
+            actor: this?.actor,
+        });
         if (modifierInfo?.BASECOST) {
             _mod.BASECOST = modifierInfo?.BASECOST || _mod.BASECOST;
         }
@@ -1060,7 +1059,10 @@ export function XmlToItemData(xml, type) {
 
             // For some reason some ADDERs have a 0 value.
             // We will override those values as necessary.
-            const adderInfo = getModifierInfo({ xmlid: _adder.XMLID });
+            const adderInfo = getModifierInfo({
+                xmlid: _adder.XMLID,
+                actor: this?.actor,
+            });
             if (adderInfo?.BASECOST) {
                 _adder.BASECOST = adderInfo?.BASECOST || _adder.BASECOST;
             }
@@ -1146,12 +1148,6 @@ export async function uploadBasic(xml, type) {
         parent: this.actor,
     });
 
-    // // Some items should be copied and created as an attack
-    // const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
-    // if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
-    //     await uploadAttack.call(this, xml)
-    // }
-
     // Some items are attacks
     const configPowerInfo = getPowerInfo({
         xmlid: itemData.system.XMLID,
@@ -1205,7 +1201,7 @@ export async function calcItemPoints(item) {
 
     // For some reason some ADDERs have a 0 value.
     for (const adder of item.system?.adders || []) {
-        const adderInfo = getModifierInfo({ xmlid: adder.XMLID });
+        const adderInfo = getModifierInfo({ xmlid: adder.XMLID, item: item });
         if (adderInfo?.BASECOST) {
             const baseCost = adderInfo?.BASECOST || adder.BASECOST;
             if (baseCost != adder.BASECOST) {
@@ -1217,7 +1213,10 @@ export async function calcItemPoints(item) {
     }
 
     for (const modifier of item.system?.modifiers || []) {
-        const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
+        const modifierInfo = getModifierInfo({
+            xmlid: modifier.XMLID,
+            item: item,
+        });
         let baseCost = modifierInfo?.BASECOST || modifier.BASECOST;
         if (baseCost != modifier.BASECOST) {
             modifier.BASECOST = baseCost;
@@ -1226,7 +1225,10 @@ export async function calcItemPoints(item) {
         }
 
         for (const adder of modifier?.adders || []) {
-            const adderInfo = getModifierInfo({ xmlid: adder.XMLID });
+            const adderInfo = getModifierInfo({
+                xmlid: adder.XMLID,
+                item: item,
+            });
             if (adderInfo?.BASECOST) {
                 let baseCost = adderInfo?.BASECOST || adder.BASECOST;
                 if (baseCost != adder.BASECOST) {
@@ -1272,7 +1274,7 @@ function calcBasePointsPlusAdders(item) {
     // Check if we have CONFIG info about this power
     const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: actor });
 
-    // Base Cost is typcailly extracted directly from HDC
+    // Base Cost is typically extracted directly from HDC
     let baseCost = parseInt(system.BASECOST);
 
     // PowerFramework might be important
@@ -1445,8 +1447,11 @@ function calcActivePoints(item) {
         // For attacks with Advantages, determine the DCs by
         // making a special Active Point calculation that only counts
         // Advantages that directly affect how the victim takes damage.
-        let powerInfo = getPowerInfo({ xmlid: system.XMLID });
-        let modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
+        let powerInfo = getPowerInfo({ xmlid: system.XMLID, item: item });
+        let modifierInfo = getModifierInfo({
+            xmlid: modifier.XMLID,
+            item: item,
+        });
         if (powerInfo && powerInfo.powerType?.includes("attack")) {
             if (modifierInfo && modifierInfo.dc) {
                 advantagesDC += Math.max(0, _myAdvantage);
@@ -1590,11 +1595,6 @@ export async function uploadPower(power, type) {
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor });
 
     if (configPowerInfo) {
-        // if ((configPowerInfo?.powerType || "").includes("skill")) {
-        // //     await uploadSkill.call(this, power, true)
-        //     await item.update({ 'system.subType': 'skill'});
-        // }
-
         // Detect attacks
         if (configPowerInfo.powerType?.includes("attack")) {
             //await uploadAttack.call(this, power, true)
@@ -1623,10 +1623,8 @@ export async function makeAttack(item) {
 
     // Confirm this is an attack
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: item.actor });
-    //if (!configPowerInfo || !configPowerInfo.powerType.includes("attack")) return
 
     let changes = {};
-    //changes[`img`] = "icons/svg/sword.svg"
 
     // Name
     let description = item.system.ALIAS;

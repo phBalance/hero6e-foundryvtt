@@ -28,9 +28,17 @@ export function registerUploadTests(quench) {
                 let item;
 
                 before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+
                     item = await new HeroSystem6eItem(
                         HeroSystem6eItem.itemDataFromXml(contents),
-                        { temporary: true },
+                        { temporary: true, parent: actor },
                     );
                     await item._postUpload();
                 });
@@ -61,9 +69,17 @@ export function registerUploadTests(quench) {
                 let item;
 
                 before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+
                     item = await new HeroSystem6eItem(
                         HeroSystem6eItem.itemDataFromXml(contents),
-                        { temporary: true },
+                        { temporary: true, parent: actor },
                     );
                     await item._postUpload();
                 });

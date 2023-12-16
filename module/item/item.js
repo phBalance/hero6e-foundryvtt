@@ -854,8 +854,10 @@ export class HeroSystem6eItem extends Item {
 
                         default:
                             newChildValue = parseFloat(
-                                getModifierInfo({ xmlid: child.XMLID })
-                                    ?.BASECOST ||
+                                getModifierInfo({
+                                    xmlid: child.XMLID,
+                                    item: this,
+                                })?.BASECOST ||
                                     child.BASECOST ||
                                     0,
                             );
@@ -866,8 +868,10 @@ export class HeroSystem6eItem extends Item {
                         if (child[key]) {
                             for (const child2 of child[key]) {
                                 const newChild2Value = parseFloat(
-                                    getModifierInfo({ xmlid: child.XMLID })
-                                        ?.BASECOST ||
+                                    getModifierInfo({
+                                        xmlid: child.XMLID,
+                                        item: this,
+                                    })?.BASECOST ||
                                         child2.BASECOST ||
                                         0,
                                 );
@@ -1196,19 +1200,19 @@ export class HeroSystem6eItem extends Item {
 
         // Check if we have CONFIG info about this power
         const configPowerInfo = getPowerInfo({
-            xmlid: system.XMLID,
+            item: this,
             actor: actor,
         });
 
-        // Base Cost is typcailly extracted directly from HDC
-        let baseCost = system.baseCost; //parseInt(system.BASECOST)
+        // Base Cost is typically extracted directly from HDC
+        let baseCost = system.baseCost;
 
         // PowerFramework might be important
         let parentItem = this.getHdcParent();
         let configPowerInfoParent = null;
         if (parentItem) {
             configPowerInfoParent = getPowerInfo({
-                xmlid: parentItem.system.XMLID,
+                item: parentItem,
                 actor: actor,
             });
         }
@@ -1414,8 +1418,11 @@ export class HeroSystem6eItem extends Item {
             // For attacks with Advantages, determine the DCs by
             // making a special Active Point calculation that only counts
             // Advantages that directly affect how the victim takes damage.
-            const powerInfo = getPowerInfo({ xmlid: system.XMLID });
-            const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
+            const powerInfo = getPowerInfo({ item: this });
+            const modifierInfo = getModifierInfo({
+                xmlid: modifier.XMLID,
+                item: this,
+            });
             if (powerInfo && powerInfo.powerType?.includes("attack")) {
                 if (modifierInfo && modifierInfo.dc) {
                     advantagesDC += Math.max(0, _myAdvantage);

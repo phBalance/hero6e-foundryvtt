@@ -58,12 +58,13 @@ export function AdjustmentSources(actor) {
 
 export function AdjustmentMultiplier(XMLID, actor) {
     if (!XMLID) return 1;
-    let configPowerInfo = getPowerInfo({ xmlid: XMLID });
+    let configPowerInfo = getPowerInfo({ xmlid: XMLID, actor: actor });
     if (!configPowerInfo) {
         if (actor) {
             configPowerInfo = getPowerInfo({
                 xmlid: actor.items.find((o) => o.name.toUpperCase() === XMLID)
                     ?.system?.XMLID,
+                actor: actor,
             });
         }
         if (!configPowerInfo) return 1;

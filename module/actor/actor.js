@@ -1095,7 +1095,7 @@ export class HeroSystem6eActor extends Actor {
                     (!o.flags?.XMLID ||
                         getPowerInfo({
                             xmlid: o.flags?.XMLID,
-                            actor: this.actor,
+                            actor: this,
                         })?.duration != "persistent"),
             )
             .sort((a, b) => a.name.localeCompare(b.name));
@@ -1108,7 +1108,7 @@ export class HeroSystem6eActor extends Actor {
                     !o.duration.duration &&
                     o.statuses.size === 0 &&
                     o.flags?.XMLID &&
-                    getPowerInfo({ xmlid: o.flags?.XMLID, actor: this.actor })
+                    getPowerInfo({ xmlid: o.flags?.XMLID, actor: this })
                         ?.duration === "persistent",
             )
             .sort((a, b) => a.name.localeCompare(b.name));
