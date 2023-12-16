@@ -1,0 +1,19 @@
+name: Check PRs conform to code format and lint standards
+
+on: pull_request
+
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v2
+
+        - name: Install
+          run: npm ci
+  
+        - name: Is it pretty?
+          run: npm run prettier
+
+        - name: Any eslint issues?
+          run: npm run prettier
