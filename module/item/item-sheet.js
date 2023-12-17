@@ -96,7 +96,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Not needed for new uploads, but previous uploads may incorrectly have upperCase version
         // and thus the item-skill-sheet.hbs selectOptions won't match, thus defaulting to general.
         // Can probably remove at some point.
-        // TODO: item-skill-sheet.hbs has been removed.
         if (data.system.characteristic) {
             data.system.characteristic =
                 data.system.characteristic.toLowerCase();
