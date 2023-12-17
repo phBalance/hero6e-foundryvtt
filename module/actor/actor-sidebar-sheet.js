@@ -18,7 +18,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         return mergeObject(super.defaultOptions, {
             classes: ["actor-sidebar-sheet"],
             template:
-                "systems/hero6efoundryvttv2/templates/actor-sidebar/actor-sidebar-sheet.hbs",
+                "systems/hero6efoundryvttv2/templates/actor/actor-sheet.hbs",
             tabs: [
                 {
                     navSelector: ".sheet-navigation",
