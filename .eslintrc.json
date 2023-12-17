@@ -50,6 +50,7 @@
         "mergeObject": "readable",
         "OperatorTerm": "readable",
         "PIXI": "readable",
+        "quench": "readable",
         "renderTemplate": "readable",
         "Roll": "readable",
         "Ruler": "readable",

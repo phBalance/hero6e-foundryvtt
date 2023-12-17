@@ -3,7 +3,7 @@ import { HeroSystem6eItem } from "../item/item.js";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
-        "quench.utils.upload",
+        "hero6efoundryvttv2.utils.upload",
         (context) => {
             const { assert, before, describe, it } = context;
 
