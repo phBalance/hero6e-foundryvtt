@@ -12,7 +12,7 @@ import {
     convertFromDC,
 } from "../utility/damage.js";
 
-export class HeroSystem6eActorSidebarSheet extends ActorSheet {
+export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
