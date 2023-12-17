@@ -10,20 +10,22 @@
         "maximum": 11
     },
     "authors": [
-        { "name" : "Jared Levine" },
-        { "name" : "BoDiddleyBeat" },
-        { "name" : "Aaron Auseth" }
+        { "name": "Jared Levine" },
+        { "name": "BoDiddleyBeat" },
+        { "name": "Aaron Auseth" }
     ],
-    "esmodules": [ "module/herosystem6e.js", "module/testing/testing-main.js" ],
-    "styles": [ "css/herosystem6e.css", "css/actor-sidebar-sheet.css" ],
+    "esmodules": ["module/herosystem6e.js", "module/testing/testing-main.js"],
+    "styles": ["css/herosystem6e.css", "css/actor-sheet.css"],
     "scripts": [],
-    "packs": [{
-        "name": "heroMacros",
-        "label": "Hero Macros",
-        "system": "hero6efoundryvttv2",
-        "type": "Macro",
-        "path": "packs/heroMacros"
-      }],
+    "packs": [
+        {
+            "name": "heroMacros",
+            "label": "Hero Macros",
+            "system": "hero6efoundryvttv2",
+            "type": "Macro",
+            "path": "packs/heroMacros"
+        }
+    ],
     "languages": [
         {
             "lang": "en",
