@@ -4,7 +4,7 @@ import { determineDefense } from "../utility/defense.js";
 
 export function registerDefenseTests(quench) {
     quench.registerBatch(
-        "quench.utils.defense",
+        "hero6efoundryvttv2.utils.defense",
         (context) => {
             const { describe, it, assert } = context;
 
