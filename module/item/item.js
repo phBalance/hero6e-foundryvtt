@@ -428,60 +428,6 @@ export class HeroSystem6eItem extends Item {
         return null;
     }
 
-    _calcBaseCost(child) {
-        let newValue = child.baseCost;
-
-        switch (child.XMLID) {
-            case "AOE":
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 32)
-                    return 1.0;
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 16)
-                    return 0.75;
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 8)
-                    return 0.5;
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 4)
-                    return 0.25;
-
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 64)
-                    return 1.0;
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 32)
-                    return 0.75;
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 16)
-                    return 0.5;
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 8)
-                    return 0.25;
-
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 125)
-                    return 1.0;
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 64)
-                    return 0.75;
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 32)
-                    return 0.5;
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 16)
-                    return 0.25;
-
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 16)
-                    return 1.0;
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 8)
-                    return 0.75;
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 4)
-                    return 0.5;
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 2)
-                    return 0.25;
-
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 16)
-                    return 1.0;
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 8)
-                    return 0.75;
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 4)
-                    return 0.5;
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 2)
-                    return 0.25;
-        }
-
-        return newValue;
-    }
-
     async _postUpload() {
         let changed = false;
 
@@ -1111,17 +1057,22 @@ export class HeroSystem6eItem extends Item {
             type: "power",
         };
 
-        for (let itemTag of [
+        // TODO: This is technically incorrect as it's accessing CONFIG.HERO.powers but ignoring CONFIG.HERO.powers5e
+        for (const itemTag of [
             ...HeroSystem6eItem.ItemXmlTags,
             ...CONFIG.HERO.powers
-                .filter((o) => o.powerType?.includes("characteristic"))
+                .filter(
+                    (o) =>
+                        o.powerType?.includes("characteristic") ||
+                        o.powerType?.includes("framework"),
+                )
                 .map((o) => o.key),
         ]) {
-            let itemSubTag = itemTag
+            const itemSubTag = itemTag
                 .replace(/S$/, "")
                 .replace("MARTIALART", "MANEUVER");
             if (heroJson[itemSubTag]) {
-                for (let system of Array.isArray(heroJson[itemSubTag])
+                for (const system of Array.isArray(heroJson[itemSubTag])
                     ? heroJson[itemSubTag]
                     : [heroJson[itemSubTag]]) {
                     itemData = {
@@ -1437,11 +1388,8 @@ export class HeroSystem6eItem extends Item {
         let system = this.system;
         // Real Cost = Active Cost / (1 + total value of all Limitations)
 
-        // if (system.XMLID == "RKA")
-        //     HEROSYS.log(false, system.XMLID)
-
         // This may be a slot in a framework if so get parent
-        const parent = this.getHdcParent(); // item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
+        const parent = this.getHdcParent();
 
         let modifiers = (system.MODIFIER || []).filter(
             (o) => parseFloat(o.baseCost) < 0,
@@ -1487,14 +1435,10 @@ export class HeroSystem6eItem extends Item {
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
             if (_myLimitation < 0.25) {
-                // if (game.settings.get(game.system.id, 'alphaTesting')) {
-                //     ui.notifications.warn(`${system.XMLID} ${modifier.XMLID} has a limiation of ${-_myLimitation}.  Overrided limitation to be -1/4.`)
-                //     console.log(`${system.XMLID} ${modifier.XMLID} has a limiation of ${-_myLimitation}.  Overrided limitation to be -1/4.`, system)
-                // }
                 _myLimitation = 0.25;
                 system.title =
                     (system.title || "") +
-                    "Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. ";
+                    "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations. ";
             }
 
             //console.log("limitation", modifier.ALIAS, _myLimitation)
@@ -1503,11 +1447,29 @@ export class HeroSystem6eItem extends Item {
             limitations += _myLimitation;
         }
 
-        // if (this.system.XMLID === "SWIMMING") {
-        //     console.log(this)
-        // }
+        let _realCost = system.activePoints;
 
-        let _realCost = system.activePoints / (1 + limitations);
+        // Power cost in Power Framework is applied before limitations
+        let costSuffix = "";
+        if (parent) {
+            if (parent.system.XMLID === "MULTIPOWER") {
+                // Fixed
+                if (this.system.ULTRA_SLOT) {
+                    costSuffix = this.actor?.system.is5e ? "u" : "f";
+                    _realCost /= 10.0;
+                }
+
+                // Variable
+                else {
+                    costSuffix = this.actor?.system.is5e ? "m" : "v";
+                    _realCost /= 5.0;
+                }
+            } else if (parent.system.XMLID === "ELEMENTAL_CONTROL") {
+                _realCost = _realCost - parent.system.baseCost;
+            }
+        }
+
+        _realCost = _realCost / (1 + limitations);
 
         // ADD_MODIFIERS_TO_BASE
         if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
@@ -1522,22 +1484,6 @@ export class HeroSystem6eItem extends Item {
             const _discount =
                 _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations));
             _realCost -= _discount;
-        }
-
-        // MULTIPOWER
-        let costSuffix = "";
-        if (parent && parent.system.XMLID === "MULTIPOWER") {
-            // Fixed
-            if (this.system.ULTRA_SLOT) {
-                costSuffix = "f";
-                _realCost /= 10.0;
-            }
-
-            // Variable
-            else {
-                costSuffix = "v";
-                _realCost /= 5.0;
-            }
         }
 
         _realCost = RoundFavorPlayerDown(_realCost);
@@ -1814,7 +1760,7 @@ export class HeroSystem6eItem extends Item {
 
             case "ELEMENTAL_CONTROL":
                 // Elemental Control, 12-point powers
-                system.description = `${system.ALIAS}, ${
+                system.description = `${system.NAME || system.ALIAS}, ${
                     parseInt(system.baseCost) * 2
                 }-point powers`;
                 break;
@@ -1917,9 +1863,9 @@ export class HeroSystem6eItem extends Item {
             case "VPP":
             case "MULTIPOWER":
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
-                system.description = `${system.ALIAS}, ${parseInt(
-                    system.baseCost,
-                )}-point reserve`;
+                system.description = `${
+                    system.NAME || system.ALIAS
+                }, ${parseInt(system.baseCost)}-point reserve`;
                 break;
 
             case "FLASH":
