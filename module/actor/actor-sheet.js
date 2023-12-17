@@ -16,7 +16,7 @@ export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            classes: ["actor-sidebar-sheet"],
+            classes: ["actor-sheet"],
             template:
                 "systems/hero6efoundryvttv2/templates/actor/actor-sheet.hbs",
             tabs: [
