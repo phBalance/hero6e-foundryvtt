@@ -2,7 +2,7 @@
 import { HERO } from "./config.js";
 import { POWERS } from "./powers/powers-rules.js";
 import { HeroSystem6eActor } from "./actor/actor.js";
-import { HeroSystemActorSheet } from "./actor/actor-sidebar-sheet.js";
+import { HeroSystemActorSheet } from "./actor/actor-sheet.js";
 import {
     HeroSystem6eToken,
     HeroSystem6eTokenDocument,
