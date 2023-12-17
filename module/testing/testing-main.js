@@ -1,4 +1,3 @@
-import { registerHitLocationTests } from "./testing-hit-locations.js";
 import { registerUtilTests } from "./testing-util.js";
 import { registerDamageFunctionTests } from "./testing-damage-functions.js";
 import { registerTagTests } from "./testing-tag.js";
@@ -21,7 +20,6 @@ Hooks.once("ready", async function () {
 });
 
 Hooks.on("quenchReady", (quench) => {
-    registerHitLocationTests(quench);
     registerUtilTests(quench);
     registerDamageFunctionTests(quench);
     registerTagTests(quench);
