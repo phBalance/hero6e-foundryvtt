@@ -1519,15 +1519,12 @@ export class HeroSystem6eActor extends Actor {
 
         for (const child of children) {
             const tagName = child.tagName;
-            //console.log(tagName, child?.attributes?.['XMLID']?.value ?? "")
 
             let jsonChild = {};
             if (child.childElementCount == 0 && child.attributes.length == 0) {
                 jsonChild = child.textContent;
             }
             if (HeroSystem6eItem.ItemXmlTags.includes(child.tagName)) {
-                // ||
-                //(HeroSystem6eItem.ItemXmlChildTags.includes(child.tagName) && !HeroSystem6eItem.ItemXmlTags.includes(child.parentElement.tagName) )) {
                 jsonChild = [];
             } else {
                 for (const attribute of child.attributes) {
@@ -1563,7 +1560,6 @@ export class HeroSystem6eActor extends Actor {
                 json[tagName] ??= [];
                 json[tagName].push(jsonChild);
             } else if (Array.isArray(json)) {
-                //if (isEmpty(json)) json = [] //json[child.parentElement.tagName] ??= []
                 json.push(jsonChild);
             } else {
                 json[tagName] = jsonChild;

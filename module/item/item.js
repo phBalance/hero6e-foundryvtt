@@ -379,8 +379,6 @@ export class HeroSystem6eItem extends Item {
         "DISADVANTAGES",
         "EQUIPMENT",
     ];
-    // static,
-    //     "STR", "DEX", "CON", "INT", "EGO", "PRE", "COM", "OCV", "DCV", "OMCV", "DMCV", "SPD", "PD", "ED", "REC", "END", "BODY", "STUN"]
     static ItemXmlChildTags = ["ADDER", "MODIFIER", "POWER"];
 
     findModsByXmlid(xmlid) {

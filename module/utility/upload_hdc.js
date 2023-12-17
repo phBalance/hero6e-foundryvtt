@@ -1,6 +1,5 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
-import { RoundFavorPlayerDown } from "../utility/round.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { AdjustmentSources } from "../utility/adjustment.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
@@ -150,19 +149,6 @@ export async function applyCharacterSheet(xmlDoc) {
         }
     }
 
-    //const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
-
-    // Caracteristics for 6e
-    //let characteristicKeys = Object.keys(characteristicCosts)
-
-    // determine spd upfront for velocity calculations
-    //let spd
-    // let value
-    // let characteristicDefaults = CONFIG.HERO.characteristicDefaults
-    // if (this.actor.system.is5e) {
-    //     characteristicDefaults = CONFIG.HERO.characteristicDefaults5e
-    // }
-
     // 5e loading over 6e fix
     if (this.actor.system.is5e) {
         changes[`system.characteristics.ocv.core`] = null;
@@ -172,74 +158,15 @@ export async function applyCharacterSheet(xmlDoc) {
     }
 
     for (const characteristic of characteristics.children) {
-        const key = characteristic.getAttribute("XMLID").toLowerCase(); //CONFIG.HERO.characteristicsXMLKey[characteristic.getAttribute('XMLID')]
+        const key = characteristic.getAttribute("XMLID").toLowerCase();
         const levels = parseInt(characteristic.getAttribute("LEVELS"));
-        //let value = (getPowerInfo({ xmlid: key.toUpperCase(), actor: this.actor }).base || 0) + levels
         let value =
             this.actor.getCharacteristicBase(key.toUpperCase()) + levels;
-
-        // if (key === "leaping" && this.actor.system.is5e) {
-        //     const str = parseInt(changes[`system.characteristics.str.core`])
-        //     if (str >= 3) value = 0.5
-        //     if (str >= 5) value = 1
-        //     if (str >= 8) value = 1.5
-        //     if (str >= 10) value = 2
-        //     if (str >= 13) value = 2.5
-        //     if (str >= 15) value = 3
-        //     if (str >= 18) value = 3.5
-        //     if (str >= 20) value = 4
-        //     if (str >= 23) value = 4.5
-        //     if (str >= 25) value = 5
-        //     if (str >= 28) value = 5.5
-        //     if (str >= 30) value = 6
-        //     if (str >= 35) value = 7
-        //     if (str >= 40) value = 8
-        //     if (str >= 45) value = 9
-        //     if (str >= 50) value = 10
-        //     if (str >= 55) value = 11
-        //     if (str >= 60) value = 12
-        //     if (str >= 65) value = 13
-        //     if (str >= 70) value = 14
-        //     if (str >= 75) value = 15
-        //     if (str >= 80) value = 16
-        //     if (str >= 85) value = 17
-        //     if (str >= 90) value = 18
-        //     if (str >= 95) value = 19
-        //     if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
-        //     changes[`system.characteristics.leaping.base`] = RoundFavorPlayerUp(value)
-        //     value += parseInt(characteristic.getAttribute('LEVELS'))
-
-        // }
 
         changes[`system.characteristics.${key}.value`] = value;
         changes[`system.characteristics.${key}.max`] = value;
         changes[`system.characteristics.${key}.core`] = value;
         this.actor.system.characteristics[key].core = value;
-        // let cost = Math.round(levels * characteristicCosts[key])
-        // changes[`system.characteristics.${key}.basePointsPlusAdders`] = cost
-        // changes[`system.characteristics.${key}.realCost`] = cost
-        // changes[`system.characteristics.${key}.activePoints`] = cost
-
-        // if (key in CONFIG.HERO.movementPowers) {
-        //     let name = characteristic.getAttribute('NAME')
-        //     name = (name === '') ? characteristic.getAttribute('ALIAS') : name
-        //     //const velocity = Math.round((spd * value) / 12)
-        //     const itemData = {
-        //         name: name,
-        //         type: 'movement',
-        //         system: {
-        //             type: key,
-        //             editable: false,
-        //             base: value,
-        //             value,
-        //             //velBase: velocity,
-        //             //velValue: velocity,
-        //             class: key,
-        //         }
-        //     }
-
-        //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        // }
     }
 
     if (this.actor.system.is5e) {
@@ -633,7 +560,7 @@ export async function CalcActorRealAndActivePoints(actor) {
     return actor.CalcActorRealAndActivePoints();
 }
 
-export function XmlToItemData(xml, type) {
+function XmlToItemData(xml, type) {
     const xmlid = xml.getAttribute("XMLID");
 
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this?.actor });
