@@ -1959,6 +1959,7 @@ export class HeroSystem6eItem extends Item {
         try {
             let re = new RegExp(`^${_rawName}`, "i");
             system.description = system.description.replace(re, "").trim();
+
             re = new RegExp(`: ${_rawName}$`, "i");
             system.description = system.description.replace(re, "").trim();
             system.description = system.description.replace(/^: /, "").trim();

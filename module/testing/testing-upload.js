@@ -1858,6 +1858,86 @@ export function registerUploadTests(quench) {
                     });
                 });
 
+                describe("MULTIPOWER 6e", () => {
+                    const mpContents = `
+                        <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1702775579792" BASECOST="20.0" LEVELS="0" ALIAS="Multipower" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1">
+                            <NOTES/>
+                        </MULTIPOWER>
+                    `;
+                    const contents = `
+                        <POWER XMLID="EGOATTACK" ID="1702775416203" BASECOST="0.0" LEVELS="2" ALIAS="Mental Blast" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1702775579792" ULTRA_SLOT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES/>
+                            <MODIFIER XMLID="EXTRATIME" ID="1702775689887" BASECOST="-0.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SEGMENT" OPTIONID="SEGMENT" OPTION_ALIAS="Extra Segment" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES/>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let mpItem;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+
+                        mpItem = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(mpContents),
+                            { temporary: true, parent: actor },
+                        );
+                        await mpItem._postUpload();
+                        actor.items.set(mpItem.system.XMLID, mpItem);
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("power description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "2d6 (20 Active Points); Extra Time (Extra Segment, -1/2)",
+                        );
+                    });
+
+                    it("power realCost", function () {
+                        assert.equal(item.system.realCost, "1f");
+                    });
+
+                    it("power activePoints", function () {
+                        assert.equal(item.system.activePoints, 20);
+                    });
+
+                    it("power end", function () {
+                        assert.equal(item.system.end, 2);
+                    });
+
+                    it("power levels", function () {
+                        assert.equal(item.system.value, 2);
+                    });
+
+                    it("multipower description", function () {
+                        assert.equal(
+                            mpItem.system.description,
+                            ", 20-point reserve", // TODO: Should be "Multipower, 20-point reserve"
+                        );
+                    });
+
+                    it("multipower realCost", function () {
+                        assert.equal(mpItem.system.realCost, 20);
+                    });
+
+                    it("multipower activePoints", function () {
+                        assert.equal(mpItem.system.activePoints, 20);
+                    });
+                });
+
                 describe("ELEMENTAL_CONTROL 5e", () => {
                     const ecContents = `
                         <ELEMENTAL_CONTROL XMLID="GENERIC_OBJECT" ID="1702694260215" BASECOST="10.0" LEVELS="0" ALIAS="Elemental Control" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="EC Ego Powers" QUANTITY="1">
