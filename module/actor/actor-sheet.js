@@ -12,6 +12,8 @@ import {
     convertFromDC,
 } from "../utility/damage.js";
 
+import { HeroSystem6eActor } from "./actor.js";
+
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
     static get defaultOptions() {
@@ -521,6 +523,18 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Defense (create fake attacks and get defense results)
         let defense = {};
 
+        // Make a fake actor to hold the fake attacks we're going to create. Give it the
+        // same HERO system version as the actor related to this sheet.
+        // TODO: Is there a better way to calculate defense without creating fake attacks?
+        const defenseCalculationActor = new HeroSystem6eActor(
+            {
+                name: "Defense Calculation Actor",
+                type: "pc",
+            },
+            { temporary: true },
+        );
+        defenseCalculationActor.system.is5e = this.actor.system.is5e;
+
         // Defense PD
         const pdContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -528,7 +542,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         `;
         const pdAttack = await new HeroSystem6eItem(
             HeroSystem6eItem.itemDataFromXml(pdContentsAttack),
-            { temporary: true },
+            { temporary: true, parent: defenseCalculationActor },
         );
         await pdAttack._postUpload();
 
@@ -574,7 +588,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         `;
         const edAttack = await new HeroSystem6eItem(
             HeroSystem6eItem.itemDataFromXml(edContentsAttack),
-            { temporary: true },
+            { temporary: true, parent: defenseCalculationActor },
         );
         await edAttack._postUpload();
 
@@ -621,7 +635,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         `;
         const mdAttack = await new HeroSystem6eItem(
             HeroSystem6eItem.itemDataFromXml(mdContentsAttack),
-            { temporary: true },
+            { temporary: true, parent: defenseCalculationActor },
         );
         await mdAttack._postUpload();
 
@@ -668,7 +682,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         `;
         const drainAttack = await new HeroSystem6eItem(
             HeroSystem6eItem.itemDataFromXml(drainContentsAttack),
-            { temporary: true },
+            { temporary: true, parent: defenseCalculationActor },
         );
         await drainAttack._postUpload();
 
