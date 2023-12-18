@@ -1,6 +1,5 @@
 import { HEROSYS } from "../herosystem6e.js";
 import { HeroSystem6eItem } from "../item/item.js";
-import { RoundFavorPlayerDown } from "../utility/round.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { AdjustmentSources } from "../utility/adjustment.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
@@ -150,19 +149,6 @@ export async function applyCharacterSheet(xmlDoc) {
         }
     }
 
-    //const characteristicCosts = this.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
-
-    // Caracteristics for 6e
-    //let characteristicKeys = Object.keys(characteristicCosts)
-
-    // determine spd upfront for velocity calculations
-    //let spd
-    // let value
-    // let characteristicDefaults = CONFIG.HERO.characteristicDefaults
-    // if (this.actor.system.is5e) {
-    //     characteristicDefaults = CONFIG.HERO.characteristicDefaults5e
-    // }
-
     // 5e loading over 6e fix
     if (this.actor.system.is5e) {
         changes[`system.characteristics.ocv.core`] = null;
@@ -172,74 +158,15 @@ export async function applyCharacterSheet(xmlDoc) {
     }
 
     for (const characteristic of characteristics.children) {
-        const key = characteristic.getAttribute("XMLID").toLowerCase(); //CONFIG.HERO.characteristicsXMLKey[characteristic.getAttribute('XMLID')]
+        const key = characteristic.getAttribute("XMLID").toLowerCase();
         const levels = parseInt(characteristic.getAttribute("LEVELS"));
-        //let value = (getPowerInfo({ xmlid: key.toUpperCase(), actor: this.actor }).base || 0) + levels
         let value =
             this.actor.getCharacteristicBase(key.toUpperCase()) + levels;
-
-        // if (key === "leaping" && this.actor.system.is5e) {
-        //     const str = parseInt(changes[`system.characteristics.str.core`])
-        //     if (str >= 3) value = 0.5
-        //     if (str >= 5) value = 1
-        //     if (str >= 8) value = 1.5
-        //     if (str >= 10) value = 2
-        //     if (str >= 13) value = 2.5
-        //     if (str >= 15) value = 3
-        //     if (str >= 18) value = 3.5
-        //     if (str >= 20) value = 4
-        //     if (str >= 23) value = 4.5
-        //     if (str >= 25) value = 5
-        //     if (str >= 28) value = 5.5
-        //     if (str >= 30) value = 6
-        //     if (str >= 35) value = 7
-        //     if (str >= 40) value = 8
-        //     if (str >= 45) value = 9
-        //     if (str >= 50) value = 10
-        //     if (str >= 55) value = 11
-        //     if (str >= 60) value = 12
-        //     if (str >= 65) value = 13
-        //     if (str >= 70) value = 14
-        //     if (str >= 75) value = 15
-        //     if (str >= 80) value = 16
-        //     if (str >= 85) value = 17
-        //     if (str >= 90) value = 18
-        //     if (str >= 95) value = 19
-        //     if (str >= 100) value = 20 + Math.floor((str - 100) / 5)
-        //     changes[`system.characteristics.leaping.base`] = RoundFavorPlayerUp(value)
-        //     value += parseInt(characteristic.getAttribute('LEVELS'))
-
-        // }
 
         changes[`system.characteristics.${key}.value`] = value;
         changes[`system.characteristics.${key}.max`] = value;
         changes[`system.characteristics.${key}.core`] = value;
         this.actor.system.characteristics[key].core = value;
-        // let cost = Math.round(levels * characteristicCosts[key])
-        // changes[`system.characteristics.${key}.basePointsPlusAdders`] = cost
-        // changes[`system.characteristics.${key}.realCost`] = cost
-        // changes[`system.characteristics.${key}.activePoints`] = cost
-
-        // if (key in CONFIG.HERO.movementPowers) {
-        //     let name = characteristic.getAttribute('NAME')
-        //     name = (name === '') ? characteristic.getAttribute('ALIAS') : name
-        //     //const velocity = Math.round((spd * value) / 12)
-        //     const itemData = {
-        //         name: name,
-        //         type: 'movement',
-        //         system: {
-        //             type: key,
-        //             editable: false,
-        //             base: value,
-        //             value,
-        //             //velBase: velocity,
-        //             //velValue: velocity,
-        //             class: key,
-        //         }
-        //     }
-
-        //     await HeroSystem6eItem.create(itemData, { parent: this.actor })
-        // }
     }
 
     if (this.actor.system.is5e) {
@@ -633,16 +560,10 @@ export async function CalcActorRealAndActivePoints(actor) {
     return actor.CalcActorRealAndActivePoints();
 }
 
-export function XmlToItemData(xml, type) {
+function XmlToItemData(xml, type) {
     const xmlid = xml.getAttribute("XMLID");
 
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this?.actor });
-    // if (!configPowerInfo)
-    // {
-    //     if (game.settings.get(game.system.id, 'alphaTesting')) {
-    //         ui.notifications.warn(`${this.actor.name} has item ${xmlid} which it not defined in config.js`);
-    //     }
-    // }
 
     let systemData = {
         id: xmlid,
@@ -710,13 +631,6 @@ export function XmlToItemData(xml, type) {
                     ).toFixed(2);
                     break;
                 case "LEVELS":
-                    // case "PDLEVELS":
-                    // case "EDLEVELS":
-                    // case "MDLEVELS":
-                    // case "LENGTHLEVELS":
-                    // case "HEIGHTLEVELS":
-                    // case "WIDTHLEVELS":
-                    // case "BODYLEVELS":
                     systemData[attribute.name] = {
                         value: attribute.value,
                         max: attribute.value,
@@ -893,12 +807,14 @@ export function XmlToItemData(xml, type) {
             }
         }
 
-        // For some reason some ADDERs have a 0 value.
+        // For some reason some MODIFIERs have a 0 value.
         // We will override those values as necessary.
-        if (CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST) {
-            _power.BASECOST =
-                CONFIG.HERO.ModifierOverride[_power.XMLID]?.BASECOST ||
-                _power.BASECOST;
+        const modifierInfo = getModifierInfo({
+            xmlid: _power.XMLID,
+            actor: this?.actor,
+        });
+        if (modifierInfo?.BASECOST) {
+            _power.BASECOST = modifierInfo?.BASECOST || _power.BASECOST;
         }
 
         systemData.powers.push(_power);
@@ -922,10 +838,12 @@ export function XmlToItemData(xml, type) {
 
         // For some reason some ADDERs have a 0 value.
         // We will override those values as necessary.
-        if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST) {
-            _adder.BASECOST =
-                CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST ||
-                _adder.BASECOST;
+        const adderInfo = getModifierInfo({
+            xmlid: _adder.XMLID,
+            actor: this?.actor,
+        });
+        if (adderInfo?.BASECOST) {
+            _adder.BASECOST = adderInfo?.BASECOST || _adder.BASECOST;
         }
 
         // ADDERs can have ADDERs.
@@ -949,17 +867,16 @@ export function XmlToItemData(xml, type) {
 
             // For some reason some ADDERs have a 0 value.
             // We will override those values as necessary.
-            if (
-                CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST !=
-                undefined
-            ) {
-                _adder2.BASECOST =
-                    CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.BASECOST;
+            const adder2Info = getModifierInfo({
+                xmlid: _adder2.XMLID,
+                actor: this?.actor,
+            });
+            if (adder2Info?.BASECOST) {
+                _adder2.BASECOST = adder2Info?.BASECOST || _adder2.BASECOST;
             }
-            if (CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER) {
+            if (adder2Info?.MULTIPLIER) {
                 _adder2.MULTIPLIER =
-                    CONFIG.HERO.ModifierOverride[_adder2.XMLID]?.MULTIPLIER ||
-                    _adder2.MULTIPLIER;
+                    adder2Info?.MULTIPLIER || _adder2.MULTIPLIER;
             }
 
             _adder.adders.push(_adder2);
@@ -986,10 +903,12 @@ export function XmlToItemData(xml, type) {
 
         // For some reason some MODIFIERs have a 0 value.
         // We will override those values as necessary.
-        if (CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST) {
-            _mod.BASECOST =
-                CONFIG.HERO.ModifierOverride[_mod.XMLID]?.BASECOST ||
-                _mod.BASECOST;
+        const modifierInfo = getModifierInfo({
+            xmlid: _mod.XMLID,
+            actor: this?.actor,
+        });
+        if (modifierInfo?.BASECOST) {
+            _mod.BASECOST = modifierInfo?.BASECOST || _mod.BASECOST;
         }
 
         // AOE BASECOST is also missing from HDC
@@ -1067,17 +986,15 @@ export function XmlToItemData(xml, type) {
 
             // For some reason some ADDERs have a 0 value.
             // We will override those values as necessary.
-            if (
-                CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST !=
-                undefined
-            ) {
-                _adder.BASECOST =
-                    CONFIG.HERO.ModifierOverride[_adder.XMLID]?.BASECOST;
+            const adderInfo = getModifierInfo({
+                xmlid: _adder.XMLID,
+                actor: this?.actor,
+            });
+            if (adderInfo?.BASECOST) {
+                _adder.BASECOST = adderInfo?.BASECOST || _adder.BASECOST;
             }
-            if (CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER) {
-                _adder.MULTIPLIER =
-                    CONFIG.HERO.ModifierOverride[_adder.XMLID]?.MULTIPLIER ||
-                    _adder.MULTIPLIER;
+            if (adderInfo?.MULTIPLIER) {
+                _adder.MULTIPLIER = adderInfo?.MULTIPLIER || _adder.MULTIPLIER;
             }
 
             _mod.adders.push(_adder);
@@ -1158,12 +1075,6 @@ export async function uploadBasic(xml, type) {
         parent: this.actor,
     });
 
-    // // Some items should be copied and created as an attack
-    // const configPowerInfo = getPowerInfo({ xmlid: itemData.system.XMLID, actor: this.actor })
-    // if (configPowerInfo && configPowerInfo.powerType.includes("attack")) {
-    //     await uploadAttack.call(this, xml)
-    // }
-
     // Some items are attacks
     const configPowerInfo = getPowerInfo({
         xmlid: itemData.system.XMLID,
@@ -1212,386 +1123,6 @@ export async function uploadSkill(skill, duplicate) {
     await HeroSystem6eItem.create(itemData, { parent: this.actor });
 }
 
-export async function calcItemPoints(item) {
-    let changed = false;
-
-    // For some reason some ADDERs have a 0 value.
-    for (let adder of item.system?.adders || []) {
-        if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
-            let baseCost =
-                CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST ||
-                adder.BASECOST;
-            if (baseCost != adder.BASECOST) {
-                adder.BASECOST = baseCost;
-                await item.update({ "system.adders": item.system.adders });
-                changed = true;
-            }
-        }
-    }
-
-    for (let modifier of item.system?.modifiers || []) {
-        let baseCost =
-            CONFIG.HERO.ModifierOverride[modifier.XMLID]?.BASECOST ||
-            modifier.BASECOST;
-        if (baseCost != modifier.BASECOST) {
-            modifier.BASECOST = baseCost;
-            await item.update({ "system.modifiers": item.system.modifiers });
-            changed = true;
-        }
-
-        for (let adder of modifier?.adders || []) {
-            if (CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST) {
-                let baseCost =
-                    CONFIG.HERO.ModifierOverride[adder.XMLID]?.BASECOST ||
-                    adder.BASECOST;
-                if (baseCost != adder.BASECOST) {
-                    adder.BASECOST = baseCost;
-                    await item.update({
-                        "system.modifiers": item.system.modifiers,
-                    });
-                    changed = true;
-                }
-            }
-        }
-    }
-
-    if (item.name === "Razor Arrow") {
-        console.log(item);
-    }
-
-    changed = changed || calcBasePointsPlusAdders(item);
-    changed = changed || calcActivePoints(item);
-    changed = changed || calcRealCost(item);
-    return changed;
-}
-
-function calcBasePointsPlusAdders(item) {
-    let system = item.system;
-    let actor = item.actor;
-
-    let old = system.basePointsPlusAdders;
-
-    if (!system.XMLID) return 0;
-
-    // if (system.XMLID == "RKA")
-    //     HEROSYS.log(false, system.XMLID)
-
-    // Everyman skills are free
-    if (system.EVERYMAN) {
-        system.basePointsPlusAdders = 0;
-        return { changed: old === system.basePointsPlusAdders };
-    }
-
-    // Native Tongue
-    if (system.NATIVE_TONGUE) {
-        system.basePointsPlusAdders = 0;
-        return { changed: old === system.basePointsPlusAdders };
-    }
-
-    // Check if we have CONFIG info about this power
-    const configPowerInfo = getPowerInfo({ xmlid: system.XMLID, actor: actor });
-
-    // Base Cost is typcailly extracted directly from HDC
-    let baseCost = parseInt(system.BASECOST);
-
-    // PowerFramework might be important
-    let parentItem = null;
-    let configPowerInfoParent = null;
-    if (system.PARENTID && actor?.items) {
-        parentItem = actor.items.find((o) => o.system.ID === system.PARENTID);
-        if (parentItem) {
-            configPowerInfoParent = getPowerInfo({
-                xmlid: parentItem.system.XMLID,
-                actor: actor,
-            });
-        }
-    }
-
-    // Cost per level is NOT included in the HDC file.
-    // We will try to get cost per level via config.js
-    // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
-    //const characteristicCosts = actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
-    let costPerLevel = parseFloat(
-        configPowerInfo?.costPerLevel ||
-            //characteristicCosts[system.XMLID.toLocaleLowerCase()] ||
-            system.costPerLevel ||
-            baseCost ||
-            (configPowerInfo?.powerType == "skill" ? 2 : 1),
-    );
-
-    // FLASH (target group cost 5 per level, non-targeting costs 3 per level)
-    if (system.XMLID === "FLASH") {
-        if (system.OPTIONID === "SIGHTGROUP") {
-            // The only targeting group
-            costPerLevel = 5;
-        } else {
-            costPerLevel = 3;
-        }
-    }
-
-    // But configPowerInfo?.costPerLevel could actually be 0 (EXTRALIMBS)
-    if (configPowerInfo?.costPerLevel != undefined) {
-        costPerLevel = parseFloat(configPowerInfo?.costPerLevel);
-    }
-
-    let levels = parseInt(system.LEVELS?.value);
-
-    let subCost = costPerLevel * levels;
-
-    // 3 CP per 2 points
-    if (costPerLevel == 3 / 2 && subCost % 1) {
-        let _threePerTwo = Math.ceil(costPerLevel * levels) + 1;
-        subCost = _threePerTwo;
-        system.title =
-            (system.title || "") +
-            "3 CP per 2 points; \n+1 level may cost nothing. ";
-    }
-
-    // FORCEWALL/BARRIER
-    if (system.XMLID == "FORCEWALL") {
-        baseCost += parseInt(system.BODYLEVELS) || 0;
-        baseCost += parseInt(system.LENGTHLEVELS) || 0;
-        baseCost += parseInt(system.HEIGHTLEVELS) || 0;
-        baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness
-    }
-
-    // Start adding up the costs
-    let cost = baseCost + subCost;
-
-    // ADDERS
-    let adderCost = 0;
-    if (system.adders) {
-        for (let adder of system.adders.filter((o) => o.SELECTED)) {
-            let adderBaseCost = parseFloat(adder.BASECOST);
-
-            let adderLevels = Math.max(1, parseInt(adder.LEVELS));
-            adderCost += Math.ceil(adderBaseCost * adderLevels); // ceil is for ENTANGLE +5 PD
-        }
-    }
-
-    // Categorized skills cost 2 per category and +1 per each subcategory.
-    // If no catagories selected then assume 3 pts
-    if (configPowerInfo?.categorized && adderCost >= 4) {
-        if (adderCost == 0) {
-            adderCost = 3;
-        } else {
-            adderCost = Math.floor(adderCost / 2) + 1;
-        }
-    }
-
-    // POWERS (likely ENDURANCERESERVEREC)
-    if (system.powers) {
-        for (let adder of system.powers) {
-            let adderBaseCost = parseFloat(adder.BASECOST);
-            let adderLevels = Math.max(1, parseInt(adder.LEVELS));
-            adderCost += Math.ceil(adderBaseCost * adderLevels);
-        }
-    }
-
-    // Skill Enhancer discount (a hidden discount; not shown in item description)
-    if (
-        configPowerInfoParent &&
-        configPowerInfoParent.powerType?.includes("enhancer")
-    ) {
-        cost = Math.max(1, cost - 1);
-    }
-
-    cost += adderCost;
-
-    // INDEPENDENT ADVANTAGE (aka Naked Advantage)
-    // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
-    if (system.XMLID == "NAKEDMODIFIER") {
-        let advantages = 0;
-        for (let modifier of system.modifiers.filter((o) => !o.PRIVATE)) {
-            advantages += parseFloat(modifier.BASECOST);
-        }
-        cost = cost * advantages;
-    }
-
-    system.basePointsPlusAdders = cost;
-
-    //return cost; //Math.max(1, cost)
-    return old != system.basePointsPlusAdders;
-}
-
-function calcActivePoints(item) {
-    let system = item.system;
-    // Active Points = (Base Points + cost of any Adders) x (1 + total value of all Advantages)
-
-    // if (system.XMLID == "ARMOR")
-    //     HEROSYS.log(false, system.XMLID)
-
-    let advantages = 0;
-    let advantagesDC = 0;
-
-    for (let modifier of system.modifiers.filter(
-        (o) =>
-            (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE) &&
-            parseFloat(o.BASECOST) >= 0,
-    )) {
-        let _myAdvantage = 0;
-        const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
-        const levels = Math.max(1, parseFloat(modifier.LEVELS));
-        switch (modifier.XMLID) {
-            case "AOE":
-                _myAdvantage += modifierBaseCost;
-                break;
-
-            case "CUMULATIVE":
-                _myAdvantage += modifierBaseCost + levels * 0.25;
-                break;
-
-            default:
-                _myAdvantage += modifierBaseCost * levels;
-        }
-
-        // Some modifiers may have ADDERS
-        const adders = modifier.adders; //modifier.getElementsByTagName("ADDER")
-        if (adders.length) {
-            for (let adder of adders) {
-                const adderBaseCost = parseFloat(adder.BASECOST || 0);
-                //if (adderBaseCost > 0) {
-                _myAdvantage += adderBaseCost;
-                //HEROSYS.log(false, adder.XMLID, adderBaseCost)
-                //}
-            }
-        }
-
-        // No negative advantages
-        advantages += Math.max(0, _myAdvantage);
-        modifier.BASECOST_total = _myAdvantage;
-
-        // For attacks with Advantages, determine the DCs by
-        // making a special Active Point calculation that only counts
-        // Advantages that directly affect how the victim takes damage.
-        let powerInfo = getPowerInfo({ xmlid: system.XMLID });
-        let modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
-        if (powerInfo && powerInfo.powerType?.includes("attack")) {
-            if (modifierInfo && modifierInfo.dc) {
-                advantagesDC += Math.max(0, _myAdvantage);
-            }
-        }
-    }
-
-    const _activePoints = system.basePointsPlusAdders * (1 + advantages);
-    system.activePointsDc = RoundFavorPlayerDown(
-        system.basePointsPlusAdders * (1 + advantagesDC),
-    );
-
-    // This may be a slot in a framework if so get parent
-    // const parent = item.actor.items.find(o=> o.system.ID === system.PARENTID);
-
-    // HALFEND is based on active points without the HALFEND modifier
-    if (system.modifiers.find((o) => o.XMLID == "REDUCEDEND")) {
-        system._activePointsWithoutEndMods =
-            system.basePointsPlusAdders * (1 + advantages - 0.25);
-    }
-
-    let old = system.activePoints;
-    system.activePoints = RoundFavorPlayerDown(_activePoints);
-
-    //return RoundFavorPlayerDown(_activePoints)
-    return old != system.activePoints;
-}
-
-function calcRealCost(item) {
-    let system = item.system;
-    // Real Cost = Active Cost / (1 + total value of all Limitations)
-
-    // if (system.XMLID == "RKA")
-    //     HEROSYS.log(false, system.XMLID)
-
-    // This may be a slot in a framework if so get parent
-    const parent = item.actor
-        ? item.actor.items.find((o) => o.system.ID === system.PARENTID)
-        : null;
-
-    let modifiers = system.modifiers.filter((o) => parseFloat(o.BASECOST) < 0);
-
-    // Add limitations from parent
-    if (parent) {
-        modifiers.push(
-            ...parent.system.modifiers.filter(
-                (o) => parseFloat(o.BASECOST) < 0,
-            ),
-        );
-    }
-
-    let limitations = 0;
-    for (let modifier of modifiers) {
-        let _myLimitation = 0;
-        const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
-        _myLimitation += -modifierBaseCost;
-
-        // Some modifiers may have ADDERS as well (like a focus)
-        for (let adder of modifier.adders) {
-            let adderBaseCost = parseFloat(adder.BASECOST || 0);
-
-            // Unique situation where JAMMED floors the limitation
-            if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
-                system.title =
-                    (system.title || "") +
-                    "Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. ";
-                adderBaseCost = 0;
-            }
-
-            // can be positive or negative (like charges).
-            // Requires a roll gets interesting with Jammed / Can choose which of two rolls to make from use to use
-            _myLimitation += -adderBaseCost;
-
-            const multiplier = Math.max(1, parseFloat(adder.MULTIPLIER || 0));
-            _myLimitation *= multiplier;
-        }
-
-        // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
-        if (_myLimitation < 0.25) {
-            // if (game.settings.get(game.system.id, 'alphaTesting')) {
-            //     ui.notifications.warn(`${system.XMLID} ${modifier.XMLID} has a limiation of ${-_myLimitation}.  Overrided limitation to be -1/4.`)
-            //     console.log(`${system.XMLID} ${modifier.XMLID} has a limiation of ${-_myLimitation}.  Overrided limitation to be -1/4.`, system)
-            // }
-            _myLimitation = 0.25;
-            system.title =
-                (system.title || "") +
-                "Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. ";
-        }
-
-        //console.log("limitation", modifier.ALIAS, _myLimitation)
-        modifier.BASECOST_total = -_myLimitation;
-
-        limitations += _myLimitation;
-    }
-
-    let _realCost = system.activePoints / (1 + limitations);
-
-    // MULTIPOWER
-    let costSuffix = "";
-    if (parent && parent.system.XMLID === "MULTIPOWER") {
-        // Fixed
-        if (item.system.ULTRA_SLOT) {
-            costSuffix = "f";
-            _realCost /= 10.0;
-        }
-
-        // Variable
-        else {
-            costSuffix = "v";
-            _realCost /= 5.0;
-        }
-    }
-
-    _realCost = RoundFavorPlayerDown(_realCost);
-
-    // Minumum cost
-    if (_realCost == 0 && system.activePoints > 0) {
-        _realCost = 1;
-    }
-
-    let old = system.realCost;
-    system.realCost = _realCost + costSuffix;
-
-    return old != system.realCost; //_realCost
-}
-
 export async function uploadPower(power, type) {
     // GENERIC_OBJECT are likely Power Frameworks.
     // Rename GENERIC_OBJECT with TAGNAME to make it easier to parse.
@@ -1609,11 +1140,6 @@ export async function uploadPower(power, type) {
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: this.actor });
 
     if (configPowerInfo) {
-        // if ((configPowerInfo?.powerType || "").includes("skill")) {
-        // //     await uploadSkill.call(this, power, true)
-        //     await item.update({ 'system.subType': 'skill'});
-        // }
-
         // Detect attacks
         if (configPowerInfo.powerType?.includes("attack")) {
             //await uploadAttack.call(this, power, true)
@@ -1642,10 +1168,8 @@ export async function makeAttack(item) {
 
     // Confirm this is an attack
     const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: item.actor });
-    //if (!configPowerInfo || !configPowerInfo.powerType.includes("attack")) return
 
     let changes = {};
-    //changes[`img`] = "icons/svg/sword.svg"
 
     // Name
     let description = item.system.ALIAS;

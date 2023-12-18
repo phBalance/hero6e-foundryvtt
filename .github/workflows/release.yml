@@ -38,7 +38,7 @@ jobs:
         if [[ "${{ steps.extract_version.outputs.VERSION }}" != "${{ steps.latest_release.outputs.LATEST_RELEASE }}" ]]; then
           RELEASE="${{ steps.extract_version.outputs.VERSION }}"
           echo "::set-output name=RELEASE::$RELEASE"
-        fi  
+        fi
 
   prepare_release:
     needs: check_release
@@ -50,6 +50,9 @@ jobs:
 
     - name: build css
       run: npm ci && npm run compile
+
+    - name: validate formatting (via prettier) and perform static analysis (via eslint)
+      run: npm run validate
 
     - name: Update release version in system.json
       run: |

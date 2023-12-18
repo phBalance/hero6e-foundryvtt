@@ -2,7 +2,7 @@ import { modifyRollEquation } from "../utility/util.js";
 
 export function registerUtilTests(quench) {
     quench.registerBatch(
-        "quench.utils.modifyRollEquation",
+        "hero6efoundryvttv2.utils.modifyRollEquation",
         (context) => {
             const { describe, it, assert } = context;
 

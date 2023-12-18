@@ -14,7 +14,7 @@ import {
 
 export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
-        "quench.damageFunctions",
+        "hero6efoundryvttv2.damageFunctions",
         (context) => {
             const { assert, beforeEach, describe, it } = context;
 

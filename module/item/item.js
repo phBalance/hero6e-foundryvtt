@@ -370,23 +370,6 @@ export class HeroSystem6eItem extends Item {
         return false;
     }
 
-    /**
-     * Display the chat card for an Item as a Chat Message
-     * @param {object} options          Options which configure the display of the item chat card
-     * @param {string} rollMode         The message visibility mode to apply to the created card
-     * @param {boolean} createMessage   Whether to automatically create a ChatMessage entity (if true), or only return
-     *                                  the prepared message data (if false)
-     */
-
-    // async displayCard({ rollMode, createMessage = true } = {}) {
-    //     switch (this.data.type) {
-    //         case "attack":
-    //             const attackCard = await HeroSystem6eAttackCard.createChatDataFromItem(this);
-    //             ChatMessage.applyRollMode(attackCard, rollMode || game.settings.get("core", "rollMode"));
-    //             return createMessage ? ChatMessage.create(attackCard) : attackCard;
-    //     }
-    // }
-
     static ItemXmlTags = [
         "SKILLS",
         "PERKS",
@@ -396,8 +379,6 @@ export class HeroSystem6eItem extends Item {
         "DISADVANTAGES",
         "EQUIPMENT",
     ];
-    // static,
-    //     "STR", "DEX", "CON", "INT", "EGO", "PRE", "COM", "OCV", "DCV", "OMCV", "DMCV", "SPD", "PD", "ED", "REC", "END", "BODY", "STUN"]
     static ItemXmlChildTags = ["ADDER", "MODIFIER", "POWER"];
 
     findModsByXmlid(xmlid) {
@@ -445,60 +426,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         return null;
-    }
-
-    _calcBaseCost(child) {
-        let newValue = child.baseCost;
-
-        switch (child.XMLID) {
-            case "AOE":
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 32)
-                    return 1.0;
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 16)
-                    return 0.75;
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 8)
-                    return 0.5;
-                if (child.OPTION == "RADIUS" && parseInt(child.LEVELS) <= 4)
-                    return 0.25;
-
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 64)
-                    return 1.0;
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 32)
-                    return 0.75;
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 16)
-                    return 0.5;
-                if (child.OPTION == "CONE" && parseInt(child.LEVELS) <= 8)
-                    return 0.25;
-
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 125)
-                    return 1.0;
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 64)
-                    return 0.75;
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 32)
-                    return 0.5;
-                if (child.OPTION == "LINE" && parseInt(child.LEVELS) <= 16)
-                    return 0.25;
-
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 16)
-                    return 1.0;
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 8)
-                    return 0.75;
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 4)
-                    return 0.5;
-                if (child.OPTION == "SURFACE" && parseInt(child.LEVELS) <= 2)
-                    return 0.25;
-
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 16)
-                    return 1.0;
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 8)
-                    return 0.75;
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 4)
-                    return 0.5;
-                if (child.OPTION == "AREA" && parseInt(child.LEVELS) <= 2)
-                    return 0.25;
-        }
-
-        return newValue;
     }
 
     async _postUpload() {
@@ -720,10 +647,10 @@ export class HeroSystem6eItem extends Item {
 
         // BASECOST
         const newBaseValue = parseFloat(
-            CONFIG.HERO.ModifierOverride[this.system.XMLID]?.BASECOST ||
+            getModifierInfo({ item: this })?.BASECOST ||
                 this.system.BASECOST ||
                 0,
-        ); // || parseFloat(configPowerInfo?.cost || 0)
+        );
         if (this.system.baseCost != newBaseValue) {
             this.system.baseCost = newBaseValue;
             changed = true;
@@ -854,8 +781,10 @@ export class HeroSystem6eItem extends Item {
 
                         default:
                             newChildValue = parseFloat(
-                                CONFIG.HERO.ModifierOverride[child.XMLID]
-                                    ?.BASECOST ||
+                                getModifierInfo({
+                                    xmlid: child.XMLID,
+                                    item: this,
+                                })?.BASECOST ||
                                     child.BASECOST ||
                                     0,
                             );
@@ -866,8 +795,10 @@ export class HeroSystem6eItem extends Item {
                         if (child[key]) {
                             for (const child2 of child[key]) {
                                 const newChild2Value = parseFloat(
-                                    CONFIG.HERO.ModifierOverride[child.XMLID]
-                                        ?.BASECOST ||
+                                    getModifierInfo({
+                                        xmlid: child.XMLID,
+                                        item: this,
+                                    })?.BASECOST ||
                                         child2.BASECOST ||
                                         0,
                                 );
@@ -1126,17 +1057,22 @@ export class HeroSystem6eItem extends Item {
             type: "power",
         };
 
-        for (let itemTag of [
+        // TODO: This is technically incorrect as it's accessing CONFIG.HERO.powers but ignoring CONFIG.HERO.powers5e
+        for (const itemTag of [
             ...HeroSystem6eItem.ItemXmlTags,
             ...CONFIG.HERO.powers
-                .filter((o) => o.powerType?.includes("characteristic"))
+                .filter(
+                    (o) =>
+                        o.powerType?.includes("characteristic") ||
+                        o.powerType?.includes("framework"),
+                )
                 .map((o) => o.key),
         ]) {
-            let itemSubTag = itemTag
+            const itemSubTag = itemTag
                 .replace(/S$/, "")
                 .replace("MARTIALART", "MANEUVER");
             if (heroJson[itemSubTag]) {
-                for (let system of Array.isArray(heroJson[itemSubTag])
+                for (const system of Array.isArray(heroJson[itemSubTag])
                     ? heroJson[itemSubTag]
                     : [heroJson[itemSubTag]]) {
                     itemData = {
@@ -1196,19 +1132,19 @@ export class HeroSystem6eItem extends Item {
 
         // Check if we have CONFIG info about this power
         const configPowerInfo = getPowerInfo({
-            xmlid: system.XMLID,
+            item: this,
             actor: actor,
         });
 
-        // Base Cost is typcailly extracted directly from HDC
-        let baseCost = system.baseCost; //parseInt(system.BASECOST)
+        // Base Cost is typically extracted directly from HDC
+        let baseCost = system.baseCost;
 
         // PowerFramework might be important
         let parentItem = this.getHdcParent();
         let configPowerInfoParent = null;
         if (parentItem) {
             configPowerInfoParent = getPowerInfo({
-                xmlid: parentItem.system.XMLID,
+                item: parentItem,
                 actor: actor,
             });
         }
@@ -1414,8 +1350,11 @@ export class HeroSystem6eItem extends Item {
             // For attacks with Advantages, determine the DCs by
             // making a special Active Point calculation that only counts
             // Advantages that directly affect how the victim takes damage.
-            const powerInfo = getPowerInfo({ xmlid: system.XMLID });
-            const modifierInfo = getModifierInfo({ xmlid: modifier.XMLID });
+            const powerInfo = getPowerInfo({ item: this });
+            const modifierInfo = getModifierInfo({
+                xmlid: modifier.XMLID,
+                item: this,
+            });
             if (powerInfo && powerInfo.powerType?.includes("attack")) {
                 if (modifierInfo && modifierInfo.dc) {
                     advantagesDC += Math.max(0, _myAdvantage);
@@ -1449,11 +1388,8 @@ export class HeroSystem6eItem extends Item {
         let system = this.system;
         // Real Cost = Active Cost / (1 + total value of all Limitations)
 
-        // if (system.XMLID == "RKA")
-        //     HEROSYS.log(false, system.XMLID)
-
         // This may be a slot in a framework if so get parent
-        const parent = this.getHdcParent(); // item.actor ? item.actor.items.find(o => o.system.ID === system.PARENTID) : null;
+        const parent = this.getHdcParent();
 
         let modifiers = (system.MODIFIER || []).filter(
             (o) => parseFloat(o.baseCost) < 0,
@@ -1499,14 +1435,10 @@ export class HeroSystem6eItem extends Item {
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
             if (_myLimitation < 0.25) {
-                // if (game.settings.get(game.system.id, 'alphaTesting')) {
-                //     ui.notifications.warn(`${system.XMLID} ${modifier.XMLID} has a limiation of ${-_myLimitation}.  Overrided limitation to be -1/4.`)
-                //     console.log(`${system.XMLID} ${modifier.XMLID} has a limiation of ${-_myLimitation}.  Overrided limitation to be -1/4.`, system)
-                // }
                 _myLimitation = 0.25;
                 system.title =
                     (system.title || "") +
-                    "Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. ";
+                    "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations. ";
             }
 
             //console.log("limitation", modifier.ALIAS, _myLimitation)
@@ -1515,11 +1447,29 @@ export class HeroSystem6eItem extends Item {
             limitations += _myLimitation;
         }
 
-        // if (this.system.XMLID === "SWIMMING") {
-        //     console.log(this)
-        // }
+        let _realCost = system.activePoints;
 
-        let _realCost = system.activePoints / (1 + limitations);
+        // Power cost in Power Framework is applied before limitations
+        let costSuffix = "";
+        if (parent) {
+            if (parent.system.XMLID === "MULTIPOWER") {
+                // Fixed
+                if (this.system.ULTRA_SLOT) {
+                    costSuffix = this.actor?.system.is5e ? "u" : "f";
+                    _realCost /= 10.0;
+                }
+
+                // Variable
+                else {
+                    costSuffix = this.actor?.system.is5e ? "m" : "v";
+                    _realCost /= 5.0;
+                }
+            } else if (parent.system.XMLID === "ELEMENTAL_CONTROL") {
+                _realCost = _realCost - parent.system.baseCost;
+            }
+        }
+
+        _realCost = _realCost / (1 + limitations);
 
         // ADD_MODIFIERS_TO_BASE
         if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
@@ -1534,22 +1484,6 @@ export class HeroSystem6eItem extends Item {
             const _discount =
                 _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations));
             _realCost -= _discount;
-        }
-
-        // MULTIPOWER
-        let costSuffix = "";
-        if (parent && parent.system.XMLID === "MULTIPOWER") {
-            // Fixed
-            if (this.system.ULTRA_SLOT) {
-                costSuffix = "f";
-                _realCost /= 10.0;
-            }
-
-            // Variable
-            else {
-                costSuffix = "v";
-                _realCost /= 5.0;
-            }
         }
 
         _realCost = RoundFavorPlayerDown(_realCost);
@@ -1826,7 +1760,7 @@ export class HeroSystem6eItem extends Item {
 
             case "ELEMENTAL_CONTROL":
                 // Elemental Control, 12-point powers
-                system.description = `${system.ALIAS}, ${
+                system.description = `${system.NAME || system.ALIAS}, ${
                     parseInt(system.baseCost) * 2
                 }-point powers`;
                 break;
@@ -1929,9 +1863,9 @@ export class HeroSystem6eItem extends Item {
             case "VPP":
             case "MULTIPOWER":
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
-                system.description = `${system.ALIAS}, ${parseInt(
-                    system.baseCost,
-                )}-point reserve`;
+                system.description = `${
+                    system.NAME || system.ALIAS
+                }, ${parseInt(system.baseCost)}-point reserve`;
                 break;
 
             case "FLASH":
@@ -2025,6 +1959,7 @@ export class HeroSystem6eItem extends Item {
         try {
             let re = new RegExp(`^${_rawName}`, "i");
             system.description = system.description.replace(re, "").trim();
+
             re = new RegExp(`: ${_rawName}$`, "i");
             system.description = system.description.replace(re, "").trim();
             system.description = system.description.replace(/^: /, "").trim();
@@ -2388,18 +2323,6 @@ export class HeroSystem6eItem extends Item {
                 break;
         }
 
-        // if ((parseInt(modifier.LEVELS) || 0) > 1) {
-        //     if (["HARDENED"].includes(modifier.XMLID)) {
-        //         result += "x" + parseInt(modifier.LEVELS)
-        //     }
-        // }
-
-        // ADDERS
-
-        // if (modifier.comments) powerData.description += "; " + modifier.comments
-        // if (modifier.option) powerData.description += "; " + modifier.option
-        // if (modifier.optionId) powerData.description += "; " + modifier.optionId
-
         if (!["CONDITIONALPOWER"].includes(modifier.XMLID)) {
             result += " (";
         } else {
@@ -2573,7 +2496,6 @@ export class HeroSystem6eItem extends Item {
 
         // Highly summarized
         if (["FOCUS"].includes(modifier.XMLID)) {
-            //result = `, ${modifier.OPTION} (${fraction.trim()})`
             // 'Focus (OAF; Pen-sized Device in pocket; -1)'
             result = result.replace(
                 `Focus (${modifier.OPTION}; `,
@@ -2601,7 +2523,6 @@ export class HeroSystem6eItem extends Item {
 
         // Mind Control Inobvious Power, Invisible to Mental Group
         // Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)
-        // Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points), Extra Time (Full Phase, -1/2)
         result = result.replace("Inobvious Power, Invisible ", "Invisible ");
 
         return result;

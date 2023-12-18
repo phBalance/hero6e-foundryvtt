@@ -2,7 +2,7 @@ import { damageRollToTag } from "../utility/tag.js";
 
 export function registerTagTests(quench) {
     quench.registerBatch(
-        "quench.utils.tag",
+        "hero6efoundryvttv2.utils.tag",
         (context) => {
             const { describe, it, assert } = context;
 

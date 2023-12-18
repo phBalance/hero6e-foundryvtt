@@ -345,7 +345,9 @@ export async function AttackToHit(item, options) {
         "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
 
     if (!item) {
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     const actor = item.actor;
@@ -358,12 +360,11 @@ export async function AttackToHit(item, options) {
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
 
-    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
     const adjustment = getPowerInfo({
-        xmlid: item.system.XMLID,
+        item: item,
     })?.powerType?.includes("adjustment");
     const senseAffecting = getPowerInfo({
-        xmlid: item.system.XMLID,
+        item: item,
     })?.powerType?.includes("sense-affecting");
 
     // -------------------------------------------------
@@ -1045,10 +1046,10 @@ export async function _onRollDamage(event) {
     }
 
     const adjustment = getPowerInfo({
-        xmlid: item.system.XMLID,
+        item: item,
     })?.powerType?.includes("adjustment");
     const senseAffecting = getPowerInfo({
-        xmlid: item.system.XMLID,
+        item: item,
     })?.powerType?.includes("sense-affecting");
 
     let { dc, tags } = convertToDcFromItem(item, {
@@ -1704,14 +1705,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     newRoll = await handleDamageNegation(item, newRoll, damageData);
 
-    // We need to recalcuate damage to account for possible Damage Negation
+    // We need to recalculate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(newRoll, item, damageData);
 
-    // AID, DRAIN or any adjustmnet powers
-    //const powers = (!actor || actor.system.is5e) ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
+    // AID, DRAIN or any adjustment powers
     const adjustment = getPowerInfo({
-        xmlid: item.system.XMLID,
-    })?.powerType?.includes("adjustment"); //powers[item.system.XMLID] && powers[item.system.XMLID].powerType.includes("adjustment")
+        item: item,
+    })?.powerType?.includes("adjustment");
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(
             event,
@@ -1721,7 +1721,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         );
     }
     const senseAffecting = getPowerInfo({
-        xmlid: item.system.XMLID,
+        item: item,
     })?.powerType?.includes("sense-affecting");
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(

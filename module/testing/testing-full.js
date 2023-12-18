@@ -2,7 +2,7 @@ import { HeroSystem6eActor } from "../actor/actor.js";
 
 export function registerFullTests(quench) {
     quench.registerBatch(
-        "quench.utils.full",
+        "hero6efoundryvttv2.utils.full",
         (context) => {
             const { assert, before, describe, it } = context;
 

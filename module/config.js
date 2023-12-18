@@ -1623,6 +1623,12 @@ HERO.ModifierOverride = {
     VARIABLESFX: { dc: true },
 };
 
+HERO.ModifierOverride5e = {
+    ARMORPIERCING: {
+        BASECOST: 0.5,
+    },
+};
+
 // Valid Power Options (found these in Custom Power)
 HERO.ValidPowerOptions = {
     Range: {
