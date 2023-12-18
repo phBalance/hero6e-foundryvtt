@@ -2,7 +2,7 @@
 import { HERO } from "./config.js";
 import { POWERS } from "./powers/powers-rules.js";
 import { HeroSystem6eActor } from "./actor/actor.js";
-import { HeroSystem6eActorSidebarSheet } from "./actor/actor-sidebar-sheet.js";
+import { HeroSystemActorSheet } from "./actor/actor-sheet.js";
 import {
     HeroSystem6eToken,
     HeroSystem6eTokenDocument,
@@ -86,7 +86,7 @@ Hooks.once("init", async function () {
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
-    Actors.registerSheet("herosystem6e", HeroSystem6eActorSidebarSheet, {
+    Actors.registerSheet("herosystem6e", HeroSystemActorSheet, {
         makeDefault: true,
     });
     Items.unregisterSheet("core", ItemSheet);

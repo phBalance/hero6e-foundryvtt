@@ -12,13 +12,13 @@ import {
     convertFromDC,
 } from "../utility/damage.js";
 
-export class HeroSystem6eActorSidebarSheet extends ActorSheet {
+export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            classes: ["actor-sidebar-sheet"],
+            classes: ["actor-sheet"],
             template:
-                "systems/hero6efoundryvttv2/templates/actor-sidebar/actor-sidebar-sheet.hbs",
+                "systems/hero6efoundryvttv2/templates/actor/actor-sheet.hbs",
             tabs: [
                 {
                     navSelector: ".sheet-navigation",

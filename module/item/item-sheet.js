@@ -93,7 +93,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         }
 
         // skillCharacteristics should be lowercase to match CONFIG.HERO.skillCharacteristics.
-        // Not needed for new uploads, but previous uploads may incorectely have upperCase version
+        // Not needed for new uploads, but previous uploads may incorrectly have upperCase version
         // and thus the item-skill-sheet.hbs selectOptions won't match, thus defaulting to general.
         // Can probably remove at some point.
         if (data.system.characteristic) {

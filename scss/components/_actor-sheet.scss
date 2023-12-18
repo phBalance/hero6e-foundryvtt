@@ -1,16 +1,16 @@
-/* Minimim size of actor sheet */
-.actor-sidebar-sheet {
+/* Minimum size of actor sheet */
+.actor-sheet {
   min-height: 310px;
   min-width: 500px;
 }
 
 /* minimal padding around window content */
-.actor-sidebar-sheet .window-content {
+.actor-sheet .window-content {
   padding: 1px;
 }
 
 /* Setup Grid */
-.actor-sidebar-sheet form {
+.actor-sheet form {
     display: grid;
     grid: 
       "sidebar header" 75px 
@@ -21,7 +21,7 @@
 }
 
 /* Sidebar */
-.actor-sidebar-sheet aside {
+.actor-sheet aside {
   display: flex;
   flex-direction: column;
   grid-area: sidebar;
@@ -29,26 +29,20 @@
   border-right: thin solid darkgrey
 }
 
-/* .actor-sidebar-sheet header {
-  grid-area: header;
-  padding: 0 2px 0 2px;
-  background-color: blue;
-} */
-
-.actor-sidebar-sheet .sidebar {
+.actor-sheet .sidebar {
     overflow: hidden scroll;
     padding: 0 2px 2px 8px;
     /* background-color: lavender; */
 }
 
-.actor-sidebar-sheet .char-header {
+.actor-sheet .char-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   /* background-color: lightgoldenrodyellow; */
 }
 
-.actor-sidebar-sheet nav.sheet-navigation {
+.actor-sheet nav.sheet-navigation {
   align-items: center;
   border-bottom: 1px solid black;
   border-top: 1px solid black;
@@ -60,14 +54,14 @@
   /* background-color: lightcyan; */
 }
 
-.actor-sidebar-sheet .sheet-body, .sheet.item .sheet-body {
+.actor-sheet .sheet-body, .sheet.item .sheet-body {
   grid-area: content;
   position: relative;
   overflow: hidden scroll;
   /* background-color: steelblue; */
 }
 
-.actor-sidebar-sheet .sheet-content, .sheet.item .sheet-content {
+.actor-sheet .sheet-content, .sheet.item .sheet-content {
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -76,12 +70,12 @@
 }
 
 
-.actor-sidebar-sheet ul.attributes {
+.actor-sheet ul.attributes {
   list-style: none;
   padding: 0;
 }
 
-.actor-sidebar-sheet .attributes .attribute {
+.actor-sheet .attributes .attribute {
   position: relative;
   margin: 0;
   border: none;
@@ -89,11 +83,11 @@
   border-radius: 0;
 }
 
-.actor-sidebar-sheet .attributes .attribute-name  {
+.actor-sheet .attributes .attribute-name  {
   position: relative;
 }
 
-.actor-sidebar-sheet h4.box-title {
+.actor-sheet h4.box-title {
   height: 18px;
   line-height: 16px;
   margin: 4px 8px 2px;
@@ -102,11 +96,11 @@
   white-space: nowrap;
 }
 
-.actor-sidebar-sheet ul.attributes li.attribute {
+.actor-sheet ul.attributes li.attribute {
   text-align: center;
 }
 
-.actor-sidebar-sheet .attributes input[type="text"]
+.actor-sheet .attributes input[type="text"]
 {
   width: 35px;
   min-width: 20px;
@@ -115,15 +109,15 @@
   /* border-color: transparent; */
 }
 
-.actor-sidebar-sheet input[type="text"]:focus {
+.actor-sheet input[type="text"]:focus {
   border-color: black;
 }
 
-.actor-sidebar-sheet input[type="text"]:hover {
+.actor-sheet input[type="text"]:hover {
   border-color: black;
 }
 
-.actor-sidebar-sheet span.sep {
+.actor-sheet span.sep {
   flex: none;
   margin: 0 1px;
   display: inline;
@@ -131,11 +125,11 @@
   color: #7a7971;
 }
 
-.actor-sidebar-sheet .profile-img {
+.actor-sheet .profile-img {
   object-fit: contain;
 }
 
-.actor-sidebar-sheet nav a {
+.actor-sheet nav a {
   margin: 0.25em;
   padding: 0.25em;
   text-align: center;
@@ -143,32 +137,32 @@
   border-radius: .5em;
 }
 
-.actor-sidebar-sheet nav a.active {
+.actor-sheet nav a.active {
   background: black;
   color: white;
 }
 
-.actor-sidebar-sheet .sheet-header {
+.actor-sheet .sheet-header {
   margin-left: 0.5em;
 }
 
-.actor-sidebar-sheet .sheet-body {
+.actor-sheet .sheet-body {
   margin-left: 0.5em;
 }
 
-.actor-sidebar-sheet table tr:first-child, .actor-sidebar-sheet table tr.activeEffects {
+.actor-sheet table tr:first-child, .actor-sheet table tr.activeEffects {
   box-shadow: inset 0 -1px 0 darkgray;
   background-color: #CFCEC3;
 }
 
-.actor-sidebar-sheet table tr.sticky {
+.actor-sheet table tr.sticky {
   position: sticky;
   top: 0;
   z-index: 1; /* pesky checkboxes */
   background-color: #CFCEC3;
 }
 
-.actor-sidebar-sheet table tr.sticky2 {
+.actor-sheet table tr.sticky2 {
   position: sticky;
   top: 33px;
   z-index: 1; /* pesky checkboxes */
@@ -176,12 +170,11 @@
   box-shadow: inset 0 -1px 0 darkgray;
 }
 
-.actor-sidebar-sheet table {
+.actor-sheet table {
   border-top: 0;
   margin-top: 0;
 }
 
-/* .actor-sidebar-sheet table tr td.left, .actor-sidebar-sheet table tr th.left { */
 th.left, td.left {
   text-align: left;
 }
@@ -190,53 +183,53 @@ input.left {
   text-align: left;
 }
 
-.actor-sidebar-sheet table tr td.right, .actor-sidebar-sheet table tr th.right {
+.actor-sheet table tr td.right, .actor-sheet table tr th.right {
   text-align: right;
   padding-right: 2px;
 }
 
-.actor-sidebar-sheet table tr td.right, .actor-sidebar-sheet table tr th.right {
+.actor-sheet table tr td.right, .actor-sheet table tr th.right {
   text-align: right;
 }
 
-.actor-sidebar-sheet .item-image {
+.actor-sheet .item-image {
   margin-right: 5px;
   min-width: 24px;
 }
 
-.actor-sidebar-sheet .item-image img {
+.actor-sheet .item-image img {
   display: block;
 }
 
-.actor-sidebar-sheet table tr  {
+.actor-sheet table tr  {
   height: auto;
   line-height: 24px;
   padding: 3px 0;
 }
 
-.actor-sidebar-sheet table tr td  {
+.actor-sheet table tr td  {
   padding: 3px 0;
   max-width: 300px; /* power description can be a bit too big; alternatives pct or flexbox */
 }
 
-.actor-sidebar-sheet table tr td button {
+.actor-sheet table tr td button {
   height: 24px;
   line-height: normal;
 }
 
-.actor-sidebar-sheet table tr.characteristic td button.rollable {
+.actor-sheet table tr.characteristic td button.rollable {
   width: 40px;
 }
 
-.actor-sidebar-sheet table tr td input {
+.actor-sheet table tr td input {
   vertical-align: middle;
 }
 
-.actor-sidebar-sheet table tr.characteristic td input {
+.actor-sheet table tr.characteristic td input {
   width: 40px;
 }
 
-.actor-sidebar-sheet input[type="file"] {
+.actor-sheet input[type="file"] {
   display: none;
 }
 
@@ -272,27 +265,27 @@ input.left {
   color: #aaa;
 }
 
-.actor-sidebar-sheet input.underMax
+.actor-sheet input.underMax
 {
   background-color: rgba(255,200,200,0.5)
 }
 
-.actor-sidebar-sheet input.overMax, .actor-sidebar-sheet tr.overMax
+.actor-sheet input.overMax, .actor-sheet tr.overMax
 {
   background-color: rgba(200,255,200,0.5)
 }
 
-.actor-sidebar-sheet .sidebar-actions {
+.actor-sheet .sidebar-actions {
   padding: 0;
   border: none;
 }
 
-.actor-sidebar-sheet .sidebar-actions button {
+.actor-sheet .sidebar-actions button {
   line-height: normal;
   margin: 2px 0px;
 }
 
-.actor-sidebar-sheet div.points {
+.actor-sheet div.points {
   border: 1px solid rgb(0 0 0 / 30%);
   border-radius: 8px;
   height: 24px;
@@ -303,16 +296,16 @@ input.left {
   text-align: center;
 }
 
-.actor-sidebar-sheet .warn
+.actor-sheet .warn
 {
   background-color: rgba(255,255,200,0.5)
 }
 
-.actor-sidebar-sheet table tr td.item-framework-child-name {
+.actor-sheet table tr td.item-framework-child-name {
   padding-left: 10px;
 }
 
-.actor-sidebar-sheet header span {
+.actor-sheet header span {
   margin-left: 2px;
   margin-right: 2px;
 }
@@ -337,12 +330,12 @@ ul.left li {
   border: 1px dashed rgba(0,0,0,0.3);
 }
 
-.actor-sidebar-sheet .sidebar section ul li>span {
+.actor-sheet .sidebar section ul li>span {
   position: relative;
   left: -5px;
 }
 
-.actor-sidebar-sheet .sidebar section .defenses {
+.actor-sheet .sidebar section .defenses {
   border-top: 2px groove #eeede0;
   padding-top: 5px;
 }
