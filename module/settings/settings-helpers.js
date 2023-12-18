@@ -104,6 +104,16 @@ export default class SettingsHelpers {
             onChange: (value) => HEROSYS.log(false, value),
         });
 
+        game.settings.register(module, "bar3", {
+            name: "3rd Bar",
+            hint: "Add a 3rd bar to tokens, which currently only supports Endurance.",
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: true,
+            onChange: (value) => HEROSYS.log(false, value),
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: "Alpha Testing",
             hint: "Enable testing of alpha features and changes.  Intended for system developer only.",

@@ -86,6 +86,8 @@ export class HeroSystem6eToken extends Token {
     }
 
     _drawBar(number, bar, data) {
+
+
         const val = Number(data.value);
         const pct = Math.clamped(val, 0, data.max) / data.max;
 
