@@ -1,5 +1,12 @@
 # Releases
 
+## Version 3.0.53 (so far...)
+
+- Fix crash with Aid and Telekinesis powers during upload. [#474](https://github.com/dmdorman/hero6e-foundryvtt/issues/474)
+- Correct general skill roll calculations to be 11 plus levels. [#456](https://github.com/dmdorman/hero6e-foundryvtt/issues/456)
+- Improvements to a number of 5e power cost calculations (MP, EC, Forcefield, Teleport, Stretching, Multiform) during upload.
+- Lots of behind the scenes work to help us write less buggy code.
+
 ## Version 3.0.52
 
 - Fixed FireFox combat tracker scrolling, slight changes in other browsers as well.
