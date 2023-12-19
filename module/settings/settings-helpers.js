@@ -105,13 +105,14 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "bar3", {
-            name: "3rd Bar",
-            hint: "Add a 3rd bar to tokens, which currently only supports Endurance.",
+            name: "Add 3rd Bar and labels",
+            hint: "Add a 3rd resource bar to tokens.  Each token will have a Body, Stun and Endurance resource bar with an appropriate label.  It is recommended this be disabled and instead use the BarBrawl module for custom bars.",
             scope: "world",
             config: true,
             type: Boolean,
-            default: true,
+            default: false,
             onChange: (value) => HEROSYS.log(false, value),
+            requiresReload: true,
         });
 
         game.settings.register(module, "alphaTesting", {
