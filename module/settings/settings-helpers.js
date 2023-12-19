@@ -122,7 +122,6 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            //onChange: foundry.utils.debouncedReload(),
             requiresReload: true,
         });
 
