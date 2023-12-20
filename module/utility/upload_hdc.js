@@ -363,7 +363,7 @@ export async function applyCharacterSheet(xmlDoc) {
         system: {
             XMLID: "PERCEPTION",
             ALIAS: "Perception",
-            CHARACTERISTIC: "int",
+            CHARACTERISTIC: "INT",
             state: "trained",
             levels: "0",
         },
@@ -1112,7 +1112,8 @@ export async function uploadSkill(skill, duplicate) {
         itemData = XmlToItemData.call(this, skill, "skill");
 
         // This really isn't a skill so get rid of roll so sheet doesn't display a roll button
-        itemData.system.characteristic = null;
+        // TODO: PH: FIXME: Should this be CHARACTERISTIC and not the capital version?
+        itemData.system.CHARACTERISTIC = null;
         itemData.system.state = null;
         itemData.system.roll = null;
     } else {

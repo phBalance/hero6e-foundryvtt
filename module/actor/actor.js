@@ -1372,7 +1372,7 @@ export class HeroSystem6eActor extends Actor {
             system: {
                 XMLID: "PERCEPTION",
                 ALIAS: "Perception",
-                CHARACTERISTIC: "int",
+                CHARACTERISTIC: "INT",
                 state: "trained",
                 levels: "0",
             },

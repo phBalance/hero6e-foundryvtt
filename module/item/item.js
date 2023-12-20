@@ -2915,8 +2915,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // No Characteristic = no roll (Skill Enhancers for example) except for FINDWEAKNESS
-        const characteristicBased =
-            skillData.CHARACTERISTIC || skillData.characteristic;
+        const characteristicBased = skillData.CHARACTERISTIC;
         if (!characteristicBased) {
             if (skillData.XMLID === "FINDWEAKNESS") {
                 // Provide up to 2 tags to explain how the roll was calculated:
@@ -2971,11 +2970,7 @@ export class HeroSystem6eItem extends Item {
             skillData.roll = "10-";
             skillData.tags.push({ value: 10, name: "Proficiency" });
         } else if (characteristicBased) {
-            const characteristic = (
-                skillData.CHARACTERISTIC || skillData.characteristic
-            ).toLowerCase();
-
-            skillData.characteristic = characteristic;
+            const characteristic = skillData.CHARACTERISTIC.toLowerCase();
 
             const baseRollValue =
                 skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
