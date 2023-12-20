@@ -1,9 +1,8 @@
 import { HEROSYS } from "../herosystem6e.js";
 
 export const extendTokenConfig = async function (tokenConfig, html, data) {
-
     // Ignore if bar3 not set
-    if (!game.settings.get(game.system.id, 'bar3')) {
+    if (!game.settings.get(game.system.id, "bar3")) {
         return html;
     }
 
