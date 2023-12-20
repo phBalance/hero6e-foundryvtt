@@ -11,10 +11,10 @@ import { getBarExtendedAttribute } from "./extendTokenConfig.js";
  * @param {Object} data The data of the token HUD.
  */
 export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
-    // Make sure were alphaTesting
-    // if (!game.settings.get(game.system.id, 'alphaTesting')) {
-    //     return html;
-    // }
+    // Ignore if bar3 not set
+    if (!game.settings.get(game.system.id, "bar3")) {
+        return html;
+    }
 
     // TokenHud includes most of the clickable controls/inputs
     // it does not include the bar's themselves.

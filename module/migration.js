@@ -293,6 +293,19 @@ export async function migrateWorld() {
         }
     }
 
+    // if lastMigration < 3.0.53
+    // Default bar3 to TRUE for existing worlds
+    if (foundry.utils.isNewerVersion("3.0.53", lastMigration)) {
+        console.log("bar3");
+        if (!game.settings.get(game.system.id, "bar3")) {
+            game.settings.set(game.system.id, "bar3", true);
+            // Refresh tokens to make sure they show the 3rd bar
+            for (const token of game.scenes.current.tokens) {
+                token.object.refresh();
+            }
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
     {
         let d = new Date();

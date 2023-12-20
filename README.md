@@ -105,6 +105,7 @@ The following modules have been successfully tested for compatibility.  They are
 - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler)
 - [Simple Calendar](https://github.com/vigoren/foundryvtt-simple-calendar)
 - [About Face](https://foundryvtt.com/packages/about-face)
+- [Bar Brawl](https://foundryvtt.com/packages/barbrawl)
 
 ## 5th Edition Support
 

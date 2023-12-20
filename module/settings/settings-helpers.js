@@ -104,6 +104,17 @@ export default class SettingsHelpers {
             onChange: (value) => HEROSYS.log(false, value),
         });
 
+        game.settings.register(module, "bar3", {
+            name: "Add 3rd Bar and labels",
+            hint: "Add a 3rd resource bar to tokens.  Each token will have a Body, Stun and Endurance resource bar with an appropriate label.  It is recommended this be disabled and instead use the BarBrawl module for custom bars.",
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: false,
+            onChange: (value) => HEROSYS.log(false, value),
+            requiresReload: true,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: "Alpha Testing",
             hint: "Enable testing of alpha features and changes.  Intended for system developer only.",
@@ -111,7 +122,6 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            //onChange: foundry.utils.debouncedReload(),
             requiresReload: true,
         });
 

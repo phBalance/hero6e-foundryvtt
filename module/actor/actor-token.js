@@ -80,12 +80,19 @@ export class HeroSystem6eToken extends Token {
         return data;
     }
 
-    CalcMovementEndurance(distanceBefore) {
-        const distanceAfter = dragRuler.getMovedDistanceFromToken(this);
-        console.log("_onUpdate", distanceBefore, distanceAfter);
-    }
+    // CalcMovementEndurance(distanceBefore) {
+    //     const distanceAfter = dragRuler.getMovedDistanceFromToken(this);
+    //     console.log("_onUpdate", distanceBefore, distanceAfter);
+    // }
 
     _drawBar(number, bar, data) {
+        //console.log("_drawBar", data)
+
+        // Ignore if bar3 not set
+        if (!game.settings.get(game.system.id, "bar3")) {
+            return super._drawBar(number, bar, data);
+        }
+
         const val = Number(data.value);
         const pct = Math.clamped(val, 0, data.max) / data.max;
 
@@ -206,6 +213,12 @@ export class HeroSystem6eToken extends Token {
 
     drawBars() {
         //HEROSYS.log(false, "drawBars")
+
+        // Ignore if bar3 not set
+        if (!game.settings.get(game.system.id, "bar3")) {
+            return super.drawBars();
+        }
+
         if (
             !this.actor ||
             this.document.displayBars === CONST.TOKEN_DISPLAY_MODES.NONE
