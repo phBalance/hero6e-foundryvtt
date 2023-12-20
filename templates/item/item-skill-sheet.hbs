@@ -17,11 +17,11 @@
 
         <div class="form-group">
             <label>Characteristic</label>
-            <select name="system.characteristic" data-dtype="text">
+            <select name="system.CHARACTERISTIC" data-dtype="text">
                 {{#if item.actor.system.is5e}}
-                {{selectOptions config.skillCharacteristics5e selected=system.characteristic}}
+                    {{selectOptions config.skillCharacteristics5e selected=system.CHARACTERISTIC}}
                 {{else}}
-                {{selectOptions config.skillCharacteristics selected=system.characteristic}}
+                    {{selectOptions config.skillCharacteristics selected=system.CHARACTERISTIC}}
                 {{/if}}
             </select>
         </div>
