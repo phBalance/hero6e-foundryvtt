@@ -6,6 +6,7 @@
 - Correct general skill roll calculations to be 11 plus levels. [#456](https://github.com/dmdorman/hero6e-foundryvtt/issues/456)
 - Improvements to a number of 5e power cost calculations (MP, EC, Forcefield, Teleport, Stretching, Multiform) during upload.
 - Fix HDC uploads when name is missing from HDC file.
+- Fix missing display of BACKGROUND an other character information. [#483](https://github.com/dmdorman/hero6e-foundryvtt/issues/483)
 - Configuration setting to toggle custom resource bars.  Existing worlds will retain custom resource bars, new worlds will default to core FoundryVTT resource bars.  The [Bar Brawl](https://foundryvtt.com/packages/barbrawl) module is superior, although requires some configuration.  Bugs related to system custom bars still exist.  We are likely to deprecate the custom resource bars in this system. [#502](https://github.com/dmdorman/hero6e-foundryvtt/issues/502) [#368](https://github.com/dmdorman/hero6e-foundryvtt/issues/368) [#274](https://github.com/dmdorman/hero6e-foundryvtt/issues/274) [#174](https://github.com/dmdorman/hero6e-foundryvtt/issues/174)
 - Lots of behind the scenes work to help improve readability and consistency of the code.
 
