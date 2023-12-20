@@ -56,20 +56,18 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // enrichedData
         for (let field of [
+            "BIOGRAPHY",
             "BACKGROUND",
             "PERSONALITY",
             "QUOTE",
             "TACTICS",
             "CAMPAIGN_USE",
             "APPEARANCE",
-        ])
+        ]) {
             data[`enriched${field}`] = await TextEditor.enrichHTML(
-                data.actor.system[field],
+                data.actor.system.CHARACTER.CHARACTER_INFO?.[field],
                 { async: true },
             );
-
-        if (!data.enrichedBACKGROUND) {
-            data.enrichedBACKGROUND;
         }
 
         let weightTotal = 0;

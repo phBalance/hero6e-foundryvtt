@@ -918,15 +918,15 @@
 
                 <table>
 
-                    {{#if actor.system.biography}}
+                    {{#if actor.system.CHARACTER.CHARACTER_INFO.BIOGRAPHY}}
                     <tr>
                         <th class="left">{{localize "ActorSheet.Biography"}}</th>
                     </tr>
                     <tr>
                         <td class="left">
                             {{editor
-                            actor.system.biography
-                            target="system.biography"
+                            enrichedBIOGRAPHY
+                            target="system.CHARACTER.CHARACTER_INFO.BIOGRAPHY"
                             button=true
                             editable=editable
                             }}
@@ -941,7 +941,7 @@
                         <td class="left">
                             {{editor
                             enrichedBACKGROUND
-                            target="system.BACKGROUND"
+                            target="system.CHARACTER.CHARACTER_INFO.BACKGROUND"
                             button=true
                             editable=editable
                             }}
@@ -955,7 +955,7 @@
                         <td class="left">
                             {{editor
                             enrichedPERSONALITY
-                            target="system.PERSONALITY"
+                            target="system.CHARACTER.CHARACTER_INFO.PERSONALITY"
                             button=true
                             editable=editable
                             }}
@@ -969,7 +969,7 @@
                         <td class="left">
                             {{editor
                             enrichedQUOTE
-                            target="system.QUOTE"
+                            target="system.CHARACTER.CHARACTER_INFO.QUOTE"
                             button=true
                             editable=editable
                             }}
@@ -983,7 +983,7 @@
                         <td class="left">
                             {{editor
                             enrichedTACTICS
-                            target="system.TACTICS"
+                            target="system.CHARACTER.CHARACTER_INFO.TACTICS"
                             button=true
                             editable=editable
                             }}
@@ -997,7 +997,7 @@
                         <td class="left">
                             {{editor
                             enrichedCAMPAIGN_USE
-                            target="system.CAMPAIGN_USE"
+                            target="system.CHARACTER.CHARACTER_INFO.CAMPAIGN_USE"
                             button=true
                             editable=editable
                             }}
@@ -1011,7 +1011,7 @@
                         <td class="left">
                             {{editor
                             enrichedAPPEARANCE
-                            target="system.APPEARANCE"
+                            target="system.CHARACTER.CHARACTER_INFO.APPEARANCE"
                             button=true
                             editable=editable
                             }}
