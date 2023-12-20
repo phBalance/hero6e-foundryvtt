@@ -1473,15 +1473,18 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Non ITEMS stuff in CHARACTER
+        // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
+        const characterName =
+            heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
         changes = {
             ...changes,
             "system.CHARACTER": heroJson.CHARACTER,
             "system.versionHeroSystem6eUpload": game.system.version,
-            name: heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME,
+            name: characterName,
         };
         this.system.CHARACTER = heroJson.CHARACTER;
         this.system.versionHeroSystem6eUpload = game.system.version;
-        this.name = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME;
+        this.name = characterName;
 
         if (this.prototypeToken) {
             changes[`prototypeToken.name`] = changes.name;
