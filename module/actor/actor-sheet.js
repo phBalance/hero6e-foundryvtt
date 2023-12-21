@@ -1109,7 +1109,6 @@ export class HeroSystemActorSheet extends ActorSheet {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(contents, "text/xml");
             await this.actor.uploadFromXml(xmlDoc);
-            //applyCharacterSheet.bind(this)(xmlDoc)
             ui.notifications.info(`${this.actor.name} upload complete`);
         }.bind(this);
         reader.readAsText(file);
