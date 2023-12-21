@@ -305,6 +305,7 @@ export async function migrateWorld() {
 
     // if lastMigration < 3.0.53
     // Default bar3 to TRUE for existing worlds
+    // All item's system.characteristic replaced with system.CHARACTERISTIC
     if (foundry.utils.isNewerVersion("3.0.53", lastMigration)) {
         console.log("bar3");
         if (!game.settings.get(game.system.id, "bar3")) {
@@ -321,14 +322,14 @@ export async function migrateWorld() {
         for (const [index, actor] of queue.entries()) {
             if (new Date() - dateNow > 4000) {
                 ui.notifications.info(
-                    `Migrating actor data to 3.0.53: (${
+                    `Migrating actor's items to 3.0.53: (${
                         queue.length - index
-                    } remaining)`,
+                    } actors remaining)`,
                 );
                 dateNow = new Date();
             }
 
-            await migrate_from_3_0_49_to_3_0_53(actor);
+            await migrate_actor_items_to_3_0_53(actor);
         }
     }
 
@@ -394,20 +395,21 @@ async function migrateActorCostDescription(actor) {
     }
 }
 
-async function migrate_from_3_0_49_to_3_0_53(actor) {
+async function migrate_actor_items_to_3_0_53(actor) {
     for (const item of actor.items) {
         // Get rid of item.system.characteristic and replace with
         // item.system.CHARACTERISTIC
         if (!item.system.CHARACTERISTIC && item.system.characteristic) {
-            item.system.CHARACTERISTIC = item.system.characteristic;
-
             await item.update({
-                "item.system.CHARACTERISTIC":
+                "system.CHARACTERISTIC":
                     item.system.characteristic.toUpperCase(),
-                "item.system.characteristic": undefined,
             });
+        }
 
-            delete item.system.characteristic;
+        if (item.system.characteristic) {
+            await item.update({
+                "system.-=characteristic": null,
+            });
         }
     }
 }
