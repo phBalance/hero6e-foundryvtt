@@ -65,7 +65,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             "APPEARANCE",
         ]) {
             data[`enriched${field}`] = await TextEditor.enrichHTML(
-                data.actor.system.CHARACTER.CHARACTER_INFO?.[field],
+                data.actor.system.CHARACTER?.CHARACTER_INFO?.[field],
                 { async: true },
             );
         }
