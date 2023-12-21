@@ -2,6 +2,16 @@ import { HeroSystem6eItem } from "./item/item.js";
 import { getPowerInfo } from "./utility/util.js";
 import { createEffects, updateItemSubTypes } from "./utility/upload_hdc.js";
 
+function getAllActorsInGame() {
+    return [
+        ...game.actors.contents,
+        ...game.scenes.contents
+            .map((scene) => scene.tokens)
+            .map((token) => token.actorLink)
+            .filter((actorLink) => actorLink),
+    ];
+}
+
 export async function migrateWorld() {
     const lastMigration = game.settings.get(game.system.id, "lastMigration");
 
@@ -295,6 +305,7 @@ export async function migrateWorld() {
 
     // if lastMigration < 3.0.53
     // Default bar3 to TRUE for existing worlds
+    // All item's system.characteristic replaced with system.CHARACTERISTIC
     if (foundry.utils.isNewerVersion("3.0.53", lastMigration)) {
         console.log("bar3");
         if (!game.settings.get(game.system.id, "bar3")) {
@@ -304,25 +315,30 @@ export async function migrateWorld() {
                 token.object.refresh();
             }
         }
+
+        const queue = getAllActorsInGame();
+        let dateNow = new Date();
+
+        for (const [index, actor] of queue.entries()) {
+            if (new Date() - dateNow > 4000) {
+                ui.notifications.info(
+                    `Migrating actor's items to 3.0.53: (${
+                        queue.length - index
+                    } actors remaining)`,
+                );
+                dateNow = new Date();
+            }
+
+            await migrate_actor_items_to_3_0_53(actor);
+        }
     }
 
     // Reparse all items (description, cost, etc) on every migration
     {
         let d = new Date();
-        let queue = [];
+        const queue = getAllActorsInGame();
 
         ui.notifications.info(`Migrating actor data`);
-        for (const actor of game.actors.contents) {
-            queue.push(actor);
-        }
-
-        for (const scene of game.scenes.contents) {
-            for (const token of scene.tokens) {
-                if (!token.actorLink) {
-                    queue.push(token.actor);
-                }
-            }
-        }
 
         while (queue.length > 0) {
             if (new Date() - d > 4000) {
@@ -375,6 +391,25 @@ async function migrateActorCostDescription(actor) {
             await ui.notifications.warn(
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
+        }
+    }
+}
+
+async function migrate_actor_items_to_3_0_53(actor) {
+    for (const item of actor.items) {
+        // Get rid of item.system.characteristic and replace with
+        // item.system.CHARACTERISTIC
+        if (!item.system.CHARACTERISTIC && item.system.characteristic) {
+            await item.update({
+                "system.CHARACTERISTIC":
+                    item.system.characteristic.toUpperCase(),
+            });
+        }
+
+        if (item.system.characteristic) {
+            await item.update({
+                "system.-=characteristic": null,
+            });
         }
     }
 }

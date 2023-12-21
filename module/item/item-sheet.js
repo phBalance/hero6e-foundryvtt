@@ -92,15 +92,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             data.effects = this.document.effects;
         }
 
-        // skillCharacteristics should be lowercase to match CONFIG.HERO.skillCharacteristics.
-        // Not needed for new uploads, but previous uploads may incorrectly have upperCase version
-        // and thus the item-skill-sheet.hbs selectOptions won't match, thus defaulting to general.
-        // Can probably remove at some point.
-        if (data.system.characteristic) {
-            data.system.characteristic =
-                data.system.characteristic.toLowerCase();
-        }
-
         // Signed OCV and DCV
         if (data.system.ocv != undefined) {
             data.system.ocv = ("+" + parseInt(data.system.ocv)).replace(

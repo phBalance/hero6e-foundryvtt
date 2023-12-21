@@ -109,11 +109,11 @@ Hooks.once("init", async function () {
     });
 
     Handlebars.registerHelper("toLowerCase", function (str) {
-        return str.toLowerCase();
+        return str?.toLowerCase();
     });
 
     Handlebars.registerHelper("toUpperCase", function (str) {
-        return str.toUpperCase();
+        return str?.toUpperCase();
     });
 
     Handlebars.registerHelper("is_active_segment", function (actives, index) {

@@ -344,7 +344,7 @@
                             {{#if item.system.description}}: {{item.system.description}}{{/if}}
                             {{/if}}
                         </td>
-                        <td>{{#if (ne item.system.characteristic "general")}}{{item.system.characteristic}}{{/if}}</td>
+                        <td>{{#if (ne item.system.CHARACTERISTIC "GENERAL")}}{{toLowerCase item.system.CHARACTERISTIC}}{{/if}}</td>
                         <td>
                             {{#if item.system.roll}}
                             <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"

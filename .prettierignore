@@ -1,4 +1,5 @@
 # Ignore all markdown files
 **/*.md 
 
-#
+# Ignore all json files
+**/*.json

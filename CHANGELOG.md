@@ -5,9 +5,11 @@
 - Fix crash with Aid and Telekinesis powers during upload. [#474](https://github.com/dmdorman/hero6e-foundryvtt/issues/474)
 - Correct general skill roll calculations to be 11 plus levels. [#456](https://github.com/dmdorman/hero6e-foundryvtt/issues/456)
 - Improvements to a number of 5e power cost calculations (MP, EC, Forcefield, Teleport, Stretching, Multiform) during upload.
+- Characters with incompletely defined adjustment powers will get a warning during upload with a hint on how to fix them.
 - Fix HDC uploads when name is missing from HDC file.
 - Fix missing display of BACKGROUND an other character information. [#483](https://github.com/dmdorman/hero6e-foundryvtt/issues/483)
 - Configuration setting to toggle custom resource bars.  Existing worlds will retain custom resource bars, new worlds will default to core FoundryVTT resource bars.  The [Bar Brawl](https://foundryvtt.com/packages/barbrawl) module is superior, although requires some configuration.  Bugs related to system custom bars still exist.  We are likely to deprecate the custom resource bars in this system. [#502](https://github.com/dmdorman/hero6e-foundryvtt/issues/502) [#368](https://github.com/dmdorman/hero6e-foundryvtt/issues/368) [#274](https://github.com/dmdorman/hero6e-foundryvtt/issues/274) [#174](https://github.com/dmdorman/hero6e-foundryvtt/issues/174)
+- Skill characteristics can now be changed in game and will update appropriately. [#511](https://github.com/dmdorman/hero6e-foundryvtt/issues/511)
 - Lots of behind the scenes work to help improve readability and consistency of the code.
 
 ## Version 3.0.52
@@ -24,7 +26,7 @@
 - Fix for power modifiers being ignored (such as reduce endurance).
 - Initial support for BOOSTABLE CHARGES.  Associated burnout is not implemented.  Does not account for reducing the DC increase for powers with advantages. [#432](https://github.com/dmdorman/hero6e-foundryvtt/issues/432)
 - Fix for Combat Skill Levels where edit sheet did not allow for changing values.
-- Improved range pentaly tags and associated tooltips.
+- Improved range penalty tags and associated tooltips.
 - Fixed error for cone placement.
 - Fixed range penalty when distance is 2 or fewer hexes. [#437](https://github.com/dmdorman/hero6e-foundryvtt/issues/437)
 - Improved ALTERNATE COMBAT VALUE upload. [#439](https://github.com/dmdorman/hero6e-foundryvtt/issues/439)
