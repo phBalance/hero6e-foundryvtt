@@ -1635,16 +1635,27 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "AID":
-            case "DISPEL":
-            case "DRAIN":
             case "TRANSFER":
                 {
-                    // Aid  STR 5d6 (standard effect: 15 points)
                     const dice = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
                     ).replace("d6 + 1d3", " 1/2d6");
                     system.description = `${system.ALIAS} ${dice} into ${
+                        system.INPUT ? system.INPUT : "unknown"
+                    }`;
+                }
+                break;
+
+            case "DISPEL":
+            case "DRAIN":
+            case "SUPPRESS":
+                {
+                    const dice = convertFromDC(
+                        this,
+                        convertToDcFromItem(this).dc,
+                    ).replace("d6 + 1d3", " 1/2d6");
+                    system.description = `${system.ALIAS} ${dice} from ${
                         system.INPUT ? system.INPUT : "unknown"
                     }`;
                 }
@@ -1998,6 +2009,7 @@ export class HeroSystem6eItem extends Item {
                 case "AID":
                 case "DISPEL":
                 case "DRAIN":
+                case "SUPPRESS":
                 case "TRANSFER":
                     break;
 
