@@ -2154,6 +2154,78 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.value, 3);
                 });
             });
+
+            describe("EXTRADIMENSIONALMOVEMENT 5e", async function () {
+                const contents = `
+                    <POWER XMLID="EXTRADIMENSIONALMOVEMENT" ID="1703224290923" BASECOST="20.0" LEVELS="0" ALIAS="Extra-Dimensional Movement" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="To Asgard" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Bifrost" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES/>
+                        <ADDER XMLID="INCREASEDWEIGHT" ID="1703224290845" BASECOST="0.0" LEVELS="4" ALIAS="x16 Increased Weight" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <MODIFIER XMLID="EXTRATIME" ID="1703224290886" BASECOST="-1.25" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" OPTION="TURN" OPTIONID="TURN" OPTION_ALIAS="1 Turn (Post-Segment 12)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="INCANTATIONS" ID="1703224290891" BASECOST="-0.25" LEVELS="0" ALIAS="Incantations" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Call Heimdall" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="MODIFIER" ID="1703224290892" BASECOST="-0.25" LEVELS="0" ALIAS="Leaves a Mark" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="MODIFIER" ID="1703224290893" BASECOST="-1.0" LEVELS="0" ALIAS="Heimdall Must Respond" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="VISIBLE" ID="1703224290894" BASECOST="-0.5" LEVELS="0" ALIAS="Perceivable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Storm clouds and rainbow column" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="MODIFIER" ID="1703224290895" BASECOST="-1.0" LEVELS="0" ALIAS="Only at specific locations" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    actor.system.is5e = true;
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Extra-Dimensional Movement To Asgard (x16 Increased Weight) (40 Active Points); Extra Time (1 Turn (Post-Segment 12), -1 1/4), Heimdall Must Respond (-1), Only at specific locations (-1), Perceivable (Storm clouds and rainbow column; -1/2), Incantations (Call Heimdall; -1/4), Leaves a Mark (-1/4)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 8);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 40);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0); // TODO: movement powers use 0 end but shouldn't
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 0);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

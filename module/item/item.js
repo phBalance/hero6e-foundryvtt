@@ -1932,6 +1932,10 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "EXTRADIMENSIONALMOVEMENT":
+                system.description = `${system.ALIAS} ${system.OPTION_ALIAS}`;
+                break;
+
             default:
                 {
                     if (
