@@ -1846,7 +1846,6 @@ export class HeroSystem6eItem extends Item {
 
             case "INVISIBILITY":
                 // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
-                system.description = `${system.ALIAS}`;
                 break;
 
             case "ENDURANCERESERVE":
@@ -1949,10 +1948,6 @@ export class HeroSystem6eItem extends Item {
                         system.ALIAS ||
                         system.EFFECT ||
                         "";
-                    // if (system.INPUT) {
-                    //     const re = new RegExp(`^${system.INPUT}`, 'i')
-                    //     _desc = _desc.replace(re, "").trim();
-                    // }
                     system.description =
                         (system.INPUT ? system.INPUT + " " : "") + _desc;
 
@@ -1969,29 +1964,6 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
                 break;
-        }
-
-        // Remove duplicate name from description and related cleanup
-        let _rawName = this.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        try {
-            let re = new RegExp(`^${_rawName}`, "i");
-            system.description = system.description.replace(re, "").trim();
-
-            re = new RegExp(`: ${_rawName}$`, "i");
-            system.description = system.description.replace(re, "").trim();
-            system.description = system.description.replace(/^: /, "").trim();
-            system.description = system.description.replace(/^:/, "").trim();
-            system.description = system.description
-                .replace(/^Damage Reduction: /, "")
-                .trim();
-        } catch (e) {
-            ui.notifications.warn(
-                `${this.actor?.name} has item "${this.name.substr(
-                    0,
-                    30,
-                )}" which failed to update item description`,
-            );
-            console.log(e);
         }
 
         // ADDRS

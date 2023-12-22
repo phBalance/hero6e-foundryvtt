@@ -46,7 +46,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)",
+                        "Naked Advantage for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)",
                     );
                 });
 
@@ -111,7 +111,7 @@ export function registerUploadTests(quench) {
             describe("CLIMBING", function () {
                 const contents = `
                     <SKILL XMLID="CLIMBING" ID="1687723638849" BASECOST="3.0" LEVELS="0" ALIAS="Climbing" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                    <NOTES />
+                        <NOTES />
                     </SKILL>
                 `;
                 let item;
@@ -135,7 +135,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, ""); // Climbing is part of the name
+                    assert.equal(item.system.description, "Climbing");
                 });
 
                 it("realCost", function () {
@@ -162,7 +162,7 @@ export function registerUploadTests(quench) {
             describe("ENERGYBLAST", function () {
                 const contents = `
                     <POWER XMLID="ENERGYBLAST" ID="1686774389914" BASECOST="0.0" LEVELS="1" ALIAS="Fire Blast" POSITION="5" MULTIPLIER="1.0" GRAPHIC="zap" COLOR="255 0 0 " SFX="Fire/Heat" USE_END_RESERVE="Yes" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES />
+                        <NOTES />
                     </POWER>
                 `;
                 let item;
@@ -186,7 +186,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, "1d6");
+                    assert.equal(item.system.description, "Fire Blast 1d6");
                 });
 
                 it("realCost", function () {
@@ -442,7 +442,7 @@ export function registerUploadTests(quench) {
             describe("MINDCONTROL", async function () {
                 const contents = `
                     <POWER XMLID="MINDCONTROL" ID="1688874983494" BASECOST="0.0" LEVELS="15" ALIAS="Mind Control" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES />
+                        <NOTES />
                     </POWER>
                 `;
                 let item;
@@ -466,7 +466,7 @@ export function registerUploadTests(quench) {
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, "15d6");
+                    assert.equal(item.system.description, "Mind Control 15d6");
                 });
 
                 it("realCost", function () {
@@ -494,25 +494,25 @@ export function registerUploadTests(quench) {
             describe("MINDCONTROL advanced", async function () {
                 const contents = `
                     <POWER XMLID="MINDCONTROL" ID="1693772868443" BASECOST="0.0" LEVELS="15" ALIAS="Mind Control" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES />
-                    <MODIFIER XMLID="ARMORPIERCING" ID="1693773081504" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="REDUCEDEND" ID="1693773081509" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="TELEPATHIC" ID="1693773081511" BASECOST="0.25" LEVELS="0" ALIAS="Telepathic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="INVISIBLE" ID="1693773081515" BASECOST="0.25" LEVELS="0" ALIAS="Invisible Power Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INOBVIOUSINVISIBLEONE" OPTIONID="INOBVIOUSINVISIBLEONE" OPTION_ALIAS="Inobvious Power, Invisible to Mental Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="CUMULATIVE" ID="1693773081517" BASECOST="0.5" LEVELS="1" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="EXTRATIME" ID="1693773081558" BASECOST="-0.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="Full Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
+                        <NOTES />
+                        <MODIFIER XMLID="ARMORPIERCING" ID="1693773081504" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="REDUCEDEND" ID="1693773081509" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="TELEPATHIC" ID="1693773081511" BASECOST="0.25" LEVELS="0" ALIAS="Telepathic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="INVISIBLE" ID="1693773081515" BASECOST="0.25" LEVELS="0" ALIAS="Invisible Power Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INOBVIOUSINVISIBLEONE" OPTIONID="INOBVIOUSINVISIBLEONE" OPTION_ALIAS="Inobvious Power, Invisible to Mental Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="CUMULATIVE" ID="1693773081517" BASECOST="0.5" LEVELS="1" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="EXTRATIME" ID="1693773081558" BASECOST="-0.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULL" OPTIONID="FULL" OPTION_ALIAS="Full Phase" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
                     </POWER>
                 `;
                 let item;
@@ -538,7 +538,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)",
+                        "Mind Control 15d6, Armor Piercing (+1/4), Reduced Endurance (1/2 END; +1/4), Telepathic (+1/4), Invisible Power Effects (Invisible to Mental Group; +1/4), Cumulative (180 points; +3/4) (206 Active Points); Extra Time (Full Phase, -1/2)",
                     );
                 });
 
@@ -611,22 +611,22 @@ export function registerUploadTests(quench) {
             describe("INVISIBILITY", async function () {
                 const contents = `
                     <POWER XMLID="INVISIBILITY" ID="1689283663052" BASECOST="20.0" LEVELS="0" ALIAS="Invisibility" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Blind Minds" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES />
-                    <ADDER XMLID="TOUCHGROUP" ID="1689356871509" BASECOST="5.0" LEVELS="0" ALIAS="Touch Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
-                    <NOTES />
-                    </ADDER>
-                    <ADDER XMLID="NORMALSMELL" ID="1689356871510" BASECOST="3.0" LEVELS="0" ALIAS="Normal Smell" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
-                    <NOTES />
-                    </ADDER>
-                    <ADDER XMLID="COMBAT_SENSE" ID="1689356871511" BASECOST="5.0" LEVELS="0" ALIAS="Combat Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
-                    <NOTES />
-                    </ADDER>
-                    <ADDER XMLID="HEARINGGROUP" ID="1689356871512" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
-                    <NOTES />
-                    </ADDER>
-                    <MODIFIER XMLID="CONDITIONALPOWER" ID="1689356871533" BASECOST="-0.5" LEVELS="0" ALIAS="Conditional Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Only vs organic perception" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
+                        <NOTES />
+                        <ADDER XMLID="TOUCHGROUP" ID="1689356871509" BASECOST="5.0" LEVELS="0" ALIAS="Touch Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="NORMALSMELL" ID="1689356871510" BASECOST="3.0" LEVELS="0" ALIAS="Normal Smell" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="COMBAT_SENSE" ID="1689356871511" BASECOST="5.0" LEVELS="0" ALIAS="Combat Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="HEARINGGROUP" ID="1689356871512" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="CONDITIONALPOWER" ID="1689356871533" BASECOST="-0.5" LEVELS="0" ALIAS="Conditional Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Only vs organic perception" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
                     </POWER>
                 `;
                 let item;
@@ -1161,22 +1161,22 @@ export function registerUploadTests(quench) {
                 describe("MENTALDEFENSE", async function () {
                     const contents = `
                     <POWER XMLID="MENTALDEFENSE" ID="1576395326670" BASECOST="0.0" LEVELS="39" ALIAS="Mental Defense" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES>Telepathy must overcome.</NOTES>
-                    <MODIFIER XMLID="ABLATIVE" ID="1578308761240" BASECOST="-1.0" LEVELS="0" ALIAS="Ablative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BODYORSTUN" OPTIONID="BODYORSTUN" OPTION_ALIAS="BODY or STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="ALWAYSON" ID="1578308761242" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1578308761277" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="CON" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="EXTRATIME" ID="1578308761317" BASECOST="-2.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="20MINUTES" OPTIONID="20MINUTES" OPTION_ALIAS="20 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="INHERENT" ID="1578308761319" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
+                        <NOTES>Telepathy must overcome.</NOTES>
+                        <MODIFIER XMLID="ABLATIVE" ID="1578308761240" BASECOST="-1.0" LEVELS="0" ALIAS="Ablative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BODYORSTUN" OPTIONID="BODYORSTUN" OPTION_ALIAS="BODY or STUN" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="ALWAYSON" ID="1578308761242" BASECOST="-0.5" LEVELS="0" ALIAS="Always On" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1578308761277" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="CON" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="EXTRATIME" ID="1578308761317" BASECOST="-2.5" LEVELS="0" ALIAS="Extra Time" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="20MINUTES" OPTIONID="20MINUTES" OPTION_ALIAS="20 Minutes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="INHERENT" ID="1578308761319" BASECOST="0.25" LEVELS="0" ALIAS="Inherent" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
                     </POWER>
                 `;
                     let item;
@@ -1201,7 +1201,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "39 points, Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)",
+                            "Mental Defense 39 points, Inherent (+1/4) (49 Active Points); Extra Time (20 Minutes, -2 1/2), Ablative BODY or STUN (-1), Always On (-1/2), Requires A Roll (Skill roll; CON; -1/2)",
                         );
                     });
 
@@ -1428,7 +1428,7 @@ export function registerUploadTests(quench) {
                     it("description", async function () {
                         assert.equal(
                             item.system.description,
-                            "9 BODY (physical) into DEX",
+                            "Absorption 9 BODY (physical) into DEX",
                         );
                     });
 
@@ -1481,7 +1481,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "9m, Reduced Endurance (1/2 END; +1/4)",
+                        "Stretching 9m, Reduced Endurance (1/2 END; +1/4)",
                     );
                 });
 
@@ -1543,7 +1543,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            '+15" (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)',
+                            'Teleportation +15" (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)',
                         );
                     });
 
@@ -1590,7 +1590,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "+15m (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)",
+                            "Teleportation +15m (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)",
                         );
                     });
 
@@ -1644,7 +1644,10 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
-                        assert.equal(item.system.description, "(10 PD/11 ED)");
+                        assert.equal(
+                            item.system.description,
+                            "Force Field (10 PD/11 ED)",
+                        );
                     });
 
                     it("realCost", function () {
@@ -1695,7 +1698,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "(11 PD/10 ED) (33 Active Points); Costs Endurance (Costs END Every Phase; -1/2)",
+                            "Resistant Protection (11 PD/10 ED) (33 Active Points); Costs Endurance (Costs END Every Phase; -1/2)",
                         );
                     });
 
@@ -1755,7 +1758,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "(x16 Number Of Forms; Custom Adder) (165 Active Points); Activation Roll (14-; Hates Lack of Control and Different Moral Compass; -1/2)",
+                        "Multiform (x16 Number Of Forms; Custom Adder) (165 Active Points); Activation Roll (14-; Hates Lack of Control and Different Moral Compass; -1/2)",
                     );
                 });
 
@@ -1822,7 +1825,7 @@ export function registerUploadTests(quench) {
                     it("power description", function () {
                         assert.equal(
                             item.system.description,
-                            "1d6 (10 Active Points);",
+                            "Ego Attack 1d6 (10 Active Points);",
                         );
                     });
 
@@ -1902,7 +1905,7 @@ export function registerUploadTests(quench) {
                     it("power description", function () {
                         assert.equal(
                             item.system.description,
-                            "2d6 (20 Active Points); Extra Time (Extra Segment, -1/2)",
+                            "Mental Blast 2d6 (20 Active Points); Extra Time (Extra Segment, -1/2)",
                         );
                     });
 
@@ -1925,7 +1928,7 @@ export function registerUploadTests(quench) {
                     it("multipower description", function () {
                         assert.equal(
                             mpItem.system.description,
-                            ", 20-point reserve", // TODO: Should be "Multipower, 20-point reserve"
+                            "Multipower, 20-point reserve",
                         );
                     });
 
@@ -1988,7 +1991,7 @@ export function registerUploadTests(quench) {
                     it("power description", function () {
                         assert.equal(
                             item.system.description,
-                            "2d6, Continuous (+1) (40 Active Points); OAF (-1)",
+                            "Ego Attack 2d6, Continuous (+1) (40 Active Points); OAF (-1)",
                         );
                     });
 
@@ -2026,6 +2029,129 @@ export function registerUploadTests(quench) {
                     it("elemental control baseCost", function () {
                         assert.equal(ecItem.system.baseCost, 10);
                     });
+                });
+            });
+
+            describe("SUPPRESS (5e only)", async function () {
+                const contents = `
+                    <POWER XMLID="SUPPRESS" ID="1703216193551" BASECOST="0.0" LEVELS="5" ALIAS="Suppress" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="SUPP" INPUT="Flight" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES/>
+                        <ADDER XMLID="PLUSONEHALFDIE" ID="1703219636357" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <MODIFIER XMLID="RANGEBASEDONSTR" ID="1703219636358" BASECOST="-0.25" LEVELS="0" ALIAS="Range Based On Strength" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="ARMORPIERCING" ID="1703219636359" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    actor.system.is5e = true;
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Suppress 7 1/2d6 from Flight, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (-1/4)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 34);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 42);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 4);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 5);
+                });
+            });
+
+            describe("AID", async function () {
+                const contents = `
+                    <POWER XMLID="AID" ID="1703216088164" BASECOST="0.0" LEVELS="3" ALIAS="Aid" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="AID" INPUT="CON" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES/>
+                        <ADDER XMLID="PLUSONEPIP" ID="1703219832654" BASECOST="3.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <ADDER XMLID="INCREASEDMAX" ID="1703219832655" BASECOST="0.0" LEVELS="8" ALIAS="Increased Maximum (+8 points)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
+                            <NOTES/>
+                        </ADDER>
+                        <MODIFIER XMLID="CONTINUOUS" ID="1703219832656" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                        <MODIFIER XMLID="CREWSERVED" ID="1703219832667" BASECOST="-0.25" LEVELS="0" ALIAS="Crew-Served" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="2" OPTIONID="2" OPTION_ALIAS="2 people" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES/>
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    actor.system.is5e = true;
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Aid 3d6 + 1 into CON (+1 pip; Increased Maximum (+8 points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 59);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 74);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 3);
                 });
             });
         },
