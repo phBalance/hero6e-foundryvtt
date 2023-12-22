@@ -1512,7 +1512,18 @@ HERO.powers5e = [
     {
         key: "AID",
         costEnd: false,
-        costPerLevel: 6,
+        costPerLevel: 10,
+    },
+    {
+        key: "SUPPRESS",
+        name: "Suppress",
+        powerType: ["adjustment", "attack"],
+        perceivability: "obvious",
+        duration: "constant",
+        target: "target’s DCV",
+        range: "standard",
+        costEnd: true,
+        costPerLevel: 5,
     },
     {
         key: "TRANSFER",
