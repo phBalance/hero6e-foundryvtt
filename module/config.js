@@ -977,7 +977,7 @@ HERO.powers = [
     {
         key: "EXTRADIMENSIONALMOVEMENT",
         powerType: ["movement"],
-        name: "Extra-Dimensional movement",
+        name: "Extra-Dimensional Movement",
         perceivability: "Inobvious",
         duration: "instant",
         target: "Self Only",
@@ -992,7 +992,7 @@ HERO.powers = [
         onlyFor: ["none"],
     },
     {
-        key: "REPUTENVIRONMENTAL_MOVEMENTATION",
+        key: "ENVIRONMENTAL_MOVEMENT",
         powerType: ["talent"],
         name: "Environmental Movement",
         costPerLevel: 0,
