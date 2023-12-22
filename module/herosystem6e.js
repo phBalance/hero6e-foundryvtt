@@ -23,7 +23,6 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from "./utility/util.js";
-import { updateItemDescription } from "./utility/upload_hdc.js";
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
 import { migrateWorld } from "./migration.js";
 
@@ -293,7 +292,7 @@ async function CreateCustomAttack(actor) {
                 json.type = "attack";
 
                 let item = await Item.create(json, { parent: actor });
-                updateItemDescription(item);
+                item.updateItemDescription();
                 return ui.notifications.info(
                     `Added ${item.name} to ${actor.name}`,
                 );

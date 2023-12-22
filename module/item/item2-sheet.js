@@ -84,17 +84,6 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
     /* -------------------------------------------- */
 
     /** @override */
-    // setPosition(options = {}) {
-    //     const position = super.setPosition(options)
-    //     const sheetBody = this.element.find('.sheet-body')
-    //     const bodyHeight = position.height - 192
-    //     sheetBody.css('height', bodyHeight)
-    //     return position
-    // }
-
-    /* -------------------------------------------- */
-
-    /** @override */
     activateListeners(html) {
         super.activateListeners(html);
     }
@@ -103,44 +92,9 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         console.log("_updateObject");
         event.preventDefault();
 
-        // Totaling Options
-        // Add to Primary Value: AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"
-        // Add to Secondary Value: AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"
-        // Do not add to Totals: AFFECTS_PRIMARY="No" AFFECTS_TOTAL="No"
-
-        // For some reason updating LEVELS.value to a numeric 0 results in [object object].
-        // if (formData['system.LEVELS'] ) {
-        //     formData['system.LEVELS.value'] = (parseInt(formData['system.LEVELS.value']) || 0).toString();
-        //     formData['system.LEVELS.max'] = (parseInt(formData['system.LEVELS.max']) || 0).toString();
-        // }
-
-        // The description may have changed
-        //let description = this.item.system.description;
-
-        // Stadndard UpdateObject
+        // Standard UpdateObject
         await super._updateObject(event, formData);
 
-        // If Description changed, update it
-        //updateItemDescription(this.item);
-        // if (description != this.item.system.description) {
-        //     this.item.update({ 'system.description': this.item.system.description })
-        // }
-
         await this.item._postUpload();
-
-        // Recalc Item cost
-        // let item = this.item;
-        // if (await this.item._postUpload()) {
-        //     let changes = {}
-        //     changes['system.description'] = item.system.description;
-        //     if (item.system.realCost) { // Some items like Perception have NaN for cost (TODO: fix)
-
-        //         changes['system.basePointsPlusAdders'] = RoundFavorPlayerDown(item.system.basePointsPlusAdders);
-        //         changes['system.activePoints'] = RoundFavorPlayerDown(item.system.activePoints);
-        //         changes['system.realCost'] = RoundFavorPlayerDown(item.system.realCost);
-
-        //     }
-        //     await this.item.update(changes);
-        // }
     }
 }

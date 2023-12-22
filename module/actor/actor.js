@@ -1,7 +1,6 @@
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import { HEROSYS } from "../herosystem6e.js";
-import { updateItemDescription } from "../utility/upload_hdc.js";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
@@ -394,7 +393,7 @@ export class HeroSystem6eActor extends Actor {
                         if (deltaEndReserve) {
                             erValue += deltaEndReserve;
                             enduranceReserve.system.LEVELS.value = erValue;
-                            updateItemDescription(enduranceReserve);
+                            enduranceReserve.updateItemDescription();
                             await enduranceReserve.update({
                                 "system.LEVELS": enduranceReserve.system.LEVELS,
                                 "system.description":

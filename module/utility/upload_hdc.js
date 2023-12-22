@@ -1,11 +1,5 @@
 import { getPowerInfo } from "../utility/util.js";
 
-export function updateItemDescription(item) {
-    ui.notifications.warn(`Old updateItemDescription(${item.name}) called.`);
-
-    item.updateItemDescription();
-}
-
 export async function makeAttack(item) {
     ui.notifications.warn(`Old makeAttack(${item.name}) called.`);
 

@@ -10,7 +10,6 @@ import {
     convertFromDC,
 } from "../utility/damage.js";
 import { AdjustmentMultiplier } from "../utility/adjustment.js";
-import { updateItemDescription } from "../utility/upload_hdc.js";
 import { RequiresASkillRollCheck } from "../item/item.js";
 import { ItemAttackFormApplication } from "../item/item-attack-application.js";
 
@@ -585,7 +584,7 @@ export async function AttackToHit(item, options) {
                 }
                 erValue -= spentEnd;
                 enduranceReserve.system.LEVELS.value = erValue;
-                updateItemDescription(enduranceReserve);
+                enduranceReserve.updateItemDescription();
                 await enduranceReserve.update({
                     "system.LEVELS": enduranceReserve.system.LEVELS,
                     "system.description": enduranceReserve.system.description,
