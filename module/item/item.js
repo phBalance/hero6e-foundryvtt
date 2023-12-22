@@ -1217,8 +1217,14 @@ export class HeroSystem6eItem extends Item {
 
             if (adder.SELECTED != false) {
                 //TRANSPORT_FAMILIARITY
-                let adderLevels = Math.max(1, parseInt(adder.LEVELS));
-                adderCost += Math.ceil(adderBaseCost * adderLevels); // ceil is for ENTANGLE +5 PD
+                const adderValPerLevel = Math.max(
+                    1,
+                    parseInt(adder.LVLVAL) || 0,
+                );
+                const adderLevels = Math.ceil(
+                    Math.max(1, parseInt(adder.LEVELS)) / adderValPerLevel,
+                );
+                adderCost += Math.ceil(adderBaseCost * adderLevels);
             }
 
             let subAdderCost = 0;
