@@ -8,6 +8,29 @@ import { RoundFavorPlayerDown } from "../utility/round.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
 
+export function initializeItemHandlebarsHelpers() {
+    Handlebars.registerHelper("itemFullDescription", itemFullDescription);
+    Handlebars.registerHelper("itemName", itemName);
+}
+
+// Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
+function itemFullDescription(item) {
+    if (item.system.NAME) {
+        return `<i>${item.system.NAME}:</i> ${item.system.description}`;
+    }
+
+    return `${item.system.description}`;
+}
+
+// Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
+function itemName(item) {
+    if (item.system.NAME) {
+        return `<i>${item.system.NAME}</i>`;
+    }
+
+    return item.name;
+}
+
 const itemTypeToIcon = {
     attack: "icons/svg/sword.svg",
     movement: "icons/svg/pawprint.svg",

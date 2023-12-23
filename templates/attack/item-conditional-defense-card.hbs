@@ -4,9 +4,11 @@
 
     <div class="hero chat-card item-card">
         <h2>Verify the following defenses apply to this attack.</h2>
-        <div class="description"><b>{{item.name}}
-            {{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}
-        </b>: {{item.system.description}}</div>
+        <div class="description">
+            <b>{{{itemName item}}}
+                {{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}
+            </b>: {{item.system.description}}
+        </div>
     </div>
 
     <div class="form-fields  csl-attack-list">

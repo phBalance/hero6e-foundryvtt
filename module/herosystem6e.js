@@ -7,7 +7,10 @@ import {
     HeroSystem6eToken,
     HeroSystem6eTokenDocument,
 } from "./actor/actor-token.js";
-import { HeroSystem6eItem } from "./item/item.js";
+import {
+    HeroSystem6eItem,
+    initializeItemHandlebarsHelpers,
+} from "./item/item.js";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.js";
 import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.js";
 import * as chat from "./chat.js";
@@ -82,6 +85,7 @@ Hooks.once("init", async function () {
     SettingsHelpers.initLevelSettings();
 
     initializeHandlebarsHelpers();
+    initializeItemHandlebarsHelpers();
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
