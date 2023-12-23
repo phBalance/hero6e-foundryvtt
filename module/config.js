@@ -977,7 +977,7 @@ HERO.powers = [
     {
         key: "EXTRADIMENSIONALMOVEMENT",
         powerType: ["movement"],
-        name: "Extra-Dimensional movement",
+        name: "Extra-Dimensional Movement",
         perceivability: "Inobvious",
         duration: "instant",
         target: "Self Only",
@@ -992,7 +992,7 @@ HERO.powers = [
         onlyFor: ["none"],
     },
     {
-        key: "REPUTENVIRONMENTAL_MOVEMENTATION",
+        key: "ENVIRONMENTAL_MOVEMENT",
         powerType: ["talent"],
         name: "Environmental Movement",
         costPerLevel: 0,
@@ -1512,7 +1512,18 @@ HERO.powers5e = [
     {
         key: "AID",
         costEnd: false,
-        costPerLevel: 6,
+        costPerLevel: 10,
+    },
+    {
+        key: "SUPPRESS",
+        name: "Suppress",
+        powerType: ["adjustment", "attack"],
+        perceivability: "obvious",
+        duration: "constant",
+        target: "target’s DCV",
+        range: "standard",
+        costEnd: true,
+        costPerLevel: 5,
     },
     {
         key: "TRANSFER",

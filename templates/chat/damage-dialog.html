@@ -1,6 +1,6 @@
 <form>
     <div class="form-group">
-        <label>{{ item.name }}</label>
+        <label>{{{itemName item}}}</label>
     </div>
 
     <section>
@@ -17,14 +17,30 @@
             </li>
             {{#each defenses as |item id|}}
             <li class="item flexrow" data-item-id="{{item._id}}">
-                <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24" /></div>
-                <h4 class="item-name flex3">{{item.name}}</h4>
+                <div class="item-image">
+                    <img
+                        src="{{item.img}}"
+                        title="{{item.name}}"
+                        width="24"
+                        height="24"
+                    />
+                </div>
+                <h4 class="item-name flex3">{{{itemName item}}}</h4>
                 <h4 class="item-name flex3">{{item.defenseType}}</h4>
                 <h4 class="item-value">{{item.value}}</h4>
                 <h4 class="item-value">{{item.resistant}}</h4>
                 <h4 class="item-value">{{item.hardened}}</h4>
                 <h4 class="item-value">{{item.impenetrable}}</h4>
-                <h4 class="item-toggle"><input class="defense-active" type="checkbox" name="item.active" {{checked item.active}} data-dtype="Boolean" /></h4>
+                <h4 class="item-toggle">
+                    <input
+                        class="defense-active"
+                        type="checkbox"
+                        name="item.active"
+                        {{checked
+                        item.active}}
+                        data-dtype="Boolean"
+                    />
+                </h4>
             </li>
             {{/each}}
         </ol>

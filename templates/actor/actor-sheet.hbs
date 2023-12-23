@@ -79,7 +79,7 @@
                             title="Restore all characteristics to max, remove status effects, and remote temporary effects">Full
                             Health</button>
                         <button type="button" class="actor-description-button"
-                            title="Show Actor Description and all percievable powers">Actor Description</button>
+                            title="Show Actor Description and all perceivable powers">Actor Description</button>
                     </div>
 
             </section>
@@ -176,7 +176,7 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left">{{{itemName item}}}</td>
                         <td>{{item.system.ocvEstimated}}</td>
                         <td>{{item.system.dcvEstimated}}</td>
                         <td>{{item.system.uses}} vs {{item.system.targets}}</td>
@@ -231,7 +231,7 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left">{{{itemName item}}}</td>
                         <td class="left">{{item.system.description}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.phase}}</td>
@@ -276,9 +276,9 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{#if
-                            item.system.childIdx}}{{item.system.childIdx}}) {{/if}}<i>{{item.name}}:</i>
-                            {{item.system.description}}
+                        <td class="left">
+                            {{#if item.system.childIdx}}{{item.system.childIdx}}){{/if}}
+                            {{{itemFullDescription item}}}
                         </td>
                         <td>{{item.system.end}}</td>
                         <td>
@@ -338,10 +338,11 @@
                         {{/if}}
 
                         <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
-                            {{#if item.system.childIdx}}{{item.system.childIdx}}) {{/if}}
+                            {{#if item.system.childIdx}}
+                                {{item.system.childIdx}})
+                            {{/if}}
                             {{#if (ne item.name "LIST")}}
-                            <i>{{item.name}}</i>
-                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                                {{{itemName item}}}
                             {{/if}}
                         </td>
                         <td>{{#if (ne item.system.CHARACTERISTIC "GENERAL")}}{{toLowerCase item.system.CHARACTERISTIC}}{{/if}}</td>
@@ -393,7 +394,7 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left">{{{itemName item}}}</td>
                         <td class="left">{{item.system.EFFECT}}</td>
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocvEstimated}}</td>
@@ -447,7 +448,7 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left">{{{itemName item}}}</td>
                         <td class="left">{{item.system.description}}</td>
                         <td>{{item.system.value}}</td>
                         <td>{{item.system.velValue}}</td>
@@ -496,44 +497,47 @@
                     </tr>
                     {{#each items as |item id|}}
                     {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
-                    {{#if (eq item.system.XMLID "LIST")}}
-                    <tr class="item">
-                        <td height="24"></td>
-                        <td></td>
-                        <td class="left">{{item.system.ALIAS}}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {{else}}
-                    <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
-                        data-item-id="{{item._id}}">
-                        <td>
-                            <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                    height="24" /></div>
-                        </td>
-                        <td>{{item.system.realCost}}</td>
-                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">{{#if
-                            item.system.childIdx}}{{item.system.childIdx}}) {{/if}}<i>{{item.name}}:</i>
-                            {{item.system.description}}</td>
-                        <td>{{item.system.endEstimate}}</td>
+                        {{#if (eq item.system.XMLID "LIST")}}
+                            <tr class="item">
+                                <td height="24"></td>
+                                <td></td>
+                                <td class="left">{{item.system.ALIAS}}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {{else}}
+                            <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
+                                data-item-id="{{item._id}}">
+                                <td>
+                                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
+                                            height="24" /></div>
+                                </td>
+                                <td>{{item.system.realCost}}</td>
+                                <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
+                                    {{#if item.system.childIdx}}
+                                        {{item.system.childIdx}})
+                                    {{/if}}
+                                    {{{itemFullDescription item}}}
+                                </td>
+                                <td>{{item.system.endEstimate}}</td>
 
-                        <td>
-                            {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
-                                Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
-                                data-action="toggle" />
-                            {{/if}}
-                        </td>
-                        <td>
-                            <a class="item-control item-chat" title="Send to chat"><i
-                                    class="fas fa-comment-alt"></i></a>
-                            <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                            <a class="item-control item-delete" title="Delete Item">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {{/if}}
+                                <td>
+                                    {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
+                                        Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
+                                        data-action="toggle" />
+                                    {{/if}}
+                                </td>
+                                <td>
+                                    <a class="item-control item-chat" title="Send to chat"><i
+                                            class="fas fa-comment-alt"></i></a>
+                                    <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                    <a class="item-control item-delete" title="Delete Item">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {{/if}}
                     {{/if}}
                     {{/each}}
 
@@ -573,7 +577,7 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
-                        <td class="left">{{item.name}}</td>
+                        <td class="left">{{{itemName item}}}</td>
                         <td class="left">{{item.system.description}}</td>
                         <td>{{item.system.realCost}}</td>
                         <td>{{item.system.end}}</td>
@@ -696,8 +700,7 @@
                         </td>
                         <td>{{item.system.realCost}}</td>
                         <td class="left">
-                            <i>{{item.name}}</i>
-                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                            {{{itemFullDescription item}}}
                         </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i
@@ -735,8 +738,7 @@
                         </td>
                         <td>{{item.system.realCost}}</td>
                         <td class="left">
-                            <i>{{item.name}}</i>
-                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                            {{{itemFullDescription item}}}
                         </td>
                         <td>
                             <input class="item-toggle" type="checkbox" {{checked item.system.active}}
@@ -777,8 +779,7 @@
                         </td>
                         <td>{{item.system.realCost}}</td>
                         <td class="left">
-                            <i>{{item.name}}</i>
-                            {{#if item.system.description}}: {{item.system.description}}{{/if}}
+                            {{{itemFullDescription item}}}
                         </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i

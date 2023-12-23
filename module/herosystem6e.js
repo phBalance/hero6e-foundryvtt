@@ -7,7 +7,10 @@ import {
     HeroSystem6eToken,
     HeroSystem6eTokenDocument,
 } from "./actor/actor-token.js";
-import { HeroSystem6eItem } from "./item/item.js";
+import {
+    HeroSystem6eItem,
+    initializeItemHandlebarsHelpers,
+} from "./item/item.js";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.js";
 import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.js";
 import * as chat from "./chat.js";
@@ -23,7 +26,6 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from "./utility/util.js";
-import { updateItemDescription } from "./utility/upload_hdc.js";
 import { AdjustmentMultiplier } from "./utility/adjustment.js";
 import { migrateWorld } from "./migration.js";
 
@@ -83,6 +85,7 @@ Hooks.once("init", async function () {
     SettingsHelpers.initLevelSettings();
 
     initializeHandlebarsHelpers();
+    initializeItemHandlebarsHelpers();
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
@@ -293,7 +296,7 @@ async function CreateCustomAttack(actor) {
                 json.type = "attack";
 
                 let item = await Item.create(json, { parent: actor });
-                updateItemDescription(item);
+                item.updateItemDescription();
                 return ui.notifications.info(
                     `Added ${item.name} to ${actor.name}`,
                 );

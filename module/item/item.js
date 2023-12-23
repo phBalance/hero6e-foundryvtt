@@ -8,6 +8,29 @@ import { RoundFavorPlayerDown } from "../utility/round.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
 
+export function initializeItemHandlebarsHelpers() {
+    Handlebars.registerHelper("itemFullDescription", itemFullDescription);
+    Handlebars.registerHelper("itemName", itemName);
+}
+
+// Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
+function itemFullDescription(item) {
+    if (item.system.NAME) {
+        return `<i>${item.system.NAME}:</i> ${item.system.description}`;
+    }
+
+    return `${item.system.description}`;
+}
+
+// Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
+function itemName(item) {
+    if (item.system.NAME) {
+        return `<i>${item.system.NAME}</i>`;
+    }
+
+    return item.name;
+}
+
 const itemTypeToIcon = {
     attack: "icons/svg/sword.svg",
     movement: "icons/svg/pawprint.svg",
@@ -1217,8 +1240,14 @@ export class HeroSystem6eItem extends Item {
 
             if (adder.SELECTED != false) {
                 //TRANSPORT_FAMILIARITY
-                let adderLevels = Math.max(1, parseInt(adder.LEVELS));
-                adderCost += Math.ceil(adderBaseCost * adderLevels); // ceil is for ENTANGLE +5 PD
+                const adderValPerLevel = Math.max(
+                    1,
+                    parseInt(adder.LVLVAL) || 0,
+                );
+                const adderLevels = Math.ceil(
+                    Math.max(1, parseInt(adder.LEVELS)) / adderValPerLevel,
+                );
+                adderCost += Math.ceil(adderBaseCost * adderLevels);
             }
 
             let subAdderCost = 0;
@@ -1629,16 +1658,27 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "AID":
-            case "DISPEL":
-            case "DRAIN":
             case "TRANSFER":
                 {
-                    // Aid  STR 5d6 (standard effect: 15 points)
                     const dice = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
                     ).replace("d6 + 1d3", " 1/2d6");
                     system.description = `${system.ALIAS} ${dice} into ${
+                        system.INPUT ? system.INPUT : "unknown"
+                    }`;
+                }
+                break;
+
+            case "DISPEL":
+            case "DRAIN":
+            case "SUPPRESS":
+                {
+                    const dice = convertFromDC(
+                        this,
+                        convertToDcFromItem(this).dc,
+                    ).replace("d6 + 1d3", " 1/2d6");
+                    system.description = `${system.ALIAS} ${dice} from ${
                         system.INPUT ? system.INPUT : "unknown"
                     }`;
                 }
@@ -1829,7 +1869,6 @@ export class HeroSystem6eItem extends Item {
 
             case "INVISIBILITY":
                 // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
-                system.description = `${system.ALIAS}`;
                 break;
 
             case "ENDURANCERESERVE":
@@ -1916,6 +1955,10 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "EXTRADIMENSIONALMOVEMENT":
+                system.description = `${system.ALIAS} ${system.OPTION_ALIAS}`;
+                break;
+
             default:
                 {
                     if (
@@ -1932,10 +1975,6 @@ export class HeroSystem6eItem extends Item {
                         system.ALIAS ||
                         system.EFFECT ||
                         "";
-                    // if (system.INPUT) {
-                    //     const re = new RegExp(`^${system.INPUT}`, 'i')
-                    //     _desc = _desc.replace(re, "").trim();
-                    // }
                     system.description =
                         (system.INPUT ? system.INPUT + " " : "") + _desc;
 
@@ -1954,29 +1993,6 @@ export class HeroSystem6eItem extends Item {
                 break;
         }
 
-        // Remove duplicate name from description and related cleanup
-        let _rawName = this.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        try {
-            let re = new RegExp(`^${_rawName}`, "i");
-            system.description = system.description.replace(re, "").trim();
-
-            re = new RegExp(`: ${_rawName}$`, "i");
-            system.description = system.description.replace(re, "").trim();
-            system.description = system.description.replace(/^: /, "").trim();
-            system.description = system.description.replace(/^:/, "").trim();
-            system.description = system.description
-                .replace(/^Damage Reduction: /, "")
-                .trim();
-        } catch (e) {
-            ui.notifications.warn(
-                `${this.actor?.name} has item "${this.name.substr(
-                    0,
-                    30,
-                )}" which failed to update item description`,
-            );
-            console.log(e);
-        }
-
         // ADDRS
         let _adderArray = [];
 
@@ -1992,6 +2008,7 @@ export class HeroSystem6eItem extends Item {
                 case "AID":
                 case "DISPEL":
                 case "DRAIN":
+                case "SUPPRESS":
                 case "TRANSFER":
                     break;
 

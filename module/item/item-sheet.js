@@ -352,8 +352,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             expandedData.system.INPUT = `${expandedData.xmlidX} to ${expandedData.xmlidY}`;
         }
 
-        //await this.item.update(expandedData)
-
         // Endurance Reserve
         if (expandedData.rec) {
             let power = this.item.system.powers.find(
@@ -381,8 +379,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         await super._updateObject(event, formData);
 
         // If Description changed, update it
-        //updateItemDescription(this.item);
-        await this.item.updateItemDescription();
+        this.item.updateItemDescription();
         if (description != this.item.system.description) {
             this.item.update({
                 "system.description": this.item.system.description,
