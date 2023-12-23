@@ -1957,6 +1957,11 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS} ${system.OPTION_ALIAS}`;
                 break;
 
+            case "PERCEPTION":
+                // Skill added by system and not in HDC
+                system.description = "Perception";
+                break;
+
             default:
                 {
                     if (
