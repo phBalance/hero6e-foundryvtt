@@ -2070,11 +2070,14 @@ export class HeroSystem6eItem extends Item {
                         //system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
                         break;
 
+                    case "COMMONMOTORIZED":
                     case "RIDINGANIMALS":
+                        // Both of these Transport Familiarity adders may contain subadders. If they do, then use the subadders
+                        // otherwise use the adder.
                         if (adder.SELECTED) {
                             _adderArray.push(adder.ALIAS);
                         } else {
-                            for (let adder2 of adder?.adders || []) {
+                            for (const adder2 of adder?.ADDER || []) {
                                 _adderArray.push(adder2.ALIAS);
                             }
                         }
@@ -2091,7 +2094,7 @@ export class HeroSystem6eItem extends Item {
             if (_adderArray.length > 0) {
                 switch (powerXmlId) {
                     case "TRANSPORT_FAMILIARITY":
-                        system.description += _adderArray.join("; ");
+                        system.description += _adderArray.sort().join(", ");
                         break;
 
                     case "INVISIBILITY":
