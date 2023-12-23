@@ -1732,14 +1732,12 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "PROFESSIONAL_SKILL":
             case "KNOWLEDGE_SKILL":
-                // 6e HDC
-                //if (system.ALIAS == "KS") {
-                // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
-                system.description = system.NAME.replace(system.ALIAS, "");
-                if (system.description.indexOf(system.ALIAS) === -1)
-                    system.description += system.ALIAS;
-                if (system.INPUT) system.description += `: ${system.INPUT}`;
+                // KS: types of brain matter 11- or  PS: Appraise 11-
+                system.description = `${
+                    system.ALIAS ? system.ALIAS + ": " : ""
+                }${system.INPUT}`;
 
                 break;
 
