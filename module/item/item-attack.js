@@ -1964,7 +1964,7 @@ async function _onApplyAdjustmentToSpecificToken(
                       )
                     : parseFloat(
                           powerInfoX?.cost || powerInfoX?.costPerLevel,
-                      )) * AdjustmentMultiplier(keyX.toUpperCase());
+                      )) * AdjustmentMultiplier(keyX.toUpperCase(), item.actor);
             levelsX = parseInt(ActivePoints / costPerPointX);
 
             const powerInfoY = getPowerInfo({
@@ -1973,7 +1973,7 @@ async function _onApplyAdjustmentToSpecificToken(
             });
             let costPerPointY =
                 parseFloat(powerInfoY?.cost || powerInfoY?.costPerLevel) *
-                AdjustmentMultiplier(keyY.toUpperCase());
+                AdjustmentMultiplier(keyY.toUpperCase(), item.actor);
             levelsY = parseInt(ActivePoints / costPerPointY);
 
             let _APtext =

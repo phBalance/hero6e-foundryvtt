@@ -601,9 +601,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                               )
                             : parseFloat(
                                   powerInfoX?.cost || powerInfoX?.costPerLevel,
-                              )) * AdjustmentMultiplier(target.toUpperCase());
+                              )) *
+                        AdjustmentMultiplier(target.toUpperCase(), aeActor);
 
-                    let costPerPoint = costPerPointX; //parseFloat(characteristicCosts[target.toLowerCase()]) * AdjustmentMultiplier(target.toUpperCase());
+                    let costPerPoint = costPerPointX;
                     let newLevels = parseInt(ActivePoints / costPerPoint);
                     ae.changes[0].value =
                         value < 0 ? -parseInt(newLevels) : parseInt(newLevels);
