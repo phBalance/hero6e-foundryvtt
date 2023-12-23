@@ -1375,10 +1375,14 @@ export class HeroSystem6eActor extends Actor {
                 levels: "0",
             },
         };
-        await HeroSystem6eItem.create(itemDataPerception, {
-            temporary: this.id ? false : true,
-            parent: this,
-        });
+        const perceptionItem = await HeroSystem6eItem.create(
+            itemDataPerception,
+            {
+                temporary: this.id ? false : true,
+                parent: this,
+            },
+        );
+        await perceptionItem._postUpload(true);
 
         // MANEUVERS
         for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {

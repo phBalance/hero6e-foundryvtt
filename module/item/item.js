@@ -1732,14 +1732,12 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "PROFESSIONAL_SKILL":
             case "KNOWLEDGE_SKILL":
-                // 6e HDC
-                //if (system.ALIAS == "KS") {
-                // system.description = system.ALIAS + ": " + (system.NAME.replace(system.ALIAS, "") || system.INPUT || "")
-                system.description = system.NAME.replace(system.ALIAS, "");
-                if (system.description.indexOf(system.ALIAS) === -1)
-                    system.description += system.ALIAS;
-                if (system.INPUT) system.description += `: ${system.INPUT}`;
+                // KS: types of brain matter 11- or  PS: Appraise 11-
+                system.description = `${
+                    system.ALIAS ? system.ALIAS + ": " : ""
+                }${system.INPUT}`;
 
                 break;
 
@@ -1959,6 +1957,11 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS} ${system.OPTION_ALIAS}`;
                 break;
 
+            case "PERCEPTION":
+                // Skill added by system and not in HDC
+                system.description = "Perception";
+                break;
+
             default:
                 {
                     if (
@@ -2072,11 +2075,14 @@ export class HeroSystem6eItem extends Item {
                         //system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
                         break;
 
+                    case "COMMONMOTORIZED":
                     case "RIDINGANIMALS":
+                        // Both of these Transport Familiarity adders may contain subadders. If they do, then use the subadders
+                        // otherwise use the adder.
                         if (adder.SELECTED) {
                             _adderArray.push(adder.ALIAS);
                         } else {
-                            for (let adder2 of adder?.adders || []) {
+                            for (const adder2 of adder?.ADDER || []) {
                                 _adderArray.push(adder2.ALIAS);
                             }
                         }
@@ -2093,7 +2099,7 @@ export class HeroSystem6eItem extends Item {
             if (_adderArray.length > 0) {
                 switch (powerXmlId) {
                     case "TRANSPORT_FAMILIARITY":
-                        system.description += _adderArray.join("; ");
+                        system.description += _adderArray.sort().join(", ");
                         break;
 
                     case "INVISIBILITY":
