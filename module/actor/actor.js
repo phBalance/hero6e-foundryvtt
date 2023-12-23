@@ -1246,7 +1246,6 @@ export class HeroSystem6eActor extends Actor {
         for (let itemTag of HeroSystem6eItem.ItemXmlTags) {
             if (heroJson.CHARACTER[itemTag]) {
                 for (let system of heroJson.CHARACTER[itemTag]) {
-                    //let system = Object.values(itemJson)[0]
                     let itemData = {
                         name:
                             system.NAME ||
