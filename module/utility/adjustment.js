@@ -51,8 +51,6 @@ export function AdjustmentSources(actor) {
             return obj;
         }, {});
 
-    //choices = ["none", ...choices]
-
     return choices;
 }
 
