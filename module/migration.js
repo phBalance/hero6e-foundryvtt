@@ -416,9 +416,9 @@ async function migrate_actor_items_to_3_0_53(actor) {
         // We no longer need this as our visualizations should be decoupled from data.
         if (
             item.system.NAME?.toUpperCase().trim() ===
-                item.system.XMLID?.toUpperCase().trim() &&
+                item.system.ALIAS?.toUpperCase().trim() &&
             item.name.toUpperCase().trim() ===
-                item.system.XMLID?.toUpperCase().trim()
+                item.system.ALIAS?.toUpperCase().trim()
         ) {
             await item.update({
                 "system.NAME": "",
