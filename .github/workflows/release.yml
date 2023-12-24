@@ -13,7 +13,7 @@ jobs:
       release: ${{ steps.extract_release.outputs.RELEASE }}
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Install jq
       run: sudo apt-get install jq
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: build css
       run: npm ci && npm run compile
@@ -64,10 +64,11 @@ jobs:
         zip -r hero6efoundryvttv2.zip .
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: hero6efoundryvttv2.zip
         path: hero6efoundryvttv2.zip
+        if-no-files-found: error
 
     - name: Create and push tag
       run: |
