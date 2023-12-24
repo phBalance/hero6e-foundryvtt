@@ -59,9 +59,9 @@ jobs:
         sed -i 's|"manifest": "[^"]*",|"manifest": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/system.json",|' system.json
         sed -i 's|"download": "[^"]*",|"download": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/hero6efoundryvttv2.zip",|' system.json
 
-    - name: Archive code
+    - name: Make a FoundryVTT system package (manifest and stuff required for execution) and ignore the rest as it is already archived in GitHub and is only needed to build or develop
       run: |
-        zip -r hero6efoundryvttv2.zip .
+        zip -r herofoundryvttv2.zip . -x .git/\* -x .github/\* -x node_modules/\* -x scss/\* -x .gitattributes -x .gitignore  -x .git-blame-ignore-revs -x .eslintrc.json -x .npmignore -x .prettierignore -x .prettierrc.json -x gulpfile.mjs -x package.json -x package-lock.json
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
