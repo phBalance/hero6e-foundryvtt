@@ -209,7 +209,6 @@
         },
         "skill": {
             "templates": ["base"],
-            "CHARACTERISTIC": "GENERAL",
             "levels": 0,
             "state": "untrained",
             "roll": "6-"
