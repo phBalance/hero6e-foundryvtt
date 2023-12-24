@@ -345,13 +345,15 @@
                             {{/if}}
                         </td>
                         <td>
-                            {{toLowerCase item.system.CHARACTERISTIC}}
+                            {{#if item.system.roll}}
+                                {{toLowerCase item.system.CHARACTERISTIC}}
+                            {{/if}}
                         </td>
                         <td>
                             {{#if item.system.roll}}
-                            <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
-                                data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
-                                sign=false}}-</button>
+                                <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
+                                    data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
+                                    sign=false}}-</button>
                             {{/if}}
                         </td>
                         <td>
