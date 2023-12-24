@@ -1646,14 +1646,20 @@ export class HeroSystem6eItem extends Item {
 
             case "ABSORPTION":
                 {
+                    const reduceAndEnhanceTargets =
+                        this.splitAdjustmentSourceAndTarget();
                     const dice = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
                     ).replace("d6 + 1d3", " 1/2d6");
+
                     system.description = `${system.ALIAS} ${
                         is5e ? `${dice}` : `${system.value} BODY`
                     } (${system.OPTION_ALIAS}) to ${
-                        system.INPUT ? system.INPUT : "unknown"
+                        reduceAndEnhanceTargets.valid
+                            ? reduceAndEnhanceTargets.enhances ||
+                              reduceAndEnhanceTargets.reduces
+                            : "unknown"
                     }`;
                 }
                 break;
@@ -1662,13 +1668,20 @@ export class HeroSystem6eItem extends Item {
             case "DISPEL":
             case "DRAIN":
             case "SUPPRESS":
+            case "HEALING":
                 {
+                    const reduceAndEnhanceTargets =
+                        this.splitAdjustmentSourceAndTarget();
                     const dice = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
                     ).replace("d6 + 1d3", " 1/2d6");
+
                     system.description = `${system.ALIAS} ${
-                        system.INPUT ? system.INPUT : "unknown"
+                        reduceAndEnhanceTargets.valid
+                            ? reduceAndEnhanceTargets.enhances ||
+                              reduceAndEnhanceTargets.reduces
+                            : "unknown"
                     } ${dice}`;
                 }
                 break;
