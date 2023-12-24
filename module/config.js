@@ -69,24 +69,24 @@ HERO.attackClasses = {
 };
 
 HERO.skillCharacteristics = {
-    general: "General",
-    str: "STR",
-    dex: "DEX",
-    con: "CON",
-    int: "INT",
-    ego: "EGO",
-    pre: "PRE",
+    GENERAL: "GENERAL",
+    STR: "STR",
+    DEX: "DEX",
+    CON: "CON",
+    INT: "INT",
+    EGO: "EGO",
+    PRE: "PRE",
 };
 
 HERO.skillCharacteristics5e = {
-    general: "General",
-    str: "STR",
-    dex: "DEX",
-    con: "CON",
-    int: "INT",
-    ego: "EGO",
-    pre: "PRE",
-    com: "COM",
+    GENERAL: "GENERAL",
+    STR: "STR",
+    DEX: "DEX",
+    CON: "CON",
+    INT: "INT",
+    EGO: "EGO",
+    PRE: "PRE",
+    COM: "COM",
 };
 
 HERO.skillTraining = {
