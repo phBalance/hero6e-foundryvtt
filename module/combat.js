@@ -489,7 +489,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // STUNNING
         // The character remains Stunned and can take no
-        // Actions (not even Aborting to a defensive action) until his next
+        // Actions (not even Aborting to a defensive action) until their next
         // Phase.
         // Use actor.canAct to block actions
         // Remove STUNNED effect _onEndTurn
@@ -706,10 +706,10 @@ export class HeroSystem6eCombat extends Combat {
         for (let combatant of this.combatants.filter((o) => !o.defeated)) {
             const actor = combatant.actor;
 
-            /// If this is an NPC and their STUN <= 0 then leave them be.
+            // If this is an NPC and their STUN <= 0 then leave them be.
             // Typically, you should only use the Recovery Time Table for
             // PCs. Once an NPC is Knocked Out below the -10 STUN level
-            // he should normally remain unconscious until the fight ends.
+            // they should normally remain unconscious until the fight ends.
             // ACTOR#ONUPDATE SHOULD MARK AS DEFEATED
             // if (actor.type != "pc" && parseInt(actor.system.characteristics.stun.value) <= -10)
             // {

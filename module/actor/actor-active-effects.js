@@ -115,8 +115,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     };
 
     // Temporary BLIND status/effect until enhanced senses can be fully implemented.
-    // When a character cannot perceive his opponent with any
-    // Targeting Sense, he is at ½ DCV. He’s also at ½ OCV in HTH
+    // When a character cannot perceive their opponent with any
+    // Targeting Sense, they are at ½ DCV. He’s also at ½ OCV in HTH
     // Combat and 0 OCV in Ranged Combat.
     // As a Half Phase Action, a character can attempt a PER Roll
     // to perceive a particular target with a Nontargeting Sense (at -5 if

@@ -45,8 +45,8 @@ export class HeroSystem6eActor extends Actor {
         );
         if (existingEffect) {
             if (activeEffect.id == "knockedOut") {
-                //When he wakes up, his END equals his
-                //current STUN total.
+                // When they wakes up, their END equals their
+                // current STUN total.
                 let newEnd = Math.min(
                     parseInt(this.system.characteristics.stun.value),
                     parseInt(this.system.characteristics.end.max),
@@ -290,7 +290,7 @@ export class HeroSystem6eActor extends Actor {
         // RECOVERING
         // Characters use REC to regain lost STUN and expended END.
         // This is known as “Recovering” or “taking a Recovery.”
-        // When a character Recovers, add his REC to his current
+        // When a character Recovers, add their REC to their current
         // STUN and END totals (to a maximum of their full values, of
         // course). Characters get to Recover in two situations: Post-
         // Segment and when they choose to Recover as a Full Phase
@@ -300,9 +300,9 @@ export class HeroSystem6eActor extends Actor {
         // Recovering is a Full Phase Action and occurs at the end of
         // the Segment (after all other characters who have a Phase that
         // Segment have acted). A character who Recovers during a Phase
-        // may do nothing else. He cannot even maintain a Constant Power
+        // may do nothing else. They cannot even maintain a Constant Power
         // or perform Actions that cost no END or take no time. However,
-        // he may take Zero Phase Actions at the beginning of his Phase
+        // they may take Zero Phase Actions at the beginning of their Phase
         // to turn off Powers, and Persistent Powers that don’t cost END
         // remain in effect.
 
@@ -310,7 +310,7 @@ export class HeroSystem6eActor extends Actor {
         let speaker = ChatMessage.getSpeaker({ actor: this, token });
         speaker["alias"] = this.name;
 
-        // A character who holds his breath does not get to Recover (even
+        // A character who holds their breath does not get to Recover (even
         // on Post-Segment 12)
         if (this.statuses.has("holdingBreath")) {
             const content = this.name + " <i>is holding their breath</i>.";
@@ -356,16 +356,6 @@ export class HeroSystem6eActor extends Actor {
             },
             { hideChatMessage: true },
         );
-
-        // let content = this.name + ` <span title="
-        // Recovering is a Full Phase Action and occurs at the end of
-        // the Segment (after all other characters who have a Phase that
-        // Segment have acted). A character who Recovers during a Phase
-        // may do nothing else. He cannot even maintain a Constant Power
-        // or perform Actions that cost no END or take no time. However,
-        // he may take Zero Phase Actions at the beginning of his Phase
-        // to turn off Powers, and Persistent Powers that don't cost END
-        // remain in effect."><i>Takes a Recovery</i></span>`;
 
         let content = this.name + ` <i>Takes a Recovery</i>`;
         if (deltaEnd || deltaStun) {
@@ -455,7 +445,7 @@ export class HeroSystem6eActor extends Actor {
         // A character
         // who is Stunned or recovering from being
         // Stunned can take no Actions, take no Recoveries
-        // (except his free Post-Segment 12 Recovery), cannot
+        // (except their free Post-Segment 12 Recovery), cannot
         // move, and cannot be affected by Presence Attacks.
 
         // Recovering from being Stunned requires a Full
