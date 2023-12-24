@@ -5,7 +5,6 @@ import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
 } from "../utility/util.js";
-import { AdjustmentSources } from "../utility/adjustment.js";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
