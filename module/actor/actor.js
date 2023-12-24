@@ -1170,6 +1170,16 @@ export class HeroSystem6eActor extends Actor {
 
         let changes = {};
 
+        // Convert XML into JSON
+        const heroJson = {};
+        HeroSystem6eActor._xmlToJsonNode(heroJson, xml.children);
+
+        // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
+        const characterName =
+            heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
+        this.name = characterName;
+        changes["name"] = this.name;
+
         // Reset system property to default
         const _actor = await HeroSystem6eActor.create(
             {
@@ -1181,7 +1191,6 @@ export class HeroSystem6eActor extends Actor {
         const _system = _actor.system;
 
         const schemaKeys = Object.keys(_system);
-
         for (const key of Object.keys(this.system)) {
             if (!schemaKeys.includes(key)) {
                 changes[`system.-=${key}`] = null;
@@ -1195,11 +1204,8 @@ export class HeroSystem6eActor extends Actor {
         if (this.id) {
             await this.update(changes);
         }
-        changes = {};
 
-        // Convert XML into JSON
-        const heroJson = {};
-        HeroSystem6eActor._xmlToJsonNode(heroJson, xml.children);
+        changes = {};
 
         // CHARACTERISTICS
         if (heroJson.CHARACTER?.CHARACTERISTICS) {
@@ -1208,7 +1214,6 @@ export class HeroSystem6eActor extends Actor {
             )) {
                 changes[`system.${key}`] = value;
                 this.system[key] = value;
-                //changes[`system.characteristics.${ key.toLowerCase() } `] = value
             }
             delete heroJson.CHARACTER.CHARACTERISTICS;
         }
@@ -1446,18 +1451,13 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Non ITEMS stuff in CHARACTER
-        // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
-        const characterName =
-            heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
         changes = {
             ...changes,
             "system.CHARACTER": heroJson.CHARACTER,
             "system.versionHeroSystem6eUpload": game.system.version,
-            name: characterName,
         };
         this.system.CHARACTER = heroJson.CHARACTER;
         this.system.versionHeroSystem6eUpload = game.system.version;
-        this.name = characterName;
 
         if (this.prototypeToken) {
             changes[`prototypeToken.name`] = changes.name;
