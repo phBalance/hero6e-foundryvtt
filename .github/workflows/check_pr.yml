@@ -16,4 +16,4 @@ jobs:
           run: npm run prettier
 
         - name: Any eslint issues?
-          run: npm run prettier
+          run: npm run lint
