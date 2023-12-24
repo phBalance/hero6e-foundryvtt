@@ -1379,7 +1379,7 @@ export function registerUploadTests(quench) {
                     it("description", async function () {
                         assert.equal(
                             item.system.description,
-                            "Absorption 2 1/2d6 (energy) into STUN",
+                            "Absorption 2 1/2d6 (energy) to STUN",
                         );
                     });
 
@@ -1428,7 +1428,7 @@ export function registerUploadTests(quench) {
                     it("description", async function () {
                         assert.equal(
                             item.system.description,
-                            "Absorption 9 BODY (physical) into DEX",
+                            "Absorption 9 BODY (physical) to DEX",
                         );
                     });
 
@@ -2071,7 +2071,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Suppress 7 1/2d6 from Flight, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (-1/4)",
+                        "Suppress Flight 7 1/2d6, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (-1/4)",
                     );
                 });
 
@@ -2134,7 +2134,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Aid 3d6 + 1 into CON (+1 pip; Increased Maximum (+8 points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
+                        "Aid CON 3d6 + 1 (+1 pip; Increased Maximum (+8 points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
                     );
                 });
 
