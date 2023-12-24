@@ -411,6 +411,19 @@ async function migrate_actor_items_to_3_0_53(actor) {
                 "system.-=characteristic": null,
             });
         }
+
+        // In the past, we filled in item.system.NAME based on item.system.ALIAS.
+        // We no longer need this as our visualizations should be decoupled from data.
+        if (
+            item.system.NAME?.toUpperCase().trim() ===
+                item.system.XMLID?.toUpperCase().trim() &&
+            item.name.toUpperCase().trim() ===
+                item.system.XMLID?.toUpperCase().trim()
+        ) {
+            await item.update({
+                "system.NAME": "",
+            });
+        }
     }
 }
 
