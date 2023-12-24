@@ -3127,8 +3127,8 @@ export class HeroSystem6eItem extends Item {
 
         return {
             valid: valid,
-            reduces: reduces || [],
-            enhances: enhances || [],
+            reduces: reduces || "",
+            enhances: enhances || "",
         };
     }
 }
