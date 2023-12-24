@@ -8,7 +8,7 @@ export function RoundFavorPlayerDown(number) {
     // Character. For example, when calculating the cost of a Power,
     // it’s to the character’s advantage if the Power costs fewer CP, so a
     // .5 in a cost would round down; if a Combat Maneuver halves a
-    // character’s DCV, it’s to the character’s advantage for his DCV to
+    // character’s DCV, it’s to the character’s advantage for their DCV to
     // be as high as possible, so a .5 in that calculation would round
     // up.
     // const fraction = Math.floor((number % 1) * 10) / 10
@@ -28,7 +28,7 @@ export function RoundFavorPlayerUp(number) {
     // Character. For example, when calculating the cost of a Power,
     // it’s to the character’s advantage if the Power costs fewer CP, so a
     // .5 in a cost would round down; if a Combat Maneuver halves a
-    // character’s DCV, it’s to the character’s advantage for his DCV to
+    // character’s DCV, it’s to the character’s advantage for their DCV to
     // be as high as possible, so a .5 in that calculation would round
     // up.
     if (number % 1 < 0.5) return Math.floor(number);

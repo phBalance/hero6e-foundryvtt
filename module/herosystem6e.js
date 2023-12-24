@@ -732,7 +732,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 // If this is an NPC and their STUN <= 0 then leave them be.
                 // Typically, you should only use the Recovery Time Table for
                 // PCs. Once an NPC is Knocked Out below the -10 STUN level
-                // he should normally remain unconscious until the fight ends.
+                // they should normally remain unconscious until the fight ends.
                 if (
                     actor.type === "pc" ||
                     parseInt(actor.system.characteristics.stun.value) > -10

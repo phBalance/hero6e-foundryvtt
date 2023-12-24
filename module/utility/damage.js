@@ -201,7 +201,7 @@ export function convertToDcFromItem(item, options) {
     // Move By (add in velocity)
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
     //
-    // A character can accelerate at a rate of 5m per meter, up to his
+    // A character can accelerate at a rate of 5m per meter, up to their
     // maximum normal Combat Movement in meters per Phase. Thus
     // a character with 50m of Flight would be moving at a velocity of
     // 5m after traveling one meter, 10m after traveling two meters,
