@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.js";
 import * as Attack from "../item/item-attack.js";
 import { createSkillPopOutFromItem } from "../item/skill.js";
 import { enforceManeuverLimits } from "../item/manuever.js";
+import { AdjustmentSources } from "../utility/adjustment.js";
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
@@ -1645,41 +1646,63 @@ export class HeroSystem6eItem extends Item {
 
             case "ABSORPTION":
                 {
+                    const reduceAndEnhanceTargets =
+                        this.splitAdjustmentSourceAndTarget();
                     const dice = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
                     ).replace("d6 + 1d3", " 1/2d6");
+
                     system.description = `${system.ALIAS} ${
                         is5e ? `${dice}` : `${system.value} BODY`
-                    } (${system.OPTION_ALIAS}) into ${
-                        system.INPUT ? system.INPUT : "unknown"
+                    } (${system.OPTION_ALIAS}) to ${
+                        reduceAndEnhanceTargets.valid
+                            ? reduceAndEnhanceTargets.enhances ||
+                              reduceAndEnhanceTargets.reduces
+                            : "unknown"
                     }`;
                 }
                 break;
 
             case "AID":
-            case "TRANSFER":
-                {
-                    const dice = convertFromDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    ).replace("d6 + 1d3", " 1/2d6");
-                    system.description = `${system.ALIAS} ${dice} into ${
-                        system.INPUT ? system.INPUT : "unknown"
-                    }`;
-                }
-                break;
-
             case "DISPEL":
             case "DRAIN":
             case "SUPPRESS":
+            case "HEALING":
                 {
+                    const reduceAndEnhanceTargets =
+                        this.splitAdjustmentSourceAndTarget();
                     const dice = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
                     ).replace("d6 + 1d3", " 1/2d6");
+
+                    system.description = `${system.ALIAS} ${
+                        reduceAndEnhanceTargets.valid
+                            ? reduceAndEnhanceTargets.enhances ||
+                              reduceAndEnhanceTargets.reduces
+                            : "unknown"
+                    } ${dice}`;
+                }
+                break;
+
+            case "TRANSFER":
+                {
+                    const reduceAndEnhanceTargets =
+                        this.splitAdjustmentSourceAndTarget();
+                    const dice = convertFromDC(
+                        this,
+                        convertToDcFromItem(this).dc,
+                    ).replace("d6 + 1d3", " 1/2d6");
+
                     system.description = `${system.ALIAS} ${dice} from ${
-                        system.INPUT ? system.INPUT : "unknown"
+                        reduceAndEnhanceTargets.valid
+                            ? reduceAndEnhanceTargets.reduces
+                            : "unknown"
+                    } to ${
+                        reduceAndEnhanceTargets.valid
+                            ? reduceAndEnhanceTargets.enhances
+                            : "unknown"
                     }`;
                 }
                 break;
@@ -3047,6 +3070,66 @@ export class HeroSystem6eItem extends Item {
             // HEROSYS.log(false, (skillData.XMLID || this.name) + ' was not included in skills.  Likely Skill Enhancer')
             return;
         }
+    }
+
+    _areAllAdjustmentTargetsInListValid(targetsList) {
+        if (!targetsList) return false;
+
+        const adjustmentTargets = targetsList.split(",");
+        for (const rawAdjustmentTarget of adjustmentTargets) {
+            const upperCasedInput = rawAdjustmentTarget.toUpperCase().trim();
+            if (
+                !Object.keys(AdjustmentSources(this.actor)).includes(
+                    upperCasedInput,
+                )
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // valid: boolean If true the enhances and reduces lists are valid, otherwise ignore them.
+    splitAdjustmentSourceAndTarget() {
+        let valid;
+        let reduces;
+        let enhances;
+
+        if (this.system.XMLID === "TRANSFER") {
+            // Should be something like "STR,CON -> DEX,SPD"
+            const splitSourcesAndTargets = this.system.INPUT
+                ? this.system.INPUT.split(" -> ")
+                : [];
+
+            valid =
+                this._areAllAdjustmentTargetsInListValid(
+                    splitSourcesAndTargets[0],
+                ) &&
+                this._areAllAdjustmentTargetsInListValid(
+                    splitSourcesAndTargets[1],
+                );
+            enhances = splitSourcesAndTargets[1];
+            reduces = splitSourcesAndTargets[0];
+        } else {
+            valid = this._areAllAdjustmentTargetsInListValid(this.system.INPUT);
+
+            if (
+                this.system.XMLID === "AID" ||
+                this.system.XMLID === "ABSORPTION" ||
+                this.system.XMLID === "HEALING"
+            ) {
+                enhances = this.system.INPUT;
+            } else {
+                reduces = this.system.INPUT;
+            }
+        }
+
+        return {
+            valid: valid,
+            reduces: reduces || [],
+            enhances: enhances || [],
+        };
     }
 }
 
