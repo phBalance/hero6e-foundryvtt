@@ -1,5 +1,9 @@
 # Releases
 
+## Version 3.0.54 (So far...)
+
+- The character sheet's power tab now has the dice icon for attack powers to initiate attacks.
+
 ## Version 3.0.53
 
 - Fix crash with Aid and Telekinesis powers during upload. [#474](https://github.com/dmdorman/hero6e-foundryvtt/issues/474)

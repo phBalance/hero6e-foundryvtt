@@ -526,9 +526,14 @@
                                 <td>{{item.system.endEstimate}}</td>
 
                                 <td>
-                                    {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"
-                                        Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
-                                        data-action="toggle" />
+                                    {{#if (ne item.system.subType "attack")}}
+                                        {{#if item.system.showToggle}}
+                                            <input class="item-toggle" type="checkbox"
+                                                Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
+                                                data-action="toggle" />
+                                        {{/if}}
+                                    {{else}}
+                                        <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
                                     {{/if}}
                                 </td>
                                 <td>
