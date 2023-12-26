@@ -1895,7 +1895,9 @@ async function _onApplyAdjustmentToSpecificToken(
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     const template =
@@ -1903,12 +1905,14 @@ async function _onApplyAdjustmentToSpecificToken(
     const token = canvas.tokens.get(tokenId);
 
     if (!item.actor) {
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     if (
         item.actor.id === token.actor.id &&
-        ["DRAIN", "TRANSFER"].includes(item.system.XMLID)
+        ["DRAIN", "TRANSFER", "DISPEL", "SUPPRESS"].includes(item.system.XMLID)
     ) {
         await ui.notifications.warn(
             `${item.system.XMLID} attacker (${item.actor.name}) and defender (${token.actor.name}) are the same.`,
