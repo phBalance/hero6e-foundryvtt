@@ -13,13 +13,8 @@
 
     {{!-- Sheet Body --}}
     <section class="sheet-body">
-        <div class="form-group">
-            <label>Power</label>
-            <input type="text" name="system.rules" value="{{system.rules}}" data-dtype="Text" disabled />
-        </div>
-
         {{#if (eq item.system.subType 'attack') }}
-        {{> systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs item=item }}
+            {{> systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs item=item }}
         {{/if}}
 
         <hr>
