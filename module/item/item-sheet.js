@@ -22,11 +22,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     /** @override */
     get template() {
         const path = "systems/hero6efoundryvttv2/templates/item";
-        // Return a single sheet for all item types.
-        // return `${path}/item-sheet.html`;
 
-        // Alternatively, you could use the following return statement to do a
-        // unique item sheet by type, like `weapon-sheet.hbs`.
+        // TODO: Does this imply we need other sheets for the remaining adjustment powers?
         if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
             return `${path}/item-${
                 this.item.type
@@ -171,9 +168,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }, {}),
         };
 
-        // DRAIN
-        // A select list of possible DRAIN from sources
-        if (item.system.XMLID == "DRAIN") {
+        if (
+            item.system.XMLID === "DISPEL" ||
+            item.system.XMLID === "DRAIN" ||
+            item.system.XMLID === "SUPPRESS"
+        ) {
             let drains = [];
             for (const key in this.actor.system.characteristics) {
                 if (
@@ -193,13 +192,22 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
         }
 
-        // AID
-        // A select list of possible AID from sources
-        if (item.system.XMLID == "AID") {
+        // A select list of possible adjustment targets on the character
+        if (
+            item.system.XMLID === "ABSORPTION" ||
+            item.system.XMLID === "AID" ||
+            item.system.XMLID === "HEALING"
+        ) {
             data.aidSources = AdjustmentSources(this.actor);
             data.inputs = [];
-            const _inputs = item.system.INPUT.split(",");
-            let count = item.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
+
+            // TODO: How to properly do error detection here? What if target
+            //       is not provided? What if too many targets are provided?
+            //       We already provided a warning on character upload.
+            const { valid, enhances } = item.splitAdjustmentSourceAndTarget();
+            const _inputs = valid ? enhances.split(",") : [];
+
+            const count = item.numberOfSimultaneousAdjustmentEffects(_inputs);
             for (let i = 0; i < count; i++) {
                 data.inputs.push(_inputs?.[i]?.toUpperCase()?.trim() || "");
             }

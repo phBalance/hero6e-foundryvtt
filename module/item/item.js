@@ -3132,6 +3132,31 @@ export class HeroSystem6eItem extends Item {
             enhances: enhances || "",
         };
     }
+
+    numberOfSimultaneousAdjustmentEffects(inputs) {
+        if (this.actor.system.is5e) {
+            // In 5e, the number of simultaneous effects is based on the VARIABLEEFFECT modifier.
+            const variableEffect = this.findModsByXmlid("VARIABLEEFFECT");
+
+            if (!variableEffect) return 1;
+
+            switch (variableEffect.BASECOST) {
+                case "0.5":
+                    return 2;
+                case "1.0":
+                    return 4;
+                case "2.0":
+                    // All of a type. Assume this is just everything listed in the inputs
+                    return inputs.length;
+                default:
+                    return 1;
+            }
+        }
+
+        // In 6e, the number of simultaneous effects is LEVELS in EXPANDEDEFFECT modifier if available or
+        // it is just 1.
+        return this.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
+    }
 }
 
 export function getItem(id) {
