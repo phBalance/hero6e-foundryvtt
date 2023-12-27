@@ -1,6 +1,6 @@
 import { HeroSystem6eItem } from "./item.js";
 import { editSubItem, deleteSubItem } from "../powers/powers.js";
-import { AdjustmentSources } from "../utility/adjustment.js";
+import { adjustmentSources } from "../utility/adjustment.js";
 import { getPowerInfo } from "../utility/util.js";
 
 /**
@@ -14,7 +14,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             classes: ["herosystem6e", "sheet", "item"],
             width: 520,
             height: 660,
-            //tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'description' }],
             scrollY: [".sheet-body"],
         });
     }
@@ -22,21 +21,19 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     /** @override */
     get template() {
         const path = "systems/hero6efoundryvttv2/templates/item";
-        // Return a single sheet for all item types.
-        // return `${path}/item-sheet.html`;
 
-        // Alternatively, you could use the following return statement to do a
-        // unique item sheet by type, like `weapon-sheet.hbs`.
-        if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
-            return `${path}/item-${
-                this.item.type
-            }-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`;
-        }
-
-        if (["TRANSFER"].includes(this.item.system.XMLID)) {
-            return `${path}/item-${
-                this.item.type
-            }-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`;
+        if (
+            [
+                "ABSORPTION",
+                "AID",
+                "DISPEL",
+                "DRAIN",
+                "HEALING",
+                "SUPPRESS",
+                "TRANSFER",
+            ].includes(this.item.system.XMLID)
+        ) {
+            return `${path}/item-${this.item.type}-adjustment-sheet.hbs`;
         }
 
         if (["ENDURANCERESERVE"].includes(this.item.system.XMLID)) {
@@ -171,51 +168,29 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }, {}),
         };
 
-        // DRAIN
-        // A select list of possible DRAIN from sources
-        if (item.system.XMLID == "DRAIN") {
-            let drains = [];
-            for (const key in this.actor.system.characteristics) {
-                if (
-                    Object.prototype.hasOwnProperty.call(
-                        this.actor.system.characteristics[key],
-                        "value",
-                    )
-                ) {
-                    drains.push(key.toUpperCase());
-                }
-            }
-            drains.sort();
-            drains = ["none", ...drains];
-            data.drains = {};
-            for (let key of drains) {
-                data.drains[key] = key;
-            }
-        }
+        // A select list of possible adjustment targets on the character
+        if (
+            item.system.XMLID === "ABSORPTION" ||
+            item.system.XMLID === "AID" ||
+            item.system.XMLID === "HEALING" ||
+            item.system.XMLID === "DISPEL" ||
+            item.system.XMLID === "DRAIN" ||
+            item.system.XMLID === "SUPPRESS" ||
+            item.system.XMLID === "TRANSFER"
+        ) {
+            const { enhances, reduces } = item.splitAdjustmentSourceAndTarget();
 
-        // AID
-        // A select list of possible AID from sources
-        if (item.system.XMLID == "AID") {
-            data.aidSources = AdjustmentSources(this.actor);
-            data.inputs = [];
-            const _inputs = item.system.INPUT.split(",");
-            let count = item.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
-            for (let i = 0; i < count; i++) {
-                data.inputs.push(_inputs?.[i]?.toUpperCase()?.trim() || "");
-            }
-        }
-
-        // TRANSFER
-        // A select list of possible AID from sources
-        if (item.system.XMLID == "TRANSFER") {
-            data.transferSources = AdjustmentSources(this.actor);
-
-            // TRANSFER X to Y  (AID and DRAIN only have X)
-            data.xmlidX = (item.system.INPUT.match(/\w+/) || [""])[0];
-            data.xmlidY = (item.system.INPUT.match(/to[ ]+(\w+)/i) || [
-                "",
-                "",
-            ])[1];
+            data.possibleSources = adjustmentSources(this.actor);
+            data.enhances = enhances
+                ? enhances
+                      .split(",")
+                      .map((target) => target.toUpperCase().trim())
+                : [];
+            data.reduces = reduces
+                ? reduces
+                      .split(",")
+                      .map((target) => target.toUpperCase().trim())
+                : [];
         }
 
         // Combat Skill Levels & Mental Combat Levels
@@ -367,11 +342,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         // AID
         if (expandedData.inputs && this.item.system.XMLID === "AID") {
-            let arry = [];
+            const array = [];
             for (let i of Object.keys(expandedData.inputs)) {
-                arry.push(expandedData.inputs[i]);
+                array.push(expandedData.inputs[i]);
             }
-            await this.item.update({ "system.INPUT": arry.join(", ") });
+            await this.item.update({ "system.INPUT": array.join(", ") });
         }
 
         let description = this.item.system.description;
@@ -424,8 +399,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             ]);
 
             // This will update the AE effects on an Item that is attached to an actor
-            // but since the updated AEs don't tranfer to the actor automatically, seems pointless.
-            // You could manually updaate the cooresponding actor as well, perhaps a future feature.
+            // but since the updated AEs don't transfer to the actor automatically, seems pointless.
+            // You could manually update the corresponding actor as well, perhaps a future feature.
             // await this.item.update({
             //   effects:
             //     [

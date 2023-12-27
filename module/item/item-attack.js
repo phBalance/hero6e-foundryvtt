@@ -35,7 +35,6 @@ export async function onMessageRendered(html) {
                 element.remove();
             }
         }
-        //console.log(element)
     }
 }
 
@@ -1895,7 +1894,9 @@ async function _onApplyAdjustmentToSpecificToken(
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     const template =
@@ -1903,12 +1904,14 @@ async function _onApplyAdjustmentToSpecificToken(
     const token = canvas.tokens.get(tokenId);
 
     if (!item.actor) {
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     if (
         item.actor.id === token.actor.id &&
-        ["DRAIN", "TRANSFER"].includes(item.system.XMLID)
+        ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(item.system.XMLID)
     ) {
         await ui.notifications.warn(
             `${item.system.XMLID} attacker (${item.actor.name}) and defender (${token.actor.name}) are the same.`,
@@ -1920,13 +1923,13 @@ async function _onApplyAdjustmentToSpecificToken(
     let ActivePoints = parseInt(damageData.stundamage);
 
     const _inputs = item.system.INPUT.split(",");
-    let count = item.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
+    const count = item.numberOfSimultaneousAdjustmentEffects(_inputs);
     for (let i = 0; i < count; i++) {
         const input = _inputs?.[i]?.toUpperCase()?.trim() || "";
 
-        // TRANSFER X to Y  (AID and DRAIN only have X)
-        let xmlidX = input.split(" to ")[0]?.trim() || ""; //item.system.INPUT.match(/\w+/)[0];
-        let xmlidY = input.split(" to ")[1]?.trim() || ""; //(item.system.INPUT.match(/to[ ]+(\w+)/i) || ["", ""])[1];
+        // TRANSFER X to Y  (ABSORB, AID, DISPEL, DRAIN, HEALING, and SUPPRESS only have X)
+        let xmlidX = input.split(" to ")[0]?.trim() || "";
+        let xmlidY = input.split(" to ")[1]?.trim() || "";
 
         // Apply the ADJUSTMENT to a CHARACTERISTIC
         let keyX = xmlidX.toLowerCase();
@@ -1941,10 +1944,12 @@ async function _onApplyAdjustmentToSpecificToken(
         }
 
         if (token.actor.system.characteristics?.[keyX] || powerTargetX) {
-            //const characteristicCosts = token.actor.system.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
-
             // Power Defense vs DRAIN
-            if (["DRAIN", "TRANSFER"].includes(item.system.XMLID)) {
+            if (
+                ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
+                    item.system.XMLID,
+                )
+            ) {
                 ActivePoints = Math.max(
                     0,
                     ActivePoints -
@@ -1985,22 +1990,19 @@ async function _onApplyAdjustmentToSpecificToken(
                 (o) =>
                     o.origin === item.uuid &&
                     o.flags.target === (powerTargetX?.uuid || keyX),
-            ); //   || o.flags?.XMLID === item.system.XMLID && o.flags?.keyX === keyX)
+            );
             let prevEffectY = item.actor.effects.find(
                 (o) =>
                     o.flags?.XMLID === item.system.XMLID &&
                     o.flags?.keyY === keyY,
             );
             if (prevEffectX) {
-                //&& token.actor.system.characteristics?.[keyX]
-
                 // Maximum Effect (ActivePoints)
                 let maxEffect = 0;
                 for (let term of JSON.parse(damageData.terms)) {
                     maxEffect +=
                         parseInt(term.faces) * parseInt(term.number) || 0;
                 }
-                //maxEffect = parseInt(maxEffect / costPerPoint);
 
                 let newActivePoints =
                     (prevEffectX.flags?.activePoints || 0) + ActivePoints;
@@ -2019,14 +2021,19 @@ async function _onApplyAdjustmentToSpecificToken(
                         ? ""
                         : ` (${newActivePoints}AP)`;
 
-                prevEffectX.changes[0].value = ["DRAIN", "TRANSFER"].includes(
-                    item.system.XMLID,
-                )
+                prevEffectX.changes[0].value = [
+                    "DISPEL",
+                    "DRAIN",
+                    "SUPPRESS",
+                    "TRANSFER",
+                ].includes(item.system.XMLID)
                     ? -parseInt(newLevelsX)
                     : parseInt(newLevelsX);
                 (prevEffectX.name =
                     `${item.system.XMLID} ${
-                        ["DRAIN", "TRANSFER"].includes(item.system.XMLID)
+                        ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
+                            item.system.XMLID,
+                        )
                             ? -parseInt(newLevelsX)
                             : parseInt(newLevelsX).signedString()
                     }${_APtext}` +
@@ -2069,10 +2076,14 @@ async function _onApplyAdjustmentToSpecificToken(
             } else {
                 // Create new ActiveEffect
                 let activeEffect = {
-                    //name: (token.actor.system.characteristics?.[keyX]) ? `${item.system.XMLID} ${["DRAIN", "TRANSFER"].includes(item.system.XMLID) ? -parseInt(levelsX) : parseInt(levelsX).signedString()} ${keyX.toUpperCase()} [${item.actor.name}]` : `${item.system.XMLID} ${parseInt(levelsX).signedString()} ${powerTargetX.name} [${item.actor.name}]`,
                     name:
                         `${item.system.XMLID} ${
-                            ["DRAIN", "TRANSFER"].includes(item.system.XMLID)
+                            [
+                                "DISPEL",
+                                "DRAIN",
+                                "SUPPRESS",
+                                "TRANSFER",
+                            ].includes(item.system.XMLID)
                                 ? -parseInt(levelsX)
                                 : parseInt(levelsX).signedString()
                         }${_APtext}` +
@@ -2091,9 +2102,12 @@ async function _onApplyAdjustmentToSpecificToken(
                             key: token.actor.system.characteristics?.[keyX]
                                 ? "system.characteristics." + keyX + ".max"
                                 : "system.value",
-                            value: ["DRAIN", "TRANSFER"].includes(
-                                item.system.XMLID,
-                            )
+                            value: [
+                                "DISPEL",
+                                "DRAIN",
+                                "SUPPRESS",
+                                "TRANSFER",
+                            ].includes(item.system.XMLID)
                                 ? -parseInt(levelsX)
                                 : parseInt(levelsX),
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -2197,7 +2211,9 @@ async function _onApplyAdjustmentToSpecificToken(
             if (token.actor.system.characteristics?.[keyX]) {
                 let newValue =
                     token.actor.system.characteristics[keyX].value +
-                    (["DRAIN", "TRANSFER"].includes(item.system.XMLID)
+                    (["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
+                        item.system.XMLID,
+                    )
                         ? -parseInt(levelsX)
                         : parseInt(levelsX));
                 await token.actor.update({
@@ -2212,7 +2228,9 @@ async function _onApplyAdjustmentToSpecificToken(
 
             // stun
             stunDamage: ActivePoints,
-            levelsX: ["DRAIN", "TRANSFER"].includes(item.system.XMLID)
+            levelsX: ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
+                item.system.XMLID,
+            )
                 ? -parseInt(levelsX)
                 : parseInt(levelsX),
             levelsY: parseInt(levelsY),
@@ -2253,7 +2271,9 @@ async function _onApplySenseAffectingToSpecificToken(
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     const template =

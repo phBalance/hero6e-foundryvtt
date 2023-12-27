@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.js";
 import * as Attack from "../item/item-attack.js";
 import { createSkillPopOutFromItem } from "../item/skill.js";
 import { enforceManeuverLimits } from "../item/manuever.js";
-import { AdjustmentSources } from "../utility/adjustment.js";
+import { adjustmentSources } from "../utility/adjustment.js";
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
@@ -3080,7 +3080,7 @@ export class HeroSystem6eItem extends Item {
         for (const rawAdjustmentTarget of adjustmentTargets) {
             const upperCasedInput = rawAdjustmentTarget.toUpperCase().trim();
             if (
-                !Object.keys(AdjustmentSources(this.actor)).includes(
+                !Object.keys(adjustmentSources(this.actor)).includes(
                     upperCasedInput,
                 )
             ) {
@@ -3131,6 +3131,31 @@ export class HeroSystem6eItem extends Item {
             reduces: reduces || "",
             enhances: enhances || "",
         };
+    }
+
+    numberOfSimultaneousAdjustmentEffects(inputs) {
+        if (this.actor.system.is5e) {
+            // In 5e, the number of simultaneous effects is based on the VARIABLEEFFECT modifier.
+            const variableEffect = this.findModsByXmlid("VARIABLEEFFECT");
+
+            if (!variableEffect) return 1;
+
+            switch (variableEffect.BASECOST) {
+                case "0.5":
+                    return 2;
+                case "1.0":
+                    return 4;
+                case "2.0":
+                    // All of a type. Assume this is just everything listed in the inputs
+                    return inputs.length;
+                default:
+                    return 1;
+            }
+        }
+
+        // In 6e, the number of simultaneous effects is LEVELS in EXPANDEDEFFECT modifier if available or
+        // it is just 1.
+        return this.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
     }
 }
 

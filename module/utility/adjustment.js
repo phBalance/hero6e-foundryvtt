@@ -1,6 +1,6 @@
 import { getPowerInfo } from "../utility/util.js";
 
-export function AdjustmentSources(actor) {
+export function adjustmentSources(actor) {
     let choices = {};
 
     let powers = CONFIG.HERO.powers.filter(
@@ -23,18 +23,6 @@ export function AdjustmentSources(actor) {
         let key = power.key;
         choices[key.toUpperCase()] = key.toUpperCase();
     }
-
-    // const powers = (!actor || actor.system.is5e)  ? CONFIG.HERO.powers5e : CONFIG.HERO.powers
-    // for (const key in powers) {
-    //     if (
-    //         !powers[key].powerType?.includes("skill") &&
-    //         !powers[key].powerType?.includes("talent") &&
-    //         !powers[key].powerType?.includes("framework")
-    //     ) {
-    //         choices[key.toUpperCase()] = key.toUpperCase();
-    //     }
-
-    // }
 
     // Add * to defensive powers
     for (let key of Object.keys(choices)) {

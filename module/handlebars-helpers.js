@@ -2,6 +2,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("filterItem", filterItem);
     Handlebars.registerHelper("indexOf", indexOf);
     Handlebars.registerHelper("abs", abs);
+    Handlebars.registerHelper("increment", increment);
 }
 
 function filterItem(item, filterString) {
@@ -28,4 +29,8 @@ function indexOf(str, searchTerm) {
 
 function abs(str) {
     return Math.abs(parseInt(str));
+}
+
+function increment(str, value) {
+    return parseInt(str) + parseInt(value);
 }
