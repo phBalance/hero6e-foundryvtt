@@ -274,9 +274,10 @@ export class HeroSystem6eItem extends Item {
         const attr = "system.active";
         const newValue = !foundry.utils.getProperty(item, attr);
 
-        const firstAE =
-            item.effects[0] ||
-            item.actor.effects.find((o) => o.origin === item.uuid);
+        // const firstAE =
+        //     item.effects[0] ||
+        //     item.actor.effects.find((o) => o.origin === item.uuid);
+        const firstAE = item.effects.contents[0];
 
         switch (this.type) {
             case "defense":
