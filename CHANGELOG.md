@@ -3,6 +3,7 @@
 ## Version 3.0.54 (So far...)
 
 - The character sheet's power tab now has the dice icon for attack powers to initiate attacks.
+- Fix for movmenet powers toggles. [#533](https://github.com/dmdorman/hero6e-foundryvtt/issues/533)
 
 ## Version 3.0.53
 
