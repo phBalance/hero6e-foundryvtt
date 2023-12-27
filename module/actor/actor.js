@@ -1648,11 +1648,6 @@ export class HeroSystem6eActor extends Actor {
             await this.update(changes);
         }
 
-        // Item Effects
-        // for (const item of this.items.contents) {
-        //     createEffects(item)
-        // }
-
         // Initiative Characteristic
         if (this.system.initiativeCharacteristic === undefined) {
             if (
