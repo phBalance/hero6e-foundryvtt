@@ -14,7 +14,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             classes: ["herosystem6e", "sheet", "item"],
             width: 520,
             height: 660,
-            //tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'description' }],
             scrollY: [".sheet-body"],
         });
     }
@@ -24,10 +23,17 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         const path = "systems/hero6efoundryvttv2/templates/item";
 
         // TODO: Does this imply we need other sheets for the remaining adjustment powers?
-        if (["AID", "DRAIN"].includes(this.item.system.XMLID)) {
-            return `${path}/item-${
-                this.item.type
-            }-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`;
+        if (
+            [
+                "ABSORPTION",
+                "AID",
+                "DISPEL",
+                "DRAIN",
+                "HEALING",
+                "SUPPRESS",
+            ].includes(this.item.system.XMLID)
+        ) {
+            return `${path}/item-${this.item.type}-adjustment-sheet.hbs`;
         }
 
         if (["TRANSFER"].includes(this.item.system.XMLID)) {
@@ -375,11 +381,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         // AID
         if (expandedData.inputs && this.item.system.XMLID === "AID") {
-            let arry = [];
+            const array = [];
             for (let i of Object.keys(expandedData.inputs)) {
-                arry.push(expandedData.inputs[i]);
+                array.push(expandedData.inputs[i]);
             }
-            await this.item.update({ "system.INPUT": arry.join(", ") });
+            await this.item.update({ "system.INPUT": array.join(", ") });
         }
 
         let description = this.item.system.description;
@@ -432,8 +438,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             ]);
 
             // This will update the AE effects on an Item that is attached to an actor
-            // but since the updated AEs don't tranfer to the actor automatically, seems pointless.
-            // You could manually updaate the cooresponding actor as well, perhaps a future feature.
+            // but since the updated AEs don't transfer to the actor automatically, seems pointless.
+            // You could manually update the corresponding actor as well, perhaps a future feature.
             // await this.item.update({
             //   effects:
             //     [

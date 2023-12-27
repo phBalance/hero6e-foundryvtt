@@ -1,6 +1,6 @@
-{{ log 'HEROSYS POWER AID SHEET' this }}
+{{ log 'HEROSYS POWER ADJUSTMENT SHEET' this }}
 <form class="hero {{cssClass}} flexcol auto-overflow" autocomplete="off" data-id="{{item._id}}"
-    data-realId="{{item.system.realId}}">
+    data-realId="{{system.realId}}">
     <header class="sheet-header flexrow">
         <img class="profile" name="img" src="{{item.img}}" title="{{item.name}}" data-edit="img" />
 
@@ -13,32 +13,26 @@
 
     {{!-- Sheet Body --}}
     <section class="sheet-body">
-        <div class="form-group">
-            <label>Power</label>
-            <input type="text" name="system.rules" value="{{system.rules}}" data-dtype="Text" disabled />
-        </div>
-
-        <!-- Drain Dice (Active Points) -->
+        <!-- Adjustment Dice (Active Points) -->
         <div class="form-group">
             <label>{{localize "Items.Attack.Value"}}</label>
             <input type="text" name="system.dice" value="{{system.dice}}" data-dtype="Number" />
             D6
-            <select name="system.extraDice" data-dtype="text">
+            <select name="system.extraDice" value={{system.extraDice}} data-dtype="text">
                 {{selectOptions config.extraDice selected=system.extraDice}}
 
             </select>
         </div>
 
-        <!-- AID (possibly up to 4 depending on modifiers) -->
+        <!-- Adjustment Targets/Sources (possibly up to infinite depending on modifiers and 5e vs 6e) -->
         {{#each inputs as |input id|}}
-        <div class="form-group">
-            <label>Aid Target {{id}}</label>
-            <select name="inputs.{{id}}" data-dtype="text">
-                {{selectOptions @root/aidSources selected=input}}
-            </select>
-        </div>
+            <div class="form-group">
+                <label>{{../system.XMLID}} Target {{increment id 1}}</label>
+                <select name="inputs.{{id}}" data-dtype="text">
+                    {{selectOptions @root/aidSources selected=input}}
+                </select>
+            </div>
         {{/each}}
-
 
         <hr>
 
