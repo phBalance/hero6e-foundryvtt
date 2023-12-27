@@ -2727,7 +2727,20 @@ export class HeroSystem6eItem extends Item {
         // DRAIN
         if (xmlid == "DRAIN") {
             this.system.class = "drain";
-            this.system.killing = true;
+            this.system.usesStrength = false;
+            this.system.noHitLocations = true;
+        }
+
+        // HEALING
+        if (xmlid == "HEALING") {
+            this.system.class = "healing";
+            this.system.usesStrength = false;
+            this.system.noHitLocations = true;
+        }
+
+        // HEALING
+        if (xmlid == "SUPPRESSION") {
+            this.system.class = "suppression";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
         }
