@@ -1450,7 +1450,7 @@ export class HeroSystem6eActor extends Actor {
         this.system.versionHeroSystem6eUpload = game.system.version;
 
         if (this.prototypeToken) {
-            changes[`prototypeToken.name`] = changes.name;
+            changes[`prototypeToken.name`] = this.name;
             changes[`prototypeToken.img`] = changes.img;
         }
 
