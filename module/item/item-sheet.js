@@ -1,6 +1,6 @@
 import { HeroSystem6eItem } from "./item.js";
 import { editSubItem, deleteSubItem } from "../powers/powers.js";
-import { AdjustmentSources } from "../utility/adjustment.js";
+import { adjustmentSources } from "../utility/adjustment.js";
 import { getPowerInfo } from "../utility/util.js";
 
 /**
@@ -22,7 +22,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     get template() {
         const path = "systems/hero6efoundryvttv2/templates/item";
 
-        // TODO: Does this imply we need other sheets for the remaining adjustment powers?
         if (
             [
                 "ABSORPTION",
@@ -31,15 +30,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 "DRAIN",
                 "HEALING",
                 "SUPPRESS",
+                "TRANSFER",
             ].includes(this.item.system.XMLID)
         ) {
             return `${path}/item-${this.item.type}-adjustment-sheet.hbs`;
-        }
-
-        if (["TRANSFER"].includes(this.item.system.XMLID)) {
-            return `${path}/item-${
-                this.item.type
-            }-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`;
         }
 
         if (["ENDURANCERESERVE"].includes(this.item.system.XMLID)) {
@@ -174,62 +168,29 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }, {}),
         };
 
-        if (
-            item.system.XMLID === "DISPEL" ||
-            item.system.XMLID === "DRAIN" ||
-            item.system.XMLID === "SUPPRESS"
-        ) {
-            let drains = [];
-            for (const key in this.actor.system.characteristics) {
-                if (
-                    Object.prototype.hasOwnProperty.call(
-                        this.actor.system.characteristics[key],
-                        "value",
-                    )
-                ) {
-                    drains.push(key.toUpperCase());
-                }
-            }
-            drains.sort();
-            drains = ["none", ...drains];
-            data.drains = {};
-            for (let key of drains) {
-                data.drains[key] = key;
-            }
-        }
-
         // A select list of possible adjustment targets on the character
         if (
             item.system.XMLID === "ABSORPTION" ||
             item.system.XMLID === "AID" ||
-            item.system.XMLID === "HEALING"
+            item.system.XMLID === "HEALING" ||
+            item.system.XMLID === "DISPEL" ||
+            item.system.XMLID === "DRAIN" ||
+            item.system.XMLID === "SUPPRESS" ||
+            item.system.XMLID === "TRANSFER"
         ) {
-            data.aidSources = AdjustmentSources(this.actor);
-            data.inputs = [];
+            const { enhances, reduces } = item.splitAdjustmentSourceAndTarget();
 
-            // TODO: How to properly do error detection here? What if target
-            //       is not provided? What if too many targets are provided?
-            //       We already provided a warning on character upload.
-            const { valid, enhances } = item.splitAdjustmentSourceAndTarget();
-            const _inputs = valid ? enhances.split(",") : [];
-
-            const count = item.numberOfSimultaneousAdjustmentEffects(_inputs);
-            for (let i = 0; i < count; i++) {
-                data.inputs.push(_inputs?.[i]?.toUpperCase()?.trim() || "");
-            }
-        }
-
-        // TRANSFER
-        // A select list of possible AID from sources
-        if (item.system.XMLID == "TRANSFER") {
-            data.transferSources = AdjustmentSources(this.actor);
-
-            // TRANSFER X to Y  (AID and DRAIN only have X)
-            data.xmlidX = (item.system.INPUT.match(/\w+/) || [""])[0];
-            data.xmlidY = (item.system.INPUT.match(/to[ ]+(\w+)/i) || [
-                "",
-                "",
-            ])[1];
+            data.possibleSources = adjustmentSources(this.actor);
+            data.enhances = enhances
+                ? enhances
+                      .split(",")
+                      .map((target) => target.toUpperCase().trim())
+                : [];
+            data.reduces = reduces
+                ? reduces
+                      .split(",")
+                      .map((target) => target.toUpperCase().trim())
+                : [];
         }
 
         // Combat Skill Levels & Mental Combat Levels

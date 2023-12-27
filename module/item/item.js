@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.js";
 import * as Attack from "../item/item-attack.js";
 import { createSkillPopOutFromItem } from "../item/skill.js";
 import { enforceManeuverLimits } from "../item/manuever.js";
-import { AdjustmentSources } from "../utility/adjustment.js";
+import { adjustmentSources } from "../utility/adjustment.js";
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown } from "../utility/round.js";
@@ -3080,7 +3080,7 @@ export class HeroSystem6eItem extends Item {
         for (const rawAdjustmentTarget of adjustmentTargets) {
             const upperCasedInput = rawAdjustmentTarget.toUpperCase().trim();
             if (
-                !Object.keys(AdjustmentSources(this.actor)).includes(
+                !Object.keys(adjustmentSources(this.actor)).includes(
                     upperCasedInput,
                 )
             ) {

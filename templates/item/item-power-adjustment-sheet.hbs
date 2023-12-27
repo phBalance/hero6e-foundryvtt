@@ -24,15 +24,25 @@
             </select>
         </div>
 
-        <!-- Adjustment Targets/Sources (possibly up to infinite depending on modifiers and 5e vs 6e) -->
-        {{#each inputs as |input id|}}
+        <!-- Adjustment Targets/Sources (possibly infinite number depending on modifiers and 5e vs 6e) -->
+        {{#each reduces as |input id|}}
             <div class="form-group">
-                <label>{{../system.XMLID}} Target {{increment id 1}}</label>
+                <label>{{../system.XMLID}} From {{increment id 1}}</label>
                 <select name="inputs.{{id}}" data-dtype="text">
-                    {{selectOptions @root/aidSources selected=input}}
+                    {{selectOptions @root/possibleSources selected=input}}
                 </select>
             </div>
         {{/each}}
+
+        {{#each enhances as |input id|}}
+            <div class="form-group">
+                <label>{{../system.XMLID}} To {{increment id 1}}</label>
+                <select name="inputs.{{id}}" data-dtype="text">
+                    {{selectOptions @root/possibleSources selected=input}}
+                </select>
+            </div>
+        {{/each}}
+
 
         <hr>
 
