@@ -132,7 +132,7 @@ export function convertToDC(item, formula) {
     return parseInt(3 * d6Count + 2 * d3Count + pip || 0);
 }
 
-// Determine DC soley from item/attack
+// Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
     let actor = item.actor;
     let dc = 0;
@@ -189,7 +189,7 @@ export function convertToDcFromItem(item, options) {
         // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
         dc += csl.dc;
 
-        // Each DC should roughtly be 5 active points
+        // Each DC should roughly be 5 active points
         // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
         // let ratio = (dcPerAp || 5) / 5;  // Typically 1 to 1 radio
         // dc += (csl.dc * dcPerAp);
@@ -257,7 +257,7 @@ export function convertToDcFromItem(item, options) {
     // Add in TK
     if (item.system.usesTk) {
         let tkItems = actor.items.filter(
-            (o) => o.system.rules == "TELEKINESIS",
+            (o) => o.system.XMLID === "TELEKINESIS",
         );
         let str = 0;
         for (const item of tkItems) {

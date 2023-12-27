@@ -193,7 +193,6 @@
         "templates": {
             "base": {
                 "description": "",
-                "rules": "",
                 "effect": "",
                 "cost": 0,
                 "modifiers": [],
@@ -215,14 +214,12 @@
         },
         "power": {
             "templates": ["power"],
-            "rules": "Power Description",
             "active": "false"
         },
         "equipment": {
             "templates": ["power"],
             "quantity": 1,
-            "weight": 0,
-            "rules": "Equipment Description"
+            "weight": 0
         },
         "attack": {
             "templates": ["base"],
@@ -274,19 +271,16 @@
         "perk": {
             "templates": ["base"],
             "id": "",
-            "rules": "Perk Description",
             "other": {}
         },
         "talent": {
             "templates": ["base"],
             "id": "",
-            "rules": "Talent Description",
             "other": {}
         },
         "complication": {
             "templates": ["base"],
             "id": "",
-            "rules": "Complication Description",
             "other": {
                 "levels": 0,
                 "option_alias": ""
@@ -295,7 +289,6 @@
         "martialart": {
             "templates": ["base"],
             "id": "",
-            "rules": "Martial Art Description",
             "other": {}
         }
     }

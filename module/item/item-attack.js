@@ -57,7 +57,7 @@ export async function AttackOptions(item) {
 
     // Uses Tk
     let tkItems = item.actor.items.filter(
-        (o) => o.system.rules == "TELEKINESIS",
+        (o) => o.system.XMLID == "TELEKINESIS",
     );
     let tkStr = 0;
     for (const item of tkItems) {

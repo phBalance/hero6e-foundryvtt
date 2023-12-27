@@ -3010,7 +3010,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         const configPowerInfo = getPowerInfo({
-            xmlid: skillData.XMLID || skillData.rules,
+            xmlid: skillData.XMLID,
             actor: this.actor,
         });
 
