@@ -1888,15 +1888,13 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData) {
             `Attack details are no longer available.`,
         );
     }
-
-    const token = canvas.tokens.get(tokenId);
-
     if (!item.actor) {
         return ui.notifications.error(
             `Attack details are no longer available.`,
         );
     }
 
+    const token = canvas.tokens.get(tokenId);
     if (
         item.actor.id === token.actor.id &&
         ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(item.system.XMLID)
@@ -1985,9 +1983,22 @@ function _findExistingMatchingEffect(
     return targetActor.effects.find(
         (effect) =>
             effect.origin === item.uuid &&
-            effect.flags.target ===
+            effect.flags.target[0] ===
                 (powerTargetName?.uuid || potentialCharacteristic),
     );
+}
+
+function _addCharacteristicAEChangeBlock(potentialCharacteristic, targetActor) {
+    return {
+        // TODO: Why is this only characteristics for the key? What about powers?
+        // system.value is transferred to the actor, so not very useful,
+        // but we can enumerate via item.effects when determining value.
+        key: targetActor.system.characteristics?.[potentialCharacteristic]
+            ? `system.characteristics.${potentialCharacteristic}.max`
+            : "system.value",
+        value: 0,
+        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+    };
 }
 
 async function _createNewAdjustmentEffect(
@@ -2008,33 +2019,51 @@ async function _createNewAdjustmentEffect(
         }`,
         icon: item.img,
         changes: [
-            {
-                // TODO: Why is this only characteristics for the key? What about powers?
-                // system.value is transferred to the actor, so not very useful,
-                // but we can enumerate via item.effects when determining value.
-                key: targetActor.system.characteristics?.[
-                    potentialCharacteristic
-                ]
-                    ? `system.characteristics.${potentialCharacteristic}.max`
-                    : "system.value",
-                value: 0,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-            },
+            _addCharacteristicAEChangeBlock(
+                potentialCharacteristic,
+                targetActor,
+            ),
         ],
         duration: {
             seconds: 12,
         },
         flags: {
+            type: "adjustment",
             activePoints: 0,
             XMLID: item.system.XMLID,
             source: targetActor.name,
-            target: powerTargetName?.uuid || potentialCharacteristic,
+            target: [powerTargetName?.uuid || potentialCharacteristic],
             key: potentialCharacteristic,
-            keyX: potentialCharacteristic, // TODO: Why do we have this?
-            keyY: 0, // TODO: Why do we have this? Can we rename these? Migrations?
         },
         origin: item.uuid,
     };
+
+    // If this is 5e then some characteristics are entirely calculated based on
+    // those. We only need to worry about 2 (DEX -> OCV & DCV and EGO -> OMCV & DMCV)
+    // as figured characteristics aren't adjusted.
+    if (targetActor.system.is5e) {
+        if (potentialCharacteristic === "dex") {
+            activeEffect.changes.push(
+                _addCharacteristicAEChangeBlock("ocv", targetActor),
+            );
+            activeEffect.flags.target.push("ocv");
+
+            activeEffect.changes.push(
+                _addCharacteristicAEChangeBlock("dcv", targetActor),
+            );
+            activeEffect.flags.target.push("dcv");
+        } else if (potentialCharacteristic === "ego") {
+            activeEffect.changes.push(
+                _addCharacteristicAEChangeBlock("omcv", targetActor),
+            );
+            activeEffect.flags.target.push("omcv");
+
+            activeEffect.changes.push(
+                _addCharacteristicAEChangeBlock("dmcv", targetActor),
+            );
+            activeEffect.flags.target.push("dmcv");
+        }
+    }
 
     // DELAYEDRETURNRATE (loss for TRANSFER and all other adjustments) and DELAYEDRETURNRATE2 (gain for TRANSFER)
     const dRR = item.findModsByXmlid("DELAYEDRETURNRATE");
@@ -2149,28 +2178,41 @@ async function _performAdjustment(
 
     // Determine how many points of effect there are based on the cost
     // TODO: Should be considering maximum allowed effect
-    // TODO: Does this track the defensive chars being double cost to adjust positively?
     const costPerActivePoint = _determineCostPerActivePoint(
         potentialCharacteristic,
         powerTargetName,
         targetActor,
     );
-    const activePointsAffected = Math.floor(
+    const activePointsAffected = Math.trunc(
         totalActivePointEffect / costPerActivePoint,
     );
     const activePointAffectedDifference =
         activePointsAffected -
-        Math.floor(activeEffect.flags.activePoints / costPerActivePoint);
+        Math.trunc(activeEffect.flags.activePoints / costPerActivePoint);
 
-    // Update the effect value
+    activeEffect.changes[0].value =
+        parseInt(activeEffect.changes[0].value) - activePointAffectedDifference;
+
+    // If this is 5e then some characteristics are calculated (not figured) based on
+    // those. We only need to worry about 2: DEX -> OCV & DCV and EGO -> OMCV & DMCV.
+    // These 2 characteristics are always at indices 2 and 3
+    if (activeEffect.changes[1]) {
+        activeEffect.changes[1].value = RoundFavorPlayerUp(
+            activeEffect.changes[0].value / 3,
+        );
+    }
+    if (activeEffect.changes[2]) {
+        activeEffect.changes[2].value = RoundFavorPlayerUp(
+            activeEffect.changes[0].value / 3,
+        );
+    }
+
+    // Update the effect value(s)
     activeEffect.name = `${item.system.XMLID} ${Math.abs(
         activePointsAffected,
     )} ${powerTargetName?.name || potentialCharacteristic} (${Math.abs(
         totalActivePointEffect,
     )} AP) [by ${item.actor.name}]`;
-
-    activeEffect.changes[0].value =
-        activeEffect.changes[0].value - activePointAffectedDifference;
 
     activeEffect.flags.activePoints = totalActivePointEffect;
 
@@ -2187,10 +2229,19 @@ async function _performAdjustment(
         const newValue =
             targetActor.system.characteristics[potentialCharacteristic].value -
             activePointAffectedDifference;
-        await targetActor.update({
+        const changes = {
             [`system.characteristics.${potentialCharacteristic}.value`]:
                 newValue,
-        });
+        };
+
+        if (targetActor.system.is5e && activeEffect.target[1]) {
+            changes[`system.characteristics.${activeEffect.target[1]}.value`] =
+                RoundFavorPlayerUp(newValue / 3);
+            changes[`system.characteristics.${activeEffect.target[2]}.value`] =
+                RoundFavorPlayerUp(newValue / 3);
+        }
+
+        await targetActor.update(changes);
     }
 
     await _generateAdjustmentChatCard(
