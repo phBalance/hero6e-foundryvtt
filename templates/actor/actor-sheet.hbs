@@ -68,7 +68,6 @@
 
                         <li title="{{defense.POWDtags}}"><span>POWD={{defense.POWD}}</span></li>
                         {{#if defense.rPOWD}}<li title="{{defense.rPOWDtags}}"><span>rPOWD={{defense.rPOWD}}</span></li>{{/if}}
-
                     </ul>
 
                     <div class="sidebar-actions flexrow flex-group-center">
@@ -617,11 +616,11 @@
                         <th title="{{localize 'ActorSheet.ValueTitle'}}">{{localize "ActorSheet.Value"}}</th>
                         <th title="{{localize 'ActorSheet.MaxTitle'}}">{{localize "ActorSheet.Max"}}</th>
                         <th title="{{localize 'ActorSheet.CoreTitle'}}">{{localize "ActorSheet.Core"}}</th>
-                        <th>{{localize "ActorSheet.Char"}}</th>
+                        <th title="{{localize 'ActorSheet.CharTitle'}}">{{localize "ActorSheet.Char"}}</th>
                         <th title="{{localize 'ActorSheet.BaseTitle'}}">{{localize "ActorSheet.Base"}}</th>
                         <th title="{{localize 'ActorSheet.CostTitle'}}">{{localize "ActorSheet.Cost"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
-                        <th>{{localize "ActorSheet.Notes"}}</th>
+                        <th title="{{localize 'ActorSheet.NoteTitle'}}">{{localize "ActorSheet.Notes"}}</th>
                     </tr>
                     {{#each characteristicSet as |characteristic key|}}
                     <tr class="characteristic">
