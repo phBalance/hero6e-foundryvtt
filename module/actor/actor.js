@@ -1324,6 +1324,17 @@ export class HeroSystem6eActor extends Actor {
                     }`,
                     { console: true, permanent: true },
                 );
+            } else {
+                const maxAllowedEffects =
+                    item.numberOfSimultaneousAdjustmentEffects();
+                if (
+                    result.reducesArray.length > maxAllowedEffects.maxReduces ||
+                    result.enhancesArray.length > maxAllowedEffects.maxEnhances
+                ) {
+                    await ui.notifications.warn(
+                        `${this.name} has too many adjustment targets defined for ${item.name}.`,
+                    );
+                }
             }
         }
 

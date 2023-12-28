@@ -3149,29 +3149,68 @@ export class HeroSystem6eItem extends Item {
         };
     }
 
-    numberOfSimultaneousAdjustmentEffects(inputs) {
+    numberOfSimultaneousAdjustmentEffects() {
         if (this.actor.system.is5e) {
             // In 5e, the number of simultaneous effects is based on the VARIABLEEFFECT modifier.
-            const variableEffect = this.findModsByXmlid("VARIABLEEFFECT");
+            const variableEffect = this.findModsByXmlid("VARIABLEEFFECT"); // From for TRANSFER and everything else
+            const variableEffect2 = this.findModsByXmlid("VARIABLEEFFECT2"); // To for TRANSFER
 
-            if (!variableEffect) return 1;
+            if (this.system.XMLID === "TRANSFER") {
+                return {
+                    maxReduces: max5eEffects(variableEffect),
+                    maxEnhances: max5eEffects(variableEffect2),
+                };
+            } else if (
+                this.system.XMLID === "AID" ||
+                this.system.XMLID === "ABSORPTION" ||
+                this.system.XMLID === "HEALING"
+            ) {
+                return {
+                    maxReduces: 0,
+                    maxEnhances: max5eEffects(variableEffect),
+                };
+            } else {
+                return {
+                    maxReduces: max5eEffects(variableEffect),
+                    maxEnhances: 0,
+                };
+            }
 
-            switch (variableEffect.BASECOST) {
-                case "0.5":
-                    return 2;
-                case "1.0":
-                    return 4;
-                case "2.0":
-                    // All of a type. Assume this is just everything listed in the inputs
-                    return inputs.length;
-                default:
-                    return 1;
+            function max5eEffects(mod) {
+                if (!variableEffect) return 1;
+
+                switch (variableEffect.BASECOST) {
+                    case "0.5":
+                        return 2;
+                    case "1.0":
+                        return 4;
+                    case "2.0":
+                        // All of a type. Assume this is just infinite (pick a really big number).
+                        return 1000;
+                    default:
+                        return 1;
+                }
             }
         }
 
         // In 6e, the number of simultaneous effects is LEVELS in EXPANDEDEFFECT modifier if available or
-        // it is just 1.
-        return this.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
+        // it is just 1. There is no TRANSFER in 6e.
+        const maxCount = this.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
+        if (
+            this.system.XMLID === "AID" ||
+            this.system.XMLID === "ABSORPTION" ||
+            this.system.XMLID === "HEALING"
+        ) {
+            return {
+                maxReduces: 0,
+                maxEnhances: maxCount,
+            };
+        } else {
+            return {
+                maxReduces: maxCount,
+                maxEnhances: 0,
+            };
+        }
     }
 }
 
