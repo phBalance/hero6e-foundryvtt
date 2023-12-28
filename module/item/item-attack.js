@@ -1925,7 +1925,14 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData) {
     for (const reduce of reducesArray) {
         const targetActor = token.actor;
 
-        _performAdjustment(item, reduce, actualActivePointDamage, targetActor);
+        _performAdjustment(
+            item,
+            reduce,
+            rawActivePointsDamage,
+            actualActivePointDamage,
+            item.system.XMLID === "TRANSFER",
+            targetActor,
+        );
     }
 
     for (const enhance of enhancesArray) {
@@ -1935,9 +1942,11 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData) {
         _performAdjustment(
             item,
             enhance,
+            -rawActivePointsDamage,
             item.system.XMLID === "TRANSFER"
                 ? -actualActivePointDamage
                 : -rawActivePointsDamage,
+            item.system.XMLID === "TRANSFER",
             targetActor,
         );
     }
@@ -1982,6 +1991,8 @@ async function _createNewAdjustmentEffect(
     item,
     potentialCharacteristic,
     powerTargetName,
+    rawActivePointsDamage,
+    isTransfer,
     targetActor,
 ) {
     // Create new ActiveEffect
@@ -2001,9 +2012,7 @@ async function _createNewAdjustmentEffect(
                 key: targetActor.system.characteristics?.[
                     potentialCharacteristic
                 ]
-                    ? "system.characteristics." +
-                      potentialCharacteristic +
-                      ".max"
+                    ? `system.characteristics.${potentialCharacteristic}.max`
                     : "system.value",
                 value: 0,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -2024,8 +2033,11 @@ async function _createNewAdjustmentEffect(
         origin: item.uuid,
     };
 
-    // DELAYEDRETURNRATE
-    let delayedReturnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
+    // DELAYEDRETURNRATE (loss for TRANSFER and all other adjustments) and DELAYEDRETURNRATE2 (gain for TRANSFER)
+    const dRR = item.findModsByXmlid("DELAYEDRETURNRATE");
+    const dRR2 = item.findModsByXmlid("DELAYEDRETURNRATE2");
+    const delayedReturnRate =
+        rawActivePointsDamage > 0 ? dRR : isTransfer ? dRR2 : dRR;
     if (delayedReturnRate) {
         switch (delayedReturnRate.OPTIONID) {
             case "MINUTE":
@@ -2087,7 +2099,9 @@ async function _createNewAdjustmentEffect(
 async function _performAdjustment(
     item,
     targetedPower,
+    rawActivePointsDamage,
     activePointDamage,
+    isTransfer,
     targetActor,
 ) {
     const targetName = targetedPower.toUpperCase();
@@ -2123,6 +2137,8 @@ async function _performAdjustment(
             item,
             potentialCharacteristic,
             powerTargetName,
+            rawActivePointsDamage,
+            isTransfer,
             targetActor,
         ));
     const totalActivePointEffect =
