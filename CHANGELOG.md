@@ -7,6 +7,8 @@
 - Adjustment powers should now respect uploaded multi sources and targets when triggering.
 - No adjustment powers should be killing attacks that are enhanced by strength.
 - Compound powers now show proper indices.
+- Correct resistant power defense (yes it's a silly thing but we were accidentally boosting it and consequently mostly likely doubling power defenses).
+- Calculated power defense will now be shown on the character sheet.
 
 ## Version 3.0.53
 
