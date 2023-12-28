@@ -3086,11 +3086,25 @@ export class HeroSystem6eItem extends Item {
         return true;
     }
 
-    // valid: boolean If true the enhances and reduces lists are valid, otherwise ignore them.
+    /**
+     *
+     *  If valid, the enhances and reduces lists are valid, otherwise ignore them.
+     *
+     * @typedef { Object } AdjustmentSourceAndTarget
+     * @property { boolean } valid - if any of the reduces and enhances fields are valid
+     * @property { string } reduces - things that are reduced (aka from)
+     * @property { string } enhances - things that are ehanced (aka to)
+     * @property { string[] } reducesArray
+     * @property { string[] } enhancesArray
+     */
+    /**
+     *
+     * @returns { AdjustmentSourceAndTarget }
+     */
     splitAdjustmentSourceAndTarget() {
         let valid;
-        let reduces;
-        let enhances;
+        let reduces = "";
+        let enhances = "";
 
         if (this.system.XMLID === "TRANSFER") {
             // Should be something like "STR,CON -> DEX,SPD"
@@ -3123,8 +3137,15 @@ export class HeroSystem6eItem extends Item {
 
         return {
             valid: valid,
-            reduces: reduces || "",
-            enhances: enhances || "",
+
+            reduces: reduces,
+            enhances: enhances,
+            reducesArray: reduces
+                ? reduces.split(",").map((str) => str.trim())
+                : [],
+            enhancesArray: enhances
+                ? enhances.split(",").map((str) => str.trim())
+                : [],
         };
     }
 

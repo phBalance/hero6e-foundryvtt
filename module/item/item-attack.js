@@ -1711,12 +1711,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         item: item,
     })?.powerType?.includes("adjustment");
     if (adjustment) {
-        return _onApplyAdjustmentToSpecificToken(
-            event,
-            tokenId,
-            damageData,
-            defense,
-        );
+        return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData);
     }
     const senseAffecting = getPowerInfo({
         item: item,
@@ -1815,7 +1810,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
     effectsFinal = effectsFinal.replace(/; $/, "");
 
-    let cardData = {
+    const cardData = {
         item: item,
         // dice rolls
         roll: newRoll,
@@ -1884,12 +1879,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     return ChatMessage.create(chatData);
 }
 
-async function _onApplyAdjustmentToSpecificToken(
-    event,
-    tokenId,
-    damageData,
-    defense,
-) {
+async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData) {
     const item = fromUuidSync(damageData.itemid);
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
@@ -1899,8 +1889,6 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
 
-    const template =
-        "systems/hero6efoundryvttv2/templates/chat/apply-adjustment-card.hbs";
     const token = canvas.tokens.get(tokenId);
 
     if (!item.actor) {
@@ -1914,351 +1902,323 @@ async function _onApplyAdjustmentToSpecificToken(
         ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(item.system.XMLID)
     ) {
         await ui.notifications.warn(
-            `${item.system.XMLID} attacker (${item.actor.name}) and defender (${token.actor.name}) are the same.`,
+            `${item.system.XMLID} attacker/source (${item.actor.name}) and defender/target (${token.actor.name}) are the same.`,
         );
     }
 
-    let levelsX = 0;
-    let levelsY = 0;
-    let ActivePoints = parseInt(damageData.stundamage);
+    const rawActivePointsDamage = parseInt(damageData.stundamage);
+    const actualActivePointDamage = Math.max(
+        0,
+        rawActivePointsDamage -
+            damageData.defenseValue -
+            damageData.resistantValue,
+    );
 
-    const _inputs = item.system.INPUT.split(",");
-    const count = item.numberOfSimultaneousAdjustmentEffects(_inputs);
-    for (let i = 0; i < count; i++) {
-        const input = _inputs?.[i]?.toUpperCase()?.trim() || "";
-
-        // TRANSFER X to Y  (ABSORB, AID, DISPEL, DRAIN, HEALING, and SUPPRESS only have X)
-        let xmlidX = input.split(" to ")[0]?.trim() || "";
-        let xmlidY = input.split(" to ")[1]?.trim() || "";
-
-        // Apply the ADJUSTMENT to a CHARACTERISTIC
-        let keyX = xmlidX.toLowerCase();
-        let keyY = xmlidY.toLowerCase();
-
-        // Or a POWER
-        const powerTargetX = token.actor.items.find(
-            (o) => o.name.toUpperCase().trim() === keyX.toUpperCase().trim(),
+    const { valid, reducesArray, enhancesArray } =
+        item.splitAdjustmentSourceAndTarget();
+    if (!valid) {
+        return ui.notifications.error(
+            `Invalid adjustment sources/targets provided. Compute effects manually.`,
         );
-        if (powerTargetX) {
-            keyX = powerTargetX.system.XMLID;
-        }
+    }
 
-        if (token.actor.system.characteristics?.[keyX] || powerTargetX) {
-            // Power Defense vs DRAIN
-            if (
-                ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
-                    item.system.XMLID,
-                )
-            ) {
-                ActivePoints = Math.max(
-                    0,
-                    ActivePoints -
-                        (damageData.defenseValue + damageData.resistantValue),
+    for (const reduce of reducesArray) {
+        const targetActor = token.actor;
+
+        _performAdjustment(item, reduce, actualActivePointDamage, targetActor);
+    }
+
+    for (const enhance of enhancesArray) {
+        const targetActor =
+            item.system.XMLID === "TRANSFER" ? item.actor : token.actor;
+
+        _performAdjustment(
+            item,
+            enhance,
+            item.system.XMLID === "TRANSFER"
+                ? -actualActivePointDamage
+                : -rawActivePointsDamage,
+            targetActor,
+        );
+    }
+}
+
+function _determineCostPerActivePoint(
+    potentialCharacteristic,
+    powerTargetX,
+    targetActor,
+) {
+    // TODO: Not sure we need to use the characteristic here...
+    const powerInfo = getPowerInfo({
+        xmlid: potentialCharacteristic.toUpperCase(),
+        actor: targetActor,
+    });
+    return (
+        (powerTargetX
+            ? parseFloat(
+                  powerTargetX.system.activePoints / powerTargetX.system.value,
+              )
+            : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel)) *
+        AdjustmentMultiplier(potentialCharacteristic.toUpperCase(), targetActor)
+    );
+}
+
+function _findExistingMatchingEffect(
+    item,
+    potentialCharacteristic,
+    powerTargetName,
+    targetActor,
+) {
+    // TODO: Variable Effect may result in multiple changes on same AE.
+    return targetActor.effects.find(
+        (effect) =>
+            effect.origin === item.uuid &&
+            effect.flags.target ===
+                (powerTargetName?.uuid || potentialCharacteristic),
+    );
+}
+
+async function _createNewAdjustmentEffect(
+    item,
+    potentialCharacteristic,
+    powerTargetName,
+    targetActor,
+) {
+    // Create new ActiveEffect
+    const activeEffect = {
+        name: `${item.system.XMLID} 0 ${
+            powerTargetName?.name || potentialCharacteristic
+        } (0 AP) [by ${item.actor.name}]`,
+        id: `${item.system.XMLID}.${item.id}.${
+            powerTargetName?.name || potentialCharacteristic
+        }`,
+        icon: item.img,
+        changes: [
+            {
+                // TODO: Why is this only characteristics for the key? What about powers?
+                // system.value is transferred to the actor, so not very useful,
+                // but we can enumerate via item.effects when determining value.
+                key: targetActor.system.characteristics?.[
+                    potentialCharacteristic
+                ]
+                    ? "system.characteristics." +
+                      potentialCharacteristic +
+                      ".max"
+                    : "system.value",
+                value: 0,
+                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            },
+        ],
+        duration: {
+            seconds: 12,
+        },
+        flags: {
+            activePoints: 0,
+            XMLID: item.system.XMLID,
+            source: targetActor.name,
+            target: powerTargetName?.uuid || potentialCharacteristic,
+            key: potentialCharacteristic,
+            keyX: potentialCharacteristic, // TODO: Why do we have this?
+            keyY: 0, // TODO: Why do we have this? Can we rename these? Migrations?
+        },
+        origin: item.uuid,
+    };
+
+    // DELAYEDRETURNRATE
+    let delayedReturnRate = item.findModsByXmlid("DELAYEDRETURNRATE");
+    if (delayedReturnRate) {
+        switch (delayedReturnRate.OPTIONID) {
+            case "MINUTE":
+                activeEffect.duration.seconds = 60;
+                break;
+            case "FIVEMINUTES":
+                activeEffect.duration.seconds = 60 * 5;
+                break;
+            case "20MINUTES":
+                activeEffect.duration.seconds = 60 * 20;
+                break;
+            case "HOUR":
+                activeEffect.duration.seconds = 60 * 60;
+                break;
+            case "6HOURS":
+                activeEffect.duration.seconds = 60 * 60 * 6;
+                break;
+            case "DAY":
+                activeEffect.duration.seconds = 60 * 60 * 24;
+                break;
+            case "WEEK":
+                activeEffect.duration.seconds = 604800;
+                break;
+            case "MONTH":
+                activeEffect.duration.seconds = 2.628e6;
+                break;
+            case "SEASON":
+                activeEffect.duration.seconds = 2.628e6 * 3;
+                break;
+            case "YEAR":
+                activeEffect.duration.seconds = 3.154e7;
+                break;
+            case "FIVEYEARS":
+                activeEffect.duration.seconds = 3.154e7 * 5;
+                break;
+            case "TWENTYFIVEYEARS":
+                activeEffect.duration.seconds = 3.154e7 * 25;
+                break;
+            case "CENTURY":
+                activeEffect.duration.seconds = 3.154e7 * 100;
+                break;
+            default:
+                await ui.notifications.error(
+                    `DELAYEDRETURNRATE has unhandled option ${delayedReturnRate?.OPTIONID}`,
                 );
-            }
-
-            const powerInfoX = getPowerInfo({
-                xmlid: keyX.toUpperCase(),
-                actor: item.actor,
-            });
-            let costPerPointX =
-                (powerTargetX
-                    ? parseFloat(
-                          powerTargetX.system.activePoints /
-                              powerTargetX.system.value,
-                      )
-                    : parseFloat(
-                          powerInfoX?.cost || powerInfoX?.costPerLevel,
-                      )) * AdjustmentMultiplier(keyX.toUpperCase(), item.actor);
-            levelsX = parseInt(ActivePoints / costPerPointX);
-
-            const powerInfoY = getPowerInfo({
-                xmlid: keyY.toUpperCase(),
-                actor: item.actor,
-            });
-            let costPerPointY =
-                parseFloat(powerInfoY?.cost || powerInfoY?.costPerLevel) *
-                AdjustmentMultiplier(keyY.toUpperCase(), item.actor);
-            levelsY = parseInt(ActivePoints / costPerPointY);
-
-            let _APtext =
-                levelsX === ActivePoints ? "" : ` (${ActivePoints}AP)`;
-
-            // Check for previous ADJUSTMENT from same source
-            // TODO: Variable Effect may result in multiple changes on same AE.
-            let prevEffectX = token.actor.effects.find(
-                (o) =>
-                    o.origin === item.uuid &&
-                    o.flags.target === (powerTargetX?.uuid || keyX),
-            );
-            let prevEffectY = item.actor.effects.find(
-                (o) =>
-                    o.flags?.XMLID === item.system.XMLID &&
-                    o.flags?.keyY === keyY,
-            );
-            if (prevEffectX) {
-                // Maximum Effect (ActivePoints)
-                let maxEffect = 0;
-                for (let term of JSON.parse(damageData.terms)) {
-                    maxEffect +=
-                        parseInt(term.faces) * parseInt(term.number) || 0;
-                }
-
-                let newActivePoints =
-                    (prevEffectX.flags?.activePoints || 0) + ActivePoints;
-                if (newActivePoints > maxEffect) {
-                    ActivePoints = maxEffect - prevEffectX.flags.activePoints;
-                    newActivePoints = maxEffect;
-                }
-
-                let newLevelsX = newActivePoints / costPerPointX;
-                levelsX =
-                    newLevelsX -
-                    Math.abs(parseInt(prevEffectX.changes[0].value));
-
-                _APtext =
-                    newLevelsX === newActivePoints
-                        ? ""
-                        : ` (${newActivePoints}AP)`;
-
-                prevEffectX.changes[0].value = [
-                    "DISPEL",
-                    "DRAIN",
-                    "SUPPRESS",
-                    "TRANSFER",
-                ].includes(item.system.XMLID)
-                    ? -parseInt(newLevelsX)
-                    : parseInt(newLevelsX);
-                (prevEffectX.name =
-                    `${item.system.XMLID} ${
-                        ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
-                            item.system.XMLID,
-                        )
-                            ? -parseInt(newLevelsX)
-                            : parseInt(newLevelsX).signedString()
-                    }${_APtext}` +
-                    (token.actor.system.characteristics?.[keyX]
-                        ? ` ${keyX.toUpperCase()}`
-                        : ` ${powerTargetX.name}`) +
-                    ` [${item.actor.name}]`),
-                    (prevEffectX.flags.activePoints = newActivePoints);
-
-                await prevEffectX.update({
-                    name: prevEffectX.name,
-                    changes: prevEffectX.changes,
-                    flags: prevEffectX.flags,
-                });
-
-                if (item.system.XMLID === "TRANSFER" && keyY && prevEffectY) {
-                    let newLevelsY = newActivePoints / costPerPointY;
-                    levelsY =
-                        newLevelsY -
-                        Math.abs(parseInt(prevEffectY.changes[0].value));
-
-                    prevEffectY.changes[0].value = parseInt(newLevelsY);
-                    prevEffectY.name = `${item.system.XMLID} +${parseInt(
-                        newLevelsY,
-                    )} ${keyY.toUpperCase()} [${item.actor.name}]`;
-                    prevEffectY.flags.activePoints = newActivePoints;
-                    await prevEffectY.update({
-                        name: prevEffectY.name,
-                        changes: prevEffectY.changes,
-                        flags: prevEffectY.flags,
-                    });
-
-                    let newValueY =
-                        item.actor.system.characteristics[keyY].value +
-                        parseInt(levelsY);
-                    await item.actor.update({
-                        [`system.characteristics.${keyY}.value`]: newValueY,
-                    });
-                }
-            } else {
-                // Create new ActiveEffect
-                let activeEffect = {
-                    name:
-                        `${item.system.XMLID} ${
-                            [
-                                "DISPEL",
-                                "DRAIN",
-                                "SUPPRESS",
-                                "TRANSFER",
-                            ].includes(item.system.XMLID)
-                                ? -parseInt(levelsX)
-                                : parseInt(levelsX).signedString()
-                        }${_APtext}` +
-                        (token.actor.system.characteristics?.[keyX]
-                            ? ` ${keyX.toUpperCase()}`
-                            : ` ${powerTargetX.name}`) +
-                        ` [${item.actor.name}]`,
-                    id: `${item.system.XMLID}.${item.id}.${
-                        powerTargetX?.name || keyX
-                    }`,
-                    icon: item.img,
-                    changes: [
-                        {
-                            // system.value is transferred to the actor, so not very useful,
-                            // but we can enumerate via item.effects when determining value.
-                            key: token.actor.system.characteristics?.[keyX]
-                                ? "system.characteristics." + keyX + ".max"
-                                : "system.value",
-                            value: [
-                                "DISPEL",
-                                "DRAIN",
-                                "SUPPRESS",
-                                "TRANSFER",
-                            ].includes(item.system.XMLID)
-                                ? -parseInt(levelsX)
-                                : parseInt(levelsX),
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                    ],
-                    duration: {
-                        seconds: 12,
-                    },
-                    flags: {
-                        activePoints: ActivePoints,
-                        XMLID: item.system.XMLID,
-                        source: item.actor.name,
-                        target: powerTargetX?.uuid || keyX,
-                        keyX: keyX,
-                        keyY: keyY,
-                    },
-                    origin: item.uuid,
-                };
-
-                // DELAYEDRETURNRATE
-                let delayedReturnRate =
-                    item.findModsByXmlid("DELAYEDRETURNRATE");
-                if (delayedReturnRate) {
-                    switch (delayedReturnRate.OPTIONID) {
-                        case "MINUTE":
-                            activeEffect.duration.seconds = 60;
-                            break;
-                        case "FIVEMINUTES":
-                            activeEffect.duration.seconds = 60 * 5;
-                            break;
-                        case "20MINUTES":
-                            activeEffect.duration.seconds = 60 * 20;
-                            break;
-                        case "HOUR":
-                            activeEffect.duration.seconds = 60 * 60;
-                            break;
-                        case "6HOURS":
-                            activeEffect.duration.seconds = 60 * 60 * 6;
-                            break;
-                        case "DAY":
-                            activeEffect.duration.seconds = 60 * 60 * 24;
-                            break;
-                        case "WEEK":
-                            activeEffect.duration.seconds = 604800;
-                            break;
-                        case "MONTH":
-                            activeEffect.duration.seconds = 2.628e6;
-                            break;
-                        case "SEASON":
-                            activeEffect.duration.seconds = 2.628e6 * 3;
-                            break;
-                        case "YEAR":
-                            activeEffect.duration.seconds = 3.154e7;
-                            break;
-                        case "FIVEYEARS":
-                            activeEffect.duration.seconds = 3.154e7 * 5;
-                            break;
-                        case "TWENTYFIVEYEARS":
-                            activeEffect.duration.seconds = 3.154e7 * 25;
-                            break;
-                        case "CENTURY":
-                            activeEffect.duration.seconds = 3.154e7 * 100;
-                            break;
-                        default:
-                            await ui.notifications.error(
-                                `DELAYEDRETURNRATE has unhandled option ${delayedReturnRate?.OPTIONID}`,
-                            );
-                    }
-                }
-
-                if (ActivePoints > 0) {
-                    await token.actor.addActiveEffect(activeEffect);
-
-                    if (item.system.XMLID === "TRANSFER" && keyY) {
-                        let activeEffectY =
-                            foundry.utils.deepClone(activeEffect);
-                        activeEffectY.id = `${item.system.XMLID}.${item.id}.${keyY}`;
-                        activeEffectY.name = `${item.system.XMLID} +${parseInt(
-                            levelsY,
-                        )} ${keyY.toUpperCase()} [${item.actor.name}]`;
-                        activeEffectY.changes[0].key =
-                            "system.characteristics." + keyY + ".max";
-                        activeEffectY.changes[0].value = parseInt(levelsY);
-                        activeEffectY.flags.target = keyY;
-                        await item.actor.addActiveEffect(activeEffectY);
-
-                        let newValueY =
-                            item.actor.system.characteristics[keyY].value +
-                            parseInt(levelsY);
-                        if (token.actor.system.characteristics?.[keyX]) {
-                            await item.actor.update({
-                                [`system.characteristics.${keyY}.value`]:
-                                    newValueY,
-                            });
-                        }
-                    }
-                }
-            }
-
-            // Add levels to value
-            if (token.actor.system.characteristics?.[keyX]) {
-                let newValue =
-                    token.actor.system.characteristics[keyX].value +
-                    (["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
-                        item.system.XMLID,
-                    )
-                        ? -parseInt(levelsX)
-                        : parseInt(levelsX));
-                await token.actor.update({
-                    [`system.characteristics.${keyX}.value`]: newValue,
-                });
-            }
         }
-
-        let cardData = {
-            item: item,
-            // dice rolls
-
-            // stun
-            stunDamage: ActivePoints,
-            levelsX: ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
-                item.system.XMLID,
-            )
-                ? -parseInt(levelsX)
-                : parseInt(levelsX),
-            levelsY: parseInt(levelsY),
-            xmlidX: xmlidX,
-            xmlidY: xmlidY,
-
-            // effects
-            //effects: effectsFinal,
-
-            // defense
-            defense: defense,
-
-            // misc
-            targetToken: token,
-        };
-
-        // render card
-        let cardHtml = await renderTemplate(template, cardData);
-        let speaker = ChatMessage.getSpeaker({ actor: item.actor });
-
-        const chatData = {
-            user: game.user._id,
-            content: cardHtml,
-            speaker: speaker,
-        };
-
-        await ChatMessage.create(chatData);
     }
+
+    await targetActor.addActiveEffect(activeEffect);
+
+    return _findExistingMatchingEffect(
+        item,
+        potentialCharacteristic,
+        powerTargetName,
+        targetActor,
+    );
+}
+
+async function _performAdjustment(
+    item,
+    targetedPower,
+    activePointDamage,
+    targetActor,
+) {
+    const targetName = targetedPower.toUpperCase();
+
+    // TODO: Not sure this should be o.name as would be the name of the power? Should it be using XMLID?
+    // TODO: Do we need to trim name? Presumably we shrink them when adding?
+    const powerTargetName = targetActor.items.find(
+        (o) => o.name.toUpperCase().trim() === targetName,
+    );
+    const potentialCharacteristic = powerTargetName
+        ? powerTargetName.system.XMLID
+        : targetName.toLowerCase();
+    const characteristicTarget =
+        targetActor.system.characteristics?.[potentialCharacteristic];
+
+    // A target we understand?
+    if (!characteristicTarget && !powerTargetName) {
+        // Can't find anything to link this against...meh. Might be caught by the validity check above.
+        return;
+    }
+
+    // Check for previous adjustment (i.e ActiveEffect) from same power against this target
+    // and calculate the total effect
+    const existingEffect = _findExistingMatchingEffect(
+        item,
+        potentialCharacteristic,
+        powerTargetName,
+        targetActor,
+    );
+    const activeEffect =
+        existingEffect ||
+        (await _createNewAdjustmentEffect(
+            item,
+            potentialCharacteristic,
+            powerTargetName,
+            targetActor,
+        ));
+    const totalActivePointEffect =
+        activePointDamage + activeEffect.flags.activePoints;
+
+    // Determine how many points of effect there are based on the cost
+    // TODO: Should be considering maximum allowed effect
+    // TODO: Does this track the defensive chars being double cost to adjust positively?
+    const costPerActivePoint = _determineCostPerActivePoint(
+        potentialCharacteristic,
+        powerTargetName,
+        targetActor,
+    );
+    const activePointsAffected = Math.floor(
+        totalActivePointEffect / costPerActivePoint,
+    );
+    const activePointAffectedDifference =
+        activePointsAffected -
+        Math.floor(activeEffect.flags.activePoints / costPerActivePoint);
+
+    // Update the effect value
+    activeEffect.name = `${item.system.XMLID} ${Math.abs(
+        activePointsAffected,
+    )} ${powerTargetName?.name || potentialCharacteristic} (${Math.abs(
+        totalActivePointEffect,
+    )} AP) [by ${item.actor.name}]`;
+
+    activeEffect.changes[0].value =
+        activeEffect.changes[0].value - activePointAffectedDifference;
+
+    activeEffect.flags.activePoints = totalActivePointEffect;
+
+    await activeEffect.update({
+        name: activeEffect.name,
+        changes: activeEffect.changes,
+        flags: activeEffect.flags,
+    });
+
+    // TODO: Pretty sure recovery isn't working as expected for defensive items
+
+    // TODO: Only needed for characteristics? How will this work for powers?
+    if (targetActor.system.characteristics?.[potentialCharacteristic]) {
+        const newValue =
+            targetActor.system.characteristics[potentialCharacteristic].value -
+            activePointAffectedDifference;
+        await targetActor.update({
+            [`system.characteristics.${potentialCharacteristic}.value`]:
+                newValue,
+        });
+    }
+
+    await _generateAdjustmentChatCard(
+        item,
+        activePointDamage,
+        activePointAffectedDifference,
+        totalActivePointEffect,
+        potentialCharacteristic,
+        targetActor,
+    );
+}
+
+async function _generateAdjustmentChatCard(
+    item,
+    activePointDamage,
+    activePointAffectedDifference,
+    totalActivePointEffect,
+    potentialCharacteristic, // TODO: Power?
+    targetActor,
+) {
+    const cardData = {
+        item: item,
+
+        adjustmentDamageRaw: activePointDamage,
+        adjustmentDamageThisApplication: activePointAffectedDifference,
+
+        adjustmentTarget: potentialCharacteristic.toUpperCase(),
+        adjustmentTotalActivePointEffect: totalActivePointEffect,
+
+        defense: 0, // TODO: FIXME:
+
+        targetActor: targetActor,
+    };
+
+    // render card
+    const template =
+        "systems/hero6efoundryvttv2/templates/chat/apply-adjustment-card.hbs";
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+
+    const chatData = {
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
 }
 
 async function _onApplySenseAffectingToSpecificToken(
