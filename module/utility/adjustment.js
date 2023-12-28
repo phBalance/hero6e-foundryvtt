@@ -26,7 +26,7 @@ export function adjustmentSources(actor) {
 
     // Add * to defensive powers
     for (let key of Object.keys(choices)) {
-        if (AdjustmentMultiplier(key, actor) > 1) {
+        if (defensivePowerAdjustmentMultiplier(key, actor) > 1) {
             choices[key] += "*";
         }
     }
@@ -42,8 +42,25 @@ export function adjustmentSources(actor) {
     return choices;
 }
 
-export function AdjustmentMultiplier(XMLID, actor) {
+// 5e (pg 114) indicates PD, ED, and defensive powers
+const defensiveCharacteristics5e = ["PD", "ED"];
+
+// 6e (V1 pg 135)
+const defensiveCharacteristics6e = [
+    "CON",
+    "DCV",
+    "DMCV",
+    "PD",
+    "ED",
+    "REC",
+    "END",
+    "BODY",
+    "STUN",
+];
+
+export function defensivePowerAdjustmentMultiplier(XMLID, actor) {
     if (!XMLID) return 1;
+
     let configPowerInfo = getPowerInfo({ xmlid: XMLID, actor: actor });
     if (!configPowerInfo) {
         if (actor) {
@@ -55,20 +72,15 @@ export function AdjustmentMultiplier(XMLID, actor) {
         }
         if (!configPowerInfo) return 1;
     }
-    if (
-        [
-            "CON",
-            "DCV",
-            "DMCV",
-            "PD",
-            "ED",
-            "REC",
-            "END",
-            "BODY",
-            "STUN",
-        ].includes(XMLID)
-    )
+
+    const defenseCharacteristics = actor.system.is5e
+        ? defensiveCharacteristics5e
+        : defensiveCharacteristics6e;
+    if (defenseCharacteristics.includes(XMLID)) {
         return 2;
+    }
+
     if (configPowerInfo.powerType?.includes("defense")) return 2;
+
     return 1;
 }

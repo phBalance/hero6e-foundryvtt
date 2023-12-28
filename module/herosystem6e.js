@@ -26,7 +26,7 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from "./utility/util.js";
-import { AdjustmentMultiplier } from "./utility/adjustment.js";
+import { defensivePowerAdjustmentMultiplier } from "./utility/adjustment.js";
 import { migrateWorld } from "./migration.js";
 
 Hooks.once("init", async function () {
@@ -602,7 +602,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                             : parseFloat(
                                   powerInfoX?.cost || powerInfoX?.costPerLevel,
                               )) *
-                        AdjustmentMultiplier(target.toUpperCase(), aeActor);
+                        defensivePowerAdjustmentMultiplier(
+                            target.toUpperCase(),
+                            aeActor,
+                        );
 
                     let costPerPoint = costPerPointX;
                     let newLevels = parseInt(ActivePoints / costPerPoint);

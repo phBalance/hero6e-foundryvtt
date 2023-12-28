@@ -9,6 +9,7 @@
 - Compound powers now show proper indices.
 - Correct resistant power defense (yes it's a silly thing but we were accidentally boosting it and consequently mostly likely doubling power defenses).
 - Calculated power defense will now be shown on the character sheet.
+- Defensive powers qualifying for the adjustment multiplier now match 5e more strict list.
 
 ## Version 3.0.53
 

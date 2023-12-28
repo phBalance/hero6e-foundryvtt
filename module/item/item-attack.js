@@ -9,7 +9,7 @@ import {
     convertToDcFromItem,
     convertFromDC,
 } from "../utility/damage.js";
-import { AdjustmentMultiplier } from "../utility/adjustment.js";
+import { defensivePowerAdjustmentMultiplier } from "../utility/adjustment.js";
 import { RequiresASkillRollCheck } from "../item/item.js";
 import { ItemAttackFormApplication } from "../item/item-attack-application.js";
 
@@ -1968,7 +1968,10 @@ function _determineCostPerActivePoint(
                   powerTargetX.system.activePoints / powerTargetX.system.value,
               )
             : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel)) *
-        AdjustmentMultiplier(potentialCharacteristic.toUpperCase(), targetActor)
+        defensivePowerAdjustmentMultiplier(
+            potentialCharacteristic.toUpperCase(),
+            targetActor,
+        )
     );
 }
 
