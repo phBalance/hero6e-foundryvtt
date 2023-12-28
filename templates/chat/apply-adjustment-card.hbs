@@ -4,7 +4,7 @@
 
   <header class="card-header flexrow">
     <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-    <h3>vs {{targetToken.name}}</h3>
+    <h3>vs {{targetActor.name}}</h3>
   </header>
 
   <div>
@@ -18,21 +18,14 @@
     <div class="description-tiny">Defense: {{ defense }}</div>
   </div>
 
-  {{item.system.XMLID}} {{stunDamage}} Active Points
+  {{item.system.XMLID}} {{abs adjustmentDamageRaw}} Active Points.
 
-  {{#if (eq item.system.XMLID "TRANSFER")}}
-  from {{xmlidX}} to {{xmlidY}}.
-  {{targetToken.actor.name}} lost {{abs levelsX}} {{xmlidX}}.  {{item.actor.name}} gained {{levelsY}} {{xmlidY}}.
+  {{abs adjustmentDamageThisApplication}} {{adjustmentTarget}}
+
+  {{#if (lte adjustmentDamageThisApplication 0)}}
+    gained. 
   {{else}}
-
-  to {{xmlidX}}. {{targetToken.actor.name}}
-
-  {{#if (gte levelsX 0)}}
-  gained 
-  {{else}}
-  lost
-  {{/if}} {{abs levelsX}} {{xmlidX}}.
-
+    lost.
   {{/if}}
-
+  Total cumulative {{item.system.XMLID}} for this effect is {{abs adjustmentTotalActivePointEffect}} AP.
 </div>
