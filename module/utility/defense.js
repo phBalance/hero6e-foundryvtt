@@ -1,5 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
-
 function determineDefense(targetActor, attackItem, options) {
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem);
@@ -24,14 +22,14 @@ function determineDefense(targetActor, attackItem, options) {
             !(options?.ignoreDefenseIds || []).includes(o.id),
     );
 
-    let PD = parseInt(targetActor.system.characteristics.pd.value);
-    let ED = parseInt(targetActor.system.characteristics.ed.value);
-    let MD = 0;
-    let POWD = 0;
-    let rPOWD = 0;
+    let PD = parseInt(targetActor.system.characteristics.pd.value); // physical defense
+    let ED = parseInt(targetActor.system.characteristics.ed.value); // energy defense
+    let MD = 0; // mental defense
+    let POWD = 0; // power defense
     let rPD = 0; // resistant physical defense
     let rED = 0; // resistant energy defense
-    let rMD = 0; // resistant mental defense (not sure rMD is a real thing)
+    let rMD = 0; // resistant mental defense (a silly but possible thing)
+    let rPOWD = 0; // resistant power defense (a silly but possible thing)
     let DRP = 0; // damage reduction physical
     let DRE = 0; // damage reduction energy
     let DRM = 0; // damage reduction mental
@@ -517,11 +515,12 @@ function determineDefense(targetActor, attackItem, options) {
                 break;
 
             default:
-                if (game.settings.get(game.system.id, "alphaTesting")) {
-                    const warnMessage = `${protectionType}: ${activeDefense.system.defenseType} not yet supported!`;
-                    ui.notifications.warn(warnMessage);
-                    HEROSYS.log(false, warnMessage);
-                }
+                // TODO: Mostly likely this is flash defense missing
+                // if (game.settings.get(game.system.id, "alphaTesting")) {
+                //     const warnMessage = `${activeDefense.name}: ${activeDefense.system.defenseType} not yet supported!`;
+                //     ui.notifications.warn(warnMessage);
+                //     HEROSYS.log(false, warnMessage);
+                // }
                 break;
         }
     }
