@@ -3154,6 +3154,22 @@ export class HeroSystem6eItem extends Item {
         };
     }
 
+    static _max5eEffects(mod) {
+        if (!mod) return 1;
+
+        switch (mod.BASECOST) {
+            case "0.5":
+                return 2;
+            case "1.0":
+                return 4;
+            case "2.0":
+                // All of a type. Assume this is just infinite (pick a really big number).
+                return 1000;
+            default:
+                return 1;
+        }
+    }
+
     numberOfSimultaneousAdjustmentEffects() {
         if (this.actor.system.is5e) {
             // In 5e, the number of simultaneous effects is based on the VARIABLEEFFECT modifier.
@@ -3162,8 +3178,9 @@ export class HeroSystem6eItem extends Item {
 
             if (this.system.XMLID === "TRANSFER") {
                 return {
-                    maxReduces: max5eEffects(variableEffect),
-                    maxEnhances: max5eEffects(variableEffect2),
+                    maxReduces: HeroSystem6eItem._max5eEffects(variableEffect),
+                    maxEnhances:
+                        HeroSystem6eItem._max5eEffects(variableEffect2),
                 };
             } else if (
                 this.system.XMLID === "AID" ||
@@ -3172,29 +3189,13 @@ export class HeroSystem6eItem extends Item {
             ) {
                 return {
                     maxReduces: 0,
-                    maxEnhances: max5eEffects(variableEffect),
+                    maxEnhances: HeroSystem6eItem._max5eEffects(variableEffect),
                 };
             } else {
                 return {
-                    maxReduces: max5eEffects(variableEffect),
+                    maxReduces: HeroSystem6eItem._max5eEffects(variableEffect),
                     maxEnhances: 0,
                 };
-            }
-
-            function max5eEffects(mod) {
-                if (!variableEffect) return 1;
-
-                switch (variableEffect.BASECOST) {
-                    case "0.5":
-                        return 2;
-                    case "1.0":
-                        return 4;
-                    case "2.0":
-                        // All of a type. Assume this is just infinite (pick a really big number).
-                        return 1000;
-                    default:
-                        return 1;
-                }
             }
         }
 
