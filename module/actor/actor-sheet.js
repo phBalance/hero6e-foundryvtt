@@ -1120,10 +1120,15 @@ export class HeroSystemActorSheet extends ActorSheet {
     async _onUnlockCharacteristic(event) {
         event.preventDefault();
 
+        // The event will not be generated from the disabled input (since disabled elements
+        // don't generally allow mouse events) but rather from the enclosing td element.
+        // Find its child input element
+        const input = event.target.querySelector("input");
+
         // Find all associated Active Effects
         let activeEffects = Array.from(
             this.actor.allApplicableEffects(),
-        ).filter((o) => o.changes.find((p) => p.key === event.target.name));
+        ).filter((o) => o.changes.find((p) => p.key === input.name));
         for (let ae of activeEffects) {
             // Delete status
             if (ae.statuses) {

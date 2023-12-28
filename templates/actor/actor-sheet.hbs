@@ -629,7 +629,8 @@
                             <input name="system.characteristics.{{characteristic.key}}.value" type="text"
                                 value="{{characteristic.value}}" data-dtype="Number"
                                 class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
-                                {{#if characteristic.valueTitle}}disabled{{/if}}>
+                                {{#if characteristic.valueTitle}}disabled{{/if}}
+                            >
                         </td>
                         <td data-tooltip="{{{characteristic.maxTitle}}}"
                             class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
