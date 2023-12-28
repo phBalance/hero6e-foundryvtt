@@ -112,11 +112,16 @@ export class HeroSystem6eItem extends Item {
                     case "EGOATTACK":
                     case "AID":
                     case "DRAIN":
+                    case "HEALING":
+                    case "TRANSFER":
                     case "STRIKE":
                     case "FLASH":
                     case undefined:
                         return await Attack.AttackOptions(this, event);
 
+                    case "ABSORPTION":
+                    case "DISPEL":
+                    case "SUPPRESS":
                     default:
                         if (
                             !this.system.EFFECT ||
