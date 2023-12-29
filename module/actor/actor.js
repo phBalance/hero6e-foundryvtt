@@ -918,7 +918,7 @@ export class HeroSystem6eActor extends Actor {
                 0,
             );
 
-        // FIXME: This is, but should never be, called with this.system[characteristic] being undefined. Need to reorder the loading
+        // TODO: FIXME: This is, but should never be, called with this.system[characteristic] being undefined. Need to reorder the loading
         //        mechanism to ensure that we do something more similar to a load, transform, and extract pipeline so that we
         //        not invoked way too many times and way too early.
         const charBase = (characteristicUpperCase) => {

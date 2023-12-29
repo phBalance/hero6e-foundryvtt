@@ -2,7 +2,10 @@ import { HEROSYS } from "../herosystem6e.js";
 import * as Attack from "../item/item-attack.js";
 import { createSkillPopOutFromItem } from "../item/skill.js";
 import { enforceManeuverLimits } from "../item/manuever.js";
-import { adjustmentSources } from "../utility/adjustment.js";
+import {
+    adjustmentSources,
+    determineMaxAdjustment,
+} from "../utility/adjustment.js";
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
@@ -702,6 +705,14 @@ export class HeroSystem6eItem extends Item {
                 changed = true;
                 this.makeAttack();
             }
+        }
+
+        // ADJUSTMENT
+        if (
+            configPowerInfo &&
+            configPowerInfo.powerType?.includes("adjustment")
+        ) {
+            this.system.maxAdjustment = determineMaxAdjustment(this);
         }
 
         // BASECOST
@@ -2149,6 +2160,13 @@ export class HeroSystem6eItem extends Item {
                                 _adderArray.push(adder2.ALIAS);
                             }
                         }
+                        break;
+
+                    case "INCREASEDMAX":
+                        // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
+                        _adderArray.push(
+                            `${adder.ALIAS} (${system.maxAdjustment} total points)`,
+                        );
                         break;
 
                     default:

@@ -332,6 +332,26 @@ export async function migrateWorld() {
         }
     }
 
+    // if last migration < 3.0.54
+    // update adjustment powers
+    if (foundry.utils.isNewerVersion("3.0.53", lastMigration)) {
+        const queue = getAllActorsInGame();
+        let dateNow = new Date();
+
+        for (const [index, actor] of queue.entries()) {
+            if (new Date() - dateNow > 4000) {
+                ui.notifications.info(
+                    `Migrating actor's items to 3.0.54: (${
+                        queue.length - index
+                    } actors remaining)`,
+                );
+                dateNow = new Date();
+            }
+
+            await migrate_actor_items_to_3_0_54(actor);
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
     {
         let d = new Date();
@@ -390,6 +410,19 @@ async function migrateActorCostDescription(actor) {
             await ui.notifications.warn(
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
+        }
+    }
+}
+
+async function migrate_actor_items_to_3_0_54(actor) {
+    for (const item of actor.items) {
+        const configPowerInfo = getPowerInfo({ item: item });
+
+        // Add max adjustment value for adjustment powers
+        if (configPowerInfo.powerType?.includes("adjustment")) {
+            await item.update({
+                "system.maxAdjustment": determineMaxAdjustment(item),
+            });
         }
     }
 }

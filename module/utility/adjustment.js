@@ -1,4 +1,5 @@
-import { getPowerInfo } from "../utility/util.js";
+import { getPowerInfo } from "./util.js";
+import { determineExtraDiceDamage } from "./damage.js";
 
 export function adjustmentSources(actor) {
     let choices = {};
@@ -83,4 +84,71 @@ export function defensivePowerAdjustmentMultiplier(XMLID, actor) {
     if (configPowerInfo.powerType?.includes("defense")) return 2;
 
     return 1;
+}
+
+export function determineMaxAdjustment(item) {
+    const reallyBigInteger = 1000000;
+
+    // Certain adjustment powers have no fixed limit. Give them a large integer.
+    if (
+        item.system.XMLID !== "ABSORPTION" &&
+        item.system.XMLID !== "AID" &&
+        item.system.XMLID !== "TRANSFER"
+    ) {
+        return reallyBigInteger;
+    }
+
+    if (item.actor.system.is5e) {
+        // Max pips in a roll is starting max base.
+        let maxAdjustment = item.system.dice * 6;
+
+        const extraDice = determineExtraDiceDamage(item);
+        switch (extraDice) {
+            case "+1":
+                maxAdjustment = maxAdjustment + 1;
+                break;
+            case "1d3":
+                maxAdjustment = maxAdjustment + 3;
+                break;
+            default:
+                break;
+        }
+
+        // Add INCREASEDMAX if available.
+        const increaseMax = item.system.ADDER?.find(
+            (adder) => adder.XMLID === "INCREASEDMAX",
+        );
+        maxAdjustment = maxAdjustment + (parseInt(increaseMax?.LEVELS) || 0);
+
+        return maxAdjustment;
+    } else {
+        if (item.system.XMLID === "ABSORPTION") {
+            let maxAdjustment = item.system.LEVELS * 2;
+
+            const increasedMax = item.system.MODIFIER?.find(
+                (mod) => mod.XMLID === "INCREASEDMAX",
+            );
+            if (increasedMax) {
+                // Each level is 2x
+                maxAdjustment =
+                    maxAdjustment * Math.pow(2, parseInt(increasedMax.LEVELS));
+            }
+            return maxAdjustment;
+        }
+
+        let maxAdjustment = item.system.dice * 6;
+
+        const extraDice = determineExtraDiceDamage(item);
+        switch (extraDice) {
+            case "+1":
+                maxAdjustment = maxAdjustment + 1;
+                break;
+            case "1d3":
+                maxAdjustment = maxAdjustment + 3;
+                break;
+            default:
+                break;
+        }
+        return maxAdjustment;
+    }
 }

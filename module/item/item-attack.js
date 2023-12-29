@@ -2176,11 +2176,24 @@ async function _performAdjustment(
             isTransfer,
             targetActor,
         ));
-    const totalNewActivePoints =
+    let totalNewActivePoints =
         activePointDamage + activeEffect.flags.activePoints;
 
+    // Clamp max change to the max allowed by the power.
+    // TODO: Combined effects may not exceed the largest maximum for a single target.
+    if (totalNewActivePoints < 0) {
+        totalNewActivePoints = Math.max(
+            totalNewActivePoints,
+            -item.system.maxAdjustment,
+        );
+    } else {
+        totalNewActivePoints = Math.min(
+            totalNewActivePoints,
+            item.system.maxAdjustment,
+        );
+    }
+
     // Determine how many points of effect there are based on the cost
-    // TODO: Should be considering maximum allowed effect
     const costPerActivePoint = _determineCostPerActivePoint(
         potentialCharacteristic,
         powerTargetName,
