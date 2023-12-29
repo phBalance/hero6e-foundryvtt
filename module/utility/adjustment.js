@@ -386,16 +386,16 @@ export async function performAdjustment(
         activePointDamage + activeEffect.flags.activePoints;
 
     // Clamp max change to the max allowed by the power.
-    // TODO: Combined effects may not exceed the largest maximum for a single target.
+    // TODO: Combined effects may not exceed the largest source's maximum for a single target.
     if (totalNewActivePoints < 0) {
         totalNewActivePoints = Math.max(
             totalNewActivePoints,
-            -item.system.maxAdjustment,
+            -determineMaxAdjustment(item),
         );
     } else {
         totalNewActivePoints = Math.min(
             totalNewActivePoints,
-            item.system.maxAdjustment,
+            determineMaxAdjustment(item),
         );
     }
 
@@ -454,7 +454,7 @@ export async function performAdjustment(
     }
 
     // TODO: Pretty sure recovery isn't working as expected for defensive items
-    // TODO: Pretty sure recovery isn't working as expected for expended stuff (need separate category keeping: value, max, boost)
+    // TODO: Pretty sure recovery isn't working as expected for expended characteristics (need separate category keeping: value, max, boost)
 
     // TODO: Only needed for characteristics? How will this work for powers?
     if (targetActor.system.characteristics?.[potentialCharacteristic]) {

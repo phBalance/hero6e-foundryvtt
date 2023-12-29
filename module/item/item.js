@@ -707,14 +707,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // ADJUSTMENT
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("adjustment")
-        ) {
-            this.system.maxAdjustment = determineMaxAdjustment(this);
-        }
-
         // BASECOST
         const newBaseValue = parseFloat(
             getModifierInfo({ item: this })?.BASECOST ||
@@ -2165,7 +2157,9 @@ export class HeroSystem6eItem extends Item {
                     case "INCREASEDMAX":
                         // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
                         _adderArray.push(
-                            `${adder.ALIAS} (${system.maxAdjustment} total points)`,
+                            `${adder.ALIAS} (${determineMaxAdjustment(
+                                this,
+                            )} total points)`,
                         );
                         break;
 
