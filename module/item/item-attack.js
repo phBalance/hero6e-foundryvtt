@@ -1988,7 +1988,10 @@ function _findExistingMatchingEffect(
     );
 }
 
-function _addCharacteristicAEChangeBlock(potentialCharacteristic, targetActor) {
+function _createCharacteristicAEChangeBlock(
+    potentialCharacteristic,
+    targetActor,
+) {
     return {
         // TODO: Why is this only characteristics for the key? What about powers?
         // system.value is transferred to the actor, so not very useful,
@@ -2019,7 +2022,7 @@ async function _createNewAdjustmentEffect(
         }`,
         icon: item.img,
         changes: [
-            _addCharacteristicAEChangeBlock(
+            _createCharacteristicAEChangeBlock(
                 potentialCharacteristic,
                 targetActor,
             ),
@@ -2044,22 +2047,22 @@ async function _createNewAdjustmentEffect(
     if (targetActor.system.is5e) {
         if (potentialCharacteristic === "dex") {
             activeEffect.changes.push(
-                _addCharacteristicAEChangeBlock("ocv", targetActor),
+                _createCharacteristicAEChangeBlock("ocv", targetActor),
             );
             activeEffect.flags.target.push("ocv");
 
             activeEffect.changes.push(
-                _addCharacteristicAEChangeBlock("dcv", targetActor),
+                _createCharacteristicAEChangeBlock("dcv", targetActor),
             );
             activeEffect.flags.target.push("dcv");
         } else if (potentialCharacteristic === "ego") {
             activeEffect.changes.push(
-                _addCharacteristicAEChangeBlock("omcv", targetActor),
+                _createCharacteristicAEChangeBlock("omcv", targetActor),
             );
             activeEffect.flags.target.push("omcv");
 
             activeEffect.changes.push(
-                _addCharacteristicAEChangeBlock("dmcv", targetActor),
+                _createCharacteristicAEChangeBlock("dmcv", targetActor),
             );
             activeEffect.flags.target.push("dmcv");
         }
@@ -2173,7 +2176,7 @@ async function _performAdjustment(
             isTransfer,
             targetActor,
         ));
-    const totalActivePointEffect =
+    const totalNewActivePoints =
         activePointDamage + activeEffect.flags.activePoints;
 
     // Determine how many points of effect there are based on the cost
@@ -2183,38 +2186,38 @@ async function _performAdjustment(
         powerTargetName,
         targetActor,
     );
-    const activePointsAffected = Math.trunc(
-        totalActivePointEffect / costPerActivePoint,
+    const activePointsThatShouldBeAffected = Math.trunc(
+        totalNewActivePoints / costPerActivePoint,
     );
     const activePointAffectedDifference =
-        activePointsAffected -
+        activePointsThatShouldBeAffected -
         Math.trunc(activeEffect.flags.activePoints / costPerActivePoint);
 
     activeEffect.changes[0].value =
-        parseInt(activeEffect.changes[0].value) - activePointAffectedDifference;
+        activeEffect.changes[0].value - activePointAffectedDifference;
 
     // If this is 5e then some characteristics are calculated (not figured) based on
     // those. We only need to worry about 2: DEX -> OCV & DCV and EGO -> OMCV & DMCV.
     // These 2 characteristics are always at indices 2 and 3
     if (activeEffect.changes[1]) {
-        activeEffect.changes[1].value = RoundFavorPlayerUp(
+        activeEffect.changes[1].value = Math.trunc(
             activeEffect.changes[0].value / 3,
         );
     }
     if (activeEffect.changes[2]) {
-        activeEffect.changes[2].value = RoundFavorPlayerUp(
+        activeEffect.changes[2].value = Math.trunc(
             activeEffect.changes[0].value / 3,
         );
     }
 
     // Update the effect value(s)
     activeEffect.name = `${item.system.XMLID} ${Math.abs(
-        activePointsAffected,
+        activePointsThatShouldBeAffected,
     )} ${powerTargetName?.name || potentialCharacteristic} (${Math.abs(
-        totalActivePointEffect,
+        totalNewActivePoints,
     )} AP) [by ${item.actor.name}]`;
 
-    activeEffect.flags.activePoints = totalActivePointEffect;
+    activeEffect.flags.activePoints = totalNewActivePoints;
 
     await activeEffect.update({
         name: activeEffect.name,
@@ -2234,11 +2237,13 @@ async function _performAdjustment(
                 newValue,
         };
 
-        if (targetActor.system.is5e && activeEffect.target[1]) {
-            changes[`system.characteristics.${activeEffect.target[1]}.value`] =
-                RoundFavorPlayerUp(newValue / 3);
-            changes[`system.characteristics.${activeEffect.target[2]}.value`] =
-                RoundFavorPlayerUp(newValue / 3);
+        if (targetActor.system.is5e && activeEffect.flags.target[1]) {
+            changes[
+                `system.characteristics.${activeEffect.flags.target[1]}.value`
+            ] = RoundFavorPlayerUp(newValue / 3);
+            changes[
+                `system.characteristics.${activeEffect.flags.target[2]}.value`
+            ] = RoundFavorPlayerUp(newValue / 3);
         }
 
         await targetActor.update(changes);
@@ -2248,7 +2253,7 @@ async function _performAdjustment(
         item,
         activePointDamage,
         activePointAffectedDifference,
-        totalActivePointEffect,
+        totalNewActivePoints,
         potentialCharacteristic,
         targetActor,
     );
