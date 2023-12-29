@@ -1,5 +1,6 @@
 import { HeroSystem6eItem } from "./item/item.js";
 import { getPowerInfo } from "./utility/util.js";
+import { determineMaxAdjustment } from "./utility/adjustment.js";
 
 function getAllActorsInGame() {
     return [
