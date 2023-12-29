@@ -563,24 +563,53 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 d = ae._prepareDuration();
                 if (game.user.isGM) await ae.update({ duration: ae.duration });
 
-                // Fade by 5 Active Points
-                let _fade;
-                if (ae.flags.activePoints < 0) {
-                    _fade = Math.max(ae.flags.activePoints, -5);
-                } else {
-                    _fade = Math.min(ae.flags.activePoints, 5);
-                }
+                // What is this effect related to?
+                if (ae.flags.type === "adjustment") {
+                    // Fade by 5 Active Points
+                    let _fade;
+                    if (ae.flags.activePoints < 0) {
+                        _fade = Math.max(ae.flags.activePoints, -5);
+                    } else {
+                        _fade = Math.min(ae.flags.activePoints, 5);
+                    }
 
-                performAdjustment(
-                    item,
-                    ae.flags.target[0],
-                    -_fade,
-                    -_fade,
-                    "None",
-                    ae.flags.XMLID === "TRANSFER",
-                    true,
-                    actor,
-                );
+                    await performAdjustment(
+                        item,
+                        ae.flags.target[0],
+                        -_fade,
+                        -_fade,
+                        "None",
+                        ae.flags.XMLID === "TRANSFER",
+                        true,
+                        actor,
+                    );
+                } else if (ae.flags.XMLID === "naturalBodyHealing") {
+                    let bodyValue = parseInt(
+                        actor.system.characteristics.body.value,
+                    );
+                    let bodyMax = parseInt(
+                        actor.system.characteristics.body.max,
+                    );
+                    bodyValue = Math.min(bodyValue + 1, bodyMax);
+                    // await
+                    if (game.user.isGM)
+                        actor.update({
+                            "system.characteristics.body.value": bodyValue,
+                        });
+
+                    if (bodyValue === bodyMax) {
+                        if (game.user.isGM) ae.delete();
+                        break;
+                    } else {
+                        //await ae.update({ duration: ae.duration });
+                    }
+                } else {
+                    // Default is to delete the expired AE
+                    if (powerInfo) {
+                        if (game.user.isGM) await ae.delete();
+                        break;
+                    }
+                }
             }
         }
 

@@ -438,15 +438,19 @@ export async function performAdjustment(
 
     activeEffect.flags.activePoints = totalNewActivePoints;
 
+    const updatePromises = [];
+
     const isEffectFinished = activeEffect.flags.activePoints === 0 && isFade;
     if (isEffectFinished) {
-        await activeEffect.delete();
+        updatePromises.push(activeEffect.delete());
     } else {
-        await activeEffect.update({
-            name: activeEffect.name,
-            changes: activeEffect.changes,
-            flags: activeEffect.flags,
-        });
+        updatePromises.push(
+            activeEffect.update({
+                name: activeEffect.name,
+                changes: activeEffect.changes,
+                flags: activeEffect.flags,
+            }),
+        );
     }
 
     // TODO: Pretty sure recovery isn't working as expected for defensive items
@@ -471,20 +475,24 @@ export async function performAdjustment(
             ] = RoundFavorPlayerUp(newValue / 3);
         }
 
-        await targetActor.update(changes);
+        updatePromises.push(targetActor.update(changes));
     }
 
-    await _generateAdjustmentChatCard(
-        item,
-        activePointDamage,
-        activePointAffectedDifference,
-        totalNewActivePoints,
-        defense,
-        potentialCharacteristic,
-        isFade,
-        isEffectFinished,
-        targetActor,
+    updatePromises.push(
+        _generateAdjustmentChatCard(
+            item,
+            activePointDamage,
+            activePointAffectedDifference,
+            totalNewActivePoints,
+            defense,
+            potentialCharacteristic,
+            isFade,
+            isEffectFinished,
+            targetActor,
+        ),
     );
+
+    return Promise.all(updatePromises);
 }
 
 async function _generateAdjustmentChatCard(

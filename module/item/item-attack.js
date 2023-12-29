@@ -1933,7 +1933,7 @@ async function _onApplyAdjustmentToSpecificToken(
     for (const reduce of reducesArray) {
         const targetActor = token.actor;
 
-        performAdjustment(
+        await performAdjustment(
             item,
             reduce,
             rawActivePointsDamage,
@@ -1949,7 +1949,7 @@ async function _onApplyAdjustmentToSpecificToken(
         const targetActor =
             item.system.XMLID === "TRANSFER" ? item.actor : token.actor;
 
-        performAdjustment(
+        await performAdjustment(
             item,
             enhance,
             -rawActivePointsDamage,
