@@ -26,7 +26,7 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from "./utility/util.js";
-import { defensivePowerAdjustmentMultiplier } from "./utility/adjustment.js";
+import { performAdjustment } from "./utility/adjustment.js";
 import { migrateWorld } from "./migration.js";
 
 Hooks.once("init", async function () {
@@ -527,9 +527,6 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
         // Active Effects
         for (let ae of actor.temporaryEffects) {
-            let fade = 0;
-            let name = ae.name;
-
             // Determine XMLID, ITEM, ACTOR
             let origin = await fromUuid(ae.origin);
             let item = origin instanceof HeroSystem6eItem ? origin : null;
@@ -566,151 +563,23 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 d = ae._prepareDuration();
                 if (game.user.isGM) await ae.update({ duration: ae.duration });
 
-                // Fade by 5 ActivePoints
-                let _fade = Math.min(ae.flags.activePoints, 5);
-                ae.flags.activePoints -= _fade;
-                fade += _fade;
-
-                if (
-                    ae.changes.length > 0 &&
-                    ae.flags.target &&
-                    powerInfo &&
-                    powerInfo.powerType.includes("adjustment")
-                ) {
-                    let value = parseInt(ae.changes[0].value);
-                    let XMLID = ae.flags.XMLID;
-                    let target = ae.flags.target;
-                    const powerTargetX = actor.items.find(
-                        (o) => o.uuid === target,
-                    );
-                    let source = ae.flags.source;
-                    let ActivePoints = parseInt(ae.flags.activePoints);
-                    let _value = parseInt(ae.changes[0].value);
-                    let _APtext =
-                        _value === ActivePoints ? "" : ` (${ActivePoints}AP)`;
-
-                    const powerInfoX = getPowerInfo({
-                        xmlid: target.toUpperCase(),
-                        actor: aeActor,
-                    });
-                    const costPerPointX =
-                        (powerTargetX
-                            ? parseFloat(
-                                  powerTargetX.system.activePoints /
-                                      powerTargetX.system.value,
-                              )
-                            : parseFloat(
-                                  powerInfoX?.cost || powerInfoX?.costPerLevel,
-                              )) *
-                        defensivePowerAdjustmentMultiplier(
-                            target.toUpperCase(),
-                            aeActor,
-                        );
-
-                    let costPerPoint = costPerPointX;
-                    let newLevels = parseInt(ActivePoints / costPerPoint);
-                    ae.changes[0].value =
-                        value < 0 ? -parseInt(newLevels) : parseInt(newLevels);
-                    ae.name = `${XMLID} ${parseInt(
-                        ae.changes[0].value,
-                    ).signedString()}${_APtext} ${
-                        powerTargetX?.name || target.toUpperCase()
-                    } [${source}]`;
-
-                    // If ActivePoints <= 0 then remove effect
-                    if (ae.flags.activePoints <= 0) {
-                        //content += `  Effect deleted.`;
-                        if (game.user.isGM) await ae.delete();
-                    } else {
-                        //await to make sure MAX is updated before VALUE
-                        if (game.user.isGM)
-                            await ae.update({
-                                name: ae.name,
-                                changes: ae.changes,
-                                flags: ae.flags,
-                            });
-                    }
-
-                    // DRAIN fade (increase VALUE)
-                    if (value < 0) {
-                        let delta = -value - newLevels;
-                        let newValue = Math.min(
-                            parseInt(actor.system.characteristics[target].max),
-                            parseInt(
-                                actor.system.characteristics[target].value,
-                            ) + delta,
-                        );
-                        actor.update({
-                            [`system.characteristics.${target}.value`]:
-                                newValue,
-                        });
-                    }
-
-                    // AID fade (VALUE = max)
-                    else if (actor.system.characteristics?.[target]) {
-                        let newValue = Math.min(
-                            parseInt(actor.system.characteristics[target].max),
-                            parseInt(
-                                actor.system.characteristics[target].value,
-                            ),
-                        );
-                        if (game.user.isGM)
-                            actor.update({
-                                [`system.characteristics.${target}.value`]:
-                                    newValue,
-                            });
-                    }
-
-                    if (ae.flags.activePoints <= 0) break;
+                // Fade by 5 Active Points
+                let _fade;
+                if (ae.flags.activePoints < 0) {
+                    _fade = Math.max(ae.flags.activePoints, -5);
                 } else {
-                    // No changes defined
-
-                    // Natural Body Healing
-                    if (ae.flags.XMLID === "naturalBodyHealing") {
-                        let bodyValue = parseInt(
-                            actor.system.characteristics.body.value,
-                        );
-                        let bodyMax = parseInt(
-                            actor.system.characteristics.body.max,
-                        );
-                        bodyValue = Math.min(bodyValue + 1, bodyMax);
-                        // await
-                        if (game.user.isGM)
-                            actor.update({
-                                "system.characteristics.body.value": bodyValue,
-                            });
-
-                        if (bodyValue === bodyMax) {
-                            if (game.user.isGM) ae.delete();
-                            break;
-                        } else {
-                            //await ae.update({ duration: ae.duration });
-                        }
-                    } else {
-                        // Default is to delete the expired AE
-                        if (powerInfo) {
-                            if (game.user.isGM) await ae.delete();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (fade) {
-                let content = `${actor.name}: ${name} fades by ${fade} active points.`;
-                if (ae.flags.activePoints <= 0) {
-                    content += `  Effect deleted.`;
+                    _fade = Math.min(ae.flags.activePoints, 5);
                 }
 
-                const chatData = {
-                    user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
-                    whisper: ChatMessage.getWhisperRecipients("GM"),
-                    speaker: ChatMessage.getSpeaker({ actor: this }),
-                    blind: true,
-                    content: content,
-                };
-                //await
-                ChatMessage.create(chatData);
+                performAdjustment(
+                    item,
+                    ae.flags.target[0],
+                    -_fade,
+                    -_fade,
+                    ae.flags.XMLID === "TRANSFER",
+                    true,
+                    actor,
+                );
             }
         }
 
