@@ -1711,7 +1711,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         item: item,
     })?.powerType?.includes("adjustment");
     if (adjustment) {
-        return _onApplyAdjustmentToSpecificToken(event, tokenId, damageData);
+        return _onApplyAdjustmentToSpecificToken(
+            event,
+            tokenId,
+            damageData,
+            defense,
+        );
     }
     const senseAffecting = getPowerInfo({
         item: item,
@@ -1879,7 +1884,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     return ChatMessage.create(chatData);
 }
 
-async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData) {
+async function _onApplyAdjustmentToSpecificToken(
+    event,
+    tokenId,
+    damageData,
+    defense,
+) {
     const item = fromUuidSync(damageData.itemid);
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
@@ -1928,6 +1938,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData) {
             reduce,
             rawActivePointsDamage,
             actualActivePointDamage,
+            defense, // TODO: FIXME: Cleanup and make general.
             item.system.XMLID === "TRANSFER",
             false,
             targetActor,
@@ -1945,6 +1956,7 @@ async function _onApplyAdjustmentToSpecificToken(event, tokenId, damageData) {
             item.system.XMLID === "TRANSFER"
                 ? -actualActivePointDamage
                 : -rawActivePointsDamage,
+            defense, // TODO: FIXME: Cleanup and make general.
             item.system.XMLID === "TRANSFER",
             false,
             targetActor,

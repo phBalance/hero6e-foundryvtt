@@ -340,6 +340,7 @@ export async function performAdjustment(
     targetedPower,
     rawActivePointsDamage,
     activePointDamage,
+    defense, // TODO: FIXME: Cleanup and make general.
     isTransfer,
     isFade,
     targetActor,
@@ -437,7 +438,8 @@ export async function performAdjustment(
 
     activeEffect.flags.activePoints = totalNewActivePoints;
 
-    if (activeEffect.flags.activePoints === 0 && isFade) {
+    const isEffectFinished = activeEffect.flags.activePoints === 0 && isFade;
+    if (isEffectFinished) {
         await activeEffect.delete();
     } else {
         await activeEffect.update({
@@ -477,7 +479,10 @@ export async function performAdjustment(
         activePointDamage,
         activePointAffectedDifference,
         totalNewActivePoints,
+        defense,
         potentialCharacteristic,
+        isFade,
+        isEffectFinished,
         targetActor,
     );
 }
@@ -487,7 +492,10 @@ async function _generateAdjustmentChatCard(
     activePointDamage,
     activePointAffectedDifference,
     totalActivePointEffect,
+    defense, // TODO: FIXME: Cleanup and make general.
     potentialCharacteristic, // TODO: Power?
+    isFade,
+    isEffectFinished,
     targetActor,
 ) {
     const cardData = {
@@ -499,7 +507,9 @@ async function _generateAdjustmentChatCard(
         adjustmentTarget: potentialCharacteristic.toUpperCase(),
         adjustmentTotalActivePointEffect: totalActivePointEffect,
 
-        defense: 0, // TODO: FIXME:
+        defense: defense, // TODO: FIXME:
+        isFade,
+        isEffectFinished,
 
         targetActor: targetActor,
     };

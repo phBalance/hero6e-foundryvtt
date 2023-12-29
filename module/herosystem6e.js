@@ -576,6 +576,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     ae.flags.target[0],
                     -_fade,
                     -_fade,
+                    "None",
                     ae.flags.XMLID === "TRANSFER",
                     true,
                     actor,

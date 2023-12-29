@@ -14,18 +14,29 @@
     Attack: <span class="item-name">{{{itemName item}}}</span>
   </div>
 
+  {{!-- No need to show defenses on a beneficial result (fade, aid, etc) --}}
+  {{#if (ne isFade true)}}
+    <div class="card-section">
+      <div class="description-tiny">Defense: {{ defense }}</div>
+    </div>
+  {{/if}}
+
   <div class="card-section">
-    <div class="description-tiny">Defense: {{ defense }}</div>
+    {{item.system.XMLID}} {{#if isFade}}fade of{{/if}} {{abs adjustmentDamageRaw}} Active Points.
+
+    {{abs adjustmentDamageThisApplication}} {{adjustmentTarget}}
+
+    {{#if (lte adjustmentDamageThisApplication 0)}}
+      gained. 
+    {{else}}
+      lost.
+    {{/if}}
+    Total cumulative {{item.system.XMLID}} for this effect is {{abs adjustmentTotalActivePointEffect}} AP.
   </div>
 
-  {{item.system.XMLID}} {{abs adjustmentDamageRaw}} Active Points.
-
-  {{abs adjustmentDamageThisApplication}} {{adjustmentTarget}}
-
-  {{#if (lte adjustmentDamageThisApplication 0)}}
-    gained. 
-  {{else}}
-    lost.
+  {{#if isEffectFinished}}
+    <div>
+      The effects of this {{item.system.XMLID}} have completely faded!
+    </div>
   {{/if}}
-  Total cumulative {{item.system.XMLID}} for this effect is {{abs adjustmentTotalActivePointEffect}} AP.
 </div>
