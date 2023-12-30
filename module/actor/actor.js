@@ -1269,8 +1269,6 @@ export class HeroSystem6eActor extends Actor {
 
                         // Treat like a MULTIPOWER for now
                         if (system.XMLID === "COMPOUNDPOWER") {
-                            // The POSITION of COMPOUNDPOWER items starts at 0 and MULTIPOWER items start at 1
-                            let position = 0;
                             for (let system2 of system.POWER) {
                                 let itemData2 = {
                                     name:
@@ -1281,7 +1279,7 @@ export class HeroSystem6eActor extends Actor {
                                     system: {
                                         ...system2,
                                         PARENTID: system.ID,
-                                        POSITION: ++position,
+                                        POSITION: parseInt(system2.POSITION),
                                     },
                                 };
                                 const item2 = await HeroSystem6eItem.create(
