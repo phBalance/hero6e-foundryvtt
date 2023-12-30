@@ -6,6 +6,7 @@
 - Fix for movement powers toggles. [#533](https://github.com/dmdorman/hero6e-foundryvtt/issues/533)
 - Adjustment powers should now respect uploaded multi sources and targets when triggering.
 - No adjustment powers should be killing attacks that are enhanced by strength.
+- Compound powers now show proper indices.
 
 ## Version 3.0.53
 
