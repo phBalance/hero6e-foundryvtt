@@ -715,7 +715,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
         deltaMs > 100
     ) {
         return ui.notifications.warn(
-            `updateWorldTime took ${deltaMs} ms.  This routine handles AID/DRAIN fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occures on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
+            `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
         );
     }
 });
