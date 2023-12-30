@@ -108,7 +108,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                     (o) => o.system.ID === item.system.PARENTID,
                 );
                 if (parent) {
-                    const parentPosition = parseInt(parent.system.POSITION);
+                    const parentPosition =
+                        parent.system.XMLID === "COMPOUNDPOWER"
+                            ? -1 // Compound power starts at a random position. Sub powers start at 0.
+                            : parseInt(parent.system.POSITION);
                     item.system.childIdx =
                         parseInt(item.system.POSITION) -
                         parseInt(parentPosition);
