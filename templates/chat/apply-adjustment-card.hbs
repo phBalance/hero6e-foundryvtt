@@ -15,9 +15,9 @@
   </div>
 
   {{!-- No need to show defenses on a beneficial result (fade, aid, etc) --}}
-  {{#if (ne isFade true)}}
+  {{#if defenseDescription}}
     <div class="card-section">
-      <div class="description-tiny">Defense: {{ defense }}</div>
+      <div class="description-tiny">Defense: {{ defenseDescription }}</div>
     </div>
   {{/if}}
 

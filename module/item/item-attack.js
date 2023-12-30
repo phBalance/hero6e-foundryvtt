@@ -1942,8 +1942,7 @@ async function _onApplyAdjustmentToSpecificToken(
                 reduce,
                 rawActivePointsDamage,
                 actualActivePointDamage,
-                defense, // TODO: FIXME: Cleanup and make general.
-                item.system.XMLID === "TRANSFER",
+                defense,
                 false,
                 reductionTargetActor,
             ),
@@ -1965,8 +1964,7 @@ async function _onApplyAdjustmentToSpecificToken(
                 item.system.XMLID === "TRANSFER"
                     ? -actualActivePointDamage
                     : -rawActivePointsDamage,
-                defense, // TODO: FIXME: Cleanup and make general.
-                item.system.XMLID === "TRANSFER",
+                "None - Beneficial",
                 false,
                 enhancementTargetActor,
             ),

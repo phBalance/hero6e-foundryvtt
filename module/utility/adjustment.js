@@ -213,7 +213,6 @@ async function _createNewAdjustmentEffect(
     potentialCharacteristic,
     powerTargetName,
     rawActivePointsDamage,
-    isTransfer,
     targetActor,
 ) {
     // Create new ActiveEffect
@@ -276,7 +275,11 @@ async function _createNewAdjustmentEffect(
     const dRR = item.findModsByXmlid("DELAYEDRETURNRATE");
     const dRR2 = item.findModsByXmlid("DELAYEDRETURNRATE2");
     const delayedReturnRate =
-        rawActivePointsDamage > 0 ? dRR : isTransfer ? dRR2 : dRR;
+        rawActivePointsDamage > 0
+            ? dRR
+            : item.system.XMLID === "TRANSFER"
+              ? dRR2
+              : dRR;
     if (delayedReturnRate) {
         switch (delayedReturnRate.OPTIONID) {
             case "MINUTE":
@@ -340,8 +343,7 @@ export async function performAdjustment(
     targetedPower,
     rawActivePointsDamage,
     activePointDamage,
-    defense, // TODO: FIXME: Cleanup and make general.
-    isTransfer,
+    defenseDescription,
     isFade,
     targetActor,
 ) {
@@ -379,7 +381,6 @@ export async function performAdjustment(
             potentialCharacteristic,
             powerTargetName,
             rawActivePointsDamage,
-            isTransfer,
             targetActor,
         ));
     let totalNewActivePoints =
@@ -491,7 +492,7 @@ export async function performAdjustment(
         activePointAffectedDifference,
         totalNewActivePoints,
         activePointEffectLostDueToMax,
-        defense,
+        defenseDescription,
         potentialCharacteristic,
         isFade,
         isEffectFinished,
@@ -505,7 +506,7 @@ function _generateAdjustmentChatCard(
     activePointAffectedDifference,
     totalActivePointEffect,
     activePointEffectLostDueToMax,
-    defense, // TODO: FIXME: Cleanup and make general.
+    defenseDescription,
     potentialCharacteristic, // TODO: Power?
     isFade,
     isEffectFinished,
@@ -516,7 +517,7 @@ function _generateAdjustmentChatCard(
 
         adjustmentDamageRaw: activePointDamage,
         adjustmentTotalActivePointEffect: totalActivePointEffect,
-        defense: defense,
+        defenseDescription: defenseDescription,
 
         adjustment: {
             adjustmentDamageThisApplication: activePointAffectedDifference,
@@ -551,7 +552,7 @@ export async function renderAdjustmentChatCards(cardOrCards) {
         adjustmentDamageRaw: cardOrCards[0].adjustmentDamageRaw,
         adjustmentTotalActivePointEffect:
             cardOrCards[0].adjustmentTotalActivePointEffect,
-        defense: cardOrCards[0].defense,
+        defenseDescription: cardOrCards[0].defenseDescription,
 
         adjustments: cardOrCards.map((card) => {
             return card.adjustment;
