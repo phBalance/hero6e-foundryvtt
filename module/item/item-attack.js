@@ -9,7 +9,10 @@ import {
     convertToDcFromItem,
     convertFromDC,
 } from "../utility/damage.js";
-import { performAdjustment } from "../utility/adjustment.js";
+import {
+    performAdjustment,
+    renderAdjustmentChatCards,
+} from "../utility/adjustment.js";
 import { RequiresASkillRollCheck } from "../item/item.js";
 import { ItemAttackFormApplication } from "../item/item-attack-application.js";
 
@@ -1930,37 +1933,47 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
 
+    const reductionChatMessages = [];
+    const reductionTargetActor = token.actor;
     for (const reduce of reducesArray) {
-        const targetActor = token.actor;
-
-        await performAdjustment(
-            item,
-            reduce,
-            rawActivePointsDamage,
-            actualActivePointDamage,
-            defense, // TODO: FIXME: Cleanup and make general.
-            item.system.XMLID === "TRANSFER",
-            false,
-            targetActor,
+        reductionChatMessages.push(
+            await performAdjustment(
+                item,
+                reduce,
+                rawActivePointsDamage,
+                actualActivePointDamage,
+                defense, // TODO: FIXME: Cleanup and make general.
+                item.system.XMLID === "TRANSFER",
+                false,
+                reductionTargetActor,
+            ),
         );
     }
+    if (reductionChatMessages.length > 0) {
+        await renderAdjustmentChatCards(reductionChatMessages);
+    }
 
+    const enhancementChatMessages = [];
+    const enhancementTargetActor =
+        item.system.XMLID === "TRANSFER" ? item.actor : token.actor;
     for (const enhance of enhancesArray) {
-        const targetActor =
-            item.system.XMLID === "TRANSFER" ? item.actor : token.actor;
-
-        await performAdjustment(
-            item,
-            enhance,
-            -rawActivePointsDamage,
-            item.system.XMLID === "TRANSFER"
-                ? -actualActivePointDamage
-                : -rawActivePointsDamage,
-            defense, // TODO: FIXME: Cleanup and make general.
-            item.system.XMLID === "TRANSFER",
-            false,
-            targetActor,
+        enhancementChatMessages.push(
+            await performAdjustment(
+                item,
+                enhance,
+                -rawActivePointsDamage,
+                item.system.XMLID === "TRANSFER"
+                    ? -actualActivePointDamage
+                    : -rawActivePointsDamage,
+                defense, // TODO: FIXME: Cleanup and make general.
+                item.system.XMLID === "TRANSFER",
+                false,
+                enhancementTargetActor,
+            ),
         );
+    }
+    if (enhancementChatMessages.length > 0) {
+        await renderAdjustmentChatCards(enhancementChatMessages);
     }
 }
 

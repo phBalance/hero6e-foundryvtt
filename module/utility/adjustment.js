@@ -483,25 +483,23 @@ export async function performAdjustment(
         updatePromises.push(targetActor.update(changes));
     }
 
-    updatePromises.push(
-        _generateAdjustmentChatCard(
-            item,
-            activePointDamage,
-            activePointAffectedDifference,
-            totalNewActivePoints,
-            activePointEffectLostDueToMax,
-            defense,
-            potentialCharacteristic,
-            isFade,
-            isEffectFinished,
-            targetActor,
-        ),
-    );
+    await Promise.all(updatePromises);
 
-    return Promise.all(updatePromises);
+    return _generateAdjustmentChatCard(
+        item,
+        activePointDamage,
+        activePointAffectedDifference,
+        totalNewActivePoints,
+        activePointEffectLostDueToMax,
+        defense,
+        potentialCharacteristic,
+        isFade,
+        isEffectFinished,
+        targetActor,
+    );
 }
 
-async function _generateAdjustmentChatCard(
+function _generateAdjustmentChatCard(
     item,
     activePointDamage,
     activePointAffectedDifference,
@@ -517,12 +515,14 @@ async function _generateAdjustmentChatCard(
         item: item,
 
         adjustmentDamageRaw: activePointDamage,
-        adjustmentDamageThisApplication: activePointAffectedDifference,
+        adjustmentTotalActivePointEffect: totalActivePointEffect,
         defense: defense,
 
-        adjustmentTarget: potentialCharacteristic.toUpperCase(),
-        adjustmentTotalActivePointEffect: totalActivePointEffect,
-        activePointEffectLostDueToMax,
+        adjustment: {
+            adjustmentDamageThisApplication: activePointAffectedDifference,
+            adjustmentTarget: potentialCharacteristic.toUpperCase(),
+            activePointEffectLostDueToMax,
+        },
 
         isFade,
         isEffectFinished,
@@ -530,11 +530,46 @@ async function _generateAdjustmentChatCard(
         targetActor: targetActor,
     };
 
+    return cardData;
+}
+
+/**
+ *
+ * Renders and creates a number of related adjustment chat messages for the same target
+ *
+ * @param {*} cardOrCards
+ * @returns void
+ */
+export async function renderAdjustmentChatCards(cardOrCards) {
+    if (!Array.isArray(cardOrCards)) {
+        cardOrCards = [cardOrCards];
+    }
+
+    const cardData = {
+        item: cardOrCards[0].item,
+
+        adjustmentDamageRaw: cardOrCards[0].adjustmentDamageRaw,
+        adjustmentTotalActivePointEffect:
+            cardOrCards[0].adjustmentTotalActivePointEffect,
+        defense: cardOrCards[0].defense,
+
+        adjustments: cardOrCards.map((card) => {
+            return card.adjustment;
+        }),
+
+        isFade: cardOrCards[0].isFade,
+        isEffectFinished: cardOrCards[0].isEffectFinished,
+
+        targetActor: cardOrCards[0].targetActor,
+    };
+
     // render card
     const template =
         "systems/hero6efoundryvttv2/templates/chat/apply-adjustment-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    const speaker = ChatMessage.getSpeaker({
+        actor: cardOrCards[0].targetActor,
+    });
 
     const chatData = {
         user: game.user._id,
@@ -542,5 +577,5 @@ async function _generateAdjustmentChatCard(
         speaker: speaker,
     };
 
-    await ChatMessage.create(chatData);
+    return ChatMessage.create(chatData);
 }

@@ -26,7 +26,10 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.js";
 import { HeroRuler } from "./ruler.js";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.js";
 import { getPowerInfo } from "./utility/util.js";
-import { performAdjustment } from "./utility/adjustment.js";
+import {
+    performAdjustment,
+    renderAdjustmentChatCards,
+} from "./utility/adjustment.js";
 import { migrateWorld } from "./migration.js";
 
 Hooks.once("init", async function () {
@@ -573,15 +576,17 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         _fade = Math.min(ae.flags.activePoints, 5);
                     }
 
-                    await performAdjustment(
-                        item,
-                        ae.flags.target[0],
-                        -_fade,
-                        -_fade,
-                        "None",
-                        ae.flags.XMLID === "TRANSFER",
-                        true,
-                        actor,
+                    renderAdjustmentChatCards(
+                        await performAdjustment(
+                            item,
+                            ae.flags.target[0],
+                            -_fade,
+                            -_fade,
+                            "None",
+                            ae.flags.XMLID === "TRANSFER",
+                            true,
+                            actor,
+                        ),
                     );
                 } else if (ae.flags.XMLID === "naturalBodyHealing") {
                     let bodyValue = parseInt(
