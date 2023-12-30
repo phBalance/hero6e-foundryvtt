@@ -425,12 +425,12 @@ export async function performAdjustment(
     // those. We only need to worry about 2: DEX -> OCV & DCV and EGO -> OMCV & DMCV.
     // These 2 characteristics are always at indices 2 and 3
     if (activeEffect.changes[1]) {
-        activeEffect.changes[1].value = Math.trunc(
+        activeEffect.changes[1].value = RoundFavorPlayerUp(
             activeEffect.changes[0].value / 3,
         );
     }
     if (activeEffect.changes[2]) {
-        activeEffect.changes[2].value = Math.trunc(
+        activeEffect.changes[2].value = RoundFavorPlayerUp(
             activeEffect.changes[0].value / 3,
         );
     }
