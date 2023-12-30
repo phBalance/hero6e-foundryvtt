@@ -154,7 +154,7 @@ export function determineMaxAdjustment(item) {
     }
 }
 
-function _determineCostPerActivePoint(
+export function determineCostPerActivePoint(
     potentialCharacteristic,
     powerTargetX,
     targetActor,
@@ -407,7 +407,7 @@ export async function performAdjustment(
     }
 
     // Determine how many points of effect there are based on the cost
-    const costPerActivePoint = _determineCostPerActivePoint(
+    const costPerActivePoint = determineCostPerActivePoint(
         potentialCharacteristic,
         powerTargetName,
         targetActor,

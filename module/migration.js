@@ -1,5 +1,7 @@
 import { HeroSystem6eItem } from "./item/item.js";
 import { getPowerInfo } from "./utility/util.js";
+import { determineCostPerActivePoint } from "./utility/adjustment.js";
+import { RoundFavorPlayerUp } from "./utility/round.js";
 
 function getAllActorsInGame() {
     return [
@@ -380,9 +382,6 @@ async function migrateActorCostDescription(actor) {
     try {
         if (!actor) return false;
 
-        if (actor.name === `Jack "Iron Shin" Daniels`)
-            console.log.apply(actor.name);
-
         let itemsChanged = false;
         for (let item of actor.items) {
             await item._postUpload();
@@ -425,7 +424,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
 
             const powerInfo = getPowerInfo({
                 actor: actor,
-                xmlid: presentAdjustmentActiveEffect?.flags?.XMLID,
+                xmlid: activeEffect?.flags?.XMLID,
                 item: item,
             });
 
@@ -439,13 +438,13 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                 continue;
             }
 
-            potentialCharacteristic = presentAdjustmentActiveEffect.flags.keyX;
-
             const presentAdjustmentActiveEffect = activeEffect;
+            const potentialCharacteristic =
+                presentAdjustmentActiveEffect.flags.keyX;
 
-            const costPerActivePoint = _determineCostPerActivePoint(
+            const costPerActivePoint = determineCostPerActivePoint(
                 potentialCharacteristic,
-                powerTargetName, // TODO: How to get this?
+                null, // TODO: Correct, as we don't support powers right now?
                 actor,
             );
             const activePointsThatShouldBeAffected = Math.trunc(
@@ -478,33 +477,100 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
             };
 
             // If 5e we may have additional changes
-            if (actor.system.is5e) {
+            if (
+                actor.system.is5e &&
+                actor.system.characteristics?.[potentialCharacteristic]
+            ) {
                 if (potentialCharacteristic === "dex") {
-                    activeEffect.changes.push(
-                        _createCharacteristicAEChangeBlock("ocv", targetActor),
+                    const charValue =
+                        actor.system.characteristics[potentialCharacteristic]
+                            .value;
+                    const lift = RoundFavorPlayerUp(
+                        (charValue -
+                            actor.system.characteristics[
+                                potentialCharacteristic
+                            ].core) /
+                            3,
                     );
-                    activeEffect.flags.target.push("ocv");
 
-                    activeEffect.changes.push(
-                        _createCharacteristicAEChangeBlock("dcv", targetActor),
-                    );
-                    activeEffect.flags.target.push("dcv");
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.ocv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("ocv");
+
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.dcv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("dcv");
+
+                    const changes = {
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[1]}.value`]:
+                            actor.system.characteristics.ocv.value + lift,
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[2]}.value`]:
+                            actor.system.characteristics.dcv.value + lift,
+                    };
+
+                    await actor.update(changes);
                 } else if (potentialCharacteristic === "ego") {
-                    activeEffect.changes.push(
-                        _createCharacteristicAEChangeBlock("omcv", targetActor),
+                    const charValue =
+                        actor.system.characteristics[potentialCharacteristic]
+                            .value;
+                    const lift = RoundFavorPlayerUp(
+                        (charValue -
+                            actor.system.characteristics[
+                                potentialCharacteristic
+                            ].core) /
+                            3,
                     );
-                    activeEffect.flags.target.push("omcv");
 
-                    activeEffect.changes.push(
-                        _createCharacteristicAEChangeBlock("dmcv", targetActor),
-                    );
-                    activeEffect.flags.target.push("dmcv");
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.omcv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("omcv");
+
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.dmcv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("dmcv");
+
+                    const changes = {
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[1]}.value`]:
+                            actor.system.characteristics.omcv.value + lift,
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[2]}.value`]:
+                            actor.system.characteristics.dmcv.value + lift,
+                    };
+
+                    await actor.update(changes);
                 }
             }
 
             // Delete old active effect and create the new one
             await presentAdjustmentActiveEffect.delete();
-            await actor.create(newFormatAdjustmentActiveEffect);
+            await actor.addActiveEffect(newFormatAdjustmentActiveEffect);
         }
     }
 }
