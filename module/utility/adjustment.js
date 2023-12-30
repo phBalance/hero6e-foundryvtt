@@ -384,19 +384,24 @@ export async function performAdjustment(
         ));
     let totalNewActivePoints =
         activePointDamage + activeEffect.flags.activePoints;
+    let activePointEffectLostDueToMax = 0;
 
     // Clamp max change to the max allowed by the power.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target.
     if (totalNewActivePoints < 0) {
-        totalNewActivePoints = Math.max(
+        const max = Math.max(
             totalNewActivePoints,
             -determineMaxAdjustment(item),
         );
+        activePointEffectLostDueToMax = totalNewActivePoints - max;
+        totalNewActivePoints = max;
     } else {
-        totalNewActivePoints = Math.min(
+        const min = Math.min(
             totalNewActivePoints,
             determineMaxAdjustment(item),
         );
+        activePointEffectLostDueToMax = totalNewActivePoints - min;
+        totalNewActivePoints = min;
     }
 
     // Determine how many points of effect there are based on the cost
@@ -484,6 +489,7 @@ export async function performAdjustment(
             activePointDamage,
             activePointAffectedDifference,
             totalNewActivePoints,
+            activePointEffectLostDueToMax,
             defense,
             potentialCharacteristic,
             isFade,
@@ -500,6 +506,7 @@ async function _generateAdjustmentChatCard(
     activePointDamage,
     activePointAffectedDifference,
     totalActivePointEffect,
+    activePointEffectLostDueToMax,
     defense, // TODO: FIXME: Cleanup and make general.
     potentialCharacteristic, // TODO: Power?
     isFade,
@@ -511,11 +518,12 @@ async function _generateAdjustmentChatCard(
 
         adjustmentDamageRaw: activePointDamage,
         adjustmentDamageThisApplication: activePointAffectedDifference,
+        defense: defense,
 
         adjustmentTarget: potentialCharacteristic.toUpperCase(),
         adjustmentTotalActivePointEffect: totalActivePointEffect,
+        activePointEffectLostDueToMax,
 
-        defense: defense, // TODO: FIXME:
         isFade,
         isEffectFinished,
 
