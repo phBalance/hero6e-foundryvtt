@@ -2766,12 +2766,12 @@ export class HeroSystem6eItem extends Item {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "SUPPRESSION") {
+        } else if (xmlid == "SUPPRESS") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
         } else if (xmlid == "TRANSFER") {
-            this.system.class = "transfer";
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
         } else if (xmlid == "MINDSCAN") {

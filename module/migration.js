@@ -332,6 +332,27 @@ export async function migrateWorld() {
         }
     }
 
+    // if lastMigration < 3.0.54
+    // Update item.system.class from specific adjustment powers to the general adjustment
+    // TODO: Active Effects for adjustments
+    if (foundry.utils.isNewerVersion("3.0.54", lastMigration)) {
+        const queue = getAllActorsInGame();
+        let dateNow = new Date();
+
+        for (const [index, actor] of queue.entries()) {
+            if (new Date() - dateNow > 4000) {
+                ui.notifications.info(
+                    `Migrating actor's items to 3.0.54: (${
+                        queue.length - index
+                    } actors remaining)`,
+                );
+                dateNow = new Date();
+            }
+
+            await migrate_actor_items_to_3_0_54(actor);
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
     {
         let d = new Date();
@@ -390,6 +411,24 @@ async function migrateActorCostDescription(actor) {
             await ui.notifications.warn(
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
+        }
+    }
+}
+
+async function migrate_actor_items_to_3_0_54(actor) {
+    for (const item of actor.items) {
+        if (
+            item.system.XMLID === "ABSORPTION" ||
+            item.system.XMLID === "AID" ||
+            item.system.XMLID === "DISPEL" ||
+            item.system.XMLID === "DRAIN" ||
+            item.system.XMLID === "HEALING" ||
+            item.system.XMLID === "TRANSFER" ||
+            item.system.XMLID === "SUPPRESS"
+        ) {
+            await item.update({
+                "system.class": "adjustment",
+            });
         }
     }
 }
