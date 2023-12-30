@@ -473,7 +473,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                     target: [presentAdjustmentActiveEffect.flags.target], // Now an array
                     key: presentAdjustmentActiveEffect.flags.keyX, // Name change
                 },
-                source: presentAdjustmentActiveEffect.source, // No change
+                origin: presentAdjustmentActiveEffect.origin, // No change
             };
 
             // If 5e we may have additional changes
