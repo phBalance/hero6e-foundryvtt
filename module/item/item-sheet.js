@@ -322,11 +322,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             return;
         }
 
-        // Adjustment Powers
-        if (expandedData.xmlidX || expandedData.xmlidY) {
-            expandedData.system.INPUT = `${expandedData.xmlidX} to ${expandedData.xmlidY}`;
-        }
-
         // Endurance Reserve
         if (expandedData.rec) {
             let power = this.item.system.powers.find(
@@ -340,13 +335,30 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
         }
 
-        // AID
-        if (expandedData.inputs && this.item.system.XMLID === "AID") {
-            const array = [];
-            for (let i of Object.keys(expandedData.inputs)) {
-                array.push(expandedData.inputs[i]);
+        // A select list of possible adjustment targets on the character
+        if (
+            (expandedData.reduces || expandedData.enhances) &&
+            (this.item.system.XMLID === "ABSORPTION" ||
+                this.item.system.XMLID === "AID" ||
+                this.item.system.XMLID === "HEALING" ||
+                this.item.system.XMLID === "DISPEL" ||
+                this.item.system.XMLID === "DRAIN" ||
+                this.item.system.XMLID === "SUPPRESS" ||
+                this.item.system.XMLID === "TRANSFER")
+        ) {
+            let newInputStr;
+
+            if (this.item.system.XMLID === "TRANSFER") {
+                newInputStr = `${Object.values(expandedData.reduces).join(
+                    ", ",
+                )} -> ${Object.values(expandedData.enhances).join(", ")}`;
+            } else {
+                newInputStr = Object.values(
+                    expandedData.reduces || expandedData.enhances,
+                ).join(", ");
             }
-            await this.item.update({ "system.INPUT": array.join(", ") });
+
+            await this.item.update({ "system.INPUT": newInputStr });
         }
 
         let description = this.item.system.description;
