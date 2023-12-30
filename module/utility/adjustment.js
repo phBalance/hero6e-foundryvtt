@@ -221,7 +221,7 @@ async function _createNewAdjustmentEffect(
             powerTargetName?.name || potentialCharacteristic
         } (0 AP) [by ${item.actor.name}]`,
         id: `${item.system.XMLID}.${item.id}.${
-            powerTargetName?.name || potentialCharacteristic
+            powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects?
         }`,
         icon: item.img,
         changes: [
@@ -235,6 +235,7 @@ async function _createNewAdjustmentEffect(
         },
         flags: {
             type: "adjustment",
+            version: 2,
             activePoints: 0,
             XMLID: item.system.XMLID,
             source: targetActor.name,

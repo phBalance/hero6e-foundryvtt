@@ -334,7 +334,7 @@ export async function migrateWorld() {
 
     // if lastMigration < 3.0.54
     // Update item.system.class from specific adjustment powers to the general adjustment
-    // TODO: Active Effects for adjustments
+    // Active Effects for adjustments changed format
     if (foundry.utils.isNewerVersion("3.0.54", lastMigration)) {
         const queue = getAllActorsInGame();
         let dateNow = new Date();
@@ -350,6 +350,7 @@ export async function migrateWorld() {
             }
 
             await migrate_actor_items_to_3_0_54(actor);
+            await migrate_actor_active_effects_to_3_0_54(actor);
         }
     }
 
@@ -415,8 +416,102 @@ async function migrateActorCostDescription(actor) {
     }
 }
 
+async function migrate_actor_active_effects_to_3_0_54(actor) {
+    for (const activeEffect of actor.temporaryEffects) {
+        // Is it possibly an old style adjustment effect?
+        if (activeEffect.changes.length > 0 && activeEffect.flags.target) {
+            const origin = await fromUuid(activeEffect.origin);
+            const item = origin instanceof HeroSystem6eItem ? origin : null;
+
+            const powerInfo = getPowerInfo({
+                actor: actor,
+                xmlid: presentAdjustmentActiveEffect?.flags?.XMLID,
+                item: item,
+            });
+
+            // Confirm the power associated with is an adjustment power type
+            if (!powerInfo || !powerInfo.powerType.includes("adjustment")) {
+                continue;
+            }
+
+            // Make sure it's not a new style adjustment active effect already (just a dev possibility)
+            if (activeEffect.flags.type === "adjustment") {
+                continue;
+            }
+
+            potentialCharacteristic = presentAdjustmentActiveEffect.flags.keyX;
+
+            const presentAdjustmentActiveEffect = activeEffect;
+
+            const costPerActivePoint = _determineCostPerActivePoint(
+                potentialCharacteristic,
+                powerTargetName, // TODO: How to get this?
+                actor,
+            );
+            const activePointsThatShouldBeAffected = Math.trunc(
+                presentAdjustmentActiveEffect.flags.activePoints /
+                    costPerActivePoint,
+            );
+
+            const newFormatAdjustmentActiveEffect = {
+                name: `${presentAdjustmentActiveEffect.flags.XMLID} ${Math.abs(
+                    activePointsThatShouldBeAffected,
+                )} ${presentAdjustmentActiveEffect.flags.target} (${Math.abs(
+                    presentAdjustmentActiveEffect.flags.activePoints,
+                )} AP) [by ${presentAdjustmentActiveEffect.flags.source}]`,
+                id: presentAdjustmentActiveEffect.id, // No change
+                icon: presentAdjustmentActiveEffect.icon, // No change
+                changes: presentAdjustmentActiveEffect.changes, // No change but for 5e there may be additional indices (see below)
+                duration: presentAdjustmentActiveEffect.duration, // No change even though it might be wrong for transfer it's too complicated to try to figure it out
+                flags: {
+                    type: "adjustment", // New
+                    version: 2, // New
+
+                    activePoints:
+                        presentAdjustmentActiveEffect.flags.activePoints, // No change
+                    XMLID: presentAdjustmentActiveEffect.flags.XMLID, // No change
+                    source: presentAdjustmentActiveEffect.flags.source, // No change
+                    target: [presentAdjustmentActiveEffect.flags.target], // Now an array
+                    key: presentAdjustmentActiveEffect.flags.keyX, // Name change
+                },
+                source: presentAdjustmentActiveEffect.source, // No change
+            };
+
+            // If 5e we may have additional changes
+            if (actor.system.is5e) {
+                if (potentialCharacteristic === "dex") {
+                    activeEffect.changes.push(
+                        _createCharacteristicAEChangeBlock("ocv", targetActor),
+                    );
+                    activeEffect.flags.target.push("ocv");
+
+                    activeEffect.changes.push(
+                        _createCharacteristicAEChangeBlock("dcv", targetActor),
+                    );
+                    activeEffect.flags.target.push("dcv");
+                } else if (potentialCharacteristic === "ego") {
+                    activeEffect.changes.push(
+                        _createCharacteristicAEChangeBlock("omcv", targetActor),
+                    );
+                    activeEffect.flags.target.push("omcv");
+
+                    activeEffect.changes.push(
+                        _createCharacteristicAEChangeBlock("dmcv", targetActor),
+                    );
+                    activeEffect.flags.target.push("dmcv");
+                }
+            }
+
+            // Delete old active effect and create the new one
+            await presentAdjustmentActiveEffect.delete();
+            await actor.create(newFormatAdjustmentActiveEffect);
+        }
+    }
+}
+
 async function migrate_actor_items_to_3_0_54(actor) {
     for (const item of actor.items) {
+        // Give all adjustment powers the new "adjustment" class for simplicity.
         if (
             item.system.XMLID === "ABSORPTION" ||
             item.system.XMLID === "AID" ||
