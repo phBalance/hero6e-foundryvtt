@@ -2071,7 +2071,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Suppress Flight 7 1/2d6, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (-1/4)",
+                        "Suppress Flight 5 1/2d6, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (-1/4)",
                     );
                 });
 
