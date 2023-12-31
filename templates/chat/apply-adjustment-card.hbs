@@ -31,7 +31,7 @@
         {{#if (eq adj.adjustmentDamageThisApplication 0)}}
           No effect on {{adj.adjustmentTarget}}.
         {{else}}
-            {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} gained.
+            {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost.
         {{/if}}
       {{/if}}
       Total cumulative {{../item.system.XMLID}} for this effect is {{abs ../adjustmentTotalActivePointEffect}} AP.

@@ -81,8 +81,22 @@ export class HeroSystem6eItem extends Item {
         super.prepareData();
     }
 
-    async _onUpdate(data, options, userId) {
-        super._onUpdate(data, options, userId);
+    async _onUpdate(changed, options, userId) {
+        super._onUpdate(changed, options, userId);
+
+        // If our value has changed, we need to rebuild this item.
+        if (changed.system?.value != null) {
+            // TODO: Update everything!
+            changed = this.calcItemPoints() || changed;
+
+            // DESCRIPTION
+            const oldDescription = this.system.description;
+            this.updateItemDescription();
+            changed = oldDescription != this.system.description || changed;
+
+            // Save changes
+            await this.update({ system: this.system });
+        }
 
         if (this.actor && this.type === "equipment") {
             this.actor.applyEncumbrancePenalty();
@@ -96,7 +110,7 @@ export class HeroSystem6eItem extends Item {
         // Set Charges to max
         if (
             this.system.charges &&
-            this.system.charges.value != this.system.charges.max
+            this.system.charges.value !== this.system.charges.max
         ) {
             await this.update({
                 [`system.charges.value`]: this.system.charges.max,
@@ -108,7 +122,11 @@ export class HeroSystem6eItem extends Item {
             this.effects.map(async (effect) => await effect.delete()),
         );
 
-        return effectPromises;
+        await effectPromises;
+
+        if (this.system.value !== this.system.max) {
+            await this.update({ ["system.value"]: this.system.max });
+        }
     }
 
     // Largely used to determine if we can drag to hotbar
@@ -3202,7 +3220,7 @@ export class HeroSystem6eItem extends Item {
         };
     }
 
-    static _max5eEffects(mod) {
+    static _maxNumOf5eAdjustmentEffects(mod) {
         if (!mod) return 1;
 
         switch (mod.BASECOST) {
@@ -3212,7 +3230,7 @@ export class HeroSystem6eItem extends Item {
                 return 4;
             case "2.0":
                 // All of a type. Assume this is just infinite (pick a really big number).
-                return 1000;
+                return 10000;
             default:
                 return 1;
         }
@@ -3226,9 +3244,14 @@ export class HeroSystem6eItem extends Item {
 
             if (this.system.XMLID === "TRANSFER") {
                 return {
-                    maxReduces: HeroSystem6eItem._max5eEffects(variableEffect),
+                    maxReduces:
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect,
+                        ),
                     maxEnhances:
-                        HeroSystem6eItem._max5eEffects(variableEffect2),
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect2,
+                        ),
                 };
             } else if (
                 this.system.XMLID === "AID" ||
@@ -3237,17 +3260,23 @@ export class HeroSystem6eItem extends Item {
             ) {
                 return {
                     maxReduces: 0,
-                    maxEnhances: HeroSystem6eItem._max5eEffects(variableEffect),
+                    maxEnhances:
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect,
+                        ),
                 };
             } else {
                 return {
-                    maxReduces: HeroSystem6eItem._max5eEffects(variableEffect),
+                    maxReduces:
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect,
+                        ),
                     maxEnhances: 0,
                 };
             }
         }
 
-        // In 6e, the number of simultaneous effects is LEVELS in EXPANDEDEFFECT modifier if available or
+        // In 6e, the number of simultaneous effects is LEVELS in the EXPANDEDEFFECT modifier, if available, or
         // it is just 1. There is no TRANSFER in 6e.
         const maxCount = this.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
         if (
@@ -3265,6 +3294,12 @@ export class HeroSystem6eItem extends Item {
                 maxEnhances: 0,
             };
         }
+    }
+
+    async addActiveEffect(activeEffect) {
+        const newEffect = foundry.utils.deepClone(activeEffect);
+
+        return this.createEmbeddedDocuments("ActiveEffect", [newEffect]);
     }
 }
 

@@ -217,10 +217,10 @@ function _findExistingMatchingEffect(
     item,
     potentialCharacteristic,
     powerTargetName,
-    targetActor,
+    targetSystem,
 ) {
     // TODO: Variable Effect may result in multiple changes on same AE.
-    return targetActor.effects.find(
+    return targetSystem.effects.find(
         (effect) =>
             effect.origin === item.uuid &&
             effect.flags.target[0] ===
@@ -230,15 +230,15 @@ function _findExistingMatchingEffect(
 
 function _createCharacteristicAEChangeBlock(
     potentialCharacteristic,
-    targetActor,
+    targetSystem,
 ) {
+    // TODO: Calculate this earlier so we don't have the logic in here
     return {
-        // TODO: Why is this only characteristics for the key? What about powers?
-        // system.value is transferred to the actor, so not very useful,
-        // but we can enumerate via item.effects when determining value.
-        key: targetActor.system.characteristics?.[potentialCharacteristic]
-            ? `system.characteristics.${potentialCharacteristic}.max`
-            : "system.value",
+        key:
+            targetSystem.system.characteristics?.[potentialCharacteristic] !=
+            null
+                ? `system.characteristics.${potentialCharacteristic}.max`
+                : "system.max",
         value: 0,
         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
     };
@@ -246,24 +246,26 @@ function _createCharacteristicAEChangeBlock(
 
 async function _createNewAdjustmentEffect(
     item,
-    potentialCharacteristic,
+    potentialCharacteristic, // TODO: By this point we should know which it is.
     powerTargetName,
     rawActivePointsDamage,
     targetActor,
+    targetSystem,
 ) {
     // Create new ActiveEffect
+    // TODO: Add a document field
     const activeEffect = {
         name: `${item.system.XMLID} 0 ${
-            powerTargetName?.name || potentialCharacteristic
+            powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         } (0 AP) [by ${item.actor.name}]`,
         id: `${item.system.XMLID}.${item.id}.${
-            powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects?
+            powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
         icon: item.img,
         changes: [
             _createCharacteristicAEChangeBlock(
                 potentialCharacteristic,
-                targetActor,
+                targetSystem,
             ),
         ],
         duration: {
@@ -279,6 +281,9 @@ async function _createNewAdjustmentEffect(
             key: potentialCharacteristic,
         },
         origin: item.uuid,
+
+        transfer: true,
+        disabled: false,
     };
 
     // If this is 5e then some characteristics are entirely calculated based on
@@ -287,22 +292,22 @@ async function _createNewAdjustmentEffect(
     if (targetActor.system.is5e) {
         if (potentialCharacteristic === "dex") {
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("ocv", targetActor),
+                _createCharacteristicAEChangeBlock("ocv", targetSystem),
             );
             activeEffect.flags.target.push("ocv");
 
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("dcv", targetActor),
+                _createCharacteristicAEChangeBlock("dcv", targetSystem),
             );
             activeEffect.flags.target.push("dcv");
         } else if (potentialCharacteristic === "ego") {
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("omcv", targetActor),
+                _createCharacteristicAEChangeBlock("omcv", targetSystem),
             );
             activeEffect.flags.target.push("omcv");
 
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("dmcv", targetActor),
+                _createCharacteristicAEChangeBlock("dmcv", targetSystem),
             );
             activeEffect.flags.target.push("dmcv");
         }
@@ -365,14 +370,15 @@ async function _createNewAdjustmentEffect(
         }
     }
 
-    await targetActor.addActiveEffect(activeEffect);
+    // await targetSystem.addActiveEffect(activeEffect);
 
-    return _findExistingMatchingEffect(
-        item,
-        potentialCharacteristic,
-        powerTargetName,
-        targetActor,
-    );
+    // return _findExistingMatchingEffect(
+    //     item,
+    //     potentialCharacteristic,
+    //     powerTargetName,
+    //     targetSystem,
+    // );
+    return activeEffect;
 }
 
 export async function performAdjustment(
@@ -386,39 +392,67 @@ export async function performAdjustment(
 ) {
     const targetName = targetedPower.toUpperCase();
 
-    // TODO: Not sure this should be o.name as would be the name of the power? Should it be using XMLID?
-    // TODO: Do we need to trim name? Presumably we shrink them when adding?
-    const powerTargetName = targetActor.items.find(
-        (o) => o.name.toUpperCase().trim() === targetName,
+    // Search the target for this power.
+    // TODO: will return first matching power. How can we distinguish without making users
+    //       setup the item for a specific? Will likely need to provide a dialog. That gets
+    //       us into the thorny question of what powers have been discovered.
+    const targetPower = targetActor.items.find(
+        (item) => item.system.XMLID === targetName,
     );
-    const potentialCharacteristic = powerTargetName
-        ? powerTargetName.system.XMLID
+    const potentialCharacteristic = targetPower
+        ? targetPower.system.XMLID
         : targetName.toLowerCase();
-    const characteristicTarget =
+    const targetCharacteristic =
         targetActor.system.characteristics?.[potentialCharacteristic];
 
     // A target we understand?
-    if (!characteristicTarget && !powerTargetName) {
+    // TODO: Targeting a movement power that the targetActor doesn't have will still succeed. This seems wrong.
+    //       Why are flying, teleportation, etc characteristics?
+    if (!targetCharacteristic && !targetPower) {
         // Can't find anything to link this against...meh. Might be caught by the validity check above.
         return;
     }
+
+    // Characteristics target an actor, and powers target an item
+    const targetSystem =
+        targetActor.system.characteristics?.[potentialCharacteristic] != null
+            ? targetActor
+            : targetPower;
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
     // and calculate the total effect
     const existingEffect = _findExistingMatchingEffect(
         item,
         potentialCharacteristic,
-        powerTargetName,
-        targetActor,
+        targetPower,
+        targetSystem,
     );
+
+    // Shortcut here in case we have no existing effect and 0 damage is done. Creating 0 effects seems to confuse foundry or me.
+    if (!existingEffect && activePointDamage === 0) {
+        return _generateAdjustmentChatCard(
+            item,
+            activePointDamage,
+            0,
+            0,
+            0,
+            defenseDescription,
+            potentialCharacteristic,
+            isFade,
+            false,
+            targetActor,
+        );
+    }
+
     const activeEffect =
         existingEffect ||
         (await _createNewAdjustmentEffect(
             item,
             potentialCharacteristic,
-            powerTargetName,
+            targetPower,
             rawActivePointsDamage,
             targetActor,
+            targetSystem,
         ));
     let totalNewActivePoints =
         activePointDamage + activeEffect.flags.activePoints;
@@ -446,7 +480,7 @@ export async function performAdjustment(
     // Determine how many points of effect there are based on the cost
     const costPerActivePoint = determineCostPerActivePoint(
         potentialCharacteristic,
-        powerTargetName,
+        targetPower,
         targetActor,
     );
     const activePointsThatShouldBeAffected = Math.trunc(
@@ -476,53 +510,59 @@ export async function performAdjustment(
     // Update the effect value(s)
     activeEffect.name = `${item.system.XMLID} ${Math.abs(
         activePointsThatShouldBeAffected,
-    )} ${powerTargetName?.name || potentialCharacteristic} (${Math.abs(
+    )} ${targetPower?.name || potentialCharacteristic} (${Math.abs(
         totalNewActivePoints,
     )} AP) [by ${item.actor.name}]`;
 
     activeEffect.flags.activePoints = totalNewActivePoints;
 
-    const updatePromises = [];
-
     const isEffectFinished = activeEffect.flags.activePoints === 0 && isFade;
     if (isEffectFinished) {
-        updatePromises.push(activeEffect.delete());
+        await activeEffect.delete();
+    } else if (!existingEffect) {
+        await targetSystem.addActiveEffect(activeEffect);
     } else {
-        updatePromises.push(
-            activeEffect.update({
-                name: activeEffect.name,
-                changes: activeEffect.changes,
-                flags: activeEffect.flags,
-            }),
-        );
+        await activeEffect.update({
+            name: activeEffect.name,
+            changes: activeEffect.changes,
+            flags: activeEffect.flags,
+        });
     }
 
     // TODO: Pretty sure recovery isn't working as expected for defensive items
     // TODO: Pretty sure recovery isn't working as expected for expended characteristics (need separate category keeping: value, max, boost)
 
     // TODO: Only needed for characteristics? How will this work for powers?
-    if (targetActor.system.characteristics?.[potentialCharacteristic]) {
-        const newValue =
-            targetActor.system.characteristics[potentialCharacteristic].value -
-            activePointAffectedDifference;
-        const changes = {
-            [`system.characteristics.${potentialCharacteristic}.value`]:
-                newValue,
-        };
+    const targetValue =
+        targetActor.system.characteristics?.[potentialCharacteristic] != null
+            ? targetActor.system.characteristics?.[potentialCharacteristic]
+                  .value
+            : targetPower.system.value;
+    const targetValuePath =
+        targetActor.system.characteristics?.[potentialCharacteristic] != null
+            ? `system.characteristics.${potentialCharacteristic}.value`
+            : `system.value`;
+    const newValue = targetValue - activePointAffectedDifference;
+    const changes = {
+        [targetValuePath]: newValue,
+    };
 
-        if (targetActor.system.is5e && activeEffect.flags.target[1]) {
-            changes[
-                `system.characteristics.${activeEffect.flags.target[1]}.value`
-            ] = RoundFavorPlayerUp(newValue / 3);
-            changes[
-                `system.characteristics.${activeEffect.flags.target[2]}.value`
-            ] = RoundFavorPlayerUp(newValue / 3);
-        }
-
-        updatePromises.push(targetActor.update(changes));
+    if (targetActor.system.is5e && activeEffect.flags.target[1]) {
+        changes[
+            `system.characteristics.${activeEffect.flags.target[1]}.value`
+        ] = RoundFavorPlayerUp(newValue / 3);
+        changes[
+            `system.characteristics.${activeEffect.flags.target[2]}.value`
+        ] = RoundFavorPlayerUp(newValue / 3);
     }
 
-    await Promise.all(updatePromises);
+    await new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve();
+        }, 1000);
+    });
+
+    await targetSystem.update(changes);
 
     return _generateAdjustmentChatCard(
         item,
@@ -583,6 +623,11 @@ export async function renderAdjustmentChatCards(cardOrCards) {
     if (!Array.isArray(cardOrCards)) {
         cardOrCards = [cardOrCards];
     }
+
+    // Filter out any invalid cards
+    cardOrCards.filter((card) => card);
+
+    if (cardOrCards.length === 0) return;
 
     const cardData = {
         item: cardOrCards[0].item,
