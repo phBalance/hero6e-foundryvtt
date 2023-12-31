@@ -509,8 +509,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             .closest("[data-effect-id]")
             .data().effectId;
         let effect = this.document.effects.get(effectId);
-        if (!effect && this.actor) {
-            effect = this.actor.effects.get(effectId);
+        if (!effect && this.document.actor) {
+            effect = this.document.actor.effects.get(effectId);
         }
 
         effect.sheet.render(true);
