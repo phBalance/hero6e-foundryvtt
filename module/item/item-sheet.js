@@ -480,8 +480,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         const effectId = $(event.currentTarget)
             .closest("[data-effect-id]")
             .data().effectId;
-        const effect = this.actor.effects.get(effectId);
+        const effect = this.item.effects.get(effectId);
+
         if (!effect) return;
+
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize(
                 "HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title",
