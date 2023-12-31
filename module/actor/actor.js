@@ -1259,7 +1259,7 @@ export class HeroSystem6eActor extends Actor {
                         case "DRAIN":
                         case "HEALING":
                         case "TRANSFER":
-                        case "SUPPRESSION":
+                        case "SUPPRESS":
                             if (!system.NAME) {
                                 itemData.name =
                                     system?.ALIAS + " " + system?.INPUT;
