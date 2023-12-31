@@ -54,18 +54,8 @@ export async function onManageActiveEffect(event, owner) {
                     }
                     await effect.delete();
                 } else {
-                    item.delete();
+                    await item.delete();
                 }
-
-                //let actor = effect.parent instanceof HeroSystem6eActor ? effect.parent : effect.parent.actor
-
-                // Characteristic VALUE should not exceed MAX
-                // for (let char of Object.keys(actor.system.characteristics)) {
-                //     if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
-                //         await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
-                //         //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
-                //     }
-                // }
             }
             return;
         }
