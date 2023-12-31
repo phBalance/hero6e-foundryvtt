@@ -7,7 +7,7 @@
             },
             "fullHealthConfirm": {
                 "Title": "Confirm Full Health",
-                "Content": "Are you sure you want to restore all characteristics to max, remove status effects, and remote temporary effects?"
+                "Content": "Are you sure you want to restore all characteristics to max, remove status effects, and remove temporary effects?"
               }
         }
     },
