@@ -92,7 +92,7 @@ export class HeroSystem6eItem extends Item {
     /**
      * Reset an item back to its default state.
      */
-    async reset() {
+    async resetToOriginal() {
         // Set Charges to max
         if (
             this.system.charges &&

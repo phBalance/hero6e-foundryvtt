@@ -802,7 +802,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Reset all items
         for (const item of this.items) {
-            await item.reset();
+            await item.resetToOriginal();
         }
 
         // We just cleared encumbrance, check if it applies again
@@ -1126,7 +1126,7 @@ export class HeroSystem6eActor extends Actor {
                 content += `<li>${retainDamage.end} END used</li>`;
             content += `</ul><p>Do you want to apply this damage after the upload?</p>`;
             const confirmed = await Dialog.confirm({
-                title: "Retain damage after upload?", //game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+                title: "Retain damage after upload?",
                 content: content,
             });
             if (confirmed === null) {
