@@ -494,7 +494,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         });
 
         if (confirmed) {
-            effect.delete();
+            await effect.delete();
             this.render();
         }
     }
