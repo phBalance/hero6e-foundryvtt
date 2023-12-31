@@ -89,6 +89,28 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    /**
+     * Reset an item back to its default state.
+     */
+    async reset() {
+        // Set Charges to max
+        if (
+            this.system.charges &&
+            this.system.charges.value != this.system.charges.max
+        ) {
+            await this.update({
+                [`system.charges.value`]: this.system.charges.max,
+            });
+        }
+
+        // Remove temporary effects
+        const effectPromises = Promise.all(
+            this.effects.map(async (effect) => await effect.delete()),
+        );
+
+        return effectPromises;
+    }
+
     // Largely used to determine if we can drag to hotbar
     isRollable() {
         switch (this.system?.subType || this.type) {

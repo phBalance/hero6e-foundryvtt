@@ -66,7 +66,6 @@ export class HeroSystem6eActor extends Actor {
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
     async addActiveEffect(activeEffect) {
         const newEffect = foundry.utils.deepClone(activeEffect);
-        newEffect.label = `${game.i18n.localize(newEffect.label)}`;
 
         // Check for standard StatusEffects
         // statuses appears to be necessary to associate with StatusEffects
@@ -773,41 +772,37 @@ export class HeroSystem6eActor extends Actor {
     async FullHealth() {
         // Remove all status effects
         for (let status of this.statuses) {
-            let ae = Array.from(this.effects).find((o) =>
-                o.statuses.has(status),
+            let ae = Array.from(this.effects).find((effect) =>
+                effect.statuses.has(status),
             );
             await ae.delete();
         }
 
         // Remove temporary effects
-        let tempEffects = Array.from(this.effects).filter(
+        const tempEffects = Array.from(this.effects).filter(
             (o) => parseInt(o.duration?.seconds || 0) > 0,
         );
-        for (let ae of tempEffects) {
+        for (const ae of tempEffects) {
             await ae.delete();
         }
 
-        // Set Characterstics VALUE to MAX
-        for (let char of Object.keys(this.system.characteristics)) {
-            let value = parseInt(this.system.characteristics[char].value);
-            let max = parseInt(this.system.characteristics[char].max);
+        // Set Characteristics VALUE to MAX
+        const characteristicChanges = {};
+        for (const char of Object.keys(this.system.characteristics)) {
+            const value = parseInt(this.system.characteristics[char].value);
+            const max = parseInt(this.system.characteristics[char].max);
             if (value != max) {
-                //this.actor.system.characteristics[char].value = max;
-                await this.update({
-                    [`system.characteristics.${char}.value`]: max,
-                });
+                characteristicChanges[`system.characteristics.${char}.value`] =
+                    max;
             }
         }
+        if (Object.keys(characteristicChanges).length > 0) {
+            await this.update(characteristicChanges);
+        }
 
-        // Set Charges to max
-        for (let item of this.items.filter(
-            (o) =>
-                o.system.charges?.max &&
-                o.system.charges.value != o.system.charges.max,
-        )) {
-            await item.update({
-                [`system.charges.value`]: item.system.charges.max,
-            });
+        // Reset all items
+        for (const item of this.items) {
+            await item.reset();
         }
 
         // We just cleared encumbrance, check if it applies again
