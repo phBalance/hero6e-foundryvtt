@@ -1215,7 +1215,6 @@ export class HeroSystem6eActor extends Actor {
                 !this.system.CHARACTER.TEMPLATE.includes("6E.") &&
                 !this.system.is5e
             ) {
-                //changes[`system.is5e`] = true
                 this.system.is5e = true;
             }
             if (
@@ -1223,12 +1222,10 @@ export class HeroSystem6eActor extends Actor {
                 this.system.CHARACTER.TEMPLATE.includes("6E.") &&
                 this.system.is5e
             ) {
-                //changes[`system.is5e`] = false
                 this.system.is5e = false;
             }
         }
         if (this.system.COM && !this.system.is5e) {
-            //changes[`system.is5e`] = true
             this.system.is5e = true;
         }
 
@@ -1249,18 +1246,27 @@ export class HeroSystem6eActor extends Actor {
                         type: itemTag.toLowerCase().replace(/s$/, ""),
                         system: system,
                     };
+
+                    // Hack in some basic information with names.
+                    // TODO: This should be turned into some kind of short version of the description
+                    //       and it should probably be done when building the description
                     switch (system.XMLID) {
                         case "FOLLOWER":
                             itemData.name = "Followers";
                             break;
                         case "AID":
+                        case "DISPEL":
                         case "DRAIN":
+                        case "HEALING":
+                        case "TRANSFER":
+                        case "SUPPRESSION":
                             if (!system.NAME) {
                                 itemData.name =
                                     system?.ALIAS + " " + system?.INPUT;
                             }
                             break;
                     }
+
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, {
                             parent: this,
