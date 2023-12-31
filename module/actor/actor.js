@@ -1254,6 +1254,7 @@ export class HeroSystem6eActor extends Actor {
                         case "FOLLOWER":
                             itemData.name = "Followers";
                             break;
+                        case "ABSORPTION":
                         case "AID":
                         case "DISPEL":
                         case "DRAIN":
