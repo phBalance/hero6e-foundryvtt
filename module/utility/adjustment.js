@@ -2,23 +2,59 @@ import { getPowerInfo } from "./util.js";
 import { determineExtraDiceDamage } from "./damage.js";
 import { RoundFavorPlayerUp } from "./round.js";
 
-export function adjustmentSources(actor) {
+/**
+ * Return the full list of possible powers and characteristics. No skills, talents, or perks.
+ */
+export function adjustmentSourcesPermissive(actor) {
     let choices = {};
 
-    let powers = CONFIG.HERO.powers.filter(
-        (o) =>
-            (o.powerType?.includes("characteristic") ||
-                o.powerType?.includes("movement")) &&
-            !o.ignoreFor?.includes(actor.type) &&
-            !o.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
-            (!o.onlyFor || o.onlyFor.includes(actor.type)),
+    const powers = CONFIG.HERO.powers.filter(
+        (power) =>
+            !power.powerType?.includes("skill") &&
+            !power.powerType?.includes("perk") &&
+            !power.powerType?.includes("talent"),
+    );
+
+    for (const power of powers) {
+        let key = power.key;
+        choices[key.toUpperCase()] = key.toUpperCase();
+    }
+
+    // Add * to defensive powers
+    for (let key of Object.keys(choices)) {
+        if (defensivePowerAdjustmentMultiplier(key, actor) > 1) {
+            choices[key] += "*";
+        }
+    }
+
+    choices[""] = "<none>";
+    choices = Object.keys(choices)
+        .sort()
+        .reduce((obj, key) => {
+            obj[key] = choices[key];
+            return obj;
+        }, {});
+
+    return choices;
+}
+
+export function adjustmentSourcesStrict(actor) {
+    let choices = {};
+
+    const powers = CONFIG.HERO.powers.filter(
+        (power) =>
+            (power.powerType?.includes("characteristic") ||
+                power.powerType?.includes("movement")) &&
+            !power.ignoreFor?.includes(actor.type) &&
+            !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
+            (!power.onlyFor || power.onlyFor.includes(actor.type)),
     );
 
     // Attack powers
     for (const item of actor.items.filter(
-        (o) => o.type === "power" && o.system.XMLID != "MULTIPOWER",
+        (item) => item.type === "power" && item.system.XMLID != "MULTIPOWER",
     )) {
-        powers.push({ key: item.name });
+        powers.push({ key: item.system.XMLID });
     }
 
     for (const power of powers) {
@@ -389,6 +425,7 @@ export async function performAdjustment(
     let activePointEffectLostDueToMax = 0;
 
     // Clamp max change to the max allowed by the power.
+    // TODO: Healing may not raise max or value above max.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target.
     if (totalNewActivePoints < 0) {
         const max = Math.max(

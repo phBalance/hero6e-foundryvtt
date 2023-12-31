@@ -1,6 +1,6 @@
 import { HeroSystem6eItem } from "./item.js";
 import { editSubItem, deleteSubItem } from "../powers/powers.js";
-import { adjustmentSources } from "../utility/adjustment.js";
+import { adjustmentSourcesStrict } from "../utility/adjustment.js";
 import { getPowerInfo } from "../utility/util.js";
 
 /**
@@ -180,7 +180,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         ) {
             const { enhances, reduces } = item.splitAdjustmentSourceAndTarget();
 
-            data.possibleSources = adjustmentSources(this.actor);
+            data.possibleSources = adjustmentSourcesStrict(this.actor);
             data.enhances = enhances
                 ? enhances
                       .split(",")

@@ -3,7 +3,8 @@ import * as Attack from "../item/item-attack.js";
 import { createSkillPopOutFromItem } from "../item/skill.js";
 import { enforceManeuverLimits } from "../item/manuever.js";
 import {
-    adjustmentSources,
+    adjustmentSourcesPermissive,
+    adjustmentSourcesStrict,
     determineMaxAdjustment,
 } from "../utility/adjustment.js";
 import { onActiveEffectToggle } from "../utility/effects.js";
@@ -3085,17 +3086,24 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    _areAllAdjustmentTargetsInListValid(targetsList) {
+    _areAllAdjustmentTargetsInListValid(targetsList, mustBeStrict) {
         if (!targetsList) return false;
+
+        // ABSORPTION, AID, and TRANSFER target characteristics/powers are the only adjustment powers that must match
+        // the character's characteristics/powers (i.e. they can't create new characteristics or powers). All others just
+        // have to match actual possible characteristics/powers.
+        const validator =
+            this.system.XMLID === "AID" ||
+            this.system.XMLID === "ABSORPTION" ||
+            (this.system.XMLID === "TRANSFER" && mustBeStrict)
+                ? adjustmentSourcesStrict
+                : adjustmentSourcesPermissive;
+        const validList = Object.keys(validator(this.actor));
 
         const adjustmentTargets = targetsList.split(",");
         for (const rawAdjustmentTarget of adjustmentTargets) {
             const upperCasedInput = rawAdjustmentTarget.toUpperCase().trim();
-            if (
-                !Object.keys(adjustmentSources(this.actor)).includes(
-                    upperCasedInput,
-                )
-            ) {
+            if (!validList.includes(upperCasedInput)) {
                 return false;
             }
         }
@@ -3110,7 +3118,7 @@ export class HeroSystem6eItem extends Item {
      * @typedef { Object } AdjustmentSourceAndTarget
      * @property { boolean } valid - if any of the reduces and enhances fields are valid
      * @property { string } reduces - things that are reduced (aka from)
-     * @property { string } enhances - things that are ehanced (aka to)
+     * @property { string } enhances - things that are enhanced (aka to)
      * @property { string[] } reducesArray
      * @property { string[] } enhancesArray
      */
@@ -3132,14 +3140,20 @@ export class HeroSystem6eItem extends Item {
             valid =
                 this._areAllAdjustmentTargetsInListValid(
                     splitSourcesAndTargets[0],
+                    false,
                 ) &&
                 this._areAllAdjustmentTargetsInListValid(
                     splitSourcesAndTargets[1],
+                    true,
                 );
             enhances = splitSourcesAndTargets[1];
             reduces = splitSourcesAndTargets[0];
         } else {
-            valid = this._areAllAdjustmentTargetsInListValid(this.system.INPUT);
+            valid = this._areAllAdjustmentTargetsInListValid(
+                this.system.INPUT,
+                this.system.XMLID === "AID" ||
+                    this.system.XMLID === "ABSORPTION",
+            );
 
             if (
                 this.system.XMLID === "AID" ||
