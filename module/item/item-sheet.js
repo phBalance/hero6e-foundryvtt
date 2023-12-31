@@ -1,6 +1,9 @@
 import { HeroSystem6eItem } from "./item.js";
 import { editSubItem, deleteSubItem } from "../powers/powers.js";
-import { adjustmentSourcesStrict } from "../utility/adjustment.js";
+import {
+    adjustmentSourcesPermissive,
+    adjustmentSourcesStrict,
+} from "../utility/adjustment.js";
 import { getPowerInfo } from "../utility/util.js";
 
 /**
@@ -180,7 +183,16 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         ) {
             const { enhances, reduces } = item.splitAdjustmentSourceAndTarget();
 
-            data.possibleSources = adjustmentSourcesStrict(this.actor);
+            const enhancesValidator =
+                item.system.XMLID === "AID" ||
+                item.system.XMLID === "ABSORPTION" ||
+                item.system.XMLID === "TRANSFER"
+                    ? adjustmentSourcesStrict
+                    : adjustmentSourcesPermissive;
+
+            data.possibleEnhances = enhancesValidator(this.actor);
+            data.possibleReduces = adjustmentSourcesPermissive(this.actor);
+
             data.enhances = enhances
                 ? enhances
                       .split(",")

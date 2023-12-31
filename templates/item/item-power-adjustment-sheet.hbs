@@ -29,7 +29,7 @@
             <div class="form-group">
                 <label>{{../system.XMLID}} From {{increment id 1}}</label>
                 <select name="reduces.{{id}}" data-dtype="text">
-                    {{selectOptions @root/possibleSources selected=input}}
+                    {{selectOptions @root/possibleReduces selected=input}}
                 </select>
             </div>
         {{/each}}
@@ -38,7 +38,7 @@
             <div class="form-group">
                 <label>{{../system.XMLID}} To {{increment id 1}}</label>
                 <select name="enhances.{{id}}" data-dtype="text">
-                    {{selectOptions @root/possibleSources selected=input}}
+                    {{selectOptions @root/possibleEnhances selected=input}}
                 </select>
             </div>
         {{/each}}
