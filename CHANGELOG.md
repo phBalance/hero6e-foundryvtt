@@ -8,6 +8,7 @@
 - Mental defense is now correctly calculated for 5e.
 - Damage calculations with an additional term (i.e 1/2 die) are no longer short changed for regular damage but they are still a few other situations. Partially resolves [#508](https://github.com/dmdorman/hero6e-foundryvtt/issues/508)
 - Add explosions for 5e.
+- Movement power improvements for 5e (pointing, description, and added gliding).
 - Improvements to adjustment powers (although we suggest still only using them for characteristics):
   - Adjustment powers should now respect uploaded multi sources and targets when triggering. They should also respect maximum amounts for absorption, aid, and transfer for 5e and 6e.
   - No adjustment powers should be killing attacks that are enhanced by strength.

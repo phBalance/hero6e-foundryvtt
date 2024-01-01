@@ -187,11 +187,12 @@ export class HeroRuler {
             if (!args?.system?.characteristics) {
                 return;
             }
-            if (
-                CONFIG.HERO.movementPowers[
-                    Object.keys(args.system.characteristics)[0]
-                ]
-            ) {
+
+            const movementPowers = actor?.system.is5e
+                ? CONFIG.HERO.movementPowers5e
+                : CONFIG.HERO.movementPowers;
+
+            if (movementPowers[Object.keys(args.system.characteristics)[0]]) {
                 movementRadioSelectRender();
             }
         });
@@ -215,18 +216,21 @@ export class HeroRuler {
 
             const relevantToken = canvas.tokens.controlled[0];
 
-            // guard
             if (!relevantToken) return;
             if (!relevantToken.actor) return;
+
+            const movementPowers = relevantToken.actor.system.is5e
+                ? CONFIG.HERO.movementPowers5e
+                : CONFIG.HERO.movementPowers;
 
             let movementItems = [];
             for (const key of Object.keys(
                 relevantToken.actor.system.characteristics,
-            ).filter((o) => CONFIG.HERO.movementPowers[o])) {
+            ).filter((o) => movementPowers[o])) {
                 const char = relevantToken.actor.system.characteristics[key];
                 if ((parseInt(char.value) || 0) > 0) {
                     char._id = key;
-                    char.name = CONFIG.HERO.movementPowers[key];
+                    char.name = movementPowers[key];
                     movementItems.push(char);
                 }
             }
@@ -307,15 +311,18 @@ function setHeroRulerLabel() {
                 return;
             }
 
-            //const movementItems = relevantToken.actor.items.filter((e) => e.type === "movement");
+            const movementPowers = relevantToken.actor.system.is5e
+                ? CONFIG.HERO.movementPowers5e
+                : CONFIG.HERO.movementPowers;
+
             let movementItems = [];
             for (const key of Object.keys(
                 relevantToken.actor.system.characteristics,
-            ).filter((o) => CONFIG.HERO.movementPowers[o])) {
+            ).filter((o) => movementPowers[o])) {
                 const char = relevantToken.actor.system.characteristics[key];
                 if ((parseInt(char.value) || 0) > 0) {
                     char._id = key;
-                    char.name = CONFIG.HERO.movementPowers[key];
+                    char.name = movementPowers[key];
                     movementItems.push(char);
                 }
             }
