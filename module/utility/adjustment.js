@@ -370,14 +370,6 @@ async function _createNewAdjustmentEffect(
         }
     }
 
-    // await targetSystem.addActiveEffect(activeEffect);
-
-    // return _findExistingMatchingEffect(
-    //     item,
-    //     potentialCharacteristic,
-    //     powerTargetName,
-    //     targetSystem,
-    // );
     return activeEffect;
 }
 
@@ -418,6 +410,19 @@ export async function performAdjustment(
         targetActor.system.characteristics?.[potentialCharacteristic] != null
             ? targetActor
             : targetPower;
+    const targetValuePath =
+        targetSystem.system.characteristics?.[potentialCharacteristic] != null
+            ? `system.characteristics.${potentialCharacteristic}.value`
+            : `system.value`;
+    const targetValue =
+        targetActor.system.characteristics?.[potentialCharacteristic] != null
+            ? targetActor.system.characteristics?.[potentialCharacteristic]
+                  .value
+            : targetPower.system.value;
+    const targetMax =
+        targetActor.system.characteristics?.[potentialCharacteristic] != null
+            ? targetActor.system.characteristics?.[potentialCharacteristic].max
+            : targetPower.system.max;
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
     // and calculate the total effect
@@ -428,7 +433,7 @@ export async function performAdjustment(
         targetSystem,
     );
 
-    // Shortcut here in case we have no existing effect and 0 damage is done. Creating 0 effects seems to confuse foundry or me.
+    // Shortcut here in case we have no existing effect and 0 damage is done.
     if (!existingEffect && activePointDamage === 0) {
         return _generateAdjustmentChatCard(
             item,
@@ -490,24 +495,34 @@ export async function performAdjustment(
         activePointsThatShouldBeAffected -
         Math.trunc(activeEffect.flags.activePoints / costPerActivePoint);
 
+    // Calculate the effect's max value(s)
     activeEffect.changes[0].value =
         activeEffect.changes[0].value - activePointAffectedDifference;
 
     // If this is 5e then some characteristics are calculated (not figured) based on
     // those. We only need to worry about 2: DEX -> OCV & DCV and EGO -> OMCV & DMCV.
     // These 2 characteristics are always at indices 2 and 3
-    if (activeEffect.changes[1]) {
-        activeEffect.changes[1].value = RoundFavorPlayerUp(
-            activeEffect.changes[0].value / 3,
+
+    // TODO: This really only works when there is 1 effect happening to the characteristic.
+    //       To fix would require separate boost tracking along with fractional boosts or
+    //       not tracking the changes to OCV and DCV as active effects but have them recalculated
+    //       as the characteristic max and value are changing.
+    if (targetActor.system.is5e && activeEffect.changes[1]) {
+        const newCalculatedValue = RoundFavorPlayerUp(
+            (targetMax - activePointAffectedDifference) / 3,
         );
-    }
-    if (activeEffect.changes[2]) {
-        activeEffect.changes[2].value = RoundFavorPlayerUp(
-            activeEffect.changes[0].value / 3,
-        );
+        const oldCalculatedValue = RoundFavorPlayerUp(targetMax / 3);
+
+        activeEffect.changes[1].value =
+            parseInt(activeEffect.changes[1].value) +
+            (newCalculatedValue - oldCalculatedValue);
+
+        activeEffect.changes[2].value =
+            parseInt(activeEffect.changes[2].value) +
+            (newCalculatedValue - oldCalculatedValue);
     }
 
-    // Update the effect value(s)
+    // Update the effect max value(s)
     activeEffect.name = `${item.system.XMLID} ${Math.abs(
         activePointsThatShouldBeAffected,
     )} ${targetPower?.name || potentialCharacteristic} (${Math.abs(
@@ -529,39 +544,35 @@ export async function performAdjustment(
         });
     }
 
+    // Calculate the effect value(s)
     // TODO: Pretty sure recovery isn't working as expected for defensive items
     // TODO: Pretty sure recovery isn't working as expected for expended characteristics (need separate category keeping: value, max, boost)
-
-    // TODO: Only needed for characteristics? How will this work for powers?
-    const targetValue =
-        targetActor.system.characteristics?.[potentialCharacteristic] != null
-            ? targetActor.system.characteristics?.[potentialCharacteristic]
-                  .value
-            : targetPower.system.value;
-    const targetValuePath =
-        targetActor.system.characteristics?.[potentialCharacteristic] != null
-            ? `system.characteristics.${potentialCharacteristic}.value`
-            : `system.value`;
     const newValue = targetValue - activePointAffectedDifference;
     const changes = {
         [targetValuePath]: newValue,
     };
 
     if (targetActor.system.is5e && activeEffect.flags.target[1]) {
+        const newCalculatedValue = RoundFavorPlayerUp(
+            (targetMax - activePointAffectedDifference) / 3,
+        );
+        const oldCalculatedValue = RoundFavorPlayerUp(targetMax / 3);
+        const char1Value =
+            targetActor.system.characteristics[activeEffect.flags.target[1]]
+                .value;
+        const char2Value =
+            targetActor.system.characteristics[activeEffect.flags.target[2]]
+                .value;
+
         changes[
             `system.characteristics.${activeEffect.flags.target[1]}.value`
-        ] = RoundFavorPlayerUp(newValue / 3);
+        ] = char1Value + (newCalculatedValue - oldCalculatedValue);
         changes[
             `system.characteristics.${activeEffect.flags.target[2]}.value`
-        ] = RoundFavorPlayerUp(newValue / 3);
+        ] = char2Value + (newCalculatedValue - oldCalculatedValue);
     }
 
-    await new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve();
-        }, 1000);
-    });
-
+    // Update the effect value(s)
     await targetSystem.update(changes);
 
     return _generateAdjustmentChatCard(
