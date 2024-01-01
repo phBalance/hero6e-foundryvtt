@@ -1594,6 +1594,10 @@ HERO.powers5e = [
     },
 
     {
+        key: "FLIGHT",
+        costPerLevel: 2,
+    },
+    {
         key: "TELEPORTATION",
         costPerLevel: 2,
     },
