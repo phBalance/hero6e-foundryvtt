@@ -205,7 +205,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         name: "EFFECT.StatusSilenced",
         icon: "icons/svg/silenced.svg",
     };
-    static freightenedEffect = {
+    static frightenedEffect = {
         id: "fear",
         name: "EFFECT.StatusFear",
         icon: "icons/svg/terror.svg",

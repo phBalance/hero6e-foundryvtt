@@ -1,6 +1,9 @@
 import { HeroSystem6eItem } from "./item.js";
 import { editSubItem, deleteSubItem } from "../powers/powers.js";
-import { adjustmentSources } from "../utility/adjustment.js";
+import {
+    adjustmentSourcesPermissive,
+    adjustmentSourcesStrict,
+} from "../utility/adjustment.js";
 import { getPowerInfo } from "../utility/util.js";
 
 /**
@@ -180,7 +183,16 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         ) {
             const { enhances, reduces } = item.splitAdjustmentSourceAndTarget();
 
-            data.possibleSources = adjustmentSources(this.actor);
+            const enhancesValidator =
+                item.system.XMLID === "AID" ||
+                item.system.XMLID === "ABSORPTION" ||
+                item.system.XMLID === "TRANSFER"
+                    ? adjustmentSourcesStrict
+                    : adjustmentSourcesPermissive;
+
+            data.possibleEnhances = enhancesValidator(this.actor);
+            data.possibleReduces = adjustmentSourcesPermissive(this.actor);
+
             data.enhances = enhances
                 ? enhances
                       .split(",")
@@ -322,11 +334,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             return;
         }
 
-        // Adjustment Powers
-        if (expandedData.xmlidX || expandedData.xmlidY) {
-            expandedData.system.INPUT = `${expandedData.xmlidX} to ${expandedData.xmlidY}`;
-        }
-
         // Endurance Reserve
         if (expandedData.rec) {
             let power = this.item.system.powers.find(
@@ -340,13 +347,30 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
         }
 
-        // AID
-        if (expandedData.inputs && this.item.system.XMLID === "AID") {
-            const array = [];
-            for (let i of Object.keys(expandedData.inputs)) {
-                array.push(expandedData.inputs[i]);
+        // A select list of possible adjustment targets on the character
+        if (
+            (expandedData.reduces || expandedData.enhances) &&
+            (this.item.system.XMLID === "ABSORPTION" ||
+                this.item.system.XMLID === "AID" ||
+                this.item.system.XMLID === "HEALING" ||
+                this.item.system.XMLID === "DISPEL" ||
+                this.item.system.XMLID === "DRAIN" ||
+                this.item.system.XMLID === "SUPPRESS" ||
+                this.item.system.XMLID === "TRANSFER")
+        ) {
+            let newInputStr;
+
+            if (this.item.system.XMLID === "TRANSFER") {
+                newInputStr = `${Object.values(expandedData.reduces).join(
+                    ", ",
+                )} -> ${Object.values(expandedData.enhances).join(", ")}`;
+            } else {
+                newInputStr = Object.values(
+                    expandedData.reduces || expandedData.enhances,
+                ).join(", ");
             }
-            await this.item.update({ "system.INPUT": array.join(", ") });
+
+            await this.item.update({ "system.INPUT": newInputStr });
         }
 
         let description = this.item.system.description;
@@ -456,8 +480,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         const effectId = $(event.currentTarget)
             .closest("[data-effect-id]")
             .data().effectId;
-        const effect = this.actor.effects.get(effectId);
+        const effect = this.item.effects.get(effectId);
+
         if (!effect) return;
+
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize(
                 "HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title",
@@ -468,7 +494,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         });
 
         if (confirmed) {
-            effect.delete();
+            await effect.delete();
             this.render();
         }
     }
@@ -483,8 +509,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             .closest("[data-effect-id]")
             .data().effectId;
         let effect = this.document.effects.get(effectId);
-        if (!effect && this.actor) {
-            effect = this.actor.effects.get(effectId);
+        if (!effect && this.document.actor) {
+            effect = this.document.actor.effects.get(effectId);
         }
 
         effect.sheet.render(true);

@@ -4,9 +4,12 @@
 
 - The character sheet's power tab now has the dice icon for attack powers to initiate attacks.
 - Fix for movement powers toggles. [#533](https://github.com/dmdorman/hero6e-foundryvtt/issues/533)
-- Adjustment powers should now respect uploaded multi sources and targets when triggering.
+- Adjustment powers should now respect uploaded multi sources and targets when triggering. They should also respect maximum amounts for absorption, aid, and transfer for 5e and 6e.
 - No adjustment powers should be killing attacks that are enhanced by strength.
 - Compound powers now show proper indices.
+- Correct resistant power defense (yes it's a silly thing but we were accidentally boosting it and consequently mostly likely doubling power defenses).
+- Calculated power defense will now be shown on the character sheet.
+- Defensive powers qualifying for the adjustment multiplier now match 5e more strict list.
 
 ## Version 3.0.53
 

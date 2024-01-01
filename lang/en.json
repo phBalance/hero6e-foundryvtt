@@ -7,7 +7,7 @@
             },
             "fullHealthConfirm": {
                 "Title": "Confirm Full Health",
-                "Content": "Are you sure you want to restore all characteristics to max, remove status effects, and remote temporary effects?"
+                "Content": "Are you sure you want to restore all characteristics to max, remove status effects, and remove temporary effects?"
               }
         }
     },
@@ -24,7 +24,7 @@
             "ToHitModifier": "To Hit Modifier",
             "UsesStrength": "Uses Strength",
             "UsesTk": "Uses Telekinesis Strength",
-            "Value": "Damage dice",
+            "Value": "Damage Dice",
             "StunBodyDamage": "Stun and/or Body Damage",
             "OcvMod": "OCV Modifier",
             "DcvMod": "DCV Modifier",
@@ -55,11 +55,13 @@
         "OCV": "OCV",
         "DCV": "DCV",
         "Char": "Char",
+        "CharTitle": "Characteristic Name's Abbreviation.",
         "Base": "Base",
         "BaseTitle": "Starting amount you get for free.",
         "Cost": "Cost",
         "CostTitle": "Cost paid that are over the base amount.",
         "Notes": "Notes",
+        "NotesTitle": "Additional crucial information relating to the characteristic.",
         "Max": "Max",
         "MaxTitle": "Maximum value including all powers and effects.",
         "Core": "Core",

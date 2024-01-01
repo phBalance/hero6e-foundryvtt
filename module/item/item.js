@@ -2,7 +2,11 @@ import { HEROSYS } from "../herosystem6e.js";
 import * as Attack from "../item/item-attack.js";
 import { createSkillPopOutFromItem } from "../item/skill.js";
 import { enforceManeuverLimits } from "../item/manuever.js";
-import { adjustmentSources } from "../utility/adjustment.js";
+import {
+    adjustmentSourcesPermissive,
+    adjustmentSourcesStrict,
+    determineMaxAdjustment,
+} from "../utility/adjustment.js";
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
@@ -77,11 +81,51 @@ export class HeroSystem6eItem extends Item {
         super.prepareData();
     }
 
-    async _onUpdate(data, options, userId) {
-        super._onUpdate(data, options, userId);
+    async _onUpdate(changed, options, userId) {
+        super._onUpdate(changed, options, userId);
+
+        // If our value has changed, we need to rebuild this item.
+        if (changed.system?.value != null) {
+            // TODO: Update everything!
+            changed = this.calcItemPoints() || changed;
+
+            // DESCRIPTION
+            const oldDescription = this.system.description;
+            this.updateItemDescription();
+            changed = oldDescription != this.system.description || changed;
+
+            // Save changes
+            await this.update({ system: this.system });
+        }
 
         if (this.actor && this.type === "equipment") {
             this.actor.applyEncumbrancePenalty();
+        }
+    }
+
+    /**
+     * Reset an item back to its default state.
+     */
+    async resetToOriginal() {
+        // Set Charges to max
+        if (
+            this.system.charges &&
+            this.system.charges.value !== this.system.charges.max
+        ) {
+            await this.update({
+                [`system.charges.value`]: this.system.charges.max,
+            });
+        }
+
+        // Remove temporary effects
+        const effectPromises = Promise.all(
+            this.effects.map(async (effect) => await effect.delete()),
+        );
+
+        await effectPromises;
+
+        if (this.system.value !== this.system.max) {
+            await this.update({ ["system.value"]: this.system.max });
         }
     }
 
@@ -112,11 +156,16 @@ export class HeroSystem6eItem extends Item {
                     case "EGOATTACK":
                     case "AID":
                     case "DRAIN":
+                    case "HEALING":
+                    case "TRANSFER":
                     case "STRIKE":
                     case "FLASH":
                     case undefined:
                         return await Attack.AttackOptions(this, event);
 
+                    case "ABSORPTION":
+                    case "DISPEL":
+                    case "SUPPRESS":
                     default:
                         if (
                             !this.system.EFFECT ||
@@ -2146,6 +2195,15 @@ export class HeroSystem6eItem extends Item {
                         }
                         break;
 
+                    case "INCREASEDMAX":
+                        // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
+                        _adderArray.push(
+                            `${adder.ALIAS} (${determineMaxAdjustment(
+                                this,
+                            )} total points)`,
+                        );
+                        break;
+
                     default:
                         if (adder.ALIAS.trim()) {
                             _adderArray.push(adder.ALIAS);
@@ -2715,93 +2773,53 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // ENTANGLE (not implemented)
+        // Specific power overrides
         if (xmlid == "ENTANGLE") {
             this.system.class = "entangle";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
             this.system.knockbackMultiplier = 0;
-        }
-
-        // DARKNESS (not implemented)
-        if (xmlid == "DARKNESS") {
+        } else if (xmlid == "DARKNESS") {
             this.system.class = "darkness";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // IMAGES (not implemented)
-        if (xmlid == "IMAGES") {
+        } else if (xmlid == "IMAGES") {
             this.system.class = "images";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // ABSORPTION
-        if (xmlid == "ABSORPTION") {
-            this.system.class = "absorb";
+        } else if (xmlid == "ABSORPTION") {
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // AID
-        if (xmlid == "AID") {
-            this.system.class = "aid";
+        } else if (xmlid == "AID") {
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // DISPEL
-        if (xmlid == "DISPEL") {
-            this.system.class = "dispel";
+        } else if (xmlid == "DISPEL") {
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // DRAIN
-        if (xmlid == "DRAIN") {
-            this.system.class = "drain";
+        } else if (xmlid == "DRAIN") {
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // HEALING
-        if (xmlid == "HEALING") {
-            this.system.class = "healing";
+        } else if (xmlid == "HEALING") {
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // HEALING
-        if (xmlid == "SUPPRESSION") {
-            this.system.class = "suppression";
+        } else if (xmlid == "SUPPRESS") {
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // TRANSFER
-        if (xmlid == "TRANSFER") {
-            this.system.class = "transfer";
+        } else if (xmlid == "TRANSFER") {
+            this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // MINDSCAN
-        if (xmlid == "MINDSCAN") {
+        } else if (xmlid == "MINDSCAN") {
             this.system.class = "mindscan";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // DISPEL
-        if (xmlid == "DISPEL") {
-            this.system.class = "dispel";
-            this.system.usesStrength = false;
-            this.system.noHitLocations = true;
-        }
-
-        // MENTALBLAST
-        if (xmlid == "EGOATTACK") {
+        } else if (xmlid == "EGOATTACK") {
             this.system.class = "mental";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
@@ -2809,10 +2827,7 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.stunBodyDamage = "stunonly";
             this.system.noHitLocations = true;
-        }
-
-        // MINDCONTROL
-        if (xmlid == "MINDCONTROL") {
+        } else if (xmlid == "MINDCONTROL") {
             this.system.class = "mindcontrol";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
@@ -2820,10 +2835,7 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.stunBodyDamage = "stunonly";
             this.system.noHitLocations = true;
-        }
-
-        // TELEPATHY
-        if (xmlid == "TELEPATHY") {
+        } else if (xmlid == "TELEPATHY") {
             this.system.class = "telepathy";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
@@ -2831,17 +2843,11 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             //this.system.stunBodyDamage = "stunonly"
             this.system.noHitLocations = true;
-        }
-
-        // CHANGEENVIRONMENT
-        if (xmlid == "CHANGEENVIRONMENT") {
+        } else if (xmlid == "CHANGEENVIRONMENT") {
             this.system.class = "change enviro";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        }
-
-        // FLASH
-        if (xmlid == "FLASH") {
+        } else if (xmlid == "FLASH") {
             this.system.class = "flash";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
@@ -3120,17 +3126,24 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    _areAllAdjustmentTargetsInListValid(targetsList) {
+    _areAllAdjustmentTargetsInListValid(targetsList, mustBeStrict) {
         if (!targetsList) return false;
+
+        // ABSORPTION, AID, and TRANSFER target characteristics/powers are the only adjustment powers that must match
+        // the character's characteristics/powers (i.e. they can't create new characteristics or powers). All others just
+        // have to match actual possible characteristics/powers.
+        const validator =
+            this.system.XMLID === "AID" ||
+            this.system.XMLID === "ABSORPTION" ||
+            (this.system.XMLID === "TRANSFER" && mustBeStrict)
+                ? adjustmentSourcesStrict
+                : adjustmentSourcesPermissive;
+        const validList = Object.keys(validator(this.actor));
 
         const adjustmentTargets = targetsList.split(",");
         for (const rawAdjustmentTarget of adjustmentTargets) {
             const upperCasedInput = rawAdjustmentTarget.toUpperCase().trim();
-            if (
-                !Object.keys(adjustmentSources(this.actor)).includes(
-                    upperCasedInput,
-                )
-            ) {
+            if (!validList.includes(upperCasedInput)) {
                 return false;
             }
         }
@@ -3138,11 +3151,25 @@ export class HeroSystem6eItem extends Item {
         return true;
     }
 
-    // valid: boolean If true the enhances and reduces lists are valid, otherwise ignore them.
+    /**
+     *
+     *  If valid, the enhances and reduces lists are valid, otherwise ignore them.
+     *
+     * @typedef { Object } AdjustmentSourceAndTarget
+     * @property { boolean } valid - if any of the reduces and enhances fields are valid
+     * @property { string } reduces - things that are reduced (aka from)
+     * @property { string } enhances - things that are enhanced (aka to)
+     * @property { string[] } reducesArray
+     * @property { string[] } enhancesArray
+     */
+    /**
+     *
+     * @returns { AdjustmentSourceAndTarget }
+     */
     splitAdjustmentSourceAndTarget() {
         let valid;
-        let reduces;
-        let enhances;
+        let reduces = "";
+        let enhances = "";
 
         if (this.system.XMLID === "TRANSFER") {
             // Should be something like "STR,CON -> DEX,SPD"
@@ -3153,14 +3180,20 @@ export class HeroSystem6eItem extends Item {
             valid =
                 this._areAllAdjustmentTargetsInListValid(
                     splitSourcesAndTargets[0],
+                    false,
                 ) &&
                 this._areAllAdjustmentTargetsInListValid(
                     splitSourcesAndTargets[1],
+                    true,
                 );
             enhances = splitSourcesAndTargets[1];
             reduces = splitSourcesAndTargets[0];
         } else {
-            valid = this._areAllAdjustmentTargetsInListValid(this.system.INPUT);
+            valid = this._areAllAdjustmentTargetsInListValid(
+                this.system.INPUT,
+                this.system.XMLID === "AID" ||
+                    this.system.XMLID === "ABSORPTION",
+            );
 
             if (
                 this.system.XMLID === "AID" ||
@@ -3175,34 +3208,98 @@ export class HeroSystem6eItem extends Item {
 
         return {
             valid: valid,
-            reduces: reduces || "",
-            enhances: enhances || "",
+
+            reduces: reduces,
+            enhances: enhances,
+            reducesArray: reduces
+                ? reduces.split(",").map((str) => str.trim())
+                : [],
+            enhancesArray: enhances
+                ? enhances.split(",").map((str) => str.trim())
+                : [],
         };
     }
 
-    numberOfSimultaneousAdjustmentEffects(inputs) {
+    static _maxNumOf5eAdjustmentEffects(mod) {
+        if (!mod) return 1;
+
+        switch (mod.BASECOST) {
+            case "0.5":
+                return 2;
+            case "1.0":
+                return 4;
+            case "2.0":
+                // All of a type. Assume this is just infinite (pick a really big number).
+                return 10000;
+            default:
+                return 1;
+        }
+    }
+
+    numberOfSimultaneousAdjustmentEffects() {
         if (this.actor.system.is5e) {
             // In 5e, the number of simultaneous effects is based on the VARIABLEEFFECT modifier.
-            const variableEffect = this.findModsByXmlid("VARIABLEEFFECT");
+            const variableEffect = this.findModsByXmlid("VARIABLEEFFECT"); // From for TRANSFER and everything else
+            const variableEffect2 = this.findModsByXmlid("VARIABLEEFFECT2"); // To for TRANSFER
 
-            if (!variableEffect) return 1;
-
-            switch (variableEffect.BASECOST) {
-                case "0.5":
-                    return 2;
-                case "1.0":
-                    return 4;
-                case "2.0":
-                    // All of a type. Assume this is just everything listed in the inputs
-                    return inputs.length;
-                default:
-                    return 1;
+            if (this.system.XMLID === "TRANSFER") {
+                return {
+                    maxReduces:
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect,
+                        ),
+                    maxEnhances:
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect2,
+                        ),
+                };
+            } else if (
+                this.system.XMLID === "AID" ||
+                this.system.XMLID === "ABSORPTION" ||
+                this.system.XMLID === "HEALING"
+            ) {
+                return {
+                    maxReduces: 0,
+                    maxEnhances:
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect,
+                        ),
+                };
+            } else {
+                return {
+                    maxReduces:
+                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
+                            variableEffect,
+                        ),
+                    maxEnhances: 0,
+                };
             }
         }
 
-        // In 6e, the number of simultaneous effects is LEVELS in EXPANDEDEFFECT modifier if available or
-        // it is just 1.
-        return this.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
+        // In 6e, the number of simultaneous effects is LEVELS in the EXPANDEDEFFECT modifier, if available, or
+        // it is just 1. There is no TRANSFER in 6e.
+        const maxCount = this.findModsByXmlid("EXPANDEDEFFECT")?.LEVELS || 1;
+        if (
+            this.system.XMLID === "AID" ||
+            this.system.XMLID === "ABSORPTION" ||
+            this.system.XMLID === "HEALING"
+        ) {
+            return {
+                maxReduces: 0,
+                maxEnhances: maxCount,
+            };
+        } else {
+            return {
+                maxReduces: maxCount,
+                maxEnhances: 0,
+            };
+        }
+    }
+
+    async addActiveEffect(activeEffect) {
+        const newEffect = foundry.utils.deepClone(activeEffect);
+
+        return this.createEmbeddedDocuments("ActiveEffect", [newEffect]);
     }
 }
 

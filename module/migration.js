@@ -1,5 +1,7 @@
 import { HeroSystem6eItem } from "./item/item.js";
 import { getPowerInfo } from "./utility/util.js";
+import { determineCostPerActivePoint } from "./utility/adjustment.js";
+import { RoundFavorPlayerUp } from "./utility/round.js";
 
 function getAllActorsInGame() {
     return [
@@ -332,6 +334,28 @@ export async function migrateWorld() {
         }
     }
 
+    // if lastMigration < 3.0.54
+    // Update item.system.class from specific adjustment powers to the general adjustment
+    // Active Effects for adjustments changed format
+    if (foundry.utils.isNewerVersion("3.0.54", lastMigration)) {
+        const queue = getAllActorsInGame();
+        let dateNow = new Date();
+
+        for (const [index, actor] of queue.entries()) {
+            if (new Date() - dateNow > 4000) {
+                ui.notifications.info(
+                    `Migrating actor's items to 3.0.54: (${
+                        queue.length - index
+                    } actors remaining)`,
+                );
+                dateNow = new Date();
+            }
+
+            await migrate_actor_items_to_3_0_54(actor);
+            await migrate_actor_active_effects_to_3_0_54(actor);
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
     {
         let d = new Date();
@@ -357,9 +381,6 @@ export async function migrateWorld() {
 async function migrateActorCostDescription(actor) {
     try {
         if (!actor) return false;
-
-        if (actor.name === `Jack "Iron Shin" Daniels`)
-            console.log.apply(actor.name);
 
         let itemsChanged = false;
         for (let item of actor.items) {
@@ -390,6 +411,185 @@ async function migrateActorCostDescription(actor) {
             await ui.notifications.warn(
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
+        }
+    }
+}
+
+async function migrate_actor_active_effects_to_3_0_54(actor) {
+    for (const activeEffect of actor.temporaryEffects) {
+        // Is it possibly an old style adjustment effect?
+        if (activeEffect.changes.length > 0 && activeEffect.flags.target) {
+            const origin = await fromUuid(activeEffect.origin);
+            const item = origin instanceof HeroSystem6eItem ? origin : null;
+
+            const powerInfo = getPowerInfo({
+                actor: actor,
+                xmlid: activeEffect?.flags?.XMLID,
+                item: item,
+            });
+
+            // Confirm the power associated with is an adjustment power type
+            if (!powerInfo || !powerInfo.powerType.includes("adjustment")) {
+                continue;
+            }
+
+            // Make sure it's not a new style adjustment active effect already (just a dev possibility)
+            if (activeEffect.flags.type === "adjustment") {
+                continue;
+            }
+
+            const presentAdjustmentActiveEffect = activeEffect;
+            const potentialCharacteristic =
+                presentAdjustmentActiveEffect.flags.keyX;
+
+            const costPerActivePoint = determineCostPerActivePoint(
+                potentialCharacteristic,
+                null, // TODO: Correct, as we don't support powers right now?
+                actor,
+            );
+            const activePointsThatShouldBeAffected = Math.trunc(
+                presentAdjustmentActiveEffect.flags.activePoints /
+                    costPerActivePoint,
+            );
+
+            const newFormatAdjustmentActiveEffect = {
+                name: `${presentAdjustmentActiveEffect.flags.XMLID} ${Math.abs(
+                    activePointsThatShouldBeAffected,
+                )} ${presentAdjustmentActiveEffect.flags.target} (${Math.abs(
+                    presentAdjustmentActiveEffect.flags.activePoints,
+                )} AP) [by ${presentAdjustmentActiveEffect.flags.source}]`,
+                id: presentAdjustmentActiveEffect.id, // No change
+                icon: presentAdjustmentActiveEffect.icon, // No change
+                changes: presentAdjustmentActiveEffect.changes, // No change but for 5e there may be additional indices (see below)
+                duration: presentAdjustmentActiveEffect.duration, // No change even though it might be wrong for transfer it's too complicated to try to figure it out
+                flags: {
+                    type: "adjustment", // New
+                    version: 2, // New
+
+                    activePoints:
+                        presentAdjustmentActiveEffect.flags.activePoints, // No change
+                    XMLID: presentAdjustmentActiveEffect.flags.XMLID, // No change
+                    source: presentAdjustmentActiveEffect.flags.source, // No change
+                    target: [presentAdjustmentActiveEffect.flags.target], // Now an array
+                    key: presentAdjustmentActiveEffect.flags.keyX, // Name change
+                },
+                origin: presentAdjustmentActiveEffect.origin, // No change
+            };
+
+            // If 5e we may have additional changes
+            if (
+                actor.system.is5e &&
+                actor.system.characteristics?.[potentialCharacteristic]
+            ) {
+                if (potentialCharacteristic === "dex") {
+                    const charValue =
+                        actor.system.characteristics[potentialCharacteristic]
+                            .value;
+                    const lift = RoundFavorPlayerUp(
+                        (charValue -
+                            actor.system.characteristics[
+                                potentialCharacteristic
+                            ].core) /
+                            3,
+                    );
+
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.ocv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("ocv");
+
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.dcv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("dcv");
+
+                    const changes = {
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[1]}.value`]:
+                            actor.system.characteristics.ocv.value + lift,
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[2]}.value`]:
+                            actor.system.characteristics.dcv.value + lift,
+                    };
+
+                    await actor.update(changes);
+                } else if (potentialCharacteristic === "ego") {
+                    const charValue =
+                        actor.system.characteristics[potentialCharacteristic]
+                            .value;
+                    const lift = RoundFavorPlayerUp(
+                        (charValue -
+                            actor.system.characteristics[
+                                potentialCharacteristic
+                            ].core) /
+                            3,
+                    );
+
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.omcv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("omcv");
+
+                    newFormatAdjustmentActiveEffect.changes.push({
+                        key: actor.system.characteristics[
+                            potentialCharacteristic
+                        ]
+                            ? `system.characteristics.dmcv.max`
+                            : "system.value",
+                        value: lift,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    });
+                    newFormatAdjustmentActiveEffect.flags.target.push("dmcv");
+
+                    const changes = {
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[1]}.value`]:
+                            actor.system.characteristics.omcv.value + lift,
+                        [`system.characteristics.${newFormatAdjustmentActiveEffect.flags.target[2]}.value`]:
+                            actor.system.characteristics.dmcv.value + lift,
+                    };
+
+                    await actor.update(changes);
+                }
+            }
+
+            // Delete old active effect and create the new one
+            await presentAdjustmentActiveEffect.delete();
+            await actor.addActiveEffect(newFormatAdjustmentActiveEffect);
+        }
+    }
+}
+
+async function migrate_actor_items_to_3_0_54(actor) {
+    for (const item of actor.items) {
+        // Give all adjustment powers the new "adjustment" class for simplicity.
+        if (
+            item.system.XMLID === "ABSORPTION" ||
+            item.system.XMLID === "AID" ||
+            item.system.XMLID === "DISPEL" ||
+            item.system.XMLID === "DRAIN" ||
+            item.system.XMLID === "HEALING" ||
+            item.system.XMLID === "TRANSFER" ||
+            item.system.XMLID === "SUPPRESS"
+        ) {
+            await item.update({
+                "system.class": "adjustment",
+            });
         }
     }
 }

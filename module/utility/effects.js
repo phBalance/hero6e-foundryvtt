@@ -15,33 +15,6 @@ export async function onManageActiveEffect(event, owner) {
     );
     const item = owner.items.get(li.dataset.effectId);
 
-    // guard or perhaps a defense item
-    // if (!effect) {
-    //     const item = owner.items.get(li.dataset.effectId);
-    //     if (item) {
-    //         switch (a.dataset.action) {
-    //             case "edit":
-    //                 item.sheet.render(true);
-    //                 break;
-    //             case "toggle":
-    //                 item.toggle();
-    //                 break;
-    //             case "delete":
-    //                 const confirmed = await Dialog.confirm({
-    //                     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
-    //                     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")
-    //                 });
-
-    //                 if (confirmed) {
-    //                     item.delete()
-    //                     //this.render();
-    //                 }
-    //                 break;
-    //         }
-    //     }
-    //     return;
-    // }
-
     switch (a.dataset.action) {
         case "create":
             return owner.createEmbeddedDocuments("ActiveEffect", [
@@ -50,8 +23,6 @@ export async function onManageActiveEffect(event, owner) {
                     icon: "icons/svg/aura.svg",
                     origin: owner.uuid,
                     disabled: true,
-                    //   "duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
-                    //   disabled: li.dataset.effectType === "inactive"
                 },
             ]);
 
@@ -83,18 +54,8 @@ export async function onManageActiveEffect(event, owner) {
                     }
                     await effect.delete();
                 } else {
-                    item.delete();
+                    await item.delete();
                 }
-
-                //let actor = effect.parent instanceof HeroSystem6eActor ? effect.parent : effect.parent.actor
-
-                // Characteristic VALUE should not exceed MAX
-                // for (let char of Object.keys(actor.system.characteristics)) {
-                //     if (actor.system.characteristics[char].value > actor.system.characteristics[char].max) {
-                //         await actor.update({ [`system.characteristics.${char}.value`]: actor.system.characteristics[char].max })
-                //         //updates.push({[`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].max)});
-                //     }
-                // }
             }
             return;
         }

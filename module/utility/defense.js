@@ -6,10 +6,12 @@ function determineDefense(targetActor, attackItem, options) {
     const attackType = avad ? "avad" : attackItem.system.class;
     const piercing =
         parseInt(attackItem.system.piercing) ||
-        attackItem.findModsByXmlid("ARMORPIERCING");
+        attackItem.findModsByXmlid("ARMORPIERCING") ||
+        0;
     const penetrating =
         parseInt(attackItem.system.penetrating) ||
-        attackItem.findModsByXmlid("PENETRATING");
+        attackItem.findModsByXmlid("PENETRATING") ||
+        0;
 
     // The defenses that are active
     const activeDefenses = targetActor.items.filter(
@@ -20,14 +22,14 @@ function determineDefense(targetActor, attackItem, options) {
             !(options?.ignoreDefenseIds || []).includes(o.id),
     );
 
-    let PD = parseInt(targetActor.system.characteristics.pd.value);
-    let ED = parseInt(targetActor.system.characteristics.ed.value);
-    let MD = 0;
-    let POWD = 0;
-    let rPOWD = 0;
+    let PD = parseInt(targetActor.system.characteristics.pd.value); // physical defense
+    let ED = parseInt(targetActor.system.characteristics.ed.value); // energy defense
+    let MD = 0; // mental defense
+    let POWD = 0; // power defense
     let rPD = 0; // resistant physical defense
     let rED = 0; // resistant energy defense
-    let rMD = 0; // resistant mental defense (not sure rMD is a real thing)
+    let rMD = 0; // resistant mental defense (a silly but possible thing)
+    let rPOWD = 0; // resistant power defense (a silly but possible thing)
     let DRP = 0; // damage reduction physical
     let DRE = 0; // damage reduction energy
     let DRM = 0; // damage reduction mental
@@ -131,51 +133,48 @@ function determineDefense(targetActor, attackItem, options) {
                 });
             break;
         case "mental":
+        case "adjustment":
             break;
     }
 
-    //if ((targetActor.items.size || targetActor.items.length) > 0) {
-    for (let i of activeDefenses) {
-        let value = parseInt(i.system.value) || 0;
+    for (const activeDefense of activeDefenses) {
+        let value = parseInt(activeDefense.system.value) || 0;
 
-        const xmlid = i.system.XMLID;
+        const xmlid = activeDefense.system.XMLID;
 
         // Resistant Defenses
         if (["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
             switch (attackType) {
                 case "physical":
-                    value = parseInt(i.system.PDLEVELS) || 0;
-                    i.system.defenseType = "pd";
-                    i.system.resistant = true;
+                    value = parseInt(activeDefense.system.PDLEVELS) || 0;
+                    activeDefense.system.defenseType = "pd";
+                    activeDefense.system.resistant = true;
                     break;
 
                 case "energy":
-                    value = parseInt(i.system.EDLEVELS) || 0;
-                    i.system.defenseType = "ed";
-                    i.system.resistant = true;
+                    value = parseInt(activeDefense.system.EDLEVELS) || 0;
+                    activeDefense.system.defenseType = "ed";
+                    activeDefense.system.resistant = true;
                     break;
 
                 case "mental":
-                    i.system.defenseType = "md";
-                    value = parseInt(i.system.MDLEVELS) || 0;
-                    i.system.resistant = true;
+                    value = parseInt(activeDefense.system.MDLEVELS) || 0;
+                    activeDefense.system.defenseType = "md";
+                    activeDefense.system.resistant = true;
                     break;
 
-                case "drain":
-                case "transfer":
-                    i.system.defenseType = "powd";
-                    value = parseInt(i.system.POWDLEVELS) || 0;
-                    i.system.resistant = true;
+                case "adjustment":
+                    value = parseInt(activeDefense.system.POWDLEVELS) || 0;
+                    activeDefense.system.defenseType = "powd";
+                    activeDefense.system.resistant = true;
                     break;
             }
         }
 
         if (["POWERDEFENSE"].includes(xmlid)) {
             switch (attackType) {
-                case "drain":
-                case "transfer":
-                    i.system.defenseType = "powd";
-                    //value += parseInt(i.system.value) || 0
+                case "adjustment":
+                    activeDefense.system.defenseType = "powd";
                     break;
             }
         }
@@ -183,9 +182,7 @@ function determineDefense(targetActor, attackItem, options) {
         if (["MENTALDEFENSE"].includes(xmlid)) {
             switch (attackType) {
                 case "mental":
-                    i.system.defenseType = "md";
-                    //value += parseInt(i.system.value) || 0
-                    //defenseTags.push({ name: 'MD', value: i.system.value, resistant: false, title: i.name})
+                    activeDefense.system.defenseType = "md";
                     break;
             }
         }
@@ -193,21 +190,22 @@ function determineDefense(targetActor, attackItem, options) {
         if (
             !value &&
             ["DAMAGEREDUCTION"].includes(xmlid) &&
-            i.system.INPUT.toLowerCase() == attackType
+            activeDefense.system.INPUT.toLowerCase() == attackType
         ) {
-            value = parseInt(i.system.OPTIONID.match(/\d+/)) || 0;
-            i.system.resistant = i.system.OPTIONID.match(/RESISTANT/)
-                ? true
-                : false;
+            value = parseInt(activeDefense.system.OPTIONID.match(/\d+/)) || 0;
+            activeDefense.system.resistant =
+                activeDefense.system.OPTIONID.match(/RESISTANT/) ? true : false;
             switch (attackType) {
                 case "physical":
-                    i.system.defenseType = "drp";
+                    activeDefense.system.defenseType = "drp";
                     break;
+
                 case "energy":
-                    i.system.defenseType = "dre";
+                    activeDefense.system.defenseType = "dre";
                     break;
+
                 case "mental":
-                    i.system.defenseType = "drm";
+                    activeDefense.system.defenseType = "drm";
                     break;
             }
         }
@@ -215,44 +213,49 @@ function determineDefense(targetActor, attackItem, options) {
         if (!value && ["DAMAGENEGATION"].includes(xmlid)) {
             switch (attackType) {
                 case "physical":
-                    i.system.defenseType = "dnp";
+                    activeDefense.system.defenseType = "dnp";
                     value =
                         parseInt(
-                            i.system.ADDER.find((o) => o.XMLID == "PHYSICAL")
-                                ?.LEVELS,
+                            activeDefense.system.ADDER.find(
+                                (o) => o.XMLID == "PHYSICAL",
+                            )?.LEVELS,
                         ) || 0;
                     break;
+
                 case "energy":
-                    i.system.defenseType = "dne";
+                    activeDefense.system.defenseType = "dne";
                     value =
                         parseInt(
-                            i.system.ADDER.find((o) => o.XMLID == "ENERGY")
-                                ?.LEVELS,
+                            activeDefense.system.ADDER.find(
+                                (o) => o.XMLID == "ENERGY",
+                            )?.LEVELS,
                         ) || 0;
                     break;
+
                 case "mental":
-                    i.system.defenseType = "dnm";
+                    activeDefense.system.defenseType = "dnm";
                     value =
                         parseInt(
-                            i.system.ADDER.find((o) => o.XMLID == "MENTAL")
-                                ?.LEVELS,
+                            activeDefense.system.ADDER.find(
+                                (o) => o.XMLID == "MENTAL",
+                            )?.LEVELS,
                         ) || 0;
                     break;
             }
         }
 
         if (["COMBAT_LUCK"].includes(xmlid)) {
-            //!value &&
             switch (attackType) {
                 case "physical":
-                    i.system.defenseType = "pd";
-                    value = (parseInt(i.system.value) || 0) * 3;
-                    i.system.resistant = true;
+                    activeDefense.system.defenseType = "pd";
+                    value = (parseInt(activeDefense.system.value) || 0) * 3;
+                    activeDefense.system.resistant = true;
                     break;
+
                 case "energy":
-                    i.system.defenseType = "ed";
-                    value = (parseInt(i.system.value) || 0) * 3;
-                    i.system.resistant = true;
+                    activeDefense.system.defenseType = "ed";
+                    value = (parseInt(activeDefense.system.value) || 0) * 3;
+                    activeDefense.system.resistant = true;
                     break;
             }
         }
@@ -265,7 +268,11 @@ function determineDefense(targetActor, attackItem, options) {
             if (["KBRESISTANCE", "DENSITYINCREASE", "GROWTH"].includes(xmlid)) {
                 let _value = value * (targetActor.system.is5e ? 1 : 2);
                 knockbackResistance += _value;
-                defenseTags.push({ value: _value, name: "KB", title: i.name });
+                defenseTags.push({
+                    value: _value,
+                    name: "KB",
+                    title: activeDefense.name,
+                });
             }
         }
 
@@ -274,7 +281,9 @@ function determineDefense(targetActor, attackItem, options) {
 
         // Hardened
         let hardened = parseInt(
-            i.system.hardened || i.findModsByXmlid("HARDENED")?.LEVELS || 0,
+            activeDefense.system.hardened ||
+                activeDefense.findModsByXmlid("HARDENED")?.LEVELS ||
+                0,
         );
 
         // Armor Piercing
@@ -284,8 +293,8 @@ function determineDefense(targetActor, attackItem, options) {
 
         // Impenetrable
         let impenetrable = parseInt(
-            i.system.impenetrable ||
-                i.findModsByXmlid("IMPENETRABLE")?.LEVELS ||
+            activeDefense.system.impenetrable ||
+                activeDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS ||
                 0,
         );
 
@@ -294,7 +303,10 @@ function determineDefense(targetActor, attackItem, options) {
             valueImp = valueAp;
         }
 
-        switch ((i.system.resistant ? "r" : "") + i.system.defenseType) {
+        const protectionType =
+            (activeDefense.system.resistant ? "r" : "") +
+            activeDefense.system.defenseType;
+        switch (protectionType) {
             case "pd": // Physical Defense
                 PD += valueAp;
                 if (attackType === "physical" || attackType === "avad") {
@@ -303,11 +315,12 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "PD",
                             value: valueAp,
                             resistant: false,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "ed": // Energy Defense
                 ED += valueAp;
                 if (attackType === "energy" || attackType === "avad") {
@@ -316,11 +329,12 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "ED",
                             value: valueAp,
                             resistant: false,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "md": // Mental Defense
                 MD += valueAp;
                 if (attackType === "mental" || attackType === "avad") {
@@ -329,15 +343,16 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "MD",
                             value: valueAp,
                             resistant: false,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "powd": // Power Defense
                 POWD += valueAp;
                 if (
-                    ["drain", "transfer"].includes(attackType) ||
+                    ["adjustment"].includes(attackType) ||
                     attackType === "avad"
                 ) {
                     if (valueAp > 0)
@@ -345,11 +360,12 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "POWD",
                             value: valueAp,
                             resistant: false,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "rpd": // Resistant PD
                 rPD += valueAp;
                 if (attackType === "physical" || attackType === "avad") {
@@ -358,11 +374,12 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "rPD",
                             value: valueAp,
                             resistant: true,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "red": // Resistant ED
                 rED += valueAp;
                 if (attackType === "energy" || attackType === "avad") {
@@ -371,11 +388,12 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "rED",
                             value: valueAp,
                             resistant: true,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "rmd": // Resistant MD
                 rMD += valueAp;
                 if (attackType === "mental" || attackType === "avad") {
@@ -384,15 +402,16 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "rMD",
                             value: valueAp,
                             resistant: true,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "rpowd": // Resistant Power Defense
                 rPOWD += valueAp;
                 if (
-                    ["drain", "transfer"].includes(attackType) ||
+                    ["adjustment"].includes(attackType) ||
                     attackType === "avad"
                 ) {
                     if (valueAp > 0)
@@ -400,74 +419,87 @@ function determineDefense(targetActor, attackItem, options) {
                             name: "rPOWD",
                             value: valueAp,
                             resistant: true,
-                            title: i.name,
+                            title: activeDefense.name,
                         });
                     impenetrableValue += valueImp;
                 }
                 break;
+
             case "drp": // Damage Reduction Physical
             case "rdrp":
                 if (value > 0)
                     defenseTags.push({
                         name: "drp",
-                        value: `${i.system.resistant ? "r" : ""}${value}%`,
-                        resistant: i.system.resistant,
-                        title: i.name,
+                        value: `${
+                            activeDefense.system.resistant ? "r" : ""
+                        }${value}%`,
+                        resistant: activeDefense.system.resistant,
+                        title: activeDefense.name,
                     });
                 DRP = Math.max(DRP, value);
                 break;
+
             case "dre": // Damage Reduction Energy
             case "rdre":
                 if (value > 0)
                     defenseTags.push({
                         name: "dre",
-                        value: `${i.system.resistant ? "r" : ""}${value}%`,
-                        resistant: i.system.resistant,
-                        title: i.name,
+                        value: `${
+                            activeDefense.system.resistant ? "r" : ""
+                        }${value}%`,
+                        resistant: activeDefense.system.resistant,
+                        title: activeDefense.name,
                     });
                 DRE = Math.max(DRE, value);
                 break;
+
             case "drm": // Damage Reduction Mental
             case "rdrm":
                 if (value > 0)
                     defenseTags.push({
                         name: "drm",
-                        value: `${i.system.resistant ? "r" : ""}${value}%`,
-                        resistant: i.system.resistant,
-                        title: i.name,
+                        value: `${
+                            activeDefense.system.resistant ? "r" : ""
+                        }${value}%`,
+                        resistant: activeDefense.system.resistant,
+                        title: activeDefense.name,
                     });
                 DRM = Math.max(DRM, value);
                 break;
+
             case "dnp": // Damage Negation Physical
                 if (value > 0)
                     defenseTags.push({
                         name: "dnp",
                         value: value,
                         resistant: false,
-                        title: i.name,
+                        title: activeDefense.name,
                     });
                 DNP += value;
                 break;
+
             case "dne": // Damage Negation Energy
                 if (value > 0)
                     defenseTags.push({
                         name: "dne",
                         value: value,
                         resistant: false,
-                        title: i.name,
+                        title: activeDefense.name,
                     });
                 DNE += value;
                 break;
+
             case "dnm": // Damage Negation Mental
                 if (value > 0)
                     defenseTags.push({
                         name: "dnm",
                         value: value,
                         resistant: false,
-                        title: i.name,
+                        title: activeDefense.name,
                     });
                 DNM += value;
                 break;
+
             case "kbr": // Knockback Resistance
                 knockbackResistance += value;
                 if (
@@ -477,20 +509,21 @@ function determineDefense(targetActor, attackItem, options) {
                     defenseTags.push({
                         name: "KB Resistance",
                         value: value,
-                        title: i.name,
+                        title: activeDefense.name,
                     });
                 }
                 break;
+
             default:
-                if (game.settings.get(game.system.id, "alphaTesting")) {
-                    //ui.notifications.warn(i.system.defenseType + " not yet supported!")
-                    //HEROSYS.log(false, i.system.defenseType + " not yet supported!");
-                }
+                // TODO: Mostly likely this is flash defense missing
+                // if (game.settings.get(game.system.id, "alphaTesting")) {
+                //     const warnMessage = `${activeDefense.name}: ${activeDefense.system.defenseType} not yet supported!`;
+                //     ui.notifications.warn(warnMessage);
+                //     HEROSYS.log(false, warnMessage);
+                // }
                 break;
         }
-        //}
     }
-    //}
 
     let defenseValue = 0;
     let resistantValue = 0;
@@ -504,6 +537,7 @@ function determineDefense(targetActor, attackItem, options) {
             damageReductionValue = DRP;
             damageNegationValue = DNP;
             break;
+
         case "energy":
             defenseValue = ED;
             resistantValue = rED;
@@ -511,6 +545,7 @@ function determineDefense(targetActor, attackItem, options) {
             damageReductionValue = DRE;
             damageNegationValue = DNE;
             break;
+
         case "mental":
             defenseValue = MD;
             resistantValue = rMD;
@@ -519,14 +554,14 @@ function determineDefense(targetActor, attackItem, options) {
             damageNegationValue = DNM;
             break;
 
-        case "drain":
-        case "transfer":
+        case "adjustment":
             defenseValue = POWD;
-            resistantValue = Math.max(POWD, rPOWD);
+            resistantValue = rPOWD;
             //impenetrableValue = Math.max(POWD, rPOWD);
             damageReductionValue = DRM;
             damageNegationValue = DNM;
             break;
+
         case "avad":
             defenseValue = PD + ED + MD + POWD;
             resistantValue = rPD + rED + rMD + rPOWD;
@@ -534,6 +569,7 @@ function determineDefense(targetActor, attackItem, options) {
             damageReductionValue = DRM;
             damageNegationValue = DNM;
             defenseTags;
+            break;
     }
 
     return [

@@ -555,7 +555,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             damageNegationValue /*knockbackResistance*/,
             ,
             defenseTagsP,
-        ] = determineDefense.call(this, this.actor, pdAttack);
+        ] = determineDefense(this.actor, pdAttack);
         defense.PD = defenseValue;
         defense.rPD = resistantValue;
         defense.PDtags = "PHYSICAL DEFENSE\n";
@@ -601,7 +601,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             damageNegationValueE /* knockbackResistanceE */,
             ,
             defenseTagsE,
-        ] = determineDefense.call(this, this.actor, edAttack);
+        ] = determineDefense(this.actor, edAttack);
         defense.ED = defenseValueE;
         defense.rED = resistantValueE;
         defense.EDtags = "ENERGY DEFENSE\n";
@@ -648,7 +648,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             damageNegationValueM /*knockbackResistanceM*/,
             ,
             defenseTagsM,
-        ] = determineDefense.call(this, this.actor, mdAttack);
+        ] = determineDefense(this.actor, mdAttack);
         defense.MD = defenseValueM;
         defense.rMD = resistantValueM;
         defense.MDtags = "MENTAL DEFENSE\n";
@@ -677,8 +677,8 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // Defense POWD
         const drainContentsAttack = `
-            <POWER XMLID="FORCEFIELD" ID="1686527339658" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="2" MDLEVELS="3" POWDLEVELS="4">
-            <NOTES />
+            <POWER XMLID="DRAIN" ID="1703727634494" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                <NOTES />
             </POWER>
         `;
         const drainAttack = await new HeroSystem6eItem(
@@ -695,7 +695,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             ,
             ,
             defenseTagsPOWD,
-        ] = determineDefense.call(this, this.actor, drainAttack);
+        ] = determineDefense(this.actor, drainAttack);
         defense.POWD = defenseValuePOWD;
         defense.rPOWD = resistantValuePOWD;
         defense.POWDtags = "POWER DEFENSE\n";
@@ -1120,10 +1120,15 @@ export class HeroSystemActorSheet extends ActorSheet {
     async _onUnlockCharacteristic(event) {
         event.preventDefault();
 
+        // The event will not be generated from the disabled input (since disabled elements
+        // don't generally allow mouse events) but rather from the enclosing td element.
+        // Find its child input element
+        const input = event.target.querySelector("input");
+
         // Find all associated Active Effects
         let activeEffects = Array.from(
             this.actor.allApplicableEffects(),
-        ).filter((o) => o.changes.find((p) => p.key === event.target.name));
+        ).filter((o) => o.changes.find((p) => p.key === input.name));
         for (let ae of activeEffects) {
             // Delete status
             if (ae.statuses) {

@@ -6,3 +6,6 @@
 
 # Ignore all yaml files
 **/*.yml
+
+# Ignore all SCSS files
+**/*.scss
