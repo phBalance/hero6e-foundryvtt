@@ -1489,22 +1489,6 @@ HERO.powers5e = [
         cost: 0,
     },
     {
-        key: "RUNNING",
-        base: 6,
-        cost: 2,
-    },
-    {
-        key: "SWIMMING",
-        base: 2,
-        cost: 1,
-        costPerLevel: 1,
-    },
-    {
-        key: "LEAPING",
-        base: 2,
-        cost: 1,
-    },
-    {
         key: "ABSORPTION",
         powerType: ["adjustment", "attack"],
         costPerLevel: 5,
@@ -1598,8 +1582,33 @@ HERO.powers5e = [
         costPerLevel: 2,
     },
     {
+        key: "LEAPING",
+        base: 2,
+        cost: 1,
+        costPerLevel: 1,
+    },
+    {
+        key: "RUNNING",
+        base: 6,
+        cost: 2,
+    },
+    {
+        key: "SWIMMING",
+        base: 2,
+        cost: 1,
+        costPerLevel: 1,
+    },
+    {
+        key: "SWINGING",
+        costPerLevel: 1,
+    },
+    {
         key: "TELEPORTATION",
         costPerLevel: 2,
+    },
+    {
+        key: "TUNNELING",
+        costPerLevel: 5,
     },
 ];
 
