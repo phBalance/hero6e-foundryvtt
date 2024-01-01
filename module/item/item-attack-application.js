@@ -50,8 +50,6 @@ export class ItemAttackFormApplication extends FormApplication {
             popOut: true,
             template: `systems/hero6efoundryvttv2/templates/attack/item-attack-application.hbs`,
             id: "item-attack-form-application",
-            //title: `${actor.name} roll to hit`,
-            //resizable: true,
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
         });
@@ -63,8 +61,9 @@ export class ItemAttackFormApplication extends FormApplication {
         const data = this.data;
         const item = data.item;
 
-        const aoe = item.findModsByXmlid("AOE");
+        const aoe = item.hasAoeModifier();
         if (aoe) {
+            // TODO: This needs to change. Shouldn't it be looking at system.areaOfEffect?
             data.aoeText = aoe.OPTION_ALIAS;
             if (aoe.LEVELS) {
                 data.aoeText += ` (${aoe.LEVELS})`;
@@ -126,7 +125,6 @@ export class ItemAttackFormApplication extends FormApplication {
 
     activateListeners(html) {
         super.activateListeners(html);
-        //html.find(".combat-skill-levels input").change((event) => this._updateCsl(event, html));
     }
 
     async _render(...args) {
@@ -143,7 +141,7 @@ export class ItemAttackFormApplication extends FormApplication {
             canvas.tokens.activate();
             await this.close();
 
-            const aoe = this.data.item.findModsByXmlid("AOE");
+            const aoe = this.data.item.hasAoeModifier();
             if (aoe) {
                 return _processAttackAoeOptions(this.data.item, formData);
             }
@@ -188,7 +186,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     async _spawnAreaOfEffect() {
         const item = this.data.item;
-        const aoe = item.findModsByXmlid("AOE");
+        const aoe = item.hasAoeModifier();
         if (!aoe) return;
 
         const aoeType = aoe.OPTION.toLowerCase();

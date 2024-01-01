@@ -121,7 +121,7 @@ export async function AttackOptions(item) {
         }
     }
 
-    const aoe = item.findModsByXmlid("AOE");
+    const aoe = item.hasAoeModifier();
 
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
@@ -186,7 +186,9 @@ export async function AttackAoeToHit(item, options) {
 
     const actor = item.actor;
     if (!actor) {
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     const token = actor.getActiveTokens()[0];
@@ -209,7 +211,7 @@ export async function AttackAoeToHit(item, options) {
         dcvTargetNumber = 3;
     }
 
-    const aoe = item.findModsByXmlid("AOE");
+    const aoe = item.hasAoeModifier();
     const SELECTIVETARGET = aoe?.adders
         ? aoe.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
         : null;
@@ -683,13 +685,11 @@ export async function AttackToHit(item, options) {
         item.update({ "system.charges.value": charges - spentCharges });
     }
 
-    const aoe = item.findModsByXmlid("AOE");
+    const aoe = item.hasAoeModifier();
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
-    const explosion = aoe?.adders
-        ? aoe.ADDER.find((o) => o.XMLID === "EXPLOSION")
-        : null;
+    const explosion = item.hasExplosionAdvantage();
     const SELECTIVETARGET = aoe?.adders
         ? aoe.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
         : null;
@@ -844,34 +844,6 @@ export async function AttackToHit(item, options) {
         return ChatMessage.create(chatData);
     }
 
-    //const aoe = item.system.modifiers.find(o => o.XMLID === "AOE");
-    //const explosion = aoe?.adders ? aoe.adders.find(o=> o.XMLID === "EXPLOSION") : null;
-
-    // Attack Tags
-    // let attackTags = []
-    // attackTags.push({name: item.system.class});
-    // if (item.system.killing) {
-    //     attackTags.push({name: `killing`});
-    // }
-    // if (item.system.stunBodyDamage != 'stunbody') {
-    //     attackTags.push({name: item.system.stunBodyDamage});
-    // }
-    // if (item.system.piercing) {
-    //     attackTags.push({name: `APx${item.system.piercing}`, title: `Armor Piercing`});
-    // }
-    // if (item.system.penetrating) {
-    //     attackTags.push({name: `PENx${item.system.penetrating}`, title: `Penetrating`});
-    // }
-    // if (autofire) {
-    //     attackTags.push({name: `AFx${autoFireShots}`, title: `Autofire`});
-    // }
-    // if (aoe) {
-    //     attackTags.push({name: `${aoe.OPTION_ALIAS}(${aoe.LEVELS})`});
-    // }
-    // if (explosion) {
-    //     attackTags.push({name: `explosion`});
-    // }
-
     let cardData = {
         // dice rolls
         //rolls: [attackRoll],
@@ -983,16 +955,14 @@ function getAttackTags(item) {
                 }
                 break;
 
+            case "EXPLOSION":
             case "AOE":
+                // TODO: This needs to be corrected as the names are not consistent.
                 attackTags.push({
                     name: `${mod.OPTION_ALIAS}(${mod.LEVELS})`,
                     title: `${mod.XMLID}`,
                 });
                 break;
-
-            // case "LIMITEDPOWER":
-            //     attackTags.push({ name: `${mod.OPTION_ALIAS}`, title: `${mod.XMLID}` });
-            //     break;
 
             default:
                 attackTags.push({
@@ -1035,7 +1005,7 @@ export async function _onRollAoeDamage(event) {
 // Notice the chatListeners function in this file.
 export async function _onRollDamage(event) {
     const button = event.currentTarget;
-    button.blur(); // The button remains hilighed for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
     const item = fromUuidSync(toHitData.itemid);
     const template =
@@ -1043,7 +1013,9 @@ export async function _onRollDamage(event) {
     const actor = item?.actor;
 
     if (!actor) {
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     const adjustment = getPowerInfo({
@@ -1058,7 +1030,7 @@ export async function _onRollDamage(event) {
         ...toHitData,
     });
 
-    let damageRoll = convertFromDC(item, dc); //(item.system.dice === 0) ? "" : item.system.dice + "d6";
+    let damageRoll = convertFromDC(item, dc);
 
     damageRoll = simplifyDamageRoll(damageRoll);
 
@@ -1069,47 +1041,19 @@ export async function _onRollDamage(event) {
     let roll = new Roll(damageRoll, actor.getRollData());
     let damageResult = await roll.roll({ async: true });
 
-    // USESTANDARDEFFECT
-    // if (item.system.USESTANDARDEFFECT) {
-    //     damageResult.standardEffect ??= { stun: 0, body: 0 }
-
-    //     // Override term results
-    //     for (let term of damageResult.terms.filter(o => o.number)) {
-    //         if (term.results) {
-    //             for (let result of term.results) {
-    //                 if (term.faces === 6) {
-    //                     result.result = 3;
-    //                     damageResult.standardEffect.stun += 3;
-    //                     damageResult.standardEffect.body += 1;
-    //                 } else {  // + half dice
-    //                     damageResult.standardEffect.stun += 1;
-    //                     damageResult.standardEffect.body += 1;
-    //                 }
-    //             }
-    //         } else { // +1
-    //             damageResult.standardEffect.stun += 1;
-    //             damageResult.standardEffect.body += 1;
-    //         }
-    //     }
-    // }
-
     let damageRenderedResult = item.system.USESTANDARDEFFECT
         ? ""
         : await damageResult.render();
 
     const damageDetail = await _calcDamage(damageResult, item, toHitData);
 
-    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
-    const explosion = aoe?.ADDER
-        ? aoe.ADDER.find((o) => o.XMLID === "EXPLOSION")
-        : null;
+    const explosion = item.hasExplosionAdvantage();
 
     // Apply Damage button for specific targets
     let targetTokens = [];
-    //let damageAoe = []
     for (const id of toHitData.targetids.split(",")) {
         let token = canvas.scene.tokens.get(id);
         if (token) {
@@ -1117,7 +1061,7 @@ export async function _onRollDamage(event) {
                 token,
                 terms: JSON.stringify(damageResult.terms),
             };
-            //targetTokens.push(token)
+
             if (explosion) {
                 // Distance from center
                 if (aoeTemplate) {
@@ -1128,7 +1072,7 @@ export async function _onRollDamage(event) {
                     // Explosion
                     // Simple rules is to remove the hightest dice term for each
                     // hex distance from center.  Works fine when radius = dice,
-                    // but that isn't alwasy the case.
+                    // but that isn't always the case.
                     // First thing to do is sort the dice terms (high to low)
                     let results = newTerms[0].results;
                     results.sort(function (a, b) {
@@ -1262,22 +1206,18 @@ export async function _onApplyDamage(event) {
 
     // All targets
     if (toHitData.targetIds) {
-        let targetsArray = toHitData.targetIds.split(",");
+        const targetsArray = toHitData.targetIds.split(",");
 
         // If AOE then sort by distance from center
-        const aoe = item.findModsByXmlid("AOE");
-        const aoeTemplate =
-            game.scenes.current.templates.find(
-                (o) => o.flags.itemId === item.id,
-            ) ||
-            game.scenes.current.templates.find(
-                (o) => o.user.id === game.user.id,
-            );
-        const explosion = aoe?.ADDER
-            ? aoe.ADDER.find((o) => o.XMLID === "EXPLOSION")
-            : null;
+        if (item.hasExplosionAdvantage()) {
+            const aoeTemplate =
+                game.scenes.current.templates.find(
+                    (o) => o.flags.itemId === item.id,
+                ) ||
+                game.scenes.current.templates.find(
+                    (o) => o.user.id === game.user.id,
+                );
 
-        if (explosion) {
             targetsArray.sort(function (a, b) {
                 let distanceA = canvas.grid.measureDistance(
                     aoeTemplate,
@@ -1307,7 +1247,7 @@ export async function _onApplyDamage(event) {
         );
     }
 
-    for (let token of canvas.tokens.controlled) {
+    for (const token of canvas.tokens.controlled) {
         _onApplyDamageToSpecificToken(event, token.id);
     }
 }
@@ -1320,7 +1260,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
         console.log(damageData.itemid);
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     const template =
@@ -1336,22 +1278,17 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
     let newTerms = JSON.parse(damageData.terms);
 
-    const aoe = item.findModsByXmlid("AOE");
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
-    const explosion = aoe?.ADDER
-        ? aoe.ADDER.find((o) => o.XMLID === "EXPLOSION")
-        : null;
 
-    // Explosion
-    if (explosion) {
+    if (item.hasExplosionAdvantage()) {
         // Distance from center
         if (aoeTemplate) {
             // Explosion
             // Simple rules is to remove the hightest dice term for each
             // hex distance from center.  Works fine when radius = dice,
-            // but that isn't alwasy the case.
+            // but that isn't always the case.
             // First thing to do is sort the dice terms (high to low)
             let results = newTerms[0].results;
             results.sort(function (a, b) {
@@ -1359,18 +1296,18 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             });
 
             // Remove highest terms based on distance
-            let distance = canvas.grid.measureDistance(
+            const distance = canvas.grid.measureDistance(
                 aoeTemplate,
                 token.center,
                 { gridSpaces: true },
             );
-            let pct = distance / aoeTemplate.distance;
-            let termsToRemove = Math.floor(pct * (results.length - 1));
+            const pct = distance / aoeTemplate.distance;
+            const termsToRemove = Math.floor(pct * (results.length - 1));
             results = results.splice(0, termsToRemove);
 
             // Finish spoofing terms for die roll
-            for (let idx in newTerms) {
-                let term = newTerms[idx];
+            for (const idx in newTerms) {
+                const term = newTerms[idx];
                 switch (term.class) {
                     case "Die":
                         newTerms[idx] = Object.assign(new Die(), term);
@@ -1392,8 +1329,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // Finish spoofing terms for die roll
-    for (let idx in newTerms) {
-        let term = newTerms[idx];
+    for (const idx in newTerms) {
+        const term = newTerms[idx];
         switch (term.class) {
             case "Die":
                 newTerms[idx] = Object.assign(new Die(), term);
@@ -1408,11 +1345,18 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     let newRoll = Roll.fromTerms(newTerms);
-    newRoll._total ??= newRoll.terms[0].results.reduce(
-        (partialSum, a) => partialSum + parseInt(a.result),
-        0,
-    );
-    newRoll.title = newRoll.terms[0].results.map((o) => o.result).toString();
+
+    newRoll._total = 0;
+    for (const term of newRoll.terms) {
+        for (const resultObj of term.results || []) {
+            newRoll._total = newRoll._total + (parseInt(resultObj.result) || 0);
+        }
+    }
+
+    newRoll.title = newRoll.terms
+        .flatMap((term) => term.results?.map((o) => o.result))
+        .filter((value) => !!value);
+
     newRoll._evaluated = true;
 
     let automation = game.settings.get("hero6efoundryvttv2", "automation");
