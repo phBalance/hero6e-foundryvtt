@@ -1804,6 +1804,7 @@ export class HeroSystem6eItem extends Item {
             case "GLIDING":
             case "FLIGHT":
             case "TELEPORTATION":
+            case "SWINGING":
                 system.description = `${system.ALIAS} ${
                     system.value
                 }${getSystemDisplayUnits(this.actor)}`;
