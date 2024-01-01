@@ -1811,11 +1811,17 @@ export class HeroSystem6eItem extends Item {
             case "TUNNELING":
                 {
                     // Tunneling 22m through 10 PD materials
-                    const defbonus = (system.ADDER || []).find(
-                        (o) => o.XMLID == "DEFBONUS",
-                    );
-                    const pd = 1 + parseInt(defbonus?.LEVELS || 0);
-                    system.description = `${system.ALIAS} +${
+                    let pd;
+                    if (this.actor?.system.is5e) {
+                        pd = parseInt(system.value);
+                    } else {
+                        const defbonus = (system.ADDER || []).find(
+                            (o) => o.XMLID == "DEFBONUS",
+                        );
+                        pd = 1 + parseInt(defbonus?.LEVELS || 0);
+                    }
+
+                    system.description = `${system.ALIAS} ${
                         system.value
                     }${getSystemDisplayUnits(
                         this.actor,
