@@ -13,6 +13,7 @@ import {
     performAdjustment,
     renderAdjustmentChatCards,
 } from "../utility/adjustment.js";
+import { getSystemDisplayUnits } from "../utility/units.js";
 import { RequiresASkillRollCheck } from "../item/item.js";
 import { ItemAttackFormApplication } from "../item/item-attack-application.js";
 
@@ -253,7 +254,7 @@ export async function AttackAoeToHit(item, options) {
             tags.push({
                 value: rangePenalty.signedString(),
                 name: "AOE range penalty",
-                title: `${distanceToken}${actor.system.is5e ? "'" : "m"}`,
+                title: `${distanceToken}${getSystemDisplayUnits(actor)}`,
             });
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
@@ -289,7 +290,7 @@ export async function AttackAoeToHit(item, options) {
             ),
         );
         hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${
-            moveDistance + (item.actor.system.is5e ? '"' : "m")
+            moveDistance + getSystemDisplayUnits(item.actor)
         } in the <b>${facingResult.total}</b> direction.`;
     }
 
@@ -413,7 +414,7 @@ export async function AttackToHit(item, options) {
             tags.push({
                 value: rangePenalty.signedString(),
                 name: "range penalty",
-                title: `${distance}${actor.system.is5e ? "'" : "m"}`,
+                title: `${distance}${getSystemDisplayUnits(actor)}`,
             });
             rollEquation = modifyRollEquation(rollEquation, rangePenalty);
         }
@@ -2330,7 +2331,10 @@ async function _calcDamage(damageResult, item, options) {
             knockbackMessage = "inflicts Knockdown";
         } else {
             // If the result is positive, the target is Knocked Back 2m times the result
-            knockbackMessage = "Knocked back " + knockbackResultTotal * 2 + "m";
+            knockbackMessage =
+                "Knocked back " +
+                knockbackResultTotal * 2 +
+                getSystemDisplayUnits(item.actor);
         }
     }
 

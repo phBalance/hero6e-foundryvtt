@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.js";
+import { HeroSystem6eActor } from "../actor/actor.js";
 import * as Attack from "../item/item-attack.js";
 import { createSkillPopOutFromItem } from "../item/skill.js";
 import { enforceManeuverLimits } from "../item/manuever.js";
@@ -10,8 +11,8 @@ import {
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
-import { HeroSystem6eActor } from "../actor/actor.js";
 import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
+import { getSystemDisplayUnits } from "../utility/units.js";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -234,9 +235,9 @@ export class HeroSystem6eItem extends Item {
                     if (this.actor?.system?.is5e) {
                         range = Math.floor(range / 2);
                     }
-                    content += ` Maximum Range ${range}${
-                        this.actor?.system?.is5e ? '"' : "m"
-                    }.`;
+                    content += ` Maximum Range ${range}${getSystemDisplayUnits(
+                        this.actor,
+                    )}.`;
                 }
                 break;
 
@@ -1786,21 +1787,27 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "STRETCHING":
-                system.description = system.ALIAS + " " + system.value + "m";
+                system.description = `${system.ALIAS} ${
+                    system.value
+                }${getSystemDisplayUnits(this.actor)}`;
                 break;
 
+            case "LEAPING":
             case "RUNNING":
             case "SWIMMING":
-            case "LEAPING":
-            case "TELEPORTATION":
                 // Running +25m (12m/37m total)
-                system.description =
-                    system.ALIAS +
-                    " +" +
-                    system.value +
-                    (this.actor?.system?.is5e ? '"' : "m");
+                system.description = `${system.ALIAS} +${
+                    system.value
+                }${getSystemDisplayUnits(this.actor)}`;
                 break;
 
+            case "GLIDING":
+            case "FLIGHT":
+            case "TELEPORTATION":
+                system.description = `${system.ALIAS} ${
+                    system.value
+                }${getSystemDisplayUnits(this.actor)}`;
+                break;
             case "TUNNELING":
                 {
                     // Tunneling 22m through 10 PD materials
@@ -1808,7 +1815,11 @@ export class HeroSystem6eItem extends Item {
                         (o) => o.XMLID == "DEFBONUS",
                     );
                     const pd = 1 + parseInt(defbonus?.LEVELS || 0);
-                    system.description = `${system.ALIAS} +${system.value}m through ${pd} PD materials`;
+                    system.description = `${system.ALIAS} +${
+                        system.value
+                    }${getSystemDisplayUnits(
+                        this.actor,
+                    )} through ${pd} PD materials`;
                 }
                 break;
 
@@ -1902,11 +1913,6 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.NAME || system.ALIAS}, ${
                     parseInt(system.baseCost) * 2
                 }-point powers`;
-                break;
-
-            case "FLIGHT":
-                // Flight 5m
-                system.description = `${system.ALIAS} ${system.value}m`;
                 break;
 
             case "MANEUVER":
