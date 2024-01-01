@@ -232,15 +232,20 @@ HERO.combatManeuversOptional = {
 };
 
 HERO.movementPowers = {
+    extradimensionalmovement: "Extra Dimensional Movement",
+    flight: "Flight",
+    ftl: "Faster Than Light",
+    leaping: "Leaping",
     running: "Running",
     swimming: "Swimming",
-    leaping: "Leaping",
-    flight: "Flight",
     swinging: "Swinging",
     teleportation: "Teleportation",
     tunneling: "Tunneling",
-    extradimensionalmovement: "Extra Dimensional Movement",
-    ftl: "Faster Than Light",
+};
+
+HERO.movementPowers5e = {
+    ...HERO.movementPowers,
+    gliding: "Gliding",
 };
 
 // Power Info
@@ -943,6 +948,7 @@ HERO.powers = [
         costEnd: false,
         costPerLevel: 1,
     },
+
     {
         key: "FLIGHT",
         powerType: ["movement"],
@@ -950,7 +956,6 @@ HERO.powers = [
         costPerLevel: 1,
         ignoreFor: ["base2", "computer", "ai"],
     },
-
     {
         key: "TELEPORTATION",
         powerType: ["movement"],
@@ -958,7 +963,6 @@ HERO.powers = [
         costPerLevel: 1,
         ignoreFor: ["base2", "computer", "ai"],
     },
-
     {
         key: "SWINGING",
         powerType: ["movement"],
@@ -1580,6 +1584,13 @@ HERO.powers5e = [
     {
         key: "FLIGHT",
         costPerLevel: 2,
+    },
+    {
+        key: "GLIDING",
+        powerType: ["movement"],
+        costEnd: false,
+        costPerLevel: 1,
+        ignoreFor: ["base2", "computer", "ai"],
     },
     {
         key: "LEAPING",
