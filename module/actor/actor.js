@@ -1265,7 +1265,7 @@ export class HeroSystem6eActor extends Actor {
                         const item = await HeroSystem6eItem.create(itemData, {
                             parent: this,
                         });
-                        await item._postUpload(true);
+                        await item._postUpload();
 
                         // Treat like a MULTIPOWER for now
                         if (system.XMLID === "COMPOUNDPOWER") {
@@ -1286,7 +1286,7 @@ export class HeroSystem6eActor extends Actor {
                                     itemData2,
                                     { parent: this },
                                 );
-                                await item2._postUpload(true);
+                                await item2._postUpload();
                             }
                         }
                     } else {
@@ -1299,7 +1299,7 @@ export class HeroSystem6eActor extends Actor {
                             item.system.XMLID + item.system.POSITION,
                             item,
                         );
-                        await item._postUpload(true);
+                        await item._postUpload();
                     }
                 }
                 delete heroJson.CHARACTER[itemTag];
@@ -1346,7 +1346,7 @@ export class HeroSystem6eActor extends Actor {
                 parent: this,
             },
         );
-        await perceptionItem._postUpload(true);
+        await perceptionItem._postUpload();
 
         // MANEUVERS
         for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
@@ -1376,15 +1376,15 @@ export class HeroSystem6eActor extends Actor {
                 },
             };
 
+            // Skip if temporary actor (Quench)
             if (this.id) {
-                // Skip if temporary actor (Quench)
                 const item = await HeroSystem6eItem.create(itemData, {
                     parent: this,
                 });
                 if (attack) {
                     await item.makeAttack();
                 }
-                await item._postUpload(true);
+                await item._postUpload();
             }
         }
 
