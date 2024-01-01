@@ -5,7 +5,7 @@ import { enforceManeuverLimits } from "../item/manuever.js";
 import { adjustmentSources } from "../utility/adjustment.js";
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
-import { RoundFavorPlayerDown } from "../utility/round.js";
+import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
 import { HeroSystem6eActor } from "../actor/actor.js";
 import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
 
@@ -453,27 +453,54 @@ export class HeroSystem6eItem extends Item {
         return null;
     }
 
-    async _postUpload() {
-        let changed = false;
+    setInitialItemValueAndMax() {
+        let changed;
 
-        const configPowerInfo = getPowerInfo({ item: this });
+        // LEVELS by default define the value/max. NOTE: use value/max instead of LEVELS so we can adjust powers.
+        let newValue = parseInt(this.system.LEVELS || 0);
 
-        // LEVELS (use value/max instead of LEVELS so we can AID/DRAIN the base power)
-        const newValue = parseInt(this.system.LEVELS || 0);
+        switch (this.system.XMLID) {
+            case "MENTALDEFENSE":
+                // 5e gets some levels for free
+                if (this.actor?.system.is5e) {
+                    newValue =
+                        newValue > 0
+                            ? newValue +
+                              RoundFavorPlayerUp(
+                                  parseInt(
+                                      this.actor?.system.characteristics.ego
+                                          .value,
+                                  ) / 5 || 0,
+                              )
+                            : 0;
+                }
+
+                // else use default value
+
+                break;
+
+            default:
+                // use default value
+                break;
+        }
+
         if (this.system.max != newValue) {
             this.system.max = newValue;
             changed = true;
         }
-        //this.system.value ??= this.system.max
+
         if (this.system.value != newValue) {
             this.system.value = newValue;
             changed = true;
         }
 
-        // ActiveEffects
-        // for (const ae of this.effects.filter(o=> !o.disabled)) {
-        //     console.log(ae)
-        // }
+        return changed;
+    }
+
+    async _postUpload() {
+        const configPowerInfo = getPowerInfo({ item: this });
+
+        let changed = this.setInitialItemValueAndMax();
 
         // CHARGES
         const CHARGES = this.findModsByXmlid("CHARGES");
@@ -491,6 +518,8 @@ export class HeroSystem6eItem extends Item {
                 )?.OPTIONID,
             };
             this.system.charges.value ??= this.system.charges.max;
+
+            changed = true;
         }
 
         // DEFENSES
@@ -1177,7 +1206,6 @@ export class HeroSystem6eItem extends Item {
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
-        //const characteristicCosts = actor?.system?.is5e ? CONFIG.HERO.characteristicCosts5e : CONFIG.HERO.characteristicCosts
         let costPerLevel = parseFloat(
             system.costPerLevel ||
                 configPowerInfo?.costPerLevel ||
@@ -1202,7 +1230,9 @@ export class HeroSystem6eItem extends Item {
             costPerLevel = parseFloat(configPowerInfo?.costPerLevel);
         }
 
-        const levels = parseInt(system.value) || 0;
+        // The number of levels for cost is based on the original power, not
+        // not any additional modifications or adjustments.
+        const levels = parseInt(system.LEVELS) || 0;
 
         let subCost = costPerLevel * levels;
 
@@ -1579,9 +1609,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "FLASHDEFENSE":
-                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${
-                    system.value
-                } point${system.value > 1 ? "s" : ""})`;
+                system.description = `${system.OPTION_ALIAS} ${system.ALIAS} (${system.value} points)`;
                 break;
 
             case "FOLLOWER":
