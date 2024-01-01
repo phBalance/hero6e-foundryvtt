@@ -1889,6 +1889,12 @@ export class HeroSystem6eItem extends Item {
                 system.description = `+${system.value} ${system.OPTION_ALIAS}`;
                 break;
 
+            case "COMBAT_LUCK":
+                system.description = `Combat Luck (${3 * system.value} rPD/${
+                    3 * system.value
+                } rED)`;
+                break;
+
             case "INVISIBILITY":
                 // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
                 break;
