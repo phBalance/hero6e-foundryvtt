@@ -2497,6 +2497,56 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.value, 0);
                 });
             });
+
+            describe("CLINGING", async function () {
+                const contents = `
+                    <POWER XMLID="CLINGING" ID="1704151912429" BASECOST="10.0" LEVELS="18" ALIAS="Clinging" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Clinging (10 + 18 = 28 STR)",
+                    );
+                });
+
+                it("roll", function () {
+                    expect(item.system.roll).to.not.be.true;
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 16);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 16);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 18);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
