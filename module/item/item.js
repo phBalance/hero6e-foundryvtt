@@ -1992,6 +1992,7 @@ export class HeroSystem6eItem extends Item {
                 } rED)`;
                 break;
 
+            case "DARKNESS":
             case "INVISIBILITY":
                 // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
                 break;
@@ -2135,7 +2136,7 @@ export class HeroSystem6eItem extends Item {
         // ADDRS
         let _adderArray = [];
 
-        if (system.XMLID === "INVISIBILITY") {
+        if (system.XMLID === "INVISIBILITY" || system.XMLID === "DARKNESS") {
             _adderArray.push(system.OPTION_ALIAS);
         }
 
@@ -2252,6 +2253,7 @@ export class HeroSystem6eItem extends Item {
                         system.description += _adderArray.sort().join(", ");
                         break;
 
+                    case "DARKNESS":
                     case "INVISIBILITY":
                         {
                             system.description += system.ALIAS + " to ";
