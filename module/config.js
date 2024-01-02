@@ -453,6 +453,8 @@ HERO.powers = [
         key: "CLINGING",
         name: "Clinging",
         powerType: ["standard"],
+        costEnd: false,
+        costPerLevel: 1 / 3,
     },
     {
         key: "EXTRALIMBS",
@@ -846,7 +848,7 @@ HERO.powers = [
     {
         key: "INVISIBILITY",
         name: "Invisibility",
-        powerType: ["sense-affecting"],
+        powerType: ["sense-affecting", "defense"],
         perceivability: "Special",
         duration: "Constant",
         target: "Self Only",

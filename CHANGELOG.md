@@ -4,7 +4,7 @@
 
 - The character sheet's power tab now has the dice icon for attack powers to initiate attacks.
 - Fix for movement powers toggles. [#533](https://github.com/dmdorman/hero6e-foundryvtt/issues/533)
-- Compound powers now show proper indices and other small description changes.
+- Compound powers now show proper indices, small description and cost changes for numerous, mostly 5e, powers.
 - Mental defense is now correctly calculated for 5e.
 - Damage calculations with an additional term (i.e 1/2 die) are no longer short changed for regular damage but they are still a few other situations. Partially resolves [#508](https://github.com/dmdorman/hero6e-foundryvtt/issues/508)
 - Add explosions for 5e.
@@ -14,12 +14,12 @@
   - No adjustment powers should be killing attacks that are enhanced by strength.
   - Correct resistant power defense (yes it's a silly thing but we were accidentally boosting it and consequently mostly likely doubling power defenses).
   - Calculated power defense will now be shown on the character sheet.
-  - Defensive powers qualifying for the adjustment multiplier now match 5e more strict list.
+  - Defensive powers qualifying for the adjustment multiplier now match 5e's more strict list.
   - Multi source/target adjustments now have just 1 long chat message for each "attack".
-  - In 5e adjustment to DEX and EGO should adjust OCV/DCV and OMCV/DMCV appropriately.
+  - In 5e, adjustment to DEX and EGO should adjust OCV/DCV and OMCV/DMCV appropriately.
 - Known Issues with adjustment powers:
   - Healing does not respect limits to original value - it can exceed like aid.
-  - Adjusting powers doesn't calculate the effected points correctly.
+  - Adjusting powers doesn't calculate the affected points correctly.
   - Adjusting movement powers probably won't work correctly.
   - Adjusting powers will automatically select the first power of that type - no selection dialog at this point.
   - Adjusting expendable characteristics doesn't work correctly as we'll still take away those points as the effect fades.

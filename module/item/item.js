@@ -2086,6 +2086,15 @@ export class HeroSystem6eItem extends Item {
                 system.description = "Perception";
                 break;
 
+            case "CLINGING":
+                {
+                    const baseStr = this.actor.system.characteristics.str.value;
+                    const additionalClingingStr = system.value;
+                    const totalStr = baseStr + additionalClingingStr;
+                    system.description = `${system.ALIAS} (${baseStr} + ${additionalClingingStr} = ${totalStr} STR)`;
+                }
+                break;
+
             default:
                 {
                     if (
