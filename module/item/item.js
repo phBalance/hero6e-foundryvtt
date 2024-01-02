@@ -119,11 +119,15 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Remove temporary effects
-        const effectPromises = Promise.all(
-            this.effects.map(async (effect) => await effect.delete()),
+        const temporaryEffectPromises = Promise.all(
+            this.effects.map(async (effect) => {
+                if (parseInt(effect.duration?.seconds || 0) > 0) {
+                    await effect.delete();
+                }
+            }),
         );
 
-        await effectPromises;
+        await temporaryEffectPromises;
 
         if (this.system.value !== this.system.max) {
             await this.update({ ["system.value"]: this.system.max });

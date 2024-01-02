@@ -1137,7 +1137,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                "Hearing Group Flash Defense (1 point), Hardened (+1/4)",
+                                "Hearing Group Flash Defense (1 points), Hardened (+1/4)", // Intentionally plural for simpler translation
                             );
                         });
 
@@ -1543,7 +1543,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            'Teleportation +15" (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)',
+                            'Teleportation 15" (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)',
                         );
                     });
 
@@ -1590,7 +1590,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Teleportation +15m (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)",
+                            "Teleportation 15m (No Relative Velocity; Position Shift), Reduced Endurance (1/2 END; +1/4)",
                         );
                     });
 

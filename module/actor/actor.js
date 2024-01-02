@@ -780,7 +780,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Remove temporary effects
         const tempEffects = Array.from(this.effects).filter(
-            (o) => parseInt(o.duration?.seconds || 0) > 0,
+            (effect) => parseInt(effect.duration?.seconds || 0) > 0,
         );
         for (const ae of tempEffects) {
             await ae.delete();
