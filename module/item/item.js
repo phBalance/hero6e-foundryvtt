@@ -93,7 +93,7 @@ export class HeroSystem6eItem extends Item {
             // DESCRIPTION
             const oldDescription = this.system.description;
             this.updateItemDescription();
-            changed = oldDescription != this.system.description || changed;
+            changed = oldDescription !== this.system.description || changed;
 
             // Save changes
             await this.update({ system: this.system });
@@ -931,7 +931,7 @@ export class HeroSystem6eItem extends Item {
         // DESCRIPTION
         const oldDescription = this.system.description;
         this.updateItemDescription();
-        changed = oldDescription != this.system.description || changed;
+        changed = oldDescription !== this.system.description || changed;
 
         // Save changes
         if (changed && this.id) {
@@ -1626,6 +1626,9 @@ export class HeroSystem6eItem extends Item {
         const type = this.type;
         const is5e = !!this.actor?.system.is5e;
 
+        // Reset the description and build it up again.
+        system.description = "";
+
         const configPowerInfo = getPowerInfo({
             xmlid: system.XMLID,
             actor: this.actor,
@@ -1989,6 +1992,7 @@ export class HeroSystem6eItem extends Item {
                 } rED)`;
                 break;
 
+            case "DARKNESS":
             case "INVISIBILITY":
                 // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
                 break;
@@ -2132,7 +2136,7 @@ export class HeroSystem6eItem extends Item {
         // ADDRS
         let _adderArray = [];
 
-        if (system.XMLID === "INVISIBILITY") {
+        if (system.XMLID === "INVISIBILITY" || system.XMLID === "DARKNESS") {
             _adderArray.push(system.OPTION_ALIAS);
         }
 
@@ -2144,8 +2148,13 @@ export class HeroSystem6eItem extends Item {
                 case "AID":
                 case "DISPEL":
                 case "DRAIN":
+                case "HEALING":
                 case "SUPPRESS":
                 case "TRANSFER":
+                    break;
+
+                case "PROFESSIONAL_SKILL":
+                case "KNOWLEDGE_SKILL":
                     break;
 
                 default:
@@ -2154,8 +2163,8 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (system?.ADDER?.length > 0) {
-            for (let adder of system.ADDER) {
+        if (system?.ADDER?.length > 0 || _adderArray.length > 0) {
+            for (let adder of system?.ADDER || []) {
                 switch (adder.XMLID) {
                     case "DIMENSIONS":
                         system.description += ", " + adder.ALIAS;
@@ -2244,6 +2253,7 @@ export class HeroSystem6eItem extends Item {
                         system.description += _adderArray.sort().join(", ");
                         break;
 
+                    case "DARKNESS":
                     case "INVISIBILITY":
                         {
                             system.description += system.ALIAS + " to ";
@@ -2262,18 +2272,18 @@ export class HeroSystem6eItem extends Item {
                                     " and " + _groups.slice(-1) + "s";
                             }
 
-                            // spacing
-                            if (_groups.length > 0) {
-                                system.description += ", ";
-                            }
-
                             // singles
                             let _singles = _adderArray.filter(
                                 (o) => o.indexOf("Group") === -1,
                             );
+                            // spacing
+                            if (_groups.length > 0 && _singles.length > 0) {
+                                system.description += ", ";
+                            }
+
                             if (_singles.length === 1) {
                                 system.description += _singles[0];
-                            } else {
+                            } else if (_singles.length > 1) {
                                 system.description += _singles
                                     .slice(0, -1)
                                     .join(", ");
