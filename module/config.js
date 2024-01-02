@@ -786,7 +786,9 @@ HERO.powers = [
     {
         key: "DARKNESS",
         powerType: ["sense-affecting", "attack", "standard"],
+        duration: "constant",
         range: "standard",
+        costEnd: true,
     },
     {
         key: "DISPEL",
