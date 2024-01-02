@@ -186,7 +186,10 @@ export function registerUploadTests(quench) {
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Fire Blast 1d6");
+                    assert.equal(
+                        item.system.description,
+                        "Fire Blast 1d6 (PD)",
+                    );
                 });
 
                 it("realCost", function () {
@@ -609,62 +612,157 @@ export function registerUploadTests(quench) {
             });
 
             describe("INVISIBILITY", async function () {
-                const contents = `
-                    <POWER XMLID="INVISIBILITY" ID="1689283663052" BASECOST="20.0" LEVELS="0" ALIAS="Invisibility" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Blind Minds" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES />
-                        <ADDER XMLID="TOUCHGROUP" ID="1689356871509" BASECOST="5.0" LEVELS="0" ALIAS="Touch Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                describe("single group sense", async function () {
+                    const contents = `
+                        <POWER XMLID="INVISIBILITY" ID="1704153437975" BASECOST="10.0" LEVELS="0" ALIAS="Invisibility" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
-                        </ADDER>
-                        <ADDER XMLID="NORMALSMELL" ID="1689356871510" BASECOST="3.0" LEVELS="0" ALIAS="Normal Smell" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
-                            <NOTES />
-                        </ADDER>
-                        <ADDER XMLID="COMBAT_SENSE" ID="1689356871511" BASECOST="5.0" LEVELS="0" ALIAS="Combat Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
-                            <NOTES />
-                        </ADDER>
-                        <ADDER XMLID="HEARINGGROUP" ID="1689356871512" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
-                            <NOTES />
-                        </ADDER>
-                        <MODIFIER XMLID="CONDITIONALPOWER" ID="1689356871533" BASECOST="-0.5" LEVELS="0" ALIAS="Conditional Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Only vs organic perception" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES />
-                        </MODIFIER>
-                    </POWER>
-                `;
-                let item;
+                        </POWER>
+                    `;
+                    let item;
 
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        { temporary: true },
-                    );
-                    item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
-                        { temporary: true, parent: actor },
-                    );
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
-                    item.skillRollUpdateValue();
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Invisibility to Hearing Group",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 10);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 10);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "1");
+                    });
                 });
 
-                it("description", function () {
-                    assert.equal(
-                        item.system.description,
-                        "Invisibility to Sight, Touch and Hearing Groups, Normal Smell and Combat Sense (38 Active Points); Conditional Power Only vs organic perception (-1/2)",
-                    );
+                describe("multiple group senses", async function () {
+                    const contents = `
+                        <POWER XMLID="INVISIBILITY" ID="1704159264800" BASECOST="10.0" LEVELS="0" ALIAS="Invisibility" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MYSTICGROUP" OPTIONID="MYSTICGROUP" OPTION_ALIAS="Mystic Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="MENTALGROUP" ID="1704160042663" BASECOST="5.0" LEVELS="0" ALIAS="Mental Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Invisibility to Mystic and Mental Groups",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 15);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 15);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "1");
+                    });
                 });
 
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 25);
-                });
+                describe("combination group and single senses", async function () {
+                    const contents = `
+                        <POWER XMLID="INVISIBILITY" ID="1689283663052" BASECOST="20.0" LEVELS="0" ALIAS="Invisibility" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Blind Minds" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="TOUCHGROUP" ID="1689356871509" BASECOST="5.0" LEVELS="0" ALIAS="Touch Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="NORMALSMELL" ID="1689356871510" BASECOST="3.0" LEVELS="0" ALIAS="Normal Smell" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="COMBAT_SENSE" ID="1689356871511" BASECOST="5.0" LEVELS="0" ALIAS="Combat Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="HEARINGGROUP" ID="1689356871512" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="CONDITIONALPOWER" ID="1689356871533" BASECOST="-0.5" LEVELS="0" ALIAS="Conditional Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="Only vs organic perception" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
 
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 38);
-                });
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
 
-                it("end", function () {
-                    assert.equal(item.system.end, "4");
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Invisibility to Sight, Touch and Hearing Groups, Normal Smell and Combat Sense (38 Active Points); Conditional Power Only vs organic perception (-1/2)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 25);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 38);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "4");
+                    });
                 });
             });
 
@@ -753,7 +851,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Killing Attack - Hand-To-Hand 2d6, Penetrating (+1/2) (45 Active Points); OAF (Pen-sized Device in pocket; -1), No STR Bonus (-1/2)",
+                        "Killing Attack - Hand-To-Hand 2d6 (ED), Penetrating (+1/2) (45 Active Points); OAF (Pen-sized Device in pocket; -1), No STR Bonus (-1/2)",
                     );
                 });
 
@@ -777,7 +875,7 @@ export function registerUploadTests(quench) {
             // Crusher
             describe("Crush", function () {
                 const contents = `
-                    <POWER XMLID="RKA" ID="1624916890101" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Ranged" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Crush" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <POWER XMLID="RKA" ID="1624916890101" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Ranged" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Crush" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         <NOTES />
                         <MODIFIER XMLID="AOE" ID="1624916927944" BASECOST="0.0" LEVELS="6" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                             <NOTES />
@@ -819,7 +917,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Killing Attack - Ranged 3d6, Personal Immunity (+1/4), Reduced Endurance (1/2 END; +1/4), Area Of Effect (6m Radius; +1/2) (90 Active Points); No Range (-1/2), Must Follow Grab (-1/2)",
+                        "Killing Attack - Ranged 3d6 (PD), Personal Immunity (+1/4), Reduced Endurance (1/2 END; +1/4), Area Of Effect (6m Radius; +1/2) (90 Active Points); No Range (-1/2), Must Follow Grab (-1/2)",
                     );
                 });
 
@@ -2276,10 +2374,10 @@ export function registerUploadTests(quench) {
 
             describe("Knowledge Skill", async function () {
                 const contents = `
-                        <SKILL XMLID="KNOWLEDGE_SKILL" ID="1703368216761" BASECOST="3.0" LEVELS="10" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="SUPA brain" INPUT="types of brain matter" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
-                            <NOTES/>
-                        </SKILL>
-                    `;
+                    <SKILL XMLID="KNOWLEDGE_SKILL" ID="1703368216761" BASECOST="3.0" LEVELS="10" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="SUPA brain" INPUT="types of brain matter" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
+                        <NOTES/>
+                    </SKILL>
+                `;
                 let item;
 
                 before(async () => {
