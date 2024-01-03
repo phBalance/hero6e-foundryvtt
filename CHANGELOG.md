@@ -10,6 +10,7 @@
 - Add explosions for 5e.
 - Movement power improvements for 5e (pointing, description, and added gliding).
 - Description improvements for invisibility and darkness. [#573](https://github.com/dmdorman/hero6e-foundryvtt/issues/573)
+- Correct a crash during the start of each segment for characters that have endurance powers active but with no power modifiers. Consequently, automatic endurance tracking should be be better.
 - Improvements to adjustment powers (although we suggest still only using them for characteristics):
   - Adjustment powers should now respect uploaded multi sources and targets when triggering. They should also respect maximum amounts for absorption, aid, and transfer for 5e and 6e.
   - No adjustment powers should be killing attacks that are enhanced by strength.
@@ -417,13 +418,13 @@
 
 - Initial DRAIN support.
 - Changing PC/NPC actor type moved to sheet header.  Also can be changed in the context menu of the actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).
-- Combat Tracker Improvments. Reworked underlying code so that _onEndRound and _onStartTurn are called as expected.  This should lead to future automation improvments.  For example Post-Segment-12 activities and Endurance use at the beginning of turn for continuous powers. Also changed tooltips for PREV/NEXT to align with Hero terminology. [#175](https://github.com/dmdorman/hero6e-foundryvtt/issues/175)
+- Combat Tracker Improvements. Reworked underlying code so that _onEndRound and _onStartTurn are called as expected.  This should lead to future automation improvements.  For example Post-Segment-12 activities and Endurance use at the beginning of turn for continuous powers. Also changed tooltips for PREV/NEXT to align with Hero terminology. [#175](https://github.com/dmdorman/hero6e-foundryvtt/issues/175)
 - Minor improvements to framework support.
 - Fixed issue where Reduced Endurance was not included in END calculations. [#132](https://github.com/dmdorman/hero6e-foundryvtt/issues/132)
 
 ## Version 3.0.4
 
-- Reworked Active Effects such that the effects on items remain with items.  They are no longered
+- Reworked Active Effects such that the effects on items remain with items.  They are no longer
 transferred from the item to the actor.  This is following [FoundryVtt v11 ActiveEffect Transferral](https://foundryvtt.com/article/v11-active-effects/) recommendations.
 - Fixed Custom martial attacks, they now show on attack tab.  Also fixed the Set & Brace martial manuevers.
 - Fixed a bug where an attack using charges would set END=0.
