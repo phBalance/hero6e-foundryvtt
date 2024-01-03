@@ -499,23 +499,23 @@ export class HeroSystem6eCombat extends Combat {
         let spentEnd = 0;
 
         for (let powerUsingEnd of combatant.actor.items.filter(
-            (o) =>
-                o.system.active === true &&
-                parseInt(o.system?.end || 0) > 0 &&
-                (o.system.subType || o.type) != "attack",
+            (item) =>
+                item.system.active === true &&
+                parseInt(item.system?.end || 0) > 0 &&
+                (item.system.subType || item.type) != "attack",
         )) {
-            const costEndOnlyToActivate = powerUsingEnd.system.MODIFIER.find(
+            const costEndOnlyToActivate = powerUsingEnd.system.MODIFIER?.find(
                 (o) => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE",
             );
             if (!costEndOnlyToActivate) {
-                let end = parseInt(powerUsingEnd.system.end);
+                const end = parseInt(powerUsingEnd.system.end);
                 spentEnd += end;
                 content += `<li>${powerUsingEnd.name} (${end})</li>`;
             }
         }
 
         const encumbered = combatant.actor.effects.find(
-            (o) => o.flags.encumbrance,
+            (effect) => effect.flags.encumbrance,
         );
         if (encumbered) {
             const endCostPerTurn =
