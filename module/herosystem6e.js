@@ -624,9 +624,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             "automation",
         );
         if (
-            automation === "all" ||
-            (automation === "npcOnly" && actor.type == "npc") ||
-            (automation === "pcEndOnly" && actor.type === "pc")
+            !game.combat?.active &&
+            (automation === "all" ||
+                (automation === "npcOnly" && actor.type == "npc") ||
+                (automation === "pcEndOnly" && actor.type === "pc"))
         ) {
             if (
                 multiplier > 0 &&
@@ -639,28 +640,37 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 // Typically, you should only use the Recovery Time Table for
                 // PCs. Once an NPC is Knocked Out below the -10 STUN level
                 // they should normally remain unconscious until the fight ends.
+
+                // TODO: Implement optional longer term recovery
+                // For STUN:
+                // From 0 to -10 they get 1 recovery every phase and post 12
+                // From -11 to -20 they get 1 recovery post 12
+                // From -21 to -30 they get 1 recovery per minute
+                // From -31 they're completely out at the GM's discretion
+
                 if (
                     actor.type === "pc" ||
                     parseInt(actor.system.characteristics.stun.value) > -10
                 ) {
+                    const rec =
+                        parseInt(actor.system.characteristics.rec.value) *
+                        multiplier;
+                    const endValue = Math.min(
+                        parseInt(actor.system.characteristics.end.max),
+                        parseInt(actor.system.characteristics.end.value) + rec,
+                    );
+                    const stunValue = Math.min(
+                        parseInt(actor.system.characteristics.stun.max),
+                        parseInt(actor.system.characteristics.stun.value) + rec,
+                    );
+
                     if (game.user.isGM)
                         await actor.removeActiveEffect(
                             HeroSystem6eActorActiveEffects.stunEffect,
                         );
-                    let rec =
-                        parseInt(actor.system.characteristics.rec.value) *
-                        multiplier;
-                    let endValue = Math.min(
-                        parseInt(actor.system.characteristics.end.max),
-                        parseInt(actor.system.characteristics.end.value) + rec,
-                    );
-                    let stunValue = Math.min(
-                        parseInt(actor.system.characteristics.stun.max),
-                        parseInt(actor.system.characteristics.stun.value) + rec,
-                    );
-                    //await
+
                     if (game.user.isGM)
-                        actor.update(
+                        await actor.update(
                             {
                                 "system.characteristics.end.value": endValue,
                                 "system.characteristics.stun.value": stunValue,
