@@ -109,11 +109,11 @@ export class HeroSystem6eCombat extends Combat {
 
         // this.turns is an array of combatants.  These combatants typically appear more than
         // once in the array (1/SPEED).  Any change to one combatant for a specific token seems
-        // to update all combatant entries for that speicifc token.  So we can't store unique
+        // to update all combatant entries for that specific token.  So we can't store unique
         // data in combatant (like segment number).  Using turnsExtra to store unique data (like segment).
         //this.turnsExtra = []
 
-        // Assign Combatent copies to appopriate segements
+        // Assign Combatant copies to appropriate segments
         // Notice segment[0] is unused
         let turns = [];
         for (let s = 1; s <= 12; s++) {
@@ -400,7 +400,7 @@ export class HeroSystem6eCombat extends Combat {
             updateData.turn = activeTurn;
         }
 
-        // Determine segement
+        // Determine segment
         let segment_prev = current?.segment;
         let segment = this.combatant?.segment;
         let advanceTime = segment - segment_prev || 0;
@@ -476,10 +476,12 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onStartTurn(combatant) {
-        //console.log("_onStartTurn", combatant.name)
+        // On the very first turn, this method can be invoked twice because we update the first turn
+        // While not a fix, to work around we'll just stop ourselves from running it twice on the very first turn.
+        if (this.previous.round === 0) return;
+
         await super._onStartTurn(combatant);
 
-        // Guard
         if (!combatant) return;
 
         // Reset movement history
@@ -793,7 +795,7 @@ export class HeroSystem6eCombat extends Combat {
 
         let previousTurn = (this.turn ?? this.turns.length) - 1;
 
-        // Determine segement
+        // Determine segment
         let segment = this.combatant.segment;
         let segment_prev = this.turns[previousTurn].segment;
         let advanceTime = segment_prev - segment;
@@ -820,7 +822,7 @@ export class HeroSystem6eCombat extends Combat {
         //let advanceTime = -1 * (this.turn || 0) * CONFIG.time.turnTime;
         //if (round > 0) advanceTime -= HERO.time.turn; //CONFIG.time.roundTime;
 
-        // Determine segement
+        // Determine segment
         let segment = this.combatant.segment;
         let segment_prev = this.turns[turn].segment;
         if (round > 0) {
@@ -871,7 +873,7 @@ export class HeroSystem6eCombat extends Combat {
             return this.nextRound();
         }
 
-        // Determine segement
+        // Determine segment
         let segment = this.combatant.segment;
         let segment_next = this.turns[next].segment;
         if (segment_next < segment) {
@@ -905,7 +907,7 @@ export class HeroSystem6eCombat extends Combat {
         //advanceTime += HERO.time.turn; //CONFIG.time.roundTime;
         let nextRound = this.round + 1;
 
-        // Determine segement
+        // Determine segment
         let segment = this.combatant.segment;
         let segment_next = this.turns[0].segment;
         //if (segment_next < segment) {
