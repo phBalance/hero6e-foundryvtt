@@ -11,6 +11,7 @@
 - Movement power improvements for 5e (pointing, description, and added gliding).
 - Description improvements for invisibility and darkness. [#573](https://github.com/dmdorman/hero6e-foundryvtt/issues/573)
 - Correct a crash during the start of each segment for characters that have endurance powers active but with no power modifiers. Consequently, automatic endurance tracking should be be better.
+- Endurance tracking improvements - no free recovery during combat and first character of combat doesn't get digged for active end using powers twice.
 - Improvements to adjustment powers (although we suggest still only using them for characteristics):
   - Adjustment powers should now respect uploaded multi sources and targets when triggering. They should also respect maximum amounts for absorption, aid, and transfer for 5e and 6e.
   - No adjustment powers should be killing attacks that are enhanced by strength.
