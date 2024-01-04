@@ -2232,9 +2232,9 @@ async function _calcDamage(damageResult, item, options) {
     let REDUCEDPENETRATION = item.findModsByXmlid("REDUCEDPENETRATION");
     if (REDUCEDPENETRATION) {
         if (item.killing) {
-            body = Math.max(0, body - options.resistantValue);
+            body = Math.max(0, body - (options.resistantValue || 0));
         }
-        body = Math.max(0, body - options.defenseValue);
+        body = Math.max(0, body - (options.defenseValue || 0));
     }
 
     // determine knockback
