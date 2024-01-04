@@ -90,10 +90,10 @@ export class HeroRuler {
                             (automation === "pcEndOnly" && actor.type === "pc")
                         ) {
                             // Only consume endurance on token's phase, allowing for Knockback movement (which does not consume END)
-                            if (game.combat.combatant.actorId != actor.id)
+                            if (game.combat?.combatant.actorId != actor.id)
                                 continue;
 
-                            let combatant = game.combat.combatants.find(
+                            const combatant = game.combat?.combatants.find(
                                 (o) => o.actorId === actor.id,
                             );
                             if (combatant) {
