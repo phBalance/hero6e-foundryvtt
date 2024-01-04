@@ -636,7 +636,7 @@ export async function renderAdjustmentChatCards(cardOrCards) {
     }
 
     // Filter out any invalid cards
-    cardOrCards.filter((card) => card);
+    cardOrCards = cardOrCards.filter((card) => card);
 
     if (cardOrCards.length === 0) return;
 
