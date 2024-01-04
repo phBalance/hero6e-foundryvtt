@@ -246,7 +246,7 @@ export class HeroSystem6eActor extends Actor {
                 data.type != "pc" &&
                 data.system.characteristics.stun.value < -10
             ) {
-                let combatant = game.combat.combatants.find(
+                const combatant = game.combat?.combatants.find(
                     (o) => o.actorId === data._id,
                 );
                 if (combatant && !combatant.defeated) {
