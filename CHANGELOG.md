@@ -7,7 +7,7 @@
 - Compound powers now show proper indices, small description and cost changes for numerous, mostly 5e, powers.
 - Mental defense is now correctly calculated for 5e.
 - Damage calculations with an additional term (i.e 1/2 die) are no longer short changed for regular damage but they are still a few other situations. Partially resolves [#508](https://github.com/dmdorman/hero6e-foundryvtt/issues/508) but there are still situations that aren't fixed (e.g. 0d6+1 or partial terms in explosions).
-- Add explosions for 5e.
+- Add explosions for 5e (without proper drop off calculations).
 - Movement power improvements for 5e (pointing, description, and added gliding).
 - Description improvements for invisibility and darkness. [#573](https://github.com/dmdorman/hero6e-foundryvtt/issues/573)
 - Endurance tracking improvements
