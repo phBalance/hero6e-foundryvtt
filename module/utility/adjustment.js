@@ -256,7 +256,7 @@ async function _createNewAdjustmentEffect(
     // TODO: Add a document field
     const activeEffect = {
         name: `${item.system.XMLID} 0 ${
-            powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
+            (powerTargetName?.name || potentialCharacteristic).toUpperCase() // TODO: This will need to change for multiple effects
         } (0 AP) [by ${item.actor.name}]`,
         id: `${item.system.XMLID}.${item.id}.${
             powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
@@ -525,9 +525,11 @@ export async function performAdjustment(
     // Update the effect max value(s)
     activeEffect.name = `${item.system.XMLID} ${Math.abs(
         activePointsThatShouldBeAffected,
-    )} ${targetPower?.name || potentialCharacteristic} (${Math.abs(
-        totalNewActivePoints,
-    )} AP) [by ${item.actor.name}]`;
+    )} ${(
+        targetPower?.name || potentialCharacteristic
+    ).toUpperCase()} (${Math.abs(totalNewActivePoints)} AP) [by ${
+        item.actor.name
+    }]`;
 
     activeEffect.flags.activePoints = totalNewActivePoints;
 

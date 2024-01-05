@@ -9,3 +9,6 @@
 
 # Ignore all SCSS files
 **/*.scss
+
+# Ignore all Handlebars files
+**/*.hbs
