@@ -25,20 +25,6 @@
   - Defensive powers qualifying for the adjustment multiplier now match 5e's more strict list.
   - Multi source/target adjustments now have just 1 long chat message for each "attack".
   - In 5e, adjustment to DEX and EGO should adjust OCV/DCV and OMCV/DMCV appropriately.
-- Known Issues with adjustment powers:
-  - Healing does not respect limits to original value - it can exceed like aid.
-  - Adjusting powers doesn't calculate the affected points correctly.
-  - Adjusting movement powers probably won't work correctly.
-  - Adjusting powers will automatically select the first power of that type - no selection dialog at this point.
-  - Adjusting expendable characteristics doesn't work correctly as we'll still take away those points as the effect fades.
-  - Adjusting defensive characteristics works correctly but fades at half the rate it should.
-  - Dispel and Suppress are not limited to powers.
-  - Adjustment powers, like suppress, that have to keep paying endurance are not implemented correctly - they'll get a 5 per turn fade.
-  - With a multi characteristic adjustment, the status icons can get very noisy with 1 status icon per characteristic adjusted.
-  - The maximum effect from combined sources will stack when then should not (should use the max possible effect from the combined sources).
-  - Draining characteristics that don't exist on the target don't work correctly (e.g. 6e draining OCV/OMCV from a 5e character).
-  - Draining characteristic costs aren't calculated based on the target's characteristic costs (e.g. 5e/6e draining a 6e/5e character).
-  - Absorption doesn't work automatically
 
 ## Version 3.0.53
 
