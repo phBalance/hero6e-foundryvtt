@@ -529,6 +529,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
         // }
 
         // Active Effects
+        let adjustmentChatMessages = [];
         for (let ae of actor.temporaryEffects) {
             // Determine XMLID, ITEM, ACTOR
             let origin = await fromUuid(ae.origin);
@@ -576,7 +577,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         _fade = Math.min(ae.flags.activePoints, 5);
                     }
 
-                    renderAdjustmentChatCards(
+                    adjustmentChatMessages.push(
                         await performAdjustment(
                             item,
                             ae.flags.target[0],
@@ -616,6 +617,8 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 }
             }
         }
+
+        await renderAdjustmentChatCards(adjustmentChatMessages);
 
         // Out of combat recovery.  When SimpleCalendar is used to advance time.
         // This simple routine only handles increments of 12 seconds or more.
