@@ -455,7 +455,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
             const newFormatAdjustmentActiveEffect = {
                 name: `${presentAdjustmentActiveEffect.flags.XMLID} ${Math.abs(
                     activePointsThatShouldBeAffected,
-                )} ${presentAdjustmentActiveEffect.flags.target} (${Math.abs(
+                )} ${presentAdjustmentActiveEffect.flags.target.toUpperCase()} (${Math.abs(
                     presentAdjustmentActiveEffect.flags.activePoints,
                 )} AP) [by ${presentAdjustmentActiveEffect.flags.source}]`,
                 id: presentAdjustmentActiveEffect.id, // No change
