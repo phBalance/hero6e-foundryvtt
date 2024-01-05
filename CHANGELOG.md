@@ -6,12 +6,14 @@
 - Fix for movement powers toggles. [#533](https://github.com/dmdorman/hero6e-foundryvtt/issues/533)
 - Compound powers now show proper indices, small description and cost changes for numerous, mostly 5e, powers.
 - Mental defense is now correctly calculated for 5e.
-- Damage calculations with an additional term (i.e 1/2 die) are no longer short changed for regular damage but they are still a few other situations. Partially resolves [#508](https://github.com/dmdorman/hero6e-foundryvtt/issues/508)
-- Add explosions for 5e.
+- Damage calculations with an additional term (i.e 1/2 die) are no longer short changed for regular damage but they are still a few other situations. Partially resolves [#508](https://github.com/dmdorman/hero6e-foundryvtt/issues/508) but there are still situations that aren't fixed (e.g. 0d6+1 or partial terms in explosions).
+- Add explosions for 5e (without proper drop off calculations).
 - Movement power improvements for 5e (pointing, description, and added gliding).
 - Description improvements for invisibility and darkness. [#573](https://github.com/dmdorman/hero6e-foundryvtt/issues/573)
-- Correct a crash during the start of each segment for characters that have endurance powers active but with no power modifiers. Consequently, automatic endurance tracking should be be better.
-- Endurance tracking improvements - no free recovery during combat and first character of combat doesn't get digged for active end using powers twice.
+- Endurance tracking improvements
+  - No free recovery during combat
+  - The first character to act in combat won't get dinged for active endurance using powers twice.
+  - Correct a crash during the start of each segment for characters that have powers active that use endurance but have no power modifiers.
 - Improvements to adjustment powers (although we suggest still only using them for characteristics):
   - Adjustment powers should now respect uploaded multi sources and targets when triggering. They should also respect maximum amounts for absorption, aid, and transfer for 5e and 6e.
   - No adjustment powers should be killing attacks that are enhanced by strength.
@@ -27,9 +29,13 @@
   - Adjusting powers will automatically select the first power of that type - no selection dialog at this point.
   - Adjusting expendable characteristics doesn't work correctly as we'll still take away those points as the effect fades.
   - Adjusting defensive characteristics works correctly but fades at half the rate it should.
-  - Drain and Suppress are not limited to powers.
-  - With a multi characteristic adjustment the status icons can get very noisy with 1 per characteristic.
+  - Dispel and Suppress are not limited to powers.
+  - Adjustment powers, like suppress, that have to keep paying endurance are not implemented correctly - they'll get a 5 per turn fade.
+  - With a multi characteristic adjustment, the status icons can get very noisy with 1 status icon per characteristic adjusted.
   - The maximum effect from combined sources will stack when then should not (should use the max possible effect from the combined sources).
+  - Draining characteristics that don't exist on the target don't work correctly (e.g. 6e draining OCV/OMCV from a 5e character).
+  - Draining characteristic costs aren't calculated based on the target's characteristic costs (e.g. 5e/6e draining a 6e/5e character).
+  - Absorption doesn't work automatically
 
 ## Version 3.0.53
 
