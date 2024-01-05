@@ -1,6 +1,6 @@
 # Releases
 
-## Version 3.0.54 (So far...)
+## Version 3.0.54
 
 - The character sheet's power tab now has the dice icon for attack powers to initiate attacks.
 - Fix for movement powers toggles. [#533](https://github.com/dmdorman/hero6e-foundryvtt/issues/533)
@@ -13,6 +13,7 @@
 - Description improvements for contact, invisibility and darkness. [#573](https://github.com/dmdorman/hero6e-foundryvtt/issues/573)
 - Correct DAMAGERESISTANCE for ED and MD
 - Powers/Talents with resistant defenses now show them as such in their descriptions (different from HD).
+- Eliminate REDUCEDPENETRATION crash. [#568](https://github.com/dmdorman/hero6e-foundryvtt/issues/568)
 - Endurance tracking improvements
   - No free recovery during combat
   - The first character to act in combat won't get dinged for active endurance using powers twice.
