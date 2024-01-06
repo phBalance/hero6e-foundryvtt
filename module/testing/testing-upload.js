@@ -1748,7 +1748,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Force Field (10 PD/11 ED)",
+                            "Force Field (10 rPD/11 rED)",
                         );
                     });
 
@@ -1800,7 +1800,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Resistant Protection (11 PD/10 ED) (33 Active Points); Costs Endurance (Costs END Every Phase; -1/2)",
+                            "Resistant Protection (11 rPD/10 rED) (33 Active Points); Costs Endurance (Costs END Every Phase; -1/2)",
                         );
                     });
 
