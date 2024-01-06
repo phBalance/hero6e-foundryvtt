@@ -11,6 +11,8 @@
 - Add explosions for 5e (without proper drop off calculations).
 - Movement power improvements for 5e (pointing, description, and added gliding).
 - Description improvements for contact, invisibility and darkness. [#573](https://github.com/dmdorman/hero6e-foundryvtt/issues/573)
+- Correct DAMAGERESISTANCE for ED and MD
+- Powers/Talents with resistant defenses now show them as such in their descriptions (different from HD).
 - Endurance tracking improvements
   - No free recovery during combat
   - The first character to act in combat won't get dinged for active endurance using powers twice.

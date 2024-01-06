@@ -1691,13 +1691,13 @@ export class HeroSystem6eItem extends Item {
 
                     let ary = [];
                     if (parseInt(system.PDLEVELS))
-                        ary.push(system.PDLEVELS + " PD");
+                        ary.push(system.PDLEVELS + " rPD");
                     if (parseInt(system.EDLEVELS))
-                        ary.push(system.EDLEVELS + " ED");
+                        ary.push(system.EDLEVELS + " rED");
                     if (parseInt(system.MDLEVELS))
-                        ary.push(system.MDLEVELS + " MD");
+                        ary.push(system.MDLEVELS + " rMD");
                     if (parseInt(system.POWDLEVELS))
-                        ary.push(system.POWDLEVELS + " POW");
+                        ary.push(system.POWDLEVELS + " rPOW");
 
                     system.description += ary.join("/") + ")";
                 }
@@ -1709,13 +1709,13 @@ export class HeroSystem6eItem extends Item {
 
                     let aryFW = [];
                     if (parseInt(system.PDLEVELS))
-                        aryFW.push(system.PDLEVELS + " PD");
+                        aryFW.push(system.PDLEVELS + " rPD");
                     if (parseInt(system.EDLEVELS))
-                        aryFW.push(system.EDLEVELS + " ED");
+                        aryFW.push(system.EDLEVELS + " rED");
                     if (parseInt(system.MDLEVELS))
-                        aryFW.push(system.MDLEVELS + " MD");
+                        aryFW.push(system.MDLEVELS + " rMD");
                     if (parseInt(system.POWDLEVELS))
-                        aryFW.push(system.POWDLEVELS + " POW");
+                        aryFW.push(system.POWDLEVELS + " rPOW");
                     if (parseInt(system.BODYLEVELS))
                         aryFW.push(system.BODYLEVELS + " BODY");
 
