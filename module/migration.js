@@ -312,7 +312,7 @@ export async function migrateWorld() {
         if (!game.settings.get(game.system.id, "bar3")) {
             game.settings.set(game.system.id, "bar3", true);
             // Refresh tokens to make sure they show the 3rd bar
-            for (const token of game.scenes.current.tokens) {
+            for (const token of game.scenes.current?.tokens || []) {
                 token.object.refresh();
             }
         }
@@ -344,7 +344,7 @@ export async function migrateWorld() {
         for (const [index, actor] of queue.entries()) {
             if (new Date() - dateNow > 4000) {
                 ui.notifications.info(
-                    `Migrating actor's items to 3.0.54: (${
+                    `Migrating actor's items and active effects to 3.0.54: (${
                         queue.length - index
                     } actors remaining)`,
                 );
