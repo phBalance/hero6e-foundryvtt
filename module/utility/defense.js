@@ -45,10 +45,10 @@ function determineDefense(targetActor, attackItem, options) {
         const pdLevels = Math.min(PD, parseInt(item.system.PDLEVELS) || 0);
         PD -= pdLevels;
         rPD += pdLevels;
-        const edLevels = Math.min(PD, parseInt(item.system.EDLEVELS) || 0);
+        const edLevels = Math.min(ED, parseInt(item.system.EDLEVELS) || 0);
         ED -= edLevels;
         rED += edLevels;
-        const mdLevels = Math.min(PD, parseInt(item.system.MDLEVELS) || 0);
+        const mdLevels = Math.min(MD, parseInt(item.system.MDLEVELS) || 0);
         MD -= mdLevels;
         rMD += mdLevels;
 
