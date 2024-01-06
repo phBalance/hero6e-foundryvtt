@@ -1867,10 +1867,32 @@ export class HeroSystem6eItem extends Item {
 
                 break;
 
+            case "CONTACT":
+                system.description = `${system.ALIAS}: `;
+                break;
+
+            case "ACCIDENTALCHANGE":
+            case "DEPENDENCE":
+            case "DEPENDENTNPC":
+            case "DISTINCTIVEFEATURES":
+            case "ENRAGED":
+            case "HUNTED":
+            case "MONEYDISAD":
+            case "PSYCHOLOGICALLIMITATION":
+            case "PHYSICALLIMITATION":
+            case "RIVALRY":
+            case "REPUTATION":
+            case "SOCIALLIMITATION":
+            case "SUSCEPTIBILITY":
+            case "UNLUCK":
+                // Disadvantage: blah blah blah
+                system.description = `${system.ALIAS}: `;
+                break;
+
             case "TRANSPORT_FAMILIARITY":
                 //TF:  Custom Adder, Small Motorized Ground Vehicles
                 //TF:  Equines, Small Motorized Ground Vehicles
-                system.description = system.ALIAS + ": ";
+                system.description = `${system.ALIAS}: `;
                 break;
 
             case "MENTAL_COMBAT_LEVELS":
@@ -2167,7 +2189,13 @@ export class HeroSystem6eItem extends Item {
             for (let adder of system?.ADDER || []) {
                 switch (adder.XMLID) {
                     case "DIMENSIONS":
-                        system.description += ", " + adder.ALIAS;
+                        system.description += `, ${adder.ALIAS}`;
+                        break;
+
+                    case "ATTACK":
+                    case "USEFUL":
+                    case "EXTENDEDBREATHING":
+                        system.description += `${adder.ALIAS} ${adder.OPTION_ALIAS}`;
                         break;
 
                     case "ADDITIONALPD":
@@ -2175,18 +2203,34 @@ export class HeroSystem6eItem extends Item {
                     case "DEFBONUS":
                         break;
 
-                    case "EXTENDEDBREATHING":
-                        system.description +=
-                            adder.ALIAS + " " + adder.OPTION_ALIAS;
-                        break;
-
+                    case "APPEARANCE":
+                    case "CAPABILITIES":
+                    case "CHANCETOGO":
+                    case "CHANCETORECOVER":
+                    case "CIRCUMSTANCES":
                     case "CONCEALABILITY":
+                    case "CONDITION":
+                    case "DAMAGE":
+                    case "DESCRIPTION":
+                    case "DICE":
+                    case "EFFECT":
+                    case "EFFECTS":
+                    case "FIERCENESS":
+                    case "IMPAIRS":
+                    case "INTENSITY":
+                    case "KNOWLEDGE":
+                    case "LEVEL":
+                    case "MOTIVATION":
+                    case "OCCUR":
+                    case "OCCURS":
+                    case "POWER":
+                    case "RECOGNIZED":
                     case "REACTION":
                     case "SENSING":
                     case "SITUATION":
-                    case "INTENSITY":
-                    case "EFFECTS":
-                    case "OCCUR":
+                    case "SUBSTANCE":
+                    case "TIME":
+                    case "USEFULNESS":
                         _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
                         break;
 
