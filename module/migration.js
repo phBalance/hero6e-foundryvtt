@@ -312,7 +312,7 @@ export async function migrateWorld() {
         if (!game.settings.get(game.system.id, "bar3")) {
             game.settings.set(game.system.id, "bar3", true);
             // Refresh tokens to make sure they show the 3rd bar
-            for (const token of game.scenes.current.tokens) {
+            for (const token of game.scenes.current?.tokens || []) {
                 token.object.refresh();
             }
         }
@@ -344,7 +344,7 @@ export async function migrateWorld() {
         for (const [index, actor] of queue.entries()) {
             if (new Date() - dateNow > 4000) {
                 ui.notifications.info(
-                    `Migrating actor's items to 3.0.54: (${
+                    `Migrating actor's items and active effects to 3.0.54: (${
                         queue.length - index
                     } actors remaining)`,
                 );
@@ -424,7 +424,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
 
             const powerInfo = getPowerInfo({
                 actor: actor,
-                xmlid: activeEffect?.flags?.XMLID,
+                xmlid: activeEffect.flags?.XMLID,
                 item: item,
             });
 
@@ -452,10 +452,21 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                     costPerActivePoint,
             );
 
+            // The new format differentiates between beneficial adjustments as negative activePoints whereas
+            // the old format considers this value to always be >= 0.
+            const activePoints =
+                activeEffect.flags.XMLID === "ABSORPTION" ||
+                activeEffect.flags.XMLID === "AID" ||
+                activeEffect.flags.XMLID === "HEALING" ||
+                (activeEffect.flags.XMLID === "TRANSFER" &&
+                    activeEffect.flags.target === keyY)
+                    ? -presentAdjustmentActiveEffect.flags.activePoints
+                    : presentAdjustmentActiveEffect.flags.activePoints;
+
             const newFormatAdjustmentActiveEffect = {
                 name: `${presentAdjustmentActiveEffect.flags.XMLID} ${Math.abs(
                     activePointsThatShouldBeAffected,
-                )} ${presentAdjustmentActiveEffect.flags.target} (${Math.abs(
+                )} ${presentAdjustmentActiveEffect.flags.target.toUpperCase()} (${Math.abs(
                     presentAdjustmentActiveEffect.flags.activePoints,
                 )} AP) [by ${presentAdjustmentActiveEffect.flags.source}]`,
                 id: presentAdjustmentActiveEffect.id, // No change
@@ -466,12 +477,12 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                     type: "adjustment", // New
                     version: 2, // New
 
-                    activePoints:
-                        presentAdjustmentActiveEffect.flags.activePoints, // No change
+                    activePoints: activePoints, // Differentiate between negative and positive adjustments
                     XMLID: presentAdjustmentActiveEffect.flags.XMLID, // No change
                     source: presentAdjustmentActiveEffect.flags.source, // No change
                     target: [presentAdjustmentActiveEffect.flags.target], // Now an array
                     key: presentAdjustmentActiveEffect.flags.keyX, // Name change
+                    // NOTE: Dropping keyY
                 },
                 origin: presentAdjustmentActiveEffect.origin, // No change
             };
