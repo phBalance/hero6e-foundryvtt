@@ -1,30 +1,27 @@
 # Releases
 
-## Version 3.0.54
+## Version 3.0.54 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - The character sheet's power tab now has the dice icon for attack powers to initiate attacks.
-- Fix for movement powers toggles. [#533](https://github.com/dmdorman/hero6e-foundryvtt/issues/533)
+- Fix for movement powers toggles.
 - Compound powers now show proper indices, small description and cost changes for numerous, mostly 5e, powers.
 - Mental defense is now correctly calculated for 5e.
-- Improve disadvantage descriptions although they still have some extra parentheses.
-- Damage calculations with an additional term (i.e 1/2 die) are no longer short changed for regular damage but they are still a few other situations. Partially resolves [#508](https://github.com/dmdorman/hero6e-foundryvtt/issues/508) but there are still situations that aren't fixed (e.g. 0d6+1 or partial terms in explosions).
+- Damage calculations with an additional term (i.e 1/2 die) are no longer short changed for regular damage.
 - Add explosions for 5e (without proper drop off calculations).
-- Movement power improvements for 5e (pointing, description, and added gliding).
-- Description improvements for contact, invisibility and darkness. [#573](https://github.com/dmdorman/hero6e-foundryvtt/issues/573)
+- Movement power improvements for 5e and added gliding.
+- Description improvements for several powers and disadvantage.
 - Correct DAMAGERESISTANCE for ED and MD
-- Powers/Talents with resistant defenses now show them as such in their descriptions (different from HD).
-- Eliminate REDUCEDPENETRATION crash. [#568](https://github.com/dmdorman/hero6e-foundryvtt/issues/568)
+- Eliminate REDUCEDPENETRATION crash.
 - Endurance tracking improvements
   - No free recovery during combat
   - The first character to act in combat won't get dinged for active endurance using powers twice.
-  - Correct a crash during the start of each segment for characters that have powers active that use endurance but have no power modifiers.
+  - Correct endurance deduction for characters that have powers active that use endurance without power modifiers.
 - Improvements to adjustment powers (although we suggest still only using them for characteristics):
-  - Adjustment powers should now respect uploaded multi sources and targets when triggering. They should also respect maximum amounts for absorption, aid, and transfer for 5e and 6e.
+  - Adjustment powers should now respect uploaded multi sources and targets when triggering. They should also respect maximum effects for absorption, aid, and transfer.
   - No adjustment powers should be killing attacks that are enhanced by strength.
-  - Correct resistant power defense (yes it's a silly thing but we were accidentally boosting it and consequently mostly likely doubling power defenses).
+  - Correct resistant power defense.
   - Calculated power defense will now be shown on the character sheet.
-  - Defensive powers qualifying for the adjustment multiplier now match 5e's more strict list.
-  - Multi source/target adjustments now have just 1 long chat message for each "attack" and fade.
+  - Defensive powers qualifying for the adjustment multiplier now match 5e's smaller list.
   - In 5e, adjustment to DEX and EGO should adjust OCV/DCV and OMCV/DMCV appropriately.
 
 ## Version 3.0.53
