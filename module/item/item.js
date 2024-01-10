@@ -1881,12 +1881,25 @@ export class HeroSystem6eItem extends Item {
             case "PSYCHOLOGICALLIMITATION":
             case "PHYSICALLIMITATION":
             case "RIVALRY":
-            case "REPUTATION":
             case "SOCIALLIMITATION":
             case "SUSCEPTIBILITY":
             case "UNLUCK":
                 // Disadvantage: blah blah blah
                 system.description = `${system.ALIAS}: `;
+                break;
+
+            case "REPUTATION":
+                // There are 2 types of reputation - positive, a perk, and negative, a disadvantage. Both share an XMLID.
+                if (this.type === "disadvantage") {
+                    system.description = `${system.ALIAS}: `;
+                } else {
+                    system.description = `${system.ALIAS}: ${
+                        system.LEVELS
+                            ? `+${system.LEVELS}/+${system.LEVELS}d6 `
+                            : ""
+                    }`;
+                }
+
                 break;
 
             case "TRANSPORT_FAMILIARITY":
@@ -2216,6 +2229,8 @@ export class HeroSystem6eItem extends Item {
                     case "EFFECT":
                     case "EFFECTS":
                     case "FIERCENESS":
+                    case "HOWWELL":
+                    case "HOWWIDE":
                     case "IMPAIRS":
                     case "INTENSITY":
                     case "KNOWLEDGE":
