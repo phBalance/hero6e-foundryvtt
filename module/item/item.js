@@ -2565,7 +2565,11 @@ export class HeroSystem6eItem extends Item {
 
         // Multiple levels?
         if ((parseInt(modifier.LEVELS) || 0) > 1) {
-            if (["HARDENED"].includes(modifier.XMLID)) {
+            if (
+                ["HARDENED", "PENETRATING", "ARMORPIERCING"].includes(
+                    modifier.XMLID,
+                )
+            ) {
                 result += "x" + parseInt(modifier.LEVELS) + "; ";
             }
         }
@@ -2663,6 +2667,7 @@ export class HeroSystem6eItem extends Item {
                     result += ", ";
                     break;
                 case "CONDITIONALPOWER":
+                    result += " (";
                     break;
                 default:
                     result += "; ";
@@ -2675,7 +2680,7 @@ export class HeroSystem6eItem extends Item {
 
         //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
         if (modifier.COMMENTS) result += modifier.COMMENTS + "; ";
-        for (let adder of modifier.ADDER || []) {
+        for (const adder of modifier.ADDER || []) {
             switch (adder.XMLID) {
                 case "DOUBLEAREA":
                     break;
@@ -2692,7 +2697,7 @@ export class HeroSystem6eItem extends Item {
         if (BASECOST_total == 0) {
             fraction += "+0";
             // if (game.settings.get(game.system.id, 'alphaTesting')) {
-            //     ui.notifications.warn(`${powerName} has an unhandeled modifier (${modifier.XMLID})`)
+            //     ui.notifications.warn(`${powerName} has an unhandled modifier (${modifier.XMLID})`)
             // }
         }
 
@@ -2720,10 +2725,6 @@ export class HeroSystem6eItem extends Item {
                 break;
             default:
                 fraction += BASECOST_total % 1;
-        }
-
-        if (["CONDITIONALPOWER"].includes(modifier.XMLID)) {
-            result += " (";
         }
 
         result += fraction.trim() + ")";
