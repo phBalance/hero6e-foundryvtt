@@ -2565,7 +2565,11 @@ export class HeroSystem6eItem extends Item {
 
         // Multiple levels?
         if ((parseInt(modifier.LEVELS) || 0) > 1) {
-            if (["HARDENED"].includes(modifier.XMLID)) {
+            if (
+                ["HARDENED", "PENETRATING", "ARMORPIERCING"].includes(
+                    modifier.XMLID,
+                )
+            ) {
                 result += "x" + parseInt(modifier.LEVELS) + "; ";
             }
         }
