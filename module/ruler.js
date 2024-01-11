@@ -1,4 +1,5 @@
 import { HEROSYS } from "./herosystem6e.js";
+import { getSystemDisplayUnits } from "./utility/units.js";
 
 export class HeroRuler {
     static initialize() {
@@ -254,9 +255,9 @@ export class HeroRuler {
                         }>
                         <label for="radio-${index}" class="radio-label">${
                             item.name
-                        } (${item.value}${
-                            game.scenes.current.grid.units || ""
-                        })</label>
+                        } (${item.value}${getSystemDisplayUnits(
+                            relevantToken.actor,
+                        )})</label>
                     </div>
                 `,
                     )
