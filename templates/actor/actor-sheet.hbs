@@ -711,6 +711,7 @@
                         <th></th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
                         <th class="left">{{localize "ActorSheet.Perk"}}</th>
+                        <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create perk" data-type="perk">
                                 <i class="fas fa-plus"></i> Add Perk</a>
@@ -726,6 +727,13 @@
                         <td>{{item.system.realCost}}</td>
                         <td class="left">
                             {{{itemFullDescription item}}}
+                        </td>
+                        <td>
+                            {{#if item.system.roll}}
+                                <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
+                                    data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
+                                    sign=false}}-</button>
+                            {{/if}}
                         </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i
@@ -790,6 +798,7 @@
                         <th></th>
                         <th>{{localize "ActorSheet.Cost"}}</th>
                         <th class="left">{{localize "ActorSheet.Complication"}}</th>
+                        <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
                             <a class="item-control item-create" title="Create complication" data-type="complication">
                                 <i class="fas fa-plus"></i> Add Complication</a>
@@ -805,6 +814,13 @@
                         <td>{{item.system.realCost}}</td>
                         <td class="left">
                             {{{itemFullDescription item}}}
+                        </td>
+                        <td>
+                            {{#if item.system.roll}}
+                                <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
+                                    data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
+                                    sign=false}}-</button>
+                            {{/if}}
                         </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i

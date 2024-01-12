@@ -1007,7 +1007,7 @@ HERO.powers = [
     },
     {
         key: "REPUTATION",
-        powerType: ["talent"],
+        powerType: ["perk", "skill"],
         name: "Positive Reputation",
         costPerLevel: 0,
     },

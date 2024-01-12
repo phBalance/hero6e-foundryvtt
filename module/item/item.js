@@ -3126,7 +3126,39 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 const rollVal = baseRollValue + levelsAdjustment;
-                skillData.roll = rollVal.toString() + "-";
+                skillData.roll = `${rollVal}-`;
+            } else if (skillData.XMLID === "REPUTATION") {
+                // 2 types of reputation. Positive is a perk ("HOWWELL" adder) and Negative is a disadvantage ("RECOGNIZED" adder).
+                let perkRollValue = parseInt(
+                    skillData.ADDER.find((adder) => adder.XMLID === "HOWWELL")
+                        ?.OPTIONID || 0,
+                );
+
+                if (!perkRollValue) {
+                    const disadRollName = skillData.ADDER.find(
+                        (adder) => adder.XMLID === "RECOGNIZED",
+                    ).OPTIONID;
+
+                    if (disadRollName === "SOMETIMES") {
+                        perkRollValue = 8;
+                    } else if (disadRollName === "FREQUENTLY") {
+                        perkRollValue = 11;
+                    } else if (disadRollName === "ALWAYS") {
+                        perkRollValue = 14;
+                    } else {
+                        console.error(
+                            `unknown disadRollName ${disadRollName} for REPUTATION`,
+                        );
+                        perkRollValue = 14;
+                    }
+                }
+
+                skillData.tags.push({
+                    value: perkRollValue,
+                    name: "Base Reputation",
+                });
+
+                skillData.roll = `${perkRollValue}-`;
             } else {
                 skillData.roll = null;
             }
