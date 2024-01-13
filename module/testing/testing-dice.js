@@ -1,82 +1,49 @@
 import { HeroRoller } from "../utility/dice.js";
 
-class RollMock {
-    static getClass(terms) {
-        return RollMock.bind(null, terms);
+class MinRollDie extends Die {
+    constructor(termData = {}) {
+        super(termData);
     }
 
-    constructor(terms, formula) {
-        this._terms = terms;
-        this._formula = formula;
-    }
+    /**
+     * Roll for this Die, but always roll a 1.
+     */
+    _evaluate() {
+        for (let i = 0; i < this.number; ++i) {
+            const roll = { result: 1, active: true };
+            this.results.push(roll);
+        }
 
-    async roll() {
         return this;
     }
+}
 
-    get dice() {
-        return this._terms.flatMap((term) => {
-            return term.results.map((result) => {
-                // TODO: Depends on the type of term
-                return result.result;
-            });
+class RollMock extends Roll {
+    static fromTerms(terms, options) {
+        const newTerms = terms.map((term) => {
+            // Replace all Die with a Die class that will always return 1 when rolling
+            if (term instanceof Die) {
+                return new MinRollDie({
+                    number: term.number,
+                    faces: term.faces,
+                });
+            }
+
+            return term;
         });
+
+        const formula = Roll.getFormula(newTerms);
+
+        const mock = new RollMock(formula, options);
+        mock.terms = newTerms;
+
+        return mock;
     }
 
-    get total() {
-        return this._terms.reduce((total, term) => {
-            return total + term.number;
-        }, 0);
+    constructor(formula, data, options) {
+        super(formula, data, options);
     }
 }
-
-function diceTermCount(number, faces) {
-    return {
-        number: number,
-        faces: faces,
-    };
-}
-
-function termResult(results) {
-    return {
-        results: results.map((result) => {
-            return {
-                result: result,
-                active: true,
-                count: result,
-                success: false,
-                failure: true,
-                discarded: false,
-                rerolled: false,
-                exploded: false,
-            };
-        }),
-    };
-}
-
-const FROM_1d6_RETURN_1x1 = [
-    new DiceTerm({
-        ...diceTermCount(1, 6),
-        ...termResult([1]),
-    }),
-];
-
-const FROM_3d6_RETURN_3x1 = [
-    new DiceTerm({
-        ...diceTermCount(3, 6),
-        ...termResult([1, 1, 1]),
-    }),
-];
-
-const sumTerms = (terms) =>
-    terms.reduce((total, term) => {
-        return (
-            total +
-            term.reduce((total, die) => {
-                return total + die;
-            }, 0)
-        );
-    }, 0);
 
 export function registerDiceTests(quench) {
     quench.registerBatch(
@@ -84,88 +51,66 @@ export function registerDiceTests(quench) {
         (context) => {
             const { describe, expect, it } = context;
             describe("HeroRoller", function () {
-                // TODO: add back when actually mocking Roll appropriately
-                // it("should take a 1 term, 1 die equation", async function () {
-                //     // 1d6 roller
-                //     const mockRoll = RollMock.getClass(FROM_1d6_RETURN_1x1);
-                //     const roller = new HeroRoller({}, {}, mockRoll)
-                //         .addDice(1, 6)
-                //         .add(1);
+                describe("success roll", function () {
+                    it("should handle a 1 pip equation", async function () {
+                        const roller = new HeroRoller({}, RollMock).addNumber(
+                            1,
+                        );
 
-                //     await roller.roll();
+                        await roller.roll();
 
-                //     expect(roller.getBaseTerms()).deep.to.equal([1]);
-                //     expect(roller.getBaseTotal()).to.equal(2);
-                // });
+                        expect(roller.getSuccessTerms()).deep.to.equal([[1]]);
+                        expect(roller.getSuccessTotal()).to.equal(1);
+                    });
 
-                // it("should take a 1 term, 3 die equation", async function () {
-                //     // 3d6 roller
-                //     const mockRoll = RollMock.getClass(FROM_3d6_RETURN_3x1);
-                //     const roller = new HeroRoller({}, {}, mockRoll)
-                //         .addDice(3, 6)
-                //         .add(1);
+                    it("should take a 1 term, 1 die equation", async function () {
+                        const roller = new HeroRoller({}, RollMock).addDice(
+                            1,
+                            6,
+                        );
 
-                //     await roller.roll();
+                        await roller.roll();
 
-                //     expect(roller.getBaseTerms()).deep.to.equal([1, 1, 1]);
-                //     expect(roller.getBaseTotal()).to.equal(4);
-                // });
+                        expect(roller.getSuccessTerms()).deep.to.equal([[1]]);
+                        expect(roller.getSuccessTotal()).to.equal(1);
+                    });
 
-                it("should roll the dice and return the data for an untyped roll", async function () {
-                    const roller = new HeroRoller().addDice(2, 6).add(1);
+                    it("should take a 2 term, 1 die equation", async function () {
+                        const roller = new HeroRoller({}, RollMock)
+                            .addDice(1)
+                            .addNumber(1);
 
-                    await roller.roll();
+                        await roller.roll();
 
-                    expect(roller.getBaseTerms().length).to.equal(1);
-                    expect(roller.getBaseTotal()).to.equal(
-                        sumTerms(roller.getBaseTerms()) + 1,
-                    );
+                        expect(roller.getSuccessTerms()).deep.to.equal([
+                            [1],
+                            [1],
+                        ]);
+                        expect(roller.getSuccessTotal()).to.equal(2);
+                    });
+
+                    it("should take a typical attack roll equation", async function () {
+                        const roller = new HeroRoller({}, RollMock)
+                            .addNumber(11)
+                            .addNumber(9)
+                            .subNumber(2)
+                            .addNumber(-2)
+                            .addNumber(3)
+                            .subDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccessTerms()).deep.to.equal([
+                            [11],
+                            [9],
+                            [-2],
+                            [-2],
+                            [3],
+                            [-1, -1, -1],
+                        ]);
+                        expect(roller.getSuccessTotal()).deep.to.equal(16);
+                    });
                 });
-
-                it("should roll the dice and return the data for a single term untyped roll", async function () {
-                    const roller = new HeroRoller().addDice(2, 6).add(2);
-
-                    await roller.roll();
-
-                    expect(roller.getBaseTerms().length).to.equal(1);
-                    expect(roller.getBaseTotal()).to.equal(
-                        sumTerms(roller.getBaseTerms()) + 2,
-                    );
-                });
-
-                it("should roll the dice and return the data for a multiple term untyped roll", async function () {
-                    const roller = new HeroRoller()
-                        .addDice(2, 6)
-                        .addDice(5, 6)
-                        .add(2);
-
-                    await roller.roll();
-
-                    expect(roller.getBaseTerms().length).to.equal(2);
-                    expect(roller.getBaseTotal()).to.equal(
-                        sumTerms(roller.getBaseTerms()) + 2,
-                    );
-                });
-
-                it(
-                    "should roll the dice and return the data for a normal attack damage roll",
-                );
-
-                it(
-                    "should roll the dice and return the data for a killing attack damage roll",
-                );
-
-                it(
-                    "should roll the dice and return the data for an adjustment attack damage roll",
-                );
-
-                it(
-                    "should roll the dice and return the data for an entangle attack damage roll",
-                );
-
-                it(
-                    "should roll the dice and return the data for an flash attack damage roll",
-                );
             });
         },
         { displayName: "HERO: Dice" },

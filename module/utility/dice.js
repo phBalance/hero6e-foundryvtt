@@ -50,7 +50,7 @@ export function generatePseudoRollFromTerms(terms) {
 }
 
 export const ROLL_TYPE = {
-    UNTYPED: 0,
+    SUCCESS: 0,
     NORMAL: 1,
     KILLING: 2,
     ADJUSTMENT: 3,
@@ -62,15 +62,31 @@ function toSignedString(value) {
     return `${value < 0 ? "" : "+"}${value}`;
 }
 
+function sumTerms(terms) {
+    return terms.reduce((total, term) => {
+        return (
+            total +
+            term.reduce((subTotal, result) => {
+                return subTotal + result;
+            }, 0)
+        );
+    }, 0);
+}
+
+function sum(terms) {
+    return terms.reduce((total, result) => {
+        return total + result;
+    }, 0);
+}
+
 export class HeroRoller {
-    constructor(data, options, rollClass = Roll) {
+    constructor(options, rollClass = Roll) {
         this._buildRollClass = rollClass;
-        this._data = data;
         this._options = options;
         this._rollObj = undefined;
 
-        this._equation = [];
-        this._type = ROLL_TYPE.UNTYPED;
+        this._formulaTerms = [];
+        this._type = ROLL_TYPE.SUCCESS;
     }
 
     getType() {
@@ -102,42 +118,196 @@ export class HeroRoller {
         return this;
     }
 
-    addDice(numDice, numFaces) {
-        this._equation.push({
-            type: "dice",
-            faces: numFaces,
-            numDice: numDice,
-        });
+    _linkIfNotFirstTerm(operator = "+") {
+        if (this._formulaTerms.length > 0) {
+            this._formulaTerms.push(new OperatorTerm({ operator: operator }));
+        }
+    }
+
+    addDice(numDice) {
+        this._linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: numDice,
+                options: { flavor: "add dice" },
+            }),
+        );
+
         return this;
     }
 
-    add(value) {
-        this._equation.push({ type: "add", value: value });
+    addHalfDie() {
+        this._linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: 1,
+                options: { flavor: "half die" },
+            }),
+        );
+
         return this;
     }
 
-    sub(value) {
-        this._equation.push({ type: "sub", value: value });
+    addDieMinus1() {
+        this._linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: 1,
+                options: { flavor: "less 1 pip" },
+            }),
+        );
+
+        return this;
+    }
+
+    subDice(numDice) {
+        this._linkIfNotFirstTerm("-");
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: numDice,
+                options: { flavor: "sub dice" },
+            }),
+        );
+
+        return this;
+    }
+
+    addNumber(value) {
+        this._linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new NumericTerm({
+                number: value,
+                options: { flavor: "add number" },
+            }),
+        );
+
+        return this;
+    }
+
+    subNumber(value) {
+        this._linkIfNotFirstTerm("-");
+
+        this._formulaTerms.push(
+            new NumericTerm({
+                number: value,
+                options: { flavor: "sub number" },
+            }),
+        );
+
         return this;
     }
 
     async roll(options) {
-        const formula = this._makeFormula();
-        this._rollObj = new this._buildRollClass(
-            formula,
-            this._data,
+        this._rollObj = this._buildRollClass.fromTerms(
+            this._formulaTerms,
             this._options,
         );
 
-        await this._rollObj.roll({ ...options, async: true });
+        await this._rollObj.evaluate({ ...options, async: true });
 
-        this._rawBaseTerms = this._rollObj.dice;
-        this._baseTotal = this._rollObj.total;
+        this._rawBaseTerms = this._rollObj.terms;
+        // this._rawBaseTerms = this._rollObj.dice;
         this._baseResult = this._rollObj.result;
 
         this._calculate();
 
         return this;
+    }
+
+    getSuccessTerms() {
+        let terms;
+
+        if (this._type === ROLL_TYPE.SUCCESS) {
+            terms = this.getBaseTerms();
+        } else {
+            console.error(
+                `asking for stun from ${this._type} type doesn't make sense`,
+            );
+            terms = [];
+        }
+
+        return terms;
+    }
+    getSuccessTotal() {
+        let total;
+
+        if (this._type === ROLL_TYPE.SUCCESS) {
+            total = this.getBaseTotal();
+        } else {
+            console.error(
+                `asking for stun from ${this._type} type doesn't make sense`,
+            );
+            total = [];
+        }
+
+        return total;
+    }
+
+    getStunTerms() {
+        let terms;
+
+        if (this._type === ROLL_TYPE.NORMAL) {
+            terms = this.getBaseTerms();
+        } else {
+            console.error(
+                `asking for stun from ${this._type} type doesn't make sense`,
+            );
+            terms = [];
+        }
+
+        return terms;
+    }
+    getStunTotal() {
+        let total;
+
+        if (this._type === ROLL_TYPE.NORMAL) {
+            total = this.getBaseTotal();
+        } else {
+            console.error(
+                `asking for stun from ${this._type} type doesn't make sense`,
+            );
+            total = [];
+        }
+
+        return total;
+    }
+
+    getBodyTerms() {
+        let terms;
+
+        if (this._type === ROLL_TYPE.NORMAL) {
+            terms = this.getCalculatedTerms();
+        } else {
+            console.error(
+                `asking for stun from ${this._type} type doesn't make sense`,
+            );
+            terms = [];
+        }
+
+        return terms;
+    }
+    getBodyTotal() {
+        let total;
+
+        if (this._type === ROLL_TYPE.NORMAL) {
+            total = this.getCalculatedTotal();
+        } else {
+            console.error(
+                `asking for stun from ${this._type} type doesn't make sense`,
+            );
+            total = [];
+        }
+
+        return total;
     }
 
     getBaseTerms() {
@@ -150,7 +320,7 @@ export class HeroRoller {
 
     getCalculatedTerms() {
         if (
-            this._type === ROLL_TYPE.UNTYPED ||
+            this._type === ROLL_TYPE.SUCCESS ||
             this._type === ROLL_TYPE.ENTANGLE ||
             this._type === ROLL_TYPE.FLASH
         ) {
@@ -158,6 +328,7 @@ export class HeroRoller {
                 `attempting to get calculatedTerms for roll type ${this._type}`,
             );
         }
+
         return this._calculatedTerms;
     }
 
@@ -167,68 +338,72 @@ export class HeroRoller {
 
     // TODO: toJSON toObject
 
-    _makeFormula() {
-        let formula = "";
-
-        for (const [index, term] of this._equation.entries()) {
-            switch (term.type) {
-                case "dice":
-                    formula += `${toSignedString(term.numDice)}d${term.faces}`;
-                    break;
-                case "add":
-                    formula += `${toSignedString(term.value)}`;
-                    break;
-                case "sub":
-                    {
-                        const value = -term.value;
-                        formula += `${toSignedString(value)}`;
-                    }
-                    break;
-            }
-        }
-
-        return formula;
-    }
-
-    _calculate() {
-        // Convert raw base terms into an array of results
-        this._baseTerms = this._rawBaseTerms.map((term) => {
-            if (term instanceof DiceTerm) {
-                return term.results.map((result) => {
-                    return result.result;
-                });
-            } else {
-                console.error(`unimplemented`);
-            }
-        });
-
-        // TODO: Calculate
+    _calculateValue(result) {
         switch (this._type) {
-            case ROLL_TYPE.UNTYPED:
+            case ROLL_TYPE.SUCCESS:
+            case ROLL_TYPE.ADJUSTMENT:
+                // Do nothing as there is no calculated values
                 break;
 
             case ROLL_TYPE.NORMAL:
-                this._calculatedTerms = this._baseTerms.map((term) => {
-                    if (term === 1) {
-                        return 0;
-                    } else if (term === 6) {
-                        return 2;
-                    } else {
-                        return 1;
-                    }
-                });
+                // Calculate BODY
+                if (result <= 1) {
+                    return 0;
+                } else if (result === 6) {
+                    return 2;
+                }
 
-                this._calculatedTotal = this._calculatedTerms.reduce(
-                    (total, term) => {
-                        return total + term;
-                    },
-                    0,
-                );
-                break;
+                return 1;
 
+            case ROLL_TYPE.ENTANGLE:
+            case ROLL_TYPE.FLASH:
+            case ROLL_TYPE.KILLING:
             default:
-                console.error(`unimplemented type ${this._type}`);
-                break;
+                console.error(`Unhandled calculation for type ${this._type}`);
         }
+    }
+
+    _calculate() {
+        this._calculatedTerms = [];
+
+        let lastOperatorMultiplier = 1;
+
+        this._baseTerms = this._rawBaseTerms
+            .map((term) => {
+                if (term instanceof NumericTerm) {
+                    const number = lastOperatorMultiplier * term.number;
+
+                    this._calculatedTerms.push(this._calculateValue(number));
+
+                    return [number];
+                } else if (term instanceof OperatorTerm) {
+                    // NOTE: No need to handle multiplication and division
+                    lastOperatorMultiplier = term.operator === "-" ? -1 : 1;
+                } else if (term instanceof Die) {
+                    return term.results.map((result) => {
+                        let adjustedValue =
+                            lastOperatorMultiplier * result.result;
+
+                        if (term.options.flavor === "half die") {
+                            adjustedValue = Math.ceil(result / 2);
+                        } else if (term.options.flavor === "less 1 pip") {
+                            adjustedValue = result - 1;
+                        }
+
+                        this._calculatedTerms.push(
+                            this._calculateValue(adjustedValue),
+                        );
+
+                        return adjustedValue;
+                    });
+                } else {
+                    // Other term types will return undefined and be filtered out
+                    // although we shouldn't ever get them.
+                }
+            })
+            .filter(Boolean);
+
+        this._baseTotal = sumTerms(this._baseTerms);
+        this._calculatedTotal = sum(this._calculatedTerms);
     }
 }
