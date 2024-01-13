@@ -69,7 +69,7 @@ export function registerDiceTests(quench) {
                 describe("success roll", function () {
                     const TestRollMock = Roll1Mock;
 
-                    it("should throw if requesting a stun or body value", async function () {
+                    it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller(
@@ -85,6 +85,10 @@ export function registerDiceTests(quench) {
                         expect(() => {
                             return roller.getStunTotal();
                         }).to.throw();
+                        expect(() => {
+                            return roller.getStunMultiplier();
+                        }).to.throw();
+
                         expect(() => {
                             return roller.getBodyTerms();
                         }).to.throw();
@@ -166,7 +170,7 @@ export function registerDiceTests(quench) {
                 });
 
                 describe("normal roll", function () {
-                    it("should throw if requesting a success term or total", async function () {
+                    it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -180,6 +184,9 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             return roller.getSuccessTotal();
+                        }).to.throw();
+                        expect(() => {
+                            return roller.getStunMultiplier();
                         }).to.throw();
                     });
 
@@ -356,12 +363,12 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("normal roll", function () {
-                    it("should throw if requesting a success term or total", async function () {
+                describe("killing roll", function () {
+                    it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeNormalRoll()
+                            .makeKillingRoll()
                             .addNumber(1);
 
                         await roller.roll();
@@ -384,23 +391,189 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([[1]]);
-                        expect(roller.getBodyTotal()).deep.to.equal(1);
+                        expect(roller.getBodyTotal()).to.equal(1);
 
-                        expect(roller.getStunMultiplier());
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
 
-                        // expect(roller.getStunTerms()).deep.to.equal([
-                        //     [
-                        //         TestRollMock.fixedRollResult,
-                        //         TestRollMock.fixedRollResult,
-                        //         TestRollMock.fixedRollResult,
-                        //     ],
-                        //     [TestRollMock.fixedRollResult - 1],
-                        // ]);
-                        // expect(roller.getStunTotal()).deep.to.equal(
-                        //     3 * TestRollMock.fixedRollResult +
-                        //         TestRollMock.fixedRollResult -
-                        //         1,
-                        // );
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [1 * (TestRollMock.fixedRollResult - 1)],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            1 * (TestRollMock.fixedRollResult - 1),
+                        );
+                    });
+
+                    it("should handle a half die", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll()
+                            .addHalfDie();
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [Math.ceil(TestRollMock.fixedRollResult / 2)],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                    (TestRollMock.fixedRollResult - 1),
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                (TestRollMock.fixedRollResult - 1),
+                        );
+                    });
+
+                    it("should handle a die", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll()
+                            .addDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [TestRollMock.fixedRollResult],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult *
+                                    (TestRollMock.fixedRollResult - 1),
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            TestRollMock.fixedRollResult *
+                                (TestRollMock.fixedRollResult - 1),
+                        );
+                    });
+
+                    it("should handle a die less a pip", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll()
+                            .addDieMinus1();
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [TestRollMock.fixedRollResult - 1],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                (TestRollMock.fixedRollResult - 1) *
+                                    (TestRollMock.fixedRollResult - 1),
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            (TestRollMock.fixedRollResult - 1) *
+                                (TestRollMock.fixedRollResult - 1),
+                        );
+                    });
+
+                    it("should handle a die plus a pip", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll()
+                            .addDice()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [TestRollMock.fixedRollResult],
+                            [1],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            TestRollMock.fixedRollResult + 1,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult *
+                                    (TestRollMock.fixedRollResult - 1),
+                            ],
+                            [1 * (TestRollMock.fixedRollResult - 1)],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            roller.getBodyTotal() * roller.getStunMultiplier(),
+                        );
+                    });
+
+                    it("should handle multiple dice", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult *
+                                    (TestRollMock.fixedRollResult - 1),
+                                TestRollMock.fixedRollResult *
+                                    (TestRollMock.fixedRollResult - 1),
+                                TestRollMock.fixedRollResult *
+                                    (TestRollMock.fixedRollResult - 1),
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 *
+                                TestRollMock.fixedRollResult *
+                                (TestRollMock.fixedRollResult - 1),
+                        );
                     });
                 });
             });

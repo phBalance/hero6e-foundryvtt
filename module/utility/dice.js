@@ -58,10 +58,6 @@ export const ROLL_TYPE = {
     FLASH: 5,
 };
 
-function toSignedString(value) {
-    return `${value < 0 ? "" : "+"}${value}`;
-}
-
 function sumTerms(terms) {
     return terms.reduce((total, term) => {
         return (
@@ -70,12 +66,6 @@ function sumTerms(terms) {
                 return subTotal + result;
             }, 0)
         );
-    }, 0);
-}
-
-function sum(terms) {
-    return terms.reduce((total, result) => {
-        return total + result;
     }, 0);
 }
 
@@ -166,6 +156,20 @@ export class HeroRoller {
         return this;
     }
 
+    addDieMinus1Min1() {
+        this._linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: 1,
+                options: { flavor: "less 1 pip min 1" },
+            }),
+        );
+
+        return this;
+    }
+
     subDice(numDice) {
         this._linkIfNotFirstTerm("-");
 
@@ -214,8 +218,16 @@ export class HeroRoller {
 
         await this._rollObj.evaluate({ ...options, async: true });
 
+        if (this._type === ROLL_TYPE.KILLING) {
+            const hr = new HeroRoller(
+                {},
+                this._buildRollClass,
+            ).addDieMinus1Min1();
+            await hr.roll({ async: true });
+            this._baseMultiplier = hr.getSuccessTotal();
+        }
+
         this._rawBaseTerms = this._rollObj.terms;
-        // this._rawBaseTerms = this._rollObj.dice;
         this._baseResult = this._rollObj.result;
 
         this._calculate();
@@ -245,6 +257,8 @@ export class HeroRoller {
     getStunTerms() {
         if (this._type === ROLL_TYPE.NORMAL) {
             return this.getBaseTerms();
+        } else if (this._type === ROLL_TYPE.KILLING) {
+            return this.getCalculatedTerms();
         }
 
         throw new Error(
@@ -254,10 +268,21 @@ export class HeroRoller {
     getStunTotal() {
         if (this._type === ROLL_TYPE.NORMAL) {
             return this.getBaseTotal();
+        } else if (this._type === ROLL_TYPE.KILLING) {
+            return this.getCalculatedTotal();
         }
 
         throw new Error(
             `asking for stun from type ${this._type} doesn't make sense`,
+        );
+    }
+    getStunMultiplier() {
+        if (this._type === ROLL_TYPE.KILLING) {
+            return this.getBaseMultiplier();
+        }
+
+        throw new Error(
+            `asking for stun multiplier from type ${this._type} doesn't make sense`,
         );
     }
 
@@ -287,9 +312,11 @@ export class HeroRoller {
     getBaseTerms() {
         return this._baseTerms;
     }
-
     getBaseTotal() {
         return this._baseTotal;
+    }
+    getBaseMultiplier() {
+        return this._baseMultiplier;
     }
 
     getCalculatedTerms() {
@@ -329,9 +356,11 @@ export class HeroRoller {
 
                 return 1;
 
+            case ROLL_TYPE.KILLING:
+                return result * this._baseMultiplier;
+
             case ROLL_TYPE.ENTANGLE:
             case ROLL_TYPE.FLASH:
-            case ROLL_TYPE.KILLING:
             default:
                 console.error(`Unhandled calculation for type ${this._type}`);
         }
@@ -364,6 +393,8 @@ export class HeroRoller {
                             adjustedValue = Math.ceil(result.result / 2);
                         } else if (term.options.flavor === "less 1 pip") {
                             adjustedValue = result.result - 1;
+                        } else if (term.options.flavor === "less 1 pip min 1") {
+                            adjustedValue = Math.max(1, result.result - 1);
                         }
 
                         calculatedTerms.push(
