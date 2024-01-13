@@ -224,90 +224,64 @@ export class HeroRoller {
     }
 
     getSuccessTerms() {
-        let terms;
-
         if (this._type === ROLL_TYPE.SUCCESS) {
-            terms = this.getBaseTerms();
-        } else {
-            console.error(
-                `asking for stun from ${this._type} type doesn't make sense`,
-            );
-            terms = [];
+            return this.getBaseTerms();
         }
 
-        return terms;
+        throw new Error(
+            `asking for success from type ${this._type} doesn't make sense`,
+        );
     }
     getSuccessTotal() {
-        let total;
-
         if (this._type === ROLL_TYPE.SUCCESS) {
-            total = this.getBaseTotal();
-        } else {
-            console.error(
-                `asking for stun from ${this._type} type doesn't make sense`,
-            );
-            total = [];
+            return this.getBaseTotal();
         }
 
-        return total;
+        throw new Error(
+            `asking for success from type ${this._type} doesn't make sense`,
+        );
     }
 
     getStunTerms() {
-        let terms;
-
         if (this._type === ROLL_TYPE.NORMAL) {
-            terms = this.getBaseTerms();
-        } else {
-            console.error(
-                `asking for stun from ${this._type} type doesn't make sense`,
-            );
-            terms = [];
+            return this.getBaseTerms();
         }
 
-        return terms;
+        throw new Error(
+            `asking for stun from type ${this._type} doesn't make sense`,
+        );
     }
     getStunTotal() {
-        let total;
-
         if (this._type === ROLL_TYPE.NORMAL) {
-            total = this.getBaseTotal();
-        } else {
-            console.error(
-                `asking for stun from ${this._type} type doesn't make sense`,
-            );
-            total = [];
+            return this.getBaseTotal();
         }
 
-        return total;
+        throw new Error(
+            `asking for stun from type ${this._type} doesn't make sense`,
+        );
     }
 
     getBodyTerms() {
-        let terms;
-
         if (this._type === ROLL_TYPE.NORMAL) {
-            terms = this.getCalculatedTerms();
-        } else {
-            console.error(
-                `asking for stun from ${this._type} type doesn't make sense`,
-            );
-            terms = [];
+            return this.getCalculatedTerms();
+        } else if (this._type === ROLL_TYPE.KILLING) {
+            return this.getBaseTerms();
         }
 
-        return terms;
+        throw new Error(
+            `asking for body from type ${this._type} doesn't make sense`,
+        );
     }
     getBodyTotal() {
-        let total;
-
         if (this._type === ROLL_TYPE.NORMAL) {
-            total = this.getCalculatedTotal();
-        } else {
-            console.error(
-                `asking for stun from ${this._type} type doesn't make sense`,
-            );
-            total = [];
+            return this.getCalculatedTotal();
+        } else if (this._type === ROLL_TYPE.KILLING) {
+            return this.getBaseTotal();
         }
 
-        return total;
+        throw new Error(
+            `asking for body from type ${this._type} doesn't make sense`,
+        );
     }
 
     getBaseTerms() {
@@ -373,29 +347,33 @@ export class HeroRoller {
                 if (term instanceof NumericTerm) {
                     const number = lastOperatorMultiplier * term.number;
 
-                    this._calculatedTerms.push(this._calculateValue(number));
+                    this._calculatedTerms.push([this._calculateValue(number)]);
 
                     return [number];
                 } else if (term instanceof OperatorTerm) {
-                    // NOTE: No need to handle multiplication and division
+                    // NOTE: No need to handle multiplication and division as
+                    //       this class doesn't support it.
                     lastOperatorMultiplier = term.operator === "-" ? -1 : 1;
                 } else if (term instanceof Die) {
-                    return term.results.map((result) => {
+                    const calculatedTerms = [];
+                    const map = term.results.map((result) => {
                         let adjustedValue =
                             lastOperatorMultiplier * result.result;
 
                         if (term.options.flavor === "half die") {
-                            adjustedValue = Math.ceil(result / 2);
+                            adjustedValue = Math.ceil(result.result / 2);
                         } else if (term.options.flavor === "less 1 pip") {
-                            adjustedValue = result - 1;
+                            adjustedValue = result.result - 1;
                         }
 
-                        this._calculatedTerms.push(
+                        calculatedTerms.push(
                             this._calculateValue(adjustedValue),
                         );
 
                         return adjustedValue;
                     });
+                    this._calculatedTerms.push(calculatedTerms);
+                    return map;
                 } else {
                     // Other term types will return undefined and be filtered out
                     // although we shouldn't ever get them.
@@ -404,6 +382,9 @@ export class HeroRoller {
             .filter(Boolean);
 
         this._baseTotal = sumTerms(this._baseTerms);
-        this._calculatedTotal = sum(this._calculatedTerms);
+
+        if (this._type !== ROLL_TYPE.SUCCESS) {
+            this._calculatedTotal = sumTerms(this._calculatedTerms);
+        }
     }
 }
