@@ -1,4 +1,4 @@
-import { HeroRoller } from "../utility/dice.js";
+import { HeroRoller, ROLL_TYPE } from "../utility/dice.js";
 
 function FixedDieRoll(fixedRollResult) {
     return class extends Die {
@@ -66,6 +66,76 @@ export function registerDiceTests(quench) {
         (context) => {
             const { describe, expect, it } = context;
             describe("HeroRoller", function () {
+                describe("chaining", function () {
+                    it("should be conditional for make functions with negative and default", function () {
+                        const roller = new HeroRoller();
+
+                        roller.makeNormalRoll(0);
+                        expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
+                        roller.makeNormalRoll(false);
+                        expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
+                        roller.makeNormalRoll(null);
+                        expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
+                        roller.makeNormalRoll(undefined);
+                        expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
+
+                        roller.makeKillingRoll(0);
+                        expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
+                        roller.makeKillingRoll(false);
+                        expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
+                        roller.makeKillingRoll(null);
+                        expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
+                        roller.makeKillingRoll(undefined);
+                        expect(roller._type).to.equal(ROLL_TYPE.KILLING);
+
+                        roller.makeAdjustmentRoll(0);
+                        expect(roller._type).to.equal(ROLL_TYPE.KILLING);
+                        roller.makeAdjustmentRoll(false);
+                        expect(roller._type).to.equal(ROLL_TYPE.KILLING);
+                        roller.makeAdjustmentRoll(null);
+                        expect(roller._type).to.equal(ROLL_TYPE.KILLING);
+                        roller.makeAdjustmentRoll(undefined);
+                        expect(roller._type).to.equal(ROLL_TYPE.ADJUSTMENT);
+
+                        roller.makeEntangleRoll(0);
+                        expect(roller._type).to.equal(ROLL_TYPE.ADJUSTMENT);
+                        roller.makeEntangleRoll(false);
+                        expect(roller._type).to.equal(ROLL_TYPE.ADJUSTMENT);
+                        roller.makeEntangleRoll(null);
+                        expect(roller._type).to.equal(ROLL_TYPE.ADJUSTMENT);
+                        roller.makeEntangleRoll(undefined);
+                        expect(roller._type).to.equal(ROLL_TYPE.ENTANGLE);
+
+                        roller.makeFlashRoll(0);
+                        expect(roller._type).to.equal(ROLL_TYPE.ENTANGLE);
+                        roller.makeFlashRoll(false);
+                        expect(roller._type).to.equal(ROLL_TYPE.ENTANGLE);
+                        roller.makeFlashRoll(null);
+                        expect(roller._type).to.equal(ROLL_TYPE.ENTANGLE);
+                        roller.makeFlashRoll(undefined);
+                        expect(roller._type).to.equal(ROLL_TYPE.FLASH);
+                    });
+
+                    it("should be conditional for make functions with negative and default", function () {
+                        const roller = new HeroRoller();
+
+                        roller.makeNormalRoll(true);
+                        expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
+
+                        roller.makeKillingRoll(true);
+                        expect(roller._type).to.equal(ROLL_TYPE.KILLING);
+
+                        roller.makeAdjustmentRoll(1);
+                        expect(roller._type).to.equal(ROLL_TYPE.ADJUSTMENT);
+
+                        roller.makeEntangleRoll("blah");
+                        expect(roller._type).to.equal(ROLL_TYPE.ENTANGLE);
+
+                        roller.makeFlashRoll(true);
+                        expect(roller._type).to.equal(ROLL_TYPE.FLASH);
+                    });
+                });
+
                 describe("success roll", function () {
                     const TestRollMock = Roll1Mock;
 
@@ -541,7 +611,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeKillingRoll()
-                            .addDice()
+                            .addDice(1)
                             .addNumber(1);
 
                         await roller.roll();
