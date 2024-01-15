@@ -466,6 +466,41 @@ export function registerDiceTests(quench) {
                         ]);
                         expect(roller.getBodyTotal()).deep.to.equal(3);
                     });
+
+                    it("should handle a standard effect d6 - 1 roll", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .modifyToStandardEffect()
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                            ],
+                            [HeroRoller.STANDARD_EFFECT_DIE_ROLL],
+                            [1],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                1,
+                        );
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [1, 1, 1],
+                            [1],
+                            [0],
+                        ]);
+                        expect(roller.getBodyTotal()).deep.to.equal(4);
+                    });
                 });
 
                 describe("killing roll", function () {
@@ -709,31 +744,87 @@ export function registerDiceTests(quench) {
                         );
 
                         expect(roller.getStunMultiplier()).to.equal(
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1,
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL,
                         );
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             [
                                 HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                    (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1),
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
                                 HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                    (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1),
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
                                 HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                    (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1),
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
                             ],
                             [
                                 HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL *
-                                    (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1),
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
                             ],
-                            [1 * (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1)],
+                            [1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL],
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
                             3 *
                                 HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1) +
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL +
                                 HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL *
-                                    (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1) +
-                                1 * (HeroRoller.STANDARD_EFFECT_DIE_ROLL - 1),
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                        );
+                    });
+
+                    it("should handle a standard effect d6 - 1 roll", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll()
+                            .modifyToStandardEffect()
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                            ],
+                            [HeroRoller.STANDARD_EFFECT_DIE_ROLL],
+                            [1],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                1,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                            ],
+                            [
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                            ],
+                            [1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 *
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL,
                         );
                     });
                 });

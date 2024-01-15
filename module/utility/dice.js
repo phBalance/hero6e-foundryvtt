@@ -93,42 +93,42 @@ export class HeroRoller {
     }
 
     makeNormalRoll(apply = true) {
-        if (!!apply) {
+        if (apply) {
             this._type = ROLL_TYPE.NORMAL;
         }
         return this;
     }
 
     makeKillingRoll(apply = true) {
-        if (!!apply) {
+        if (apply) {
             this._type = ROLL_TYPE.KILLING;
         }
         return this;
     }
 
     makeAdjustmentRoll(apply = true) {
-        if (!!apply) {
+        if (apply) {
             this._type = ROLL_TYPE.ADJUSTMENT;
         }
         return this;
     }
 
     makeEntangleRoll(apply = true) {
-        if (!!apply) {
+        if (apply) {
             this._type = ROLL_TYPE.ENTANGLE;
         }
         return this;
     }
 
     makeFlashRoll(apply = true) {
-        if (!!apply) {
+        if (apply) {
             this._type = ROLL_TYPE.FLASH;
         }
         return this;
     }
 
     modifyToStandardEffect(apply = true) {
-        if (!!apply) {
+        if (apply) {
             this._standardEffect = true;
         }
         return this;
@@ -504,10 +504,14 @@ export class HeroRoller {
 
                         if (term.options._hrFlavor === "half die") {
                             adjustedValue = Math.ceil(result.result / 2);
-                        } else if (term.options._hrFlavor === "less 1 pip") {
+                        } else if (
+                            term.options._hrFlavor === "less 1 pip" &&
+                            !this._standardEffect
+                        ) {
                             adjustedValue = result.result - 1;
                         } else if (
-                            term.options._hrFlavor === "less 1 pip min 1"
+                            term.options._hrFlavor === "less 1 pip min 1" &&
+                            !this._standardEffect
                         ) {
                             adjustedValue = Math.max(1, result.result - 1);
                         }
@@ -611,6 +615,7 @@ export class HeroRoller {
                             formulaTerms[i].results[j].result =
                                 HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
                         } else {
+                            // NOTE: 5e p. 104 & 6E1 p.133. Full die and (die - 1) count as 3.
                             formulaTerms[i].results[j].result =
                                 HeroRoller.STANDARD_EFFECT_DIE_ROLL;
                         }
