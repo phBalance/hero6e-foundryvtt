@@ -1,54 +1,3 @@
-// TODO: Not sure what this comment means or what the purpose of this is
-// TODO: This should probably be returning the new object?
-// Finish spoofing terms for die roll
-export function spoofDiceRoll(newTerms) {
-    for (const idx in newTerms) {
-        const term = newTerms[idx];
-        switch (term.class) {
-            case "Die":
-                newTerms[idx] = Object.assign(new Die(), term);
-                break;
-            case "OperatorTerm":
-                newTerms[idx] = Object.assign(new OperatorTerm(), term);
-                break;
-            case "NumericTerm":
-                newTerms[idx] = Object.assign(new NumericTerm(), term);
-                break;
-            default:
-                console.warn(`Unknown dice term class ${term.class}`);
-                break;
-        }
-    }
-}
-
-// TODO: Not sure if this is a useful name or method.
-export function getSumOfTermsResults(terms) {
-    return getAllTermsResults(terms).reduce((sum, current) => {
-        return sum + current;
-    }, 0);
-}
-
-export function getAllTermsResults(terms) {
-    return getAllDieTerms(terms).map((resultObj) => resultObj.result);
-}
-
-export function getAllDieTerms(terms) {
-    return terms
-        .filter((term) => term.class === "Die")
-        .flatMap((term) => term.results);
-}
-
-export function generatePseudoRollFromTerms(terms) {
-    spoofDiceRoll(terms);
-
-    const newRoll = Roll.fromTerms(terms);
-    newRoll._total = getSumOfTermsResults(terms);
-    newRoll.title = getAllTermsResults(terms);
-    newRoll._evaluated = true;
-
-    return newRoll;
-}
-
 export const ROLL_TYPE = {
     SUCCESS: 0,
     NORMAL: 1,
@@ -58,25 +7,21 @@ export const ROLL_TYPE = {
     FLASH: 5,
 };
 
-function sumTerms(terms) {
-    return terms.reduce((total, term) => {
-        return total + sum(term);
-    }, 0);
-}
-
-function sum(term) {
-    return term.reduce((subTotal, result) => {
-        return subTotal + result;
-    }, 0);
-}
-
-export function signedString(value) {
-    return `${value < 0 ? "" : "+"}${value}`;
-}
-
 export class HeroRoller {
     static STANDARD_EFFECT_DIE_ROLL = 3;
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
+
+    static sumTerms(terms) {
+        return terms.reduce((total, term) => {
+            return total + HeroRoller.sum(term);
+        }, 0);
+    }
+
+    static sum(term) {
+        return term.reduce((subTotal, result) => {
+            return subTotal + result;
+        }, 0);
+    }
 
     constructor(options, rollClass = Roll) {
         this._buildRollClass = rollClass;
@@ -559,10 +504,10 @@ export class HeroRoller {
             })
             .filter(Boolean);
 
-        this._baseTotal = sumTerms(this._baseTerms);
+        this._baseTotal = HeroRoller.sumTerms(this._baseTerms);
 
         if (this._type !== ROLL_TYPE.SUCCESS) {
-            this._calculatedTotal = sumTerms(this._calculatedTerms);
+            this._calculatedTotal = HeroRoller.sumTerms(this._calculatedTerms);
         }
     }
 
@@ -589,7 +534,7 @@ export class HeroRoller {
     _buildDiceTooltip() {
         return this._baseTerms.reduce((soFar, term) => {
             if (term._hrExtra.term === "Dice") {
-                const total = Math.abs(sum(term));
+                const total = Math.abs(HeroRoller.sum(term));
                 const formula = this._buildFormulaForDiceTerm(term);
                 return `${soFar}
                         <div class="dice">
