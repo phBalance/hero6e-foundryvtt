@@ -75,6 +75,9 @@ export function signedString(value) {
 }
 
 export class HeroRoller {
+    static STANDARD_EFFECT_DIE_ROLL = 3;
+    static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
+
     constructor(options, rollClass = Roll) {
         this._buildRollClass = rollClass;
         this._options = options;
@@ -82,6 +85,7 @@ export class HeroRoller {
 
         this._formulaTerms = [];
         this._type = ROLL_TYPE.SUCCESS;
+        this._standardEffect = false;
     }
 
     getType() {
@@ -110,6 +114,11 @@ export class HeroRoller {
 
     makeFlashRoll() {
         this._type = ROLL_TYPE.FLASH;
+        return this;
+    }
+
+    modifyToStandardEffect() {
+        this._standardEffect = true;
         return this;
     }
 
@@ -243,17 +252,24 @@ export class HeroRoller {
             async: true,
         });
 
+        // Convert to standard effect if appropriate.
+        this._rollObj.terms = this._applyStandardEffectIfAppropriate(
+            this._rollObj.terms,
+        );
+
         if (this._type === ROLL_TYPE.KILLING) {
-            const hr = new HeroRoller(
+            let hr = new HeroRoller(
                 {},
                 this._buildRollClass,
             ).addDieMinus1Min1();
+            hr = this._standardEffect ? hr.modifyToStandardEffect() : hr;
+
             await hr.roll({ async: true });
+
             this._baseMultiplier = hr.getSuccessTotal();
         }
 
         this._rawBaseTerms = this._rollObj.terms;
-        this._baseResult = this._rollObj.result;
 
         this._calculate();
 
@@ -552,5 +568,25 @@ export class HeroRoller {
                 absNumber <= 1 ? "min" : absNumber === 6 ? "max" : ""
             }">${absNumber}</li>`;
         }, "");
+    }
+
+    _applyStandardEffectIfAppropriate(formulaTerms) {
+        if (this._standardEffect) {
+            for (let i = 0; i < formulaTerms.length; ++i) {
+                if (formulaTerms[i] instanceof Die) {
+                    for (let j = 0; j < formulaTerms[i].results.length; ++j) {
+                        if (formulaTerms[i].options._hrFlavor === "half die") {
+                            formulaTerms[i].results[j].result =
+                                HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
+                        } else {
+                            formulaTerms[i].results[j].result =
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+                        }
+                    }
+                }
+            }
+        }
+
+        return formulaTerms;
     }
 }
