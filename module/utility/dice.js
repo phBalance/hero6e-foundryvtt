@@ -92,6 +92,13 @@ export class HeroRoller {
         return this._type;
     }
 
+    makeSuccessRoll(apply = true) {
+        if (apply) {
+            this._type = ROLL_TYPE.SUCCESS;
+        }
+        return this;
+    }
+
     makeNormalRoll(apply = true) {
         if (apply) {
             this._type = ROLL_TYPE.NORMAL;
@@ -99,9 +106,17 @@ export class HeroRoller {
         return this;
     }
 
-    makeKillingRoll(apply = true) {
+    make5eKillingRoll(apply = true) {
         if (apply) {
             this._type = ROLL_TYPE.KILLING;
+            this._killingStunMultiplier = "1d6-1";
+        }
+        return this;
+    }
+    make6eKillingRoll(apply = true) {
+        if (apply) {
+            this._type = ROLL_TYPE.KILLING;
+            this._killingStunMultiplier = "1d3";
         }
         return this;
     }
@@ -290,10 +305,11 @@ export class HeroRoller {
         );
 
         if (this._type === ROLL_TYPE.KILLING) {
-            let hr = new HeroRoller(
-                {},
-                this._buildRollClass,
-            ).addDieMinus1Min1();
+            let hr = new HeroRoller({}, this._buildRollClass)
+                .addDieMinus1Min1(
+                    this._killingStunMultiplier === "1d6-1" ? 1 : 0,
+                )
+                .addHalfDie(this._killingStunMultiplier === "1d3" ? 1 : 0);
             hr = this._standardEffect ? hr.modifyToStandardEffect() : hr;
 
             await hr.roll({ async: true });
