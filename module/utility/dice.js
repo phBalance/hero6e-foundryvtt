@@ -60,12 +60,13 @@ export const ROLL_TYPE = {
 
 function sumTerms(terms) {
     return terms.reduce((total, term) => {
-        return (
-            total +
-            term.reduce((subTotal, result) => {
-                return subTotal + result;
-            }, 0)
-        );
+        return total + sum(term);
+    }, 0);
+}
+
+function sum(term) {
+    return term.reduce((subTotal, result) => {
+        return subTotal + result;
     }, 0);
 }
 
@@ -266,7 +267,6 @@ export class HeroRoller {
 
         // TODO: This is really placeholder
         // TODO: Formula
-        // TODO: Tooltip but can't call into individual terms
         const chatData = {
             formula: this._buildFormula(),
             flavor: null,
@@ -394,7 +394,7 @@ export class HeroRoller {
         switch (this._type) {
             case ROLL_TYPE.SUCCESS:
             case ROLL_TYPE.ADJUSTMENT:
-                // Do nothing as there is no calculated values
+                // Do nothing as there are no calculated values
                 break;
 
             case ROLL_TYPE.NORMAL:
@@ -426,17 +426,31 @@ export class HeroRoller {
             .map((term) => {
                 if (term instanceof NumericTerm) {
                     const number = lastOperatorMultiplier * term.number;
+                    const hrExtra = {
+                        term: "Numeric",
+                        flavor: term.options._hrFlavor,
+                    };
 
-                    this._calculatedTerms.push([this._calculateValue(number)]);
+                    const newCalculatedTerm = [this._calculateValue(number)];
+                    newCalculatedTerm._hrExtra = hrExtra;
+                    this._calculatedTerms.push(newCalculatedTerm);
 
-                    return [number];
+                    const newBaseTerm = [number];
+                    newBaseTerm._hrExtra = hrExtra;
+                    return newBaseTerm;
                 } else if (term instanceof OperatorTerm) {
                     // NOTE: No need to handle multiplication and division as
                     //       this class doesn't support it.
                     lastOperatorMultiplier = term.operator === "-" ? -1 : 1;
                 } else if (term instanceof Die) {
                     const calculatedTerms = [];
-                    const map = term.results.map((result) => {
+                    const hrExtra = {
+                        term: "Dice",
+                        flavor: term.options._hrFlavor,
+                    };
+                    calculatedTerms._hrExtra = hrExtra;
+
+                    const termResults = term.results.map((result) => {
                         let adjustedValue =
                             lastOperatorMultiplier * result.result;
 
@@ -456,8 +470,11 @@ export class HeroRoller {
 
                         return adjustedValue;
                     });
+
                     this._calculatedTerms.push(calculatedTerms);
-                    return map;
+
+                    termResults._hrExtra = hrExtra;
+                    return termResults;
                 } else {
                     // Other term types will return undefined and be filtered out
                     // although we shouldn't ever get them.
@@ -493,11 +510,10 @@ export class HeroRoller {
     }
 
     _buildDiceTooltip() {
-        return this._rawBaseTerms.reduce((soFar, term) => {
-            if (term instanceof Die) {
-                // TODO: Not entirely correct. Works for whole dice and not if has been changed
-                const total = term.total;
-                const formula = term.formula;
+        return this._baseTerms.reduce((soFar, term) => {
+            if (term._hrExtra.term === "Dice") {
+                const total = Math.abs(sum(term));
+                const formula = this._buildFormulaForDiceTerm(term);
                 return `${soFar}
                         <div class="dice">
                             <header class="part-header flexrow">
@@ -516,10 +532,25 @@ export class HeroRoller {
         }, "");
     }
 
+    _buildFormulaForDiceTerm(diceTerm) {
+        if (diceTerm._hrExtra.flavor === "half die") {
+            return `½d6`;
+        } else if (
+            diceTerm._hrExtra.flavor === "less 1 pip" ||
+            diceTerm._hrExtra.flavor === "less 1 pip min 1"
+        ) {
+            return `d6-1`;
+        } else {
+            return `${diceTerm.length}d6`;
+        }
+    }
+
     _buildDiceRollsTooltip(diceTerm) {
-        return diceTerm.results.reduce((soFar, result) => {
-            // TODO: Add "min" and "max" classes as appropriate.
-            return `${soFar}<li class="roll die d6">${result.result}</li>`;
+        return diceTerm.reduce((soFar, result) => {
+            const absNumber = Math.abs(result);
+            return `${soFar}<li class="roll die d6 ${
+                absNumber <= 1 ? "min" : absNumber === 6 ? "max" : ""
+            }">${absNumber}</li>`;
         }, "");
     }
 }
