@@ -3,7 +3,6 @@
     tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
     <span class="flavor-text">
-
         {{!-- Attack Name --}}
         <header class="card-header attack flexrow">
             <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
@@ -36,39 +35,12 @@
                 </i>
             </div>
             {{/unless}}
-            {{!-- <div class="result degree-of-success" data-visibility="all">
-                Result: <span data-visibility="all" data-whose="self" class="failure">Miss</span>
-                <span data-visibility="gm" data-whose="target">by -4</span>
-            </div> --}}
         </div>
 
         <div class="tags">
             {{#each attackTags as |tag id|}}
             <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
             {{/each}}
-
-            {{!-- <span class="tag">{{item.system.class}}</span>
-            {{#if item.system.killing}}
-            <span class="tag">killing</span>
-            {{/if}}
-            {{#if (ne item.system.stunBodyDamage 'stunbody')}}
-            <span class="tag">{{item.system.stunBodyDamage}}S</span>
-            {{/if}}
-            {{#if item.system.piercing}}
-            <span class="tag" title="Armor Piercing">APx{{item.system.piercing}}</span>
-            {{/if}}
-            {{#if item.system.penetrating}}
-            <span class="tag" title="Penetrating">PENx{{item.system.penetrating}}</span>
-            {{/if}}
-            {{#if (ne item.system.areaOfEffect.type 'none')}}
-            <span class="tag area-effect-tag" data-aoe-type="{{item.system.areaOfEffect.type}}"
-                data-aoe-value="{{item.system.areaOfEffect.value}}">
-                {{item.system.areaOfEffect.type}} ({{item.system.areaOfEffect.value}})
-            </span>
-            {{/if}}
-            {{#if explosion}}
-            <span class="tag" title="Explosion">explosion</span>
-            {{/if}} --}}
         </div>
         <hr>
         <div class="tags">
@@ -78,18 +50,10 @@
             </span>
             {{/each}}
         </div>
-
-
         <hr>
-        {{!-- TODO: list to-hit modifiers --}}
-        {{!-- <div class="tags">
-            <span class="tag tag_transparent" data-slug="untrained">Untrained +0</span>
-            <span class="tag tag_transparent" data-slug="str">Strength +0</span>
-        </div> --}}
     </span>
 
     <div class="hit-roll">
-
         {{#if useEnd}}
         <div class="card-section">
             <div class="description-tiny">{{{ enduranceText }}}</div>
@@ -114,8 +78,5 @@
                 {{/if}}
             </button>
         </div>
-
-
     </div>
-
 </div>
