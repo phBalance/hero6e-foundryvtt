@@ -733,6 +733,58 @@ export function registerDiceTests(quench) {
                         );
                     });
 
+                    it("should handle multiple dice with increased stun multiplier", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .make6eKillingRoll()
+                            .addStunMultiplier(7)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2) + 7,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult *
+                                    (Math.ceil(
+                                        TestRollMock.fixedRollResult / 2,
+                                    ) +
+                                        7),
+                                TestRollMock.fixedRollResult *
+                                    (Math.ceil(
+                                        TestRollMock.fixedRollResult / 2,
+                                    ) +
+                                        7),
+                                TestRollMock.fixedRollResult *
+                                    (Math.ceil(
+                                        TestRollMock.fixedRollResult / 2,
+                                    ) +
+                                        7),
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 *
+                                TestRollMock.fixedRollResult *
+                                (Math.ceil(TestRollMock.fixedRollResult / 2) +
+                                    7),
+                        );
+                    });
+
                     it("should handle a standard effect full roll", async function () {
                         const TestRollMock = Roll6Mock;
 

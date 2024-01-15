@@ -85,6 +85,8 @@ export class HeroRoller {
 
         this._formulaTerms = [];
         this._type = ROLL_TYPE.SUCCESS;
+        this._baseMultiplier = 0;
+        this._additionalStunMultiplier = 0;
         this._standardEffect = false;
     }
 
@@ -288,6 +290,13 @@ export class HeroRoller {
         return this;
     }
 
+    addStunMultiplier(levels) {
+        if (levels) {
+            this._additionalStunMultiplier += levels;
+        }
+        return this;
+    }
+
     async roll(options) {
         this._rollObj = this._buildRollClass.fromTerms(
             this._formulaTerms,
@@ -431,7 +440,7 @@ export class HeroRoller {
         return this._baseTotal;
     }
     getBaseMultiplier() {
-        return this._baseMultiplier;
+        return this._baseMultiplier + this._additionalStunMultiplier;
     }
 
     getCalculatedTerms() {
@@ -472,7 +481,7 @@ export class HeroRoller {
                 return 1;
 
             case ROLL_TYPE.KILLING:
-                return result * this._baseMultiplier;
+                return result * this.getBaseMultiplier();
 
             case ROLL_TYPE.ENTANGLE:
             case ROLL_TYPE.FLASH:
