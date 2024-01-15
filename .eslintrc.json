@@ -28,7 +28,6 @@
         "DefaultTokenConfig": "readable",
         "Dialog": "readable",
         "Die": "readable",
-        "DiceTerm": "readable",
         "dragRuler": "readable",
         "FilePicker": "readable",
         "fromUuid": "readable",

@@ -201,7 +201,7 @@ export class HeroRoller {
                     flavor: description,
                     _hrTag: {
                         name: description,
-                        value: signedString(value),
+                        value: value,
                     },
                 },
             }),
@@ -494,7 +494,7 @@ export class HeroRoller {
 
     _buildDiceTooltip() {
         return this._rawBaseTerms.reduce((soFar, term) => {
-            if (term instanceof DiceTerm) {
+            if (term instanceof Die) {
                 // TODO: Not entirely correct. Works for whole dice and not if has been changed
                 const total = term.total;
                 const formula = term.formula;
@@ -518,6 +518,7 @@ export class HeroRoller {
 
     _buildDiceRollsTooltip(diceTerm) {
         return diceTerm.results.reduce((soFar, result) => {
+            // TODO: Add "min" and "max" classes as appropriate.
             return `${soFar}<li class="roll die d6">${result.result}</li>`;
         }, "");
     }

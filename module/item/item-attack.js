@@ -183,7 +183,7 @@ export async function _processAttackAoeOptions(item, formData) {
 }
 
 export async function AttackAoeToHit(item, options) {
-    let template =
+    const template =
         "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs";
 
     const actor = item.actor;
@@ -205,7 +205,7 @@ export async function AttackAoeToHit(item, options) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
 
-    let distanceToken = canvas.grid.measureDistance(aoeTemplate, token, {
+    const distanceToken = canvas.grid.measureDistance(aoeTemplate, token, {
         gridSpaces: true,
     });
     let dcvTargetNumber = 0;
@@ -219,16 +219,18 @@ export async function AttackAoeToHit(item, options) {
         : null;
 
     const hitCharacteristic = actor.system.characteristics.ocv.value;
-    let tags = [];
+    let tags = []; // TODO: Remove
 
-    let rollEquation = "11 + " + hitCharacteristic;
+    const attackHeroRoller = new HeroRoller()
+        .addNumber(11, "Base to hit")
+        .addNumber(hitCharacteristic, item.system.uses);
+
     tags.push({ value: hitCharacteristic, name: item.system.uses });
-    rollEquation = rollEquation + " - 3D6";
 
     const ocvMod = parseInt(options.ocvMod) || 0;
     if (parseInt(ocvMod) != 0) {
-        rollEquation = modifyRollEquation(rollEquation, ocvMod);
         tags.push({ value: ocvMod, name: item.name });
+        attackHeroRoller.addNumber(ocvMod, "OCV modifier");
     }
 
     // Set +1 OCV
@@ -240,9 +242,9 @@ export async function AttackAoeToHit(item, options) {
             value: parseInt(setManeuver.system.ocv),
             name: setManeuver.name,
         });
-        rollEquation = modifyRollEquation(
-            rollEquation,
+        attackHeroRoller.subNumber(
             parseInt(setManeuver.system.ocv),
+            "Maneuver OCV",
         );
     }
 
@@ -257,7 +259,7 @@ export async function AttackAoeToHit(item, options) {
                 name: "AOE range penalty",
                 title: `${distanceToken}${getSystemDisplayUnits(actor)}`,
             });
-            rollEquation = modifyRollEquation(rollEquation, rangePenalty);
+            attackHeroRoller.addNumber(rangePenalty, "Range penalty");
         }
 
         // Brace (+2 OCV only to offset the Range Modifier)
@@ -269,22 +271,26 @@ export async function AttackAoeToHit(item, options) {
             let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
             if (brace > 0) {
                 tags.push({ value: brace, name: braceManeuver.name });
-                rollEquation = modifyRollEquation(rollEquation, brace);
+                attackHeroRoller.addNumber(brace, "Brace modifier");
             }
         }
     }
 
-    let attackRoll = new Roll(rollEquation, actor.getRollData());
-    let result = await attackRoll.evaluate({ async: true });
-    let renderedResult = await result.render();
-    let hitRollData = result.total;
-    let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollData;
+    attackHeroRoller.subDice(3, "Randomness");
 
-    if (hitRollData < dcvTargetNumber) {
-        let missBy = dcvTargetNumber - hitRollData;
-        let facingRoll = new Roll("1d6", actor.getRollData());
-        let facingResult = await facingRoll.evaluate({ async: true });
-        let moveDistance = RoundFavorPlayerDown(
+    await attackHeroRoller.roll();
+    const renderedRollResult = await attackHeroRoller.render();
+    const hitRollTotal = attackHeroRoller.getSuccessTotal();
+    let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollTotal;
+
+    if (hitRollTotal < dcvTargetNumber) {
+        const missBy = dcvTargetNumber - hitRollTotal;
+
+        const facingHeroRoller = new HeroRoller().addDice(1);
+        await facingHeroRoller.roll();
+        const facingRollResult = facingHeroRoller.getSuccessTotal();
+
+        const moveDistance = RoundFavorPlayerDown(
             Math.min(
                 distanceToken / 2,
                 item.actor.system.is5e ? missBy : missBy * 2,
@@ -292,34 +298,23 @@ export async function AttackAoeToHit(item, options) {
         );
         hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${
             moveDistance + getSystemDisplayUnits(item.actor)
-        } in the <b>${facingResult.total}</b> direction.`;
+        } in the <b>${facingRollResult}</b> direction.`;
     }
 
-    let cardData = {
+    const cardData = {
         // dice rolls
-        //rolls: [attackRoll],
-        renderedHitRoll: renderedResult,
+        renderedHitRoll: renderedRollResult,
         hitRollText: hitRollText,
-        hitRollValue: result.total,
-        // velocity: options.velocity,
+        hitRollValue: hitRollTotal,
 
         // data for damage card
         actor,
         item,
-        //adjustment,
-        //senseAffecting,
         ...options,
-        //hitRollData: hitRollData,
-        //effectivestr: options.effectivestr,
-        //targetData: targetData,
-        //targetIds: targetIds,
-
-        // endurance
-        //useEnd: useEnd,
-        //enduranceText: enduranceText,
 
         // misc
-        tags: tags,
+        // TODO: Remove this. tags: tags,
+        tags: attackHeroRoller.tags(),
         attackTags: getAttackTags(item),
         formData: JSON.stringify(options),
         dcvTargetNumber,
@@ -328,14 +323,13 @@ export async function AttackAoeToHit(item, options) {
             : "Confirm AOE placement",
     };
 
-    let cardHtml = await renderTemplate(template, cardData);
-    //let token = actor.token;
-    let speaker = ChatMessage.getSpeaker({ actor: actor, token });
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker["alias"] = actor.name;
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        roll: result,
+        // TODO: FIXME: Resolve this roll: result,
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -550,7 +544,7 @@ export async function AttackToHit(item, options) {
     }
     heroRoller = heroRoller.subDice(3);
 
-    await heroRoller.roll(actor.getRollData());
+    await heroRoller.roll();
     const renderedRoll = await heroRoller.render();
 
     const hitRollTotal = heroRoller.getSuccessTotal();
@@ -845,7 +839,6 @@ export async function AttackToHit(item, options) {
 
     const cardData = {
         // dice rolls
-        //rolls: [attackRoll],
         renderedHitRoll: renderedRoll,
         hitRollText: hitRollText,
         hitRollValue: hitRollTotal,
@@ -859,7 +852,6 @@ export async function AttackToHit(item, options) {
         senseAffecting,
         ...options,
         hitRollData: hitRollTotal,
-        //effectivestr: options.effectivestr,
         targetData: targetData,
         targetIds: targetIds,
 
@@ -885,7 +877,7 @@ export async function AttackToHit(item, options) {
         type: AoeAlwaysHit
             ? CONST.CHAT_MESSAGE_TYPES.OTHER
             : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOE's are auto hit
-        // roll: heroRoller, // TODO: Need to follow this through as it was using a Roll object.
+        // roll: heroRoller, // TODO: FIXME: Need to follow this through as it was using a Roll object.
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
