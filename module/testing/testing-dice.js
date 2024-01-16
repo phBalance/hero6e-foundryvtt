@@ -365,7 +365,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
                             .addDice(3)
-                            .addHalfDie();
+                            .addHalfDice();
 
                         await roller.roll();
 
@@ -456,7 +456,7 @@ export function registerDiceTests(quench) {
                             .makeNormalRoll()
                             .modifyToStandardEffect()
                             .addDice(3)
-                            .addHalfDie()
+                            .addHalfDice()
                             .addNumber(1);
 
                         await roller.roll();
@@ -567,7 +567,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .make6eKillingRoll()
-                            .addHalfDie();
+                            .addHalfDice();
 
                         await roller.roll();
 
@@ -785,6 +785,106 @@ export function registerDiceTests(quench) {
                         );
                     });
 
+                    it("should handle multiple dice with decreased stun multiplier", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .make6eKillingRoll()
+                            .addStunMultiplier(-1)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.max(
+                                1,
+                                Math.ceil(TestRollMock.fixedRollResult / 2) - 1,
+                            ),
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult *
+                                    Math.max(
+                                        1,
+                                        Math.ceil(
+                                            TestRollMock.fixedRollResult / 2,
+                                        ) - 1,
+                                    ),
+                                TestRollMock.fixedRollResult *
+                                    Math.max(
+                                        1,
+                                        Math.ceil(
+                                            TestRollMock.fixedRollResult / 2,
+                                        ) - 1,
+                                    ),
+                                TestRollMock.fixedRollResult *
+                                    Math.max(
+                                        1,
+                                        Math.ceil(
+                                            TestRollMock.fixedRollResult / 2,
+                                        ) - 1,
+                                    ),
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 *
+                                TestRollMock.fixedRollResult *
+                                Math.max(
+                                    1,
+                                    Math.ceil(
+                                        TestRollMock.fixedRollResult / 2,
+                                    ) - 1,
+                                ),
+                        );
+                    });
+
+                    it("should clamp decreased stun multiplier to a minimum of 1", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .make6eKillingRoll()
+                            .addStunMultiplier(-7)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(1);
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult * 1,
+                                TestRollMock.fixedRollResult * 1,
+                                TestRollMock.fixedRollResult * 1,
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * TestRollMock.fixedRollResult * 1,
+                        );
+                    });
+
                     it("should handle a standard effect full roll", async function () {
                         const TestRollMock = Roll6Mock;
 
@@ -792,7 +892,7 @@ export function registerDiceTests(quench) {
                             .make5eKillingRoll()
                             .modifyToStandardEffect()
                             .addDice(3)
-                            .addHalfDie()
+                            .addHalfDice()
                             .addNumber(1);
 
                         await roller.roll();

@@ -11,13 +11,13 @@ export class HeroRoller {
     static STANDARD_EFFECT_DIE_ROLL = 3;
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
 
-    static sumTerms(terms) {
+    static _sumTerms(terms) {
         return terms.reduce((total, term) => {
-            return total + HeroRoller.sum(term);
+            return total + HeroRoller._sum(term);
         }, 0);
     }
 
-    static sum(term) {
+    static _sum(term) {
         return term.reduce((subTotal, result) => {
             return subTotal + result;
         }, 0);
@@ -29,9 +29,12 @@ export class HeroRoller {
         this._rollObj = undefined;
 
         this._formulaTerms = [];
+
         this._type = ROLL_TYPE.SUCCESS;
+
         this._baseMultiplier = 0;
         this._additionalStunMultiplier = 0;
+
         this._standardEffect = false;
     }
 
@@ -121,7 +124,7 @@ export class HeroRoller {
         return this;
     }
 
-    addHalfDie(numDice = 1) {
+    addHalfDice(numDice = 1) {
         if (!numDice) {
             return this;
         }
@@ -263,7 +266,7 @@ export class HeroRoller {
                 .addDieMinus1Min1(
                     this._killingStunMultiplier === "1d6-1" ? 1 : 0,
                 )
-                .addHalfDie(this._killingStunMultiplier === "1d3" ? 1 : 0);
+                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
             hr = this._standardEffect ? hr.modifyToStandardEffect() : hr;
 
             await hr.roll({ async: true });
@@ -385,7 +388,10 @@ export class HeroRoller {
         return this._baseTotal;
     }
     getBaseMultiplier() {
-        return this._baseMultiplier + this._additionalStunMultiplier;
+        return Math.max(
+            this._baseMultiplier + this._additionalStunMultiplier,
+            1,
+        );
     }
 
     getCalculatedTerms() {
@@ -504,10 +510,10 @@ export class HeroRoller {
             })
             .filter(Boolean);
 
-        this._baseTotal = HeroRoller.sumTerms(this._baseTerms);
+        this._baseTotal = HeroRoller._sumTerms(this._baseTerms);
 
         if (this._type !== ROLL_TYPE.SUCCESS) {
-            this._calculatedTotal = HeroRoller.sumTerms(this._calculatedTerms);
+            this._calculatedTotal = HeroRoller._sumTerms(this._calculatedTerms);
         }
     }
 
