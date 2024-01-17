@@ -3,11 +3,10 @@ import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
 import {
-    simplifyDamageRoll,
-    handleDamageNegation,
+    calculateDiceFormulaParts,
     CombatSkillLevelsForAttack,
     convertToDcFromItem,
-    convertFromDC,
+    handleDamageNegation,
 } from "../utility/damage.js";
 import {
     performAdjustment,
@@ -1017,27 +1016,54 @@ export async function _onRollDamage(event) {
         item: item,
     })?.powerType?.includes("sense-affecting");
 
-    let { dc, tags } = convertToDcFromItem(item, {
+    const increasedMultiplierLevels = parseInt(
+        item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0,
+    );
+    const decreasedMultiplierLevels = parseInt(
+        item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0,
+    );
+
+    const { dc, tags } = convertToDcFromItem(item, {
         isAction: true,
         ...toHitData,
     });
+    const formulaParts = calculateDiceFormulaParts(item, dc);
 
-    let damageRoll = convertFromDC(item, dc);
+    const heroRoller = new HeroRoller()
+        .makeNormalRoll(!formulaParts.isKilling)
+        .make5eKillingRoll(formulaParts.isKilling && actor.system.is5e)
+        .make6eKillingRoll(formulaParts.isKilling && !actor.system.is5e)
+        .addDice(formulaParts.d6Count)
+        .addHalfDice(formulaParts.halfDieCount)
+        .addNumber(formulaParts.constant)
+        .modifyToStandardEffect(item.system.USESTANDARDEFFECT)
+        .addStunMultiplier(
+            increasedMultiplierLevels - decreasedMultiplierLevels,
+        );
 
-    damageRoll = simplifyDamageRoll(damageRoll);
+    await heroRoller.roll();
 
-    if (!damageRoll) {
-        return ui.notifications.error(`${item.name} damage roll is undefined.`);
-    }
+    // let damageRoll = convertFromDC(item, dc);
+    // damageRoll = simplifyDamageRoll(damageRoll);
 
-    let roll = new Roll(damageRoll, actor.getRollData());
-    let damageResult = await roll.roll({ async: true });
+    // if (!damageRoll) {
+    //     return ui.notifications.error(`${item.name} damage roll is undefined.`);
+    // }
 
+    // let roll = new Roll(damageRoll, actor.getRollData());
+    // let damageResult = await roll.roll({ async: true });
+
+    // let damageRenderedResult = item.system.USESTANDARDEFFECT
+    //     ? ""
+    //     : await damageResult.render();
+
+    // TODO: Need to play with this as I'm not sure it should be required if everything just
+    //       gets figured in.
     let damageRenderedResult = item.system.USESTANDARDEFFECT
         ? ""
-        : await damageResult.render();
+        : await heroRoller.render();
 
-    const damageDetail = await _calcDamage(damageResult, item, toHitData);
+    const damageDetail = await _calcDamage(heroRoller, item, toHitData);
 
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
@@ -1051,14 +1077,17 @@ export async function _onRollDamage(event) {
         if (token) {
             let targetToken = {
                 token,
-                terms: JSON.stringify(damageResult.terms),
+                // terms: JSON.stringify(damageResult.terms), // TODO: consider purpose and track further
+                terms: JSON.stringify(heroRoller.getBaseTerms()),
             };
 
+            // TODO: Add in explosion handling (or flattening)
             if (explosion) {
                 // Distance from center
                 if (aoeTemplate) {
-                    let newTerms = JSON.parse(
-                        JSON.stringify(damageResult.terms),
+                    // TODO: Make a copy
+                    let newTerms = foundry.utils.deepClone(
+                        heroRoller.getBaseTerms(),
                     );
 
                     // Explosion
@@ -1151,7 +1180,8 @@ export async function _onRollDamage(event) {
         hasRenderedDamageRoll: true,
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-        terms: JSON.stringify(damageResult.terms),
+        // terms: JSON.stringify(damageResult.terms), // TODO: Same thing is in the token information
+        terms: JSON.stringify(heroRoller.getBaseTerms()), // TODO: Should provide toJSON and back.
 
         // misc
         targetIds: toHitData.targetids,
@@ -1163,10 +1193,8 @@ export async function _onRollDamage(event) {
     };
 
     // render card
-    let cardHtml = await renderTemplate(template, cardData);
-
-    let speaker = ChatMessage.getSpeaker({ actor: item.actor });
-
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
 
@@ -1174,11 +1202,13 @@ export async function _onRollDamage(event) {
         content: cardHtml,
         speaker: speaker,
     };
-    if (!item.system.USESTANDARDEFFECT) {
-        chatData.roll = damageResult;
-    } else {
-        chatData.standardEffect = damageResult.standardEffect;
-    }
+
+    // TODO: This should not be commented out.
+    // if (!item.system.USESTANDARDEFFECT) {
+    //     chatData.roll = damageResult;
+    // } else {
+    //     chatData.standardEffect = damageResult.standardEffect;
+    // }
 
     return ChatMessage.create(chatData);
 }
@@ -1188,7 +1218,7 @@ export async function _onRollDamage(event) {
 // Notice the chatListeners function in this file.
 export async function _onApplyDamage(event) {
     const button = event.currentTarget;
-    button.blur(); // The button remains hilighed for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
     const item = fromUuidSync(event.currentTarget.dataset.itemid);
 
@@ -2006,74 +2036,13 @@ async function _onApplySenseAffectingToSpecificToken(
     return ChatMessage.create(chatData);
 }
 
-async function _calcDamage(damageResult, item, options) {
+async function _calcDamage(heroRoller, item, options) {
     let damageDetail = {};
     const itemData = item.system;
     let body = 0;
     let stun = 0;
-    let countedBody = 0;
-
-    // USESTANDARDEFFECT
-    if (item.system.USESTANDARDEFFECT) {
-        // Override term results
-        for (let term of damageResult.terms.filter((o) => o.number)) {
-            if (term.results) {
-                for (let result of term.results) {
-                    if (term.faces === 6) {
-                        result.result = 3;
-                        stun += 3;
-                        body += 1;
-                    } else {
-                        // + half dice
-                        result.result = 1;
-                        stun += 1;
-                        body += 1;
-                    }
-                }
-            } else {
-                // +1
-                stun += 1;
-                body += 1;
-            }
-        }
-    } else {
-        // We may have spoofed a roll, so total is missing.
-        if (!damageResult.total) {
-            damageResult._total = 0;
-
-            for (let term of damageResult.terms) {
-                if (term instanceof OperatorTerm) continue;
-                if (term instanceof Die) {
-                    for (let result of term.results) {
-                        damageResult._total += result.result;
-                    }
-                    continue;
-                }
-                if (term instanceof NumericTerm) {
-                    damageResult._total += term.number;
-                }
-            }
-
-            damageResult._formula = damageResult.terms[0].results.length + "d6";
-            if (damageResult.terms[1]) {
-                damageResult._formula += " + ";
-
-                if (damageResult.terms[2] instanceof Die) {
-                    damageResult._formula +=
-                        damageResult.terms[2].results[0].rersults += "1d3";
-                }
-
-                if (damageResult.terms[2] instanceof NumericTerm) {
-                    damageResult._formula += damageResult.terms[2].number;
-                }
-            }
-
-            damageResult._evaluated = true;
-        }
-    }
 
     let hasStunMultiplierRoll = false;
-    //let renderedStunMultiplierRoll = null;
 
     const INCREASEDSTUNMULTIPLIER = item.findModsByXmlid(
         "INCREASEDSTUNMULTIPLIER",
@@ -2083,11 +2052,16 @@ async function _calcDamage(damageResult, item, options) {
 
     let noHitLocationsPower = item.system.noHitLocations || false;
 
+    // TODO: FIXME: This calculation is buggy as it doesn't consider
+    //       more than 1 die term possibility (so 5d6 + 1/2d6 or 5d6 + 1 don't work)
+    //       It also doesn't handle 0 pips correctly in body calculation.
+    //       It also doesn't handle 0 dice correctly (e.g. 0d6 + 1)
+    //       It also doesn't consider multiple levels of penetrating vs hardened/impenetrable.
     // Penetrating
     let penetratingBody = 0;
     if (item.system.penetrating) {
-        for (let die of damageResult.terms[0].results) {
-            switch (die.result) {
+        for (const die of heroRoller.getBodyTerms()[0]) {
+            switch (die) {
                 case 1:
                     penetratingBody += 0;
                     break;
@@ -2106,7 +2080,6 @@ async function _calcDamage(damageResult, item, options) {
     let hitLocationModifiers = [1, 1, 1, 0];
     let hitLocation = "None";
     let useHitLoc = false;
-    //let noHitLocationsPower = false;
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         !noHitLocationsPower
@@ -2147,68 +2120,62 @@ async function _calcDamage(damageResult, item, options) {
         }
     }
 
+    // TODO: Clean this up.
     if (itemData.killing) {
         // Killing Attack
         hasStunMultiplierRoll = true;
-        body = item.system.USESTANDARDEFFECT ? stun : damageResult.total;
+        body = item.system.USESTANDARDEFFECT ? stun : heroRoller.total;
         //let hitLocationModifiers = [1, 1, 1, 0];
 
-        // 6E uses 1d3 stun multiplier
-        let stunRoll = new Roll("1D3", item.actor.getRollData());
+        // // 6E uses 1d3 stun multiplier
+        // let stunRoll = new Roll("1D3", item.actor.getRollData());
 
-        // 5E uses 1d6-1 for stun multiplier
-        if (item.actor.system.is5e) {
-            stunRoll = new Roll("max(1D6-1,1)", item.actor.getRollData());
-        }
+        // // 5E uses 1d6-1 for stun multiplier
+        // if (item.actor.system.is5e) {
+        //     stunRoll = new Roll("max(1D6-1,1)", item.actor.getRollData());
+        // }
 
-        let stunResult = await stunRoll.roll({ async: true });
-        let renderedStunResult = await stunResult.render();
-        damageDetail.renderedStunMultiplierRoll = renderedStunResult;
+        // let stunResult = await stunRoll.roll({ async: true });
+        // let renderedStunResult = await stunResult.render();
 
-        if (
-            game.settings.get("hero6efoundryvttv2", "hit locations") &&
-            !noHitLocationsPower
-        ) {
-            stunMultiplier = hitLocationModifiers[0];
-        } else {
-            stunMultiplier = stunResult.total;
-        }
+        // TODO: Not sure this is needed.
+        // damageDetail.renderedStunMultiplierRoll = renderedStunResult;
 
-        stunMultiplier += parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0);
+        // TODO: This is not considering the hit location correctly is it?
+        // TODO: Build into the roller?
+        // if (
+        //     game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        //     !noHitLocationsPower
+        // ) {
+        //     stunMultiplier = hitLocationModifiers[0];
+        // } else {
+        //     stunMultiplier = stunResult.total;
+        // }
 
-        if (options.stunmultiplier) {
-            stunMultiplier = options.stunmultiplier;
-        }
+        // stunMultiplier += parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0);
 
-        stun = body * stunMultiplier;
+        // if (options.stunmultiplier) {
+        //     stunMultiplier = options.stunmultiplier;
+        // }
 
-        damageDetail.renderedStunResult = renderedStunResult;
+        // stun = body * stunMultiplier;
+
+        // damageDetail.renderedStunResult = renderedStunResult;
     } else {
-        // Normal Attack
-        // counts body damage for non-killing attack
-        if (damageResult.terms[0].results) {
-            // Possible 0d6 roll
-            for (let die of damageResult.terms[0].results) {
-                switch (die.result) {
-                    case 1:
-                        countedBody += 0;
-                        break;
-                    case 6:
-                        countedBody += 2;
-                        break;
-                    default:
-                        countedBody += 1;
-                        break;
-                }
-            }
-        }
-
-        stun = item.system.USESTANDARDEFFECT ? stun : damageResult.total;
-        body = item.system.USESTANDARDEFFECT ? body : countedBody;
+        // TODO: Where does hit location get figured for these? Looks like it's not right.
+        //       It appears hit location will have to be figured in as it can be a part of
+        //       normal and killing damage.
+        // TODO: Should ignore hit locations if the modifier on the item is no hit locations.
+        // TODO: Should ignore hit locations if they're turned off at the global level.
+        // TODO: Should ignore hit locations if they're turned off for the particular power.
     }
 
-    let bodyDamage = body;
-    let stunDamage = stun;
+    // TODO: Why both?
+    body = heroRoller.getBodyTotal();
+    stun = heroRoller.getStunTotal();
+
+    let bodyDamage = heroRoller.getBodyTotal();
+    let stunDamage = heroRoller.getStunTotal();
 
     let effects = "";
     if (item.system.EFFECT) {
@@ -2312,6 +2279,7 @@ async function _calcDamage(damageResult, item, options) {
             );
         }
 
+        // TODO: Convert to new HeroRoller
         let knockbackRoll = new Roll(knockBackEquation);
         let knockbackResult = await knockbackRoll.roll({ async: true });
         knockbackRenderedResult = await knockbackResult.render();
@@ -2437,6 +2405,7 @@ async function _calcDamage(damageResult, item, options) {
     stun = RoundFavorPlayerDown(stun);
     body = RoundFavorPlayerDown(body);
 
+    // TODO: Should this be entirely within the HeroRoller itself and extractable as required?
     damageDetail.body = body;
     damageDetail.stun = stun;
     damageDetail.effects = effects;
