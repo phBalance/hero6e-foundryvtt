@@ -534,8 +534,10 @@ export class HeroRoller {
                         flavor: term.options._hrFlavor,
                         numberOfDice: term.results.length,
                         signMultiplier: lastOperatorMultiplier,
+                        min: -99,
+                        max: -99,
                     };
-                    calculatedTerms._hrExtra = hrExtra;
+                    calculatedTerms._hrExtra = foundry.utils.deepClone(hrExtra);
 
                     const termResults = term.results.map((result) => {
                         let adjustedValue =
@@ -543,16 +545,25 @@ export class HeroRoller {
 
                         if (term.options._hrFlavor === "half die") {
                             adjustedValue = Math.ceil(result.result / 2);
+                            hrExtra.min = 1;
+                            hrExtra.max = 3;
                         } else if (
                             term.options._hrFlavor === "less 1 pip" &&
                             !this._standardEffect
                         ) {
                             adjustedValue = result.result - 1;
+                            hrExtra.min = 0;
+                            hrExtra.max = 5;
                         } else if (
                             term.options._hrFlavor === "less 1 pip min 1" &&
                             !this._standardEffect
                         ) {
                             adjustedValue = Math.max(1, result.result - 1);
+                            hrExtra.min = 1;
+                            hrExtra.max = 5;
+                        } else {
+                            hrExtra.min = 1;
+                            hrExtra.max = 6;
                         }
 
                         calculatedTerms.push(
@@ -615,7 +626,7 @@ export class HeroRoller {
                     </header>
                     <ol class="dice-rolls">
                         ${this.#buildDiceRollsTooltip(
-                            this._killingStunMultiplierHeroRoller.getBaseTerms(),
+                            this._killingStunMultiplierHeroRoller.getBaseTerms()[0],
                             true,
                         )}
                     </ol>
@@ -763,14 +774,27 @@ export class HeroRoller {
             const absNumber = Math.abs(result);
 
             // TODO: Perhaps should have different interpretation based on 1d6 vs 1d6 - 1 vs 1?
+            // TODO: Make able to show for calculated
             return `${soFar}<li class="roll die d6 ${
-                absNumber <= 1 && showMinMax
-                    ? "min"
-                    : absNumber === 6 && showMinMax
-                      ? "max"
-                      : ""
+                showMinMax ? this.#buildMinMaxClass(diceTerm, result) : ""
             }">${absNumber}</li>`;
         }, "");
+    }
+
+    #buildMinMaxClass(term, value) {
+        if (term._hrExtra.term === "Dice") {
+            const absValue = Math.abs(value);
+            const minPossible = term._hrExtra.min;
+            const maxPossible = term._hrExtra.max;
+
+            return absValue === minPossible
+                ? "min"
+                : absValue === maxPossible
+                  ? "max"
+                  : "";
+        }
+
+        return "";
     }
 
     #buildTooltipTotal() {
