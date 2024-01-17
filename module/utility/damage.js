@@ -326,48 +326,65 @@ export function convertToDcFromItem(item, options) {
     return { dc: dc, tags: tags, end: end };
 }
 
+export function calculateDiceFormulaParts(item, dc) {
+    let d6Count = 0;
+    let halfDieCount = 0;
+    let constant = 0;
+
+    if (dc) {
+        // Normal Attack
+        if (!item.system.killing) {
+            // NOTE: This is ugly because with floating point calculations we need to use epsilon comparisons (see https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ for instance)
+            //       However due to the fact that Number.EPSILON doesn't scale based on input we're going to make our tolerances based on the fact that we
+            //       can only have 3 possible values x.0, x.2, and x.5 for any whole number x >= 0. If we make our epsilon 0.1 it'll more than do for
+            //       values of x < a few million.
+            const ourEpsilon = 0.1;
+
+            d6Count = Math.floor(dc);
+            // d3Count = DC % 1 >= 0.5 ? 1 : 0
+            halfDieCount = (dc % 1) - 0.5 >= -ourEpsilon ? 1 : 0;
+            // constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
+            constant =
+                (dc % 1) - 0.2 >= -ourEpsilon && (dc % 1) - 0.5 < -ourEpsilon
+                    ? 1
+                    : 0;
+        }
+
+        // Killing Attack
+        else {
+            d6Count = Math.floor(dc / 3);
+            halfDieCount = Math.floor((dc % 3) / 2);
+            constant = Math.floor((dc % 3) % 2);
+        }
+    }
+
+    return {
+        isKilling: item.system.killing,
+        d6Count,
+        halfDieCount,
+        constant,
+    };
+}
+
 export function convertFromDC(item, DC) {
     if (DC === 0) {
         return "";
     }
 
     let output = "";
-    let d6Count = 0;
-    let d3Count = 0;
-    let constant = 0;
 
-    // Normal Attack
-    if (!item.system.killing) {
-        // NOTE: This is ugly because with floating point calculations we need to use epsilon comparisons (see https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/ for instance)
-        d6Count = Math.floor(DC);
-        // d3Count = DC % 1 >= 0.5 ? 1 : 0
-        d3Count = (DC % 1) - 0.5 >= -Number.EPSILON ? 1 : 0;
-        // constant = (DC % 1 >= 0.2 && DC % 1 < 0.5) ? 1 : 0
-        constant =
-            (DC % 1) - 0.2 >= -Number.EPSILON &&
-            (DC % 1) - 0.5 < -Number.EPSILON
-                ? 1
-                : 0;
-        //return DC.toString() + "d6";
+    const formulaParts = calculateDiceFormulaParts(item, DC);
+
+    if (formulaParts.d6Count !== 0) {
+        output = addTerms(output, formulaParts.d6Count.toString() + "d6");
     }
 
-    // Killing Attack
-    else {
-        d6Count = Math.floor(DC / 3);
-        d3Count = Math.floor((DC % 3) / 2);
-        constant = Math.floor((DC % 3) % 2);
+    if (formulaParts.halfDieCount !== 0) {
+        output = addTerms(output, formulaParts.halfDieCount.toString() + "d3");
     }
 
-    if (d6Count !== 0) {
-        output = addTerms(output, d6Count.toString() + "d6");
-    }
-
-    if (d3Count !== 0) {
-        output = addTerms(output, d3Count.toString() + "d3");
-    }
-
-    if (constant !== 0) {
-        output = addTerms(output, constant);
+    if (formulaParts.constant !== 0) {
+        output = addTerms(output, formulaParts.constant);
     }
 
     return output;

@@ -389,8 +389,22 @@ export function registerDamageFunctionTests(quench) {
                         );
                     });
 
+                    it("13.2", function () {
+                        assert.equal(
+                            convertFromDC(nonKillingItem, 13.2),
+                            "13d6 + 1",
+                        );
+                    });
+
                     it("20", function () {
                         assert.equal(convertFromDC(nonKillingItem, 20), "20d6");
+                    });
+
+                    it("1234567890.2", function () {
+                        assert.equal(
+                            convertFromDC(nonKillingItem, 1234567890.2),
+                            "1234567890d6 + 1",
+                        );
                     });
                 });
             });
