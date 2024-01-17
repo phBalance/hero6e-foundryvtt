@@ -11,16 +11,21 @@ export class HeroRoller {
     static STANDARD_EFFECT_DIE_ROLL = 3;
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
 
-    static _sumTerms(terms) {
+    static #sumTerms(terms) {
         return terms.reduce((total, term) => {
-            return total + HeroRoller._sum(term);
+            return total + HeroRoller.#sum(term);
         }, 0);
     }
 
-    static _sum(term) {
+    static #sum(term) {
         return term.reduce((subTotal, result) => {
             return subTotal + result;
         }, 0);
+    }
+
+    // Assumption arrays are the same size
+    static #zipTerms(first, second) {
+        return first.map((ele, index) => [ele, second[index]]);
     }
 
     constructor(options, rollClass = Roll) {
@@ -32,10 +37,14 @@ export class HeroRoller {
 
         this._type = ROLL_TYPE.SUCCESS;
 
-        this._baseMultiplier = 0;
-        this._additionalStunMultiplier = 0;
+        this._killingStunMultiplierHeroRoller = undefined;
+        this._killingBaseStunMultiplier = 0;
+        this._killingAdditionalStunMultiplier = 0;
 
         this._standardEffect = false;
+
+        this._hitLocation = "";
+        this._useHitLocation = false;
     }
 
     getType() {
@@ -99,7 +108,14 @@ export class HeroRoller {
         return this;
     }
 
-    _linkIfNotFirstTerm(operator = "+") {
+    modifyToHitLocation(apply = true) {
+        if (apply) {
+            this._useHitLocation = true;
+        }
+        return this;
+    }
+
+    #linkIfNotFirstTerm(operator = "+") {
         if (this._formulaTerms.length > 0) {
             this._formulaTerms.push(new OperatorTerm({ operator: operator }));
         }
@@ -111,7 +127,7 @@ export class HeroRoller {
             return this;
         }
 
-        this._linkIfNotFirstTerm();
+        this.#linkIfNotFirstTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -129,7 +145,7 @@ export class HeroRoller {
             return this;
         }
 
-        this._linkIfNotFirstTerm();
+        this.#linkIfNotFirstTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -147,7 +163,7 @@ export class HeroRoller {
             return this;
         }
 
-        this._linkIfNotFirstTerm();
+        this.#linkIfNotFirstTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -165,7 +181,7 @@ export class HeroRoller {
             return this;
         }
 
-        this._linkIfNotFirstTerm();
+        this.#linkIfNotFirstTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -183,7 +199,7 @@ export class HeroRoller {
             return this;
         }
 
-        this._linkIfNotFirstTerm("-");
+        this.#linkIfNotFirstTerm("-");
 
         this._formulaTerms.push(
             new Die({
@@ -202,7 +218,7 @@ export class HeroRoller {
             return this;
         }
 
-        this._linkIfNotFirstTerm();
+        this.#linkIfNotFirstTerm();
 
         this._formulaTerms.push(
             new NumericTerm({
@@ -226,7 +242,7 @@ export class HeroRoller {
             return this;
         }
 
-        this._linkIfNotFirstTerm("-");
+        this.#linkIfNotFirstTerm("-");
 
         this._formulaTerms.push(
             new NumericTerm({
@@ -240,7 +256,7 @@ export class HeroRoller {
 
     addStunMultiplier(levels) {
         if (levels) {
-            this._additionalStunMultiplier += levels;
+            this._killingAdditionalStunMultiplier += levels;
         }
         return this;
     }
@@ -257,26 +273,30 @@ export class HeroRoller {
         });
 
         // Convert to standard effect if appropriate.
-        this._rollObj.terms = this._applyStandardEffectIfAppropriate(
+        this._rollObj.terms = this.#applyStandardEffectIfAppropriate(
             this._rollObj.terms,
         );
 
         if (this._type === ROLL_TYPE.KILLING) {
-            let hr = new HeroRoller({}, this._buildRollClass)
+            this._killingStunMultiplierHeroRoller = new HeroRoller(
+                {},
+                this._buildRollClass,
+            )
                 .addDieMinus1Min1(
                     this._killingStunMultiplier === "1d6-1" ? 1 : 0,
                 )
-                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
-            hr = this._standardEffect ? hr.modifyToStandardEffect() : hr;
+                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0)
+                .modifyToStandardEffect(this._standardEffect);
 
-            await hr.roll({ async: true });
+            await this._killingStunMultiplierHeroRoller.roll({ async: true });
 
-            this._baseMultiplier = hr.getSuccessTotal();
+            this._killingBaseStunMultiplier =
+                this._killingStunMultiplierHeroRoller.getSuccessTotal();
         }
 
         this._rawBaseTerms = this._rollObj.terms;
 
-        this._calculate();
+        this.#calculate();
 
         return this;
     }
@@ -286,14 +306,13 @@ export class HeroRoller {
     async render() {
         const template = this._buildRollClass.CHAT_TEMPLATE;
 
-        // TODO: This is really placeholder
         // TODO: Formula
         const chatData = {
-            formula: this._buildFormula(),
+            formula: this.#buildFormula(),
             flavor: null,
             user: game.user.id,
-            tooltip: this._buildTooltip(),
-            total: this._baseTotal,
+            tooltip: this.#buildTooltip(),
+            total: this.#buildTooltipTotal(),
         };
 
         return renderTemplate(template, chatData);
@@ -305,6 +324,10 @@ export class HeroRoller {
                 return term.options._hrTag;
             })
             .filter(Boolean);
+    }
+
+    getFormula() {
+        return this.#buildFormula();
     }
 
     getSuccessTerms() {
@@ -381,6 +404,36 @@ export class HeroRoller {
         );
     }
 
+    getEntangleTotal() {
+        if (this._type === ROLL_TYPE.ENTANGLE) {
+            return this.getBaseTotal();
+        }
+
+        throw new Error(
+            `asking for entangle from type ${this._type} doesn't make sense`,
+        );
+    }
+
+    getAdjustmentTotal() {
+        if (this._type === ROLL_TYPE.ADJUSTMENT) {
+            return this.getBaseTotal();
+        }
+
+        throw new Error(
+            `asking for adjustment from type ${this._type} doesn't make sense`,
+        );
+    }
+
+    getFlashTotal() {
+        if (this._type === ROLL_TYPE.FLASH) {
+            return this.getBaseTotal();
+        }
+
+        throw new Error(
+            `asking for flash from type ${this._type} doesn't make sense`,
+        );
+    }
+
     getBaseTerms() {
         return this._baseTerms;
     }
@@ -389,7 +442,8 @@ export class HeroRoller {
     }
     getBaseMultiplier() {
         return Math.max(
-            this._baseMultiplier + this._additionalStunMultiplier,
+            this._killingBaseStunMultiplier +
+                this._killingAdditionalStunMultiplier,
             1,
         );
     }
@@ -412,9 +466,13 @@ export class HeroRoller {
         return this._calculatedTotal;
     }
 
-    // TODO: toJSON toObject
+    getCalculatedHitLocation() {
+        return this._hitLocation;
+    }
 
-    _calculateValue(result) {
+    // TODO: toJSON fromJSON
+
+    #calculateValue(result) {
         switch (this._type) {
             case ROLL_TYPE.SUCCESS:
             case ROLL_TYPE.ADJUSTMENT:
@@ -441,7 +499,7 @@ export class HeroRoller {
         }
     }
 
-    _calculate() {
+    #calculate() {
         this._calculatedTerms = [];
 
         let lastOperatorMultiplier = 1;
@@ -453,9 +511,12 @@ export class HeroRoller {
                     const hrExtra = {
                         term: "Numeric",
                         flavor: term.options._hrFlavor,
+                        baseNumber: term.number,
+                        signMultiplier:
+                            lastOperatorMultiplier * (term.number < 0 ? -1 : 1),
                     };
 
-                    const newCalculatedTerm = [this._calculateValue(number)];
+                    const newCalculatedTerm = [this.#calculateValue(number)];
                     newCalculatedTerm._hrExtra = hrExtra;
                     this._calculatedTerms.push(newCalculatedTerm);
 
@@ -471,6 +532,8 @@ export class HeroRoller {
                     const hrExtra = {
                         term: "Dice",
                         flavor: term.options._hrFlavor,
+                        numberOfDice: term.results.length,
+                        signMultiplier: lastOperatorMultiplier,
                     };
                     calculatedTerms._hrExtra = hrExtra;
 
@@ -493,7 +556,7 @@ export class HeroRoller {
                         }
 
                         calculatedTerms.push(
-                            this._calculateValue(adjustedValue),
+                            this.#calculateValue(adjustedValue),
                         );
 
                         return adjustedValue;
@@ -510,79 +573,233 @@ export class HeroRoller {
             })
             .filter(Boolean);
 
-        this._baseTotal = HeroRoller._sumTerms(this._baseTerms);
+        this._baseTotal = HeroRoller.#sumTerms(this._baseTerms);
 
         if (this._type !== ROLL_TYPE.SUCCESS) {
-            this._calculatedTotal = HeroRoller._sumTerms(this._calculatedTerms);
+            this._calculatedTotal = HeroRoller.#sumTerms(this._calculatedTerms);
         }
     }
 
-    _buildFormula() {
-        const formula = this._formulaTerms.reduce((formulaSoFar, term) => {
+    #buildFormula() {
+        const formula = this._baseTerms.reduce((formulaSoFar, term, index) => {
             // TODO: This will work until we allow modification post evaluation
             // TODO: Will need to fix things like " + " concatenated with "-2"
-            return formulaSoFar + term.formula;
+            // TODO: Will need to work with 1d6-1, 1d6-1(min 1), and 1/2d6
+            return formulaSoFar + this.#buildFormulaForTerm(term, !!index);
         }, "");
 
         return formula;
     }
 
-    _buildTooltip() {
-        // TODO: Need to add in the calculated results too.
-
+    #buildTooltip() {
         return `<div class="dice-tooltip">
                     <section class="tooltip-part">
-                        ${this._buildDiceTooltip()}
+                        ${this.#buildDiceTooltip()}
                     </section>
                 </div>`;
     }
 
-    _buildDiceTooltip() {
-        return this._baseTerms.reduce((soFar, term) => {
-            if (term._hrExtra.term === "Dice") {
-                const total = Math.abs(HeroRoller.sum(term));
-                const formula = this._buildFormulaForDiceTerm(term);
-                return `${soFar}
+    #buildDiceTooltip() {
+        let preliminaryTooltip = "";
+        if (this._type === ROLL_TYPE.KILLING) {
+            const stunMultiplier =
+                this._killingStunMultiplierHeroRoller.getBaseTotal();
+            const stunMultiplierFormula =
+                this._killingStunMultiplierHeroRoller.getFormula();
+
+            preliminaryTooltip = `
+                <div class="dice">
+                    <header class="part-header flexrow">
+                        <span class="part-formula">${stunMultiplierFormula} STUN Multiplier</span>
+                        <span class="part-total">${stunMultiplier}</span>
+                    </header>
+                    <ol class="dice-rolls">
+                        ${this.#buildDiceRollsTooltip(
+                            this._killingStunMultiplierHeroRoller.getBaseTerms(),
+                            true,
+                        )}
+                    </ol>
+                </div>
+            `;
+        }
+
+        const zippedTerms = HeroRoller.#zipTerms(
+            this._baseTerms,
+            this._calculatedTerms,
+        );
+
+        return zippedTerms.reduce((soFar, zippedTerm) => {
+            if (
+                zippedTerm[0]._hrExtra.term === "Dice" ||
+                zippedTerm[0]._hrExtra.term === "Numeric"
+            ) {
+                const baseTotal = HeroRoller.#sum(zippedTerm[0]);
+                const baseFormula = this.#buildFormulaForTerm(
+                    zippedTerm[0],
+                    false,
+                );
+                const baseFormulaPurpose = this.#buildFormulaBasePurpose();
+
+                const baseTermTooltip = `
                         <div class="dice">
                             <header class="part-header flexrow">
-                                <span class="part-formula">${formula}</span>
-                                
-                                <span class="part-total">${total}</span>
+                                <span class="part-formula">${baseFormula} ${baseFormulaPurpose}</span>
+                                <span class="part-total">${baseTotal}</span>
                             </header>
                             <ol class="dice-rolls">
-                                ${this._buildDiceRollsTooltip(term)}
+                                ${this.#buildDiceRollsTooltip(
+                                    zippedTerm[0],
+                                    true,
+                                )}
                             </ol>
                         </div>
                     `;
-            }
 
-            return soFar;
-        }, "");
+                const calculatedTotal = HeroRoller.#sum(zippedTerm[1]);
+                const calculatedFormulaPurpose =
+                    this.#buildFormulaCalculatedPurpose();
+                const calculatedTermTooltip =
+                    !this.#buildFormulaCalculatedPurpose()
+                        ? ""
+                        : `
+                            <div class="dice">
+                                <header class="part-header flexrow">
+                                    <span class="part-formula">${calculatedFormulaPurpose} calculated from ${baseFormula} ${baseFormulaPurpose}</span>
+                                    <span class="part-total">${calculatedTotal}</span>
+                                </header>
+                                <ol class="dice-rolls">
+                                    ${this.#buildDiceRollsTooltip(
+                                        zippedTerm[1],
+                                        false,
+                                    )}
+                                </ol>
+                            </div>
+                        `;
+
+                return `${soFar}${baseTermTooltip}${calculatedTermTooltip}`;
+            }
+        }, preliminaryTooltip);
     }
 
-    _buildFormulaForDiceTerm(diceTerm) {
-        if (diceTerm._hrExtra.flavor === "half die") {
-            return `½d6`;
-        } else if (
-            diceTerm._hrExtra.flavor === "less 1 pip" ||
-            diceTerm._hrExtra.flavor === "less 1 pip min 1"
-        ) {
-            return `d6-1`;
-        } else {
-            return `${diceTerm.length}d6`;
+    #buildFormulaForTerm(term, showPositive) {
+        const sign =
+            term._hrExtra.signMultiplier < 0
+                ? " - "
+                : showPositive
+                  ? " + "
+                  : " ";
+
+        if (term._hrExtra.term === "Dice") {
+            if (term._hrExtra.flavor === "half die") {
+                return `${sign}½d6`;
+            } else if (term._hrExtra.flavor === "less 1 pip") {
+                return `${
+                    term._hrExtra.signMultiplier < 0
+                        ? `${sign}(d6-1)`
+                        : `${sign}d6-1`
+                }`;
+            } else if (term._hrExtra.flavor === "less 1 pip min 1") {
+                return `${
+                    term._hrExtra.signMultiplier < 0
+                        ? `${sign}(d6-1[min 1])`
+                        : `${sign}d6-1[min 1]`
+                }`;
+            } else {
+                return `${sign}${term.length}d6`;
+            }
+        } else if (term._hrExtra.term === "Numeric") {
+            // NOTE: Should only be 1 value per Numeric term
+            return `${sign}${term._hrExtra.signMultiplier * term[0]}`;
         }
     }
 
-    _buildDiceRollsTooltip(diceTerm) {
+    #buildFormulaBasePurpose() {
+        switch (this._type) {
+            case ROLL_TYPE.SUCCESS:
+                return "";
+
+            case ROLL_TYPE.NORMAL:
+                return "STUN";
+
+            case ROLL_TYPE.ENTANGLE:
+            case ROLL_TYPE.KILLING:
+                return "BODY";
+
+            case ROLL_TYPE.ADJUSTMENT:
+                return "Active Points";
+
+            case ROLL_TYPE.FLASH:
+                return "Segments";
+
+            default:
+                console.error(`unknown base purpose type ${this._type}`);
+                return "";
+        }
+    }
+
+    #buildFormulaCalculatedPurpose() {
+        switch (this._type) {
+            case ROLL_TYPE.SUCCESS:
+            case ROLL_TYPE.ENTANGLE:
+            case ROLL_TYPE.ADJUSTMENT:
+            case ROLL_TYPE.FLASH:
+                // No calculated terms
+                return "";
+
+            case ROLL_TYPE.KILLING:
+                return "STUN";
+
+            case ROLL_TYPE.NORMAL:
+                return "BODY";
+
+            default:
+                console.error(`unknown base purpose type ${this._type}`);
+                return "";
+        }
+    }
+
+    #buildDiceRollsTooltip(diceTerm, showMinMax) {
         return diceTerm.reduce((soFar, result) => {
             const absNumber = Math.abs(result);
+
+            // TODO: Perhaps should have different interpretation based on 1d6 vs 1d6 - 1 vs 1?
             return `${soFar}<li class="roll die d6 ${
-                absNumber <= 1 ? "min" : absNumber === 6 ? "max" : ""
+                absNumber <= 1 && showMinMax
+                    ? "min"
+                    : absNumber === 6 && showMinMax
+                      ? "max"
+                      : ""
             }">${absNumber}</li>`;
         }, "");
     }
 
-    _applyStandardEffectIfAppropriate(formulaTerms) {
+    #buildTooltipTotal() {
+        switch (this._type) {
+            case ROLL_TYPE.SUCCESS:
+                return `${this._baseTotal}`;
+
+            case ROLL_TYPE.NORMAL:
+                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`;
+
+            case ROLL_TYPE.KILLING:
+                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN (${this.getStunMultiplier()}x)`;
+
+            case ROLL_TYPE.ENTANGLE:
+                return `${this.getEntangleTotal()} BODY`;
+
+            case ROLL_TYPE.ADJUSTMENT:
+                return `${this.getAdjustmentTotal()} Active Points`;
+
+            case ROLL_TYPE.FLASH:
+                return `${this.getFlashTotal()} Segments`;
+
+            default:
+                console.error(`unknown type ${this._type}`);
+                break;
+        }
+    }
+
+    #applyStandardEffectIfAppropriate(formulaTerms) {
         if (this._standardEffect) {
             for (let i = 0; i < formulaTerms.length; ++i) {
                 if (formulaTerms[i] instanceof Die) {
