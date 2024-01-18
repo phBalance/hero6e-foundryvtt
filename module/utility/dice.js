@@ -65,17 +65,10 @@ export class HeroRoller {
         return this;
     }
 
-    make5eKillingRoll(apply = true) {
+    makeKillingRoll(apply = true, isd6minus1 = false) {
         if (apply) {
             this._type = ROLL_TYPE.KILLING;
-            this._killingStunMultiplier = "1d6-1";
-        }
-        return this;
-    }
-    make6eKillingRoll(apply = true) {
-        if (apply) {
-            this._type = ROLL_TYPE.KILLING;
-            this._killingStunMultiplier = "1d3";
+            this._killingStunMultiplier = isd6minus1 ? "1d6-1" : "1d3";
         }
         return this;
     }

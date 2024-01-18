@@ -1029,17 +1029,21 @@ export async function _onRollDamage(event) {
     });
     const formulaParts = calculateDiceFormulaParts(item, dc);
 
+    const includeHitLocation =
+        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        (item.system.noHitLocations || false);
+
     const heroRoller = new HeroRoller()
         .makeNormalRoll(!formulaParts.isKilling)
-        .make5eKillingRoll(formulaParts.isKilling && actor.system.is5e)
-        .make6eKillingRoll(formulaParts.isKilling && !actor.system.is5e)
+        .makeKillingRoll(formulaParts.isKilling, actor.system.is5e)
+        .addStunMultiplier(
+            increasedMultiplierLevels - decreasedMultiplierLevels,
+        )
         .addDice(formulaParts.d6Count)
         .addHalfDice(formulaParts.halfDieCount)
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(item.system.USESTANDARDEFFECT)
-        .addStunMultiplier(
-            increasedMultiplierLevels - decreasedMultiplierLevels,
-        );
+        .modifyToHitLocation(includeHitLocation);
 
     await heroRoller.roll();
 

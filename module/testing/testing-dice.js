@@ -79,24 +79,24 @@ export function registerDiceTests(quench) {
                         roller.makeNormalRoll(undefined);
                         expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
 
-                        roller.make5eKillingRoll(0);
+                        roller.makeKillingRoll(0, true);
                         expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
-                        roller.make5eKillingRoll(false);
+                        roller.makeKillingRoll(false, true);
                         expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
-                        roller.make5eKillingRoll(null);
+                        roller.makeKillingRoll(null, true);
                         expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
-                        roller.make5eKillingRoll(undefined);
+                        roller.makeKillingRoll(undefined, true);
                         expect(roller._type).to.equal(ROLL_TYPE.KILLING);
 
                         roller.makeSuccessRoll();
                         expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
-                        roller.make6eKillingRoll(0);
+                        roller.makeKillingRoll(0);
                         expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
-                        roller.make6eKillingRoll(false);
+                        roller.makeKillingRoll(false);
                         expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
-                        roller.make6eKillingRoll(null);
+                        roller.makeKillingRoll(null);
                         expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
-                        roller.make6eKillingRoll(undefined);
+                        roller.makeKillingRoll(undefined);
                         expect(roller._type).to.equal(ROLL_TYPE.KILLING);
 
                         roller.makeAdjustmentRoll(0);
@@ -133,13 +133,13 @@ export function registerDiceTests(quench) {
                         roller.makeNormalRoll(true);
                         expect(roller._type).to.equal(ROLL_TYPE.NORMAL);
 
-                        roller.make5eKillingRoll(true);
+                        roller.makeKillingRoll(true, true);
                         expect(roller._type).to.equal(ROLL_TYPE.KILLING);
 
                         roller.makeSuccessRoll(true);
                         expect(roller._type).to.equal(ROLL_TYPE.SUCCESS);
 
-                        roller.make6eKillingRoll(true);
+                        roller.makeKillingRoll(true);
                         expect(roller._type).to.equal(ROLL_TYPE.KILLING);
 
                         roller.makeAdjustmentRoll(1);
@@ -595,7 +595,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make5eKillingRoll()
+                            .makeKillingRoll(true, true)
                             .addNumber(1);
 
                         await roller.roll();
@@ -612,7 +612,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make5eKillingRoll()
+                            .makeKillingRoll(true, true)
                             .addNumber(1);
 
                         await roller.roll();
@@ -636,7 +636,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .addHalfDice();
 
                         await roller.roll();
@@ -668,7 +668,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make5eKillingRoll()
+                            .makeKillingRoll(true, true)
                             .addDice(1);
 
                         await roller.roll();
@@ -700,7 +700,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .addDieMinus1();
 
                         await roller.roll();
@@ -732,7 +732,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make5eKillingRoll()
+                            .makeKillingRoll(true, true)
                             .addDice(1)
                             .addNumber(1);
 
@@ -766,7 +766,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .addDice(3);
 
                         await roller.roll();
@@ -807,7 +807,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .addStunMultiplier(7)
                             .addDice(3);
 
@@ -859,7 +859,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .addStunMultiplier(-1)
                             .addDice(3);
 
@@ -924,7 +924,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .addStunMultiplier(-7)
                             .addDice(3);
 
@@ -959,7 +959,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make5eKillingRoll()
+                            .makeKillingRoll(true, true)
                             .modifyToStandardEffect()
                             .addDice(3)
                             .addHalfDice()
@@ -1015,7 +1015,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .modifyToStandardEffect()
                             .addDice(3)
                             .addDieMinus1()
@@ -1071,7 +1071,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .modifyToHitLocation()
                             .addDice(3)
                             .addDieMinus1()
@@ -1092,7 +1092,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .make6eKillingRoll()
+                            .makeKillingRoll()
                             .modifyToHitLocation()
                             .addDice(3)
                             .addDieMinus1()
