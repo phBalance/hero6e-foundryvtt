@@ -277,22 +277,9 @@ export class HeroRoller {
             this._rollObj.terms,
         );
 
-        if (this._type === ROLL_TYPE.KILLING) {
-            this._killingStunMultiplierHeroRoller = new HeroRoller(
-                {},
-                this._buildRollClass,
-            )
-                .addDieMinus1Min1(
-                    this._killingStunMultiplier === "1d6-1" ? 1 : 0,
-                )
-                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0)
-                .modifyToStandardEffect(this._standardEffect);
+        await this.#calculateStunMultiplierIfAppropriate();
 
-            await this._killingStunMultiplierHeroRoller.roll({ async: true });
-
-            this._killingBaseStunMultiplier =
-                this._killingStunMultiplierHeroRoller.getSuccessTotal();
-        }
+        await this.#calculateHitLocationIfAppropriate();
 
         this._rawBaseTerms = this._rollObj.terms;
 
@@ -466,11 +453,71 @@ export class HeroRoller {
         return this._calculatedTotal;
     }
 
-    getCalculatedHitLocation() {
+    getHitLocation() {
         return this._hitLocation;
     }
 
     // TODO: toJSON fromJSON
+
+    async #calculateStunMultiplierIfAppropriate() {
+        if (this._type === ROLL_TYPE.KILLING) {
+            this._killingStunMultiplierHeroRoller = new HeroRoller(
+                {},
+                this._buildRollClass,
+            )
+                .addDieMinus1Min1(
+                    this._killingStunMultiplier === "1d6-1" ? 1 : 0,
+                )
+                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0)
+                .modifyToStandardEffect(this._standardEffect);
+
+            await this._killingStunMultiplierHeroRoller.roll({ async: true });
+
+            this._killingBaseStunMultiplier =
+                this._killingStunMultiplierHeroRoller.getSuccessTotal();
+        }
+    }
+
+    async #calculateHitLocationIfAppropriate() {
+        if (
+            this._useHitLocation &&
+            (this._type === ROLL_TYPE.NORMAL ||
+                this._type === ROLL_TYPE.KILLING)
+        ) {
+            this._hitLocationRoller = new HeroRoller({}, this._buildRollClass)
+                .addDice(3)
+                .addDice(1);
+            await this._hitLocationRoller.roll();
+
+            const locationRollTotal = HeroRoller.#sum(
+                this._hitLocationRoller.getBaseTerms()[0],
+            );
+            const locationSideRollTotal = HeroRoller.#sum(
+                this._hitLocationRoller.getBaseTerms()[1],
+            );
+
+            const locationName =
+                CONFIG.HERO.hitLocationsToHit[locationRollTotal];
+            const locationSide = locationSideRollTotal > 4 ? "Right" : "Left";
+
+            this._hitLocation = {
+                name: locationName,
+                side: locationSide,
+                stunMultiplier:
+                    this._type === ROLL_TYPE.KILLING
+                        ? CONFIG.HERO.hitLocations[locationName][0]
+                        : CONFIG.HERO.hitLocations[locationName][1],
+                bodyMultiplier: CONFIG.HERO.hitLocations[locationName][2],
+            };
+        } else {
+            this._hitLocation = {
+                name: "body",
+                side: "either",
+                stunMultiplier: 1,
+                bodyMultiplier: 1,
+            };
+        }
+    }
 
     #calculateValue(result) {
         switch (this._type) {

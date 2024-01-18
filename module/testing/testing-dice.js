@@ -518,6 +518,76 @@ export function registerDiceTests(quench) {
                         ]);
                         expect(roller.getBodyTotal()).deep.to.equal(4);
                     });
+
+                    it("should work with hit locations and not apply standard effect", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .modifyToStandardEffect()
+                            .modifyToHitLocation()
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // Should be no difference in BODY and STUN from roll (be standard effect)
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                            ],
+                            [HeroRoller.STANDARD_EFFECT_DIE_ROLL],
+                            [1],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                1,
+                        );
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [1, 1, 1],
+                            [1],
+                            [0],
+                        ]);
+                        expect(roller.getBodyTotal()).deep.to.equal(4);
+
+                        // But we should be able to get a hit location that is not
+                        // determined by standard effect.
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "Right",
+                            stunMultiplier: 0.5,
+                            bodyMultiplier: 0.5,
+                        });
+                    });
+
+                    it("should work with hit locations", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .modifyToHitLocation()
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // But we should be able to get a hit location that is not
+                        // determined by standard effect.
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Head",
+                            side: "Left",
+                            stunMultiplier: 2,
+                            bodyMultiplier: 2,
+                        });
+                    });
                 });
 
                 describe("killing roll", function () {
@@ -995,6 +1065,48 @@ export function registerDiceTests(quench) {
                                     HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL +
                                 1 * HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
                         );
+                    });
+
+                    it("should handle hit locations (roll 6) with killing attacks", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .make6eKillingRoll()
+                            .modifyToHitLocation()
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "Right",
+                            stunMultiplier: 1,
+                            bodyMultiplier: 0.5,
+                        });
+                    });
+
+                    it("should handle hit locations (roll 1) with killing attacks", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .make6eKillingRoll()
+                            .modifyToHitLocation()
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Head",
+                            side: "Left",
+                            stunMultiplier: 5,
+                            bodyMultiplier: 2,
+                        });
                     });
                 });
             });
