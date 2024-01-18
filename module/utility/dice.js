@@ -11,6 +11,15 @@ export class HeroRoller {
     static STANDARD_EFFECT_DIE_ROLL = 3;
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
 
+    static #sidedLocations = [
+        "Hand",
+        "Shoulder",
+        "Arm",
+        "Thigh",
+        "Leg",
+        "Foot",
+    ];
+
     static #sumTerms(terms) {
         return terms.reduce((total, term) => {
             return total + HeroRoller.#sum(term);
@@ -43,8 +52,9 @@ export class HeroRoller {
 
         this._standardEffect = false;
 
-        this._hitLocation = "";
+        this._hitLocation = undefined;
         this._useHitLocation = false;
+        this._alreadyHitLocation = "none";
     }
 
     getType() {
@@ -101,9 +111,10 @@ export class HeroRoller {
         return this;
     }
 
-    modifyToHitLocation(apply = true) {
+    addToHitLocation(apply = true, alreadyHitLocation) {
         if (apply) {
             this._useHitLocation = true;
+            this._alreadyHitLocation = alreadyHitLocation || "none";
         }
         return this;
     }
@@ -490,12 +501,17 @@ export class HeroRoller {
             );
 
             const locationName =
-                CONFIG.HERO.hitLocationsToHit[locationRollTotal];
+                this._alreadyHitLocation && this._alreadyHitLocation !== "none"
+                    ? this._alreadyHitLocation
+                    : CONFIG.HERO.hitLocationsToHit[locationRollTotal];
             const locationSide = locationSideRollTotal > 4 ? "Right" : "Left";
 
             this._hitLocation = {
                 name: locationName,
                 side: locationSide,
+                fullName: HeroRoller.#sidedLocations.includes(locationName)
+                    ? `${locationSide} ${locationName}`
+                    : locationName,
                 stunMultiplier:
                     this._type === ROLL_TYPE.KILLING
                         ? CONFIG.HERO.hitLocations[locationName][0]
@@ -530,6 +546,10 @@ export class HeroRoller {
                 return 1;
 
             case ROLL_TYPE.KILLING:
+                if (this._useHitLocation) {
+                    return result;
+                }
+
                 return result * this.getBaseMultiplier();
 
             case ROLL_TYPE.ENTANGLE:

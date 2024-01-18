@@ -525,7 +525,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
                             .modifyToStandardEffect()
-                            .modifyToHitLocation()
+                            .addToHitLocation()
                             .addDice(3)
                             .addDieMinus1()
                             .addNumber(1);
@@ -561,6 +561,7 @@ export function registerDiceTests(quench) {
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
                             side: "Right",
+                            fullName: "Right Foot",
                             stunMultiplier: 0.5,
                             bodyMultiplier: 0.5,
                         });
@@ -571,7 +572,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
-                            .modifyToHitLocation()
+                            .addToHitLocation()
                             .addDice(3)
                             .addDieMinus1()
                             .addNumber(1);
@@ -584,8 +585,57 @@ export function registerDiceTests(quench) {
                         expect(hitLocation).to.deep.equal({
                             name: "Head",
                             side: "Left",
+                            fullName: "Head",
                             stunMultiplier: 2,
                             bodyMultiplier: 2,
+                        });
+                    });
+
+                    it('should work with a "none" hit locations', async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addToHitLocation(true, "none")
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // But we should be able to get a hit location that is not
+                        // determined by standard effect.
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Head",
+                            side: "Left",
+                            fullName: "Head",
+                            stunMultiplier: 2,
+                            bodyMultiplier: 2,
+                        });
+                    });
+
+                    it("should work with guaranteed hit location", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addToHitLocation(true, "Foot")
+                            .addDice(3)
+                            .addDieMinus1()
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // But we should be able to get a hit location that is not
+                        // determined by standard effect.
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "Left",
+                            fullName: "Left Foot",
+                            stunMultiplier: 0.5,
+                            bodyMultiplier: 0.5,
                         });
                     });
                 });
@@ -636,7 +686,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
+                            .makeKillingRoll(true, false)
                             .addHalfDice();
 
                         await roller.roll();
@@ -700,7 +750,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
+                            .makeKillingRoll(true, false)
                             .addDieMinus1();
 
                         await roller.roll();
@@ -766,7 +816,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
+                            .makeKillingRoll(true, false)
                             .addDice(3);
 
                         await roller.roll();
@@ -807,7 +857,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
+                            .makeKillingRoll(true, false)
                             .addStunMultiplier(7)
                             .addDice(3);
 
@@ -859,7 +909,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
+                            .makeKillingRoll(true, false)
                             .addStunMultiplier(-1)
                             .addDice(3);
 
@@ -924,7 +974,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
+                            .makeKillingRoll(true, false)
                             .addStunMultiplier(-7)
                             .addDice(3);
 
@@ -1015,7 +1065,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
+                            .makeKillingRoll(true, false)
                             .modifyToStandardEffect()
                             .addDice(3)
                             .addDieMinus1()
@@ -1067,12 +1117,110 @@ export function registerDiceTests(quench) {
                         );
                     });
 
+                    it("should not use hit location and stun multiplier with killing attacks", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addToHitLocation()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.max(
+                                1,
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
+                            ),
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                1 * TestRollMock.fixedRollResult,
+                                1 * TestRollMock.fixedRollResult,
+                                1 * TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * 1 * TestRollMock.fixedRollResult,
+                        );
+
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "Right",
+                            fullName: "Right Foot",
+                            stunMultiplier: 1,
+                            bodyMultiplier: 0.5,
+                        });
+                    });
+
+                    it("should not use hit location and increased stun multiplier with killing attacks", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addStunMultiplier(7)
+                            .addToHitLocation()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            [
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                                TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.max(
+                                1,
+                                Math.ceil(TestRollMock.fixedRollResult / 2) + 7,
+                            ),
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            [
+                                1 * TestRollMock.fixedRollResult,
+                                1 * TestRollMock.fixedRollResult,
+                                1 * TestRollMock.fixedRollResult,
+                            ],
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * 1 * TestRollMock.fixedRollResult,
+                        );
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "Right",
+                            fullName: "Right Foot",
+                            stunMultiplier: 1,
+                            bodyMultiplier: 0.5,
+                        });
+                    });
+
                     it("should handle hit locations (roll 6) with killing attacks", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
-                            .modifyToHitLocation()
+                            .makeKillingRoll(true, false)
+                            .addToHitLocation()
                             .addDice(3)
                             .addDieMinus1()
                             .addNumber(1);
@@ -1083,6 +1231,7 @@ export function registerDiceTests(quench) {
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
                             side: "Right",
+                            fullName: "Right Foot",
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -1092,8 +1241,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll()
-                            .modifyToHitLocation()
+                            .makeKillingRoll(true, false)
+                            .addToHitLocation()
                             .addDice(3)
                             .addDieMinus1()
                             .addNumber(1);
@@ -1104,6 +1253,7 @@ export function registerDiceTests(quench) {
                         expect(hitLocation).to.deep.equal({
                             name: "Head",
                             side: "Left",
+                            fullName: "Head",
                             stunMultiplier: 5,
                             bodyMultiplier: 2,
                         });
