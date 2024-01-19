@@ -7,6 +7,14 @@ export const ROLL_TYPE = {
     FLASH: 5,
 };
 
+/**
+ * @typedef {Object} HitLocationInfo
+ * @property {string} name
+ * @property {"Left" | "Right" | ""} side
+ * @property {string} fullName
+ * @property {number} stunMultiplier
+ * @property {number} bodyMultiplier
+ */
 export class HeroRoller {
     static STANDARD_EFFECT_DIE_ROLL = 3;
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
@@ -52,7 +60,13 @@ export class HeroRoller {
 
         this._standardEffect = false;
 
-        this._hitLocation = undefined;
+        this._hitLocation = {
+            name: "body",
+            side: "",
+            fullName: "body",
+            stunMultiplier: 1,
+            bodyMultiplier: 1,
+        };
         this._useHitLocation = false;
         this._alreadyHitLocation = "none";
     }
@@ -297,7 +311,8 @@ export class HeroRoller {
     async render() {
         const template = this._buildRollClass.CHAT_TEMPLATE;
 
-        // TODO: Formula
+        // TODO: Don't show stun multiplier if hit locations involved
+        // TODO: How to best handle the difference between hit location applied on killing vs normal attacks?
         const chatData = {
             formula: this.#buildFormula(),
             flavor: null,
@@ -457,6 +472,10 @@ export class HeroRoller {
         return this._calculatedTotal;
     }
 
+    /**
+     *
+     * @returns {HitLocationInfo}
+     */
     getHitLocation() {
         return this._hitLocation;
     }
@@ -482,6 +501,9 @@ export class HeroRoller {
         }
     }
 
+    /**
+     * @returns {HitLocationInfo}
+     */
     async #calculateHitLocationIfAppropriate() {
         if (
             this._useHitLocation &&
@@ -517,13 +539,6 @@ export class HeroRoller {
                         ? CONFIG.HERO.hitLocations[locationName][0]
                         : CONFIG.HERO.hitLocations[locationName][1],
                 bodyMultiplier: CONFIG.HERO.hitLocations[locationName][2],
-            };
-        } else {
-            this._hitLocation = {
-                name: "body",
-                side: "either",
-                stunMultiplier: 1,
-                bodyMultiplier: 1,
             };
         }
     }
