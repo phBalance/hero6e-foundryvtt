@@ -1043,7 +1043,7 @@ export async function _onRollDamage(event) {
         .addHalfDice(formulaParts.halfDieCount)
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(item.system.USESTANDARDEFFECT)
-        .modifyToHitLocation(includeHitLocation);
+        .addToHitLocation(includeHitLocation, toHitData.aim);
 
     await heroRoller.roll();
 
@@ -1099,56 +1099,79 @@ export async function _onRollDamage(event) {
                     // hex distance from center.  Works fine when radius = dice,
                     // but that isn't always the case.
                     // First thing to do is sort the dice terms (high to low)
-                    let results = newTerms[0].results;
-                    results.sort(function (a, b) {
-                        return b.result - a.result;
-                    });
 
-                    // Remove highest terms based on distance
-                    let distance = canvas.grid.measureDistance(
-                        aoeTemplate,
-                        token.object.center,
-                        { gridSpaces: true },
-                    );
-                    let pct = distance / aoeTemplate.distance;
-                    let termsToRemove = Math.floor(pct * (results.length - 1));
-                    results = results.splice(0, termsToRemove);
+                    if (false) {
+                        let results = newTerms[0].results;
+                        results.sort(function (a, b) {
+                            return b.result - a.result;
+                        });
 
-                    // Finish spoofing terms for die roll
-                    for (let idx in newTerms) {
-                        let term = newTerms[idx];
-                        switch (term.class) {
-                            case "Die":
-                                newTerms[idx] = Object.assign(new Die(), term);
-                                break;
-                            case "OperatorTerm":
-                                newTerms[idx] = Object.assign(
-                                    new OperatorTerm(),
-                                    term,
-                                );
-                                break;
-                            case "NumericTerm":
-                                newTerms[idx] = Object.assign(
-                                    new NumericTerm(),
-                                    term,
-                                );
-                                break;
+                        // Remove highest terms based on distance
+                        // TODO: This doesn't consider 5e explosion advantage
+                        let distance = canvas.grid.measureDistance(
+                            aoeTemplate,
+                            token.object.center,
+                            { gridSpaces: true },
+                        );
+                        let pct = distance / aoeTemplate.distance;
+                        let termsToRemove = Math.floor(
+                            pct * (results.length - 1),
+                        );
+                        results = results.splice(0, termsToRemove);
+
+                        // Finish spoofing terms for die roll
+                        for (let idx in newTerms) {
+                            let term = newTerms[idx];
+                            switch (term.class) {
+                                case "Die":
+                                    newTerms[idx] = Object.assign(
+                                        new Die(),
+                                        term,
+                                    );
+                                    break;
+                                case "OperatorTerm":
+                                    newTerms[idx] = Object.assign(
+                                        new OperatorTerm(),
+                                        term,
+                                    );
+                                    break;
+                                case "NumericTerm":
+                                    newTerms[idx] = Object.assign(
+                                        new NumericTerm(),
+                                        term,
+                                    );
+                                    break;
+                            }
                         }
+                        let newRoll = Roll.fromTerms(newTerms);
+                        newRoll._total = newRoll.terms[0].results.reduce(
+                            (partialSum, a) => partialSum + a.result,
+                            0,
+                        );
+                        newRoll.title = newRoll.terms[0].results
+                            .map((o) => o.result)
+                            .toString();
+                        targetToken = {
+                            ...targetToken,
+                            distance,
+                            roll: newRoll,
+                            terms: JSON.stringify(newRoll.terms),
+                        };
+                    } else {
+                        // Remove highest terms based on distance
+                        // TODO: This doesn't consider 5e explosion advantage
+                        let distance = canvas.grid.measureDistance(
+                            aoeTemplate,
+                            token.object.center,
+                            { gridSpaces: true },
+                        );
+                        let pct = distance / aoeTemplate.distance;
+                        let termsToRemove = Math.floor(
+                            pct * (results.length - 1),
+                        );
+
+                        heroRoller.removeNHighestRankTerms(termsToRemove);
                     }
-                    let newRoll = Roll.fromTerms(newTerms);
-                    newRoll._total = newRoll.terms[0].results.reduce(
-                        (partialSum, a) => partialSum + a.result,
-                        0,
-                    );
-                    newRoll.title = newRoll.terms[0].results
-                        .map((o) => o.result)
-                        .toString();
-                    targetToken = {
-                        ...targetToken,
-                        distance,
-                        roll: newRoll,
-                        terms: JSON.stringify(newRoll.terms),
-                    };
                 }
             }
             targetTokens.push(targetToken);
@@ -1160,7 +1183,7 @@ export async function _onRollDamage(event) {
         delete toHitData.targetids;
     }
 
-    let cardData = {
+    const cardData = {
         item: item,
         adjustment,
         senseAffecting,
@@ -1185,7 +1208,8 @@ export async function _onRollDamage(event) {
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
         // terms: JSON.stringify(damageResult.terms), // TODO: Same thing is in the token information
-        terms: JSON.stringify(heroRoller.getBaseTerms()), // TODO: Should provide toJSON and back.
+
+        terms: heroRoller.toJSON(),
 
         // misc
         targetIds: toHitData.targetids,
@@ -1302,8 +1326,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         );
     }
 
-    // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
-    let newTerms = JSON.parse(damageData.terms);
+    const heroRoller = HeroRoller.fromJSON(damageData.terms);
+
+    // TODO: REmove
+    // // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
+    // let newTerms = JSON.parse(damageData.terms);
 
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
@@ -1313,6 +1340,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         // Distance from center
         if (aoeTemplate) {
             // Explosion
+
+            // TODO: Implement explosions. Need to look at the stuff during damage rolling.
+
             // Simple rules is to remove the hightest dice term for each
             // hex distance from center.  Works fine when radius = dice,
             // but that isn't always the case.
@@ -1355,38 +1385,39 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
-    // Finish spoofing terms for die roll
-    for (const idx in newTerms) {
-        const term = newTerms[idx];
-        switch (term.class) {
-            case "Die":
-                newTerms[idx] = Object.assign(new Die(), term);
-                break;
-            case "OperatorTerm":
-                newTerms[idx] = Object.assign(new OperatorTerm(), term);
-                break;
-            case "NumericTerm":
-                newTerms[idx] = Object.assign(new NumericTerm(), term);
-                break;
-        }
-    }
+    // TODO: Remove
+    // // Finish spoofing terms for die roll
+    // for (const idx in newTerms) {
+    //     const term = newTerms[idx];
+    //     switch (term.class) {
+    //         case "Die":
+    //             newTerms[idx] = Object.assign(new Die(), term);
+    //             break;
+    //         case "OperatorTerm":
+    //             newTerms[idx] = Object.assign(new OperatorTerm(), term);
+    //             break;
+    //         case "NumericTerm":
+    //             newTerms[idx] = Object.assign(new NumericTerm(), term);
+    //             break;
+    //     }
+    // }
 
-    let newRoll = Roll.fromTerms(newTerms);
+    // let newRoll = Roll.fromTerms(newTerms);
 
-    newRoll._total = 0;
-    for (const term of newRoll.terms) {
-        for (const resultObj of term.results || []) {
-            newRoll._total = newRoll._total + (parseInt(resultObj.result) || 0);
-        }
-    }
+    // newRoll._total = 0;
+    // for (const term of newRoll.terms) {
+    //     for (const resultObj of term.results || []) {
+    //         newRoll._total = newRoll._total + (parseInt(resultObj.result) || 0);
+    //     }
+    // }
 
-    newRoll.title = newRoll.terms
-        .flatMap((term) => term.results?.map((o) => o.result))
-        .filter((value) => !!value);
+    // newRoll.title = newRoll.terms
+    //     .flatMap((term) => term.results?.map((o) => o.result))
+    //     .filter((value) => !!value);
 
-    newRoll._evaluated = true;
+    // newRoll._evaluated = true;
 
-    let automation = game.settings.get("hero6efoundryvttv2", "automation");
+    const automation = game.settings.get("hero6efoundryvttv2", "automation");
 
     const avad = item.findModsByXmlid("AVAD");
 
@@ -1675,10 +1706,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
-    newRoll = await handleDamageNegation(item, newRoll, damageData);
+    // TODO: This needs to be handled. Bypass for now. For normal attacks this is easy
+    //       but there are considerations for what subtracting a DC means for a killing attack
+    // newRoll = await handleDamageNegation(item, newRoll, damageData);
 
     // We need to recalculate damage to account for possible Damage Negation
-    const damageDetail = await _calcDamage(newRoll, item, damageData);
+    // const damageDetail = await _calcDamage(newRoll, item, damageData);
+    const damageDetail = await _calcDamage(heroRoller, item, damageData);
 
     // AID, DRAIN or any adjustment powers
     const adjustment = getPowerInfo({
@@ -1775,7 +1809,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
-    let damageRenderedResult = await newRoll.render();
+    const damageRenderedResult = await heroRoller.render();
 
     // Attack may have additional effects, such as those from martial arts
     let effectsFinal = foundry.utils.deepClone(damageDetail.effects);
@@ -1792,7 +1826,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const cardData = {
         item: item,
         // dice rolls
-        roll: newRoll,
+        roll: heroRoller,
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
 
@@ -1827,8 +1861,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     };
 
     // render card
-    let cardHtml = await renderTemplate(template, cardData);
-    let speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
     const chatData = {
         user: game.user._id,
@@ -2040,6 +2074,13 @@ async function _onApplySenseAffectingToSpecificToken(
     return ChatMessage.create(chatData);
 }
 
+/**
+ *
+ * @param {HeroRoller} heroRoller
+ * @param {*} item
+ * @param {*} options
+ * @returns
+ */
 async function _calcDamage(heroRoller, item, options) {
     let damageDetail = {};
     const itemData = item.system;
@@ -2059,7 +2100,7 @@ async function _calcDamage(heroRoller, item, options) {
     // TODO: FIXME: This calculation is buggy as it doesn't consider
     //       more than 1 die term possibility (so 5d6 + 1/2d6 or 5d6 + 1 don't work)
     //       It also doesn't handle 0 pips correctly in body calculation.
-    //       It also doesn't handle 0 dice correctly (e.g. 0d6 + 1)
+    //       It also doesn't handle a die less 1 correctly (e.g. 1d6-1) as 0 is interpreted as 1 BODY.
     //       It also doesn't consider multiple levels of penetrating vs hardened/impenetrable.
     // Penetrating
     let penetratingBody = 0;
@@ -2081,46 +2122,23 @@ async function _calcDamage(heroRoller, item, options) {
     penetratingBody = Math.max(0, penetratingBody - options.impenetrableValue);
 
     // get hit location
-    let hitLocationModifiers = [1, 1, 1, 0];
     let hitLocation = "None";
     let useHitLoc = false;
+
+    // TODO: Is there a way to clean this up? Is "somewhere" to hit with standard stun and body
+    //       multipliers sufficient?
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         !noHitLocationsPower
     ) {
         useHitLoc = true;
 
-        options.aim = options.aim || options.hitLocation;
-        hitLocation = options.aim;
-        if (options.aim === "none" || !options.aim) {
-            let locationRoll = new Roll("3D6");
-            let locationResult = await locationRoll.roll({ async: true });
-            hitLocation = CONFIG.HERO.hitLocationsToHit[locationResult.total];
-        }
-
-        hitLocationModifiers = CONFIG.HERO.hitLocations[hitLocation];
-
         if (
             game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all"
         ) {
-            let sidedLocations = [
-                "Hand",
-                "Shoulder",
-                "Arm",
-                "Thigh",
-                "Leg",
-                "Foot",
-            ];
-            if (sidedLocations.includes(hitLocation)) {
-                let sideRoll = new Roll("1D2", item.actor.getRollData());
-                let sideResult = await sideRoll.roll();
-
-                if (sideResult.result === 1) {
-                    hitLocation = "Left " + hitLocation;
-                } else {
-                    hitLocation = "Right " + hitLocation;
-                }
-            }
+            hitLocation = heroRoller.getHitLocation().fullName;
+        } else {
+            hitLocation = heroRoller.getHitLocation().name;
         }
     }
 
@@ -2128,58 +2146,14 @@ async function _calcDamage(heroRoller, item, options) {
     if (itemData.killing) {
         // Killing Attack
         hasStunMultiplierRoll = true;
-        body = item.system.USESTANDARDEFFECT ? stun : heroRoller.total;
-        //let hitLocationModifiers = [1, 1, 1, 0];
-
-        // // 6E uses 1d3 stun multiplier
-        // let stunRoll = new Roll("1D3", item.actor.getRollData());
-
-        // // 5E uses 1d6-1 for stun multiplier
-        // if (item.actor.system.is5e) {
-        //     stunRoll = new Roll("max(1D6-1,1)", item.actor.getRollData());
-        // }
-
-        // let stunResult = await stunRoll.roll({ async: true });
-        // let renderedStunResult = await stunResult.render();
-
-        // TODO: Not sure this is needed.
-        // damageDetail.renderedStunMultiplierRoll = renderedStunResult;
-
-        // TODO: This is not considering the hit location correctly is it?
-        // TODO: Build into the roller?
-        // if (
-        //     game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        //     !noHitLocationsPower
-        // ) {
-        //     stunMultiplier = hitLocationModifiers[0];
-        // } else {
-        //     stunMultiplier = stunResult.total;
-        // }
-
-        // stunMultiplier += parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0);
-
-        // if (options.stunmultiplier) {
-        //     stunMultiplier = options.stunmultiplier;
-        // }
-
-        // stun = body * stunMultiplier;
-
-        // damageDetail.renderedStunResult = renderedStunResult;
-    } else {
-        // TODO: Where does hit location get figured for these? Looks like it's not right.
-        //       It appears hit location will have to be figured in as it can be a part of
-        //       normal and killing damage.
-        // TODO: Should ignore hit locations if the modifier on the item is no hit locations.
-        // TODO: Should ignore hit locations if they're turned off at the global level.
-        // TODO: Should ignore hit locations if they're turned off for the particular power.
     }
 
     // TODO: Why both?
     body = heroRoller.getBodyTotal();
     stun = heroRoller.getStunTotal();
 
-    let bodyDamage = heroRoller.getBodyTotal();
-    let stunDamage = heroRoller.getStunTotal();
+    let bodyDamage = body;
+    let stunDamage = stun;
 
     let effects = "";
     if (item.system.EFFECT) {
@@ -2204,14 +2178,13 @@ async function _calcDamage(heroRoller, item, options) {
     let useKnockBack = false;
     let knockbackMessage = "";
     let knockbackRenderedResult = null;
-    let knockbackMultiplier = parseInt(itemData.knockbackMultiplier);
+    const knockbackMultiplier = parseInt(itemData.knockbackMultiplier);
     let knockbackTags = [];
     if (
         game.settings.get("hero6efoundryvttv2", "knockback") &&
         knockbackMultiplier
     ) {
         useKnockBack = true;
-        // body - 2d6 m
 
         let knockbackDice = 2;
 
@@ -2225,8 +2198,8 @@ async function _calcDamage(heroRoller, item, options) {
             });
         }
 
-        // Target Rolled With A Punch -1d6
-        // Target is in zero gravity -1d6
+        // TODO: Target Rolled With A Punch -1d6
+        // TODO: Target is in zero gravity -1d6
 
         // Target is underwater +1d6
         if (options.targetToken?.actor?.statuses?.has("underwater")) {
@@ -2238,7 +2211,7 @@ async function _calcDamage(heroRoller, item, options) {
             });
         }
 
-        // Target is using Clinging +1d6
+        // TODO: Target is using Clinging +1d6
 
         // Attack did Killing Damage +1d6
         if (item.system.killing) {
@@ -2283,11 +2256,16 @@ async function _calcDamage(heroRoller, item, options) {
             );
         }
 
-        // TODO: Convert to new HeroRoller
-        let knockbackRoll = new Roll(knockBackEquation);
-        let knockbackResult = await knockbackRoll.roll({ async: true });
-        knockbackRenderedResult = await knockbackResult.render();
-        let knockbackResultTotal = Math.round(knockbackResult.total);
+        const heroRoller = new HeroRoller()
+            .addNumber(
+                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
+            )
+            .subDice(Math.max(0, knockbackDice));
+        await heroRoller.roll();
+
+        const knockbackResultTotal = Math.round(heroRoller.getBaseTotal());
+
+        knockbackRenderedResult = await heroRoller.render();
 
         if (knockbackResultTotal < 0) {
             knockbackMessage = "No knockback";
@@ -2295,6 +2273,7 @@ async function _calcDamage(heroRoller, item, options) {
             knockbackMessage = "inflicts Knockdown";
         } else {
             // If the result is positive, the target is Knocked Back 2m times the result
+            // TODO: FIXME: This should be based on the receiving token not the item's actor and is wrong for 5e
             knockbackMessage =
                 "Knocked back " +
                 knockbackResultTotal * 2 +
@@ -2325,33 +2304,30 @@ async function _calcDamage(heroRoller, item, options) {
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         !noHitLocationsPower
     ) {
+        const hitLocationBodyMultiplier =
+            heroRoller.getHitLocation().bodyMultiplier;
+        const hitLocationStunMultiplier =
+            heroRoller.getHitLocation().stunMultiplier;
+
         if (itemData.killing) {
             // killing attacks apply hit location multiplier after resistant damage protection has been subtracted
             // Location : [x Stun, x N Stun, x Body, OCV modifier]
-            body = body * hitLocationModifiers[2];
-
-            hitLocText =
-                "Hit " +
-                hitLocation +
-                " (x" +
-                hitLocationModifiers[0] +
-                " STUN x" +
-                hitLocationModifiers[2] +
-                " BODY)";
+            // TODO: Should this also be round down?
+            body = body * hitLocationBodyMultiplier;
         } else {
             // stun attacks apply N STUN hit location multiplier after defenses
-            stun = RoundFavorPlayerDown(stun * hitLocationModifiers[1]);
-            body = RoundFavorPlayerDown(body * hitLocationModifiers[2]);
-
-            hitLocText =
-                "Hit " +
-                hitLocation +
-                " (x" +
-                hitLocationModifiers[1] +
-                " STUN x" +
-                hitLocationModifiers[2] +
-                " BODY)";
+            stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
+            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
+
+        hitLocText =
+            "Hit " +
+            hitLocation +
+            " (x" +
+            hitLocationStunMultiplier +
+            " STUN x" +
+            hitLocationBodyMultiplier +
+            " BODY)";
 
         hasStunMultiplierRoll = false;
     }
