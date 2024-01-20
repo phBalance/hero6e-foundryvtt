@@ -82,19 +82,24 @@ class Roll1Mock extends RollMock {
 
 function buildGenerateLinearRollResultFunction(start, end, step) {
     let result = start;
-    return function generateRoll() {
-        const value = result;
-        result = result + step;
-        if (result > end) result = start;
-        if (result < start) result = end;
-        return value;
+
+    return {
+        generate: function generateRoll() {
+            const value = result;
+            result = result + step;
+            if (result > end) result = start;
+            if (result < start) result = end;
+            return value;
+        },
+        reset: function resetRollResult() {
+            result = start;
+        },
     };
 }
 
 class Roll1Through6Mock extends RollMock {
-    static DieClass = DynamicDieRoll(
-        buildGenerateLinearRollResultFunction(1, 6, 1),
-    );
+    static generatorInfo = buildGenerateLinearRollResultFunction(1, 6, 1);
+    static DieClass = DynamicDieRoll(Roll1Through6Mock.generatorInfo.generate);
 }
 
 export function registerDiceTests(quench) {
@@ -745,6 +750,7 @@ export function registerDiceTests(quench) {
 
                     it("should work in the presence of an explosion modifier", async function () {
                         const TestRollMock = Roll1Through6Mock;
+                        TestRollMock.generatorInfo.reset();
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
@@ -760,6 +766,9 @@ export function registerDiceTests(quench) {
                         expect(roller.getStunTotal()).deep.to.equal(10);
 
                         roller.removeNHighestRankTerms(2);
+
+                        expect(roller.getStunTerms()).deep.to.equal([2, 1, 1]);
+                        expect(roller.getStunTotal()).deep.to.equal(4);
                     });
                 });
 

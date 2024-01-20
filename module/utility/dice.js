@@ -1110,4 +1110,14 @@ export class HeroRoller {
 
         return formulaTerms;
     }
+
+    #removeNHighestRankTerms(ranksToRemove) {
+        // sort
+        this._termsCluster.sort(function (a, b) {
+            return b.base - a.base;
+        });
+
+        // Remove highest ranks
+        this._termsCluster.splice(0, ranksToRemove);
+    }
 }
