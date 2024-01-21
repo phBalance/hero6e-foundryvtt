@@ -307,7 +307,7 @@ export async function AttackAoeToHit(item, options) {
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        roller: heroRoller, // TODO: This might not work.
+        roller: attackHeroRoller, // TODO: This might not work.
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -1517,7 +1517,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     await handleDamageNegation(item, heroRoller, damageData);
 
     // We need to recalculate damage to account for possible Damage Negation
-    // const damageDetail = await _calcDamage(newRoll, item, damageData);
     const damageDetail = await _calcDamage(heroRoller, item, damageData);
 
     // AID, DRAIN or any adjustment powers
@@ -1901,12 +1900,9 @@ async function _calcDamage(heroRoller, item, options) {
 
     let hasStunMultiplierRoll = !!itemData.killing;
 
-    const INCREASEDSTUNMULTIPLIER = item.findModsByXmlid(
-        "INCREASEDSTUNMULTIPLIER",
-    );
-
-    // TODO: Consolidate
-    let stunMultiplier = 1 + parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0);
+    let stunMultiplier = hasStunMultiplierRoll
+        ? heroRoller.getStunMultiplier()
+        : 1;
 
     let noHitLocationsPower = item.system.noHitLocations || false;
 
