@@ -555,16 +555,13 @@ export async function AttackToHit(item, options) {
 
         if (newEnd < 0) {
             let stunDice = Math.ceil(Math.abs(newEnd) / 2);
-            let stunRollEquation = `${stunDice}d6`;
-            let stunDamageRoll = new Roll(
-                stunRollEquation,
-                actor.getRollData(),
-            );
-            let stunDamageresult = await stunDamageRoll.evaluate({
-                async: true,
-            });
-            let stunRenderedResult = await stunDamageresult.render();
-            newEnd = -stunDamageresult.total;
+
+            const stunForEndHeroRoller = new HeroRoller().addDice(stunDice);
+            await stunForEndHeroRoller.roll();
+            const stunRenderedResult = await stunForEndHeroRoller.render();
+            const stunDamageTotal = stunForEndHeroRoller.getBaseTotal();
+
+            newEnd = -stunDamageTotal;
 
             enduranceText =
                 "Spent " + valueEnd + " END and " + Math.abs(newEnd) + " STUN";
