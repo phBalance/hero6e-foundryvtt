@@ -1306,28 +1306,36 @@ export function registerDiceTests(quench) {
                                 1,
                         );
 
+                        // The STUN multiplier is not subject to the standard effect rule!
                         expect(roller.getStunMultiplier()).to.equal(
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                            Math.max(1, TestRollMock.fixedRollResult - 1),
                         );
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                Math.max(1, TestRollMock.fixedRollResult - 1),
                             HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                Math.max(1, TestRollMock.fixedRollResult - 1),
                             HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                Math.max(1, TestRollMock.fixedRollResult - 1),
                             HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL,
-                            1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                Math.max(1, TestRollMock.fixedRollResult - 1),
+                            1 * Math.max(1, TestRollMock.fixedRollResult - 1),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
                             3 *
                                 HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                Math.max(1, TestRollMock.fixedRollResult - 1) +
                                 HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL *
-                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL +
-                                1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL,
+                                    Math.max(
+                                        1,
+                                        TestRollMock.fixedRollResult - 1,
+                                    ) +
+                                1 *
+                                    Math.max(
+                                        1,
+                                        TestRollMock.fixedRollResult - 1,
+                                    ),
                         );
                     });
 
@@ -1352,32 +1360,36 @@ export function registerDiceTests(quench) {
                         ]);
                         expect(roller.getBodyTotal()).to.equal(
                             3 * HeroRoller.STANDARD_EFFECT_DIE_ROLL +
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL +
+                                1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL +
                                 1,
                         );
 
+                        // The STUN multiplier is not subject to the standard effect rule!
                         expect(roller.getStunMultiplier()).to.equal(
-                            HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
                         );
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
                             HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
                             HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
                             HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
-                            1 * HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
+                            1 * Math.ceil(TestRollMock.fixedRollResult / 2),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
                             3 *
                                 HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL +
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
-                                    HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL +
-                                1 * HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL,
+                                Math.ceil(TestRollMock.fixedRollResult / 2) +
+                                1 *
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                    Math.ceil(
+                                        TestRollMock.fixedRollResult / 2,
+                                    ) +
+                                1 * Math.ceil(TestRollMock.fixedRollResult / 2),
                         );
                     });
 

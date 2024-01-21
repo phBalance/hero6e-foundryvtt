@@ -657,6 +657,8 @@ export class HeroRoller {
 
     async #calculateStunMultiplierIfAppropriate() {
         if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
+            // NOTE: It appears there is no standard effect for the STUNx per APG p 53
+            //       although there don't appear to be any mention of this in other books.
             this._killingStunMultiplierHeroRoller = new HeroRoller(
                 {},
                 this._buildRollClass,
@@ -664,8 +666,7 @@ export class HeroRoller {
                 .addDieMinus1Min1(
                     this._killingStunMultiplier === "1d6-1" ? 1 : 0,
                 )
-                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0)
-                .modifyToStandardEffect(this._standardEffect);
+                .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
 
             await this._killingStunMultiplierHeroRoller.roll({ async: true });
 
@@ -819,10 +820,7 @@ export class HeroRoller {
 
                             hrExtra.min = 1;
                             hrExtra.max = 3;
-                        } else if (
-                            term.options._hrQualifier === "less 1 pip" &&
-                            !this._standardEffect
-                        ) {
+                        } else if (term.options._hrQualifier === "less 1 pip") {
                             if (this._standardEffect) {
                                 adjustedValue =
                                     HeroRoller.STANDARD_EFFECT_DIE_ROLL;
@@ -833,8 +831,7 @@ export class HeroRoller {
                             hrExtra.min = 0;
                             hrExtra.max = 5;
                         } else if (
-                            term.options._hrQualifier === "less 1 pip min 1" &&
-                            !this._standardEffect
+                            term.options._hrQualifier === "less 1 pip min 1"
                         ) {
                             if (this._standardEffect) {
                                 adjustedValue =
@@ -968,9 +965,7 @@ export class HeroRoller {
             preliminaryTooltip = `
                 <div class="dice">
                     <header class="part-header flexrow">
-                        <span class="part-formula">${stunMultiplierFormula} STUN Multiplier${
-                            this._standardEffect ? " (Standard Effect)" : ""
-                        }</span>
+                        <span class="part-formula">${stunMultiplierFormula} STUN Multiplier</span>
                         <span class="part-total">${stunMultiplier}</span>
                     </header>
                     <ol class="dice-rolls">
@@ -1196,7 +1191,7 @@ export class HeroRoller {
                 return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`;
 
             case HeroRoller.ROLL_TYPE.KILLING:
-                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN (${this.getStunMultiplier()}x)`;
+                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN (${this.getStunMultiplier()} STUNx)`;
 
             case HeroRoller.ROLL_TYPE.ENTANGLE:
                 return `${this.getEntangleTotal()} BODY`;
