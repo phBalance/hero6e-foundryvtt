@@ -342,10 +342,6 @@ export class HeroRoller {
             async: true,
         });
 
-        this._rollObj.terms = this.#convertToStandardEffectIfAppropriate(
-            this._rollObj.terms,
-        );
-
         await this.#calculateStunMultiplierIfAppropriate();
 
         await this.#calculateHitLocationIfAppropriate();
@@ -795,24 +791,47 @@ export class HeroRoller {
                             lastOperatorMultiplier * result.result;
 
                         if (term.options._hrQualifier === "half die") {
-                            adjustedValue = Math.ceil(result.result / 2);
+                            if (this._standardEffect) {
+                                adjustedValue =
+                                    HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
+                            } else {
+                                adjustedValue = Math.ceil(result.result / 2);
+                            }
+
                             hrExtra.min = 1;
                             hrExtra.max = 3;
                         } else if (
                             term.options._hrQualifier === "less 1 pip" &&
                             !this._standardEffect
                         ) {
-                            adjustedValue = result.result - 1;
+                            if (this._standardEffect) {
+                                adjustedValue =
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+                            } else {
+                                adjustedValue = result.result - 1;
+                            }
+
                             hrExtra.min = 0;
                             hrExtra.max = 5;
                         } else if (
                             term.options._hrQualifier === "less 1 pip min 1" &&
                             !this._standardEffect
                         ) {
-                            adjustedValue = Math.max(1, result.result - 1);
+                            if (this._standardEffect) {
+                                adjustedValue =
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+                            } else {
+                                adjustedValue = Math.max(1, result.result - 1);
+                            }
+
                             hrExtra.min = 1;
                             hrExtra.max = 5;
                         } else {
+                            if (this._standardEffect) {
+                                adjustedValue =
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+                            }
+
                             hrExtra.min = 1;
                             hrExtra.max = 6;
                         }
@@ -927,7 +946,9 @@ export class HeroRoller {
             preliminaryTooltip = `
                 <div class="dice">
                     <header class="part-header flexrow">
-                        <span class="part-formula">${stunMultiplierFormula} STUN Multiplier</span>
+                        <span class="part-formula">${stunMultiplierFormula} STUN Multiplier${
+                            this._standardEffect ? " (Standard Effect)" : ""
+                        }</span>
                         <span class="part-total">${stunMultiplier}</span>
                     </header>
                     <ol class="dice-rolls">
@@ -980,6 +1001,8 @@ export class HeroRoller {
                                 baseMetadataCluster[0].flavor
                                     ? ` ${baseMetadataCluster[0].flavor}`
                                     : ""
+                            }${
+                                this._standardEffect ? " (Standard Effect)" : ""
                             }</span>
                             <span class="part-total">${baseTotal}</span>
                         </header>
@@ -1166,29 +1189,6 @@ export class HeroRoller {
                 console.error(`unknown type ${this._type}`);
                 break;
         }
-    }
-
-    #convertToStandardEffectIfAppropriate(formulaTerms) {
-        if (this._standardEffect) {
-            for (let i = 0; i < formulaTerms.length; ++i) {
-                if (formulaTerms[i] instanceof Die) {
-                    for (let j = 0; j < formulaTerms[i].results.length; ++j) {
-                        if (
-                            formulaTerms[i].options._hrQualifier === "half die"
-                        ) {
-                            formulaTerms[i].results[j].result =
-                                HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
-                        } else {
-                            // NOTE: 5e p. 104 & 6E1 p.133. Full die and (die - 1) count as 3.
-                            formulaTerms[i].results[j].result =
-                                HeroRoller.STANDARD_EFFECT_DIE_ROLL;
-                        }
-                    }
-                }
-            }
-        }
-
-        return formulaTerms;
     }
 
     #removeNHighestRankTerms(ranksToRemove) {

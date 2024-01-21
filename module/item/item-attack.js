@@ -1008,11 +1008,7 @@ export async function _onRollDamage(event) {
 
     await heroRoller.roll();
 
-    // TODO: Need to play with this as I'm not sure it should be required if everything just
-    //       gets figured in.
-    let damageRenderedResult = item.system.USESTANDARDEFFECT
-        ? ""
-        : await heroRoller.render();
+    const damageRenderedResult = await heroRoller.render();
 
     const damageDetail = await _calcDamage(heroRoller, item, toHitData);
 
@@ -1028,8 +1024,7 @@ export async function _onRollDamage(event) {
         if (token) {
             let targetToken = {
                 token,
-                // terms: JSON.stringify(damageResult.terms), // TODO: consider purpose and track further
-                terms: JSON.stringify(heroRoller.getBaseTerms()),
+                roller: heroRoller.toJSON(),
             };
 
             // TODO: Add in explosion handling (or flattening)
@@ -1040,9 +1035,6 @@ export async function _onRollDamage(event) {
                     // Simple rules is to remove the hightest dice term for each
                     // hex distance from center.  Works fine when radius = dice,
                     // but that isn't always the case.
-                    // First thing to do is sort the dice terms (high to low)
-
-                    const heroRollerClone = heroRoller.clone();
 
                     // Remove highest terms based on distance
                     const distance = canvas.grid.measureDistance(
@@ -1056,16 +1048,16 @@ export async function _onRollDamage(event) {
                     //       true for normal attacks but not always.
                     //       This ignores explosion modifiers for DC falloff.
                     const termsToRemove = Math.floor(
-                        pct * (heroRollerClone.getBaseTerms().length - 1),
+                        pct * (heroRoller.getBaseTerms().length - 1),
                     );
 
+                    const heroRollerClone = heroRoller.clone();
                     heroRollerClone.removeNHighestRankTerms(termsToRemove);
 
                     targetToken = {
                         ...targetToken,
                         distance,
-                        roll: heroRollerClone.toJSON(), // TODO: Do we want the roller?
-                        terms: JSON.stringify(heroRollerClone.getBaseTerms()), // TODO: Do we really want terms?
+                        roller: heroRollerClone.toJSON(),
                     };
                 }
             }
@@ -1103,8 +1095,7 @@ export async function _onRollDamage(event) {
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
 
-        roll: heroRoller.toJSON(),
-        terms: JSON.stringify(heroRoller.getBaseTerms()), // TODO: Same thing is in the token information
+        roller: heroRoller.toJSON(),
 
         // misc
         targetIds: toHitData.targetids,
@@ -1513,6 +1504,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // TODO: This needs to be handled. Bypass for now. For normal attacks this is easy
     //       but there are considerations for what subtracting a DC means for a killing attack
+    //       This should really be done before rolling damage.
     // newRoll = await handleDamageNegation(item, newRoll, damageData);
     await handleDamageNegation(item, heroRoller, damageData);
 
@@ -1632,7 +1624,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const cardData = {
         item: item,
         // dice rolls
-        roll: heroRoller,
+        roller: heroRoller,
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
 
