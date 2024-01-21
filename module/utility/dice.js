@@ -467,6 +467,14 @@ export class HeroRoller {
         return this;
     }
 
+    removeFirstNTerms(ranksToRemove) {
+        if (ranksToRemove && ranksToRemove > 0) {
+            this.#removeFirstNTerms(ranksToRemove);
+        }
+
+        return this;
+    }
+
     getEntangleTotal() {
         if (this._type === ROLL_TYPE.ENTANGLE) {
             return this.getBaseTotal();
@@ -1189,7 +1197,11 @@ export class HeroRoller {
             return b.base - a.base;
         });
 
-        // Remove highest ranks
+        this.#removeFirstNTerms(ranksToRemove);
+    }
+
+    #removeFirstNTerms(ranksToRemove) {
+        // Remove the first ranks
         const removed = this._termsCluster.splice(0, ranksToRemove);
 
         // Fixup the base and calculated metadata so that it reflects what remains. The base and calculated
@@ -1200,7 +1212,7 @@ export class HeroRoller {
         // 2) For parts of the formula that have had terms removed, we need to fixup the expected
         //    number of dice and their indices.
 
-        // Determine indices that have been modified
+        // Determine indices that have been modified ...
         const fixUp = new Map();
         removed.forEach((termCluster) => {
             const indexCount =
@@ -1208,6 +1220,7 @@ export class HeroRoller {
             fixUp.set(termCluster.baseMetadata.termIndex, indexCount + 1);
         });
 
+        // ... and modify the metadata counts for them
         this._termsCluster.forEach((termCluster) => {
             const indexCount = fixUp.get(termCluster.baseMetadata.termIndex);
             if (indexCount != null) {

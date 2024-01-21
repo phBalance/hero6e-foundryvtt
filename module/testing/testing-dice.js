@@ -291,7 +291,7 @@ export function registerDiceTests(quench) {
                         );
                     });
 
-                    it("should handle removing terms from simple formulas (explosions)", async function () {
+                    it("should handle removing largest terms from simple formulas (explosions)", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock).addDice(
@@ -306,7 +306,7 @@ export function registerDiceTests(quench) {
                         expect(roller.getFormula()).to.equal("8d6");
                     });
 
-                    it("should handle removing terms from multi term formulas and 1 part completely (explosions)", async function () {
+                    it("should handle removing largest terms from multi term formulas and 1 part completely (explosions)", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -321,7 +321,7 @@ export function registerDiceTests(quench) {
                         expect(roller.getFormula()).to.equal("10d6");
                     });
 
-                    it("should handle removing terms from multi term formulas (explosions)", async function () {
+                    it("should handle removing largest terms from multi term formulas (explosions)", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -334,6 +334,38 @@ export function registerDiceTests(quench) {
                         roller.removeNHighestRankTerms(3);
 
                         expect(roller.getFormula()).to.equal("8d6");
+                    });
+
+                    it("should handle removing first terms from simple formulas (damage negation)", async function () {
+                        const TestRollMock = Roll1Through6Mock;
+                        TestRollMock.generatorInfo.reset();
+
+                        const roller = new HeroRoller({}, TestRollMock).addDice(
+                            10,
+                        );
+                        await roller.roll();
+
+                        expect(roller.getFormula()).to.equal("10d6");
+
+                        roller.removeFirstNTerms(2);
+
+                        expect(roller.getFormula()).to.equal("8d6");
+                    });
+
+                    it("should handle removing first terms from multi term formulas and 1 part completely (damage negation)", async function () {
+                        const TestRollMock = Roll1Through6Mock;
+                        TestRollMock.generatorInfo.reset();
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .addDice(10)
+                            .addNumber(7);
+                        await roller.roll();
+
+                        expect(roller.getFormula()).to.equal("10d6 + 7");
+
+                        roller.removeFirstNTerms(2);
+
+                        expect(roller.getFormula()).to.equal("8d6 + 7");
                     });
                 });
 
