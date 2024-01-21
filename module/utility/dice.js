@@ -1,12 +1,3 @@
-export const ROLL_TYPE = {
-    SUCCESS: 0,
-    NORMAL: 1,
-    KILLING: 2,
-    ADJUSTMENT: 3,
-    ENTANGLE: 4,
-    FLASH: 5,
-};
-
 /**
  * @typedef {Object} HitLocationInfo
  * @property {string} name
@@ -19,6 +10,16 @@ export class HeroRoller {
     static STANDARD_EFFECT_DIE_ROLL = 3;
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
 
+    static ROLL_TYPE = {
+        SUCCESS: 0,
+        NORMAL: 1,
+        KILLING: 2,
+        ADJUSTMENT: 3,
+        ENTANGLE: 4,
+        FLASH: 5,
+    };
+
+    // TODO: Consider moving to CONFIG.HERO like everything else related to hit location.
     static #sidedLocations = [
         "Hand",
         "Shoulder",
@@ -45,7 +46,7 @@ export class HeroRoller {
 
         this._formulaTerms = [];
 
-        this._type = ROLL_TYPE.SUCCESS;
+        this._type = HeroRoller.ROLL_TYPE.SUCCESS;
 
         this._termsCluster = [];
 
@@ -72,21 +73,21 @@ export class HeroRoller {
 
     makeSuccessRoll(apply = true) {
         if (apply) {
-            this._type = ROLL_TYPE.SUCCESS;
+            this._type = HeroRoller.ROLL_TYPE.SUCCESS;
         }
         return this;
     }
 
     makeNormalRoll(apply = true) {
         if (apply) {
-            this._type = ROLL_TYPE.NORMAL;
+            this._type = HeroRoller.ROLL_TYPE.NORMAL;
         }
         return this;
     }
 
     makeKillingRoll(apply = true, isd6minus1 = false) {
         if (apply) {
-            this._type = ROLL_TYPE.KILLING;
+            this._type = HeroRoller.ROLL_TYPE.KILLING;
             this._killingStunMultiplier = isd6minus1 ? "1d6-1" : "1d3";
         }
         return this;
@@ -94,21 +95,21 @@ export class HeroRoller {
 
     makeAdjustmentRoll(apply = true) {
         if (apply) {
-            this._type = ROLL_TYPE.ADJUSTMENT;
+            this._type = HeroRoller.ROLL_TYPE.ADJUSTMENT;
         }
         return this;
     }
 
     makeEntangleRoll(apply = true) {
         if (apply) {
-            this._type = ROLL_TYPE.ENTANGLE;
+            this._type = HeroRoller.ROLL_TYPE.ENTANGLE;
         }
         return this;
     }
 
     makeFlashRoll(apply = true) {
         if (apply) {
-            this._type = ROLL_TYPE.FLASH;
+            this._type = HeroRoller.ROLL_TYPE.FLASH;
         }
         return this;
     }
@@ -382,7 +383,7 @@ export class HeroRoller {
     }
 
     getSuccessTerms() {
-        if (this._type === ROLL_TYPE.SUCCESS) {
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS) {
             return this.getBaseTerms();
         }
 
@@ -391,7 +392,7 @@ export class HeroRoller {
         );
     }
     getSuccessTotal() {
-        if (this._type === ROLL_TYPE.SUCCESS) {
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS) {
             return this.getBaseTotal();
         }
 
@@ -401,9 +402,9 @@ export class HeroRoller {
     }
 
     getStunTerms() {
-        if (this._type === ROLL_TYPE.NORMAL) {
+        if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
             return this.getBaseTerms();
-        } else if (this._type === ROLL_TYPE.KILLING) {
+        } else if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
             return this.getCalculatedTerms();
         }
 
@@ -412,9 +413,9 @@ export class HeroRoller {
         );
     }
     getStunTotal() {
-        if (this._type === ROLL_TYPE.NORMAL) {
+        if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
             return this.getBaseTotal();
-        } else if (this._type === ROLL_TYPE.KILLING) {
+        } else if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
             return this.getCalculatedTotal();
         }
 
@@ -423,7 +424,7 @@ export class HeroRoller {
         );
     }
     getStunMultiplier() {
-        if (this._type === ROLL_TYPE.KILLING) {
+        if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
             return this.getBaseMultiplier();
         }
 
@@ -433,9 +434,9 @@ export class HeroRoller {
     }
 
     getBodyTerms() {
-        if (this._type === ROLL_TYPE.NORMAL) {
+        if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
             return this.getCalculatedTerms();
-        } else if (this._type === ROLL_TYPE.KILLING) {
+        } else if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
             return this.getBaseTerms();
         }
 
@@ -444,9 +445,9 @@ export class HeroRoller {
         );
     }
     getBodyTotal() {
-        if (this._type === ROLL_TYPE.NORMAL) {
+        if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
             return this.getCalculatedTotal();
-        } else if (this._type === ROLL_TYPE.KILLING) {
+        } else if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
             return this.getBaseTotal();
         }
 
@@ -472,7 +473,7 @@ export class HeroRoller {
     }
 
     getEntangleTotal() {
-        if (this._type === ROLL_TYPE.ENTANGLE) {
+        if (this._type === HeroRoller.ROLL_TYPE.ENTANGLE) {
             return this.getBaseTotal();
         }
 
@@ -482,7 +483,7 @@ export class HeroRoller {
     }
 
     getAdjustmentTotal() {
-        if (this._type === ROLL_TYPE.ADJUSTMENT) {
+        if (this._type === HeroRoller.ROLL_TYPE.ADJUSTMENT) {
             return this.getBaseTotal();
         }
 
@@ -492,7 +493,7 @@ export class HeroRoller {
     }
 
     getFlashTotal() {
-        if (this._type === ROLL_TYPE.FLASH) {
+        if (this._type === HeroRoller.ROLL_TYPE.FLASH) {
             return this.getBaseTotal();
         }
 
@@ -535,9 +536,9 @@ export class HeroRoller {
 
     getCalculatedTerms() {
         if (
-            this._type === ROLL_TYPE.SUCCESS ||
-            this._type === ROLL_TYPE.ENTANGLE ||
-            this._type === ROLL_TYPE.FLASH
+            this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
+            this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+            this._type === HeroRoller.ROLL_TYPE.FLASH
         ) {
             console.error(
                 `attempting to get calculatedTerms for roll type ${this._type}`,
@@ -637,7 +638,7 @@ export class HeroRoller {
     }
 
     async #calculateStunMultiplierIfAppropriate() {
-        if (this._type === ROLL_TYPE.KILLING) {
+        if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
             this._killingStunMultiplierHeroRoller = new HeroRoller(
                 {},
                 this._buildRollClass,
@@ -661,8 +662,8 @@ export class HeroRoller {
     async #calculateHitLocationIfAppropriate() {
         if (
             this._useHitLocation &&
-            (this._type === ROLL_TYPE.NORMAL ||
-                this._type === ROLL_TYPE.KILLING)
+            (this._type === HeroRoller.ROLL_TYPE.NORMAL ||
+                this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
             this._hitLocationRoller = new HeroRoller(
                 {},
@@ -693,7 +694,7 @@ export class HeroRoller {
                     ? `${locationSide} ${locationName}`
                     : locationName,
                 stunMultiplier:
-                    this._type === ROLL_TYPE.KILLING
+                    this._type === HeroRoller.ROLL_TYPE.KILLING
                         ? CONFIG.HERO.hitLocations[locationName][0]
                         : CONFIG.HERO.hitLocations[locationName][1],
                 bodyMultiplier: CONFIG.HERO.hitLocations[locationName][2],
@@ -703,12 +704,12 @@ export class HeroRoller {
 
     #calculateValue(result) {
         switch (this._type) {
-            case ROLL_TYPE.SUCCESS:
-            case ROLL_TYPE.ADJUSTMENT:
+            case HeroRoller.ROLL_TYPE.SUCCESS:
+            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
                 // Do nothing as there are no calculated values
                 break;
 
-            case ROLL_TYPE.NORMAL:
+            case HeroRoller.ROLL_TYPE.NORMAL:
                 // Calculate BODY
                 if (result <= 1) {
                     return 0;
@@ -718,15 +719,15 @@ export class HeroRoller {
 
                 return 1;
 
-            case ROLL_TYPE.KILLING:
+            case HeroRoller.ROLL_TYPE.KILLING:
                 if (this._useHitLocation) {
                     return result;
                 }
 
                 return result * this.getBaseMultiplier();
 
-            case ROLL_TYPE.ENTANGLE:
-            case ROLL_TYPE.FLASH:
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
+            case HeroRoller.ROLL_TYPE.FLASH:
             default:
                 console.error(`Unhandled calculation for type ${this._type}`);
         }
@@ -935,7 +936,10 @@ export class HeroRoller {
 
         // Show the stun multiplier only if this is a killing attack and there is no
         // hit location.
-        if (this._type === ROLL_TYPE.KILLING && !this._useHitLocation) {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.KILLING &&
+            !this._useHitLocation
+        ) {
             const stunMultiplier =
                 this._killingStunMultiplierHeroRoller.getBaseTotal();
             const stunMultiplierFormula =
@@ -1098,20 +1102,20 @@ export class HeroRoller {
 
     #buildFormulaBasePurpose() {
         switch (this._type) {
-            case ROLL_TYPE.SUCCESS:
+            case HeroRoller.ROLL_TYPE.SUCCESS:
                 return "";
 
-            case ROLL_TYPE.NORMAL:
+            case HeroRoller.ROLL_TYPE.NORMAL:
                 return "STUN";
 
-            case ROLL_TYPE.ENTANGLE:
-            case ROLL_TYPE.KILLING:
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
+            case HeroRoller.ROLL_TYPE.KILLING:
                 return "BODY";
 
-            case ROLL_TYPE.ADJUSTMENT:
+            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
                 return "Active Points";
 
-            case ROLL_TYPE.FLASH:
+            case HeroRoller.ROLL_TYPE.FLASH:
                 return "Segments";
 
             default:
@@ -1122,17 +1126,17 @@ export class HeroRoller {
 
     #buildFormulaCalculatedPurpose() {
         switch (this._type) {
-            case ROLL_TYPE.SUCCESS:
-            case ROLL_TYPE.ENTANGLE:
-            case ROLL_TYPE.ADJUSTMENT:
-            case ROLL_TYPE.FLASH:
+            case HeroRoller.ROLL_TYPE.SUCCESS:
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
+            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
+            case HeroRoller.ROLL_TYPE.FLASH:
                 // No calculated terms
                 return "";
 
-            case ROLL_TYPE.KILLING:
+            case HeroRoller.ROLL_TYPE.KILLING:
                 return "STUN";
 
-            case ROLL_TYPE.NORMAL:
+            case HeroRoller.ROLL_TYPE.NORMAL:
                 return "BODY";
 
             default:
@@ -1167,22 +1171,22 @@ export class HeroRoller {
 
     #buildTooltipTotal() {
         switch (this._type) {
-            case ROLL_TYPE.SUCCESS:
+            case HeroRoller.ROLL_TYPE.SUCCESS:
                 return `${this.getSuccessTotal()}`;
 
-            case ROLL_TYPE.NORMAL:
+            case HeroRoller.ROLL_TYPE.NORMAL:
                 return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`;
 
-            case ROLL_TYPE.KILLING:
+            case HeroRoller.ROLL_TYPE.KILLING:
                 return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN (${this.getStunMultiplier()}x)`;
 
-            case ROLL_TYPE.ENTANGLE:
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
                 return `${this.getEntangleTotal()} BODY`;
 
-            case ROLL_TYPE.ADJUSTMENT:
+            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
                 return `${this.getAdjustmentTotal()} Active Points`;
 
-            case ROLL_TYPE.FLASH:
+            case HeroRoller.ROLL_TYPE.FLASH:
                 return `${this.getFlashTotal()} Segments`;
 
             default:
