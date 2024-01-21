@@ -1213,9 +1213,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         );
     }
 
-    const template =
-        "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs";
-
     const token = canvas.tokens.get(tokenId);
     if (!token) {
         return ui.notifications.warn(
@@ -1517,6 +1514,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // TODO: This needs to be handled. Bypass for now. For normal attacks this is easy
     //       but there are considerations for what subtracting a DC means for a killing attack
     // newRoll = await handleDamageNegation(item, newRoll, damageData);
+    await handleDamageNegation(item, heroRoller, damageData);
 
     // We need to recalculate damage to account for possible Damage Negation
     // const damageDetail = await _calcDamage(newRoll, item, damageData);
@@ -1669,6 +1667,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     };
 
     // render card
+    const template =
+        "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 

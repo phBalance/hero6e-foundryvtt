@@ -366,6 +366,7 @@ export function calculateDiceFormulaParts(item, dc) {
     };
 }
 
+// TODO: Consider removing this as it's primarily for old behaviour as 1d3 is not the same as a 1/2d6 when counting BODY for a normal attack.
 export function convertFromDC(item, DC) {
     if (DC === 0) {
         return "";
@@ -408,12 +409,20 @@ export function addTerms(term1, term2) {
     return output;
 }
 
-export async function handleDamageNegation(item, damageResult, options) {
+/**
+ *
+ * @param {*} item
+ * @param {HeroRoller} heroRoller
+ * @param {*} options
+ * @returns
+ */
+export async function handleDamageNegation(item, heroRoller, options) {
     if (!options?.damageNegationValue) {
-        return damageResult;
+        return heroRoller;
     }
 
     async function newDamageRoll(formula, oldDamageResult) {
+        // TODO: Remove it?
         let newRoll = new HeroRoll(formula);
         await newRoll.evaluate({ async: true });
 
@@ -447,7 +456,7 @@ export async function handleDamageNegation(item, damageResult, options) {
                     }
 
                     default: {
-                        console.warn("Uhandled Damage Negation");
+                        console.warn("Unhandled Damage Negation");
                         break;
                     }
                 }
@@ -465,16 +474,24 @@ export async function handleDamageNegation(item, damageResult, options) {
     }
 
     if (!item.system.killing) {
-        const formula =
-            damageResult.terms[0].results.length -
-            options.damageNegationValue +
-            "d6";
+        // TODO: Remove
+        // TODO: This is incorrect as it is ignoring additional terms
+        // const formula =
+        //     heroRoller.terms[0].results.length -
+        //     options.damageNegationValue +
+        //     "d6";
 
-        return await newDamageRoll(formula, damageResult);
+        // return await newDamageRoll(formula, heroRoller);
+
+        heroRoller.removeFirstNTerms(options.damageNegationValue);
+        return;
     }
 
+    // Killing
+    // TODO: This is not correctly converted over to the new roller.
+    //       Will require being able to slice up terms
     if (options.damageNegationValue >= 3) {
-        damageResult.terms[0].results = damageResult.terms[0].results.slice(
+        heroRoller.terms[0].results = heroRoller.terms[0].results.slice(
             0,
             -Math.floor(options.damageNegationValue / 3),
         );
@@ -484,25 +501,25 @@ export async function handleDamageNegation(item, damageResult, options) {
 
     switch (remainder) {
         case 2: {
-            const formula = damageResult.terms[0].results.length - 1 + "d6 + 1";
-            return await newDamageRoll(formula, damageResult);
+            const formula = heroRoller.terms[0].results.length - 1 + "d6 + 1";
+            return await newDamageRoll(formula, heroRoller);
         }
 
         case 1: {
-            const formula = damageResult.terms[0].results.length + "d6 - 1";
-            return await newDamageRoll(formula, damageResult);
+            const formula = heroRoller.terms[0].results.length + "d6 - 1";
+            return await newDamageRoll(formula, heroRoller);
         }
 
         case 0: {
             return await newDamageRoll(
-                damageResult.terms[0].results.length + "d6",
-                damageResult,
+                heroRoller.terms[0].results.length + "d6",
+                heroRoller,
             );
         }
 
         default: {
-            console.warn("Uhandled Damage Negation");
-            return damageResult;
+            console.warn("Unhandled Damage Negation");
+            return heroRoller;
         }
     }
 }
