@@ -3001,7 +3001,7 @@ export class HeroSystem6eItem extends Item {
             this.system.extraDice = "half";
         }
 
-        const aoeModifier = this.hasAoeModifier();
+        const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
             // 5e has a slightly different alias for an Explosive Radius in HDC.
             // Otherwise, all other shapes seems the same.
@@ -3428,7 +3428,7 @@ export class HeroSystem6eItem extends Item {
         );
     }
 
-    hasAoeModifier() {
+    getAoeModifier() {
         const aoe = this.findModsByXmlid("AOE");
         const explosion5e = this.findModsByXmlid("EXPLOSION");
 

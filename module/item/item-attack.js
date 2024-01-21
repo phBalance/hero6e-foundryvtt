@@ -1,4 +1,4 @@
-import { modifyRollEquation, getPowerInfo } from "../utility/util.js";
+import { getPowerInfo } from "../utility/util.js";
 import { determineDefense } from "../utility/defense.js";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
@@ -122,7 +122,7 @@ export async function AttackOptions(item) {
         }
     }
 
-    const aoe = item.hasAoeModifier();
+    const aoe = item.getAoeModifier();
 
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
@@ -182,9 +182,6 @@ export async function _processAttackAoeOptions(item, formData) {
 }
 
 export async function AttackAoeToHit(item, options) {
-    const template =
-        "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs";
-
     const actor = item.actor;
     if (!actor) {
         return ui.notifications.error(
@@ -212,40 +209,24 @@ export async function AttackAoeToHit(item, options) {
         dcvTargetNumber = 3;
     }
 
-    const aoe = item.hasAoeModifier();
+    const aoe = item.getAoeModifier();
     const SELECTIVETARGET = aoe?.adders
         ? aoe.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
         : null;
 
     const hitCharacteristic = actor.system.characteristics.ocv.value;
-    let tags = []; // TODO: Remove
+    const setManeuver = item.actor.items.find(
+        (item) =>
+            item.type == "maneuver" &&
+            item.name === "Set" &&
+            item.system.active,
+    );
 
     const attackHeroRoller = new HeroRoller()
         .addNumber(11, "Base to hit")
-        .addNumber(hitCharacteristic, item.system.uses);
-
-    tags.push({ value: hitCharacteristic, name: item.system.uses });
-
-    const ocvMod = parseInt(options.ocvMod) || 0;
-    if (parseInt(ocvMod) != 0) {
-        tags.push({ value: ocvMod, name: item.name });
-        attackHeroRoller.addNumber(ocvMod, "OCV modifier");
-    }
-
-    // Set +1 OCV
-    const setManeuver = item.actor.items.find(
-        (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
-    );
-    if (setManeuver) {
-        tags.push({
-            value: parseInt(setManeuver.system.ocv),
-            name: setManeuver.name,
-        });
-        attackHeroRoller.subNumber(
-            parseInt(setManeuver.system.ocv),
-            "Maneuver OCV",
-        );
-    }
+        .addNumber(hitCharacteristic, item.system.uses)
+        .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
+        .subNumber(parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
 
     if (item.system.uses === "ocv") {
         let factor = actor.system.is5e ? 4 : 8;
@@ -253,33 +234,30 @@ export async function AttackAoeToHit(item, options) {
         rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
-            tags.push({
-                value: rangePenalty.signedString(),
-                name: "AOE range penalty",
-                title: `${distanceToken}${getSystemDisplayUnits(actor)}`,
-            });
             attackHeroRoller.addNumber(rangePenalty, "Range penalty");
         }
 
         // Brace (+2 OCV only to offset the Range Modifier)
         const braceManeuver = item.actor.items.find(
-            (o) =>
-                o.type == "maneuver" && o.name === "Brace" && o.system.active,
+            (item) =>
+                item.type == "maneuver" &&
+                item.name === "Brace" &&
+                item.system.active,
         );
         if (braceManeuver) {
             let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
             if (brace > 0) {
-                tags.push({ value: brace, name: braceManeuver.name });
                 attackHeroRoller.addNumber(brace, "Brace modifier");
             }
         }
     }
 
-    attackHeroRoller.subDice(3, "Randomness");
+    attackHeroRoller.subDice(3);
 
     await attackHeroRoller.roll();
     const renderedRollResult = await attackHeroRoller.render();
     const hitRollTotal = attackHeroRoller.getSuccessTotal();
+
     let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollTotal;
 
     if (hitRollTotal < dcvTargetNumber) {
@@ -312,7 +290,6 @@ export async function AttackAoeToHit(item, options) {
         ...options,
 
         // misc
-        // TODO: Remove this. tags: tags,
         tags: attackHeroRoller.tags(),
         attackTags: getAttackTags(item),
         formData: JSON.stringify(options),
@@ -322,6 +299,8 @@ export async function AttackAoeToHit(item, options) {
             : "Confirm AOE placement",
     };
 
+    const template =
+        "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker["alias"] = actor.name;
@@ -365,34 +344,19 @@ export async function AttackToHit(item, options) {
         item: item,
     })?.powerType?.includes("sense-affecting");
 
-    // TODO: Much of this looks similar to the AOE stuff above
+    // TODO: Much of this looks similar to the AOE stuff above. Any way to combine?
     // -------------------------------------------------
     // attack roll
     // -------------------------------------------------
-    let heroRoller = new HeroRoller()
-        .addNumber(11, "Base to hit")
-        .addNumber(hitCharacteristic, itemData.uses);
-    tags.push({ value: hitCharacteristic.signedString(), name: itemData.uses });
-
-    const ocvMod = parseInt(options.ocvMod) || 0;
-    if (ocvMod) {
-        heroRoller = heroRoller.addNumber(ocvMod, "OCV modifier");
-        tags.push({ value: ocvMod.signedString(), name: item.name });
-    }
-
-    // Set +1 OCV
     const setManeuver = item.actor.items.find(
         (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
     );
-    if (setManeuver) {
-        tags.push({
-            value: parseInt(setManeuver.system.ocv).signedString(),
-            name: setManeuver.name,
-        });
-        heroRoller = heroRoller.addNumber(
-            parseInt(setManeuver.system.ocv, "Maneuver OCV"),
-        );
-    }
+
+    let heroRoller = new HeroRoller()
+        .addNumber(11, "Base to hit")
+        .addNumber(hitCharacteristic, itemData.uses)
+        .addNumber(parseInt(options.ocvMod), "OCV modifier")
+        .addNumber(parseInt(setManeuver?.system.ocv) || 0, "Maneuver OCV");
 
     // Calc Distance if we have a target (and using ocv; dcv is typically line of sight)
     if (game.user.targets.size > 0 && itemData?.uses === "ocv") {
@@ -677,7 +641,7 @@ export async function AttackToHit(item, options) {
         item.update({ "system.charges.value": charges - spentCharges });
     }
 
-    const aoe = item.hasAoeModifier();
+    const aoe = item.getAoeModifier();
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
@@ -859,7 +823,6 @@ export async function AttackToHit(item, options) {
         enduranceText: enduranceText,
 
         // misc
-        // tags: tags, // TODO: Remove
         tags: heroRoller.tags(),
         attackTags: getAttackTags(item),
     };
@@ -1046,20 +1009,6 @@ export async function _onRollDamage(event) {
         .addToHitLocation(includeHitLocation, toHitData.aim);
 
     await heroRoller.roll();
-
-    // let damageRoll = convertFromDC(item, dc);
-    // damageRoll = simplifyDamageRoll(damageRoll);
-
-    // if (!damageRoll) {
-    //     return ui.notifications.error(`${item.name} damage roll is undefined.`);
-    // }
-
-    // let roll = new Roll(damageRoll, actor.getRollData());
-    // let damageResult = await roll.roll({ async: true });
-
-    // let damageRenderedResult = item.system.USESTANDARDEFFECT
-    //     ? ""
-    //     : await damageResult.render();
 
     // TODO: Need to play with this as I'm not sure it should be required if everything just
     //       gets figured in.
@@ -2233,34 +2182,21 @@ async function _calcDamage(heroRoller, item, options) {
             });
         }
 
-        let knockBackEquation =
-            body +
-            (knockbackMultiplier > 1 ? "*" + knockbackMultiplier : "") +
-            ` - ${Math.max(0, knockbackDice)}D6`;
-        // knockback modifier added on an attack by attack basis
-        const knockbackMod = parseInt(
-            options.knockbackMod || options.knockbadmod || 0,
-        );
-        if (knockbackMod != 0) {
-            knockBackEquation = modifyRollEquation(
-                knockBackEquation,
-                (knockbackMod || 0) + "D6",
-            );
-        }
-        // knockback resistance effect
-        const knockbackResistance = parseInt(options.knockbackResistance || 0);
-        if (knockbackResistance != 0) {
-            knockBackEquation = modifyRollEquation(
-                knockBackEquation,
-                " -" + (knockbackResistance || 0),
-            );
-        }
-
         const heroRoller = new HeroRoller()
             .addNumber(
-                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
+                body *
+                    (knockbackMultiplier > 1 ? knockbackMultiplier : 1,
+                    "Total knockback"), // TODO: Consider supporting multiplication in HeroRoller
             )
-            .subDice(Math.max(0, knockbackDice));
+            .subNumber(
+                parseInt(options.knockbackResistance || 0),
+                "Knockback resistance",
+            )
+            .addDice(
+                parseInt(options.knockbackMod || options.knockbadmod || 0),
+                "Knockback modifier", // knockback modifier added on an attack by attack basis
+            )
+            .subDice(Math.max(0, knockbackDice), "Random knockback resistance");
         await heroRoller.roll();
 
         const knockbackResultTotal = Math.round(heroRoller.getBaseTotal());
