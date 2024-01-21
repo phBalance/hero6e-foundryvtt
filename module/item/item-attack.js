@@ -990,9 +990,10 @@ export async function _onRollDamage(event) {
     });
     const formulaParts = calculateDiceFormulaParts(item, dc);
 
+    // TODO: Should also include AOE considerations.
     const includeHitLocation =
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        (item.system.noHitLocations || false);
+        (item.system.noHitLocations || true);
 
     const heroRoller = new HeroRoller()
         .makeNormalRoll(!formulaParts.isKilling)
