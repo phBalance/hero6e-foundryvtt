@@ -2036,7 +2036,7 @@ async function _calcDamage(heroRoller, item, options) {
         const heroRoller = new HeroRoller()
             .addNumber(
                 body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
-                "Total knockback",
+                "Max potential knockback",
             )
             .subNumber(
                 parseInt(options.knockbackResistance || 0),
@@ -2057,14 +2057,14 @@ async function _calcDamage(heroRoller, item, options) {
         knockbackRenderedResult = await heroRoller.render();
 
         if (knockbackResultTotal < 0) {
-            knockbackMessage = "No knockback";
+            knockbackMessage = "No Knockback";
         } else if (knockbackResultTotal == 0) {
-            knockbackMessage = "inflicts Knockdown";
+            knockbackMessage = "Inflicts Knockdown";
         } else {
             // If the result is positive, the target is Knocked Back 2m times the result
-            // TODO: FIXME: This should be based on the receiving token not the item's actor and is wrong for 5e
+            // TODO: FIXME: This should be based on the receiving token not the item's actor and is wrong for 5e.
             knockbackMessage =
-                "Knocked back " +
+                "Knocked Back " +
                 knockbackResultTotal * 2 +
                 getSystemDisplayUnits(item.actor);
         }

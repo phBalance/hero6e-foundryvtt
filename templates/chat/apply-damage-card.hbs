@@ -70,10 +70,13 @@
     <div class="description-tiny">Effect</div>
     <div class="description-medium">{{ bodyDamageEffective }} BODY; {{ stunDamageEffective }} STUN</div>
     <div class="description-tiny">{{{ effects }}}</div>
-    {{#if useKnockBack}}
-      <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
-      <div class="description-tiny">{{ knockbackMessage }}</div>
-    {{/if}}
   </div>
 
+  {{#if useKnockBack}}
+    <div class="card-section">
+      <div class="description-tiny">Knockback Roll</div>
+      <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
+      <div class="description-tiny">{{ knockbackMessage }}</div>
+    </div>
+  {{/if}}
 </div>
