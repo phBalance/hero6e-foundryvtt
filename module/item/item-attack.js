@@ -1211,7 +1211,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         );
     }
 
-    const heroRoller = HeroRoller.fromJSON(damageData.roll);
+    const heroRoller = HeroRoller.fromJSON(damageData.roller);
 
     const automation = game.settings.get("hero6efoundryvttv2", "automation");
 
