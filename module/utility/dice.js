@@ -521,6 +521,12 @@ export class HeroRoller {
     }
 
     getBaseTerms() {
+        if (this._type === HeroRoller.ROLL_TYPE.FLASH) {
+            console.error(
+                `attempting to get baseTerms for roll type ${this._type}`,
+            );
+        }
+
         return HeroRoller.#extractPropertyFromTermsCluster(
             this._termsCluster,
             "base",
@@ -555,8 +561,7 @@ export class HeroRoller {
     getCalculatedTerms() {
         if (
             this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
-            this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
-            this._type === HeroRoller.ROLL_TYPE.FLASH
+            this._type === HeroRoller.ROLL_TYPE.ENTANGLE
         ) {
             console.error(
                 `attempting to get calculatedTerms for roll type ${this._type}`,
