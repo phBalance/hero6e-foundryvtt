@@ -195,6 +195,15 @@ export function registerDiceTests(quench) {
                     });
                 });
 
+                describe("to and from JSON", function () {
+                    it("should be able to serialize and deserialize success roll before the roll", async function () {
+                        const roller = new HeroRoller().addNumber(7).subDice(3);
+
+                        expect(roller).to.deep.equal(
+                            HeroRoller.fromJSON(roller.toJSON()),
+                        );
+                    });
+                });
 
                 describe("formula", function () {
                     it("should handle formulas with numeric term", async function () {
@@ -253,14 +262,14 @@ export function registerDiceTests(quench) {
                     });
 
                     it("should handle formulas with whole dice minus 1", async function () {
-                        const roller = new HeroRoller().addDieMinus1();
+                        const roller = new HeroRoller().addDiceMinus1(1);
                         await roller.roll();
 
                         expect(roller.getFormula()).to.equal("1d6-1");
                     });
 
                     it("should handle formulas with whole dice minus 1", async function () {
-                        const roller = new HeroRoller().addDieMinus1(2);
+                        const roller = new HeroRoller().addDiceMinus1(2);
                         await roller.roll();
 
                         expect(roller.getFormula()).to.equal("2(d6-1)");
@@ -452,7 +461,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
-                            .addDieMinus1(1);
+                            .addDiceMinus1(1);
 
                         await roller.roll();
 
@@ -495,7 +504,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
                             .addDice(3)
-                            .addHalfDice();
+                            .addHalfDice(1);
 
                         await roller.roll();
 
@@ -548,7 +557,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
                             .addDice(3)
-                            .addDieMinus1();
+                            .addDiceMinus1(1);
 
                         await roller.roll();
 
@@ -577,7 +586,7 @@ export function registerDiceTests(quench) {
                             .makeNormalRoll()
                             .modifyToStandardEffect()
                             .addDice(3)
-                            .addHalfDice()
+                            .addHalfDice(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -608,7 +617,7 @@ export function registerDiceTests(quench) {
                             .makeNormalRoll()
                             .modifyToStandardEffect()
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -640,7 +649,7 @@ export function registerDiceTests(quench) {
                             .modifyToStandardEffect()
                             .addToHitLocation()
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -683,7 +692,7 @@ export function registerDiceTests(quench) {
                             .makeNormalRoll()
                             .addToHitLocation()
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -707,7 +716,7 @@ export function registerDiceTests(quench) {
                             .makeNormalRoll()
                             .addToHitLocation(true, "none")
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -731,7 +740,7 @@ export function registerDiceTests(quench) {
                             .makeNormalRoll()
                             .addToHitLocation(true, "Foot")
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -755,7 +764,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -819,7 +828,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeKillingRoll(true, false)
-                            .addHalfDice();
+                            .addHalfDice(1);
 
                         await roller.roll();
 
@@ -879,7 +888,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeKillingRoll(true, false)
-                            .addDieMinus1();
+                            .addDiceMinus1(1);
 
                         await roller.roll();
 
@@ -1114,7 +1123,7 @@ export function registerDiceTests(quench) {
                             .makeKillingRoll(true, true)
                             .modifyToStandardEffect()
                             .addDice(3)
-                            .addHalfDice()
+                            .addHalfDice(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -1164,7 +1173,7 @@ export function registerDiceTests(quench) {
                             .makeKillingRoll(true, false)
                             .modifyToStandardEffect()
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -1212,7 +1221,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeKillingRoll(true, false)
-                            .addToHitLocation()
+                            .addToHitLocation(1)
                             .addDice(3);
 
                         await roller.roll();
@@ -1304,7 +1313,7 @@ export function registerDiceTests(quench) {
                             .makeKillingRoll(true, false)
                             .addToHitLocation()
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();
@@ -1326,7 +1335,7 @@ export function registerDiceTests(quench) {
                             .makeKillingRoll(true, false)
                             .addToHitLocation()
                             .addDice(3)
-                            .addDieMinus1()
+                            .addDiceMinus1(1)
                             .addNumber(1);
 
                         await roller.roll();

@@ -28,13 +28,6 @@ export class HeroRoller {
         "Foot",
     ];
 
-    // TODO: Remove...
-    static #sumTerms(terms) {
-        return terms.reduce((total, term) => {
-            return total + HeroRoller.#sum(term);
-        }, 0);
-    }
-
     static #sum(term) {
         return term.reduce((subTotal, result) => {
             return subTotal + result;
@@ -143,7 +136,7 @@ export class HeroRoller {
     }
 
     // TODO: May wish to add tagging information to each of these. Are tags always 1:1?
-    addDice(numDice) {
+    addDice(numDice, description) {
         if (!numDice) {
             return this;
         }
@@ -154,68 +147,21 @@ export class HeroRoller {
             new Die({
                 faces: 6,
                 number: numDice,
-                options: { _hrFlavor: "add dice" },
+                options: {
+                    _hrQualifier: "add dice",
+                    flavor: description,
+                    _hrTag: {
+                        name: description,
+                        value: numDice,
+                    },
+                },
             }),
         );
 
         return this;
     }
 
-    addHalfDice(numDice = 1) {
-        if (!numDice) {
-            return this;
-        }
-
-        this.#linkIfNotFirstTerm();
-
-        this._formulaTerms.push(
-            new Die({
-                faces: 6,
-                number: numDice,
-                options: { _hrFlavor: "half die" },
-            }),
-        );
-
-        return this;
-    }
-
-    addDieMinus1(numDice = 1) {
-        if (!numDice) {
-            return this;
-        }
-
-        this.#linkIfNotFirstTerm();
-
-        this._formulaTerms.push(
-            new Die({
-                faces: 6,
-                number: numDice,
-                options: { _hrFlavor: "less 1 pip" },
-            }),
-        );
-
-        return this;
-    }
-
-    addDieMinus1Min1(numDice = 1) {
-        if (!numDice) {
-            return this;
-        }
-
-        this.#linkIfNotFirstTerm();
-
-        this._formulaTerms.push(
-            new Die({
-                faces: 6,
-                number: numDice,
-                options: { _hrFlavor: "less 1 pip min 1" },
-            }),
-        );
-
-        return this;
-    }
-
-    subDice(numDice) {
+    subDice(numDice, description) {
         if (!numDice) {
             return this;
         }
@@ -226,7 +172,89 @@ export class HeroRoller {
             new Die({
                 faces: 6,
                 number: numDice,
-                options: { _hrFlavor: "sub dice" },
+                options: {
+                    _hrQualifier: "sub dice",
+                    flavor: description,
+                    _hrTag: {
+                        name: description,
+                        value: numDice,
+                    },
+                },
+            }),
+        );
+
+        return this;
+    }
+
+    addHalfDice(numDice, description) {
+        if (!numDice) {
+            return this;
+        }
+
+        this.#linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: numDice,
+                options: {
+                    _hrQualifier: "half die",
+                    flavor: description,
+                    _hrTag: {
+                        name: description,
+                        value: numDice,
+                    },
+                },
+            }),
+        );
+
+        return this;
+    }
+
+    addDiceMinus1(numDice, description) {
+        if (!numDice) {
+            return this;
+        }
+
+        this.#linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: numDice,
+                options: {
+                    _hrQualifier: "less 1 pip",
+                    flavor: description,
+                    _hrTag: {
+                        name: description,
+                        value: numDice,
+                    },
+                },
+            }),
+        );
+
+        return this;
+    }
+
+    addDieMinus1Min1(numDice, description) {
+        if (!numDice) {
+            return this;
+        }
+
+        this.#linkIfNotFirstTerm();
+
+        this._formulaTerms.push(
+            new Die({
+                faces: 6,
+                number: numDice,
+                options: {
+                    _hrQualifier: "less 1 pip min 1",
+                    flavor: description,
+                    _hrTag: {
+                        name: description,
+                        value: numDice,
+                    },
+                },
             }),
         );
 
@@ -245,7 +273,7 @@ export class HeroRoller {
             new NumericTerm({
                 number: value,
                 options: {
-                    _hrFlavor: "add number",
+                    _hrQualifier: "add number",
                     flavor: description,
                     _hrTag: {
                         name: description,
@@ -258,7 +286,7 @@ export class HeroRoller {
         return this;
     }
 
-    subNumber(value) {
+    subNumber(value, description) {
         if (!value) {
             return this;
         }
@@ -268,7 +296,14 @@ export class HeroRoller {
         this._formulaTerms.push(
             new NumericTerm({
                 number: value,
-                options: { _hrFlavor: "sub number" },
+                options: {
+                    _hrQualifier: "sub number",
+                    flavor: description,
+                    _hrTag: {
+                        name: description,
+                        value: value,
+                    },
+                },
             }),
         );
 
@@ -511,6 +546,12 @@ export class HeroRoller {
         return this._hitLocation;
     }
 
+    clone() {
+        // TODO: Clone. Is this the best approach?
+
+        return HeroRoller.fromJSON(this.toJSON());
+    }
+
     toData() {
         return {
             _buildRollClass: this._buildRollClass.name, // TODO: This is just wrong.
@@ -689,7 +730,8 @@ export class HeroRoller {
                     const hrExtra = {
                         term: "Numeric",
                         originalTermIndex: index,
-                        flavor: term.options._hrFlavor,
+                        qualifier: term.options._hrQualifier,
+                        flavor: term.options.flavor,
                         baseNumber: term.number,
                         signMultiplier: lastOperatorMultiplier,
                         classDecorators: "",
@@ -716,7 +758,8 @@ export class HeroRoller {
                     const hrExtra = {
                         term: "Dice",
                         originalTermIndex: index,
-                        flavor: term.options._hrFlavor,
+                        qualifier: term.options._hrQualifier,
+                        flavor: term.options.flavor,
                         baseNumber: term.results.length,
                         signMultiplier: lastOperatorMultiplier,
                         min: -99,
@@ -727,19 +770,19 @@ export class HeroRoller {
                         let adjustedValue =
                             lastOperatorMultiplier * result.result;
 
-                        if (term.options._hrFlavor === "half die") {
+                        if (term.options._hrQualifier === "half die") {
                             adjustedValue = Math.ceil(result.result / 2);
                             hrExtra.min = 1;
                             hrExtra.max = 3;
                         } else if (
-                            term.options._hrFlavor === "less 1 pip" &&
+                            term.options._hrQualifier === "less 1 pip" &&
                             !this._standardEffect
                         ) {
                             adjustedValue = result.result - 1;
                             hrExtra.min = 0;
                             hrExtra.max = 5;
                         } else if (
-                            term.options._hrFlavor === "less 1 pip min 1" &&
+                            term.options._hrQualifier === "less 1 pip min 1" &&
                             !this._standardEffect
                         ) {
                             adjustedValue = Math.max(1, result.result - 1);
@@ -902,7 +945,15 @@ export class HeroRoller {
             const baseTermTooltip = `
                     <div class="dice">
                         <header class="part-header flexrow">
-                            <span class="part-formula">${baseFormula} ${baseFormulaPurpose}</span>
+                            <span class="part-formula">${baseFormula}${
+                                baseFormulaPurpose
+                                    ? ` ${baseFormulaPurpose}`
+                                    : ""
+                            }${
+                                baseMetadataCluster[0].flavor
+                                    ? ` ${baseMetadataCluster[0].flavor}`
+                                    : ""
+                            }</span>
                             <span class="part-total">${baseTotal}</span>
                         </header>
                         <ol class="dice-rolls">
@@ -962,20 +1013,20 @@ export class HeroRoller {
               : " ";
 
         if (termMetadata.term === "Dice") {
-            if (termMetadata.flavor === "half die") {
+            if (termMetadata.qualifier === "half die") {
                 return `${sign}${
                     termMetadata.baseNumber !== 1
                         ? `${Math.abs(termMetadata.baseNumber)}(½d6)`
                         : "½d6"
                 }`;
-            } else if (termMetadata.flavor === "less 1 pip") {
+            } else if (termMetadata.qualifier === "less 1 pip") {
                 return `${
                     termMetadata.signMultiplier < 0 ||
                     termMetadata.baseNumber !== 1
                         ? `${sign}${Math.abs(termMetadata.baseNumber)}(d6-1)`
                         : `${sign}${Math.abs(termMetadata.baseNumber)}d6-1`
                 }`;
-            } else if (termMetadata.flavor === "less 1 pip min 1") {
+            } else if (termMetadata.qualifier === "less 1 pip min 1") {
                 return `${
                     termMetadata.signMultiplier < 0 ||
                     termMetadata.baseNumber !== 1
@@ -1095,7 +1146,9 @@ export class HeroRoller {
             for (let i = 0; i < formulaTerms.length; ++i) {
                 if (formulaTerms[i] instanceof Die) {
                     for (let j = 0; j < formulaTerms[i].results.length; ++j) {
-                        if (formulaTerms[i].options._hrFlavor === "half die") {
+                        if (
+                            formulaTerms[i].options._hrQualifier === "half die"
+                        ) {
                             formulaTerms[i].results[j].result =
                                 HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
                         } else {
