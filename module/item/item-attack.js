@@ -1627,6 +1627,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     const cardData = {
         item: item,
+
         // dice rolls
         roller: heroRoller,
         renderedDamageRoll: damageRenderedResult,
@@ -1636,6 +1637,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         bodyDamage: damageDetail.bodyDamage,
         bodyDamageEffective: damageDetail.body,
         countedBody: damageDetail.countedBody,
+        stringifiedBodyTerms: JSON.stringify(heroRoller.getBodyTerms()),
 
         // stun
         stunDamage: damageDetail.stunDamage,
@@ -1643,6 +1645,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         hasRenderedDamageRoll: true,
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
+        stringifiedStunTerms: JSON.stringify(heroRoller.getStunTerms()),
 
         // effects
         effects: effectsFinal,
