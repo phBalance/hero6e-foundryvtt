@@ -362,7 +362,6 @@ export class HeroRoller {
     async render() {
         const template = this._buildRollClass.CHAT_TEMPLATE;
 
-        // TODO: How to best handle the difference between hit location applied on killing vs normal attacks?
         const chatData = {
             formula: this.#buildFormula(),
             flavor: null,
@@ -461,7 +460,7 @@ export class HeroRoller {
     }
 
     removeNHighestRankTerms(ranksToRemove) {
-        if (ranksToRemove) {
+        if (ranksToRemove && ranksToRemove > 0) {
             this.#removeNHighestRankTerms(ranksToRemove);
         }
 
@@ -743,8 +742,10 @@ export class HeroRoller {
                     const hrExtra = {
                         term: "Numeric",
                         originalTermIndex: index,
+                        termIndex: index,
                         qualifier: term.options._hrQualifier,
                         flavor: term.options.flavor,
+                        originalBaseNumber: term.number,
                         baseNumber: term.number,
                         signMultiplier: lastOperatorMultiplier,
                         classDecorators: "",
@@ -771,8 +772,10 @@ export class HeroRoller {
                     const hrExtra = {
                         term: "Dice",
                         originalTermIndex: index,
+                        termIndex: index,
                         qualifier: term.options._hrQualifier,
                         flavor: term.options.flavor,
+                        originalBaseNumber: term.results.length,
                         baseNumber: term.results.length,
                         signMultiplier: lastOperatorMultiplier,
                         min: -99,
@@ -867,17 +870,20 @@ export class HeroRoller {
             ),
         );
 
-        // Sort the metadata into original term lowest to highest
+        // Sort the metadata by original term - lowest index to highest
         baseMetadata.sort(function (a, b) {
-            return a.originalTermIndex - b.originalTermIndex;
+            return a.termIndex - b.termIndex;
         });
 
+        // Just look at the first term of an index we come across so that we don't have duplicate
+        const seenAlready = new Set();
         const formula = baseMetadata
             .filter((metadataTerm) => {
-                return (
-                    metadataTerm.originalResultIndex === undefined ||
-                    metadataTerm.originalResultIndex === 0
-                );
+                const found = seenAlready.has(metadataTerm.termIndex);
+                if (!found) {
+                    seenAlready.add(metadataTerm.termIndex);
+                }
+                return !found;
             })
             .reduce((formulaSoFar, metadataTerm, index) => {
                 return (
@@ -930,7 +936,7 @@ export class HeroRoller {
         // Turn the flat termsCluster array back into an unflattened original style of terms.
         const groupedCluster = [];
         this._termsCluster.forEach((termCluster) => {
-            const originalTerm = termCluster.baseMetadata.originalTermIndex;
+            const originalTerm = termCluster.baseMetadata.termIndex;
             if (!groupedCluster[originalTerm]) {
                 groupedCluster[originalTerm] = [];
             }
@@ -1178,12 +1184,36 @@ export class HeroRoller {
     }
 
     #removeNHighestRankTerms(ranksToRemove) {
-        // sort
+        // sort - highest first & lowest last.
         this._termsCluster.sort(function (a, b) {
             return b.base - a.base;
         });
 
         // Remove highest ranks
-        this._termsCluster.splice(0, ranksToRemove);
+        const removed = this._termsCluster.splice(0, ranksToRemove);
+
+        // Fixup the base and calculated metadata so that it reflects what remains. The base and calculated
+        // values are correct as is.
+        // NOTE: This will only work for dice term.
+        // 1) If all the terms of a part of the equation were removed, there is nothing to fix up
+        //    as that has already been removed from the metadata.
+        // 2) For parts of the formula that have had terms removed, we need to fixup the expected
+        //    number of dice and their indices.
+
+        // Determine indices that have been modified
+        const fixUp = new Map();
+        removed.forEach((termCluster) => {
+            const indexCount =
+                fixUp.get(termCluster.baseMetadata.termIndex) || 0;
+            fixUp.set(termCluster.baseMetadata.termIndex, indexCount + 1);
+        });
+
+        this._termsCluster.forEach((termCluster) => {
+            const indexCount = fixUp.get(termCluster.baseMetadata.termIndex);
+            if (indexCount != null) {
+                termCluster.baseMetadata.baseNumber -= indexCount;
+                termCluster.calculatedMetadata.baseNumber -= indexCount;
+            }
+        });
     }
 }
