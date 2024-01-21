@@ -307,7 +307,7 @@ export async function AttackAoeToHit(item, options) {
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        // TODO: FIXME: Resolve this roll: result,
+        roller: heroRoller, // TODO: This might not work.
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -839,7 +839,7 @@ export async function AttackToHit(item, options) {
         type: AoeAlwaysHit
             ? CONST.CHAT_MESSAGE_TYPES.OTHER
             : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOE's are auto hit
-        // roll: heroRoller, // TODO: FIXME: Need to follow this through as it was using a Roll object.
+        roller: heroRoller, // TODO: FIXME: Need to follow this through as it was using a Roll object.
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -996,8 +996,15 @@ export async function _onRollDamage(event) {
         (item.system.noHitLocations || true);
 
     const heroRoller = new HeroRoller()
-        .makeNormalRoll(!formulaParts.isKilling)
-        .makeKillingRoll(formulaParts.isKilling, actor.system.is5e)
+        .makeNormalRoll(
+            !senseAffecting && !adjustment && !formulaParts.isKilling,
+        )
+        .makeKillingRoll(
+            !senseAffecting && !adjustment && formulaParts.isKilling,
+            actor.system.is5e,
+        )
+        .makeAdjustmentRoll(adjustment)
+        .makeFlashRoll(senseAffecting)
         .addStunMultiplier(
             increasedMultiplierLevels - decreasedMultiplierLevels,
         )
@@ -1796,12 +1803,12 @@ async function _onApplySenseAffectingToSpecificToken(
         );
     }
 
-    const template =
-        "systems/hero6efoundryvttv2/templates/chat/apply-sense-affecting-card.hbs";
     const token = canvas.tokens.get(tokenId);
 
     if (!item.actor) {
-        return ui.notifications.error(`Attack details are no longer availble.`);
+        return ui.notifications.error(
+            `Attack details are no longer available.`,
+        );
     }
 
     // FLASHDEFENSE
@@ -1829,26 +1836,9 @@ async function _onApplySenseAffectingToSpecificToken(
             },
             origin: item.uuid,
         });
-        // let activeEffect =
-        // {
-        //     name: `${item.system.XMLID} ${damageData.bodyDamage} [${item.actor.name}]`,
-        //     id: `${item.system.XMLID}.${item.id}`,
-        //     //icon: item.img,
-        //     statuses: ['blind'],
-        //     duration: {
-        //         seconds: 12,
-        //     },
-        //     flags: {
-        //         bodyDamage: damageData.bodyDamage,
-        //         XMLID: item.system.XMLID,
-        //         source: item.actor.name,
-        //     },
-        //     origin: item.uuid
-        // }
-        // await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
     }
 
-    let cardData = {
+    const cardData = {
         item: item,
         // dice rolls
 
@@ -1863,8 +1853,10 @@ async function _onApplySenseAffectingToSpecificToken(
     };
 
     // render card
-    let cardHtml = await renderTemplate(template, cardData);
-    let speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    const template =
+        "systems/hero6efoundryvttv2/templates/chat/apply-sense-affecting-card.hbs";
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
     const chatData = {
         user: game.user._id,
@@ -1885,49 +1877,51 @@ async function _onApplySenseAffectingToSpecificToken(
 async function _calcDamage(heroRoller, item, options) {
     let damageDetail = {};
     const itemData = item.system;
-    let body = 0;
-    let stun = 0;
 
-    let hasStunMultiplierRoll = false;
+    const adjustmentPower = getPowerInfo({
+        item: item,
+    })?.powerType?.includes("adjustment");
+    const senseAffectingPower = getPowerInfo({
+        item: item,
+    })?.powerType?.includes("sense-affecting");
+
+    let body;
+    let stun;
+
+    if (adjustmentPower) {
+        body = 0;
+        stun = heroRoller.getAdjustmentTotal();
+    } else if (senseAffectingPower) {
+        body = heroRoller.getFlashTotal();
+        stun = 0;
+    } else {
+        body = heroRoller.getBodyTotal();
+        stun = heroRoller.getStunTotal();
+    }
+
+    let hasStunMultiplierRoll = !!itemData.killing;
 
     const INCREASEDSTUNMULTIPLIER = item.findModsByXmlid(
         "INCREASEDSTUNMULTIPLIER",
     );
 
+    // TODO: Consolidate
     let stunMultiplier = 1 + parseInt(INCREASEDSTUNMULTIPLIER?.LEVELS || 0);
 
     let noHitLocationsPower = item.system.noHitLocations || false;
 
     // TODO: FIXME: This calculation is buggy as it doesn't consider
-    //       more than 1 die term possibility (so 5d6 + 1/2d6 or 5d6 + 1 don't work)
-    //       It also doesn't handle 0 pips correctly in body calculation.
-    //       It also doesn't handle a die less 1 correctly (e.g. 1d6-1) as 0 is interpreted as 1 BODY.
-    //       It also doesn't consider multiple levels of penetrating vs hardened/impenetrable.
+    //       It also doesn't consider multiple levels of penetrating vs hardened/impenetrable
+    //       or the fact that there is no impenetrable in 5e which uses hardened instead.
     // Penetrating
-    let penetratingBody = 0;
-    if (item.system.penetrating) {
-        for (const die of heroRoller.getBodyTerms()[0]) {
-            switch (die) {
-                case 1:
-                    penetratingBody += 0;
-                    break;
-                case 6:
-                    penetratingBody += 2;
-                    break;
-                default:
-                    penetratingBody += 1;
-                    break;
-            }
-        }
-    }
-    penetratingBody = Math.max(0, penetratingBody - options.impenetrableValue);
+    const penetratingBody = item.system.penetrating
+        ? Math.max(0, body - options.impenetrableValue)
+        : 0;
 
     // get hit location
     let hitLocation = "None";
     let useHitLoc = false;
 
-    // TODO: Is there a way to clean this up? Is "somewhere" to hit with standard stun and body
-    //       multipliers sufficient?
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         !noHitLocationsPower
@@ -1942,16 +1936,6 @@ async function _calcDamage(heroRoller, item, options) {
             hitLocation = heroRoller.getHitLocation().name;
         }
     }
-
-    // TODO: Clean this up.
-    if (itemData.killing) {
-        // Killing Attack
-        hasStunMultiplierRoll = true;
-    }
-
-    // TODO: Why both?
-    body = heroRoller.getBodyTotal();
-    stun = heroRoller.getStunTotal();
 
     let bodyDamage = body;
     let stunDamage = stun;

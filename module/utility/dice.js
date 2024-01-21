@@ -343,11 +343,11 @@ export class HeroRoller {
             async: true,
         });
 
+        this._rawBaseTerms = this._rollObj.terms;
+
         await this.#calculateStunMultiplierIfAppropriate();
 
         await this.#calculateHitLocationIfAppropriate();
-
-        this._rawBaseTerms = this._rollObj.terms;
 
         this.#calculate();
 
@@ -482,6 +482,15 @@ export class HeroRoller {
         );
     }
 
+    getAdjustmentTerms() {
+        if (this._type === HeroRoller.ROLL_TYPE.ADJUSTMENT) {
+            return this.getBaseTerms();
+        }
+
+        throw new Error(
+            `asking for adjustment from type ${this._type} doesn't make sense`,
+        );
+    }
     getAdjustmentTotal() {
         if (this._type === HeroRoller.ROLL_TYPE.ADJUSTMENT) {
             return this.getBaseTotal();
@@ -492,9 +501,18 @@ export class HeroRoller {
         );
     }
 
+    getFlashTerms() {
+        if (this._type === HeroRoller.ROLL_TYPE.FLASH) {
+            return this.getCalculatedTerms();
+        }
+
+        throw new Error(
+            `asking for flash from type ${this._type} doesn't make sense`,
+        );
+    }
     getFlashTotal() {
         if (this._type === HeroRoller.ROLL_TYPE.FLASH) {
-            return this.getBaseTotal();
+            return this.getCalculatedTotal();
         }
 
         throw new Error(
@@ -507,6 +525,9 @@ export class HeroRoller {
             this._termsCluster,
             "base",
         );
+    }
+    getBaseTotal() {
+        return HeroRoller.#sum(this.getBaseTerms());
     }
 
     // TODO: Is there a better way of doing this?
@@ -521,9 +542,6 @@ export class HeroRoller {
                 "baseMetadata",
             ),
         };
-    }
-    getBaseTotal() {
-        return HeroRoller.#sum(this.getBaseTerms());
     }
 
     getBaseMultiplier() {
@@ -709,6 +727,7 @@ export class HeroRoller {
                 // Do nothing as there are no calculated values
                 break;
 
+            case HeroRoller.ROLL_TYPE.FLASH:
             case HeroRoller.ROLL_TYPE.NORMAL:
                 // Calculate BODY
                 if (result <= 1) {
@@ -727,7 +746,6 @@ export class HeroRoller {
                 return result * this.getBaseMultiplier();
 
             case HeroRoller.ROLL_TYPE.ENTANGLE:
-            case HeroRoller.ROLL_TYPE.FLASH:
             default:
                 console.error(`Unhandled calculation for type ${this._type}`);
         }

@@ -559,6 +559,18 @@ export function registerDiceTests(quench) {
                         expect(() => {
                             return roller.getStunMultiplier();
                         }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTotal();
+                        }).to.throw();
                     });
 
                     it("should handle a 1 pip equation", async function () {
@@ -937,6 +949,18 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             return roller.getSuccessTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTotal();
                         }).to.throw();
                     });
 
@@ -1489,6 +1513,242 @@ export function registerDiceTests(quench) {
                             stunMultiplier: 5,
                             bodyMultiplier: 2,
                         });
+                    });
+                });
+
+                describe("adjustment roll", function () {
+                    it("should throw if asking for inappropriate interpretations", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeAdjustmentRoll()
+                            .addDice(3)
+                            .addDiceMinus1(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(() => {
+                            return roller.getSuccessTerms();
+                        }).to.throw();
+                        expect(() => {
+                            return roller.getSuccessTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getBodyTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getBodyTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTotal();
+                        }).to.throw();
+                    });
+
+                    it("should return the rolled active points for a lowest roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeAdjustmentRoll()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getAdjustmentTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getAdjustmentTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+                    });
+
+                    it("should return the rolled active points for a lowest roll", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeAdjustmentRoll()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getAdjustmentTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getAdjustmentTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+                    });
+
+                    it("should return the rolled active points for a multi term roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeAdjustmentRoll()
+                            .addDice(3)
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getAdjustmentTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        ]);
+                        expect(roller.getAdjustmentTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult +
+                                1 * Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+                    });
+
+                    it("should return the rolled active points for a multi term roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeAdjustmentRoll()
+                            .addDice(3)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getAdjustmentTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            1,
+                        ]);
+                        expect(roller.getAdjustmentTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult + 1 * 1,
+                        );
+                    });
+                });
+
+                describe("flash roll", function () {
+                    it("should throw if asking for inappropriate interpretations", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addDice(3)
+                            .addDiceMinus1(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(() => {
+                            return roller.getSuccessTerms();
+                        }).to.throw();
+                        expect(() => {
+                            return roller.getSuccessTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getBodyTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getBodyTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTotal();
+                        }).to.throw();
+                    });
+
+                    it("should return the rolled active points for a lowest roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([0, 0, 0]);
+                        expect(roller.getFlashTotal()).to.equal(3 * 0);
+                    });
+
+                    it("should return the rolled active points for a lowest roll", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([2, 2, 2]);
+                        expect(roller.getFlashTotal()).to.equal(3 * 2);
+                    });
+
+                    it("should return the rolled active points for a multi term roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addDice(3)
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([
+                            0, 0, 0, 0,
+                        ]);
+                        expect(roller.getFlashTotal()).to.equal(3 * 0 + 1 * 0);
+                    });
+
+                    it("should return the rolled active points for a multi term roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addDice(3)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([
+                            0, 0, 0, 0,
+                        ]);
+                        expect(roller.getFlashTotal()).to.equal(3 * 0 + 1 * 0);
+                    });
+
+                    it("should return the rolled active points for a multi term roll", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addDice(3)
+                            .addHalfDice(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([
+                            2, 2, 2, 1, 0,
+                        ]);
+                        expect(roller.getFlashTotal()).to.equal(
+                            3 * 2 + 1 * 1 + 1 * 0,
+                        );
                     });
                 });
             });
