@@ -43,7 +43,7 @@
 
         <div data-visibility="gm">
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
-                data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-terms="{{terms}}"
+                data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-terms="{{terms}}" data-roll="{{roll}}"
                 data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
                 {{#if (or adjustment senseAffecting)}}
                 Apply {{item.system.XMLID}}
@@ -55,7 +55,7 @@
             {{#each targetTokens as |target id|}}
             <button class="apply-damage" title="Apply damage to {{target.token.name}}." data-itemId="{{../item.uuid}}"
                 data-target-token-id="{{target.token.id}}" data-bodyDamage="{{../bodyDamage}}"
-                data-stunDamage="{{../stunDamage}}" data-terms="{{target.terms}}"
+                data-stunDamage="{{../stunDamage}}" data-terms="{{target.terms}}" data-roll="{{target.roll}}"
                 data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">
                 {{#if ../adjustment}}
                 Apply {{../item.system.XMLID}} to <b>{{target.token.name}}</b>
@@ -68,7 +68,7 @@
             {{#if targetIds}}
             <button class="apply-damage" title="Apply damage to ALL tokens that were hit." data-itemId="{{item.uuid}}"
                 data-target-Ids="{{targetIds}}" data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}"
-                data-terms="{{terms}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
+                data-terms="{{terms}}" data-roll="{{roll}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
                 {{#if adjustment}}
                 Apply {{item.system.XMLID}} to <b>ALL</b>
                 {{else}}

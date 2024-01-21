@@ -39,7 +39,9 @@
     </span>
     {{/if}}
   </div>
+
   <hr>
+
   <div class="tags">
     {{#each tags as |tag id|}}
     <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} +{{tag.value}}</span>
@@ -69,11 +71,9 @@
     <div class="description-medium">{{ bodyDamageEffective }} BODY; {{ stunDamageEffective }} STUN</div>
     <div class="description-tiny">{{{ effects }}}</div>
     {{#if useKnockBack}}
-    <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
-    <div class="description-tiny">{{ knockbackMessage }}</div>
+      <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
+      <div class="description-tiny">{{ knockbackMessage }}</div>
     {{/if}}
-
-
   </div>
 
 </div>

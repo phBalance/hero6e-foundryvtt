@@ -962,8 +962,6 @@ export async function _onRollDamage(event) {
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
     const item = fromUuidSync(toHitData.itemid);
-    const template =
-        "systems/hero6efoundryvttv2/templates/chat/item-damage-card.hbs";
     const actor = item?.actor;
 
     if (!actor) {
@@ -1038,89 +1036,37 @@ export async function _onRollDamage(event) {
             if (explosion) {
                 // Distance from center
                 if (aoeTemplate) {
-                    // TODO: Make a copy
-                    let newTerms = foundry.utils.deepClone(
-                        heroRoller.getBaseTerms(),
-                    );
-
                     // Explosion
                     // Simple rules is to remove the hightest dice term for each
                     // hex distance from center.  Works fine when radius = dice,
                     // but that isn't always the case.
                     // First thing to do is sort the dice terms (high to low)
 
-                    if (false) {
-                        let results = newTerms[0].results;
-                        results.sort(function (a, b) {
-                            return b.result - a.result;
-                        });
+                    const heroRollerClone = heroRoller.clone();
 
-                        // Remove highest terms based on distance
-                        // TODO: This doesn't consider 5e explosion advantage
-                        let distance = canvas.grid.measureDistance(
-                            aoeTemplate,
-                            token.object.center,
-                            { gridSpaces: true },
-                        );
-                        let pct = distance / aoeTemplate.distance;
-                        let termsToRemove = Math.floor(
-                            pct * (results.length - 1),
-                        );
-                        results = results.splice(0, termsToRemove);
+                    // Remove highest terms based on distance
+                    const distance = canvas.grid.measureDistance(
+                        aoeTemplate,
+                        token.object.center,
+                        { gridSpaces: true },
+                    );
+                    const pct = distance / aoeTemplate.distance;
 
-                        // Finish spoofing terms for die roll
-                        for (let idx in newTerms) {
-                            let term = newTerms[idx];
-                            switch (term.class) {
-                                case "Die":
-                                    newTerms[idx] = Object.assign(
-                                        new Die(),
-                                        term,
-                                    );
-                                    break;
-                                case "OperatorTerm":
-                                    newTerms[idx] = Object.assign(
-                                        new OperatorTerm(),
-                                        term,
-                                    );
-                                    break;
-                                case "NumericTerm":
-                                    newTerms[idx] = Object.assign(
-                                        new NumericTerm(),
-                                        term,
-                                    );
-                                    break;
-                            }
-                        }
-                        let newRoll = Roll.fromTerms(newTerms);
-                        newRoll._total = newRoll.terms[0].results.reduce(
-                            (partialSum, a) => partialSum + a.result,
-                            0,
-                        );
-                        newRoll.title = newRoll.terms[0].results
-                            .map((o) => o.result)
-                            .toString();
-                        targetToken = {
-                            ...targetToken,
-                            distance,
-                            roll: newRoll,
-                            terms: JSON.stringify(newRoll.terms),
-                        };
-                    } else {
-                        // Remove highest terms based on distance
-                        // TODO: This doesn't consider 5e explosion advantage
-                        let distance = canvas.grid.measureDistance(
-                            aoeTemplate,
-                            token.object.center,
-                            { gridSpaces: true },
-                        );
-                        let pct = distance / aoeTemplate.distance;
-                        let termsToRemove = Math.floor(
-                            pct * (results.length - 1),
-                        );
+                    // TODO: This assumes that the number of terms equals the DC/5 AP. This is
+                    //       true for normal attacks but not always.
+                    //       This ignores explosion modifiers for DC falloff.
+                    const termsToRemove = Math.floor(
+                        pct * (heroRollerClone.getBaseTerms().length - 1),
+                    );
 
-                        heroRoller.removeNHighestRankTerms(termsToRemove);
-                    }
+                    heroRollerClone.removeNHighestRankTerms(termsToRemove);
+
+                    targetToken = {
+                        ...targetToken,
+                        distance,
+                        roll: heroRollerClone.toJSON(), // TODO: Do we want the roller?
+                        terms: JSON.stringify(heroRollerClone.getBaseTerms()), // TODO: Do we really want terms?
+                    };
                 }
             }
             targetTokens.push(targetToken);
@@ -1156,9 +1102,9 @@ export async function _onRollDamage(event) {
         hasRenderedDamageRoll: true,
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-        // terms: JSON.stringify(damageResult.terms), // TODO: Same thing is in the token information
 
-        terms: heroRoller.toJSON(),
+        roll: heroRoller.toJSON(),
+        terms: JSON.stringify(heroRoller.getBaseTerms()), // TODO: Same thing is in the token information
 
         // misc
         targetIds: toHitData.targetids,
@@ -1170,6 +1116,8 @@ export async function _onRollDamage(event) {
     };
 
     // render card
+    const template =
+        "systems/hero6efoundryvttv2/templates/chat/item-damage-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
@@ -1275,96 +1223,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         );
     }
 
-    const heroRoller = HeroRoller.fromJSON(damageData.terms);
-
-    // TODO: REmove
-    // // Spoof previous roll (foundry won't process a generic term, needs to be a proper Die instance)
-    // let newTerms = JSON.parse(damageData.terms);
-
-    const aoeTemplate =
-        game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.user.id === game.user.id);
-
-    if (item.hasExplosionAdvantage()) {
-        // Distance from center
-        if (aoeTemplate) {
-            // Explosion
-
-            // TODO: Implement explosions. Need to look at the stuff during damage rolling.
-
-            // Simple rules is to remove the hightest dice term for each
-            // hex distance from center.  Works fine when radius = dice,
-            // but that isn't always the case.
-            // First thing to do is sort the dice terms (high to low)
-            let results = newTerms[0].results;
-            results.sort(function (a, b) {
-                return b.result - a.result;
-            });
-
-            // Remove highest terms based on distance
-            const distance = canvas.grid.measureDistance(
-                aoeTemplate,
-                token.center,
-                { gridSpaces: true },
-            );
-            const pct = distance / aoeTemplate.distance;
-            const termsToRemove = Math.floor(pct * (results.length - 1));
-            results = results.splice(0, termsToRemove);
-
-            // Finish spoofing terms for die roll
-            for (const idx in newTerms) {
-                const term = newTerms[idx];
-                switch (term.class) {
-                    case "Die":
-                        newTerms[idx] = Object.assign(new Die(), term);
-                        break;
-                    case "OperatorTerm":
-                        newTerms[idx] = Object.assign(new OperatorTerm(), term);
-                        break;
-                    case "NumericTerm":
-                        newTerms[idx] = Object.assign(new NumericTerm(), term);
-                        break;
-                }
-            }
-            let newRoll = Roll.fromTerms(newTerms);
-            newRoll._total = newRoll.terms[0].results.reduce(
-                (partialSum, a) => partialSum + a.result,
-                0,
-            );
-        }
-    }
-
-    // TODO: Remove
-    // // Finish spoofing terms for die roll
-    // for (const idx in newTerms) {
-    //     const term = newTerms[idx];
-    //     switch (term.class) {
-    //         case "Die":
-    //             newTerms[idx] = Object.assign(new Die(), term);
-    //             break;
-    //         case "OperatorTerm":
-    //             newTerms[idx] = Object.assign(new OperatorTerm(), term);
-    //             break;
-    //         case "NumericTerm":
-    //             newTerms[idx] = Object.assign(new NumericTerm(), term);
-    //             break;
-    //     }
-    // }
-
-    // let newRoll = Roll.fromTerms(newTerms);
-
-    // newRoll._total = 0;
-    // for (const term of newRoll.terms) {
-    //     for (const resultObj of term.results || []) {
-    //         newRoll._total = newRoll._total + (parseInt(resultObj.result) || 0);
-    //     }
-    // }
-
-    // newRoll.title = newRoll.terms
-    //     .flatMap((term) => term.results?.map((o) => o.result))
-    //     .filter((value) => !!value);
-
-    // newRoll._evaluated = true;
+    const heroRoller = HeroRoller.fromJSON(damageData.roll);
 
     const automation = game.settings.get("hero6efoundryvttv2", "automation");
 
@@ -2184,9 +2043,8 @@ async function _calcDamage(heroRoller, item, options) {
 
         const heroRoller = new HeroRoller()
             .addNumber(
-                body *
-                    (knockbackMultiplier > 1 ? knockbackMultiplier : 1,
-                    "Total knockback"), // TODO: Consider supporting multiplication in HeroRoller
+                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
+                "Total knockback",
             )
             .subNumber(
                 parseInt(options.knockbackResistance || 0),
@@ -2196,7 +2054,10 @@ async function _calcDamage(heroRoller, item, options) {
                 parseInt(options.knockbackMod || options.knockbadmod || 0),
                 "Knockback modifier", // knockback modifier added on an attack by attack basis
             )
-            .subDice(Math.max(0, knockbackDice), "Random knockback resistance");
+            .subDice(
+                Math.max(0, knockbackDice),
+                "Natural knockback resistance",
+            );
         await heroRoller.roll();
 
         const knockbackResultTotal = Math.round(heroRoller.getBaseTotal());
