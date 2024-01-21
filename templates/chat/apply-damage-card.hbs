@@ -52,14 +52,14 @@
   </div>
 
   {{#if damageNegationValue}}
-  <div class="card-section">
-    <div class="damage-roll">{{{ renderedDamageRoll }}}</div>
-    {{#if hasStunMultiplierRoll}}
-    <div class="description-tiny">Stun Multiplier</div>
-    <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
-    {{/if}}
-    <div class="description-tiny">{{ bodyDamage }} BODY; {{ stunDamage }} STUN (after DN)</div>
-  </div>
+    <div class="card-section">
+      <div class="damage-roll">{{{ renderedDamageRoll }}}</div>
+      {{#if hasStunMultiplierRoll}}
+        <div class="description-tiny">Stun Multiplier</div>
+        <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
+      {{/if}}
+      <div class="description-tiny">{{ bodyDamage }} BODY; {{ stunDamage }} STUN (after DN)</div>
+    </div>
   {{/if}}
 
   <div class="card-section">
