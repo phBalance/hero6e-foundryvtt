@@ -75,6 +75,11 @@ class Roll6Mock extends RollMock {
     static DieClass = FixedDieRoll(this.fixedRollResult);
 }
 
+class Roll3Mock extends RollMock {
+    static fixedRollResult = 3;
+    static DieClass = FixedDieRoll(this.fixedRollResult);
+}
+
 class Roll1Mock extends RollMock {
     static fixedRollResult = 1;
     static DieClass = FixedDieRoll(this.fixedRollResult);
@@ -649,6 +654,29 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getBodyTerms()).deep.to.equal([2, 2, 2]);
                         expect(roller.getBodyTotal()).deep.to.equal(6);
+                    });
+
+                    it("should calculate BODY correctly for a half die with a roll of 3", async function () {
+                        const TestRollMock = Roll3Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addDice(1)
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult,
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            TestRollMock.fixedRollResult +
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getBodyTerms()).deep.to.equal([1, 0]);
+                        expect(roller.getBodyTotal()).deep.to.equal(1);
                     });
 
                     it("should handle a multiple dice and a half die equation", async function () {

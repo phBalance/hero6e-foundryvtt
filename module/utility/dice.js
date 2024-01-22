@@ -719,7 +719,7 @@ export class HeroRoller {
         }
     }
 
-    #calculateValue(result) {
+    #calculateValue(originalResult, adjustedResult, termQualifier) {
         switch (this._type) {
             case HeroRoller.ROLL_TYPE.SUCCESS:
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
@@ -729,20 +729,32 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.FLASH:
             case HeroRoller.ROLL_TYPE.NORMAL:
                 // Calculate BODY
-                if (result <= 1) {
-                    return 0;
-                } else if (result === 6) {
-                    return 2;
-                }
+                if (termQualifier === "half die") {
+                    if (this._standardEffect) {
+                        return 0;
+                    } else {
+                        if (originalResult >= 4) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                } else {
+                    if (adjustedResult <= 1) {
+                        return 0;
+                    } else if (adjustedResult === 6) {
+                        return 2;
+                    }
 
-                return 1;
+                    return 1;
+                }
 
             case HeroRoller.ROLL_TYPE.KILLING:
                 if (this._useHitLocation) {
-                    return result;
+                    return adjustedResult;
                 }
 
-                return result * this.getBaseMultiplier();
+                return adjustedResult * this.getBaseMultiplier();
 
             case HeroRoller.ROLL_TYPE.ENTANGLE:
             default:
@@ -777,7 +789,13 @@ export class HeroRoller {
                     _baseTermsMetadata.push([hrExtra]);
                     _calculatedTermsMetadata.push([hrExtra]);
 
-                    const newCalculatedTerm = [this.#calculateValue(number)];
+                    const newCalculatedTerm = [
+                        this.#calculateValue(
+                            number,
+                            number,
+                            term.options._hrQualifier,
+                        ),
+                    ];
                     _calculatedTerms.push(newCalculatedTerm);
 
                     const newBaseTerm = [number];
@@ -863,7 +881,11 @@ export class HeroRoller {
                         );
 
                         calculatedTerms.push(
-                            this.#calculateValue(adjustedValue),
+                            this.#calculateValue(
+                                result.result,
+                                adjustedValue,
+                                term.options._hrQualifier,
+                            ),
                         );
 
                         thisTermCalculatedTermsMetadata.push(
