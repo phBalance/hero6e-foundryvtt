@@ -1478,7 +1478,52 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "Right",
                             fullName: "Right Foot",
-                            stunMultiplier: 1,
+                            stunMultiplier: 8,
+                            bodyMultiplier: 0.5,
+                        });
+                    });
+
+                    it("should not use hit location and decreased stun multiplier with killing attacks", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addStunMultiplier(-1)
+                            .addToHitLocation()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.max(
+                                1,
+                                Math.ceil(TestRollMock.fixedRollResult / 2) - 1,
+                            ),
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * 1 * TestRollMock.fixedRollResult,
+                        );
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "Right",
+                            fullName: "Right Foot",
+                            stunMultiplier: 0,
                             bodyMultiplier: 0.5,
                         });
                     });

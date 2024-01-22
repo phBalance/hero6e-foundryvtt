@@ -707,10 +707,13 @@ export class HeroRoller {
                 fullName: CONFIG.HERO.sidedLocations.has(locationName)
                     ? `${locationSide} ${locationName}`
                     : locationName,
-                stunMultiplier:
-                    this._type === HeroRoller.ROLL_TYPE.KILLING
+                stunMultiplier: Math.max(
+                    0,
+                    (this._type === HeroRoller.ROLL_TYPE.KILLING
                         ? CONFIG.HERO.hitLocations[locationName][0]
-                        : CONFIG.HERO.hitLocations[locationName][1],
+                        : CONFIG.HERO.hitLocations[locationName][1]) +
+                        this._killingAdditionalStunMultiplier,
+                ),
                 bodyMultiplier: CONFIG.HERO.hitLocations[locationName][2],
             };
         }
