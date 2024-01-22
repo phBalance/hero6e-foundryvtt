@@ -1186,7 +1186,11 @@ export class HeroRoller {
                 return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`;
 
             case HeroRoller.ROLL_TYPE.KILLING:
-                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN (${this.getStunMultiplier()} STUNx)`;
+                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN${
+                    !this._useHitLocation
+                        ? ` (${this.getStunMultiplier()} STUNx)`
+                        : ""
+                }`;
 
             case HeroRoller.ROLL_TYPE.ENTANGLE:
                 return `${this.getEntangleTotal()} BODY`;
