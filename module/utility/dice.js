@@ -19,16 +19,6 @@ export class HeroRoller {
         FLASH: 5,
     };
 
-    // TODO: Consider moving to CONFIG.HERO like everything else related to hit location.
-    static #sidedLocations = [
-        "Hand",
-        "Shoulder",
-        "Arm",
-        "Thigh",
-        "Leg",
-        "Foot",
-    ];
-
     static #sum(term) {
         return term.reduce((subTotal, result) => {
             return subTotal + result;
@@ -714,7 +704,7 @@ export class HeroRoller {
             this._hitLocation = {
                 name: locationName,
                 side: locationSide,
-                fullName: HeroRoller.#sidedLocations.includes(locationName)
+                fullName: CONFIG.HERO.sidedLocations.has(locationName)
                     ? `${locationSide} ${locationName}`
                     : locationName,
                 stunMultiplier:
