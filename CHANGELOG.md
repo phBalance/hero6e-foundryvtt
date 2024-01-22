@@ -2,12 +2,15 @@
 
 ## Version 3.0.55 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- WARNING: Any attack chain (roll to hit -> roll for damage -> apply damage) still in progress may no longer be continuable after migrating to this version.
 - Improved clarity of defense tags for HARDENED and IMPENETRABLE. [#604](https://github.com/dmdorman/hero6e-foundryvtt/issues/604)
 - Fix for incorrect END use when "Begin Combat" is clicked and actor is using FLIGHT movement.
 - Preliminary work on alternate actor sheet herosystem6e.HeroSystemActorSavuoriSheet. [#647](https://github.com/dmdorman/hero6e-foundryvtt/pull/647) [#659](https://github.com/dmdorman/hero6e-foundryvtt/pull/659)
 - Dice rolls now have more information about how they're constructed. Click to open the dice equation, as usual, to see more.
+- Attack sequence chat messages will see some improvements. For instance knockback is separated.
 - Correct STUN calculation for 6e killing attacks with reduced stun multipliers.
 - Correct 1 pip and half die DC calculations for normal attacks larger than 7 DC.
+- Correct explosion damage for normal attacks with partial dice and pips.
 
 ## Version 3.0.54
 
