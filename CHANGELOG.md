@@ -1,7 +1,7 @@
 # Releases
 
 ## Version 3.0.55 (so far)
- - Improved clarity of defense tags for Armor Piercing on apply damage chat message. [#604](https://github.com/dmdorman/hero6e-foundryvtt/issues/604)
+ - Improved clarity of defense tags for HARDENED and IMPENETRABLE. [#604](https://github.com/dmdorman/hero6e-foundryvtt/issues/604)
 
 ## Version 3.0.54 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
