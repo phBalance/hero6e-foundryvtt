@@ -145,6 +145,27 @@ function determineDefense(targetActor, attackItem, options) {
 
         const xmlid = activeDefense.system.XMLID;
 
+        // Hardened
+        let hardened = parseInt(
+            activeDefense.system.hardened ||
+                activeDefense.findModsByXmlid("HARDENED")?.LEVELS ||
+                0,
+        );
+        let tagXmlids = [];
+        if (hardened > 0) {
+            tagXmlids.push(`h${hardened}`);
+        }
+
+        // Impenetrable
+        let impenetrable = parseInt(
+            activeDefense.system.impenetrable ||
+                activeDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS ||
+                0,
+        );
+        if (impenetrable > 0) {
+            tagXmlids.push(`i${impenetrable}`);
+        }
+
         // Resistant Defenses
         if (["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
             switch (attackType) {
@@ -273,7 +294,7 @@ function determineDefense(targetActor, attackItem, options) {
                 knockbackResistance += _value;
                 defenseTags.push({
                     value: _value,
-                    name: "KB",
+                    name: "KB" + tagXmlids,
                     title: activeDefense.name,
                 });
             }
@@ -282,24 +303,10 @@ function determineDefense(targetActor, attackItem, options) {
         let valueAp = value;
         let valueImp = 0;
 
-        // Hardened
-        let hardened = parseInt(
-            activeDefense.system.hardened ||
-                activeDefense.findModsByXmlid("HARDENED")?.LEVELS ||
-                0,
-        );
-
         // Armor Piercing
         if (piercing > hardened) {
             valueAp = Math.round(valueAp / 2);
         }
-
-        // Impenetrable
-        let impenetrable = parseInt(
-            activeDefense.system.impenetrable ||
-                activeDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS ||
-                0,
-        );
 
         // Penetrating
         if (penetrating <= impenetrable) {
@@ -315,7 +322,7 @@ function determineDefense(targetActor, attackItem, options) {
                 if (attackType === "physical" || attackType === "avad") {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "PD",
+                            name: "PD" + tagXmlids,
                             value: value,
                             resistant: false,
                             title: activeDefense.name,
@@ -329,7 +336,7 @@ function determineDefense(targetActor, attackItem, options) {
                 if (attackType === "energy" || attackType === "avad") {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "ED",
+                            name: "ED" + tagXmlids,
                             value: value,
                             resistant: false,
                             title: activeDefense.name,
@@ -343,7 +350,7 @@ function determineDefense(targetActor, attackItem, options) {
                 if (attackType === "mental" || attackType === "avad") {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "MD",
+                            name: "MD" + tagXmlids,
                             value: value,
                             resistant: false,
                             title: activeDefense.name,
@@ -360,7 +367,7 @@ function determineDefense(targetActor, attackItem, options) {
                 ) {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "POWD",
+                            name: "POWD" + tagXmlids,
                             value: value,
                             resistant: false,
                             title: activeDefense.name,
@@ -374,7 +381,7 @@ function determineDefense(targetActor, attackItem, options) {
                 if (attackType === "physical" || attackType === "avad") {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "rPD",
+                            name: "rPD" + tagXmlids,
                             value: value,
                             resistant: true,
                             title: activeDefense.name,
@@ -388,7 +395,7 @@ function determineDefense(targetActor, attackItem, options) {
                 if (attackType === "energy" || attackType === "avad") {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "rED",
+                            name: "rED" + tagXmlids,
                             value: value,
                             resistant: true,
                             title: activeDefense.name,
@@ -402,7 +409,7 @@ function determineDefense(targetActor, attackItem, options) {
                 if (attackType === "mental" || attackType === "avad") {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "rMD",
+                            name: "rMD" + tagXmlids,
                             value: value,
                             resistant: true,
                             title: activeDefense.name,
@@ -419,7 +426,7 @@ function determineDefense(targetActor, attackItem, options) {
                 ) {
                     if (valueAp > 0)
                         defenseTags.push({
-                            name: "rPOWD",
+                            name: "rPOWD" + tagXmlids,
                             value: value,
                             resistant: true,
                             title: activeDefense.name,
@@ -432,7 +439,7 @@ function determineDefense(targetActor, attackItem, options) {
             case "rdrp":
                 if (value > 0)
                     defenseTags.push({
-                        name: "drp",
+                        name: "drp" + tagXmlids,
                         value: `${
                             activeDefense.system.resistant ? "r" : ""
                         }${value}%`,
@@ -446,7 +453,7 @@ function determineDefense(targetActor, attackItem, options) {
             case "rdre":
                 if (value > 0)
                     defenseTags.push({
-                        name: "dre",
+                        name: "dre" + tagXmlids,
                         value: `${
                             activeDefense.system.resistant ? "r" : ""
                         }${value}%`,
@@ -460,7 +467,7 @@ function determineDefense(targetActor, attackItem, options) {
             case "rdrm":
                 if (value > 0)
                     defenseTags.push({
-                        name: "drm",
+                        name: "drm" + tagXmlids,
                         value: `${
                             activeDefense.system.resistant ? "r" : ""
                         }${value}%`,
@@ -473,7 +480,7 @@ function determineDefense(targetActor, attackItem, options) {
             case "dnp": // Damage Negation Physical
                 if (value > 0)
                     defenseTags.push({
-                        name: "dnp",
+                        name: "dnp" + tagXmlids,
                         value: value,
                         resistant: false,
                         title: activeDefense.name,
@@ -484,7 +491,7 @@ function determineDefense(targetActor, attackItem, options) {
             case "dne": // Damage Negation Energy
                 if (value > 0)
                     defenseTags.push({
-                        name: "dne",
+                        name: "dne" + tagXmlids,
                         value: value,
                         resistant: false,
                         title: activeDefense.name,
@@ -495,7 +502,7 @@ function determineDefense(targetActor, attackItem, options) {
             case "dnm": // Damage Negation Mental
                 if (value > 0)
                     defenseTags.push({
-                        name: "dnm",
+                        name: "dnm" + tagXmlids,
                         value: value,
                         resistant: false,
                         title: activeDefense.name,
@@ -510,7 +517,7 @@ function determineDefense(targetActor, attackItem, options) {
                     game.settings.get("hero6efoundryvttv2", "knockback")
                 ) {
                     defenseTags.push({
-                        name: "KB Resistance",
+                        name: "KB Resistance" + tagXmlids,
                         value: value,
                         title: activeDefense.name,
                     });
