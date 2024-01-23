@@ -3,7 +3,7 @@ import { HEROSYS } from "../herosystem6e.js";
 export default class SettingsHelpers {
     // Initialize System Settings after the Init Hook
     static initLevelSettings() {
-        let module = "hero6efoundryvttv2";
+        const module = "hero6efoundryvttv2";
 
         game.settings.register(module, "stunned", {
             name: "Use Stunned",
@@ -92,7 +92,7 @@ export default class SettingsHelpers {
         game.settings.register(module, "automation", {
             name: "Attack Card Automation",
             scope: "world",
-            config: true,
+            config: false, // UI is now part of AutomationMenu.  Intend to allow improved granularity.
             type: String,
             choices: {
                 none: "No Automation",
@@ -102,6 +102,24 @@ export default class SettingsHelpers {
             },
             default: "all",
             onChange: (value) => HEROSYS.log(false, value),
+        });
+
+        game.settings.register(module, "automation2", {
+            name: "Automation Preview",
+            scope: "world",
+            config: false, // UI is now part of AutomationMenu.  Intend to allow improved granularity.
+            type: Object,
+            default: {},
+            onChange: (value) => HEROSYS.log(false, value),
+        });
+
+        game.settings.registerMenu(module, "AutomationMenu", {
+            name: "Automation",
+            label: "Automation Settings", // The text label used in the button
+            //hint: "A description of what will occur in the submenu dialog.",
+            icon: "fas fa-bars", // A Font Awesome icon used in the submenu button
+            type: AutomationMenu, // A FormApplication subclass
+            restricted: true, // Restrict this submenu to gamemaster only?
         });
 
         game.settings.register(module, "bar3", {
@@ -134,5 +152,131 @@ export default class SettingsHelpers {
             default: "1.0.0",
             requiresReload: true,
         });
+    }
+}
+
+class AutomationMenu extends FormApplication {
+    static get defaultOptions() {
+        let options = super.defaultOptions;
+        options = mergeObject(options, {
+            classes: ["form"],
+            popOut: true,
+            template: `systems/hero6efoundryvttv2/templates/automationMenu.hbs`,
+            id: "automation-form-application",
+            closeOnSubmit: false, // do not close when submitted
+            submitOnChange: true, // submit when any input changes
+            title: "Automation Settings",
+        });
+
+        return options;
+    }
+
+    async getData() {
+        const automation = game.settings.get(game.system.id, "automation");
+        const settings = [
+            { name: "Body", enabled: false },
+            { name: "Stun", enabled: false },
+            { name: "Endurance", enabled: false },
+            { name: "Movement", enabled: false },
+        ];
+        switch (automation) {
+            case "none":
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "none",
+                    gm: false,
+                    owner: false,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "none",
+                    gm: false,
+                    owner: false,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "none",
+                    gm: false,
+                    owner: false,
+                };
+                break;
+            case "npcOnly":
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                break;
+            case "pcEndOnly": //pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "npc",
+                    gm: true,
+                    owner: false,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "all",
+                    gm: true,
+                    owner: false,
+                };
+                break;
+            default:
+                settings[0] = {
+                    ...settings[0],
+                    tokenType: "all",
+                    gm: true,
+                    owner: true,
+                };
+                settings[1] = {
+                    ...settings[1],
+                    tokenType: "all",
+                    gm: true,
+                    owner: true,
+                };
+                settings[2] = {
+                    ...settings[2],
+                    tokenType: "all",
+                    gm: true,
+                    owner: true,
+                };
+                break;
+        }
+
+        return {
+            settings,
+            choices: {
+                none: "No Automation",
+                npcOnly: "NPCs Only (end, stun, body)",
+                pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
+                all: "PCs and NPCs (end, stun, body)",
+            },
+            automation,
+        };
+    }
+
+    async _updateObject(event, formData) {
+        const data = foundry.utils.expandObject(formData);
+        await game.settings.set(game.system.id, "automation", data.automation);
+        await this.render();
     }
 }
