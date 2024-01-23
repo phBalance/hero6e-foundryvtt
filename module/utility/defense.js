@@ -87,12 +87,6 @@ function determineDefense(targetActor, attackItem, options) {
         }
     }
 
-    // Armor Piercing of natural PD and ED
-    if (piercing) {
-        PD = Math.round(PD / 2);
-        ED = Math.round(ED / 2);
-    }
-
     // Impenetrable (defense vs penetrating)
     let impenetrableValue = 0;
 
@@ -135,6 +129,15 @@ function determineDefense(targetActor, attackItem, options) {
         case "mental":
         case "adjustment":
             break;
+    }
+
+    // Armor Piercing of natural PD and ED
+    // Notice the tag (above) shows full defenses, but we half it here
+    if (piercing) {
+        PD = Math.round(PD / 2);
+        ED = Math.round(ED / 2);
+        rPD = Math.round(rPD / 2);
+        rED = Math.round(rED / 2);
     }
 
     for (const activeDefense of activeDefenses) {
@@ -313,7 +316,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "PD",
-                            value: valueAp,
+                            value: value,
                             resistant: false,
                             title: activeDefense.name,
                         });
@@ -327,7 +330,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "ED",
-                            value: valueAp,
+                            value: value,
                             resistant: false,
                             title: activeDefense.name,
                         });
@@ -341,7 +344,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "MD",
-                            value: valueAp,
+                            value: value,
                             resistant: false,
                             title: activeDefense.name,
                         });
@@ -358,7 +361,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "POWD",
-                            value: valueAp,
+                            value: value,
                             resistant: false,
                             title: activeDefense.name,
                         });
@@ -372,7 +375,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "rPD",
-                            value: valueAp,
+                            value: value,
                             resistant: true,
                             title: activeDefense.name,
                         });
@@ -386,7 +389,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "rED",
-                            value: valueAp,
+                            value: value,
                             resistant: true,
                             title: activeDefense.name,
                         });
@@ -400,7 +403,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "rMD",
-                            value: valueAp,
+                            value: value,
                             resistant: true,
                             title: activeDefense.name,
                         });
@@ -417,7 +420,7 @@ function determineDefense(targetActor, attackItem, options) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "rPOWD",
-                            value: valueAp,
+                            value: value,
                             resistant: true,
                             title: activeDefense.name,
                         });
