@@ -426,6 +426,38 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getFormula()).to.equal("8d6 + 7");
                     });
+
+                    it("should gracefully handle removing all terms that exist", async function () {
+                        const TestRollMock = Roll1Through6Mock;
+                        TestRollMock.generatorInfo.reset();
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .addDice(10)
+                            .addNumber(7);
+                        await roller.roll();
+
+                        expect(roller.getFormula()).to.equal("10d6 + 7");
+
+                        roller.removeFirstNTerms(12);
+
+                        expect(roller.getFormula()).to.equal("");
+                    });
+
+                    it("should gracefully handle removing more terms than exist", async function () {
+                        const TestRollMock = Roll1Through6Mock;
+                        TestRollMock.generatorInfo.reset();
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .addDice(10)
+                            .addNumber(7);
+                        await roller.roll();
+
+                        expect(roller.getFormula()).to.equal("10d6 + 7");
+
+                        roller.removeFirstNTerms(22);
+
+                        expect(roller.getFormula()).to.equal("");
+                    });
                 });
 
                 describe("success roll", function () {
