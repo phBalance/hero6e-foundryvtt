@@ -307,7 +307,7 @@ export async function AttackAoeToHit(item, options) {
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        roller: attackHeroRoller, // TODO: This might not work.
+        rolls: attackHeroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -836,7 +836,7 @@ export async function AttackToHit(item, options) {
         type: AoeAlwaysHit
             ? CONST.CHAT_MESSAGE_TYPES.OTHER
             : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOE's are auto hit
-        roller: heroRoller, // TODO: FIXME: Need to follow this through as it was using a Roll object.
+        rolls: heroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -1118,7 +1118,7 @@ export async function _onRollDamage(event) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-
+        rolls: heroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,

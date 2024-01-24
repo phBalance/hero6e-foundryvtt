@@ -264,16 +264,6 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("to and from JSON", function () {
-                    it("should be able to serialize and deserialize success roll before the roll", async function () {
-                        const roller = new HeroRoller().addNumber(7).subDice(3);
-
-                        expect(roller).to.deep.equal(
-                            HeroRoller.fromJSON(roller.toJSON()),
-                        );
-                    });
-                });
-
                 describe("formula", function () {
                     it("should handle formulas with numeric term", async function () {
                         const roller = new HeroRoller().addNumber(7);

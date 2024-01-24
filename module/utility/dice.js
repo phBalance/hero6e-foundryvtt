@@ -119,11 +119,8 @@ export class HeroRoller {
         return this;
     }
 
-    #linkIfNotFirstTerm(operator = "+") {
-        // TODO: Do we really need this not if first term given we now get rid of the operator terms?
-        // if (this._formulaTerms.length > 0) {
+    #addOperatorTerm(operator = "+") {
         this._formulaTerms.push(new OperatorTerm({ operator: operator }));
-        // }
     }
 
     // TODO: May wish to add tagging information to each of these. Are tags always 1:1?
@@ -132,7 +129,7 @@ export class HeroRoller {
             return this;
         }
 
-        this.#linkIfNotFirstTerm();
+        this.#addOperatorTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -159,7 +156,7 @@ export class HeroRoller {
             return this;
         }
 
-        this.#linkIfNotFirstTerm("-");
+        this.#addOperatorTerm("-");
 
         this._formulaTerms.push(
             new Die({
@@ -186,7 +183,7 @@ export class HeroRoller {
             return this;
         }
 
-        this.#linkIfNotFirstTerm();
+        this.#addOperatorTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -213,7 +210,7 @@ export class HeroRoller {
             return this;
         }
 
-        this.#linkIfNotFirstTerm();
+        this.#addOperatorTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -240,7 +237,7 @@ export class HeroRoller {
             return this;
         }
 
-        this.#linkIfNotFirstTerm();
+        this.#addOperatorTerm();
 
         this._formulaTerms.push(
             new Die({
@@ -267,7 +264,7 @@ export class HeroRoller {
             return this;
         }
 
-        this.#linkIfNotFirstTerm();
+        this.#addOperatorTerm();
 
         this._formulaTerms.push(
             new NumericTerm({
@@ -293,7 +290,7 @@ export class HeroRoller {
             return this;
         }
 
-        this.#linkIfNotFirstTerm("-");
+        this.#addOperatorTerm("-");
 
         this._formulaTerms.push(
             new NumericTerm({
@@ -333,8 +330,6 @@ export class HeroRoller {
             async: true,
         });
 
-        this._rawBaseTerms = this._rollObj.terms;
-
         await this.#calculateStunMultiplierIfAppropriate();
 
         await this.#calculateHitLocationIfAppropriate();
@@ -342,6 +337,20 @@ export class HeroRoller {
         this.#calculate();
 
         return this;
+    }
+
+    /**
+     * Return raw roll objects. Should only be used for message system integration.
+     */
+    rawRolls() {
+        return [
+            this._rollObj,
+            this._killingStunMultiplierHeroRoller?.rawRolls(),
+            this._hitLocationRoller?.rawRolls(),
+            this._hitSideRoller?.rawRolls(),
+        ]
+            .flat()
+            .filter(Boolean);
     }
 
     // TODO: May wish to consider our own custom chat template for this.
@@ -584,7 +593,7 @@ export class HeroRoller {
 
     toData() {
         return {
-            _buildRollClass: this._buildRollClass.name, // TODO: This is just wrong.
+            // _buildRollClass: this._buildRollClass.name, // TODO: This is just wrong.
             _options: this._options,
             _rollObj: this._rollObj ? this._rollObj.toJSON() : undefined,
             _formulaTerms: this._formulaTerms,
@@ -592,10 +601,8 @@ export class HeroRoller {
 
             _termsCluster: this._termsCluster,
 
-            _killingStunMultiplierHeroRoller: this
-                ._killingStunMultiplierHeroRoller
-                ? this._killingStunMultiplierHeroRoller.toData()
-                : undefined,
+            _killingStunMultiplierHeroRoller:
+                this._killingStunMultiplierHeroRoller?.toData(),
             _killingBaseStunMultiplier: this._killingBaseStunMultiplier,
             _killingAdditionalStunMultiplier:
                 this._killingAdditionalStunMultiplier,
@@ -605,6 +612,8 @@ export class HeroRoller {
             _hitLocation: this._hitLocation,
             _useHitLocation: this._useHitLocation,
             _alreadyHitLocation: this._alreadyHitLocation,
+            _hitLocationRoller: this._hitLocationRoller?.toData(),
+            _hitSideRoller: this._hitSideRoller?.toData(),
         };
     }
 
@@ -644,6 +653,12 @@ export class HeroRoller {
         heroRoller._hitLocation = dataObj._hitLocation;
         heroRoller._useHitLocation = dataObj._useHitLocation;
         heroRoller._alreadyHitLocation = dataObj._alreadyHitLocation;
+        heroRoller._hitLocationRoller = dataObj._hitLocationRoller
+            ? HeroRoller.fromData(dataObj._hitLocationRoller)
+            : undefined;
+        heroRoller._hitSideRoller = dataObj._hitSideRoller
+            ? HeroRoller.toData(dataObj._hitSideRoller)
+            : undefined;
 
         // TODO: Check if anything is missing...
 
@@ -769,7 +784,7 @@ export class HeroRoller {
         let lastOperatorMultiplier = 1; // Start with +1
 
         const _baseTermsMetadata = [];
-        const _baseTerms = this._rawBaseTerms
+        const _baseTerms = this._rollObj.terms
             .map((term, index) => {
                 if (term instanceof NumericTerm) {
                     const number = lastOperatorMultiplier * term.number;
