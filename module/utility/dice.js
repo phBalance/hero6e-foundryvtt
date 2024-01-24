@@ -139,7 +139,7 @@ export class HeroRoller {
                 faces: 6,
                 number: numDice,
                 options: {
-                    _hrQualifier: "add dice",
+                    _hrQualifier: "dice",
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -166,7 +166,7 @@ export class HeroRoller {
                 faces: 6,
                 number: numDice,
                 options: {
-                    _hrQualifier: "sub dice",
+                    _hrQualifier: "dice",
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -273,7 +273,7 @@ export class HeroRoller {
             new NumericTerm({
                 number: value,
                 options: {
-                    _hrQualifier: "add number",
+                    _hrQualifier: "number",
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -299,7 +299,7 @@ export class HeroRoller {
             new NumericTerm({
                 number: value,
                 options: {
-                    _hrQualifier: "sub number",
+                    _hrQualifier: "number",
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -783,6 +783,7 @@ export class HeroRoller {
                         baseNumber: term.number,
                         signMultiplier: lastOperatorMultiplier,
                         classDecorators: "",
+                        originalValue: term.number,
                     };
 
                     // Create the metadata for this term
@@ -869,7 +870,7 @@ export class HeroRoller {
                         }
 
                         hrExtra.originalResultIndex = index;
-
+                        hrExtra.originalValue = result.result;
                         hrExtra.classDecorators =
                             HeroRoller.#buildMinMaxClassForValue(
                                 hrExtra,
@@ -1180,13 +1181,23 @@ export class HeroRoller {
 
     static #buildDiceRollsTooltip(diceTerm, diceTermMetadata, showMinMax) {
         return diceTerm.reduce((soFar, result, index) => {
+            const absUnadjustedNumber = Math.abs(
+                diceTermMetadata[index].originalValue,
+            );
+            const unadjustedTooltip =
+                diceTermMetadata[index].qualifier !== "dice" &&
+                diceTermMetadata[index].qualifier !== "number" &&
+                showMinMax
+                    ? `title="${absUnadjustedNumber}"`
+                    : "";
+
             const absNumber = Math.abs(result);
 
             return `${soFar}<li class="${
                 showMinMax
                     ? `roll die d6 ${diceTermMetadata[index].classDecorators}`
                     : "roll calculated"
-            }">${absNumber}</li>`;
+            }" ${unadjustedTooltip}>${absNumber}</li>`;
         }, "");
     }
 
