@@ -11,6 +11,7 @@
 - Correct STUN calculation for 6e killing attacks with reduced stun multipliers.
 - Correct 1 pip and half die DC calculations for normal attacks larger than 7 DC.
 - Correct explosion damage for normal attacks with partial dice and pips.
+- Correct BODY calculation for 1/2 die with normal attacks by using a 1d6 rather than 1d3.
 
 ## Version 3.0.54
 
