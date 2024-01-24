@@ -1000,8 +1000,8 @@ export async function _onRollDamage(event) {
             !senseAffecting && !adjustment && formulaParts.isKilling,
             actor.system.is5e,
         )
-        .makeAdjustmentRoll(adjustment)
-        .makeFlashRoll(senseAffecting)
+        .makeAdjustmentRoll(!!adjustment)
+        .makeFlashRoll(!!senseAffecting)
         .addStunMultiplier(
             increasedMultiplierLevels - decreasedMultiplierLevels,
         )
