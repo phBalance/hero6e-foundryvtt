@@ -1079,7 +1079,7 @@ export class HeroRoller {
                                 ${HeroRoller.#buildDiceRollsTooltip(
                                     calculatedCluster,
                                     calculatedMetadataCluster,
-                                    true,
+                                    false,
                                 )}    
                             </ol>
                         </div>
@@ -1182,8 +1182,10 @@ export class HeroRoller {
         return diceTerm.reduce((soFar, result, index) => {
             const absNumber = Math.abs(result);
 
-            return `${soFar}<li class="roll die d6 ${
-                showMinMax ? diceTermMetadata[index].classDecorators : ""
+            return `${soFar}<li class="${
+                showMinMax
+                    ? `roll die d6 ${diceTermMetadata[index].classDecorators}`
+                    : "roll calculated"
             }">${absNumber}</li>`;
         }, "");
     }
