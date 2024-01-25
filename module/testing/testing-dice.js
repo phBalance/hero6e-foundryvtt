@@ -982,6 +982,129 @@ export function registerDiceTests(quench) {
                         expect(roller.getStunTerms()).deep.to.equal([2, 1, 1]);
                         expect(roller.getStunTotal()).deep.to.equal(4);
                     });
+
+                    it("should work with damage reduction that doesn't remove all DC", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addDice(5);
+
+                        await roller.roll();
+
+                        roller.removeNDC(4);
+
+                        expect(roller.getStunTerms()).to.deep.equal([1]);
+                        expect(roller.getStunTotal()).to.deep.equal(1);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([0]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("1d6");
+                    });
+
+                    it("should work with damage reduction that removes all DC", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addDice(5);
+
+                        await roller.roll();
+
+                        roller.removeNDC(5);
+
+                        expect(roller.getStunTerms()).to.deep.equal([]);
+                        expect(roller.getStunTotal()).to.deep.equal(0);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("");
+                    });
+
+                    it("should work with damage reduction that removes more than all DC", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addDice(5);
+
+                        await roller.roll();
+
+                        roller.removeNDC(8);
+
+                        expect(roller.getStunTerms()).to.deep.equal([]);
+                        expect(roller.getStunTotal()).to.deep.equal(0);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("");
+                    });
+
+                    it("should work with damage reduction that removes some DC but leaves partial DC", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addDice(5)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        roller.removeNDC(5);
+
+                        expect(roller.getStunTerms()).to.deep.equal([1]);
+                        expect(roller.getStunTotal()).to.deep.equal(1);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([0]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("1");
+                    });
+
+                    it("should work with damage reduction that removes some DC but leaves partial DC", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addDice(5)
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        roller.removeNDC(5);
+
+                        expect(roller.getStunTerms()).to.deep.equal([1]);
+                        expect(roller.getStunTotal()).to.deep.equal(1);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([0]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("½d6");
+                    });
+
+                    it("should work with damage reduction that removes some DC but leaves partial DC when partial comes first", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addHalfDice(1)
+                            .addDice(5);
+
+                        await roller.roll();
+
+                        roller.removeNDC(5);
+
+                        expect(roller.getStunTerms()).to.deep.equal([1]);
+                        expect(roller.getStunTotal()).to.deep.equal(1);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([0]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("½d6");
+                    });
                 });
 
                 describe("killing roll", function () {
@@ -1620,6 +1743,172 @@ export function registerDiceTests(quench) {
                             stunMultiplier: 5,
                             bodyMultiplier: 2,
                         });
+                    });
+
+                    it("should work with damage reduction that does not remove all DC by whole dice", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        // Remove 3 DC/1 die
+                        roller.removeNDC(3);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(1);
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getFormula()).to.equal("2d6");
+                    });
+
+                    it("should work with damage reduction that removes 2 DC (1/2d6) when it exists", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(2)
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        // Remove 2 DC/ a 1/2 d6
+                        roller.removeNDC(2);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(1);
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getFormula()).to.equal("2d6");
+                    });
+
+                    it("should work with damage reduction that removes 2 DC (1d6-1) when it exists", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(2)
+                            .addDiceMinus1(1);
+
+                        await roller.roll();
+
+                        // Remove 2 DC/ a 1d6-1 term
+                        roller.removeNDC(2);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(1);
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getFormula()).to.equal("2d6");
+                    });
+
+                    it("should work with damage reduction that removes 1 DC (+1) when it exists", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(2)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // Remove 1 DC/ a +1 pip term
+                        roller.removeNDC(1);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(1);
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            2 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getFormula()).to.equal("2d6");
+                    });
+
+                    it("should work with damage reduction that removes 1 DC when it doesn't exist as a term", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(1);
+
+                        await roller.roll();
+
+                        // Remove 1 DC/ a +1 pip term
+                        roller.removeNDC(1);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult - 1,
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(1);
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            1 * (TestRollMock.fixedRollResult - 1),
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            1 * (TestRollMock.fixedRollResult - 1),
+                        );
+
+                        expect(roller.getFormula()).to.equal("1d6-1");
                     });
                 });
 

@@ -987,7 +987,7 @@ export async function _onRollDamage(event) {
     });
     const formulaParts = calculateDiceFormulaParts(item, dc);
 
-    // TODO: Should also include AOE considerations.
+    // TODO: Should also include AOE considerations. Does AOE preclude hit locations? The code is not consistent.
     const includeHitLocation =
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         (item.system.noHitLocations || true);
@@ -1511,7 +1511,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     //       but there are considerations for what subtracting a DC means for a killing attack
     //       This should really be done before rolling damage.
     // newRoll = await handleDamageNegation(item, newRoll, damageData);
-    await handleDamageNegation(item, heroRoller, damageData);
+    heroRoller.removeDcFromTerms(damageData.damageNegationValue);
 
     // We need to recalculate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(heroRoller, item, damageData);
@@ -1970,6 +1970,8 @@ async function _calcDamage(heroRoller, item, options) {
         let knockbackDice = 2;
 
         // Target is in the air -1d6
+        // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
+        //       when more than 0m off the ground? This same effect should also be considered for gliding.
         if (options.targetToken?.actor?.flags?.activeMovement === "flight") {
             knockbackDice -= 1;
             knockbackTags.push({

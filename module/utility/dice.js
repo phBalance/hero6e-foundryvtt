@@ -11,12 +11,21 @@ export class HeroRoller {
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
 
     static ROLL_TYPE = {
-        SUCCESS: 0,
-        NORMAL: 1,
-        KILLING: 2,
-        ADJUSTMENT: 3,
-        ENTANGLE: 4,
-        FLASH: 5,
+        SUCCESS: "success",
+        NORMAL: "normal",
+        KILLING: "killing",
+        ADJUSTMENT: "adjustment",
+        ENTANGLE: "entangle",
+        FLASH: "flash",
+    };
+
+    static QUALIFIER = {
+        FULL_DIE: "full dice",
+        HALF_DIE: "half dice",
+        FULL_DIE_LESS_ONE: "full dice less 1",
+        FULL_DIE_LESS_ONE_MIN_ONE: "full dice less 1 min 1",
+
+        NUMBER: "number",
     };
 
     static #sum(term) {
@@ -136,7 +145,7 @@ export class HeroRoller {
                 faces: 6,
                 number: numDice,
                 options: {
-                    _hrQualifier: "dice",
+                    _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE,
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -163,7 +172,7 @@ export class HeroRoller {
                 faces: 6,
                 number: numDice,
                 options: {
-                    _hrQualifier: "dice",
+                    _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE,
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -190,7 +199,7 @@ export class HeroRoller {
                 faces: 6,
                 number: numDice,
                 options: {
-                    _hrQualifier: "half die",
+                    _hrQualifier: HeroRoller.QUALIFIER.HALF_DIE,
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -217,7 +226,7 @@ export class HeroRoller {
                 faces: 6,
                 number: numDice,
                 options: {
-                    _hrQualifier: "less 1 pip",
+                    _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE,
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -244,7 +253,8 @@ export class HeroRoller {
                 faces: 6,
                 number: numDice,
                 options: {
-                    _hrQualifier: "less 1 pip min 1",
+                    _hrQualifier:
+                        HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE,
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -270,7 +280,7 @@ export class HeroRoller {
             new NumericTerm({
                 number: value,
                 options: {
-                    _hrQualifier: "number",
+                    _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -296,7 +306,7 @@ export class HeroRoller {
             new NumericTerm({
                 number: value,
                 options: {
-                    _hrQualifier: "number",
+                    _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
                     flavor: description,
                     _hrTag: !description
                         ? undefined
@@ -455,6 +465,11 @@ export class HeroRoller {
         );
     }
 
+    /**
+     *
+     * @param {number} ranksToRemove
+     * @returns {HeroRoller}
+     */
     removeNHighestRankTerms(ranksToRemove) {
         if (ranksToRemove && ranksToRemove > 0) {
             this.#removeNHighestRankTerms(ranksToRemove);
@@ -463,6 +478,11 @@ export class HeroRoller {
         return this;
     }
 
+    /**
+     *
+     * @param {number} ranksToRemove
+     * @returns {HeroRoller}
+     */
     removeFirstNTerms(ranksToRemove) {
         if (ranksToRemove && ranksToRemove > 0) {
             this.#removeFirstNTerms(ranksToRemove);
@@ -471,6 +491,28 @@ export class HeroRoller {
         return this;
     }
 
+    /**
+     *
+     * @param {number} dcToRemove
+     * @returns {HeroRoller}
+     */
+    removeNDC(dcToRemove) {
+        if (dcToRemove && dcToRemove > 0) {
+            this.#removeNDcFromTerms(dcToRemove);
+        }
+
+        return this;
+    }
+
+    getEntangleTerms() {
+        if (this._type === HeroRoller.ROLL_TYPE.ENTANGLE) {
+            return this.getBaseTerms();
+        }
+
+        throw new Error(
+            `asking for entangle from type ${this._type} doesn't make sense`,
+        );
+    }
     getEntangleTotal() {
         if (this._type === HeroRoller.ROLL_TYPE.ENTANGLE) {
             return this.getBaseTotal();
@@ -744,7 +786,7 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.FLASH:
             case HeroRoller.ROLL_TYPE.NORMAL:
                 // Calculate BODY
-                if (termQualifier === "half die") {
+                if (termQualifier === HeroRoller.QUALIFIER.HALF_DIE) {
                     if (this._standardEffect) {
                         return 0;
                     } else {
@@ -842,7 +884,10 @@ export class HeroRoller {
                         let adjustedValue =
                             lastOperatorMultiplier * result.result;
 
-                        if (term.options._hrQualifier === "half die") {
+                        if (
+                            term.options._hrQualifier ===
+                            HeroRoller.QUALIFIER.HALF_DIE
+                        ) {
                             if (this._standardEffect) {
                                 adjustedValue =
                                     HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
@@ -852,7 +897,10 @@ export class HeroRoller {
 
                             hrExtra.min = 1;
                             hrExtra.max = 3;
-                        } else if (term.options._hrQualifier === "less 1 pip") {
+                        } else if (
+                            term.options._hrQualifier ===
+                            HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE
+                        ) {
                             if (this._standardEffect) {
                                 adjustedValue =
                                     HeroRoller.STANDARD_EFFECT_DIE_ROLL;
@@ -863,7 +911,8 @@ export class HeroRoller {
                             hrExtra.min = 0;
                             hrExtra.max = 5;
                         } else if (
-                            term.options._hrQualifier === "less 1 pip min 1"
+                            term.options._hrQualifier ===
+                            HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE
                         ) {
                             if (this._standardEffect) {
                                 adjustedValue =
@@ -1116,20 +1165,26 @@ export class HeroRoller {
               : " ";
 
         if (termMetadata.term === "Dice") {
-            if (termMetadata.qualifier === "half die") {
+            if (termMetadata.qualifier === HeroRoller.QUALIFIER.HALF_DIE) {
                 return `${sign}${
                     termMetadata.baseNumber !== 1
                         ? `${Math.abs(termMetadata.baseNumber)}(½d6)`
                         : "½d6"
                 }`;
-            } else if (termMetadata.qualifier === "less 1 pip") {
+            } else if (
+                termMetadata.qualifier ===
+                HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE
+            ) {
                 return `${
                     termMetadata.signMultiplier < 0 ||
                     termMetadata.baseNumber !== 1
                         ? `${sign}${Math.abs(termMetadata.baseNumber)}(d6-1)`
                         : `${sign}${Math.abs(termMetadata.baseNumber)}d6-1`
                 }`;
-            } else if (termMetadata.qualifier === "less 1 pip min 1") {
+            } else if (
+                termMetadata.qualifier ===
+                HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE
+            ) {
                 return `${
                     termMetadata.signMultiplier < 0 ||
                     termMetadata.baseNumber !== 1
@@ -1200,8 +1255,10 @@ export class HeroRoller {
                 diceTermMetadata[index].originalValue,
             );
             const unadjustedTooltip =
-                diceTermMetadata[index].qualifier !== "dice" &&
-                diceTermMetadata[index].qualifier !== "number" &&
+                diceTermMetadata[index].qualifier !==
+                    HeroRoller.QUALIFIER.FULL_DIE &&
+                diceTermMetadata[index].qualifier !==
+                    HeroRoller.QUALIFIER.NUMBER &&
                 showMinMax
                     ? `title="${absUnadjustedNumber}"`
                     : "";
@@ -1270,9 +1327,20 @@ export class HeroRoller {
     }
 
     #removeFirstNTerms(ranksToRemove) {
-        // Remove the first ranks
+        // Remove the first N ranks
         const removed = this._termsCluster.splice(0, ranksToRemove);
 
+        this.#fixUpTermMetadata(removed);
+    }
+
+    #removeLastNTerms(ranksToRemove) {
+        // Remove the last N ranks
+        const removed = this._termsCluster.splice(-1, ranksToRemove);
+
+        this.#fixUpTermMetadata(removed);
+    }
+
+    #fixUpTermMetadata(removed) {
         // Fixup the base and calculated metadata so that it reflects what remains. The base and calculated
         // values are correct as is.
         // NOTE: This will only work for dice term.
@@ -1297,5 +1365,167 @@ export class HeroRoller {
                 termCluster.calculatedMetadata.baseNumber -= indexCount;
             }
         });
+        // TODO: Filter for things with a baseNumber of 0?
+    }
+
+    static #qualifierToDC = {
+        [HeroRoller.QUALIFIER.FULL_DIE]: 3,
+        [HeroRoller.QUALIFIER.HALF_DIE]: 2,
+        [HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE]: 2,
+        [HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE]: 2,
+        [HeroRoller.QUALIFIER.NUMBER]: 1,
+    };
+
+    #removeNDcFromTerms(dcToRemove) {
+        let wholeTermsToRemove;
+        let partialTermsToRemove;
+
+        // How many terms to remove
+        if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
+            wholeTermsToRemove = Math.floor(dcToRemove / 3);
+            partialTermsToRemove = dcToRemove % 3;
+        } else {
+            wholeTermsToRemove = dcToRemove;
+            partialTermsToRemove = 0;
+        }
+
+        const baseMetadata = HeroRoller.#extractPropertyFromTermsCluster(
+            this._termsCluster,
+            "baseMetadata",
+        );
+
+        // What unique terms do we have?
+        const seenAlready = new Set();
+        const oneTermOfEachType = baseMetadata
+            .map((metadataTerm) => {
+                const found = seenAlready.has(metadataTerm.termIndex);
+                if (!found) {
+                    seenAlready.add(metadataTerm.termIndex);
+                    return {
+                        index: metadataTerm.termIndex,
+                        count: metadataTerm.baseNumber,
+                        originalCount: metadataTerm.baseNumber,
+                        qualifier: metadataTerm.qualifier,
+                        changeTo: undefined,
+                    };
+                }
+                return undefined;
+            })
+            .filter(Boolean);
+
+        // First pass, order from largest DC to smallest DC, attempt to match whole terms
+        // with whole terms and partial terms to their exact partial terms
+        oneTermOfEachType.sort((a, b) => {
+            return (
+                HeroRoller.#qualifierToDC[a.qualifier] -
+                HeroRoller.#qualifierToDC[b.qualifier]
+            );
+        });
+
+        oneTermOfEachType.forEach((term, index) => {
+            if (
+                term.count > 0 &&
+                wholeTermsToRemove > 0 &&
+                term.qualifier === HeroRoller.QUALIFIER.FULL_DIE
+            ) {
+                const matchingCount = Math.min(wholeTermsToRemove, term.count);
+                term.count = term.count - matchingCount;
+                wholeTermsToRemove = matchingCount - matchingCount;
+
+                oneTermOfEachType[index] = term;
+            } else if (
+                term.count > 0 &&
+                partialTermsToRemove === 2 &&
+                (term.qualifier === HeroRoller.QUALIFIER.HALF_DIE ||
+                    term.qualifier === HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE ||
+                    term.qualifier ===
+                        HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE)
+            ) {
+                term.count = term.count - 1;
+                partialTermsToRemove = 0;
+
+                oneTermOfEachType[index] = term;
+            } else if (
+                term.count > 0 &&
+                partialTermsToRemove === 1 &&
+                term.qualifier === HeroRoller.QUALIFIER.NUMBER
+            ) {
+                term.count = term.count - 1;
+                partialTermsToRemove = 0;
+
+                oneTermOfEachType[index] = term;
+            }
+        });
+
+        // 2nd pass, order from smallest DC to largest DC, and then start subtracting until either
+        // all terms are removed or all the removal count has hit 0.
+        oneTermOfEachType.sort((a, b) => {
+            return (
+                HeroRoller.#qualifierToDC[b.qualifier] -
+                HeroRoller.#qualifierToDC[a.qualifier]
+            );
+        });
+
+        // TODO: Hack up blocks.
+        oneTermOfEachType.forEach((term, index) => {
+            if (
+                term.count > 0 &&
+                wholeTermsToRemove > 0 &&
+                term.qualifier === HeroRoller.QUALIFIER.FULL_DIE
+            ) {
+                const matchingCount = Math.min(wholeTermsToRemove, term.count);
+                term.count = term.count - matchingCount;
+                wholeTermsToRemove = matchingCount - matchingCount;
+
+                oneTermOfEachType[index] = term;
+            } else if (
+                term.count > 0 &&
+                partialTermsToRemove === 2 &&
+                (term.qualifier === HeroRoller.QUALIFIER.HALF_DIE ||
+                    term.qualifier === HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE ||
+                    term.qualifier ===
+                        HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE)
+            ) {
+                term.count = term.count - 1;
+                partialTermsToRemove = 0;
+
+                oneTermOfEachType[index] = term;
+            } else if (
+                term.count > 0 &&
+                partialTermsToRemove === 1 &&
+                term.qualifier === HeroRoller.QUALIFIER.NUMBER
+            ) {
+                term.count = term.count - 1;
+                partialTermsToRemove = 0;
+
+                oneTermOfEachType[index] = term;
+            }
+        });
+
+        // What should we trim
+        const entriesToTrim = new Map();
+        oneTermOfEachType.forEach((term) => {
+            if (term.count != term.originalCount) {
+                entriesToTrim.set(term.index, term);
+            }
+        });
+
+        const removed = [];
+        const remaining = [];
+        this._termsCluster.forEach((term) => {
+            const termToTrim = entriesToTrim.get(term.baseMetadata.termIndex);
+
+            // Remove the appropriate number of terms matching this index.
+            if (termToTrim && termToTrim.originalCount !== termToTrim.count) {
+                termToTrim.originalCount = termToTrim.originalCount - 1;
+                removed.push(term);
+            } else {
+                remaining.push(term);
+            }
+        });
+
+        this._termsCluster = remaining;
+
+        this.#fixUpTermMetadata(removed);
     }
 }
