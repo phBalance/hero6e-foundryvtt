@@ -223,6 +223,7 @@ export async function AttackAoeToHit(item, options) {
     );
 
     const attackHeroRoller = new HeroRoller()
+        .makeSuccessRoll()
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, item.system.uses)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
@@ -263,9 +264,9 @@ export async function AttackAoeToHit(item, options) {
     if (hitRollTotal < dcvTargetNumber) {
         const missBy = dcvTargetNumber - hitRollTotal;
 
-        const facingHeroRoller = new HeroRoller().addDice(1);
+        const facingHeroRoller = new HeroRoller().makeBasicRoll().addDice(1);
         await facingHeroRoller.roll();
-        const facingRollResult = facingHeroRoller.getSuccessTotal();
+        const facingRollResult = facingHeroRoller.getBasicTotal();
 
         const moveDistance = RoundFavorPlayerDown(
             Math.min(
@@ -303,7 +304,7 @@ export async function AttackAoeToHit(item, options) {
         "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    speaker["alias"] = actor.name;
+    speaker.alias = actor.name;
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
@@ -353,6 +354,7 @@ export async function AttackToHit(item, options) {
     );
 
     let heroRoller = new HeroRoller()
+        .makeSuccessRoll()
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, itemData.uses)
         .addNumber(parseInt(options.ocvMod), "OCV modifier")
@@ -556,10 +558,12 @@ export async function AttackToHit(item, options) {
         if (newEnd < 0) {
             let stunDice = Math.ceil(Math.abs(newEnd) / 2);
 
-            const stunForEndHeroRoller = new HeroRoller().addDice(stunDice);
+            const stunForEndHeroRoller = new HeroRoller()
+                .makeBasicRoll()
+                .addDice(stunDice);
             await stunForEndHeroRoller.roll();
             const stunRenderedResult = await stunForEndHeroRoller.render();
-            const stunDamageTotal = stunForEndHeroRoller.getBaseTotal();
+            const stunDamageTotal = stunForEndHeroRoller.getBasicTotal();
 
             newEnd = -stunDamageTotal;
 
@@ -825,12 +829,11 @@ export async function AttackToHit(item, options) {
     };
 
     // render card
-    let cardHtml = await renderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
 
-    let token = actor.token;
-
-    let speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    speaker["alias"] = actor.name;
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+    speaker.alias = actor.name;
 
     const chatData = {
         type: AoeAlwaysHit
@@ -2017,6 +2020,7 @@ async function _calcDamage(heroRoller, item, options) {
         }
 
         const heroRoller = new HeroRoller()
+            .makeBasicRoll()
             .addNumber(
                 body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
                 "Max potential knockback",
@@ -2035,7 +2039,7 @@ async function _calcDamage(heroRoller, item, options) {
             );
         await heroRoller.roll();
 
-        const knockbackResultTotal = Math.round(heroRoller.getBaseTotal());
+        const knockbackResultTotal = Math.round(heroRoller.getBasicTotal());
 
         knockbackRenderedResult = await heroRoller.render();
 

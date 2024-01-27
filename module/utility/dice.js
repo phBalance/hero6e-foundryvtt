@@ -1103,7 +1103,7 @@ export class HeroRoller {
             !this._useHitLocation
         ) {
             const stunMultiplier =
-                this._killingStunMultiplierHeroRoller.getBaseTotal();
+                this._killingStunMultiplierHeroRoller.getBasicTotal();
             const stunMultiplierFormula =
                 this._killingStunMultiplierHeroRoller.getFormula();
             const fullBaseTerms =
