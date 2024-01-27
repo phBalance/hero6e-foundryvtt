@@ -1880,7 +1880,7 @@ export function registerDiceTests(quench) {
                         expect(roller.getFormula()).to.equal("2d6");
                     });
 
-                    it("should work with damage reduction that removes 1 DC when it doesn't exist as a term", async function () {
+                    it("should work with damage reduction that removes 1 DC when it doesn't exist as a unique term (1)", async function () {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -1889,26 +1889,186 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        // Remove 1 DC/ a +1 pip term
+                        // Remove 1 DC to a 1/2 die term
                         roller.removeNDC(1);
 
                         expect(roller.getBodyTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult - 1,
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
                         ]);
                         expect(roller.getBodyTotal()).to.deep.equal(
-                            TestRollMock.fixedRollResult - 1,
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
                         );
 
                         expect(roller.getStunMultiplier()).to.deep.equal(1);
 
                         expect(roller.getStunTerms()).to.deep.equal([
-                            1 * (TestRollMock.fixedRollResult - 1),
+                            1 * Math.ceil(TestRollMock.fixedRollResult / 2),
                         ]);
                         expect(roller.getStunTotal()).to.deep.equal(
-                            1 * (TestRollMock.fixedRollResult - 1),
+                            1 * Math.ceil(TestRollMock.fixedRollResult / 2),
                         );
 
-                        expect(roller.getFormula()).to.equal("1d6-1");
+                        expect(roller.getFormula()).to.equal("½d6");
+                    });
+
+                    it("should work with damage reduction that removes 1 DC when it doesn't exist as a unique term (6)", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(1);
+
+                        await roller.roll();
+
+                        // Remove 1 DC to a 1/2 die term
+                        roller.removeNDC(1);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getFormula()).to.equal("½d6");
+                    });
+
+                    it("should work with damage reduction that removes 2 DC when it doesn't exist as a unique term (1", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(1);
+
+                        await roller.roll();
+
+                        // Remove 2 DC to a +1 pip term
+                        roller.removeNDC(2);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([1]);
+                        expect(roller.getBodyTotal()).to.deep.equal(1);
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.fixedRollResult / 2) * 1,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2) * 1,
+                        );
+
+                        expect(roller.getFormula()).to.equal("1");
+                    });
+
+                    it("should work with damage reduction that removes 2 DC when it doesn't exist as a unique term (6)", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(1);
+
+                        await roller.roll();
+
+                        // Remove 2 DC to a +1 pip term
+                        roller.removeNDC(2);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([1]);
+                        expect(roller.getBodyTotal()).to.deep.equal(1);
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.fixedRollResult / 2) * 1,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2) * 1,
+                        );
+
+                        expect(roller.getFormula()).to.equal("1");
+                    });
+
+                    it("should work with damage reduction that removes 4 DC when it doesn't exist as a unique term (6)", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        // Remove 4 DC to a 1 1/2 d6
+                        roller.removeNDC(4);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            TestRollMock.fixedRollResult,
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(
+                            TestRollMock.fixedRollResult +
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                TestRollMock.fixedRollResult,
+                            Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                Math.ceil(TestRollMock.fixedRollResult / 2),
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                TestRollMock.fixedRollResult +
+                                Math.ceil(TestRollMock.fixedRollResult / 2) *
+                                    Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getFormula()).to.equal("1d6 + ½d6");
+                    });
+
+                    it("should work with damage reduction that removes 4 DC when it doesn't that many DC", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true, false)
+                            .addHalfDice(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // Remove 4 DC from a 3 DC should be empty
+                        roller.removeNDC(4);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+
+                        expect(roller.getStunTerms()).to.deep.equal([]);
+                        expect(roller.getStunTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("");
                     });
                 });
 
