@@ -463,7 +463,7 @@ export function registerDamageFunctionTests(quench) {
                     options: {},
                 };
 
-                const numbericTerm = {
+                const numericTerm = {
                     _evaluated: false,
                     isIntermediate: false,
                     number: 1,
@@ -610,7 +610,7 @@ export function registerDamageFunctionTests(quench) {
                     };
 
                     const expectedDamageResult = {
-                        terms: [newDie, minus, numbericTerm],
+                        terms: [newDie, minus, numericTerm],
                         dice: [newDie],
                         total: 14,
                     };
