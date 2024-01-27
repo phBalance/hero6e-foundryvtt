@@ -46,9 +46,6 @@
     {{#each tags as |tag id|}}
     <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} +{{tag.value}}</span>
     {{/each}}
-    {{#each knockbackTags as | tag id|}}
-    <span class="tag tag_knockback" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
-    {{/each}}
   </div>
 
   {{#if damageNegationValue}}
@@ -75,6 +72,15 @@
   {{#if useKnockBack}}
     <div class="card-section">
       <div class="description-tiny">Knockback Roll</div>
+      {{#if knockbackTags}}
+        <div class="card-section">
+          <div class="tags">
+            {{#each knockbackTags as | tag id|}}
+            <span class="tag tag_knockback" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
+            {{/each}}
+          </div>
+        </div>
+      {{/if}}
       <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
       <div class="description-tiny">{{ knockbackMessage }}</div>
     </div>
