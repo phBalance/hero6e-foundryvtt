@@ -33,6 +33,7 @@ export class HeroRoller {
     static STANDARD_EFFECT_HALF_DIE_ROLL = 1;
 
     static ROLL_TYPE = {
+        BASIC: "basic",
         SUCCESS: "success",
         NORMAL: "normal",
         KILLING: "killing",
@@ -80,7 +81,7 @@ export class HeroRoller {
 
         this._formulaTerms = [];
 
-        this._type = HeroRoller.ROLL_TYPE.SUCCESS;
+        this._type = HeroRoller.ROLL_TYPE.BASIC;
 
         this._termsCluster = [];
 
@@ -103,6 +104,13 @@ export class HeroRoller {
 
     getType() {
         return this._type;
+    }
+
+    makeBasicRoll(apply = true) {
+        if (apply) {
+            this._type = HeroRoller.ROLL_TYPE.BASIC;
+        }
+        return this;
     }
 
     makeSuccessRoll(apply = true) {
@@ -426,6 +434,25 @@ export class HeroRoller {
         return this.#buildFormula();
     }
 
+    getBasicTerms() {
+        if (this._type === HeroRoller.ROLL_TYPE.BASIC) {
+            return this.getBaseTerms();
+        }
+
+        throw new Error(
+            `asking for basic from type ${this._type} doesn't make sense`,
+        );
+    }
+    getBasicTotal() {
+        if (this._type === HeroRoller.ROLL_TYPE.BASIC) {
+            return this.getBaseTotal();
+        }
+
+        throw new Error(
+            `asking for basic from type ${this._type} doesn't make sense`,
+        );
+    }
+
     getSuccessTerms() {
         if (this._type === HeroRoller.ROLL_TYPE.SUCCESS) {
             return this.getBaseTerms();
@@ -636,6 +663,7 @@ export class HeroRoller {
 
     getCalculatedTerms() {
         if (
+            this._type === HeroRoller.ROLL_TYPE.BASIC ||
             this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
             this._type === HeroRoller.ROLL_TYPE.ENTANGLE
         ) {
@@ -750,6 +778,7 @@ export class HeroRoller {
                 {},
                 this._buildRollClass,
             )
+                .makeBasicRoll()
                 .addDieMinus1Min1(
                     this._killingStunMultiplier === "1d6-1" ? 1 : 0,
                 )
@@ -758,7 +787,7 @@ export class HeroRoller {
             await this._killingStunMultiplierHeroRoller.roll({ async: true });
 
             this._killingBaseStunMultiplier =
-                this._killingStunMultiplierHeroRoller.getSuccessTotal();
+                this._killingStunMultiplierHeroRoller.getBasicTotal();
         }
     }
 
@@ -771,21 +800,19 @@ export class HeroRoller {
             (this._type === HeroRoller.ROLL_TYPE.NORMAL ||
                 this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
-            this._hitLocationRoller = new HeroRoller(
-                {},
-                this._buildRollClass,
-            ).addDice(3);
+            this._hitLocationRoller = new HeroRoller({}, this._buildRollClass)
+                .makeBasicRoll()
+                .addDice(3);
             await this._hitLocationRoller.roll();
 
-            const locationRollTotal = this._hitLocationRoller.getBaseTotal();
+            const locationRollTotal = this._hitLocationRoller.getBasicTotal();
 
-            this._hitSideRoller = new HeroRoller(
-                {},
-                this._buildRollClass,
-            ).addDice(1);
+            this._hitSideRoller = new HeroRoller({}, this._buildRollClass)
+                .makeBasicRoll()
+                .addDice(1);
             await this._hitSideRoller.roll();
 
-            const locationSideRollTotal = this._hitSideRoller.getBaseTotal();
+            const locationSideRollTotal = this._hitSideRoller.getBasicTotal();
 
             const locationName =
                 this._alreadyHitLocation && this._alreadyHitLocation !== "none"
@@ -813,6 +840,7 @@ export class HeroRoller {
 
     #calculateValue(originalResult, adjustedResult, termQualifier) {
         switch (this._type) {
+            case HeroRoller.ROLL_TYPE.BASIC:
             case HeroRoller.ROLL_TYPE.SUCCESS:
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
                 // Do nothing as there are no calculated values
@@ -1246,6 +1274,7 @@ export class HeroRoller {
 
     #buildFormulaBasePurpose() {
         switch (this._type) {
+            case HeroRoller.ROLL_TYPE.BASIC:
             case HeroRoller.ROLL_TYPE.SUCCESS:
                 return "";
 
@@ -1270,6 +1299,7 @@ export class HeroRoller {
 
     #buildFormulaCalculatedPurpose() {
         switch (this._type) {
+            case HeroRoller.ROLL_TYPE.BASIC:
             case HeroRoller.ROLL_TYPE.SUCCESS:
             case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
@@ -1329,6 +1359,9 @@ export class HeroRoller {
 
     #buildTooltipTotal() {
         switch (this._type) {
+            case HeroRoller.ROLL_TYPE.BASIC:
+                return `${this.getBasicTotal()}`;
+
             case HeroRoller.ROLL_TYPE.SUCCESS:
                 return `${this.getSuccessTotal()}`;
 

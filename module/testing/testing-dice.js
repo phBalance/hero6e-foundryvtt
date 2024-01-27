@@ -115,7 +115,7 @@ export function registerDiceTests(quench) {
             describe("HeroRoller", function () {
                 describe("chaining", function () {
                     it("should be conditional for make functions with negative and default", function () {
-                        const roller = new HeroRoller();
+                        const roller = new HeroRoller().makeSuccessRoll();
 
                         roller.makeNormalRoll(0);
                         expect(roller._type).to.equal(
@@ -464,10 +464,9 @@ export function registerDiceTests(quench) {
                     it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
-                        const roller = new HeroRoller(
-                            {},
-                            TestRollMock,
-                        ).addNumber(1);
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
+                            .addNumber(1);
 
                         await roller.roll();
 
@@ -492,10 +491,9 @@ export function registerDiceTests(quench) {
                     it("should handle a 1 pip equation", async function () {
                         const TestRollMock = Roll1Mock;
 
-                        const roller = new HeroRoller(
-                            {},
-                            TestRollMock,
-                        ).addNumber(1);
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
+                            .addNumber(1);
 
                         await roller.roll();
 
@@ -506,9 +504,9 @@ export function registerDiceTests(quench) {
                     it("should take a 1 term, 1 die equation", async function () {
                         const TestRollMock = Roll1Mock;
 
-                        const roller = new HeroRoller({}, TestRollMock).addDice(
-                            1,
-                        );
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
+                            .addDice(1);
 
                         await roller.roll();
 
@@ -524,6 +522,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
                             .addDice(1)
                             .addNumber(1);
 
@@ -542,6 +541,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
                             .addNumber(11)
                             .addNumber(9)
                             .subNumber(2)
