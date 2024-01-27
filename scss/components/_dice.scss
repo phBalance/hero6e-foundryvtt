@@ -20,3 +20,9 @@
     color: red;
   }
 }
+
+.dice-rolls .roll {
+  &.calculated {
+    background-image: url("../icons/circle.svg");
+  }
+}
