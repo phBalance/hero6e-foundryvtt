@@ -408,12 +408,12 @@ export class HeroRoller {
 
     // TODO: May wish to consider our own custom chat template for this.
     // TODO: May wish to consider no flavour, but rather have it be the type of roll?
-    async render() {
+    async render(flavor) {
         const template = this._buildRollClass.CHAT_TEMPLATE;
 
         const chatData = {
             formula: this.#buildFormula(),
-            flavor: null,
+            flavor: flavor,
             user: game.user.id,
             tooltip: this.#buildTooltip(),
             total: this.#buildTooltipTotal(),
