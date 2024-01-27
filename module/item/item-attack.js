@@ -1511,7 +1511,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     //       but there are considerations for what subtracting a DC means for a killing attack
     //       This should really be done before rolling damage.
     // newRoll = await handleDamageNegation(item, newRoll, damageData);
-    heroRoller.removeDcFromTerms(damageData.damageNegationValue);
+    heroRoller.removeNDC(damageData.damageNegationValue);
 
     // We need to recalculate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(heroRoller, item, damageData);
