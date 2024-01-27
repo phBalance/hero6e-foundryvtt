@@ -1,0 +1,56 @@
+{{ log 'AUTOMATIONMENU' this }}
+<form class="{{cssClass}}" autocomplete="off">
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        <section class="sheet-content"> {{!-- sheet-content scrolls --}}
+
+
+            <div class="tab tab-body">
+                <table>
+                    <tr>
+                        <td>Automation</td>
+                        <td>
+                            <select name="automation" data-dtype="text">
+                              {{selectOptions choices selected=automation}}
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                
+            </div> 
+            
+            <p></p>
+
+            {{#if settings}}
+                <div class="tab tab-body">
+
+                    <table>
+                        <tr class="sticky">
+                            <th>Automation</th>
+                            <th>PC/NPC</th>
+                            <th title="Send details to GM chat">GM</th>
+                            <th title="Send details to token OWNER chat">PLAYER</th>
+                        </tr>
+
+                        {{#each settings as |setting id|}}
+                        <tr>
+                            <td>{{setting.name}}</td>
+                            <td>
+                                <input name="{{setting.tokenType}}" value="{{setting.tokenType}}" type="text" {{#unless setting.enabled}}DISABLED{{/unless}} />
+                            </td>
+                             <td>
+                                <input name="{{setting.gm}}" type="checkbox" {{checked setting.gm}} data-dtype="Boolean" {{#unless setting.enabled}}DISABLED{{/unless}} />
+                            </td>
+                             <td>
+                                <input name="{{setting.owner}}" type="checkbox" {{checked setting.owner}} data-dtype="Boolean" {{#unless setting.enabled}}DISABLED{{/unless}} />
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </table>
+                </div>
+      
+            {{/if}}
+
+    </section>
+</form>
