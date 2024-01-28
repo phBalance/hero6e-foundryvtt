@@ -566,6 +566,30 @@ export function registerDiceTests(quench) {
                         );
                     });
 
+                    it("should allow auto success determination of true without specific value set", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getAutoSuccess()).to.equal(true);
+                    });
+
+                    it("should allow auto success determination of false without specific value set", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll()
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getAutoSuccess()).to.equal(false);
+                    });
+
                     it("should allow auto success determination of true", async function () {
                         const TestRollMock = Roll1Mock;
 

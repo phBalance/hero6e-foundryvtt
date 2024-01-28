@@ -497,10 +497,7 @@ export class HeroRoller {
         );
     }
     getAutoSuccess() {
-        if (
-            this._type === HeroRoller.ROLL_TYPE.SUCCESS &&
-            this._successValue !== undefined
-        ) {
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS) {
             if (this._successRolledValue === 3) {
                 return true;
             } else if (this._successRolledValue === 18) {
@@ -511,7 +508,7 @@ export class HeroRoller {
         }
 
         throw new Error(
-            `asking for success from type ${this._type}/${this._successValue} doesn't make sense`,
+            `asking for auto success from type ${this._type} doesn't make sense`,
         );
     }
 
