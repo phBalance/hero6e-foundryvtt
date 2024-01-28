@@ -3,7 +3,6 @@ import { HeroSystem6eItem } from "../item/item.js";
 import {
     determineStrengthDamage,
     determineExtraDiceDamage,
-    simplifyDamageRoll,
     getNumberOfEachDice,
     convertToDC,
     convertFromDC,
@@ -192,50 +191,6 @@ export function registerDamageFunctionTests(quench) {
                     assert.deepEqual(
                         getNumberOfEachDice("1d6 + 1d3"),
                         [1, 1, 0],
-                    );
-                });
-            });
-
-            describe("simplifyDamageRoll", function () {
-                it("Empty", function () {
-                    assert.equal(simplifyDamageRoll(""), "");
-                });
-
-                it("+1", function () {
-                    assert.equal(simplifyDamageRoll("+1"), "1");
-                });
-
-                it("1d3", function () {
-                    assert.equal(simplifyDamageRoll("1d3"), "1d3");
-                });
-
-                it("2d3", function () {
-                    assert.equal(simplifyDamageRoll("2d3"), "1d6");
-                });
-
-                it("1d6", function () {
-                    assert.equal(simplifyDamageRoll("1d6"), "1d6");
-                });
-
-                it("1d6 + 1d3", function () {
-                    assert.equal(simplifyDamageRoll("1d6 + 1d3"), "1d6 + 1d3");
-                });
-
-                it("1d6 + 2d3", function () {
-                    assert.equal(simplifyDamageRoll("1d6 + 2d3"), "2d6");
-                });
-
-                it("1d6 + 1d3 + 2d6 + 2d3", function () {
-                    assert.equal(
-                        simplifyDamageRoll("1d6 + 1d3 + 2d6 + 2d3"),
-                        "4d6 + 1d3",
-                    );
-                });
-
-                it("1d6 + 1d3 + 1", function () {
-                    assert.equal(
-                        simplifyDamageRoll("1d6 + 1d3 + 1"),
-                        "1d6 + 1d3 + 1",
                     );
                 });
             });

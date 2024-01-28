@@ -100,26 +100,6 @@ export function getNumberOfEachDice(roll) {
     return [d6Count, d3Count, constant];
 }
 
-export function simplifyDamageRoll(damageRoll) {
-    const [d6Count, d3Count, constant] = getNumberOfEachDice(damageRoll);
-
-    let output = "";
-
-    if (d6Count !== 0) {
-        output = addTerms(output, d6Count.toString() + "d6");
-    }
-
-    if (d3Count !== 0) {
-        output = addTerms(output, d3Count.toString() + "d3");
-    }
-
-    if (constant !== 0) {
-        output = addTerms(output, constant);
-    }
-
-    return output;
-}
-
 export function convertToDC(item, formula) {
     const [d6Count, d3Count, constant] = getNumberOfEachDice(formula);
 
