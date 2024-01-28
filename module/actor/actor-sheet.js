@@ -13,6 +13,7 @@ import {
 } from "../utility/damage.js";
 
 import { HeroSystem6eActor } from "./actor.js";
+import { HeroRoller } from "../utility/dice.js";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
@@ -950,26 +951,32 @@ export class HeroSystemActorSheet extends ActorSheet {
         const dataset = element.dataset;
         const charRoll = parseInt(element.textContent.slice(0, -1));
 
-        if (dataset.roll) {
-            const actor = this.actor;
+        const heroRoller = new HeroRoller().makeSuccessRoll().addDice(3);
+        await heroRoller.roll();
 
-            const roll = new Roll(dataset.roll, this.actor.getRollData());
-            roll.evaluate({ async: true }).then(function (result) {
-                // let margin = actor.system.characteristics[dataset.label].roll - result.total;
-                const margin = charRoll - result.total;
+        const margin = charRoll - heroRoller.getSuccessTotal();
+        const cardHtml = await heroRoller.render(
+            dataset.label.toUpperCase() +
+                ` (${charRoll}-) roll ` +
+                (margin >= 0 ? "succeeded" : "failed") +
+                " by " +
+                Math.abs(margin),
+        );
 
-                result.toMessage({
-                    speaker: ChatMessage.getSpeaker({ actor }),
-                    flavor:
-                        dataset.label.toUpperCase() +
-                        ` (${charRoll}-) roll ` +
-                        (margin >= 0 ? "succeeded" : "failed") +
-                        " by " +
-                        Math.abs(margin),
-                    borderColor: margin >= 0 ? 0x00ff00 : 0xff0000,
-                });
-            });
-        }
+        const actor = this.actor;
+        const token = actor.token;
+        const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+        speaker.alias = actor.name;
+
+        const chatData = {
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            rolls: heroRoller.rawRolls(),
+            user: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        return ChatMessage.create(chatData);
     }
 
     async _onItemToggle(event) {
