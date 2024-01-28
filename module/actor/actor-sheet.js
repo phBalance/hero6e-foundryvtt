@@ -955,13 +955,19 @@ export class HeroSystemActorSheet extends ActorSheet {
         await heroRoller.roll();
 
         const margin = charRoll - heroRoller.getSuccessTotal();
-        const cardHtml = await heroRoller.render(
-            dataset.label.toUpperCase() +
-                ` (${charRoll}-) roll ` +
-                (margin >= 0 ? "succeeded" : "failed") +
-                " by " +
-                Math.abs(margin),
-        );
+        const autoSuccess = heroRoller.getAutoSuccess();
+        const useAutoSuccess = autoSuccess !== undefined;
+        const success = useAutoSuccess ? autoSuccess : margin >= 0;
+
+        const flavor = `${dataset.label.toUpperCase()} (${charRoll}-) roll ${
+            success ? "succeeded" : "failed"
+        } ${
+            useAutoSuccess
+                ? `due to automatic ${autoSuccess ? "success" : "failure"}`
+                : `by ${Math.abs(margin)}`
+        }`;
+
+        const cardHtml = await heroRoller.render(flavor);
 
         const actor = this.actor;
         const token = actor.token;
