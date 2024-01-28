@@ -984,6 +984,8 @@ export async function _onRollDamage(event) {
         item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0,
     );
 
+    const useStandardEffect = item.system.USESTANDARDEFFECT || false;
+
     const { dc, tags } = convertToDcFromItem(item, {
         isAction: true,
         ...toHitData,
@@ -1012,7 +1014,7 @@ export async function _onRollDamage(event) {
         .addDice(formulaParts.d6Count)
         .addHalfDice(formulaParts.halfDieCount)
         .addNumber(formulaParts.constant)
-        .modifyToStandardEffect(item.system.USESTANDARDEFFECT)
+        .modifyToStandardEffect(useStandardEffect)
         .addToHitLocation(includeHitLocation, toHitData.aim);
 
     await heroRoller.roll();
