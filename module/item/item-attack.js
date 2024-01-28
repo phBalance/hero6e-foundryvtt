@@ -1639,7 +1639,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         bodyDamage: damageDetail.bodyDamage,
         bodyDamageEffective: damageDetail.body,
         countedBody: damageDetail.countedBody,
-        stringifiedBodyTerms: JSON.stringify(heroRoller.getBodyTerms()),
+        // stringifiedBodyTerms: JSON.stringify(heroRoller.getBodyTerms()), // TODO: Need to figure out how to display this appropriately.
 
         // stun
         stunDamage: damageDetail.stunDamage,
@@ -1647,7 +1647,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         hasRenderedDamageRoll: true,
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-        stringifiedStunTerms: JSON.stringify(heroRoller.getStunTerms()),
+        // stringifiedStunTerms: JSON.stringify(heroRoller.getStunTerms()), // TODO: Need to figure out how to display this appropriately.
+
+        damageString: heroRoller.getTooltipTotal(),
 
         // effects
         effects: effectsFinal,
