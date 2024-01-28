@@ -4,7 +4,6 @@ import {
     determineStrengthDamage,
     determineExtraDiceDamage,
     getNumberOfEachDice,
-    convertToDC,
     convertFromDC,
     addTerms,
     convertToDcFromItem,
@@ -192,67 +191,6 @@ export function registerDamageFunctionTests(quench) {
                         getNumberOfEachDice("1d6 + 1d3"),
                         [1, 1, 0],
                     );
-                });
-            });
-
-            describe("convertToDC", function () {
-                const item = new HeroSystem6eItem({
-                    name: "Test",
-                    type: "attack",
-                    system: {
-                        killing: true,
-                    },
-                    parent: actor,
-                });
-
-                const item_nk = new HeroSystem6eItem({
-                    name: "Test",
-                    type: "attack",
-                    parent: actor,
-                });
-
-                it('""', function () {
-                    assert.equal(convertToDC(item, ""), 0);
-                });
-
-                it("(Killing) 1", function () {
-                    assert.equal(convertToDC(item, "1"), 1);
-                });
-
-                it("(Killing) 2", function () {
-                    assert.equal(convertToDC(item, "1d3"), 2);
-                });
-
-                it("(Killing) 3", function () {
-                    assert.equal(convertToDC(item, "1d6"), 3);
-                });
-
-                it("(Killing) 4", function () {
-                    assert.equal(convertToDC(item, "1d6+1"), 4);
-                });
-
-                it("(Killing) 5", function () {
-                    assert.equal(convertToDC(item, "1d6 + 1d3"), 5);
-                });
-
-                it("(Killing) 6", function () {
-                    assert.equal(convertToDC(item, "2d6"), 6);
-                });
-
-                it("(Killing) 7", function () {
-                    assert.equal(convertToDC(item, "2d6 + 1"), 7);
-                });
-
-                it("(Non-Killing) 0", function () {
-                    assert.equal(convertToDC(item_nk, "0d6"), 0);
-                });
-
-                it("(Non-Killing) 1", function () {
-                    assert.equal(convertToDC(item_nk, "1d6"), 1);
-                });
-
-                it("(Non-Killing) 20", function () {
-                    assert.equal(convertToDC(item_nk, "20d6"), 20);
                 });
             });
 

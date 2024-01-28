@@ -100,18 +100,6 @@ export function getNumberOfEachDice(roll) {
     return [d6Count, d3Count, constant];
 }
 
-export function convertToDC(item, formula) {
-    const [d6Count, d3Count, constant] = getNumberOfEachDice(formula);
-
-    if (!item.system.killing) {
-        return d6Count;
-    }
-
-    const pip = constant > 0 ? 1 : 0;
-
-    return parseInt(3 * d6Count + 2 * d3Count + pip || 0);
-}
-
 // Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
     let actor = item.actor;
