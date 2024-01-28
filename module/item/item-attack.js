@@ -6,7 +6,6 @@ import {
     calculateDiceFormulaParts,
     CombatSkillLevelsForAttack,
     convertToDcFromItem,
-    handleDamageNegation,
 } from "../utility/damage.js";
 import {
     performAdjustment,
@@ -1512,10 +1511,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
-    // TODO: This needs to be handled. Bypass for now. For normal attacks this is easy
-    //       but there are considerations for what subtracting a DC means for a killing attack
-    //       This should really be done before rolling damage.
-    // newRoll = await handleDamageNegation(item, newRoll, damageData);
     heroRoller.removeNDC(damageData.damageNegationValue);
 
     // We need to recalculate damage to account for possible Damage Negation
