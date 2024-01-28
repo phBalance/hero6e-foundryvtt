@@ -998,12 +998,12 @@ export async function _onRollDamage(event) {
         (item.system.noHitLocations || true);
 
     const heroRoller = new HeroRoller()
+        .modifyTo5e(actor.system.is5e)
         .makeNormalRoll(
             !senseAffecting && !adjustment && !formulaParts.isKilling,
         )
         .makeKillingRoll(
             !senseAffecting && !adjustment && formulaParts.isKilling,
-            actor.system.is5e,
         )
         .makeAdjustmentRoll(!!adjustment)
         .makeFlashRoll(!!senseAffecting)

@@ -75,6 +75,11 @@ class Roll6Mock extends RollMock {
     static DieClass = FixedDieRoll(this.fixedRollResult);
 }
 
+class Roll5Mock extends RollMock {
+    static fixedRollResult = 5;
+    static DieClass = FixedDieRoll(this.fixedRollResult);
+}
+
 class Roll3Mock extends RollMock {
     static fixedRollResult = 3;
     static DieClass = FixedDieRoll(this.fixedRollResult);
@@ -134,19 +139,19 @@ export function registerDiceTests(quench) {
                             HeroRoller.ROLL_TYPE.NORMAL,
                         );
 
-                        roller.makeKillingRoll(0, true);
+                        roller.makeKillingRoll(0);
                         expect(roller._type).to.equal(
                             HeroRoller.ROLL_TYPE.NORMAL,
                         );
-                        roller.makeKillingRoll(false, true);
+                        roller.makeKillingRoll(false);
                         expect(roller._type).to.equal(
                             HeroRoller.ROLL_TYPE.NORMAL,
                         );
-                        roller.makeKillingRoll(null, true);
+                        roller.makeKillingRoll(null);
                         expect(roller._type).to.equal(
                             HeroRoller.ROLL_TYPE.NORMAL,
                         );
-                        roller.makeKillingRoll(undefined, true);
+                        roller.makeKillingRoll(undefined);
                         expect(roller._type).to.equal(
                             HeroRoller.ROLL_TYPE.KILLING,
                         );
@@ -232,7 +237,7 @@ export function registerDiceTests(quench) {
                             HeroRoller.ROLL_TYPE.NORMAL,
                         );
 
-                        roller.makeKillingRoll(true, true);
+                        roller.makeKillingRoll(true);
                         expect(roller._type).to.equal(
                             HeroRoller.ROLL_TYPE.KILLING,
                         );
@@ -1236,7 +1241,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, true)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true)
                             .addNumber(1);
 
                         await roller.roll();
@@ -1267,11 +1273,72 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                     });
 
+                    it("should calculate stun multiplier correctly for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+                    });
+
+                    it("should calculate stun multiplier correctly for 5e in reverse order", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true)
+                            .modifyTo5e(true)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1,
+                        );
+                    });
+
+                    it("should calculate stun multiplier correctly for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(false)
+                            .makeKillingRoll(true)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+                    });
+
+                    it("should calculate stun multiplier correctly for 6e in reverse order", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true)
+                            .modifyTo5e(false)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                        );
+                    });
+
                     it("should handle a pip", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, true)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true)
                             .addNumber(1);
 
                         await roller.roll();
@@ -1295,7 +1362,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addHalfDice(1);
 
                         await roller.roll();
@@ -1325,7 +1392,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, true)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true)
                             .addDice(1);
 
                         await roller.roll();
@@ -1355,7 +1423,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDiceMinus1(1);
 
                         await roller.roll();
@@ -1385,7 +1453,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, true)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true)
                             .addDice(1)
                             .addNumber(1);
 
@@ -1417,7 +1486,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(3);
 
                         await roller.roll();
@@ -1454,7 +1523,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addStunMultiplier(7)
                             .addDice(3);
 
@@ -1496,7 +1565,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addStunMultiplier(-1)
                             .addDice(3);
 
@@ -1557,7 +1626,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addStunMultiplier(-7)
                             .addDice(3);
 
@@ -1588,7 +1657,8 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, true)
+                            .modifyTo5e(true)
+                            .makeKillingRoll(true)
                             .modifyToStandardEffect()
                             .addDice(3)
                             .addHalfDice(1)
@@ -1646,7 +1716,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .modifyToStandardEffect()
                             .addDice(3)
                             .addDiceMinus1(1)
@@ -1700,7 +1770,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addToHitLocation(1)
                             .addDice(3);
 
@@ -1745,7 +1815,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addStunMultiplier(7)
                             .addToHitLocation()
                             .addDice(3);
@@ -1790,7 +1860,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addStunMultiplier(-1)
                             .addToHitLocation()
                             .addDice(3);
@@ -1835,7 +1905,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addToHitLocation()
                             .addDice(3)
                             .addDiceMinus1(1)
@@ -1857,7 +1927,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addToHitLocation()
                             .addDice(3)
                             .addDiceMinus1(1)
@@ -1879,7 +1949,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(3);
 
                         await roller.roll();
@@ -1912,7 +1982,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(2)
                             .addHalfDice(1);
 
@@ -1946,7 +2016,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(2)
                             .addDiceMinus1(1);
 
@@ -1980,7 +2050,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(2)
                             .addNumber(1);
 
@@ -2014,7 +2084,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(1);
 
                         await roller.roll();
@@ -2045,7 +2115,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(1);
 
                         await roller.roll();
@@ -2080,7 +2150,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(1);
 
                         await roller.roll();
@@ -2109,7 +2179,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(1);
 
                         await roller.roll();
@@ -2138,7 +2208,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addDice(3);
 
                         await roller.roll();
@@ -2179,7 +2249,7 @@ export function registerDiceTests(quench) {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
-                            .makeKillingRoll(true, false)
+                            .makeKillingRoll(true)
                             .addHalfDice(1)
                             .addNumber(1);
 
@@ -2447,6 +2517,47 @@ export function registerDiceTests(quench) {
                         expect(roller.getFlashTotal()).to.equal(
                             3 * 2 + 1 * 1 + 1 * 0,
                         );
+                    });
+
+                    it("should correctly handle half dice for 5e with a 6", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([1]);
+                        expect(roller.getFlashTotal()).to.equal(1);
+                    });
+
+                    it("should correctly handle half dice for 5e with a 5", async function () {
+                        const TestRollMock = Roll5Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .modifyTo5e(true)
+                            .makeFlashRoll()
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([0]);
+                        expect(roller.getFlashTotal()).to.equal(0);
+                    });
+
+                    it("should correctly handle half dice for 6e with a 5", async function () {
+                        const TestRollMock = Roll5Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .modifyTo5e(false)
+                            .addHalfDice(1);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([1]);
+                        expect(roller.getFlashTotal()).to.equal(1);
                     });
                 });
 

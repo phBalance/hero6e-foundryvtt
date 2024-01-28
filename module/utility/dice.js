@@ -82,6 +82,7 @@ export class HeroRoller {
         this._formulaTerms = [];
 
         this._type = HeroRoller.ROLL_TYPE.BASIC;
+        this._is5eRoll = false;
 
         this._termsCluster = [];
 
@@ -131,10 +132,10 @@ export class HeroRoller {
         return this;
     }
 
-    makeKillingRoll(apply = true, isd6minus1 = false) {
+    makeKillingRoll(apply = true) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.KILLING;
-            this._killingStunMultiplier = isd6minus1 ? "1d6-1" : "1d3";
+            this._killingStunMultiplier = this._is5eRoll ? "1d6-1" : "1d3";
         }
         return this;
     }
@@ -163,6 +164,14 @@ export class HeroRoller {
     modifyToStandardEffect(apply = true) {
         if (apply) {
             this._standardEffect = true;
+        }
+        return this;
+    }
+
+    modifyTo5e(apply = false) {
+        if (apply) {
+            this._is5eRoll = true;
+            this.makeKillingRoll(this._type === HeroRoller.ROLL_TYPE.KILLING);
         }
         return this;
     }
@@ -925,7 +934,19 @@ export class HeroRoller {
                         return 0;
                     } else {
                         if (originalResult >= 4) {
-                            return 1;
+                            // 5e pg. 176 rule that doesn't exist in 6e
+                            if (
+                                this._type === HeroRoller.ROLL_TYPE.FLASH &&
+                                this._is5eRoll
+                            ) {
+                                if (originalResult === 6) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                            } else {
+                                return 1;
+                            }
                         } else {
                             return 0;
                         }
@@ -1225,7 +1246,8 @@ export class HeroRoller {
             const baseFormulaPurpose = this.#buildFormulaBasePurpose();
 
             const baseTermTooltip =
-                this._type === HeroRoller.ROLL_TYPE.ENTANGLE
+                this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+                this._type === HeroRoller.ROLL_TYPE.FLASH
                     ? ""
                     : `
                     <div class="dice">
@@ -1349,6 +1371,7 @@ export class HeroRoller {
         switch (this._type) {
             case HeroRoller.ROLL_TYPE.BASIC:
             case HeroRoller.ROLL_TYPE.ENTANGLE:
+            case HeroRoller.ROLL_TYPE.FLASH:
             case HeroRoller.ROLL_TYPE.SUCCESS:
                 return "";
 
@@ -1361,9 +1384,6 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
                 return "Active Points";
 
-            case HeroRoller.ROLL_TYPE.FLASH:
-                return "Segments";
-
             default:
                 console.error(`unknown base purpose type ${this._type}`);
                 return "";
@@ -1375,7 +1395,6 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.BASIC:
             case HeroRoller.ROLL_TYPE.SUCCESS:
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
-            case HeroRoller.ROLL_TYPE.FLASH:
                 // No calculated terms
                 return "";
 
@@ -1385,6 +1404,9 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.NORMAL:
                 return "BODY";
+
+            case HeroRoller.ROLL_TYPE.FLASH:
+                return "Segments";
 
             default:
                 console.error(`unknown base purpose type ${this._type}`);
@@ -1399,10 +1421,11 @@ export class HeroRoller {
             );
 
             // Show the unadjusted value if this is a partial dice (1d6-1 or 1/2d6)
-            // and showMinMax was requested. Alternatively, if this is an ENTANGLE
+            // and showMinMax was requested. Alternatively, if this is an ENTANGLE or FLASH
             // we don't show the original roll so always show this.
             const unadjustedTooltip =
                 this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+                this._type === HeroRoller.ROLL_TYPE.FLASH ||
                 (diceTermMetadata[index].qualifier !==
                     HeroRoller.QUALIFIER.FULL_DIE &&
                     diceTermMetadata[index].qualifier !==
