@@ -976,6 +976,7 @@ export async function _onRollDamage(event) {
     const senseAffecting = getPowerInfo({
         item: item,
     })?.powerType?.includes("sense-affecting");
+    const entangle = item.system.XMLID === "ENTANGLE";
 
     const increasedMultiplierLevels = parseInt(
         item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0,
@@ -1005,6 +1006,7 @@ export async function _onRollDamage(event) {
         )
         .makeAdjustmentRoll(!!adjustment)
         .makeFlashRoll(!!senseAffecting)
+        .makeEntangleRoll(entangle)
         .addStunMultiplier(
             increasedMultiplierLevels - decreasedMultiplierLevels,
         )
@@ -1886,6 +1888,7 @@ async function _calcDamage(heroRoller, item, options) {
     const senseAffectingPower = getPowerInfo({
         item: item,
     })?.powerType?.includes("sense-affecting");
+    const entangle = item.system.XMLID === "ENTANGLE";
 
     let body;
     let stun;
@@ -1895,6 +1898,9 @@ async function _calcDamage(heroRoller, item, options) {
         stun = heroRoller.getAdjustmentTotal();
     } else if (senseAffectingPower) {
         body = heroRoller.getFlashTotal();
+        stun = 0;
+    } else if (entangle) {
+        body = heroRoller.getEntangleTotal();
         stun = 0;
     } else {
         body = heroRoller.getBodyTotal();
