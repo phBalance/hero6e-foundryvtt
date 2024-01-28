@@ -565,6 +565,82 @@ export function registerDiceTests(quench) {
                             19 - 3 * TestRollMock.fixedRollResult,
                         );
                     });
+
+                    it("should allow auto success determination of true", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll(true, 11)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getAutoSuccess()).to.equal(true);
+                    });
+
+                    it("should allow auto success determination of false", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll(true, 11)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getAutoSuccess()).to.equal(false);
+                    });
+
+                    it("should allow auto success determination of true in roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll(true, 11)
+                            .addNumber(11)
+                            .subDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccess()).to.equal(true);
+                    });
+
+                    it("should allow auto success determination of false in roll", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll(true, 11)
+                            .addNumber(11)
+                            .subDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccess()).to.equal(false);
+                    });
+
+                    it("should allow a more complex success determination of true (just making it)", async function () {
+                        const TestRollMock = Roll3Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll(true, 9)
+                            .addNumber(18)
+                            .subDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccess()).to.equal(true);
+                    });
+
+                    it("should allow a more complex success determination of true (just failing it)", async function () {
+                        const TestRollMock = Roll3Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeSuccessRoll(true, 9)
+                            .addNumber(19)
+                            .subDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getSuccess()).to.equal(false);
+                    });
                 });
 
                 describe("normal roll", function () {

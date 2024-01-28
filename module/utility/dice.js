@@ -100,6 +100,9 @@ export class HeroRoller {
         };
         this._useHitLocation = false;
         this._alreadyHitLocation = "none";
+
+        this._successValue = undefined;
+        this._successRolledValue = undefined;
     }
 
     getType() {
@@ -113,9 +116,10 @@ export class HeroRoller {
         return this;
     }
 
-    makeSuccessRoll(apply = true) {
+    makeSuccessRoll(apply = true, successValue) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.SUCCESS;
+            this._successValue = successValue;
         }
         return this;
     }
@@ -389,6 +393,8 @@ export class HeroRoller {
 
         this.#calculate();
 
+        this.#calculateAutoSuccessOrFailureIfAppropriate();
+
         return this;
     }
 
@@ -408,6 +414,7 @@ export class HeroRoller {
 
     // TODO: May wish to consider our own custom chat template for this.
     // TODO: May wish to consider no flavour, but rather have it be the type of roll?
+    // TODO: borderColor: margin >= 0 ? 0x00ff00 : 0xff0000, based on success/failure?
     async render(flavor) {
         const template = this._buildRollClass.CHAT_TEMPLATE;
 
@@ -469,6 +476,42 @@ export class HeroRoller {
 
         throw new Error(
             `asking for success from type ${this._type} doesn't make sense`,
+        );
+    }
+    getSuccess() {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.SUCCESS &&
+            this._successValue !== undefined
+        ) {
+            const autoSuccess = this.getAutoSuccess();
+
+            if (autoSuccess !== undefined) {
+                return autoSuccess;
+            } else {
+                return this.getSuccessTotal() <= this._successValue; // TODO: Is this right? Does it work for attack?
+            }
+        }
+
+        throw new Error(
+            `asking for success from type ${this._type}/${this._successValue} doesn't make sense`,
+        );
+    }
+    getAutoSuccess() {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.SUCCESS &&
+            this._successValue !== undefined
+        ) {
+            if (this._successRolledValue === 3) {
+                return true;
+            } else if (this._successRolledValue === 18) {
+                return false;
+            }
+
+            return undefined;
+        }
+
+        throw new Error(
+            `asking for success from type ${this._type}/${this._successValue} doesn't make sense`,
         );
     }
 
@@ -768,6 +811,27 @@ export class HeroRoller {
         // TODO: Check if anything is missing...
 
         return heroRoller;
+    }
+
+    // Was the roll an auto success or not?
+    #calculateAutoSuccessOrFailureIfAppropriate() {
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS) {
+            // Pull out the result of the 3d6 roll somewhere in the terms and use that total
+            this._successRolledValue =
+                HeroRoller.#extractPropertyFromTermsCluster(
+                    this._termsCluster,
+                    "baseMetadata",
+                ).reduce((total, termMetadata) => {
+                    if (
+                        termMetadata.qualifier ===
+                            HeroRoller.QUALIFIER.FULL_DIE &&
+                        termMetadata.termCardinality === 3
+                    ) {
+                        return total + termMetadata.originalValue;
+                    }
+                    return total;
+                }, 0);
+        }
     }
 
     async #calculateStunMultiplierIfAppropriate() {
