@@ -71,35 +71,6 @@ export function determineExtraDiceDamage(item) {
     }
 }
 
-export function getNumberOfEachDice(roll) {
-    const matches = roll.match(/\d+d6|\d+d3/g) || null;
-
-    const constant =
-        parseInt(roll.match(/(?<![a-zA-Z])\b\d+\b(?![a-zA-Z])/g)) || 0;
-
-    if (!matches) {
-        return [0, 0, constant];
-    }
-
-    let d6Count = 0;
-    let d3Count = 0;
-
-    matches.forEach((current) => {
-        const [numDice, diceType] = current.split("d");
-
-        if (diceType == "6") {
-            d6Count += parseInt(numDice);
-        } else if (diceType == "3") {
-            d3Count += parseInt(numDice);
-        }
-    });
-
-    d6Count += Math.floor(d3Count / 2);
-    d3Count = d3Count % 2;
-
-    return [d6Count, d3Count, constant];
-}
-
 // Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
     let actor = item.actor;

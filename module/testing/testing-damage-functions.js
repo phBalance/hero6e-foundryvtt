@@ -3,7 +3,6 @@ import { HeroSystem6eItem } from "../item/item.js";
 import {
     determineStrengthDamage,
     determineExtraDiceDamage,
-    getNumberOfEachDice,
     convertFromDC,
     addTerms,
     convertToDcFromItem,
@@ -152,45 +151,6 @@ export function registerDamageFunctionTests(quench) {
                     });
 
                     assert.equal(determineExtraDiceDamage(item), "+1d3");
-                });
-            });
-
-            describe("getNumberOfEachDice", function () {
-                it("Empty", function () {
-                    assert.deepEqual(getNumberOfEachDice(""), [0, 0, 0]);
-                });
-
-                it("1d6 + 1d3 + 1", function () {
-                    assert.deepEqual(
-                        getNumberOfEachDice("1d6 + 1d3 + 1"),
-                        [1, 1, 1],
-                    );
-                });
-
-                it("1d6 + 1d6", function () {
-                    assert.deepEqual(
-                        getNumberOfEachDice("1d6 + 1d6"),
-                        [2, 0, 0],
-                    );
-                });
-
-                it("+1", function () {
-                    assert.deepEqual(getNumberOfEachDice("+1"), [0, 0, 1]);
-                });
-
-                it("1d6", function () {
-                    assert.deepEqual(getNumberOfEachDice("1d6"), [1, 0, 0]);
-                });
-
-                it("1d3", function () {
-                    assert.deepEqual(getNumberOfEachDice("1d3"), [0, 1, 0]);
-                });
-
-                it("1d6 + 1d3", function () {
-                    assert.deepEqual(
-                        getNumberOfEachDice("1d6 + 1d3"),
-                        [1, 1, 0],
-                    );
                 });
             });
 
