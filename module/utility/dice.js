@@ -417,7 +417,6 @@ export class HeroRoller {
     // TODO: borderColor: margin >= 0 ? 0x00ff00 : 0xff0000, based on success/failure?
     async render(flavor) {
         const template = this._buildRollClass.CHAT_TEMPLATE;
-
         const chatData = {
             formula: this.#buildFormula(),
             flavor: flavor,
@@ -608,7 +607,7 @@ export class HeroRoller {
 
     getEntangleTerms() {
         if (this._type === HeroRoller.ROLL_TYPE.ENTANGLE) {
-            return this.getBaseTerms();
+            return this.getCalculatedTerms();
         }
 
         throw new Error(
@@ -617,7 +616,7 @@ export class HeroRoller {
     }
     getEntangleTotal() {
         if (this._type === HeroRoller.ROLL_TYPE.ENTANGLE) {
-            return this.getBaseTotal();
+            return this.getCalculatedTotal();
         }
 
         throw new Error(
@@ -664,7 +663,10 @@ export class HeroRoller {
     }
 
     getBaseTerms() {
-        if (this._type === HeroRoller.ROLL_TYPE.FLASH) {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.FLASH ||
+            this._type === HeroRoller.ROLL_TYPE.ENTANGLE
+        ) {
             console.error(
                 `attempting to get baseTerms for roll type ${this._type}`,
             );
@@ -704,8 +706,7 @@ export class HeroRoller {
     getCalculatedTerms() {
         if (
             this._type === HeroRoller.ROLL_TYPE.BASIC ||
-            this._type === HeroRoller.ROLL_TYPE.SUCCESS ||
-            this._type === HeroRoller.ROLL_TYPE.ENTANGLE
+            this._type === HeroRoller.ROLL_TYPE.SUCCESS
         ) {
             console.error(
                 `attempting to get calculatedTerms for roll type ${this._type}`,
@@ -907,8 +908,17 @@ export class HeroRoller {
                 // Do nothing as there are no calculated values
                 break;
 
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.FLASH:
             case HeroRoller.ROLL_TYPE.NORMAL:
+                // constants for entangle are straight body
+                if (
+                    this._type === HeroRoller.ROLL_TYPE.ENTANGLE &&
+                    termQualifier === HeroRoller.QUALIFIER.NUMBER
+                ) {
+                    return originalResult;
+                }
+
                 // Calculate BODY
                 if (termQualifier === HeroRoller.QUALIFIER.HALF_DIE) {
                     if (this._standardEffect) {
@@ -937,7 +947,6 @@ export class HeroRoller {
 
                 return adjustedResult * this.getBaseMultiplier();
 
-            case HeroRoller.ROLL_TYPE.ENTANGLE:
             default:
                 console.error(`Unhandled calculation for type ${this._type}`);
         }
@@ -1177,7 +1186,7 @@ export class HeroRoller {
                         <span class="part-total">${stunMultiplier}</span>
                     </header>
                     <ol class="dice-rolls">
-                        ${HeroRoller.#buildDiceRollsTooltip(
+                        ${this.#buildDiceRollsTooltip(
                             fullBaseTerms.base,
                             fullBaseTerms.baseMetadata,
                             true,
@@ -1215,7 +1224,10 @@ export class HeroRoller {
             );
             const baseFormulaPurpose = this.#buildFormulaBasePurpose();
 
-            const baseTermTooltip = `
+            const baseTermTooltip =
+                this._type === HeroRoller.ROLL_TYPE.ENTANGLE
+                    ? ""
+                    : `
                     <div class="dice">
                         <header class="part-header flexrow">
                             <span class="part-formula">${baseFormula}${
@@ -1232,7 +1244,7 @@ export class HeroRoller {
                             <span class="part-total">${baseTotal}</span>
                         </header>
                         <ol class="dice-rolls">
-                            ${HeroRoller.#buildDiceRollsTooltip(
+                            ${this.#buildDiceRollsTooltip(
                                 baseCluster,
                                 baseMetadataCluster,
                                 true,
@@ -1255,7 +1267,7 @@ export class HeroRoller {
                     "calculatedMetadata",
                 );
 
-            const calculatedTermTooltip = !this.#buildFormulaCalculatedPurpose()
+            const calculatedTermTooltip = !calculatedFormulaPurpose
                 ? ""
                 : `
                         <div class="dice">
@@ -1264,7 +1276,7 @@ export class HeroRoller {
                                 <span class="part-total">${calculatedTotal}</span>
                             </header>
                             <ol class="dice-rolls">
-                                ${HeroRoller.#buildDiceRollsTooltip(
+                                ${this.#buildDiceRollsTooltip(
                                     calculatedCluster,
                                     calculatedMetadataCluster,
                                     false,
@@ -1336,13 +1348,13 @@ export class HeroRoller {
     #buildFormulaBasePurpose() {
         switch (this._type) {
             case HeroRoller.ROLL_TYPE.BASIC:
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.SUCCESS:
                 return "";
 
             case HeroRoller.ROLL_TYPE.NORMAL:
                 return "STUN";
 
-            case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.KILLING:
                 return "BODY";
 
@@ -1362,7 +1374,6 @@ export class HeroRoller {
         switch (this._type) {
             case HeroRoller.ROLL_TYPE.BASIC:
             case HeroRoller.ROLL_TYPE.SUCCESS:
-            case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
             case HeroRoller.ROLL_TYPE.FLASH:
                 // No calculated terms
@@ -1371,6 +1382,7 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.KILLING:
                 return "STUN";
 
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.NORMAL:
                 return "BODY";
 
@@ -1380,17 +1392,22 @@ export class HeroRoller {
         }
     }
 
-    static #buildDiceRollsTooltip(diceTerm, diceTermMetadata, showMinMax) {
+    #buildDiceRollsTooltip(diceTerm, diceTermMetadata, showMinMax) {
         return diceTerm.reduce((soFar, result, index) => {
             const absUnadjustedNumber = Math.abs(
                 diceTermMetadata[index].originalValue,
             );
+
+            // Show the unadjusted value if this is a partial dice (1d6-1 or 1/2d6)
+            // and showMinMax was requested. Alternatively, if this is an ENTANGLE
+            // we don't show the original roll so always show this.
             const unadjustedTooltip =
-                diceTermMetadata[index].qualifier !==
+                this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+                (diceTermMetadata[index].qualifier !==
                     HeroRoller.QUALIFIER.FULL_DIE &&
-                diceTermMetadata[index].qualifier !==
-                    HeroRoller.QUALIFIER.NUMBER &&
-                showMinMax
+                    diceTermMetadata[index].qualifier !==
+                        HeroRoller.QUALIFIER.NUMBER &&
+                    showMinMax)
                     ? `title="${absUnadjustedNumber}"`
                     : "";
 
