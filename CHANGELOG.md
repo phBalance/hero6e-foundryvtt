@@ -1,7 +1,9 @@
 # Releases
 
-## Version 3.0.55 (so far)
+## Version 3.0.55 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
  - Improved clarity of defense tags for HARDENED and IMPENETRABLE. [#604](https://github.com/dmdorman/hero6e-foundryvtt/issues/604)
+ - Fix for incorrect END use when "Begin Combat" is clicked and actor is using FLIGHT movement.
+ - Preliminary work on alternate actor sheet herosystem6e.HeroSystemActorSavuoriSheet. [#647](https://github.com/dmdorman/hero6e-foundryvtt/pull/647) [#659](https://github.com/dmdorman/hero6e-foundryvtt/pull/659)
 
 ## Version 3.0.54 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
