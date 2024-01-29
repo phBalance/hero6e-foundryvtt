@@ -1,3 +1,5 @@
+import { HeroRoller } from "./dice.js";
+
 async function _renderForm(actor, stateData) {
     const token = actor.token;
 
@@ -16,21 +18,29 @@ async function _renderForm(actor, stateData) {
 async function presenceAttackRoll(actor, html) {
     let form = html[0].querySelector("form");
 
-    let rollEquation =
-        eval(
+    const heroRoller = new HeroRoller()
+        .makeBasicRoll()
+        .addDice(
             parseInt(Math.floor(actor.system.characteristics.pre.value / 5)) +
                 parseInt(form.mod.value),
-        ).toString() + "D6";
+            "Presence Attack",
+        );
+    await heroRoller.roll();
 
-    let roll = new Roll(rollEquation, actor.getRollData());
+    const cardHtml = await heroRoller.render("Presence Attack");
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+    speaker.alias = actor.name;
 
-    roll.evaluate({ async: true }).then(function (result) {
-        result.toMessage({
-            speaker: ChatMessage.getSpeaker({ actor: actor }),
-            flavor: "Presence Attack",
-            borderColor: 0x00ff00,
-        });
-    });
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: heroRoller.rawRolls(),
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    return ChatMessage.create(chatData);
 }
 
 async function presenceAttackPopOut(actor) {
@@ -43,16 +53,16 @@ async function presenceAttackPopOut(actor) {
 
     return new Promise((resolve) => {
         const data = {
-            title: "Roll to Hit",
+            title: "Presence Attack",
             content: content,
             buttons: {
-                rollToHit: {
-                    label: "Roll to Hit",
+                presenceAttack: {
+                    label: "Make Presence Attack",
                     callback: (html) =>
                         resolve(presenceAttackRoll(actor, html)),
                 },
             },
-            default: "rollToHit",
+            default: "presenceAttack",
             close: () => resolve({}),
         };
 

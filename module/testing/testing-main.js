@@ -4,6 +4,7 @@ import { registerTagTests } from "./testing-tag.js";
 import { registerUploadTests } from "./testing-upload.js";
 import { registerDefenseTests } from "./testing-defense.js";
 import { registerFullTests } from "./testing-full.js";
+import { registerDiceTests } from "./testing-dice.js";
 
 Hooks.once("ready", async function () {
     if (!game.modules.get("_dev-mode")?.active) {
@@ -26,6 +27,7 @@ Hooks.on("quenchReady", (quench) => {
     registerDefenseTests(quench);
     registerUploadTests(quench);
     registerFullTests(quench);
+    registerDiceTests(quench);
 });
 
 // Helper function to run all tests from browser console.

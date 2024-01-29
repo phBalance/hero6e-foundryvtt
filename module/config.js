@@ -116,6 +116,15 @@ HERO.hitLocationsToHit = {
     18: "Foot",
 };
 
+HERO.sidedLocations = new Set([
+    "Hand",
+    "Shoulder",
+    "Arm",
+    "Thigh",
+    "Leg",
+    "Foot",
+]);
+
 HERO.hitLocations = {
     // Location : [x Stun, x N Stun, x Body, OCV modifier]
     Head: [5, 2, 2, -8],

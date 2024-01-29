@@ -15,7 +15,7 @@
   </div>
 
   <div class="apply-damage-amount">
-    <span title="{{roll.title}}"> {{ bodyDamage }} BODY; {{ stunDamage }} STUN</span>
+    <span title="{{incomingDamageTerms}}">{{incomingDamageSummary}}</span>
   </div>
 
   <div class="tags">
@@ -39,25 +39,24 @@
     </span>
     {{/if}}
   </div>
+
   <hr>
+
   <div class="tags">
     {{#each tags as |tag id|}}
     <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} +{{tag.value}}</span>
     {{/each}}
-    {{#each knockbackTags as | tag id|}}
-    <span class="tag tag_knockback" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
-    {{/each}}
   </div>
 
   {{#if damageNegationValue}}
-  <div class="card-section">
-    <div class="damage-roll">{{{ renderedDamageRoll }}}</div>
-    {{#if hasStunMultiplierRoll}}
-    <div class="description-tiny">Stun Multiplier</div>
-    <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
-    {{/if}}
-    <div class="description-tiny">{{ bodyDamage }} BODY; {{ stunDamage }} STUN (after DN)</div>
-  </div>
+    <div class="card-section">
+      <div class="damage-roll">{{{ renderedDamageRoll }}}</div>
+      {{#if hasStunMultiplierRoll}}
+        <div class="description-tiny">Stun Multiplier</div>
+        <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
+      {{/if}}
+      <div class="description-tiny">{{ bodyDamage }} BODY; {{ stunDamage }} STUN (after DN)</div>
+    </div>
   {{/if}}
 
   <div class="card-section">
@@ -68,12 +67,22 @@
     <div class="description-tiny">Effect</div>
     <div class="description-medium">{{ bodyDamageEffective }} BODY; {{ stunDamageEffective }} STUN</div>
     <div class="description-tiny">{{{ effects }}}</div>
-    {{#if useKnockBack}}
-    <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
-    <div class="description-tiny">{{ knockbackMessage }}</div>
-    {{/if}}
-
-
   </div>
 
+  {{#if useKnockBack}}
+    <div class="card-section">
+      <div class="description-tiny">Knockback Roll</div>
+      {{#if knockbackTags}}
+        <div class="card-section">
+          <div class="tags">
+            {{#each knockbackTags as | tag id|}}
+            <span class="tag tag_knockback" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
+            {{/each}}
+          </div>
+        </div>
+      {{/if}}
+      <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
+      <div class="description-tiny">{{ knockbackMessage }}</div>
+    </div>
+  {{/if}}
 </div>

@@ -27,23 +27,14 @@
 
         <div class="card-section">
             {{#if useHitLoc}}
-            <div class="description-tiny">{{ hitLocText }}</div>
+                <div class="description-tiny">{{ hitLocText }}</div>
             {{/if}}
             <div class="damage-roll">{{{ renderedDamageRoll }}}</div>
-            {{#if hasStunMultiplierRoll}}
-            <div class="description-tiny">Stun Multiplier</div>
-            <div class="stun-x-roll">{{{ renderedStunMultiplierRoll }}}</div>
-            <div class="description-tiny">{{ stunMultiplier }}X STUN MULTIPLIER</div>
-            {{/if}}
-            <div class="description-tiny">
-                (
-                    {{#if item.system.USESTANDARDEFFECT}}Standard Effect{{else}}Raw Roll{{/if}}) {{ bodyDamage }} BODY; {{ stunDamage }} STUN
-            </div>
         </div>
 
         <div data-visibility="gm">
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
-                data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-terms="{{terms}}"
+                data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-roller="{{roller}}"
                 data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
                 {{#if (or adjustment senseAffecting)}}
                 Apply {{item.system.XMLID}}
@@ -55,12 +46,12 @@
             {{#each targetTokens as |target id|}}
             <button class="apply-damage" title="Apply damage to {{target.token.name}}." data-itemId="{{../item.uuid}}"
                 data-target-token-id="{{target.token.id}}" data-bodyDamage="{{../bodyDamage}}"
-                data-stunDamage="{{../stunDamage}}" data-terms="{{target.terms}}"
+                data-stunDamage="{{../stunDamage}}" data-roller="{{target.roller}}"
                 data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">
                 {{#if ../adjustment}}
                 Apply {{../item.system.XMLID}} to <b>{{target.token.name}}</b>
                 {{else}}
-                Apply <span title="{{target.roll.title}}">{{target.roll.total}}</span> Damage to <b>{{target.token.name}} {{item.system.XMLID}}</b>
+                Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.token.name}} {{item.system.XMLID}}</b>
                 {{/if}}
             </button>
             {{/each}}
@@ -68,7 +59,7 @@
             {{#if targetIds}}
             <button class="apply-damage" title="Apply damage to ALL tokens that were hit." data-itemId="{{item.uuid}}"
                 data-target-Ids="{{targetIds}}" data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}"
-                data-terms="{{terms}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
+                data-roller="{{roller}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
                 {{#if adjustment}}
                 Apply {{item.system.XMLID}} to <b>ALL</b>
                 {{else}}

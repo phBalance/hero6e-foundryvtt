@@ -61,7 +61,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const data = this.data;
         const item = data.item;
 
-        const aoe = item.hasAoeModifier();
+        const aoe = item.getAoeModifier();
         if (aoe) {
             // TODO: This needs to change. Shouldn't it be looking at system.areaOfEffect?
             data.aoeText = aoe.OPTION_ALIAS;
@@ -141,7 +141,7 @@ export class ItemAttackFormApplication extends FormApplication {
             canvas.tokens.activate();
             await this.close();
 
-            const aoe = this.data.item.hasAoeModifier();
+            const aoe = this.data.item.getAoeModifier();
             if (aoe) {
                 return _processAttackAoeOptions(this.data.item, formData);
             }
@@ -186,7 +186,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     async _spawnAreaOfEffect() {
         const item = this.data.item;
-        const aoe = item.hasAoeModifier();
+        const aoe = item.getAoeModifier();
         if (!aoe) return;
 
         const aoeType = aoe.OPTION.toLowerCase();
