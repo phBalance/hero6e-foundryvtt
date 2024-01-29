@@ -2027,7 +2027,7 @@ async function _calcDamage(heroRoller, item, options) {
             });
         }
 
-        const heroRoller = new HeroRoller()
+        const knockbackHeroRoller = new HeroRoller()
             .makeBasicRoll()
             .addNumber(
                 body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
@@ -2041,12 +2041,14 @@ async function _calcDamage(heroRoller, item, options) {
                 parseInt(options.knockbackMod || options.knockbadmod || 0),
                 "Knockback modifier", // knockback modifier added on an attack by attack basis
             )
-            .subDice(Math.max(0, knockbackDice), "Knockback resistance");
-        await heroRoller.roll();
+            .subDice(Math.max(0, knockbackDice));
+        await knockbackHeroRoller.roll();
 
-        const knockbackResultTotal = Math.round(heroRoller.getBasicTotal());
+        const knockbackResultTotal = Math.round(
+            knockbackHeroRoller.getBasicTotal(),
+        );
 
-        knockbackRenderedResult = await heroRoller.render();
+        knockbackRenderedResult = await knockbackHeroRoller.render();
 
         if (knockbackResultTotal < 0) {
             knockbackMessage = "No Knockback";
