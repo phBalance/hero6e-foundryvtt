@@ -24,6 +24,28 @@ $sidebar-width: 136px;
         "sidebar content" 1fr/#{$sidebar-width}  1fr;
 }
 
+.savuori.actor-sheet .sidebar {
+    overflow: hidden scroll;
+    padding: 4px;
+    background-color: $sheet-lighter-background;
+    height: 100%;
+}
+
+.savuori.actor-sheet nav.sheet-navigation {
+    align-items: center;
+    border-bottom: inherit;
+    border-top: inherit;
+    border-radius: 8px 0 0 0;
+    display: inline-flex;
+    justify-content: center;
+    position: relative;
+    transition: all 0.1s ease-out;
+    grid-area: nav;
+    padding: 10px;
+    background-color: $sheet-middle-background;
+}
+
+
 /* Sidebar */
 .savuori.actor-sheet aside {
     display: flex;
@@ -70,7 +92,7 @@ $sidebar-width: 136px;
     background-color: $sheet-lighter-background;
 }
 
-.savuori .sheet-content table {
+.savuori.sheet-content table {
     border: none;
     padding: 4px;
     margin: 0;
@@ -92,7 +114,6 @@ $sidebar-width: 136px;
     border-radius: 7px 7px 0 0;
     background-color: $sheet-header-background;
     margin-bottom: 0.2em;
-
     white-space: nowrap;
 }
 
@@ -108,6 +129,11 @@ $sidebar-width: 136px;
 }
 
 .savuori.actor-sheet nav a {
+    margin: 0.25em;
+    padding: 0.25em;
+    text-align: center;
+    border: thin solid black;
+    border-radius: 0.5em;
     background-color: $sheet-highlight-background;
 }
 
@@ -119,16 +145,22 @@ $sidebar-width: 136px;
 .savuori.actor-sheet .sheet-header {
     padding-left: 0.7em;
     background-color: $sheet-lighter-background;
+    margin-left: 0;
 }
 
 .savuori.actor-sheet .sheet-body {
     background-color: $sheet-darker-background;
+    margin-left: 0;
 }
 
 .savuori.actor-sheet table tr.sticky {
-    background-color: $sheet-header-background;
+    position: sticky;
+    top: 0;
+    z-index: 1; /* pesky checkboxes */
+    background-color: "red"; /* $sheet-header-background; */
 }
 
+.savuori th.left,
 .savuori td.left {
     padding-left: 1em;
     text-align: left;
@@ -193,26 +225,50 @@ $sidebar-width: 136px;
 }
 
 
-
+/* TAB */
+.savuori .tab-body {
+    height: 100%;
+    overflow-y: auto;
+    background-color: $sheet-lighter-background;
+    margin: 10px;
+}
 
 
 /* UPLOAD */
 .savuori .upload-button {
-    border-radius: 7px;
-    border-style: solid;
-    border-color: rgb(226, 226, 226);
-    border-width: 2px;
-    border: 2px groove var(--color-border-light-highlight);
-    background-color: $sheet-highlight-background;
+    height: 30px;
+  margin: 3px 5px;
+  padding: 0 4px;
+  background: rgba(255, 255, 240, 0.8);
+  font-size: 14px;
+  line-height: 28px;
+  font-family: "Signika", sans-serif;
+  align-content: center;
+  text-align: center;
+  border-radius: 7px;
+  border-style: solid;
+  border-color: rgb(226, 226, 226);
+  border-width: 2px;
+  border: 2px groove var(--color-border-light-highlight);
+  background-color: $sheet-highlight-background;
+
+  &:hover,
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 5px red;
+  }
+  &:disabled {
+    color: #4b4a44;
+    box-shadow: none;
+  }
+  &>i {
+    margin-right: 3px;
+  }
 }
 
 
 
-/* TAB */
-.savuori .tab-body {
-    background-color: $sheet-lighter-background;
-    margin: 10px;
-}
+
 
 
 
