@@ -2041,10 +2041,7 @@ async function _calcDamage(heroRoller, item, options) {
                 parseInt(options.knockbackMod || options.knockbadmod || 0),
                 "Knockback modifier", // knockback modifier added on an attack by attack basis
             )
-            .subDice(
-                Math.max(0, knockbackDice),
-                "Natural knockback resistance",
-            );
+            .subDice(Math.max(0, knockbackDice), "Knockback resistance");
         await heroRoller.roll();
 
         const knockbackResultTotal = Math.round(heroRoller.getBasicTotal());
@@ -2056,12 +2053,10 @@ async function _calcDamage(heroRoller, item, options) {
         } else if (knockbackResultTotal == 0) {
             knockbackMessage = "Inflicts Knockdown";
         } else {
-            // If the result is positive, the target is Knocked Back 2m times the result
-            // TODO: FIXME: This should be based on the receiving token not the item's actor and is wrong for 5e.
-            knockbackMessage =
-                "Knocked Back " +
-                knockbackResultTotal * 2 +
-                getSystemDisplayUnits(item.actor);
+            // If the result is positive, the target is Knocked Back 1" or 2m times the result
+            knockbackMessage = `Knocked Back ${
+                knockbackResultTotal * (item.actor.system.is5e ? 1 : 2)
+            }${getSystemDisplayUnits(item.actor)}`;
         }
     }
 
