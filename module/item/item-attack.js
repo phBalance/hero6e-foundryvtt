@@ -1223,6 +1223,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     const heroRoller = HeroRoller.fromJSON(damageData.roller);
+    const originalRoll = heroRoller.clone();
 
     const automation = game.settings.get("hero6efoundryvttv2", "automation");
 
@@ -1630,6 +1631,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const cardData = {
         item: item,
 
+        // Incoming Damage Information
+        incomingDamageSummary: originalRoll.getTotalSummary(),
+        incomingDamageTerms: originalRoll.getTermsSummary(),
+
         // dice rolls
         roller: heroRoller,
         renderedDamageRoll: damageRenderedResult,
@@ -1639,7 +1644,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         bodyDamage: damageDetail.bodyDamage,
         bodyDamageEffective: damageDetail.body,
         countedBody: damageDetail.countedBody,
-        // stringifiedBodyTerms: JSON.stringify(heroRoller.getBodyTerms()), // TODO: Need to figure out how to display this appropriately.
 
         // stun
         stunDamage: damageDetail.stunDamage,
@@ -1647,9 +1651,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         hasRenderedDamageRoll: true,
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-        // stringifiedStunTerms: JSON.stringify(heroRoller.getStunTerms()), // TODO: Need to figure out how to display this appropriately.
 
-        damageString: heroRoller.getTooltipTotal(),
+        damageString: heroRoller.getTotalSummary(),
 
         // effects
         effects: effectsFinal,
@@ -1914,8 +1917,8 @@ async function _calcDamage(heroRoller, item, options) {
 
     let noHitLocationsPower = item.system.noHitLocations || false;
 
-    // TODO: FIXME: This calculation is buggy as it doesn't consider
-    //       It also doesn't consider multiple levels of penetrating vs hardened/impenetrable
+    // TODO: FIXME: This calculation is buggy as it doesn't consider:
+    //       multiple levels of penetrating vs hardened/impenetrable
     //       or the fact that there is no impenetrable in 5e which uses hardened instead.
     // Penetrating
     const penetratingBody = item.system.penetrating

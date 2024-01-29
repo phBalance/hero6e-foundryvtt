@@ -431,7 +431,7 @@ export class HeroRoller {
             flavor: flavor,
             user: game.user.id,
             tooltip: this.#buildTooltip(),
-            total: this.#buildTooltipTotal(),
+            total: this.getTotalSummary(),
         };
 
         return renderTemplate(template, chatData);
@@ -573,6 +573,74 @@ export class HeroRoller {
         throw new Error(
             `asking for body from type ${this._type} doesn't make sense`,
         );
+    }
+
+    /**
+     *
+     * @returns {Object[]} summary
+     * @param {string} total
+     * @param {string} terms
+     */
+    #getRawSummary() {
+        switch (this._type) {
+            case HeroRoller.ROLL_TYPE.BASIC:
+                return {
+                    terms: `${this.getBasicTerms()}`,
+                    total: `${this.getBasicTotal()}`,
+                };
+
+            case HeroRoller.ROLL_TYPE.SUCCESS:
+                return {
+                    terms: `${this.getSuccessTerms()}`,
+                    total: `${this.getSuccessTotal()}`,
+                };
+
+            case HeroRoller.ROLL_TYPE.NORMAL:
+                return {
+                    terms: `${this.getBodyTerms()}; ${this.getStunTerms()}`,
+                    total: `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`,
+                };
+
+            case HeroRoller.ROLL_TYPE.KILLING:
+                return {
+                    terms: `${this.getBodyTerms()}; ${this.getStunTerms()}`,
+                    total: `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN${
+                        !this._useHitLocation
+                            ? ` (${this.getStunMultiplier()} STUNx)`
+                            : ""
+                    }`,
+                };
+
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
+                return {
+                    terms: `${this.getEntangleTerms()}`,
+                    total: `${this.getEntangleTotal()} BODY`,
+                };
+
+            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
+                return {
+                    terms: `${this.getAdjustmentTerms()}`,
+                    total: `${this.getAdjustmentTotal()} Active Points`,
+                };
+
+            case HeroRoller.ROLL_TYPE.FLASH:
+                return {
+                    terms: `${this.getFlashTerms()}}`,
+                    total: `${this.getFlashTotal()} Segments`,
+                };
+
+            default:
+                console.error(`unknown type ${this._type}`);
+                break;
+        }
+    }
+
+    getTermsSummary() {
+        return this.#getRawSummary().terms;
+    }
+
+    getTotalSummary() {
+        return this.#getRawSummary().total;
     }
 
     /**
@@ -1456,39 +1524,6 @@ export class HeroRoller {
         }
 
         return "";
-    }
-
-    #buildTooltipTotal() {
-        switch (this._type) {
-            case HeroRoller.ROLL_TYPE.BASIC:
-                return `${this.getBasicTotal()}`;
-
-            case HeroRoller.ROLL_TYPE.SUCCESS:
-                return `${this.getSuccessTotal()}`;
-
-            case HeroRoller.ROLL_TYPE.NORMAL:
-                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`;
-
-            case HeroRoller.ROLL_TYPE.KILLING:
-                return `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN${
-                    !this._useHitLocation
-                        ? ` (${this.getStunMultiplier()} STUNx)`
-                        : ""
-                }`;
-
-            case HeroRoller.ROLL_TYPE.ENTANGLE:
-                return `${this.getEntangleTotal()} BODY`;
-
-            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
-                return `${this.getAdjustmentTotal()} Active Points`;
-
-            case HeroRoller.ROLL_TYPE.FLASH:
-                return `${this.getFlashTotal()} Segments`;
-
-            default:
-                console.error(`unknown type ${this._type}`);
-                break;
-        }
     }
 
     #removeNHighestRankTerms(ranksToRemove) {
