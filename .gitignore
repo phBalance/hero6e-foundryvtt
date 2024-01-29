@@ -16,3 +16,6 @@ private
 # CSS files are generated from SCSS
 css/
 
+# FoundryVTT v11 database creates several log files which we don't need in our system.
+# However, we may need some of these when updating packs/compendiums.
+packs/
