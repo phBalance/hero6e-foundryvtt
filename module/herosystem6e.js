@@ -3,6 +3,8 @@ import { HERO } from "./config.js";
 import { POWERS } from "./powers/powers-rules.js";
 import { HeroSystem6eActor } from "./actor/actor.js";
 import { HeroSystemActorSheet } from "./actor/actor-sheet.js";
+import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.js";
+
 import {
     HeroSystem6eToken,
     HeroSystem6eTokenDocument,
@@ -94,6 +96,9 @@ Hooks.once("init", async function () {
     Actors.unregisterSheet("core", ActorSheet);
     Actors.registerSheet("herosystem6e", HeroSystemActorSheet, {
         makeDefault: true,
+    });
+    Actors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
+        makeDefault: false,
     });
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {

@@ -1,0 +1,275 @@
+@import "../utils/_colors";
+
+$c-white: #fff;
+$c-black: #000;
+
+$sheet-lighter-background: #f6f5f7;
+$sheet-middle-background: #e2e3e7;
+$sheet-darker-background: #c2c3cd;
+$sheet-header-background: #c9c8c0;
+$sheet-highlight-background: #fefdff;
+
+$sidebar-width: 136px;
+
+::-webkit-scrollbar-track {
+    box-shadow: none;
+}
+
+/* Setup Grid */
+.savuori.actor-sheet form {
+    display: grid;
+    grid:
+        "sidebar header" 75px
+        "sidebar nav" minmax(min-content, max-content)
+        "sidebar content" 1fr/#{$sidebar-width}  1fr;
+}
+
+.savuori.actor-sheet .sidebar {
+    overflow: hidden scroll;
+    padding: 4px;
+    background-color: $sheet-lighter-background;
+    height: 100%;
+}
+
+.savuori.actor-sheet nav.sheet-navigation {
+    align-items: center;
+    border-bottom: inherit;
+    border-top: inherit;
+    border-radius: 8px 0 0 0;
+    display: inline-flex;
+    justify-content: center;
+    position: relative;
+    transition: all 0.1s ease-out;
+    grid-area: nav;
+    padding: 10px;
+    background-color: $sheet-middle-background;
+}
+
+
+/* Sidebar */
+.savuori.actor-sheet aside {
+    display: flex;
+    flex-direction: column;
+    grid-area: sidebar;
+    border-right: inherit;
+}
+
+.savuori.actor-sheet .sidebar {
+    overflow: hidden scroll;
+    padding: 4px;
+    background-color: $sheet-lighter-background;
+    height: 100%;
+}
+
+.savuori.actor-sheet nav.sheet-navigation {
+    align-items: center;
+    border-radius: 8px 0 0 0;
+    display: inline-flex;
+    justify-content: center;
+    position: relative;
+    transition: all 0.1s ease-out;
+    grid-area: nav;
+    padding: 10px;
+    background-color: $sheet-middle-background;
+}
+
+.savuori.actor-sheet .sheet-body,
+.savuori.sheet.item .sheet-body {
+    grid-area: content;
+    position: relative;
+    overflow: hidden scroll;
+    border-top: 10px solid $sheet-darker-background;
+}
+
+.savuori.actor-sheet .sheet-content,
+.savuori.sheet.item .sheet-content {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0px;
+    left: 10px;
+    width: calc(100% - 20px);
+    background-color: $sheet-lighter-background;
+}
+
+.savuori.sheet-content table {
+    border: none;
+    padding: 4px;
+    margin: 0;
+}
+
+.savuori.actor-sheet .attributes .attribute {
+    position: relative;
+    margin: 8px 6px;
+    border: none;
+    background-color: $sheet-highlight-background;
+    border-radius: 7px;
+    min-width: calc($sidebar-width - 20%);
+}
+
+.savuori.actor-sheet h4.box-title {
+    height: 20px;
+    line-height: 16px;
+    padding: 4px 8px 5px;
+    border-radius: 7px 7px 0 0;
+    background-color: $sheet-header-background;
+    margin-bottom: 0.2em;
+    white-space: nowrap;
+}
+
+.savuori.actor-sheet input[type="text"] {
+    border-radius: 7px;
+    border-color: rgb(226, 226, 226);
+    background-color: rgb(240, 240, 240);
+}
+
+.savuori.actor-sheet .profile-img {
+    object-fit: contain;
+    margin: 12px;
+}
+
+.savuori.actor-sheet nav a {
+    margin: 0.25em;
+    padding: 0.25em;
+    text-align: center;
+    border: thin solid black;
+    border-radius: 0.5em;
+    background-color: $sheet-highlight-background;
+}
+
+.savuori.actor-sheet nav a.active {
+    background: black;
+    color: $sheet-highlight-background;
+}
+
+.savuori.actor-sheet .sheet-header {
+    padding-left: 0.7em;
+    background-color: $sheet-lighter-background;
+    margin-left: 0;
+}
+
+.savuori.actor-sheet .sheet-body {
+    background-color: $sheet-darker-background;
+    margin-left: 0;
+}
+
+.savuori.actor-sheet table tr.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1; /* pesky checkboxes */
+    background-color: "red"; /* $sheet-header-background; */
+}
+
+.savuori th.left,
+.savuori td.left {
+    padding-left: 1em;
+    text-align: left;
+}
+
+.savuori.actor-sheet table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.savuori.actor-sheet table tr td.right,
+.savuori.actor-sheet table tr th.right {
+    text-align: right;
+    padding-right: 4px;
+}
+
+.savuori.actor-sheet .item-image img {
+    display: block;
+    filter: brightness(0.2);
+    border: none;
+}
+
+.savuori.actor-sheet table th {
+    background-color: $sheet-header-background;
+}
+
+.savuori.actor-sheet .tab .form-group {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+.savuori.actor-sheet table td:first-child {
+    padding-left: 0.5em;
+}
+
+.savuori.actor-sheet table tr td {
+    padding: inherit;
+    max-width: 300px;
+    /* power description can be a bit too big; alternatives pct or flexbox */
+}
+
+.savuori.actor-sheet button {
+    border-radius: 7px;
+    border-color: rgb(236, 236, 236);
+    border-width: 2px;
+    background-color: $sheet-highlight-background;
+}
+
+.savuori.actor-sheet .sidebar-actions button {
+    line-height: normal;
+    margin: 2px 0px;
+    padding: 4px 0;
+    width: calc($sidebar-width - 20%);
+}
+
+.savuori.actor-sheet .header-fields.flexrow {
+    align-items: center;
+}
+
+.savuori.actor-sheet h1.charname input {
+    margin-top: 0px;
+    font-size: 80%;
+}
+
+
+/* TAB */
+.savuori .tab-body {
+    height: 100%;
+    overflow-y: auto;
+    background-color: $sheet-lighter-background;
+    margin: 10px;
+}
+
+
+/* UPLOAD */
+.savuori .upload-button {
+    height: 30px;
+  margin: 3px 5px;
+  padding: 0 4px;
+  background: rgba(255, 255, 240, 0.8);
+  font-size: 14px;
+  line-height: 28px;
+  font-family: "Signika", sans-serif;
+  align-content: center;
+  text-align: center;
+  border-radius: 7px;
+  border-style: solid;
+  border-color: rgb(226, 226, 226);
+  border-width: 2px;
+  border: 2px groove var(--color-border-light-highlight);
+  background-color: $sheet-highlight-background;
+
+  &:hover,
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 5px red;
+  }
+  &:disabled {
+    color: #4b4a44;
+    box-shadow: none;
+  }
+  &>i {
+    margin-right: 3px;
+  }
+}
+
+
+
+
+
+
+
+

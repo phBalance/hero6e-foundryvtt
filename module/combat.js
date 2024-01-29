@@ -595,28 +595,31 @@ export class HeroSystem6eCombat extends Combat {
             "automation",
         );
 
-        // Hover (flight) uses 1 END
-        if (
-            automation === "all" ||
-            (automation === "npcOnly" && combatant.actor.type == "npc") ||
-            (automation === "pcEndOnly" && combatant.actor.type === "pc")
-        ) {
-            if (combatant.actor?.flags?.activeMovement === "flight") {
-                console.log(combatant.actor);
-                if (dragRuler?.getRangesFromSpeedProvider) {
-                    if (
-                        dragRuler.getMovedDistanceFromToken(
-                            combatant.token.object,
-                        ) === 0
-                    ) {
-                        let endValue =
-                            parseInt(
-                                combatant.actor.system.characteristics.end
-                                    .value,
-                            ) - 1;
-                        await combatant.actor.update({
-                            "system.characteristics.end.value": endValue,
-                        });
+        if (this.round > 0) {
+            // Edge case where Flight was using 1 END when combat begins.  Make sure that doesn't happen.
+            // Hover (flight) uses 1 END
+            if (
+                automation === "all" ||
+                (automation === "npcOnly" && combatant.actor.type == "npc") ||
+                (automation === "pcEndOnly" && combatant.actor.type === "pc")
+            ) {
+                if (combatant.actor?.flags?.activeMovement === "flight") {
+                    console.log(combatant.actor);
+                    if (dragRuler?.getRangesFromSpeedProvider) {
+                        if (
+                            dragRuler.getMovedDistanceFromToken(
+                                combatant.token.object,
+                            ) === 0
+                        ) {
+                            let endValue =
+                                parseInt(
+                                    combatant.actor.system.characteristics.end
+                                        .value,
+                                ) - 1;
+                            await combatant.actor.update({
+                                "system.characteristics.end.value": endValue,
+                            });
+                        }
                     }
                 }
             }
