@@ -12,7 +12,7 @@ export function registerDamageFunctionTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.damageFunctions",
         (context) => {
-            const { assert, beforeEach, describe, it } = context;
+            const { assert, describe, it } = context;
 
             const actor = new HeroSystem6eActor({
                 name: "Test Actor",
