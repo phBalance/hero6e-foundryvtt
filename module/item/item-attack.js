@@ -638,19 +638,19 @@ export async function AttackToHit(item, options) {
         item.update({ "system.charges.value": charges - spentCharges });
     }
 
-    const aoe = item.getAoeModifier();
+    const aoeModifier = item.getAoeModifier();
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
     const explosion = item.hasExplosionAdvantage();
-    const SELECTIVETARGET = aoe?.adders
-        ? aoe.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
+    const SELECTIVETARGET = aoeModifier?.ADDER
+        ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
         : null;
-    const NONSELECTIVETARGET = aoe?.adders
-        ? aoe.ADDER.find((o) => o.XMLID === "NONSELECTIVETARGET")
+    const NONSELECTIVETARGET = aoeModifier?.ADDER
+        ? aoeModifier.ADDER.find((o) => o.XMLID === "NONSELECTIVETARGET")
         : null;
 
-    const AoeAlwaysHit = aoe && !SELECTIVETARGET && !NONSELECTIVETARGET;
+    const AoeAlwaysHit = aoeModifier && !SELECTIVETARGET && !NONSELECTIVETARGET;
 
     let targetData = [];
     let targetIds = [];
@@ -686,7 +686,7 @@ export async function AttackToHit(item, options) {
         if (explosion) {
             value = 0;
             hit = "Hit";
-            by = aoe.OPTION_ALIAS + aoe.LEVELS;
+            by = aoeModifier.OPTION_ALIAS + aoeModifier.LEVELS;
 
             // Distance from center
             if (aoeTemplate) {
