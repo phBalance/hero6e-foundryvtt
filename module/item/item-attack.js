@@ -208,9 +208,9 @@ export async function AttackAoeToHit(item, options) {
         dcvTargetNumber = 3;
     }
 
-    const aoe = item.getAoeModifier();
-    const SELECTIVETARGET = aoe?.adders
-        ? aoe.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
+    const aoeModifier = item.getAoeModifier();
+    const SELECTIVETARGET = aoeModifier?.ADDER
+        ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
         : null;
 
     const hitCharacteristic = actor.system.characteristics.ocv.value;
@@ -318,9 +318,6 @@ export async function AttackAoeToHit(item, options) {
 
 /// ChatMessage showing Attack To Hit
 export async function AttackToHit(item, options) {
-    let template =
-        "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
-
     if (!item) {
         return ui.notifications.error(
             `Attack details are no longer available.`,
@@ -828,6 +825,8 @@ export async function AttackToHit(item, options) {
     };
 
     // render card
+    const template =
+        "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
 
     const token = actor.token;
@@ -837,7 +836,7 @@ export async function AttackToHit(item, options) {
     const chatData = {
         type: AoeAlwaysHit
             ? CONST.CHAT_MESSAGE_TYPES.OTHER
-            : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOE's are auto hit
+            : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOEs are auto hit
         rolls: heroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -947,7 +946,7 @@ function getAttackTags(item) {
 export async function _onRollAoeDamage(event) {
     console.log("_onRollAoeDamage");
     const button = event.currentTarget;
-    button.blur(); // The button remains hilighed for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
     const item = fromUuidSync(options.itemid);
     return AttackToHit(item, JSON.parse(options.formdata));
