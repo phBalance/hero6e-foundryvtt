@@ -819,7 +819,7 @@ export class HeroRoller {
             // _buildRollClass: this._buildRollClass.name, // TODO: This is just wrong.
             _options: this._options,
             _rollObj: this._rollObj ? this._rollObj.toJSON() : undefined,
-            _formulaTerms: this._formulaTerms,
+            _formulaTerms: this._formulaTerms.map((term) => term.toJSON()),
             _type: this._type,
 
             _termsCluster: this._termsCluster,
@@ -856,7 +856,9 @@ export class HeroRoller {
         heroRoller._rollObj = dataObj._rollObj
             ? Roll.fromData(dataObj._rollObj)
             : undefined;
-        heroRoller._formulaTerms = dataObj._formulaTerms;
+        heroRoller._formulaTerms = dataObj._formulaTerms.map((_term, index) =>
+            RollTerm.fromData(dataObj._formulaTerms[index]),
+        );
 
         heroRoller._type = dataObj._type;
 
