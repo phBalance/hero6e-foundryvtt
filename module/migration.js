@@ -459,7 +459,8 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                 activeEffect.flags.XMLID === "AID" ||
                 activeEffect.flags.XMLID === "HEALING" ||
                 (activeEffect.flags.XMLID === "TRANSFER" &&
-                    activeEffect.flags.target === keyY)
+                    activeEffect.flags.target ===
+                        presentAdjustmentActiveEffect.flags.keyY)
                     ? -presentAdjustmentActiveEffect.flags.activePoints
                     : presentAdjustmentActiveEffect.flags.activePoints;
 
