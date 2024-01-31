@@ -324,6 +324,10 @@ export async function AttackToHit(item, options) {
         );
     }
 
+    // if (game.user.targets.size === 0) {
+    //     return ui.notifications.error(`No target(s) selected.`);
+    // }
+
     const actor = item.actor;
     const itemData = item.system;
     let tags = []; // TODO: Remove if using the Roll created tags
@@ -349,7 +353,7 @@ export async function AttackToHit(item, options) {
         (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
     );
 
-    let heroRoller = new HeroRoller()
+    const heroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, itemData.uses)
@@ -374,7 +378,7 @@ export async function AttackToHit(item, options) {
                 name: "range penalty",
                 title: `${distance}${getSystemDisplayUnits(actor)}`,
             });
-            heroRoller = heroRoller.addNumber(rangePenalty, "Range penalty");
+            heroRoller.addNumber(rangePenalty, "Range penalty");
         }
 
         // Brace (+2 OCV only to offset the Range Modifier)
@@ -386,7 +390,7 @@ export async function AttackToHit(item, options) {
             let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
             if (brace > 0) {
                 tags.push({ value: brace, name: braceManeuver.name });
-                heroRoller = heroRoller.addNumber(brace, "Bracing");
+                heroRoller.addNumber(brace, "Bracing");
             }
         }
     }
@@ -398,10 +402,7 @@ export async function AttackToHit(item, options) {
             value: csl.ocv.signedString() || csl.omcv,
             name: csl.item.name,
         });
-        heroRoller = heroRoller.addNumber(
-            csl.ocv || csl.omcv,
-            "Combat skill levels",
-        );
+        heroRoller.addNumber(csl.ocv || csl.omcv, "Combat skill levels");
     }
 
     let dcv = parseInt(item.system.dcv || 0) + csl.dcv;
@@ -476,7 +477,7 @@ export async function AttackToHit(item, options) {
             name: options.aim,
             hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0,
         });
-        heroRoller = heroRoller.addNumber(
+        heroRoller.addNumber(
             CONFIG.HERO.hitLocations[options.aim][3],
             "Hit location aiming",
         );
@@ -496,20 +497,12 @@ export async function AttackToHit(item, options) {
                     name: PENALTY_SKILL_LEVELS.name,
                     title: PENALTY_SKILL_LEVELS.system.description,
                 });
-                heroRoller = heroRoller.addNumber(
-                    pslValue,
-                    "Penalty skill levels",
-                );
+                heroRoller.addNumber(pslValue, "Penalty skill levels");
             }
         }
     }
-    heroRoller = heroRoller.subDice(3);
 
-    await heroRoller.roll();
-    const renderedRoll = await heroRoller.render();
-
-    const hitRollTotal = heroRoller.getSuccessTotal();
-    let hitRollText = "Hits a " + toHitChar + " of " + hitRollTotal;
+    heroRoller.subDice(3);
 
     let useEnd = false;
     let enduranceText = "";
@@ -640,8 +633,12 @@ export async function AttackToHit(item, options) {
 
     const aoeModifier = item.getAoeModifier();
     const aoeTemplate =
-        game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.user.id === game.user.id);
+        game.scenes.current.templates.find(
+            (template) => template.flags.itemId === item.id,
+        ) ||
+        game.scenes.current.templates.find(
+            (template) => template.user.id === game.user.id,
+        );
     const explosion = item.hasExplosionAdvantage();
     const SELECTIVETARGET = aoeModifier?.ADDER
         ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
@@ -650,7 +647,8 @@ export async function AttackToHit(item, options) {
         ? aoeModifier.ADDER.find((o) => o.XMLID === "NONSELECTIVETARGET")
         : null;
 
-    const AoeAlwaysHit = aoeModifier && !SELECTIVETARGET && !NONSELECTIVETARGET;
+    const AoeAlwaysHit =
+        aoeModifier && !(SELECTIVETARGET || NONSELECTIVETARGET);
 
     let targetData = [];
     let targetIds = [];
@@ -669,16 +667,27 @@ export async function AttackToHit(item, options) {
         });
     }
 
-    for (let target of targetsArray) {
+    // Make attacks against all targets
+    for (const target of targetsArray) {
         let hit = "Miss";
         let value = RoundFavorPlayerUp(
             target.actor.system.characteristics[toHitChar.toLowerCase()].value,
         );
 
-        if (value <= hitRollTotal || AoeAlwaysHit) {
+        const targetHeroRoller = heroRoller.clone();
+
+        // TODO: Autofire against multiple targets should have increasing difficulty
+
+        await targetHeroRoller.roll();
+        const toHitRollTotal = targetHeroRoller.getSuccessTotal();
+
+        // TODO: Auto success and failure
+
+        if (value <= toHitRollTotal || AoeAlwaysHit) {
             hit = "Hit";
         }
-        let by = hitRollTotal - value;
+
+        let by = toHitRollTotal - value;
         if (by >= 0) {
             by = "+" + by;
         }
@@ -695,7 +704,10 @@ export async function AttackToHit(item, options) {
                     target.center,
                     { gridSpaces: true },
                 );
-                by += ` (${distance}m from center)`;
+                // TODO: Does distance need to be scaled for units?
+                by += ` (${distance}${getSystemDisplayUnits(
+                    item.actor,
+                )} from center)`;
             }
         }
 
@@ -703,8 +715,12 @@ export async function AttackToHit(item, options) {
             id: target.id,
             name: target.name,
             toHitChar: toHitChar,
+            toHitRollTotal: toHitRollTotal,
+            hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
             value: value,
             result: { hit: hit, by: by.toString() },
+            roller: targetHeroRoller.toJSON(),
+            renderedRoll: await targetHeroRoller.render(),
         });
 
         // Keep track of which tokens were hit so we can apply damage later,
@@ -724,32 +740,49 @@ export async function AttackToHit(item, options) {
         ? parseInt(autofire.OPTION_ALIAS.match(/\d+/))
         : 0;
     if (autofire) {
-        hitRollText =
-            `Autofire ${autofire.OPTION_ALIAS.toLowerCase()}<br>` + hitRollText;
-
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
-            let singleTarget = Array.from(game.user.targets)[0];
+            const singleTarget = Array.from(game.user.targets)[0];
+            const toHitRollTotal = targetData[0].toHitRollTotal;
+            const firstShotResult = targetData[0].result.hit;
 
-            for (let shot = 1; shot < autoFireShots; shot++) {
+            const firstShotRenderedRoll = targetData[0].renderedRoll;
+            const firstShotRoller = targetData[0].roller;
+
+            targetData = [];
+
+            for (let shot = 0; shot < autoFireShots; shot++) {
+                const autofireShotRollTotal = toHitRollTotal - shot * 2;
+
+                const hitRollText = `Autofire ${
+                    shot + 1
+                }/${autofire.OPTION_ALIAS.toLowerCase()}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
+
                 let hit = "Miss";
-                let value =
+                const value =
                     singleTarget.actor.system.characteristics[
                         toHitChar.toLowerCase()
                     ].value;
-                if (value <= hitRollTotal - shot * 2) {
+
+                if (value <= autofireShotRollTotal) {
                     hit = "Hit";
                 }
-                let by = hitRollTotal - value - shot * 2;
+
+                let by = autofireShotRollTotal - value;
                 if (by >= 0) {
                     by = "+" + by;
                 }
+
                 targetData.push({
                     id: singleTarget.id,
                     name: singleTarget.name,
                     toHitChar: toHitChar,
+                    toHitRollTotal: autofireShotRollTotal,
+                    hitRollText: hitRollText,
                     value: value,
                     result: { hit: hit, by: by.toString() },
+                    roller: firstShotRoller, // TODO: Should perhaps rerender and adjust?
+                    renderedRoll: firstShotRenderedRoll, // TODO: Should perhaps rerender and adjust?
                 });
             }
         }
@@ -771,10 +804,15 @@ export async function AttackToHit(item, options) {
     }
 
     // Block (which is a repeatable abort)
-    if (item.system.EFFECT?.toLowerCase().indexOf("block") > -1) {
-        template =
-            "systems/hero6efoundryvttv2/templates/chat/item-toHit-block-card.hbs";
-        hitRollText = `Block roll of ${hitRollTotal} vs OCV of pending attack.`;
+    const block = item.system.EFFECT?.toLowerCase().indexOf("block");
+    if (block > -1) {
+        if (targetsArray.length === 1) {
+            const hitRollTotal = targetData[0].toHitRollTotal;
+            const hitRollText = `Block roll of ${hitRollTotal} vs OCV of pending attack.`;
+            targetData[0].hitRollText = hitRollText;
+        } else {
+            return ui.notifications.error(`Block requires a target.`);
+        }
     }
 
     // Abort
@@ -803,9 +841,6 @@ export async function AttackToHit(item, options) {
 
     const cardData = {
         // dice rolls
-        renderedHitRoll: renderedRoll,
-        hitRollText: hitRollText,
-        hitRollValue: hitRollTotal,
         velocity: options.velocity,
         AoeAlwaysHit,
 
@@ -815,7 +850,6 @@ export async function AttackToHit(item, options) {
         adjustment,
         senseAffecting,
         ...options,
-        hitRollData: hitRollTotal,
         targetData: targetData,
         targetIds: targetIds,
 
@@ -824,13 +858,15 @@ export async function AttackToHit(item, options) {
         enduranceText: enduranceText,
 
         // misc
-        tags: heroRoller.tags(),
+        tags: heroRoller.tags(), // TODO: This should change for each target.
         attackTags: getAttackTags(item),
     };
 
     // render card
     const template =
-        "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
+        block > -1
+            ? "systems/hero6efoundryvttv2/templates/chat/item-toHit-block-card.hbs"
+            : "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
 
     const token = actor.token;
