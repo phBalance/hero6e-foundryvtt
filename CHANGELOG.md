@@ -14,6 +14,7 @@
 - Correct BODY calculation for 1/2 die with normal attacks by using a 1d6 rather than 1d3. [#612](https://github.com/dmdorman/hero6e-foundryvtt/issues/612)
 - Add auto success (roll of 3) and failure (roll of 18) to characteristic rolls.
 - SELECTIVE and NONSELECTIVE area of effect attacks now make multiple attacks. [#628](https://github.com/dmdorman/hero6e-foundryvtt/issues/628) [#654](https://github.com/dmdorman/hero6e-foundryvtt/issues/654)
+- Autofire attacks now use endurance for each shot.
 
 ## Version 3.0.54
 

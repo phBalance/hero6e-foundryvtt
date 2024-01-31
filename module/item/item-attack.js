@@ -504,12 +504,17 @@ export async function AttackToHit(item, options) {
 
     heroRoller.subDice(3);
 
+    const autofire = item.findModsByXmlid("AUTOFIRE");
+    const autoFireShots = autofire
+        ? parseInt(autofire.OPTION_ALIAS.match(/\d+/))
+        : 0;
+
     let useEnd = false;
     let enduranceText = "";
     if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
         useEnd = true;
         let valueEnd = actor.system.characteristics.end.value;
-        let itemEnd = parseInt(item.system.end) || 0;
+        let itemEnd = (parseInt(item.system.end) || 0) * (autoFireShots || 1);
         let newEnd = valueEnd - itemEnd;
         let spentEnd = itemEnd;
         options.effectiveStr = options.effectiveStr || 0;
@@ -735,10 +740,6 @@ export async function AttackToHit(item, options) {
     }
 
     // AUTOFIRE
-    const autofire = item.findModsByXmlid("AUTOFIRE");
-    const autoFireShots = autofire
-        ? parseInt(autofire.OPTION_ALIAS.match(/\d+/))
-        : 0;
     if (autofire) {
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
