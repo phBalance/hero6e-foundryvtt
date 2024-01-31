@@ -21,7 +21,7 @@
                 <br />
                 <span>
                     Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
-                    {{#if @root.AoeAlwaysHit}}
+                    {{#if target.aoeAlwaysHit}}
                         due to AOE
                     {{else}}
                         <span data-visibility="gm" class="resultBy">by {{target.result.by}}</span>
@@ -30,11 +30,11 @@
             </div>
             {{/each}}
             {{#unless targetData}}
-            <div class="target-dc">
-                <i>
-                    Hint: Select a target [t] or multiple targets [shift-t] to automate determination of Hit/Miss.
-                </i>
-            </div>
+                <div class="target-dc">
+                    <i>
+                        Hint: Select a target [t] or multiple targets [shift-t] to automate determination of Hit/Miss.
+                    </i>
+                </div>
             {{/unless}}
         </div>
 
@@ -62,16 +62,18 @@
         {{/if}}
 
         {{#each targetData as |target|}}
-            <div class="card-section">
-                <div class="description-tiny">Attack Roll<br>vs.<br>{{target.name}}</div>
-                <div class="hit-roll">{{{ target.renderedRoll }}}</div>
-                <div class="description-medium">
-                    {{{ target.hitRollText }}}
-                    <span data-visibility="gm">
-                        ({{target.toHitChar}} {{target.value}})
-                    </span>
+            {{#unless target.aoeAlwaysHit}}
+                <div class="card-section">
+                    <div class="description-tiny">Attack Roll<br>vs.<br>{{target.name}}</div>
+                    <div class="hit-roll">{{{ target.renderedRoll }}}</div>
+                    <div class="description-medium">
+                        {{{ target.hitRollText }}}
+                        <span data-visibility="gm">
+                            ({{target.toHitChar}} {{target.value}})
+                        </span>
+                    </div>
                 </div>
-            </div>
+            {{/unless}}
         {{/each}}
 
         <div data-visibility="{{actor.id}}">

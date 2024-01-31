@@ -652,7 +652,7 @@ export async function AttackToHit(item, options) {
         ? aoeModifier.ADDER.find((o) => o.XMLID === "NONSELECTIVETARGET")
         : null;
 
-    const AoeAlwaysHit =
+    const aoeAlwaysHit =
         aoeModifier && !(SELECTIVETARGET || NONSELECTIVETARGET);
 
     let targetData = [];
@@ -688,7 +688,7 @@ export async function AttackToHit(item, options) {
 
         // TODO: Auto success and failure
 
-        if (value <= toHitRollTotal || AoeAlwaysHit) {
+        if (value <= toHitRollTotal || aoeAlwaysHit) {
             hit = "Hit";
         }
 
@@ -719,6 +719,7 @@ export async function AttackToHit(item, options) {
         targetData.push({
             id: target.id,
             name: target.name,
+            aoeAlwaysHit: aoeAlwaysHit,
             toHitChar: toHitChar,
             toHitRollTotal: toHitRollTotal,
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
@@ -777,6 +778,7 @@ export async function AttackToHit(item, options) {
                 targetData.push({
                     id: singleTarget.id,
                     name: singleTarget.name,
+                    aoeAlwaysHit: aoeAlwaysHit,
                     toHitChar: toHitChar,
                     toHitRollTotal: autofireShotRollTotal,
                     hitRollText: hitRollText,
@@ -843,7 +845,6 @@ export async function AttackToHit(item, options) {
     const cardData = {
         // dice rolls
         velocity: options.velocity,
-        AoeAlwaysHit,
 
         // data for damage card
         actor,
