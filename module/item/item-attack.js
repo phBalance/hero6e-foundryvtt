@@ -708,8 +708,12 @@ export async function AttackToHit(item, options) {
         });
 
         // Keep track of which tokens were hit so we can apply damage later,
-        // Assume "AID" always hits
-        if (hit === "Hit" || item.system.XMLID == "AID") {
+        // Assume beneficial adjustment powers always hits
+        if (
+            hit === "Hit" ||
+            item.system.XMLID == "AID" ||
+            item.system.XMLID === "HEALING"
+        ) {
             targetIds.push(target.id);
         }
     }
