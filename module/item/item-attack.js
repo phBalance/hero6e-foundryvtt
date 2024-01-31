@@ -324,10 +324,6 @@ export async function AttackToHit(item, options) {
         );
     }
 
-    // if (game.user.targets.size === 0) {
-    //     return ui.notifications.error(`No target(s) selected.`);
-    // }
-
     const actor = item.actor;
     const itemData = item.system;
     let tags = []; // TODO: Remove if using the Roll created tags
@@ -725,7 +721,7 @@ export async function AttackToHit(item, options) {
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
             value: value,
             result: { hit: hit, by: by.toString() },
-            roller: targetHeroRoller.toJSON(),
+            roller: targetHeroRoller,
             renderedRoll: await targetHeroRoller.render(),
         });
 
@@ -784,8 +780,8 @@ export async function AttackToHit(item, options) {
                     hitRollText: hitRollText,
                     value: value,
                     result: { hit: hit, by: by.toString() },
-                    roller: firstShotRoller, // TODO: Should perhaps rerender and adjust?
-                    renderedRoll: firstShotRenderedRoll, // TODO: Should perhaps rerender and adjust?
+                    roller: shot ? undefined : firstShotRoller,
+                    renderedRoll: firstShotRenderedRoll, // TODO: Should perhaps adjust and rerender?
                 });
             }
         }
@@ -860,7 +856,7 @@ export async function AttackToHit(item, options) {
         enduranceText: enduranceText,
 
         // misc
-        tags: heroRoller.tags(), // TODO: This should change for each target.
+        tags: heroRoller.tags(),
         attackTags: getAttackTags(item),
     };
 
@@ -876,10 +872,13 @@ export async function AttackToHit(item, options) {
     speaker.alias = actor.name;
 
     const chatData = {
-        type: AoeAlwaysHit
+        type: aoeAlwaysHit
             ? CONST.CHAT_MESSAGE_TYPES.OTHER
             : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOEs are auto hit
-        rolls: heroRoller.rawRolls(),
+        rolls: targetData
+            .map((target) => target.roller?.rawRolls())
+            .flat()
+            .filter(Boolean),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
