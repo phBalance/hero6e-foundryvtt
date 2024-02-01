@@ -294,9 +294,8 @@ export async function AttackAoeToHit(item, options) {
         attackTags: getAttackTags(item),
         formData: JSON.stringify(options),
         dcvTargetNumber,
-        buttonText: SELECTIVETARGET
-            ? "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)"
-            : "Confirm AOE placement",
+        buttonText:
+            "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)",
     };
 
     const template =
@@ -807,7 +806,7 @@ export async function AttackToHit(item, options) {
     if (block > -1) {
         if (targetsArray.length === 1) {
             const hitRollTotal = targetData[0].toHitRollTotal;
-            const hitRollText = `Block roll of ${hitRollTotal} vs OCV of pending attack.`;
+            const hitRollText = `Block roll of ${hitRollTotal} vs. OCV of pending attack.`;
             targetData[0].hitRollText = hitRollText;
         } else {
             return ui.notifications.error(`Block requires a target.`);
