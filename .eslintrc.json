@@ -53,6 +53,7 @@
         "quench": "readable",
         "renderTemplate": "readable",
         "Roll": "readable",
+        "RollTerm": "readable",
         "Ruler": "readable",
         "SimpleCalendar": "readable",
         "TextEditor": "readable",

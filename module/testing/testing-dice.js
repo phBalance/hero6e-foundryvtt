@@ -465,6 +465,49 @@ export function registerDiceTests(quench) {
                     });
                 });
 
+                describe("serialize/deserialize", async function () {
+                    it("should generate the same object when serialized and deserialized", async function () {
+                        const roller = new HeroRoller()
+                            .makeSuccessRoll()
+                            .addDice(7)
+                            .addNumber(7)
+                            .addDiceMinus1(3)
+                            .addHalfDice(2)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        const postRoller = HeroRoller.fromJSON(roller.toJSON());
+                        expect(roller.getBaseTerms()).to.deep.equal(
+                            postRoller.getBaseTerms(),
+                        );
+                        expect(roller.getFormula()).to.equal(
+                            postRoller.getFormula(),
+                        );
+                    });
+
+                    it("should be possible to roll after serialization/deserialization", async function () {
+                        const roller = new HeroRoller()
+                            .makeSuccessRoll()
+                            .addDice(7)
+                            .addNumber(7)
+                            .addDiceMinus1(3)
+                            .addHalfDice(2)
+                            .addNumber(1);
+
+                        const postRoller = HeroRoller.fromJSON(roller.toJSON());
+
+                        await postRoller.roll();
+
+                        expect(roller.getBaseTerms()).to.not.deep.equal(
+                            postRoller.getBaseTerms(),
+                        );
+                        expect(roller.getFormula()).to.not.equal(
+                            postRoller.getFormula(),
+                        );
+                    });
+                });
+
                 describe("success roll", function () {
                     it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;

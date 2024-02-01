@@ -208,9 +208,9 @@ export async function AttackAoeToHit(item, options) {
         dcvTargetNumber = 3;
     }
 
-    const aoe = item.getAoeModifier();
-    const SELECTIVETARGET = aoe?.adders
-        ? aoe.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
+    const aoeModifier = item.getAoeModifier();
+    const SELECTIVETARGET = aoeModifier?.ADDER
+        ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
         : null;
 
     const hitCharacteristic = actor.system.characteristics.ocv.value;
@@ -294,9 +294,8 @@ export async function AttackAoeToHit(item, options) {
         attackTags: getAttackTags(item),
         formData: JSON.stringify(options),
         dcvTargetNumber,
-        buttonText: SELECTIVETARGET
-            ? "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)"
-            : "Confirm AOE placement",
+        buttonText:
+            "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)",
     };
 
     const template =
@@ -318,9 +317,6 @@ export async function AttackAoeToHit(item, options) {
 
 /// ChatMessage showing Attack To Hit
 export async function AttackToHit(item, options) {
-    let template =
-        "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
-
     if (!item) {
         return ui.notifications.error(
             `Attack details are no longer available.`,
@@ -352,7 +348,7 @@ export async function AttackToHit(item, options) {
         (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
     );
 
-    let heroRoller = new HeroRoller()
+    const heroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, itemData.uses)
@@ -377,7 +373,7 @@ export async function AttackToHit(item, options) {
                 name: "range penalty",
                 title: `${distance}${getSystemDisplayUnits(actor)}`,
             });
-            heroRoller = heroRoller.addNumber(rangePenalty, "Range penalty");
+            heroRoller.addNumber(rangePenalty, "Range penalty");
         }
 
         // Brace (+2 OCV only to offset the Range Modifier)
@@ -389,7 +385,7 @@ export async function AttackToHit(item, options) {
             let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
             if (brace > 0) {
                 tags.push({ value: brace, name: braceManeuver.name });
-                heroRoller = heroRoller.addNumber(brace, "Bracing");
+                heroRoller.addNumber(brace, "Bracing");
             }
         }
     }
@@ -401,10 +397,7 @@ export async function AttackToHit(item, options) {
             value: csl.ocv.signedString() || csl.omcv,
             name: csl.item.name,
         });
-        heroRoller = heroRoller.addNumber(
-            csl.ocv || csl.omcv,
-            "Combat skill levels",
-        );
+        heroRoller.addNumber(csl.ocv || csl.omcv, "Combat skill levels");
     }
 
     let dcv = parseInt(item.system.dcv || 0) + csl.dcv;
@@ -479,7 +472,7 @@ export async function AttackToHit(item, options) {
             name: options.aim,
             hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0,
         });
-        heroRoller = heroRoller.addNumber(
+        heroRoller.addNumber(
             CONFIG.HERO.hitLocations[options.aim][3],
             "Hit location aiming",
         );
@@ -499,27 +492,24 @@ export async function AttackToHit(item, options) {
                     name: PENALTY_SKILL_LEVELS.name,
                     title: PENALTY_SKILL_LEVELS.system.description,
                 });
-                heroRoller = heroRoller.addNumber(
-                    pslValue,
-                    "Penalty skill levels",
-                );
+                heroRoller.addNumber(pslValue, "Penalty skill levels");
             }
         }
     }
-    heroRoller = heroRoller.subDice(3);
 
-    await heroRoller.roll();
-    const renderedRoll = await heroRoller.render();
+    heroRoller.subDice(3);
 
-    const hitRollTotal = heroRoller.getSuccessTotal();
-    let hitRollText = "Hits a " + toHitChar + " of " + hitRollTotal;
+    const autofire = item.findModsByXmlid("AUTOFIRE");
+    const autoFireShots = autofire
+        ? parseInt(autofire.OPTION_ALIAS.match(/\d+/))
+        : 0;
 
     let useEnd = false;
     let enduranceText = "";
     if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
         useEnd = true;
         let valueEnd = actor.system.characteristics.end.value;
-        let itemEnd = parseInt(item.system.end) || 0;
+        let itemEnd = (parseInt(item.system.end) || 0) * (autoFireShots || 1);
         let newEnd = valueEnd - itemEnd;
         let spentEnd = itemEnd;
         options.effectiveStr = options.effectiveStr || 0;
@@ -641,19 +631,24 @@ export async function AttackToHit(item, options) {
         item.update({ "system.charges.value": charges - spentCharges });
     }
 
-    const aoe = item.getAoeModifier();
+    const aoeModifier = item.getAoeModifier();
     const aoeTemplate =
-        game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.user.id === game.user.id);
+        game.scenes.current.templates.find(
+            (template) => template.flags.itemId === item.id,
+        ) ||
+        game.scenes.current.templates.find(
+            (template) => template.user.id === game.user.id,
+        );
     const explosion = item.hasExplosionAdvantage();
-    const SELECTIVETARGET = aoe?.adders
-        ? aoe.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
+    const SELECTIVETARGET = aoeModifier?.ADDER
+        ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
         : null;
-    const NONSELECTIVETARGET = aoe?.adders
-        ? aoe.ADDER.find((o) => o.XMLID === "NONSELECTIVETARGET")
+    const NONSELECTIVETARGET = aoeModifier?.ADDER
+        ? aoeModifier.ADDER.find((o) => o.XMLID === "NONSELECTIVETARGET")
         : null;
 
-    const AoeAlwaysHit = aoe && !SELECTIVETARGET && !NONSELECTIVETARGET;
+    const aoeAlwaysHit =
+        aoeModifier && !(SELECTIVETARGET || NONSELECTIVETARGET);
 
     let targetData = [];
     let targetIds = [];
@@ -672,16 +667,27 @@ export async function AttackToHit(item, options) {
         });
     }
 
-    for (let target of targetsArray) {
+    // Make attacks against all targets
+    for (const target of targetsArray) {
         let hit = "Miss";
         let value = RoundFavorPlayerUp(
             target.actor.system.characteristics[toHitChar.toLowerCase()].value,
         );
 
-        if (value <= hitRollTotal || AoeAlwaysHit) {
+        const targetHeroRoller = heroRoller.clone();
+
+        // TODO: Autofire against multiple targets should have increasing difficulty
+
+        await targetHeroRoller.roll();
+        const toHitRollTotal = targetHeroRoller.getSuccessTotal();
+
+        // TODO: Auto success and failure
+
+        if (value <= toHitRollTotal || aoeAlwaysHit) {
             hit = "Hit";
         }
-        let by = hitRollTotal - value;
+
+        let by = toHitRollTotal - value;
         if (by >= 0) {
             by = "+" + by;
         }
@@ -689,7 +695,7 @@ export async function AttackToHit(item, options) {
         if (explosion) {
             value = 0;
             hit = "Hit";
-            by = aoe.OPTION_ALIAS + aoe.LEVELS;
+            by = aoeModifier.OPTION_ALIAS + aoeModifier.LEVELS;
 
             // Distance from center
             if (aoeTemplate) {
@@ -698,57 +704,83 @@ export async function AttackToHit(item, options) {
                     target.center,
                     { gridSpaces: true },
                 );
-                by += ` (${distance}m from center)`;
+                // TODO: Does distance need to be scaled for units?
+                by += ` (${distance}${getSystemDisplayUnits(
+                    item.actor,
+                )} from center)`;
             }
         }
 
         targetData.push({
             id: target.id,
             name: target.name,
+            aoeAlwaysHit: aoeAlwaysHit,
             toHitChar: toHitChar,
+            toHitRollTotal: toHitRollTotal,
+            hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
             value: value,
             result: { hit: hit, by: by.toString() },
+            roller: targetHeroRoller,
+            renderedRoll: await targetHeroRoller.render(),
         });
 
         // Keep track of which tokens were hit so we can apply damage later,
-        // Assume "AID" always hits
-        if (hit === "Hit" || item.system.XMLID == "AID") {
+        // Assume beneficial adjustment powers always hits
+        if (
+            hit === "Hit" ||
+            item.system.XMLID == "AID" ||
+            item.system.XMLID === "HEALING"
+        ) {
             targetIds.push(target.id);
         }
     }
 
     // AUTOFIRE
-    const autofire = item.findModsByXmlid("AUTOFIRE");
-    const autoFireShots = autofire
-        ? parseInt(autofire.OPTION_ALIAS.match(/\d+/))
-        : 0;
     if (autofire) {
-        hitRollText =
-            `Autofire ${autofire.OPTION_ALIAS.toLowerCase()}<br>` + hitRollText;
-
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
-            let singleTarget = Array.from(game.user.targets)[0];
+            const singleTarget = Array.from(game.user.targets)[0];
+            const toHitRollTotal = targetData[0].toHitRollTotal;
+            const firstShotResult = targetData[0].result.hit;
 
-            for (let shot = 1; shot < autoFireShots; shot++) {
+            const firstShotRenderedRoll = targetData[0].renderedRoll;
+            const firstShotRoller = targetData[0].roller;
+
+            targetData = [];
+
+            for (let shot = 0; shot < autoFireShots; shot++) {
+                const autofireShotRollTotal = toHitRollTotal - shot * 2;
+
+                const hitRollText = `Autofire ${
+                    shot + 1
+                }/${autofire.OPTION_ALIAS.toLowerCase()}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
+
                 let hit = "Miss";
-                let value =
+                const value =
                     singleTarget.actor.system.characteristics[
                         toHitChar.toLowerCase()
                     ].value;
-                if (value <= hitRollTotal - shot * 2) {
+
+                if (value <= autofireShotRollTotal) {
                     hit = "Hit";
                 }
-                let by = hitRollTotal - value - shot * 2;
+
+                let by = autofireShotRollTotal - value;
                 if (by >= 0) {
                     by = "+" + by;
                 }
+
                 targetData.push({
                     id: singleTarget.id,
                     name: singleTarget.name,
+                    aoeAlwaysHit: aoeAlwaysHit,
                     toHitChar: toHitChar,
+                    toHitRollTotal: autofireShotRollTotal,
+                    hitRollText: hitRollText,
                     value: value,
                     result: { hit: hit, by: by.toString() },
+                    roller: shot ? undefined : firstShotRoller,
+                    renderedRoll: firstShotRenderedRoll, // TODO: Should perhaps adjust and rerender?
                 });
             }
         }
@@ -770,10 +802,15 @@ export async function AttackToHit(item, options) {
     }
 
     // Block (which is a repeatable abort)
-    if (item.system.EFFECT?.toLowerCase().indexOf("block") > -1) {
-        template =
-            "systems/hero6efoundryvttv2/templates/chat/item-toHit-block-card.hbs";
-        hitRollText = `Block roll of ${hitRollTotal} vs OCV of pending attack.`;
+    const block = item.system.EFFECT?.toLowerCase().indexOf("block");
+    if (block > -1) {
+        if (targetsArray.length === 1) {
+            const hitRollTotal = targetData[0].toHitRollTotal;
+            const hitRollText = `Block roll of ${hitRollTotal} vs. OCV of pending attack.`;
+            targetData[0].hitRollText = hitRollText;
+        } else {
+            return ui.notifications.error(`Block requires a target.`);
+        }
     }
 
     // Abort
@@ -802,11 +839,7 @@ export async function AttackToHit(item, options) {
 
     const cardData = {
         // dice rolls
-        renderedHitRoll: renderedRoll,
-        hitRollText: hitRollText,
-        hitRollValue: hitRollTotal,
         velocity: options.velocity,
-        AoeAlwaysHit,
 
         // data for damage card
         actor,
@@ -814,7 +847,6 @@ export async function AttackToHit(item, options) {
         adjustment,
         senseAffecting,
         ...options,
-        hitRollData: hitRollTotal,
         targetData: targetData,
         targetIds: targetIds,
 
@@ -828,6 +860,10 @@ export async function AttackToHit(item, options) {
     };
 
     // render card
+    const template =
+        block > -1
+            ? "systems/hero6efoundryvttv2/templates/chat/item-toHit-block-card.hbs"
+            : "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
 
     const token = actor.token;
@@ -835,10 +871,13 @@ export async function AttackToHit(item, options) {
     speaker.alias = actor.name;
 
     const chatData = {
-        type: AoeAlwaysHit
+        type: aoeAlwaysHit
             ? CONST.CHAT_MESSAGE_TYPES.OTHER
-            : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOE's are auto hit
-        rolls: heroRoller.rawRolls(),
+            : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOEs are auto hit
+        rolls: targetData
+            .map((target) => target.roller?.rawRolls())
+            .flat()
+            .filter(Boolean),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -947,7 +986,7 @@ function getAttackTags(item) {
 export async function _onRollAoeDamage(event) {
     console.log("_onRollAoeDamage");
     const button = event.currentTarget;
-    button.blur(); // The button remains hilighed for some reason; kluge to fix.
+    button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
     const item = fromUuidSync(options.itemid);
     return AttackToHit(item, JSON.parse(options.formdata));
