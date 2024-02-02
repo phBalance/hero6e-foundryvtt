@@ -208,11 +208,6 @@ export async function AttackAoeToHit(item, options) {
         dcvTargetNumber = 3;
     }
 
-    const aoeModifier = item.getAoeModifier();
-    const SELECTIVETARGET = aoeModifier?.ADDER
-        ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET")
-        : null;
-
     const hitCharacteristic = actor.system.characteristics.ocv.value;
     const setManeuver = item.actor.items.find(
         (item) =>
