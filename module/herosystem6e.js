@@ -175,9 +175,20 @@ Hooks.on("renderChatPopout", (app, html) =>
 );
 
 // When actor SPD is changed we need to setupTurns again
-Hooks.on("updateActor", () => {
-    for (const combat of game.combats) {
-        combat.setupTurns();
+Hooks.on("updateActor", (document, change, _options, _userId) => {
+    if (
+        change?.system?.characteristics?.spd?.value ||
+        change?.system?.characteristics?.dex?.value ||
+        change?.system?.characteristics?.ego?.value ||
+        change?.system?.characteristics?.int?.value
+    ) {
+        for (const combat of game.combats) {
+            if (combat.active) {
+                if (combat.combatants.find((o) => o.actorId === document.id)) {
+                    combat.setupTurns();
+                }
+            }
+        }
     }
 });
 
