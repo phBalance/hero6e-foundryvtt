@@ -1,6 +1,11 @@
 # Releases
 
-## Version 3.0.55 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.56 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix inability to apply damage when hit locations enabled. [#678](https://github.com/dmdorman/hero6e-foundryvtt/issues/678)
+- RAR and RSR now have always success on 3 and failure on 18
+
+## Version 3.0.55
 
 - WARNING: Any attack chain (roll to hit -> roll for damage -> apply damage) still in progress may no longer be continuable after migrating to this version.
 - Improved clarity of defense tags for HARDENED and IMPENETRABLE. [#604](https://github.com/dmdorman/hero6e-foundryvtt/issues/604)
