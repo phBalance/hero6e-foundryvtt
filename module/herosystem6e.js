@@ -128,7 +128,7 @@ Hooks.once("init", async function () {
     });
 
     Handlebars.registerHelper("is_active_segment", function (actives, index) {
-        return actives[index];
+        return actives?.[index];
     });
 
     // Handlebars Templates and Partials

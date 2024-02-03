@@ -1,4 +1,4 @@
-{{!-- {{ log 'combat-tracker2.hbs' this }} --}}
+{{!-- {{ log 'combat-tracker.hbs' this }} --}}
 <section class="{{cssClass}} directory flexcol" id="{{cssId}}" data-tab="{{tabName}}">
     <header class="combat-tracker-header">
         {{#if user.isGM}}
@@ -38,7 +38,7 @@
 
             {{#if combatCount}}
             {{#if combat.round}}
-            <h3 class="encounter-title noborder">{{localize 'COMBAT.Turn'}} {{combat.round}} / {{localize 'COMBAT.Segment'}} {{combat.combatant.segment}}</h3>
+            <h3 class="encounter-title noborder">{{localize 'COMBAT.Turn'}} {{combat.round}} / {{localize 'COMBAT.Segment'}} {{combat.segment}}</h3>
             {{else}}
             <h3 class="encounter-title noborder">{{localize 'COMBAT.NotStarted'}}</h3>
             {{/if}}
@@ -65,8 +65,8 @@
     <ol id="combat-tracker" class="directory-list">
         {{#each segments}}
         <li class="segment-container">
-            {{#if this.length}}
-            <h3 class="segment-active segment-header">Segment {{@index}}</h3>
+            {{#if this.length }}
+            <h3 class="segment-hasItems segment-header {{#if (is_active_segment @root.activeSegments @index)}}segment-active{{/if}}">Segment {{@index}}</h3>
 
             <ol class="segment-content" {{#unless (is_active_segment @root.activeSegments @index)}} style="display:none"
                 {{/unless}} data-segment-id="{{@index}}">
@@ -128,7 +128,7 @@
 
             </ol>
             {{else}}
-            <h3 class="segment-inactive">Segment {{@index}}</h3>
+            <h3 class="segment-inactive {{#if (is_active_segment @root.activeSegments @index)}}segment-active{{/if}}">Segment {{@index}}</h3>
             {{/if}}
         </li>
         {{/each}}

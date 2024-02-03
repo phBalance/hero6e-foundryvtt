@@ -25,7 +25,7 @@ $sidebar-width: 136px;
 }
 
 .savuori.actor-sheet .sidebar {
-    overflow: hidden scroll;
+    overflow: hidden;
     padding: 4px;
     background-color: $sheet-lighter-background;
     height: 100%;
@@ -55,7 +55,7 @@ $sidebar-width: 136px;
 }
 
 .savuori.actor-sheet .sidebar {
-    overflow: hidden scroll;
+    overflow: hidden;
     padding: 4px;
     background-color: $sheet-lighter-background;
     height: 100%;
@@ -77,7 +77,7 @@ $sidebar-width: 136px;
 .savuori.sheet.item .sheet-body {
     grid-area: content;
     position: relative;
-    overflow: hidden scroll;
+    overflow: hidden auto;
     border-top: 10px solid $sheet-darker-background;
 }
 
