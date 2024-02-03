@@ -575,64 +575,8 @@ export class HeroRoller {
         );
     }
 
-    /**
-     *
-     * @returns {Object[]} summary
-     * @param {string} total
-     * @param {string} terms
-     */
-    #getRawSummary() {
-        switch (this._type) {
-            case HeroRoller.ROLL_TYPE.BASIC:
-                return {
-                    terms: `${this.getBasicTerms()}`,
-                    total: `${this.getBasicTotal()}`,
-                };
-
-            case HeroRoller.ROLL_TYPE.SUCCESS:
-                return {
-                    terms: `${this.getSuccessTerms()}`,
-                    total: `${this.getSuccessTotal()}`,
-                };
-
-            case HeroRoller.ROLL_TYPE.NORMAL:
-                return {
-                    terms: `${this.getBodyTerms()}; ${this.getStunTerms()}`,
-                    total: `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`,
-                };
-
-            case HeroRoller.ROLL_TYPE.KILLING:
-                return {
-                    terms: `${this.getBodyTerms()}; ${this.getStunTerms()}`,
-                    total: `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN${
-                        !this._useHitLocation
-                            ? ` (${this.getStunMultiplier()} STUNx)`
-                            : ""
-                    }`,
-                };
-
-            case HeroRoller.ROLL_TYPE.ENTANGLE:
-                return {
-                    terms: `${this.getEntangleTerms()}`,
-                    total: `${this.getEntangleTotal()} BODY`,
-                };
-
-            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
-                return {
-                    terms: `${this.getAdjustmentTerms()}`,
-                    total: `${this.getAdjustmentTotal()} Active Points`,
-                };
-
-            case HeroRoller.ROLL_TYPE.FLASH:
-                return {
-                    terms: `${this.getFlashTerms()}}`,
-                    total: `${this.getFlashTotal()} Segments`,
-                };
-
-            default:
-                console.error(`unknown type ${this._type}`);
-                break;
-        }
+    getAnnotatedTermsSummary() {
+        return this.#getRawSummary().annotatedTerms;
     }
 
     getTermsSummary() {
@@ -1835,5 +1779,81 @@ export class HeroRoller {
             calculated: calculated,
             calculatedMetadata: calculatedMetadata,
         };
+    }
+
+    /**
+     *
+     * @returns {Object[]} summary
+     * @param {string} total
+     * @param {string} terms
+     * @param {string} annotatedTerms
+     */
+    #getRawSummary() {
+        switch (this._type) {
+            case HeroRoller.ROLL_TYPE.BASIC:
+                return {
+                    annotatedTerms: `Basic breakdown: ${this.getBasicTerms()}]`,
+                    terms: `${this.getBasicTerms()}`,
+                    total: `${this.getBasicTotal()}`,
+                };
+
+            case HeroRoller.ROLL_TYPE.SUCCESS:
+                return {
+                    annotatedTerms: `Success breakdown: ${this.getSuccessTerms()}]`,
+                    terms: `${this.getSuccessTerms()}`,
+                    total: `${this.getSuccessTotal()}`,
+                };
+
+            case HeroRoller.ROLL_TYPE.NORMAL:
+                return {
+                    annotatedTerms: `BODY breakdown: [${this.getBodyTerms()}], STUN breakdown: [${this.getStunTerms()}]`,
+                    terms: `${this.getBodyTerms()}; ${this.getStunTerms()}`,
+                    total: `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`,
+                };
+
+            case HeroRoller.ROLL_TYPE.KILLING:
+                return {
+                    annotatedTerms: `BODY breakdown: [${this.getBodyTerms()}], STUN breakdown: [${this.getStunTerms()}]${
+                        !this._useHitLocation
+                            ? `, STUNx breakdown: [${this._killingStunMultiplierHeroRoller.getTermsSummary()}]`
+                            : ""
+                    }`,
+                    terms: `${this.getBodyTerms()} BODY; ${this.getStunTerms()} STUN${
+                        !this._useHitLocation
+                            ? `; (${this._killingStunMultiplierHeroRoller.getTermsSummary()} STUNx)`
+                            : ""
+                    }`,
+                    total: `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN${
+                        !this._useHitLocation
+                            ? ` (${this.getStunMultiplier()} STUNx)`
+                            : ""
+                    }`,
+                };
+
+            case HeroRoller.ROLL_TYPE.ENTANGLE:
+                return {
+                    annotatedTerms: `BODY breakdown: [${this.getEntangleTerms()}]`,
+                    terms: `${this.getEntangleTerms()} BODY`,
+                    total: `${this.getEntangleTotal()} BODY`,
+                };
+
+            case HeroRoller.ROLL_TYPE.ADJUSTMENT:
+                return {
+                    annotatedTerms: `Active point breakdown: [${this.getAdjustmentTerms()}]`,
+                    terms: `[${this.getAdjustmentTerms()}] Active Points`,
+                    total: `${this.getAdjustmentTotal()} Active Points`,
+                };
+
+            case HeroRoller.ROLL_TYPE.FLASH:
+                return {
+                    annotatedTerms: `Segments breakdown: [${this.getFlashTerms()}}]`,
+                    terms: `[${this.getFlashTerms()}}] Segments`,
+                    total: `${this.getFlashTotal()} Segments`,
+                };
+
+            default:
+                console.error(`unknown type ${this._type}`);
+                break;
+        }
     }
 }

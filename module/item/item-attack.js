@@ -1667,7 +1667,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
         // Incoming Damage Information
         incomingDamageSummary: originalRoll.getTotalSummary(),
-        incomingDamageTerms: originalRoll.getTermsSummary(),
+        incomingAnnotatedDamageTerms: originalRoll.getAnnotatedTermsSummary(),
 
         // dice rolls
         roller: heroRoller,
