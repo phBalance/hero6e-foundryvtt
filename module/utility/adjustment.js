@@ -128,9 +128,9 @@ export function determineMaxAdjustment(item) {
 
     // Certain adjustment powers have no fixed limit. Give them a large integer.
     if (
-        item.system.XMLID !== "ABSORPTION" &&
-        item.system.XMLID !== "AID" &&
-        item.system.XMLID !== "TRANSFER"
+        item?.system.XMLID !== "ABSORPTION" &&
+        item?.system.XMLID !== "AID" &&
+        item?.system.XMLID !== "TRANSFER"
     ) {
         return reallyBigInteger;
     }
@@ -220,9 +220,10 @@ function _findExistingMatchingEffect(
     targetSystem,
 ) {
     // TODO: Variable Effect may result in multiple changes on same AE.
+    // Caution: The item may no longer exist.
     return targetSystem.effects.find(
         (effect) =>
-            effect.origin === item.uuid &&
+            effect.origin === item?.uuid &&
             effect.flags.target[0] ===
                 (powerTargetName?.uuid || potentialCharacteristic),
     );
@@ -255,13 +256,13 @@ async function _createNewAdjustmentEffect(
     // Create new ActiveEffect
     // TODO: Add a document field
     const activeEffect = {
-        name: `${item.system.XMLID} 0 ${
+        name: `${item?.system?.XMLID || "undefined"} 0 ${
             (powerTargetName?.name || potentialCharacteristic).toUpperCase() // TODO: This will need to change for multiple effects
-        } (0 AP) [by ${item.actor.name}]`,
-        id: `${item.system.XMLID}.${item.id}.${
+        } (0 AP) [by ${item?.actor.name || "undefined"}]`,
+        id: `${item?.system.XMLID}.${item?.id}.${
             powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
-        icon: item.img,
+        icon: item?.img,
         changes: [
             _createCharacteristicAEChangeBlock(
                 potentialCharacteristic,
@@ -275,12 +276,12 @@ async function _createNewAdjustmentEffect(
             type: "adjustment",
             version: 2,
             activePoints: 0,
-            XMLID: item.system.XMLID,
+            XMLID: item?.system.XMLID,
             source: targetActor.name,
             target: [powerTargetName?.uuid || potentialCharacteristic],
             key: potentialCharacteristic,
         },
-        origin: item.uuid,
+        origin: item?.uuid,
 
         transfer: true,
         disabled: false,
@@ -314,12 +315,12 @@ async function _createNewAdjustmentEffect(
     }
 
     // DELAYEDRETURNRATE (loss for TRANSFER and all other adjustments) and DELAYEDRETURNRATE2 (gain for TRANSFER)
-    const dRR = item.findModsByXmlid("DELAYEDRETURNRATE");
-    const dRR2 = item.findModsByXmlid("DELAYEDRETURNRATE2");
+    const dRR = item?.findModsByXmlid("DELAYEDRETURNRATE");
+    const dRR2 = item?.findModsByXmlid("DELAYEDRETURNRATE2");
     const delayedReturnRate =
         rawActivePointsDamage > 0
             ? dRR
-            : item.system.XMLID === "TRANSFER"
+            : item?.system.XMLID === "TRANSFER"
               ? dRR2
               : dRR;
     if (delayedReturnRate) {
@@ -523,12 +524,12 @@ export async function performAdjustment(
     }
 
     // Update the effect max value(s)
-    activeEffect.name = `${item.system.XMLID} ${Math.abs(
+    activeEffect.name = `${item?.system.XMLID || "undefined"} ${Math.abs(
         activePointsThatShouldBeAffected,
     )} ${(
         targetPower?.name || potentialCharacteristic
     ).toUpperCase()} (${Math.abs(totalNewActivePoints)} AP) [by ${
-        item.actor.name
+        item?.actor.name || "undefined"
     }]`;
 
     activeEffect.flags.activePoints = totalNewActivePoints;
