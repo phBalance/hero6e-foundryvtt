@@ -826,7 +826,7 @@ export class HeroRoller {
             ? HeroRoller.fromData(dataObj._hitLocationRoller)
             : undefined;
         heroRoller._hitSideRoller = dataObj._hitSideRoller
-            ? HeroRoller.toData(dataObj._hitSideRoller)
+            ? HeroRoller.fromData(dataObj._hitSideRoller)
             : undefined;
 
         // TODO: Check if anything is missing...
