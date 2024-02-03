@@ -21,7 +21,8 @@ function validateFilesByLint() {
     return gulp
         .src(JAVASCRIPT_FILES)
         .pipe(gulpEslintNew(eslintDefaultConfig))
-        .pipe(gulpEslintNew.formatEach("compact", process.stderr));
+        .pipe(gulpEslintNew.formatEach("compact", process.stderr))
+        .pipe(gulpEslintNew.failAfterError());
 }
 const lint = gulp.series(validateFilesByLint);
 
