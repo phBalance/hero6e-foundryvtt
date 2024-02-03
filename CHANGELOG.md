@@ -15,6 +15,7 @@
 - Add auto success (roll of 3) and failure (roll of 18) to characteristic rolls.
 - SELECTIVE and NONSELECTIVE area of effect attacks now make multiple attacks. [#628](https://github.com/dmdorman/hero6e-foundryvtt/issues/628) [#654](https://github.com/dmdorman/hero6e-foundryvtt/issues/654)
 - Autofire attacks now use endurance for each shot.
+- Improve stun/body/effect only and 5e explosion attack tags. [#630](https://github.com/dmdorman/hero6e-foundryvtt/issues/630) [#666](https://github.com/dmdorman/hero6e-foundryvtt/issues/666)
 
 ## Version 3.0.54
 

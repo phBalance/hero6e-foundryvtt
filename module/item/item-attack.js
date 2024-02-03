@@ -891,6 +891,7 @@ function getAttackTags(item) {
         attackTags.push({ name: `killing` });
     }
 
+    // Item adders
     if (item.system.adders) {
         for (let adder of item.system.adders) {
             switch (adder.XMLID) {
@@ -923,12 +924,22 @@ function getAttackTags(item) {
         });
     }
 
+    // STUN/BODY/EFFECT Only
+    if (item.system.stunBodyDamage !== "stunbody") {
+        const phrase = CONFIG.HERO.stunBodyDamages[item.system.stunBodyDamage];
+        attackTags.push({
+            name: phrase,
+            title: phrase,
+        });
+    }
+
     // FLASH
     if (item.system.XMLID === "FLASH") {
         attackTags.push({ name: item.system.OPTION_ALIAS });
     }
 
-    for (let mod of item.system.MODIFIER || []) {
+    // item modifiers
+    for (const mod of item.system.MODIFIER || []) {
         switch (mod.XMLID) {
             case "AUTOFIRE":
                 {
@@ -943,6 +954,14 @@ function getAttackTags(item) {
                 break;
 
             case "EXPLOSION":
+                // 6e explosion is a modifier to AOE. In 5e EXPLOSION is a mod to itself so
+                // for 5e (i.e. here), show 2 tags.
+                attackTags.push({
+                    name: `${mod.ALIAS}`,
+                    title: `${mod.XMLID}`,
+                });
+
+            // Intentionally Fall Through to AOE to show the size of the attack
             case "AOE":
                 // TODO: This needs to be corrected as the names are not consistent.
                 attackTags.push({
@@ -958,7 +977,8 @@ function getAttackTags(item) {
                 });
         }
 
-        for (let adder of mod.ADDER || []) {
+        // item modifier adders
+        for (const adder of mod.ADDER || []) {
             switch (adder.XMLID) {
                 case "CONTINUOUSCONCENTRATION":
                     attackTags.push({
@@ -1163,13 +1183,6 @@ export async function _onRollDamage(event) {
         content: cardHtml,
         speaker: speaker,
     };
-
-    // TODO: This should not be commented out.
-    // if (!item.system.USESTANDARDEFFECT) {
-    //     chatData.roll = damageResult;
-    // } else {
-    //     chatData.standardEffect = damageResult.standardEffect;
-    // }
 
     return ChatMessage.create(chatData);
 }
