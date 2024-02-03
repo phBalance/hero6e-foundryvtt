@@ -175,7 +175,7 @@ Hooks.on("renderChatPopout", (app, html) =>
 );
 
 // When actor SPD is changed we need to setupTurns again
-Hooks.on("updateActor", (document, change, _options, _userId) => {
+Hooks.on("updateActor", (document, change /*, _options, _userId */) => {
     if (
         change?.system?.characteristics?.spd?.value ||
         change?.system?.characteristics?.dex?.value ||

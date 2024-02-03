@@ -13,6 +13,7 @@ import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
 import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
 import { getSystemDisplayUnits } from "../utility/units.js";
+import { HeroRoller } from "../utility/dice.js";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -3460,11 +3461,6 @@ export async function RequiresASkillRollCheck(item) {
         (o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL",
     );
     if (rar) {
-        let rollEquation = "3d6";
-        let roll = new Roll(rollEquation, item.getRollData());
-
-        let result = await roll.evaluate({ async: true });
-
         let OPTION_ALIAS = rar.OPTION_ALIAS;
 
         // Requires A Roll (generic) default to 11
@@ -3578,25 +3574,41 @@ export async function RequiresASkillRollCheck(item) {
                 }
         }
 
-        let margin = parseInt(value) - result.total;
+        const successValue = parseInt(value);
+        const activationRoller = new HeroRoller()
+            .makeSuccessRoll(true, successValue)
+            .addDice(3);
+        await activationRoller.roll();
+        const succeeded = activationRoller.getSuccess();
+        const autoSuccess = activationRoller.getAutoSuccess();
+        const total = activationRoller.getSuccessTotal();
+        const margin = successValue - total;
 
-        let flavor = item.name.toUpperCase() + " (" + OPTION_ALIAS + ") ";
-        if (value > 0) {
-            flavor +=
-                (margin >= 0 ? "succeeded" : "failed") +
-                " by " +
-                Math.abs(margin);
-        }
+        const flavor = `${item.name.toUpperCase()} (${OPTION_ALIAS}) activation ${
+            succeeded ? "succeeded" : "failed"
+        } by ${
+            autoSuccess === undefined
+                ? `${Math.abs(margin)}`
+                : `rolling ${total}`
+        }`;
+        const cardHtml = await activationRoller.render(flavor);
 
-        await result.toMessage({
-            speaker: ChatMessage.getSpeaker({ actor: item.actor }),
-            flavor: flavor,
-            borderColor: margin >= 0 ? 0x00ff00 : 0xff0000,
-        });
+        const actor = item.actor;
+        const token = actor.token;
+        const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+        speaker.alias = actor.name;
 
-        if (margin < 0) {
-            return false;
-        }
+        const chatData = {
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            rolls: activationRoller.rawRolls(),
+            user: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        await ChatMessage.create(chatData);
+
+        return succeeded;
     }
     return true;
 }

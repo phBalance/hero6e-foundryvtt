@@ -1,6 +1,11 @@
 # Releases
 
-## Version 3.0.55 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.56 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix inability to apply damage when hit locations enabled. [#678](https://github.com/dmdorman/hero6e-foundryvtt/issues/678)
+- RAR and RSR now have always success on 3 and failure on 18
+
+## Version 3.0.55
 
 - WARNING: Any attack chain (roll to hit -> roll for damage -> apply damage) still in progress may no longer be continuable after migrating to this version.
 - Improved clarity of defense tags for HARDENED and IMPENETRABLE. [#604](https://github.com/dmdorman/hero6e-foundryvtt/issues/604)
@@ -15,7 +20,7 @@
 - Add auto success (roll of 3) and failure (roll of 18) to characteristic rolls.
 - SELECTIVE and NONSELECTIVE area of effect attacks now make multiple attacks. [#628](https://github.com/dmdorman/hero6e-foundryvtt/issues/628) [#654](https://github.com/dmdorman/hero6e-foundryvtt/issues/654)
 - Autofire attacks now use endurance for each shot.
-- Fixed player combat tracker crash when there are non-visable tokens in the combat tracker. [#650](https://github.com/dmdorman/hero6e-foundryvtt/issues/628) [#654](https://github.com/dmdorman/hero6e-foundryvtt/issues/650)
+- Fixed player combat tracker crash when there are non-visible tokens in the combat tracker. [#650](https://github.com/dmdorman/hero6e-foundryvtt/issues/628) [#654](https://github.com/dmdorman/hero6e-foundryvtt/issues/650)
 - Improve stun/body/effect only and 5e explosion attack tags. [#630](https://github.com/dmdorman/hero6e-foundryvtt/issues/630) [#666](https://github.com/dmdorman/hero6e-foundryvtt/issues/666)
 
 ## Version 3.0.54
