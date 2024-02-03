@@ -82,7 +82,8 @@ export class HeroRuler {
                     );
 
                     for (const tokenObj of tokens) {
-                        const token = tokenObj.document;
+                        const token = tokenObj?.document;
+                        if (!token) continue; // This should not be needed.  Possible issue with Flight selected, and actor re-uploaded.
                         const actor = token.actor;
 
                         if (
