@@ -11,7 +11,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
     activateListeners(html) {
         super.activateListeners(html);
-        html.find(".segment-active").click((ev) =>
+        html.find(".segment-hasItems").click((ev) =>
             this._onSegmentToggleContent(ev),
         );
     }
@@ -45,21 +45,21 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
     async getData(options) {
         const context = await super.getData(options);
 
-        // Copy combatants from context.turns to segments.
-        // Combatants in context.turns was altered (super) to include CSS, and possibly other stuff.
-        for (let i = 1; i <= 12; i++) {
-            if (!context.combat?.segments[i]) {
-                break;
-            }
+        // Initialize segments
+        context.segments = [];
+        for (let s = 1; s <= 12; s++) {
+            context.segments[s] = [];
+        }
 
-            for (const _combatant of context.combat.segments[i]) {
-                const turn = _combatant.turn;
-
-                _combatant.css = context.turns[turn].css;
-                _combatant.effects = context.turns[turn].effects;
-                _combatant.canPing = context.turns[turn].canPing;
-                _combatant.active = context.turns[turn].active;
-                _combatant.hidden = context.turns[turn].hidden;
+        if (context.combat?.turns) {
+            // Add segment to context.turns
+            let t = 0;
+            for (const combatant of context.combat.turns) {
+                if (!combatant.visible) continue;
+                context.turns[t].flags = combatant.flags;
+                const s = parseInt(context.turns[t].flags.segment) || 12;
+                context.segments[s].push(context.turns[t]);
+                t++;
             }
         }
 
@@ -67,12 +67,15 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             // Active Segment is expanded, all others are collapsed
             context.activeSegments = [];
             for (let i = 1; i <= 12; i++) {
-                context.activeSegments[i] =
-                    (context.combat.turn === null && i === 12) ||
-                    (context.combat?.combatant &&
-                        context.combat.combatant.segment === i);
+                const active =
+                    i === context.combat.combatant?.flags?.segment ||
+                    (!context.combat.combatant && i === 12);
+
+                context.activeSegments[i] = active;
+                if (active) {
+                    context.combat.segment = i;
+                }
             }
-            context.segments = context.combat.segments;
         }
 
         return context;

@@ -30,7 +30,7 @@
 }
 
 .actor-sheet .sidebar {
-    overflow: hidden scroll;
+    overflow: hidden;
     padding: 0 2px 2px 8px;
     /* background-color: lavender; */
 }
@@ -58,7 +58,7 @@
 .sheet.item .sheet-body {
     grid-area: content;
     position: relative;
-    overflow: hidden scroll;
+    overflow: hidden auto;
     /* background-color: steelblue; */
 }
 
