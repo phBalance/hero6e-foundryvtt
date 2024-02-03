@@ -302,12 +302,14 @@ export class HeroSystem6eCombat extends Combat {
         await this.rollInitiative();
 
         // Keep the current Combatant the same after adding new Combatants to the Combat
-        this.turn = this.turns.findIndex(
-            (o) =>
-                o.tokenId === oldCombatant.tokenId &&
-                o.flags.segment === oldCombatant.flags.segment,
-        );
-        await this.update({ turn: this.turn });
+        if (oldCombatant) {
+            this.turn = this.turns.findIndex(
+                (o) =>
+                    o.tokenId === oldCombatant.tokenId &&
+                    o.flags.segment === oldCombatant.flags.segment,
+            );
+            await this.update({ turn: this.turn });
+        }
 
         // if (oldCombatant) {
         //     let activeTurn = this.turns.findIndex(
