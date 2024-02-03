@@ -3,7 +3,8 @@
 ## Version 3.0.56 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix inability to apply damage when hit locations enabled. [#678](https://github.com/dmdorman/hero6e-foundryvtt/issues/678)
-- RAR and RSR now have always success on 3 and failure on 18
+- RAR and RSR now have always success on 3 and failure on 18.
+- Fix for effect fades for unlinked actors and missing item source when actors/items are deleted or re-uploaded via HDC. [#679](https://github.com/dmdorman/hero6e-foundryvtt/issues/679)
 
 ## Version 3.0.55
 
