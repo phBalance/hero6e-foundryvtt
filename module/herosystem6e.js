@@ -709,36 +709,36 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     }
                 }
             }
-        } catch (e) {
-            console.error(e, actor, actor?.temporaryEffects[0]);
-        }
 
-        // Charges Recover each day
-        if (today > lastDate) {
-            const itemsWithCharges = actor.items.filter(
-                (o) => o.system.charges?.max,
-            );
-            let content = "";
-            for (let item of itemsWithCharges) {
-                let value = parseInt(item.system.charges.value);
-                let max = parseInt(item.system.charges.max);
-                if (value < max) {
-                    content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
-                    item.update({ "system.charges.value": max });
+            // Charges Recover each day
+            if (today > lastDate) {
+                const itemsWithCharges = actor.items.filter(
+                    (o) => o.system.charges?.max,
+                );
+                let content = "";
+                for (let item of itemsWithCharges) {
+                    let value = parseInt(item.system.charges.value);
+                    let max = parseInt(item.system.charges.max);
+                    if (value < max) {
+                        content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
+                        item.update({ "system.charges.value": max });
+                    }
+                }
+
+                if (content) {
+                    const chatData = {
+                        user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
+                        whisper: ChatMessage.getWhisperRecipients("GM"),
+                        speaker: ChatMessage.getSpeaker({ actor: actor }),
+                        blind: true,
+                        content: content,
+                    };
+                    //await
+                    ChatMessage.create(chatData);
                 }
             }
-
-            if (content) {
-                const chatData = {
-                    user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
-                    whisper: ChatMessage.getWhisperRecipients("GM"),
-                    speaker: ChatMessage.getSpeaker({ actor: actor }),
-                    blind: true,
-                    content: content,
-                };
-                //await
-                ChatMessage.create(chatData);
-            }
+        } catch (e) {
+            console.error(e, actor, actor?.temporaryEffects[0]);
         }
     }
 
