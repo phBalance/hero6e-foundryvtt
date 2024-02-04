@@ -440,17 +440,13 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
     element.innerHTML = `<i class="fal fa-user-robot"></i>Type`;
 
     html.find("header h4").after(element);
-    // `<a class="header-button control configure-type" onclick=">
-    // <i class="fal fa-user-robot"></i>Type
-    // </a>`)
 });
 
 Hooks.on("renderItemSheet", (dialog, html) => {
     html.find("header h4").append(`<span>${game.system.version}<span>`);
 });
 
-Hooks.on("getActorDirectoryEntryContext", (dialog, html) => {
-    console.log("getActorDirectoryEntryContext");
+Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
     const menu = {
         name: "Change Type",
         icon: '<i class="fas fa-cog"></i>',
