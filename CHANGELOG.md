@@ -5,6 +5,8 @@
 - Fix inability to apply damage when hit locations enabled. [#678](https://github.com/dmdorman/hero6e-foundryvtt/issues/678)
 - RAR and RSR now have always success on 3 and failure on 18.
 - Fix for effect fades for unlinked actors and missing item source when actors/items are deleted or re-uploaded via HDC. [#679](https://github.com/dmdorman/hero6e-foundryvtt/issues/679)
+- Fix max effect for positive adjustment powers with half dice. [#685](https://github.com/dmdorman/hero6e-foundryvtt/issues/685)
+- Correct Knockback Resistance cost for 5e.
 
 ## Version 3.0.55
 

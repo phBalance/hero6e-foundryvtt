@@ -1248,7 +1248,7 @@ export class HeroSystem6eItem extends Item {
         // Base Cost is typically extracted directly from HDC
         let baseCost = system.baseCost;
 
-        // PowerFramework might be important
+        // Power Framework might be important
         let parentItem = this.getHdcParent();
         let configPowerInfoParent = null;
         if (parentItem) {
@@ -1450,7 +1450,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Some modifiers may have ADDERS
-            const adders = modifier.ADDER || []; //modifier.getElementsByTagName("ADDER")
+            const adders = modifier.ADDER || [];
             if (adders.length) {
                 for (const adder of adders) {
                     const adderBaseCost = parseFloat(adder.baseCost || 0);
