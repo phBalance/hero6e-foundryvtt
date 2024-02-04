@@ -1884,9 +1884,13 @@ export class HeroSystem6eItem extends Item {
             case "RIVALRY":
             case "SOCIALLIMITATION":
             case "SUSCEPTIBILITY":
-            case "UNLUCK":
+            case "VULNERABILITY":
                 // Disadvantage: blah blah blah
                 system.description = `${system.ALIAS}: `;
+                break;
+
+            case "UNLUCK":
+                system.description = `${system.ALIAS}`;
                 break;
 
             case "REPUTATION":
@@ -2135,6 +2139,10 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "AMBIDEXTERITY":
+                system.description = `${system.ALIAS} (${system.OPTION_ALIAS})`;
+                break;
+
             default:
                 {
                     if (
@@ -2207,9 +2215,16 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     case "ATTACK":
-                    case "USEFUL":
+                    case "EATING":
                     case "EXTENDEDBREATHING":
-                        system.description += `${adder.ALIAS} ${adder.OPTION_ALIAS}`;
+                    case "IMMUNITY":
+                    case "LONGEVITY":
+                    case "RECOGNIZED":
+                    case "SLEEPING":
+                    case "USEFUL":
+                        _adderArray.push(
+                            `${adder.ALIAS} ${adder.OPTION_ALIAS}`,
+                        );
                         break;
 
                     case "ADDITIONALPD":
@@ -2240,7 +2255,6 @@ export class HeroSystem6eItem extends Item {
                     case "OCCUR":
                     case "OCCURS":
                     case "POWER":
-                    case "RECOGNIZED":
                     case "REACTION":
                     case "SENSING":
                     case "SITUATION":
