@@ -1634,6 +1634,10 @@ HERO.powers5e = [
         key: "TUNNELING",
         costPerLevel: 5,
     },
+    {
+        key: "KBRESISTANCE",
+        costPerLevel: 2,
+    },
 ];
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
