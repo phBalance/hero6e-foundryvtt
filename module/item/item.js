@@ -1884,9 +1884,12 @@ export class HeroSystem6eItem extends Item {
             case "RIVALRY":
             case "SOCIALLIMITATION":
             case "SUSCEPTIBILITY":
-            case "UNLUCK":
                 // Disadvantage: blah blah blah
                 system.description = `${system.ALIAS}: `;
+                break;
+
+            case "UNLUCK":
+                system.description = `${system.ALIAS}`;
                 break;
 
             case "REPUTATION":
