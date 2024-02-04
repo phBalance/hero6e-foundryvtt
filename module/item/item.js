@@ -2211,9 +2211,15 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     case "ATTACK":
-                    case "USEFUL":
+                    case "EATING":
                     case "EXTENDEDBREATHING":
-                        system.description += `${adder.ALIAS} ${adder.OPTION_ALIAS}`;
+                    case "IMMUNITY":
+                    case "LONGEVITY":
+                    case "SLEEPING":
+                    case "USEFUL":
+                        _adderArray.push(
+                            `${adder.ALIAS} ${adder.OPTION_ALIAS}`,
+                        );
                         break;
 
                     case "ADDITIONALPD":
