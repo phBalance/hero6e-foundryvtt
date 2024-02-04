@@ -2215,6 +2215,7 @@ export class HeroSystem6eItem extends Item {
                     case "EXTENDEDBREATHING":
                     case "IMMUNITY":
                     case "LONGEVITY":
+                    case "RECOGNIZED":
                     case "SLEEPING":
                     case "USEFUL":
                         _adderArray.push(
@@ -2250,7 +2251,6 @@ export class HeroSystem6eItem extends Item {
                     case "OCCUR":
                     case "OCCURS":
                     case "POWER":
-                    case "RECOGNIZED":
                     case "REACTION":
                     case "SENSING":
                     case "SITUATION":
