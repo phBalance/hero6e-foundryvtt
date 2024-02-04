@@ -1884,6 +1884,7 @@ export class HeroSystem6eItem extends Item {
             case "RIVALRY":
             case "SOCIALLIMITATION":
             case "SUSCEPTIBILITY":
+            case "VULNERABILITY":
                 // Disadvantage: blah blah blah
                 system.description = `${system.ALIAS}: `;
                 break;
