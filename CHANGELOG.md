@@ -7,6 +7,7 @@
 - Fix for effect fades for unlinked actors and missing item source when actors/items are deleted or re-uploaded via HDC. [#679](https://github.com/dmdorman/hero6e-foundryvtt/issues/679)
 - Fix max effect for positive adjustment powers with half dice. [#685](https://github.com/dmdorman/hero6e-foundryvtt/issues/685)
 - Correct Knockback Resistance cost for 5e.
+- Fix CombatTracker bug introduced in 3.0.55 that incorrectly set tracker to first instance of active token, ignoring segment details.
 
 ## Version 3.0.55
 

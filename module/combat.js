@@ -246,14 +246,15 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    async _onUpdate(data, options, userId) {
-        //console.log("_onUpdate")
+    _onUpdate(data, options, userId) {
+        console.log("_onUpdate", data, options, userId);
         super._onUpdate(data, options, userId);
-        if (data.combatants) this.setupTurns();
 
         // Render the sidebar
-        if (data.active === true) ui.combat.initialize({ combat: this });
-        return ui.combat.scrollToTurn();
+        if (data.active === true) {
+            ui.combat.initialize({ combat: this });
+        }
+        ui.combat.scrollToTurn();
     }
 
     /* -------------------------------------------- */
@@ -267,7 +268,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         userId,
     ) {
-        //console.log("_onCreateDescendantDocuments");
+        console.log("_onCreateDescendantDocuments");
 
         //Missing actor?
         // let missingActors = documents.filter((o) => !o.actor);
@@ -355,7 +356,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         userId,
     ) {
-        //console.log("_onDeleteDescendantDocuments")
+        console.log("_onDeleteDescendantDocuments");
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
 
@@ -459,54 +460,83 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    // async _onUpdateDescendantDocuments(...args) {
-    //     //console.log("_onUpdateDescendantDocuments")
-    //     super._onUpdateEmbeddedDocuments(...args);
-    //     this.setupTurns();
+    _onUpdateDescendantDocuments(
+        parent,
+        collection,
+        documents,
+        changes,
+        options,
+        userId,
+    ) {
+        console.log("_onUpdateDescendantDocuments");
 
-    //     // // If the current combatant was removed, update the heroTurn order to the next survivor
-    //     // let heroTurn = this.heroTurn;
-    //     // if (result.includes(currId)) {
-    //     //     if (nextSurvivor) heroTurn = this.segments[this.segment].findIndex(t => t.id === nextSurvivor.id);
-    //     // }
+        //super.super._onUpdateDescendantDocuments(..) would be ideal but not likely necessary and difficult to implement.
 
-    //     // // Otherwise keep the combatant the same
-    //     // else heroTurn = this.segments[this.segment].findIndex(t => t.id === currId);
+        // Update the turn order
+        const priorState = foundry.utils.deepClone(this.current);
+        const combatant = this.combatant;
+        this.setupTurns();
+        this.#recordPreviousState(priorState);
 
-    //     // // Update database or perform a local override
-    //     // heroTurn = Math.max(heroTurn, 0);
+        // Adjust turn order to keep the current Combatant the same (SEGMENT is important for HeroSystem)
+        const sameTurn = combatant
+            ? this.turns.findIndex(
+                  (t) =>
+                      t.id === combatant.id &&
+                      t.flags.segment === combatant.flags.segment,
+              )
+            : this.turn;
+        const adjustedTurn = sameTurn !== this.turn ? sameTurn : undefined;
+        if (options.turnEvents !== false && adjustedTurn) {
+            this._manageTurnEvents(adjustedTurn);
+        }
 
-    //     // if (game.user.id === userId) this.update({ heroTurn });
-    //     // else this.update({ heroTurn });
+        // Render the Collection
+        if (this.active && options.render !== false) {
+            this.collection.render();
+        }
 
-    //     // Render the collection
-    //     if (this.active) this.collection.render();
-    // }
+        // super._onUpdateEmbeddedDocuments(...args);
+        // this.setupTurns();
+
+        // // If the current combatant was removed, update the heroTurn order to the next survivor
+        // let heroTurn = this.heroTurn;
+        // if (result.includes(currId)) {
+        //     if (nextSurvivor) heroTurn = this.segments[this.segment].findIndex(t => t.id === nextSurvivor.id);
+        // }
+
+        // // Otherwise keep the combatant the same
+        // else heroTurn = this.segments[this.segment].findIndex(t => t.id === currId);
+
+        // // Update database or perform a local override
+        // heroTurn = Math.max(heroTurn, 0);
+
+        // if (game.user.id === userId) this.update({ heroTurn });
+        // else this.update({ heroTurn });
+
+        // // Render the collection
+        // if (this.active) this.collection.render();
+    }
+
+    /**
+     * Update the previous turn data.
+     * Compare the state with the new current state. Only update the previous state if there is a difference.
+     * @param {CombatHistoryData} priorState      A cloned copy of the current history state before changes
+     */
+    #recordPreviousState(priorState) {
+        const current = this.current;
+        const hasChanged =
+            current.combatantId !== priorState.combatantId ||
+            current.round !== priorState.round ||
+            current.turn !== priorState.turn;
+        if (hasChanged) this.previous = priorState;
+    }
 
     async _onActorDataUpdate(...args) {
         console.log("_onActorDataUpdate");
         super._onActorDataUpdate(...args);
         this.setupTurns();
         if (this.active) this.collection.render();
-    }
-
-    /* -------------------------------------------- */
-
-    /**
-     * Manage the execution of Combat lifecycle events.
-     * This method orchestrates the execution of four events in the following order, as applicable:
-     * 1. End Turn
-     * 2. End Round
-     * 3. Begin Round
-     * 4. Begin Turn
-     * Each lifecycle event is an async method, and each is awaited before proceeding.
-     * @param {number} [adjustedTurn]   Optionally, an adjusted turn to commit to the Combat.
-     * @returns {Promise<void>}
-     * @protected
-     */
-    async _manageTurnEvents(adjustedTurn) {
-        //console.log("_manageTurnEvents", adjustedTurn)
-        await super._manageTurnEvents(adjustedTurn);
     }
 
     /**
@@ -519,9 +549,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onStartTurn(combatant) {
-        // On the very first turn, this method can be invoked twice because we update the first turn
-        // While not a fix, to work around we'll just stop ourselves from running it twice on the very first turn.
-        if (this.previous.round === 0) return;
+        console.log("_onStartTurn", combatant.name, this.current);
 
         await super._onStartTurn(combatant);
 
@@ -619,6 +647,8 @@ export class HeroSystem6eCombat extends Combat {
             );
             await effect.delete();
         }
+
+        //console.log("_onStartTurn.end", combatant.name, this.current);
     }
 
     /**
@@ -631,7 +661,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndTurn(combatant) {
-        console.log("_onEndTurn", combatant.name);
+        console.log("_onEndTurn", combatant.name, this.current);
 
         const automation = game.settings.get(
             "hero6efoundryvttv2",
@@ -675,7 +705,11 @@ export class HeroSystem6eCombat extends Combat {
             this.turns?.[this.turn]?.flags.segment !=
             this.turns?.[this.turn - 1]?.flags.segment
         ) {
-            console.log("next segment");
+            console.log(
+                "next segment",
+                this.combatant.flags?.segment,
+                this.current,
+            );
             for (let _combatant of this.combatants) {
                 if (
                     _combatant.actor.statuses.has("stunned") ||
@@ -722,13 +756,13 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndRound() {
-        //console.log("_onEndRound")
+        console.log("_onEndRound", this.current);
 
         super._onEndRound();
 
         // Make really sure we only call at the end of the round
         if (this.current.round > 1 && this.current.turn === 0) {
-            return this.PostSegment12();
+            await this.PostSegment12();
         }
     }
 
@@ -810,15 +844,35 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async startCombat() {
-        await super.startCombat();
+        console.log("startCombat", this.current);
+
+        // Don't call super because we start on segment 12 which is never turn 0.
+        //await super.startCombat();
+        this._playCombatSound("startEncounter");
+        const turn = this.turns.findIndex((o) => o.flags.segment === 12) || 1;
+        const updateData = {
+            round: 1,
+            turn: turn,
+            previous: { round: 1, turn: Math.max(0, turn - 1) },
+        };
+        Hooks.callAll("combatStart", this, updateData);
+        await this.update(updateData);
+
+        // Reset all movement history when we start combat
+        // if (dragRuler) {
+        //     for (const _combatant of this.combatants) {
+        //         await dragRuler.resetMovementHistory(this, _combatant.id);
+        //     }
+        // }
 
         //this.setupTurns();
 
         // Find first TURN with segment 12
-        let turn = this.turns.findIndex((o) => o.flags.segment === 12) || 1;
+        // let turn = this.turns.findIndex((o) => o.flags.segment === 12) || 1;
 
-        const updateData = { round: 1, turn: turn };
-        return this.update(updateData);
+        // const updateData = { round: 1, turn: turn };
+        // await this.update(updateData);
+        //console.log("startCombat.end", this.current);
     }
 
     /**
