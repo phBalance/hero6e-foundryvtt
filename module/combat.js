@@ -466,7 +466,7 @@ export class HeroSystem6eCombat extends Combat {
         documents,
         changes,
         options,
-        userId,
+        //_userId,
     ) {
         console.log("_onUpdateDescendantDocuments");
 
