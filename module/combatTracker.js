@@ -56,6 +56,38 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             let t = 0;
             for (const combatant of context.combat.turns) {
                 if (!combatant.visible) continue;
+
+                //Lightning Reflexes (kluge), run every time for now.
+                if (combatant.flags.lightningReflexesAlias) {
+                    const lightningReflexes = combatant.actor.items.find(
+                        (o) =>
+                            o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
+                            o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+                    );
+                    if (lightningReflexes) {
+                        const levels =
+                            lightningReflexes.system.LEVELS?.value ||
+                            lightningReflexes.system.LEVELS ||
+                            lightningReflexes.system.levels ||
+                            lightningReflexes.system.other.levels ||
+                            0;
+                        const characteristic =
+                            combatant.actor.system?.initiativeCharacteristic ||
+                            "dex";
+                        const dexValue =
+                            combatant.actor.system.characteristics[
+                                characteristic
+                            ].value;
+                        const intValue =
+                            combatant.actor.system.characteristics.int.value;
+                        context.turns[t].initiative =
+                            dexValue +
+                            intValue / 100 +
+                            combatant.initiative +
+                            parseInt(levels);
+                    }
+                }
+
                 context.turns[t].flags = combatant.flags;
                 const s = parseInt(context.turns[t].flags.segment) || 12;
                 context.segments[s].push(context.turns[t]);

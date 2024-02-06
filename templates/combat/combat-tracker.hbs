@@ -1,4 +1,4 @@
-{{!-- {{ log 'combat-tracker.hbs' this }} --}}
+{{ log 'combat-tracker.hbs' this }}
 <section class="{{cssClass}} directory flexcol" id="{{cssId}}" data-tab="{{tabName}}">
     <header class="combat-tracker-header">
         {{#if user.isGM}}
@@ -78,11 +78,11 @@
                     <div class="token-name flexcol">
                         <h4>{{this.name}}</h4>
 
-                        {{#if this.isFake}}
-                        <h4 title="Lightning Reflexes">LR {{this.alias}}</h4>
+                        {{#if this.flags.lightningReflexesAlias}}
+                        <h4 title="Lightning Reflexes">LR {{this.flags.lightningReflexesAlias}}</h4>
                         {{/if}}
 
-                        {{#unless this.isFake}}
+                        {{#unless this.flags.lightningReflexesAlias}}
                         <div class="combatant-controls flexrow">
                             {{#if @root.user.isGM}}
                             <a class="combatant-control {{#if this.hidden}}active{{/if}}"

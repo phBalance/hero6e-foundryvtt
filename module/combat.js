@@ -61,45 +61,55 @@ export class HeroSystem6eCombat extends Combat {
 
     setupTurns() {
         // Roll Initiative everytime as DEX/INT/SPD may have changed
-        this.rollAll();
-
+        // await this.rollAll();
         // Determine the turn order and the current turn
         const turnsRaw = this.combatants.contents.sort(this._sortCombatants);
 
-        for (let i = 0; i < turnsRaw.length; i++) {
-            let combatant = turnsRaw[i];
-
-            // Lightning Reflexes
-            const actor = game.actors.get(combatant.actorId);
-            if (!actor) {
+        // Loop thru all combatants, add extra turn if they have LIGHTNING REFLEXES
+        for (const combatant of this.combatants) {
+            if (!combatant.actor) {
                 continue; // Not sure how this could happen
             }
 
-            const item = actor.items.find(
+            const lightningReflexes = combatant.actor.items.find(
                 (o) =>
                     o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
                     o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
             );
-            if (item) {
+            if (lightningReflexes) {
                 const levels =
-                    item.system.LEVELS?.value ||
-                    item.system.LEVELS ||
-                    item.system.levels ||
-                    item.system.other.levels ||
+                    lightningReflexes.system.LEVELS?.value ||
+                    lightningReflexes.system.LEVELS ||
+                    lightningReflexes.system.levels ||
+                    lightningReflexes.system.other.levels ||
                     0;
-                const lightning_reflex_initiative =
-                    combatant.initiative + parseInt(levels);
+                const lightning_reflex_initiative = combatant.initiative
+                    ? combatant.initiative + parseInt(levels)
+                    : null;
                 const alias =
-                    item.system.OPTION_ALIAS ||
-                    item.system.INPUT ||
+                    lightningReflexes.system.OPTION_ALIAS ||
+                    lightningReflexes.system.INPUT ||
                     "All Actions";
                 const lightning_reflex_alias = "(" + alias + ")";
 
-                const combatantLR = new HeroCombatant(combatant);
+                const combatantLR = new Combatant({
+                    tokenId: combatant.tokenId,
+                    sceneId: combatant.sceneId,
+                    actorId: combatant.actor.id,
+                    hidden: combatant.hidden,
+                    _id: combatant.id,
+                });
+
                 combatantLR.initiative = lightning_reflex_initiative;
-                combatantLR.alias = lightning_reflex_alias;
-                combatantLR.isFake = true;
+                combatantLR.flags.lightningReflexesAlias =
+                    lightning_reflex_alias;
+
                 turnsRaw.push(combatantLR);
+
+                // Notice we didn't update the database with combatantLR.
+                // Not really sure how we would do that without really messing things up.
+                // As a result the flags.lightning_reflex_initiative is likely null,
+                // which we will update in the combatTracker::getData()
             }
         }
 
@@ -126,7 +136,7 @@ export class HeroSystem6eCombat extends Combat {
                     )
                 ) {
                     const combatant = new Combatant(turnsRaw[t]);
-                    combatant.flags.segment = s;
+                    combatant.flags = { ...turnsRaw[t].flags, segment: s };
                     turns.push(combatant);
                 }
             }
@@ -483,7 +493,8 @@ export class HeroSystem6eCombat extends Combat {
             ? this.turns.findIndex(
                   (t) =>
                       t.id === combatant.id &&
-                      t.flags.segment === combatant.flags.segment,
+                      t.flags.segment === combatant.flags.segment &&
+                      t.initiative === combatant.initiative,
               )
             : this.turn;
         const adjustedTurn = sameTurn !== this.turn ? sameTurn : undefined;
@@ -1021,18 +1032,18 @@ export class HeroSystem6eCombat extends Combat {
     }
 }
 
-class HeroCombatant extends Combatant {
-    constructor(combatant) {
-        super();
-        Object.assign(this, combatant);
-        this.id = combatant.id;
-    }
+// class HeroCombatant extends Combatant {
+//     constructor(combatant) {
+//         super();
+//         Object.assign(this, combatant);
+//         this.id = combatant.id;
+//     }
 
-    id = null;
-    initiative = null; //Override
-    turn = null;
-    segment = null;
-    alias = null;
-    isFake = false;
-    //hasRolled = true; // Initiative is static, but actor DEX/INT/SPD might change
-}
+//     id = null;
+//     initiative = null; //Override
+//     turn = null;
+//     segment = null;
+//     alias = null;
+//     isFake = false;
+//     //hasRolled = true; // Initiative is static, but actor DEX/INT/SPD might change
+// }
