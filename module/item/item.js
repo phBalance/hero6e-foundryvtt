@@ -41,7 +41,7 @@ function itemName(item) {
         // This should not happen, but one of the test tokens (Venin Vert had this issue).
         // Possibly due to testing that caused failed initilization of an item.
         // Possibly the item was null due to an effect source that is no longer available.
-        console.log(e);
+        console.error(e);
         return "<i>undefined</i>";
     }
 }
