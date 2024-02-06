@@ -1801,7 +1801,7 @@ export class HeroSystem6eActor extends Actor {
         const characteristic = this.system.characteristics[key];
         if (characteristic.type === "rollable") {
             if (characteristic.value >= 0 && characteristic.value <= 52) {
-                characteristic.roll = characteristic.roll = 9 + (characteristic.value * 0.2);
+                characteristic.roll = Math.round(9 + (characteristic.value * 0.2));
             } else if (characteristic.value > 52) {
                 characteristic.roll = 20;
             }
