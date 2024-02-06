@@ -18,7 +18,7 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     async rollInitiative() {
-        console.log("rollInitiative");
+        //console.log("rollInitiative");
         // Iterate over Combatants, performing an initiative roll for each
         const updates = [];
         for (let [id /*, value*/] of this.combatants.entries()) {
@@ -61,7 +61,7 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     setupTurns() {
-        console.log("setupTurns");
+        //console.log("setupTurns");
         // Roll Initiative everytime as DEX/INT/SPD may have changed
         // await this.rollAll();
         // Determine the turn order and the current turn
@@ -252,7 +252,7 @@ export class HeroSystem6eCombat extends Combat {
 
     /** @inheritdoc */
     _onUpdate(data, options, userId) {
-        console.log("_onUpdate", data, options, userId);
+        //console.log("_onUpdate", data, options, userId);
         super._onUpdate(data, options, userId);
 
         // _onUpdate isn't async, so can't call await.
@@ -272,7 +272,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         userId,
     ) {
-        console.log("_onCreateDescendantDocuments");
+        //console.log("_onCreateDescendantDocuments");
 
         //Missing actor?
         // let missingActors = documents.filter((o) => !o.actor);
@@ -331,7 +331,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         userId,
     ) {
-        console.log("_onDeleteDescendantDocuments");
+        //console.log("_onDeleteDescendantDocuments");
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
 
@@ -397,7 +397,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         //_userId,
     ) {
-        console.log("_onUpdateDescendantDocuments");
+        //console.log("_onUpdateDescendantDocuments");
 
         //super.super._onUpdateDescendantDocuments(..) would be ideal but not likely necessary and difficult to implement.
 
@@ -443,7 +443,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async _onActorDataUpdate(...args) {
-        console.log("_onActorDataUpdate");
+        //console.log("_onActorDataUpdate");
         super._onActorDataUpdate(...args);
         this.setupTurns();
         if (this.active) this.collection.render();
@@ -459,7 +459,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onStartTurn(combatant) {
-        console.log("_onStartTurn", combatant.name, this.current);
+        //console.log("_onStartTurn", combatant.name, this.current);
 
         await super._onStartTurn(combatant);
 
@@ -571,7 +571,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndTurn(combatant) {
-        console.log("_onEndTurn", combatant.name, this.current);
+        //console.log("_onEndTurn", combatant.name, this.current);
 
         const automation = game.settings.get(
             "hero6efoundryvttv2",
@@ -587,7 +587,7 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "pcEndOnly" && combatant.actor.type === "pc")
             ) {
                 if (combatant.actor?.flags?.activeMovement === "flight") {
-                    console.log(combatant.actor);
+                    //console.log(combatant.actor);
                     if (dragRuler?.getRangesFromSpeedProvider) {
                         if (
                             dragRuler.getMovedDistanceFromToken(
@@ -615,11 +615,11 @@ export class HeroSystem6eCombat extends Combat {
             this.turns?.[this.turn]?.flags.segment !=
             this.turns?.[this.turn - 1]?.flags.segment
         ) {
-            console.log(
-                "next segment",
-                this.combatant.flags?.segment,
-                this.current,
-            );
+            //console.log(
+            //     "next segment",
+            //     this.combatant.flags?.segment,
+            //     this.current,
+            // );
             for (let _combatant of this.combatants) {
                 if (
                     _combatant.actor.statuses.has("stunned") ||
@@ -666,7 +666,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndRound() {
-        console.log("_onEndRound", this.current);
+        //console.log("_onEndRound", this.current);
 
         super._onEndRound();
 
@@ -754,7 +754,7 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async startCombat() {
-        console.log("startCombat", this.current);
+        //console.log("startCombat", this.current);
 
         // Don't call super because we start on segment 12 which is never turn 0.
         //await super.startCombat();
