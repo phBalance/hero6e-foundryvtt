@@ -31,11 +31,19 @@ function itemFullDescription(item) {
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
 function itemName(item) {
-    if (item.system.NAME) {
-        return `<i>${item.system.NAME}</i>`;
-    }
+    try {
+        if (item.system.NAME) {
+            return `<i>${item.system.NAME}</i>`;
+        }
 
-    return item.name;
+        return item.name;
+    } catch (e) {
+        // This should not happen, but one of the test tokens (Venin Vert had this issue).
+        // Possibly due to testing that caused failed initilization of an item.
+        // Possibly the item was null due to an effect source that is no longer available.
+        console.log(e);
+        return "<i>undefined</i>";
+    }
 }
 
 const itemTypeToIcon = {
