@@ -324,35 +324,6 @@ export class HeroSystem6eCombat extends Combat {
             await this.update({ turn: this.turn });
         }
 
-        // if (oldCombatant) {
-        //     let activeTurn = this.turns.findIndex(
-        //         (o) =>
-        //             o.id === current.id &&
-        //             o.flags.segment === current.flags.segment,
-        //     );
-        //     activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-
-        //     // Edge case where combat tracker is empty and this is the first combatant.
-        //     // Advance to phase 12
-        //     while (
-        //         this.round === 1 &&
-        //         activeTurn < this.turns.length - 1 &&
-        //         this.turns[activeTurn].flags.segment < 12
-        //     ) {
-        //         activeTurn++;
-        //     }
-
-        //     // Another Edge case where combatant has speed of 1 and thus no segment 12
-        //     if (
-        //         this.round === 1 &&
-        //         this.turns[activeTurn].flags.segment != 12
-        //     ) {
-        //         this.round = 2;
-        //     }
-
-        //    await this.update({ turn: this.turn , round: this.round });
-        //}
-
         // Render the collection
         if (this.active) this.collection.render();
     }
@@ -376,29 +347,6 @@ export class HeroSystem6eCombat extends Combat {
         const oldCombatant = this.combatant;
         const nextCombatant =
             this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1];
-
-        // Assign new turn to combatants
-        // let j = 0;
-        // for (let _combatant of this.turns) {
-        //     if (!documents.map((o) => o.tokenId).includes(_combatant.tokenId)) {
-        //         _combatant.turn = j++;
-        //     } else {
-        //         _combatant.turn = null;
-        //     }
-        // }
-
-        // Find the expected new active turn
-        //let activeTurn = this.turns.indexOf(current);
-
-        // Advance activeTurn if it has a null turn value (about to be deleted).
-        // while (
-        //     activeTurn > -1 &&
-        //     activeTurn < this.turns.length &&
-        //     this.turns[activeTurn].turn === null
-        // ) {
-        //     activeTurn++;
-        // }
-        // activeTurn = this.turns[activeTurn]?.turn || activeTurn;
 
         // Super
         super._onDeleteDescendantDocuments(
@@ -441,29 +389,6 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
         await this.update({ turn: this.turn, round: this.round });
-
-        // const updateData = {};
-
-        // if (currentTurn< this.turn) {
-        //     this.turn
-        // }
-
-        // // If activeTurn == -1 then combat has not begun
-        // if (activeTurn > -1) {
-        //     // There is an edge case where the last combatant of the round is deleted.
-        //     activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-        //     //await this.update({ turn: activeTurn });
-        //     updateData.turn = activeTurn;
-        // }
-
-        // // Determine segment
-        // let segment_prev = current?.flags?.segment;
-        // let segment = this.combatant?.flags?.segment;
-        // let advanceTime = segment - segment_prev || 0;
-
-        // const updateOptions = { advanceTime, direction: 1 };
-        // //Hooks.callAll("combatTurn", this, updateData, updateOptions);
-        // await this.update(updateData, updateOptions);
 
         // Render the collection
         if (this.active) this.collection.render();
