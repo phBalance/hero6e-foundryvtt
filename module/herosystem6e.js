@@ -3,6 +3,8 @@ import { HERO } from "./config.js";
 import { POWERS } from "./powers/powers-rules.js";
 import { HeroSystem6eActor } from "./actor/actor.js";
 import { HeroSystemActorSheet } from "./actor/actor-sheet.js";
+import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.js";
+
 import {
     HeroSystem6eToken,
     HeroSystem6eTokenDocument,
@@ -31,7 +33,6 @@ import {
     renderAdjustmentChatCards,
 } from "./utility/adjustment.js";
 import { migrateWorld } from "./migration.js";
-import { HeroSystemActorSheetRevised } from "./actor/actor-sheet-revised.js";
 
 Hooks.once("init", async function () {
     game.herosystem6e = {
@@ -94,10 +95,10 @@ Hooks.once("init", async function () {
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
     Actors.registerSheet("herosystem6e", HeroSystemActorSheet, {
-        makeDefault: false,
-    });
-    Actors.registerSheet("herosystem6e",HeroSystemActorSheetRevised, {
         makeDefault: true,
+    });
+    Actors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
+        makeDefault: false,
     });
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
@@ -127,7 +128,7 @@ Hooks.once("init", async function () {
     });
 
     Handlebars.registerHelper("is_active_segment", function (actives, index) {
-        return actives[index];
+        return actives?.[index];
     });
 
     // Handlebars Templates and Partials
@@ -174,9 +175,20 @@ Hooks.on("renderChatPopout", (app, html) =>
 );
 
 // When actor SPD is changed we need to setupTurns again
-Hooks.on("updateActor", () => {
-    for (const combat of game.combats) {
-        combat.setupTurns();
+Hooks.on("updateActor", (document, change /*, _options, _userId */) => {
+    if (
+        change?.system?.characteristics?.spd?.value ||
+        change?.system?.characteristics?.dex?.value ||
+        change?.system?.characteristics?.ego?.value ||
+        change?.system?.characteristics?.int?.value
+    ) {
+        for (const combat of game.combats) {
+            if (combat.active) {
+                if (combat.combatants.find((o) => o.actorId === document.id)) {
+                    combat.setupTurns();
+                }
+            }
+        }
     }
 });
 
@@ -327,12 +339,12 @@ function rollItemMacro(itemName, itemType) {
     if (!actor) actor = game.actors.get(speaker.actor);
     let item = actor
         ? actor.items.find(
-              (i) =>
-                  i.name === itemName &&
-                  (!itemType ||
-                      i.type == itemType ||
-                      i.system.subType == itemType),
-          )
+            (i) =>
+                i.name === itemName &&
+                (!itemType ||
+                    i.type == itemType ||
+                    i.system.subType == itemType),
+        )
         : null;
 
     // The selected actor does not have an item with this name.
@@ -355,8 +367,7 @@ function rollItemMacro(itemName, itemType) {
 
         if (!item)
             return ui.notifications.warn(
-                `Your controlled Actor does not have an ${
-                    itemType || "item"
+                `Your controlled Actor does not have an ${itemType || "item"
                 } named ${itemName}`,
             );
     }
@@ -428,17 +439,13 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
     element.innerHTML = `<i class="fal fa-user-robot"></i>Type`;
 
     html.find("header h4").after(element);
-    // `<a class="header-button control configure-type" onclick=">
-    // <i class="fal fa-user-robot"></i>Type
-    // </a>`)
 });
 
 Hooks.on("renderItemSheet", (dialog, html) => {
     html.find("header h4").append(`<span>${game.system.version}<span>`);
 });
 
-Hooks.on("getActorDirectoryEntryContext", (dialog, html) => {
-    console.log("getActorDirectoryEntryContext");
+Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
     const menu = {
         name: "Change Type",
         icon: '<i class="fas fa-cog"></i>',
@@ -493,227 +500,240 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     let actors = Array.from(game.actors);
     const currentTokens = game.scenes.current?.tokens || [];
     for (const token of currentTokens) {
-        if (token.actor && !actors.find((o) => o.id === token.actor.id)) {
+        if (
+            token.actor &&
+            (!token.actorLink || !actors.find((o) => o.id === token.actor.id))
+        ) {
             actors.push(token.actor);
         }
     }
 
     for (let actor of actors) {
-        // Create a natural body healing if needed (requires permissions)
-        const naturalBodyHealing = actor.temporaryEffects.find(
-            (o) => o.flags.XMLID === "naturalBodyHealing",
-        );
-        if (
-            actor.type === "pc" &&
-            !naturalBodyHealing &&
-            parseInt(actor.system.characteristics.body.value) <
-                parseInt(actor.system.characteristics.body.max)
-        ) {
-            const bodyPerMonth = parseInt(
-                actor.system.characteristics.rec.value,
+        try {
+            // Create a natural body healing if needed (requires permissions)
+            const naturalBodyHealing = actor.temporaryEffects.find(
+                (o) => o.flags.XMLID === "naturalBodyHealing",
             );
-            const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
-            let activeEffect = {
-                name: `Natural Body Healing (${bodyPerMonth}/month)`,
-                id: "naturalBodyHealing",
-                icon: "systems/hero6efoundryvttv2/icons/heartbeat.svg", //'icons/svg/regen.svg',
-                duration: {
-                    seconds: secondsPerBody,
-                },
-                flags: {
-                    XMLID: "naturalBodyHealing",
-                },
-            };
-            if (game.user.isGM) await actor.addActiveEffect(activeEffect);
-        }
-
-        // Delete natural body healing when body value = max (typically by manual adjustment)
-        // if (naturalBodyHealing && parseInt(actor.system.characteristics.body.value) >= parseInt(actor.system.characteristics.body.max)) {
-        //     await naturalBodyHealing.delete();
-        // }
-
-        // Active Effects
-        let adjustmentChatMessages = [];
-        for (let ae of actor.temporaryEffects) {
-            // Determine XMLID, ITEM, ACTOR
-            let origin = await fromUuid(ae.origin);
-            let item = origin instanceof HeroSystem6eItem ? origin : null;
-            let aeActor =
-                origin instanceof HeroSystem6eActor
-                    ? origin
-                    : item?.actor || actor;
-            let XMLID = ae.flags.XMLID || item?.system?.XMLID;
-
-            let powerInfo = getPowerInfo({
-                actor: aeActor,
-                xmlid: XMLID,
-                item: item,
-            });
-
             if (
-                !powerInfo &&
-                ae.statuses.size === 0 &&
-                game.user.isGM &&
-                game.settings.get(game.system.id, "alphaTesting") &&
-                ae.duration?.seconds < 3.154e7 * 100
+                actor.type === "pc" &&
+                !naturalBodyHealing &&
+                parseInt(actor.system.characteristics.body.value) <
+                parseInt(actor.system.characteristics.body.max)
             ) {
-                return ui.notifications.warn(
-                    `Unable to determine XMLID for ${ae.name} active effect.`,
+                const bodyPerMonth = parseInt(
+                    actor.system.characteristics.rec.value,
                 );
+                const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
+                let activeEffect = {
+                    name: `Natural Body Healing (${bodyPerMonth}/month)`,
+                    id: "naturalBodyHealing",
+                    icon: "systems/hero6efoundryvttv2/icons/heartbeat.svg", //'icons/svg/regen.svg',
+                    duration: {
+                        seconds: secondsPerBody,
+                    },
+                    flags: {
+                        XMLID: "naturalBodyHealing",
+                    },
+                };
+                if (game.user.isGM) await actor.addActiveEffect(activeEffect);
             }
 
-            // With Simple Calendar you can move time ahead in large steps.
-            // Need to loop as multiple fades may be required.
-            let d = ae._prepareDuration();
-            while (d.remaining != null && d.remaining <= 0) {
-                // Add duration to startTime
-                ae.duration.startTime += d.duration;
-                d = ae._prepareDuration();
-                if (game.user.isGM) await ae.update({ duration: ae.duration });
+            // Delete natural body healing when body value = max (typically by manual adjustment)
+            // if (naturalBodyHealing && parseInt(actor.system.characteristics.body.value) >= parseInt(actor.system.characteristics.body.max)) {
+            //     await naturalBodyHealing.delete();
+            // }
 
-                // What is this effect related to?
-                if (ae.flags.type === "adjustment") {
-                    // Fade by 5 Active Points
-                    let _fade;
-                    if (ae.flags.activePoints < 0) {
-                        _fade = Math.max(ae.flags.activePoints, -5);
-                    } else {
-                        _fade = Math.min(ae.flags.activePoints, 5);
-                    }
+            // Active Effects
+            let adjustmentChatMessages = [];
+            for (let ae of actor.temporaryEffects) {
+                // Determine XMLID, ITEM, ACTOR
+                let origin = await fromUuid(ae.origin);
+                let item = origin instanceof HeroSystem6eItem ? origin : null;
+                let aeActor =
+                    origin instanceof HeroSystem6eActor
+                        ? origin
+                        : item?.actor || actor;
+                let XMLID = ae.flags.XMLID || item?.system?.XMLID;
 
-                    adjustmentChatMessages.push(
-                        await performAdjustment(
-                            item,
-                            ae.flags.target[0],
-                            -_fade,
-                            -_fade,
-                            "None - Beneficial",
-                            true,
-                            actor,
-                        ),
-                    );
-                } else if (ae.flags.XMLID === "naturalBodyHealing") {
-                    let bodyValue = parseInt(
-                        actor.system.characteristics.body.value,
-                    );
-                    let bodyMax = parseInt(
-                        actor.system.characteristics.body.max,
-                    );
-                    bodyValue = Math.min(bodyValue + 1, bodyMax);
-                    // await
-                    if (game.user.isGM)
-                        actor.update({
-                            "system.characteristics.body.value": bodyValue,
-                        });
-
-                    if (bodyValue === bodyMax) {
-                        if (game.user.isGM) ae.delete();
-                        break;
-                    } else {
-                        //await ae.update({ duration: ae.duration });
-                    }
-                } else {
-                    // Default is to delete the expired AE
-                    if (powerInfo) {
-                        if (game.user.isGM) await ae.delete();
-                        break;
-                    }
-                }
-            }
-        }
-
-        await renderAdjustmentChatCards(adjustmentChatMessages);
-
-        // Out of combat recovery.  When SimpleCalendar is used to advance time.
-        // This simple routine only handles increments of 12 seconds or more.
-        const automation = game.settings.get(
-            "hero6efoundryvttv2",
-            "automation",
-        );
-        if (
-            !game.combat?.active &&
-            (automation === "all" ||
-                (automation === "npcOnly" && actor.type == "npc") ||
-                (automation === "pcEndOnly" && actor.type === "pc"))
-        ) {
-            if (
-                multiplier > 0 &&
-                (parseInt(actor.system.characteristics.end.value) <
-                    parseInt(actor.system.characteristics.end.max) ||
-                    parseInt(actor.system.characteristics.stun.value) <
-                        parseInt(actor.system.characteristics.stun.max))
-            ) {
-                // If this is an NPC and their STUN <= 0 then leave them be.
-                // Typically, you should only use the Recovery Time Table for
-                // PCs. Once an NPC is Knocked Out below the -10 STUN level
-                // they should normally remain unconscious until the fight ends.
-
-                // TODO: Implement optional longer term recovery
-                // For STUN:
-                // From 0 to -10 they get 1 recovery every phase and post 12
-                // From -11 to -20 they get 1 recovery post 12
-                // From -21 to -30 they get 1 recovery per minute
-                // From -31 they're completely out at the GM's discretion
+                let powerInfo = getPowerInfo({
+                    actor: aeActor,
+                    xmlid: XMLID,
+                    item: item,
+                });
 
                 if (
-                    actor.type === "pc" ||
-                    parseInt(actor.system.characteristics.stun.value) > -10
+                    !powerInfo &&
+                    ae.statuses.size === 0 &&
+                    game.user.isGM &&
+                    game.settings.get(game.system.id, "alphaTesting") &&
+                    ae.duration?.seconds < 3.154e7 * 100
                 ) {
-                    const rec =
-                        parseInt(actor.system.characteristics.rec.value) *
-                        multiplier;
-                    const endValue = Math.min(
-                        parseInt(actor.system.characteristics.end.max),
-                        parseInt(actor.system.characteristics.end.value) + rec,
+                    return ui.notifications.warn(
+                        `Unable to determine XMLID for ${ae.name} active effect.`,
                     );
-                    const stunValue = Math.min(
-                        parseInt(actor.system.characteristics.stun.max),
-                        parseInt(actor.system.characteristics.stun.value) + rec,
-                    );
+                }
 
-                    if (game.user.isGM)
-                        await actor.removeActiveEffect(
-                            HeroSystem6eActorActiveEffects.stunEffect,
-                        );
+                // With Simple Calendar you can move time ahead in large steps.
+                // Need to loop as multiple fades may be required.
+                let d = ae._prepareDuration();
+                while (d.remaining != null && d.remaining <= 0) {
+                    // Add duration to startTime
+                    ae.duration.startTime += d.duration;
+                    d = ae._prepareDuration();
+                    if (game.user.isGM) {
+                        await ae.update({ duration: ae.duration });
+                    }
 
-                    if (game.user.isGM)
-                        await actor.update(
-                            {
-                                "system.characteristics.end.value": endValue,
-                                "system.characteristics.stun.value": stunValue,
-                            },
-                            { render: true },
+                    // What is this effect related to?
+                    if (ae.flags.type === "adjustment") {
+                        // Fade by 5 Active Points
+                        let _fade;
+                        if (ae.flags.activePoints < 0) {
+                            _fade = Math.max(ae.flags.activePoints, -5);
+                        } else {
+                            _fade = Math.min(ae.flags.activePoints, 5);
+                        }
+
+                        adjustmentChatMessages.push(
+                            await performAdjustment(
+                                item,
+                                ae.flags.target[0],
+                                -_fade,
+                                -_fade,
+                                "None - Beneficial",
+                                true,
+                                actor,
+                            ),
                         );
+                    } else if (ae.flags.XMLID === "naturalBodyHealing") {
+                        let bodyValue = parseInt(
+                            actor.system.characteristics.body.value,
+                        );
+                        let bodyMax = parseInt(
+                            actor.system.characteristics.body.max,
+                        );
+                        bodyValue = Math.min(bodyValue + 1, bodyMax);
+                        // await
+                        if (game.user.isGM)
+                            actor.update({
+                                "system.characteristics.body.value": bodyValue,
+                            });
+
+                        if (bodyValue === bodyMax) {
+                            if (game.user.isGM) ae.delete();
+                            break;
+                        } else {
+                            //await ae.update({ duration: ae.duration });
+                        }
+                    } else {
+                        // Default is to delete the expired AE
+                        if (powerInfo) {
+                            if (game.user.isGM) await ae.delete();
+                            break;
+                        }
+                    }
                 }
             }
-        }
 
-        // Charges Recover each day
-        if (today > lastDate) {
-            const itemsWithCharges = actor.items.filter(
-                (o) => o.system.charges?.max,
+            await renderAdjustmentChatCards(adjustmentChatMessages);
+
+            // Out of combat recovery.  When SimpleCalendar is used to advance time.
+            // This simple routine only handles increments of 12 seconds or more.
+            const automation = game.settings.get(
+                "hero6efoundryvttv2",
+                "automation",
             );
-            let content = "";
-            for (let item of itemsWithCharges) {
-                let value = parseInt(item.system.charges.value);
-                let max = parseInt(item.system.charges.max);
-                if (value < max) {
-                    content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
-                    item.update({ "system.charges.value": max });
+            if (
+                !game.combat?.active &&
+                (automation === "all" ||
+                    (automation === "npcOnly" && actor.type == "npc") ||
+                    (automation === "pcEndOnly" && actor.type === "pc"))
+            ) {
+                if (
+                    multiplier > 0 &&
+                    (parseInt(actor.system.characteristics.end.value) <
+                        parseInt(actor.system.characteristics.end.max) ||
+                        parseInt(actor.system.characteristics.stun.value) <
+                        parseInt(actor.system.characteristics.stun.max))
+                ) {
+                    // If this is an NPC and their STUN <= 0 then leave them be.
+                    // Typically, you should only use the Recovery Time Table for
+                    // PCs. Once an NPC is Knocked Out below the -10 STUN level
+                    // they should normally remain unconscious until the fight ends.
+
+                    // TODO: Implement optional longer term recovery
+                    // For STUN:
+                    // From 0 to -10 they get 1 recovery every phase and post 12
+                    // From -11 to -20 they get 1 recovery post 12
+                    // From -21 to -30 they get 1 recovery per minute
+                    // From -31 they're completely out at the GM's discretion
+
+                    if (
+                        actor.type === "pc" ||
+                        parseInt(actor.system.characteristics.stun.value) > -10
+                    ) {
+                        const rec =
+                            parseInt(actor.system.characteristics.rec.value) *
+                            multiplier;
+                        const endValue = Math.min(
+                            parseInt(actor.system.characteristics.end.max),
+                            parseInt(actor.system.characteristics.end.value) +
+                            rec,
+                        );
+                        const stunValue = Math.min(
+                            parseInt(actor.system.characteristics.stun.max),
+                            parseInt(actor.system.characteristics.stun.value) +
+                            rec,
+                        );
+
+                        if (game.user.isGM)
+                            await actor.removeActiveEffect(
+                                HeroSystem6eActorActiveEffects.stunEffect,
+                            );
+
+                        if (game.user.isGM)
+                            await actor.update(
+                                {
+                                    "system.characteristics.end.value":
+                                        endValue,
+                                    "system.characteristics.stun.value":
+                                        stunValue,
+                                },
+                                { render: true },
+                            );
+                    }
                 }
             }
 
-            if (content) {
-                const chatData = {
-                    user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
-                    whisper: ChatMessage.getWhisperRecipients("GM"),
-                    speaker: ChatMessage.getSpeaker({ actor: actor }),
-                    blind: true,
-                    content: content,
-                };
-                //await
-                ChatMessage.create(chatData);
+            // Charges Recover each day
+            if (today > lastDate) {
+                const itemsWithCharges = actor.items.filter(
+                    (o) => o.system.charges?.max,
+                );
+                let content = "";
+                for (let item of itemsWithCharges) {
+                    let value = parseInt(item.system.charges.value);
+                    let max = parseInt(item.system.charges.max);
+                    if (value < max) {
+                        content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
+                        item.update({ "system.charges.value": max });
+                    }
+                }
+
+                if (content) {
+                    const chatData = {
+                        user: game.user.id, //ChatMessage.getWhisperRecipients('GM'),
+                        whisper: ChatMessage.getWhisperRecipients("GM"),
+                        speaker: ChatMessage.getSpeaker({ actor: actor }),
+                        blind: true,
+                        content: content,
+                    };
+                    //await
+                    ChatMessage.create(chatData);
+                }
             }
+        } catch (e) {
+            console.error(e, actor, actor?.temporaryEffects[0]);
         }
     }
 
