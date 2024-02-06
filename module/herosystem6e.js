@@ -175,7 +175,7 @@ Hooks.on("renderChatPopout", (app, html) =>
 );
 
 // When actor SPD is changed we need to setupTurns again
-Hooks.on("updateActor", (document, change /*, _options, _userId */) => {
+Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
     if (
         change?.system?.characteristics?.spd?.value ||
         change?.system?.characteristics?.dex?.value ||
@@ -185,6 +185,10 @@ Hooks.on("updateActor", (document, change /*, _options, _userId */) => {
         for (const combat of game.combats) {
             if (combat.active) {
                 if (combat.combatants.find((o) => o.actorId === document.id)) {
+                    // Reroll Initiative (based on new spd/dex/ego/int changes)
+                    await combat.rollAll();
+
+                    // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
                     combat.setupTurns();
                 }
             }
