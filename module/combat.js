@@ -138,7 +138,11 @@ export class HeroSystem6eCombat extends Combat {
                     )
                 ) {
                     const combatant = new Combatant(turnsRaw[t]);
-                    combatant.flags = { ...turnsRaw[t].flags, segment: s };
+                    combatant.flags = {
+                        ...turnsRaw[t].flags,
+                        segment: s,
+                        turn: turns.length,
+                    };
                     turns.push(combatant);
                 }
             }
@@ -246,27 +250,15 @@ export class HeroSystem6eCombat extends Combat {
 
     /* -------------------------------------------- */
 
-    /**
-     * Begin the combat encounter, advancing to heroRound 1 and heroTurn 1
-     * @return {Promise<Combat>}
-     */
-    // async startCombat() {
-    //     this.setSegment(12)
-    //     return await this.update({ round: 1, turn: 0 });
-    // }
-
-    /* -------------------------------------------- */
-
     /** @inheritdoc */
     _onUpdate(data, options, userId) {
         console.log("_onUpdate", data, options, userId);
         super._onUpdate(data, options, userId);
 
-        // Render the sidebar
-        if (data.active === true) {
-            ui.combat.initialize({ combat: this });
-        }
-        ui.combat.scrollToTurn();
+        // _onUpdate isn't async, so can't call await.
+        // Without await is seems to loose track of turn (go from turn=0 to turn=last ).
+        // Instead moved scrollToTurn to combatTracker::_render.
+        //await ui.combat.scrollToTurn();
     }
 
     /* -------------------------------------------- */

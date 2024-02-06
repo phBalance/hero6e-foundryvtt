@@ -6,6 +6,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             "systems/hero6efoundryvttv2/templates/combat/combat-tracker.hbs";
         return foundry.utils.mergeObject(super.defaultOptions, {
             template: path,
+            //scrollY: [], // Do not save ['.directory-list'] scrollY positions, were just going to override them.
         });
     }
 
@@ -117,40 +118,25 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
      * Scroll the combat log container to ensure the current Combatant turn is centered vertically
      */
     scrollToTurn() {
-        //console.log("scrollToTurn");
+        //console.log("scrollToTurn", this.viewed?.turn);
         const combat = this.viewed;
-        if (!combat || combat.turn === null) {
-            return;
-        }
+        if (!combat || combat.turn === null) return;
+        let active = this.element.find(".combatant.active")[0];
+        if (!active) return;
 
-        const active = this.element.find(".active")[0];
-        if (!active) {
-            return;
-        }
+        // scrollIntoViewIfNeeded is better but non-standard.
+        active.scrollIntoView(scrollIntoViewOptions);
 
-        const container = active.closest("ol.directory-list");
+        // Store scroll positions (nott working with browser reload)
+        // const element = this.element;
+        // if (element.length && this.options.scrollY)
+        //     this._saveScrollPositions(element);
+    }
 
-        // Collapse all segments except for the one with the active combatant.
-        // Scroll to segment header because it would be nice if it was in view.
-        const segment = combat.turns[combat.turn].segment;
-        for (let s = 1; s <= 12; s++) {
-            let el = container.querySelector(`[data-segment-id="${s}"]`);
-            if (el) {
-                if (s === segment) {
-                    el.style.display = "block";
-                    el.parentElement
-                        .querySelector("h3")
-                        .scrollIntoView(scrollIntoViewOptions);
-                } else {
-                    el.style.display = "none";
-                }
-            }
-        }
+    async _render(...args) {
+        //console.log("_render");
 
-        // Scroll active combatant into view.
-        let el = container.querySelector(`[data-turn-id="${combat.turn}"]`);
-        if (el) {
-            el.scrollIntoView(scrollIntoViewOptions);
-        }
+        await super._render(args);
+        await ui.combat.scrollToTurn();
     }
 }

@@ -72,7 +72,7 @@
                 {{/unless}} data-segment-id="{{@index}}">
 
                 {{#each this}}
-                <li class="combatant actor directory-item flexrow {{this.css}}" data-turn-id="{{this.turn}}"
+                <li class="combatant actor directory-item flexrow {{this.css}}" data-turn-id="{{this.flags.turn}}"
                     data-combatant-id="{{this.id}}" style="margin-left: -20px !important;">
                     <img class="token-image" data-src="{{this.img}}" alt="{{this.name}}" />
                     <div class="token-name flexcol">
@@ -133,10 +133,8 @@
         </li>
         {{/each}}
 
-
-
-
     </ol>
+
 
     <nav id="combat-controls" class="directory-footer flexrow" data-tooltip-direction="UP">
         {{#if hasCombat}}
