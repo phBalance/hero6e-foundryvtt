@@ -18,6 +18,7 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     async rollInitiative() {
+        console.log("rollInitiative");
         // Iterate over Combatants, performing an initiative roll for each
         const updates = [];
         for (let [id /*, value*/] of this.combatants.entries()) {
@@ -60,6 +61,7 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     setupTurns() {
+        console.log("setupTurns");
         // Roll Initiative everytime as DEX/INT/SPD may have changed
         // await this.rollAll();
         // Determine the turn order and the current turn
@@ -488,15 +490,16 @@ export class HeroSystem6eCombat extends Combat {
         this.setupTurns();
         this.#recordPreviousState(priorState);
 
+        // When token (turns) are added or deleted this.turns likely points to the wrong turn.
         // Adjust turn order to keep the current Combatant the same (SEGMENT is important for HeroSystem)
-        const sameTurn = combatant
-            ? this.turns.findIndex(
-                  (t) =>
-                      t.id === combatant.id &&
-                      t.flags.segment === combatant.flags.segment &&
-                      t.initiative === combatant.initiative,
-              )
-            : this.turn;
+        let sameTurn = this.turns.findIndex(
+            (t) =>
+                t.id === combatant?.id &&
+                t.flags.segment === combatant?.flags.segment &&
+                t.initiative === combatant?.initiative,
+        );
+        if (sameTurn < 0) sameTurn = this.turn;
+
         const adjustedTurn = sameTurn !== this.turn ? sameTurn : undefined;
         if (options.turnEvents !== false && adjustedTurn) {
             this._manageTurnEvents(adjustedTurn);
@@ -506,27 +509,6 @@ export class HeroSystem6eCombat extends Combat {
         if (this.active && options.render !== false) {
             this.collection.render();
         }
-
-        // super._onUpdateEmbeddedDocuments(...args);
-        // this.setupTurns();
-
-        // // If the current combatant was removed, update the heroTurn order to the next survivor
-        // let heroTurn = this.heroTurn;
-        // if (result.includes(currId)) {
-        //     if (nextSurvivor) heroTurn = this.segments[this.segment].findIndex(t => t.id === nextSurvivor.id);
-        // }
-
-        // // Otherwise keep the combatant the same
-        // else heroTurn = this.segments[this.segment].findIndex(t => t.id === currId);
-
-        // // Update database or perform a local override
-        // heroTurn = Math.max(heroTurn, 0);
-
-        // if (game.user.id === userId) this.update({ heroTurn });
-        // else this.update({ heroTurn });
-
-        // // Render the collection
-        // if (this.active) this.collection.render();
     }
 
     /**
