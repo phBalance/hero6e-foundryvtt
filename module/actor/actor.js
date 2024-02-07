@@ -1806,9 +1806,9 @@ export class HeroSystem6eActor extends Actor {
                 characteristic.roll = 20;
             }
             if (!this.system.is5e && characteristic.value < 0) {
-                characteristic.value = 9;
+                characteristic.roll = 9;
             } else if (characteristic.value < -45) {
-                characteristic.value = 0;
+                characteristic.roll = 0;
             }
         }
     }
