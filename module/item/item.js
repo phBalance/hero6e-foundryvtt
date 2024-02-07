@@ -763,11 +763,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // BASECOST
-        const newBaseValue = parseFloat(
-            getModifierInfo({ item: this })?.BASECOST ||
-                this.system.BASECOST ||
-                0,
-        );
+        const newBaseValue = parseFloat(this.system.BASECOST || 0);
         if (this.system.baseCost != newBaseValue) {
             this.system.baseCost = newBaseValue;
             changed = true;
