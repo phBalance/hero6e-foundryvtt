@@ -777,110 +777,64 @@ export class HeroSystem6eItem extends Item {
 
                     switch (child.XMLID) {
                         case "AOE":
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.25;
+                            if (!this.actor?.system?.is5e) {
+                                let minLevel;
+                                let minDoubles;
 
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 64
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.25;
+                                if (
+                                    child.OPTION === "SURFACE" ||
+                                    child.OPTION === "AREA"
+                                ) {
+                                    minLevel = 2;
+                                    minDoubles = 0;
+                                } else if (child.OPTION === "RADIUS") {
+                                    minLevel = 4;
+                                    minDoubles = 1;
+                                } else if (child.OPTION === "CONE") {
+                                    minLevel = 8;
+                                    minDoubles = 2;
+                                } else if (child.OPTION === "LINE") {
+                                    minLevel = 16;
+                                    minDoubles = 3;
+                                } else {
+                                    console.error(
+                                        `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
+                                    );
+                                }
 
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 125
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 64
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.25;
+                                const levels =
+                                    parseInt(child.LEVELS) < minLevel
+                                        ? minLevel
+                                        : parseInt(child.LEVELS);
 
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 2
-                            )
-                                newChildValue = 0.25;
-
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 2
-                            )
-                                newChildValue = 0.25;
+                                newChildValue =
+                                    0.25 * Math.ceil(Math.log2(levels) - 1);
+                            } else {
+                                // Modifier plus any dimension doubling adders
+                                const baseModifierCost = parseFloat(
+                                    child.BASECOST,
+                                );
+                                const addersCost =
+                                    0.25 *
+                                    (child.ADDER || [])
+                                        .filter((adder) => {
+                                            return (
+                                                adder.XMLID ===
+                                                    "DOUBLEHEIGHT" ||
+                                                adder.XMLID === "DOUBLEWIDTH" ||
+                                                adder.XMLID ===
+                                                    "DOUBLELENGTH" ||
+                                                adder.XMLID === "DOUBLEAREA"
+                                            );
+                                        })
+                                        .reduce((total, adder) => {
+                                            return (
+                                                total +
+                                                (parseInt(adder.LEVELS) || 0)
+                                            );
+                                        }, 0);
+                                newChildValue = baseModifierCost + addersCost;
+                            }
 
                             break;
 
