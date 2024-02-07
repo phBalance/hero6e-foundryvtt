@@ -1798,12 +1798,15 @@ export class HeroSystem6eActor extends Actor {
     }
    
     updateRollable(key) {
-        const characteristic = this.system.characteristics[key];
+        const characteristic = this.system.characteristics[key];       
         if (characteristic.type === "rollable") {
-            if (characteristic.value >= 0 && characteristic.value <= 52) {
+            if (characteristic.value <= 52) {
                 characteristic.roll = Math.round(9 + (characteristic.value * 0.2));
             } else if (characteristic.value > 52) {
                 characteristic.roll = 20;
+            }
+            if (!this.system.is5e && characteristic.value < 0) {
+                characteristic.value = 9;
             }
         }
     }
