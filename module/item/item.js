@@ -654,7 +654,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
-            if (this?.actor?.system?.is5e) {
+            if (this.actor?.system?.is5e) {
                 switch (this.system.OPTION) {
                     case "SINGLE":
                         this.system.costPerLevel = 2;
