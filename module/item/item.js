@@ -2637,7 +2637,11 @@ export class HeroSystem6eItem extends Item {
             modifier.OPTION_ALIAS &&
             !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)
         ) {
-            result += modifier.OPTION_ALIAS;
+            if (modifier.OPTION_ALIAS === "One Hex" && modifier.LEVELS > 1) {
+                result += "Radius";
+            } else {
+                result += modifier.OPTION_ALIAS;
+            }
             switch (modifier.XMLID) {
                 case "EXTRATIME":
                     result += ", ";

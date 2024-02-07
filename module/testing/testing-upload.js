@@ -210,7 +210,69 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("5e one hex", async function () {
+                describe("5e hex with no increased radius", async function () {
+                    const contents = `
+                        <POWER XMLID="ENERGYBLAST" ID="1707283846537" BASECOST="0.0" LEVELS="22" ALIAS="Energy Blast" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="West Side Massiv (W) with 1 Hex &amp; 2x radius" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1707283846513" BASECOST="0.5" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEX" OPTIONID="HEX" OPTION_ALIAS="One Hex" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1707283846531" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="BURNOUT" ID="1707283846517" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="JAMMED" ID="1707283846518" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            'Energy Blast 22d6 (ED), Area Of Effect (1" One Hex; +1/2) (165 Active Points); Activation Roll (15-; Burnout, Jammed, -1/2)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 110);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 165);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 22);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 16);
+                    });
+                });
+
+                describe("5e hex with increased radius", async function () {
                     const contents = `
                         <POWER XMLID="ENERGYBLAST" ID="1705275176659" BASECOST="0.0" LEVELS="22" ALIAS="Energy Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="West Side Massiv (W) with 1 Hex &amp; 2x radius" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
@@ -254,9 +316,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-
-                            // TODO: This should be Radius rather than One Hex but it's a pain to restructure so we'll leave it as good enough right now.
-                            'Energy Blast 22d6 (ED), Area Of Effect (2" One Hex, +3/4) (192 Active Points); Activation Roll (15-; Burnout, Jammed, -1/2)',
+                            'Energy Blast 22d6 (ED), Area Of Effect (2" Radius; +3/4) (192 Active Points); Activation Roll (15-; Burnout, Jammed, -1/2)',
                         );
                     });
 
