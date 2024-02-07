@@ -339,12 +339,12 @@ function rollItemMacro(itemName, itemType) {
     if (!actor) actor = game.actors.get(speaker.actor);
     let item = actor
         ? actor.items.find(
-            (i) =>
-                i.name === itemName &&
-                (!itemType ||
-                    i.type == itemType ||
-                    i.system.subType == itemType),
-        )
+              (i) =>
+                  i.name === itemName &&
+                  (!itemType ||
+                      i.type == itemType ||
+                      i.system.subType == itemType),
+          )
         : null;
 
     // The selected actor does not have an item with this name.
@@ -367,7 +367,8 @@ function rollItemMacro(itemName, itemType) {
 
         if (!item)
             return ui.notifications.warn(
-                `Your controlled Actor does not have an ${itemType || "item"
+                `Your controlled Actor does not have an ${
+                    itemType || "item"
                 } named ${itemName}`,
             );
     }
@@ -518,7 +519,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 actor.type === "pc" &&
                 !naturalBodyHealing &&
                 parseInt(actor.system.characteristics.body.value) <
-                parseInt(actor.system.characteristics.body.max)
+                    parseInt(actor.system.characteristics.body.max)
             ) {
                 const bodyPerMonth = parseInt(
                     actor.system.characteristics.rec.value,
@@ -654,7 +655,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     (parseInt(actor.system.characteristics.end.value) <
                         parseInt(actor.system.characteristics.end.max) ||
                         parseInt(actor.system.characteristics.stun.value) <
-                        parseInt(actor.system.characteristics.stun.max))
+                            parseInt(actor.system.characteristics.stun.max))
                 ) {
                     // If this is an NPC and their STUN <= 0 then leave them be.
                     // Typically, you should only use the Recovery Time Table for
@@ -678,12 +679,12 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         const endValue = Math.min(
                             parseInt(actor.system.characteristics.end.max),
                             parseInt(actor.system.characteristics.end.value) +
-                            rec,
+                                rec,
                         );
                         const stunValue = Math.min(
                             parseInt(actor.system.characteristics.stun.max),
                             parseInt(actor.system.characteristics.stun.value) +
-                            rec,
+                                rec,
                         );
 
                         if (game.user.isGM)
