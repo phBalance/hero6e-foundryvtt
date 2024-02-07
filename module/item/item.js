@@ -808,7 +808,8 @@ export class HeroSystem6eItem extends Item {
                                         : parseInt(child.LEVELS);
 
                                 newChildValue =
-                                    0.25 * Math.ceil(Math.log2(levels) - 1);
+                                    0.25 *
+                                    Math.ceil(Math.log2(levels) - minDoubles);
                             } else {
                                 // Modifier plus any dimension doubling adders
                                 const baseModifierCost = parseFloat(
@@ -2553,25 +2554,26 @@ export class HeroSystem6eItem extends Item {
                 let levels = 1;
 
                 // not counting the Area Of Effect Advantage.
-                let _activePointsWithoutAoeAdvantage =
-                    item.system.activePoints / (1 + modifier.BASECOST_total);
+                // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
+                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
+                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+                const activePointsWithoutAoeAdvantage = Math.max(
+                    item.system.basePointsPlusAdders,
+                    item.system.activePoints / (1 + modifier.BASECOST_total),
+                );
                 switch (modifier.OPTIONID) {
                     case "CONE":
                         // +1 for a Cone with sides (1”+ (1” for
                         // every 5 Active Points in the power))
                         // long; double the length of the sides for
                         // each additional +¼
-                        levels =
-                            1 +
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 5,
-                            );
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 5,
+                        );
                         break;
 
                     case "HEX":
-                        levels = 0;
+                        levels = 1;
                         break;
 
                     case "LINE":
@@ -2579,38 +2581,39 @@ export class HeroSystem6eItem extends Item {
                         // Points in the power; double the length,
                         // width, or height of the Line for each additional
                         // +¼
-                        levels =
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 5,
-                            ) * 2;
+                        levels = Math.floor(
+                            (2 * activePointsWithoutAoeAdvantage) / 5,
+                        );
                         break;
 
                     case "RADIUS":
                         // +1 for a 1” Radius for every 10 Active
                         // Points in the power; double the Radius for
                         // each additional +¼
-                        levels =
-                            1 +
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 10,
-                            );
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 10,
+                        );
+                        break;
+
+                    default:
+                        console.error(
+                            `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                        );
                         break;
                 }
 
+                // TODO: Not considering lines which do not use DOUBLEAREA
                 const DOUBLEAREA = (modifier?.ADDER || []).find(
                     (o) => o.XMLID === "DOUBLEAREA",
                 );
                 if (DOUBLEAREA) {
-                    levels *= parseInt(DOUBLEAREA.LEVELS) * 2;
+                    levels *= Math.pow(2, parseInt(DOUBLEAREA.LEVELS));
                 }
 
                 if (parseInt(modifier.LEVELS) != levels) {
                     modifier.LEVELS = levels;
-                    if (item.update) {
+                    if (item.id) {
+                        // TODO: This should be awaiting ... which implies it should be elsewhere.
                         item.update({
                             "system.modifiers": item.system.modifiers,
                         });
@@ -2618,9 +2621,9 @@ export class HeroSystem6eItem extends Item {
                 }
             }
             if (parseInt(modifier.LEVELS || 0) > 0) {
-                result +=
-                    parseInt(modifier.LEVELS) +
-                    (item.actor?.system?.is5e ? '" ' : "m ");
+                result += `${parseInt(modifier.LEVELS)}${getSystemDisplayUnits(
+                    item.actor,
+                )} `;
             }
         }
 
@@ -2651,10 +2654,12 @@ export class HeroSystem6eItem extends Item {
             result += modifier.INPUT + "; ";
         }
 
-        //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
         if (modifier.COMMENTS) result += modifier.COMMENTS + "; ";
         for (const adder of modifier.ADDER || []) {
             switch (adder.XMLID) {
+                case "DOUBLELENGTH":
+                case "DOUBLEWIDTH":
+                case "DOUBLEHEIGHT":
                 case "DOUBLEAREA":
                     break;
 
