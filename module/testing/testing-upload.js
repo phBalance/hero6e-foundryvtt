@@ -159,7 +159,7 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe.only("ENERGYBLAST", function () {
+            describe("ENERGYBLAST", function () {
                 describe("fire blast", async function () {
                     const contents = `
                     <POWER XMLID="ENERGYBLAST" ID="1686774389914" BASECOST="0.0" LEVELS="1" ALIAS="Fire Blast" POSITION="5" MULTIPLIER="1.0" GRAPHIC="zap" COLOR="255 0 0 " SFX="Fire/Heat" USE_END_RESERVE="Yes" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -429,6 +429,126 @@ export function registerUploadTests(quench) {
                         assert.equal(
                             item.system.description,
                             'Energy Blast 1d6 (ED), Area Of Effect (4" Cone; +1 1/4)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 11);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 11);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 1);
+                    });
+                });
+
+                describe.skip("5e line", async function () {
+                    const contents = `
+                        <POWER XMLID="ENERGYBLAST" ID="1707276230888" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1707276426768" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LINE" OPTIONID="LINE" OPTION_ALIAS="Line" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="DOUBLEHEIGHT" ID="1707276452940" BASECOST="0.0" LEVELS="1" ALIAS="x2 Height" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="DOUBLEWIDTH" ID="1707276453391" BASECOST="0.0" LEVELS="1" ALIAS="x2 Width" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="DOUBLELENGTH" ID="1707276453882" BASECOST="0.0" LEVELS="1" ALIAS="x2 Length" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            // TODO: This is what it should be.
+                            'Energy Blast 1d6 (ED), Area Of Effect (2" Line; +1 3/4)',
+                            // 'Energy Blast 1d6 (ED), Area Of Effect (4" Long, 2" Tall, 2" Wide Line; +1 3/4)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 14);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 14);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 1);
+                    });
+                });
+
+                describe("5e area", async function () {
+                    const contents = `
+                        <POWER XMLID="ENERGYBLAST" ID="1707276300061" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="AOE" ID="1707276495254" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANY" OPTIONID="ANY" OPTION_ALIAS="Any Area" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="DOUBLEAREA" ID="1707276501208" BASECOST="0.0" LEVELS="1" ALIAS="x2 Area" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            'Energy Blast 1d6 (ED), Area Of Effect (2" Any Area; +1 1/4)',
                         );
                     });
 
