@@ -654,7 +654,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
-            if (this?.actor?.system?.is5e) {
+            if (this.actor?.system?.is5e) {
                 switch (this.system.OPTION) {
                     case "SINGLE":
                         this.system.costPerLevel = 2;
@@ -763,11 +763,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // BASECOST
-        const newBaseValue = parseFloat(
-            getModifierInfo({ item: this })?.BASECOST ||
-                this.system.BASECOST ||
-                0,
-        );
+        const newBaseValue = parseFloat(this.system.BASECOST || 0);
         if (this.system.baseCost != newBaseValue) {
             this.system.baseCost = newBaseValue;
             changed = true;
@@ -781,110 +777,65 @@ export class HeroSystem6eItem extends Item {
 
                     switch (child.XMLID) {
                         case "AOE":
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.25;
+                            if (!this.actor?.system?.is5e) {
+                                let minLevel;
+                                let minDoubles;
 
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 64
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.25;
+                                if (
+                                    child.OPTION === "SURFACE" ||
+                                    child.OPTION === "AREA"
+                                ) {
+                                    minLevel = 2;
+                                    minDoubles = 0;
+                                } else if (child.OPTION === "RADIUS") {
+                                    minLevel = 4;
+                                    minDoubles = 1;
+                                } else if (child.OPTION === "CONE") {
+                                    minLevel = 8;
+                                    minDoubles = 2;
+                                } else if (child.OPTION === "LINE") {
+                                    minLevel = 16;
+                                    minDoubles = 3;
+                                } else {
+                                    console.error(
+                                        `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
+                                    );
+                                }
 
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 125
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 64
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.25;
+                                const levels =
+                                    parseInt(child.LEVELS) < minLevel
+                                        ? minLevel
+                                        : parseInt(child.LEVELS);
 
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 2
-                            )
-                                newChildValue = 0.25;
-
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 2
-                            )
-                                newChildValue = 0.25;
+                                newChildValue =
+                                    0.25 *
+                                    Math.ceil(Math.log2(levels) - minDoubles);
+                            } else {
+                                // Modifier plus any dimension doubling adders
+                                const baseModifierCost = parseFloat(
+                                    child.BASECOST,
+                                );
+                                const addersCost =
+                                    0.25 *
+                                    (child.ADDER || [])
+                                        .filter((adder) => {
+                                            return (
+                                                adder.XMLID ===
+                                                    "DOUBLEHEIGHT" ||
+                                                adder.XMLID === "DOUBLEWIDTH" ||
+                                                adder.XMLID ===
+                                                    "DOUBLELENGTH" ||
+                                                adder.XMLID === "DOUBLEAREA"
+                                            );
+                                        })
+                                        .reduce((total, adder) => {
+                                            return (
+                                                total +
+                                                (parseInt(adder.LEVELS) || 0)
+                                            );
+                                        }, 0);
+                                newChildValue = baseModifierCost + addersCost;
+                            }
 
                             break;
 
@@ -2603,25 +2554,26 @@ export class HeroSystem6eItem extends Item {
                 let levels = 1;
 
                 // not counting the Area Of Effect Advantage.
-                let _activePointsWithoutAoeAdvantage =
-                    item.system.activePoints / (1 + modifier.BASECOST_total);
+                // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
+                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
+                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+                const activePointsWithoutAoeAdvantage = Math.max(
+                    item.system.basePointsPlusAdders,
+                    item.system.activePoints / (1 + modifier.BASECOST_total),
+                );
                 switch (modifier.OPTIONID) {
                     case "CONE":
                         // +1 for a Cone with sides (1”+ (1” for
                         // every 5 Active Points in the power))
                         // long; double the length of the sides for
                         // each additional +¼
-                        levels =
-                            1 +
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 5,
-                            );
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 5,
+                        );
                         break;
 
                     case "HEX":
-                        levels = 0;
+                        levels = 1;
                         break;
 
                     case "LINE":
@@ -2629,38 +2581,39 @@ export class HeroSystem6eItem extends Item {
                         // Points in the power; double the length,
                         // width, or height of the Line for each additional
                         // +¼
-                        levels =
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 5,
-                            ) * 2;
+                        levels = Math.floor(
+                            (2 * activePointsWithoutAoeAdvantage) / 5,
+                        );
                         break;
 
                     case "RADIUS":
                         // +1 for a 1” Radius for every 10 Active
                         // Points in the power; double the Radius for
                         // each additional +¼
-                        levels =
-                            1 +
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 10,
-                            );
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 10,
+                        );
+                        break;
+
+                    default:
+                        console.error(
+                            `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                        );
                         break;
                 }
 
+                // TODO: Not considering lines which do not use DOUBLEAREA
                 const DOUBLEAREA = (modifier?.ADDER || []).find(
                     (o) => o.XMLID === "DOUBLEAREA",
                 );
                 if (DOUBLEAREA) {
-                    levels *= parseInt(DOUBLEAREA.LEVELS) * 2;
+                    levels *= Math.pow(2, parseInt(DOUBLEAREA.LEVELS));
                 }
 
                 if (parseInt(modifier.LEVELS) != levels) {
                     modifier.LEVELS = levels;
-                    if (item.update) {
+                    if (item.id) {
+                        // TODO: This should be awaiting ... which implies it should be elsewhere.
                         item.update({
                             "system.modifiers": item.system.modifiers,
                         });
@@ -2668,9 +2621,9 @@ export class HeroSystem6eItem extends Item {
                 }
             }
             if (parseInt(modifier.LEVELS || 0) > 0) {
-                result +=
-                    parseInt(modifier.LEVELS) +
-                    (item.actor?.system?.is5e ? '" ' : "m ");
+                result += `${parseInt(modifier.LEVELS)}${getSystemDisplayUnits(
+                    item.actor,
+                )} `;
             }
         }
 
@@ -2684,7 +2637,11 @@ export class HeroSystem6eItem extends Item {
             modifier.OPTION_ALIAS &&
             !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)
         ) {
-            result += modifier.OPTION_ALIAS;
+            if (modifier.OPTION_ALIAS === "One Hex" && modifier.LEVELS > 1) {
+                result += "Radius";
+            } else {
+                result += modifier.OPTION_ALIAS;
+            }
             switch (modifier.XMLID) {
                 case "EXTRATIME":
                     result += ", ";
@@ -2701,10 +2658,12 @@ export class HeroSystem6eItem extends Item {
             result += modifier.INPUT + "; ";
         }
 
-        //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
         if (modifier.COMMENTS) result += modifier.COMMENTS + "; ";
         for (const adder of modifier.ADDER || []) {
             switch (adder.XMLID) {
+                case "DOUBLELENGTH":
+                case "DOUBLEWIDTH":
+                case "DOUBLEHEIGHT":
                 case "DOUBLEAREA":
                     break;
 
