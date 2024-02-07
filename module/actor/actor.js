@@ -279,6 +279,22 @@ export class HeroSystem6eActor extends Actor {
             this.applyEncumbrancePenalty();
         }
 
+        // Ensure natural healing effect is removed when returned to full BODY
+        if (
+            data?.system?.characteristics?.body?.value &&
+            data?.system?.characteristics?.body?.value >=
+                parseInt(this.system.characteristics.body.max)
+        ) {
+            const naturalHealingTempEffect = this.temporaryEffects.find(
+                (o) => o.flags.XMLID === "naturalBodyHealing",
+            );
+
+            // Fire and forget
+            if (naturalHealingTempEffect) {
+                naturalHealingTempEffect.delete();
+            }
+        }
+
         // Display changes from _preUpdate
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);
