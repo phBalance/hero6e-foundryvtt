@@ -9,7 +9,7 @@
 
 - Fix CombatTracker bug introduced in 3.0.55 that added extra Lightning Reflexes tokens repeatedly; caused unresponsiveness and/or crashing.
 
-## Version 3.0.56 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.56
 
 - Fix inability to apply damage when hit locations enabled. [#678](https://github.com/dmdorman/hero6e-foundryvtt/issues/678)
 - RAR and RSR now have always success on 3 and failure on 18.
