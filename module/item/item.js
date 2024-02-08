@@ -862,14 +862,18 @@ export class HeroSystem6eItem extends Item {
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
                         if (child[key]) {
                             for (const child2 of child[key]) {
-                                const newChild2Value = parseFloat(
-                                    getModifierInfo({
-                                        xmlid: child.XMLID,
-                                        item: this,
-                                    })?.BASECOST ||
-                                        child2.BASECOST ||
-                                        0,
-                                );
+                                const newChild2Value =
+                                    parseFloat(
+                                        getModifierInfo({
+                                            xmlid: child2.XMLID,
+                                            item: this,
+                                        })?.BASECOST ||
+                                            child2.BASECOST ||
+                                            0,
+                                    ) +
+                                    parseFloat(child2.LVLCOST || 0) *
+                                        parseFloat(child2.LVLVAL || 0);
+
                                 if (child2.baseCost != newChild2Value) {
                                     child2.baseCost = newChild2Value;
                                     changed = true;
