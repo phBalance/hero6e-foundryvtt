@@ -2586,6 +2586,7 @@ export class HeroSystem6eItem extends Item {
                         );
                         break;
 
+                    case "ANY":
                     case "RADIUS":
                         // +1 for a 1” Radius for every 10 Active
                         // Points in the power; double the Radius for

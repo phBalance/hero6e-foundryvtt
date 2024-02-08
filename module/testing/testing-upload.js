@@ -515,11 +515,11 @@ export function registerUploadTests(quench) {
 
                 describe("5e area", async function () {
                     const contents = `
-                        <POWER XMLID="ENERGYBLAST" ID="1707276300061" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <POWER XMLID="ENERGYBLAST" ID="1707276300061" BASECOST="0.0" LEVELS="3" ALIAS="Energy Blast" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
-                            <MODIFIER XMLID="AOE" ID="1707276495254" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANY" OPTIONID="ANY" OPTION_ALIAS="Any Area" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <MODIFIER XMLID="AOE" ID="1707355669461" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ANY" OPTIONID="ANY" OPTION_ALIAS="Any Area" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="DOUBLEAREA" ID="1707276501208" BASECOST="0.0" LEVELS="1" ALIAS="x2 Area" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+                                <ADDER XMLID="DOUBLEAREA" ID="1707355669437" BASECOST="0.0" LEVELS="1" ALIAS="x2 Area" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
                                     <NOTES />
                                 </ADDER>
                             </MODIFIER>
@@ -548,24 +548,24 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            'Energy Blast 1d6 (ED), Area Of Effect (2" Any Area; +1 1/4)',
+                            'Energy Blast 3d6 (PD), Area Of Effect (4" Any Area; +1 1/4)',
                         );
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, 11);
+                        assert.equal(item.system.realCost, 34);
                     });
 
                     it("activePoints", function () {
-                        assert.equal(item.system.activePoints, 11);
+                        assert.equal(item.system.activePoints, 34);
                     });
 
                     it("levels", function () {
-                        assert.equal(item.system.value, 1);
+                        assert.equal(item.system.value, 3);
                     });
 
                     it("end", function () {
-                        assert.equal(item.system.end, 1);
+                        assert.equal(item.system.end, 3);
                     });
                 });
             });
