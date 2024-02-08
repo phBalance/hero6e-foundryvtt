@@ -66,7 +66,9 @@ export class ItemAttackFormApplication extends FormApplication {
             // TODO: This needs to change. Shouldn't it be looking at system.areaOfEffect?
             data.aoeText = aoe.OPTION_ALIAS;
             if (aoe.LEVELS) {
-                data.aoeText += ` (${aoe.LEVELS})`;
+                data.aoeText += ` (${aoe.LEVELS}${getSystemDisplayUnits(
+                    item.actor,
+                )})`;
             }
 
             if (this.aoeTemplate() || game.user.targets.size > 0) {
