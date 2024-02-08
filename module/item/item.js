@@ -783,7 +783,7 @@ export class HeroSystem6eItem extends Item {
 
                                 if (
                                     child.OPTION === "SURFACE" ||
-                                    child.OPTION === "AREA"
+                                    child.OPTION === "ANY"
                                 ) {
                                     minLevel = 2;
                                     minDoubles = 0;
@@ -2622,9 +2622,12 @@ export class HeroSystem6eItem extends Item {
                 }
             }
             if (parseInt(modifier.LEVELS || 0) > 0) {
-                result += `${parseInt(modifier.LEVELS)}${getSystemDisplayUnits(
-                    item.actor,
-                )} `;
+                result += `${parseInt(modifier.LEVELS)}${
+                    modifier.OPTION_ALIAS === "Any Area" &&
+                    !item.actor?.system?.is5e
+                        ? ""
+                        : getSystemDisplayUnits(item.actor)
+                } `;
             }
         }
 
@@ -2640,6 +2643,11 @@ export class HeroSystem6eItem extends Item {
         ) {
             if (modifier.OPTION_ALIAS === "One Hex" && modifier.LEVELS > 1) {
                 result += "Radius";
+            } else if (
+                modifier.OPTION_ALIAS === "Any Area" &&
+                !item.actor?.system?.is5e
+            ) {
+                result += "2m Areas";
             } else {
                 result += modifier.OPTION_ALIAS;
             }
@@ -2666,6 +2674,7 @@ export class HeroSystem6eItem extends Item {
                 case "DOUBLEWIDTH":
                 case "DOUBLEHEIGHT":
                 case "DOUBLEAREA":
+                    // These adders relate to AOE and so are displayed as a part of that
                     break;
 
                 default:
@@ -2726,8 +2735,7 @@ export class HeroSystem6eItem extends Item {
             actor: item?.actor,
         });
 
-        // All Slots?  // This may be a slot in a framework if so get parent
-        // const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+        // All Slots? This may be a slot in a framework if so get parent
         if (
             configPowerInfo &&
             configPowerInfo.powerType?.includes("framework")
