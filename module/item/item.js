@@ -812,29 +812,7 @@ export class HeroSystem6eItem extends Item {
                                     Math.ceil(Math.log2(levels) - minDoubles);
                             } else {
                                 // Modifier plus any dimension doubling adders
-                                const baseModifierCost = parseFloat(
-                                    child.BASECOST,
-                                );
-                                const addersCost =
-                                    0.25 *
-                                    (child.ADDER || [])
-                                        .filter((adder) => {
-                                            return (
-                                                adder.XMLID ===
-                                                    "DOUBLEHEIGHT" ||
-                                                adder.XMLID === "DOUBLEWIDTH" ||
-                                                adder.XMLID ===
-                                                    "DOUBLELENGTH" ||
-                                                adder.XMLID === "DOUBLEAREA"
-                                            );
-                                        })
-                                        .reduce((total, adder) => {
-                                            return (
-                                                total +
-                                                (parseInt(adder.LEVELS) || 0)
-                                            );
-                                        }, 0);
-                                newChildValue = baseModifierCost + addersCost;
+                                newChildValue = parseFloat(child.BASECOST);
                             }
 
                             break;
@@ -859,6 +837,11 @@ export class HeroSystem6eItem extends Item {
                             break;
                     }
 
+                    if (child.baseCost != newChildValue) {
+                        child.baseCost = newChildValue;
+                        changed = true;
+                    }
+
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
                         if (child[key]) {
                             for (const child2 of child[key]) {
@@ -872,7 +855,7 @@ export class HeroSystem6eItem extends Item {
                                             0,
                                     ) +
                                     parseFloat(child2.LVLCOST || 0) *
-                                        parseFloat(child2.LVLVAL || 0);
+                                        parseFloat(child2.LEVELS || 0);
 
                                 if (child2.baseCost != newChild2Value) {
                                     child2.baseCost = newChild2Value;
@@ -880,11 +863,6 @@ export class HeroSystem6eItem extends Item {
                                 }
                             }
                         }
-                    }
-
-                    if (child.baseCost != newChildValue) {
-                        child.baseCost = newChildValue;
-                        changed = true;
                     }
                 }
             }
