@@ -783,7 +783,7 @@ export class HeroSystem6eItem extends Item {
 
                                 if (
                                     child.OPTION === "SURFACE" ||
-                                    child.OPTION === "AREA"
+                                    child.OPTION === "ANY"
                                 ) {
                                     minLevel = 2;
                                     minDoubles = 0;
@@ -812,29 +812,7 @@ export class HeroSystem6eItem extends Item {
                                     Math.ceil(Math.log2(levels) - minDoubles);
                             } else {
                                 // Modifier plus any dimension doubling adders
-                                const baseModifierCost = parseFloat(
-                                    child.BASECOST,
-                                );
-                                const addersCost =
-                                    0.25 *
-                                    (child.ADDER || [])
-                                        .filter((adder) => {
-                                            return (
-                                                adder.XMLID ===
-                                                    "DOUBLEHEIGHT" ||
-                                                adder.XMLID === "DOUBLEWIDTH" ||
-                                                adder.XMLID ===
-                                                    "DOUBLELENGTH" ||
-                                                adder.XMLID === "DOUBLEAREA"
-                                            );
-                                        })
-                                        .reduce((total, adder) => {
-                                            return (
-                                                total +
-                                                (parseInt(adder.LEVELS) || 0)
-                                            );
-                                        }, 0);
-                                newChildValue = baseModifierCost + addersCost;
+                                newChildValue = parseFloat(child.BASECOST);
                             }
 
                             break;
@@ -845,6 +823,13 @@ export class HeroSystem6eItem extends Item {
                             newChildValue = -Math.abs(
                                 parseFloat(child.BASECOST),
                             );
+                            break;
+
+                        case "EXPLOSION":
+                            // Not specified correctly in HDC.
+                            newChildValue =
+                                parseFloat(child.BASECOST) +
+                                0.25 * (parseInt(child.LEVELS || 1) - 1);
                             break;
 
                         default:
@@ -859,28 +844,32 @@ export class HeroSystem6eItem extends Item {
                             break;
                     }
 
+                    if (child.baseCost != newChildValue) {
+                        child.baseCost = newChildValue;
+                        changed = true;
+                    }
+
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
                         if (child[key]) {
                             for (const child2 of child[key]) {
-                                const newChild2Value = parseFloat(
-                                    getModifierInfo({
-                                        xmlid: child.XMLID,
-                                        item: this,
-                                    })?.BASECOST ||
-                                        child2.BASECOST ||
-                                        0,
-                                );
+                                const newChild2Value =
+                                    parseFloat(
+                                        getModifierInfo({
+                                            xmlid: child2.XMLID,
+                                            item: this,
+                                        })?.BASECOST ||
+                                            child2.BASECOST ||
+                                            0,
+                                    ) +
+                                    parseFloat(child2.LVLCOST || 0) *
+                                        parseFloat(child2.LEVELS || 0);
+
                                 if (child2.baseCost != newChild2Value) {
                                     child2.baseCost = newChild2Value;
                                     changed = true;
                                 }
                             }
                         }
-                    }
-
-                    if (child.baseCost != newChildValue) {
-                        child.baseCost = newChildValue;
-                        changed = true;
                     }
                 }
             }
@@ -1392,6 +1381,7 @@ export class HeroSystem6eItem extends Item {
             let _myAdvantage = 0;
             const modifierBaseCost = parseFloat(modifier.baseCost || 0);
             switch (modifier.XMLID) {
+                case "EXPLOSION":
                 case "AOE":
                     _myAdvantage += modifierBaseCost;
                     break;
@@ -2586,6 +2576,7 @@ export class HeroSystem6eItem extends Item {
                         );
                         break;
 
+                    case "ANY":
                     case "RADIUS":
                         // +1 for a 1” Radius for every 10 Active
                         // Points in the power; double the Radius for
@@ -2621,9 +2612,12 @@ export class HeroSystem6eItem extends Item {
                 }
             }
             if (parseInt(modifier.LEVELS || 0) > 0) {
-                result += `${parseInt(modifier.LEVELS)}${getSystemDisplayUnits(
-                    item.actor,
-                )} `;
+                result += `${parseInt(modifier.LEVELS)}${
+                    modifier.OPTION_ALIAS === "Any Area" &&
+                    !item.actor?.system?.is5e
+                        ? ""
+                        : getSystemDisplayUnits(item.actor)
+                } `;
             }
         }
 
@@ -2637,20 +2631,33 @@ export class HeroSystem6eItem extends Item {
             modifier.OPTION_ALIAS &&
             !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)
         ) {
-            if (modifier.OPTION_ALIAS === "One Hex" && modifier.LEVELS > 1) {
-                result += "Radius";
-            } else {
-                result += modifier.OPTION_ALIAS;
-            }
             switch (modifier.XMLID) {
+                case "AOE":
+                    if (
+                        modifier.OPTION_ALIAS === "One Hex" &&
+                        modifier.LEVELS > 1
+                    ) {
+                        result += "Radius; ";
+                    } else if (
+                        modifier.OPTION_ALIAS === "Any Area" &&
+                        !item.actor?.system?.is5e
+                    ) {
+                        result += "2m Areas; ";
+                    } else {
+                        result += `${modifier.OPTION_ALIAS}; `;
+                    }
+                    break;
+                case "EXPLOSION":
+                    result += `-1 DC/${parseInt(modifier.LEVELS)}"; `;
+                    break;
                 case "EXTRATIME":
-                    result += ", ";
+                    result += `${modifier.OPTION_ALIAS}, `;
                     break;
                 case "CONDITIONALPOWER":
-                    result += " (";
+                    result += `${modifier.OPTION_ALIAS}; (`;
                     break;
                 default:
-                    result += "; ";
+                    result += `${modifier.OPTION_ALIAS}; `;
             }
         }
 
@@ -2665,8 +2672,13 @@ export class HeroSystem6eItem extends Item {
                 case "DOUBLEWIDTH":
                 case "DOUBLEHEIGHT":
                 case "DOUBLEAREA":
+                    // These adders relate to AOE and so are displayed as a part of that
                     break;
 
+                case "EXPLOSION":
+                    result += adder.ALIAS + "; ";
+
+                    break;
                 default:
                     result += adder.ALIAS + ", ";
             }
@@ -2725,8 +2737,7 @@ export class HeroSystem6eItem extends Item {
             actor: item?.actor,
         });
 
-        // All Slots?  // This may be a slot in a framework if so get parent
-        // const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+        // All Slots? This may be a slot in a framework if so get parent
         if (
             configPowerInfo &&
             configPowerInfo.powerType?.includes("framework")
