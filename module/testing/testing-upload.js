@@ -666,6 +666,59 @@ export function registerUploadTests(quench) {
                         });
                     });
 
+                    describe("explosion", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1707362956219" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="EXPLOSION" ID="1707363188738" BASECOST="0.5" LEVELS="4" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="Normal (Radius)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                'Energy Blast 1d6 (ED), Explosion (-1 DC/4"; +1 1/4)',
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 11);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 11);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.value, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, 1);
+                        });
+                    });
+
                     describe("radius", async function () {
                         const contents = `
                             <POWER XMLID="ENERGYBLAST" ID="1707276179129" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">

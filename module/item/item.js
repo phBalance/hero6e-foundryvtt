@@ -825,6 +825,13 @@ export class HeroSystem6eItem extends Item {
                             );
                             break;
 
+                        case "EXPLOSION":
+                            // Not specified correctly in HDC.
+                            newChildValue =
+                                parseFloat(child.BASECOST) +
+                                0.25 * (parseInt(child.LEVELS || 1) - 1);
+                            break;
+
                         default:
                             newChildValue = parseFloat(
                                 getModifierInfo({
@@ -1374,6 +1381,7 @@ export class HeroSystem6eItem extends Item {
             let _myAdvantage = 0;
             const modifierBaseCost = parseFloat(modifier.baseCost || 0);
             switch (modifier.XMLID) {
+                case "EXPLOSION":
                 case "AOE":
                     _myAdvantage += modifierBaseCost;
                     break;
@@ -2623,25 +2631,33 @@ export class HeroSystem6eItem extends Item {
             modifier.OPTION_ALIAS &&
             !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)
         ) {
-            if (modifier.OPTION_ALIAS === "One Hex" && modifier.LEVELS > 1) {
-                result += "Radius";
-            } else if (
-                modifier.OPTION_ALIAS === "Any Area" &&
-                !item.actor?.system?.is5e
-            ) {
-                result += "2m Areas";
-            } else {
-                result += modifier.OPTION_ALIAS;
-            }
             switch (modifier.XMLID) {
+                case "AOE":
+                    if (
+                        modifier.OPTION_ALIAS === "One Hex" &&
+                        modifier.LEVELS > 1
+                    ) {
+                        result += "Radius; ";
+                    } else if (
+                        modifier.OPTION_ALIAS === "Any Area" &&
+                        !item.actor?.system?.is5e
+                    ) {
+                        result += "2m Areas; ";
+                    } else {
+                        result += `${modifier.OPTION_ALIAS}; `;
+                    }
+                    break;
+                case "EXPLOSION":
+                    result += `-1 DC/${parseInt(modifier.LEVELS)}"; `;
+                    break;
                 case "EXTRATIME":
-                    result += ", ";
+                    result += `${modifier.OPTION_ALIAS}, `;
                     break;
                 case "CONDITIONALPOWER":
-                    result += " (";
+                    result += `${modifier.OPTION_ALIAS}; (`;
                     break;
                 default:
-                    result += "; ";
+                    result += `${modifier.OPTION_ALIAS}; `;
             }
         }
 
