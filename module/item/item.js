@@ -2659,6 +2659,10 @@ export class HeroSystem6eItem extends Item {
                     // These adders relate to AOE and so are displayed as a part of that
                     break;
 
+                case "EXPLOSION":
+                    result += adder.ALIAS + "; ";
+
+                    break;
                 default:
                     result += adder.ALIAS + ", ";
             }
