@@ -2553,10 +2553,6 @@ export class HeroSystem6eItem extends Item {
                 );
                 switch (modifier.OPTIONID) {
                     case "CONE":
-                        // +1 for a Cone with sides (1”+ (1” for
-                        // every 5 Active Points in the power))
-                        // long; double the length of the sides for
-                        // each additional +¼
                         levels = Math.floor(
                             1 + activePointsWithoutAoeAdvantage / 5,
                         );
@@ -2567,10 +2563,6 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     case "LINE":
-                        // +1 for a Line 2” long for every 5 Active
-                        // Points in the power; double the length,
-                        // width, or height of the Line for each additional
-                        // +¼
                         levels = Math.floor(
                             (2 * activePointsWithoutAoeAdvantage) / 5,
                         );
@@ -2578,9 +2570,6 @@ export class HeroSystem6eItem extends Item {
 
                     case "ANY":
                     case "RADIUS":
-                        // +1 for a 1” Radius for every 10 Active
-                        // Points in the power; double the Radius for
-                        // each additional +¼
                         levels = Math.floor(
                             1 + activePointsWithoutAoeAdvantage / 10,
                         );
@@ -2593,12 +2582,17 @@ export class HeroSystem6eItem extends Item {
                         break;
                 }
 
-                // TODO: Not considering lines which do not use DOUBLEAREA
-                const DOUBLEAREA = (modifier?.ADDER || []).find(
-                    (o) => o.XMLID === "DOUBLEAREA",
+                // Modify major dimension (radius, length, etc). Line is different from all others.
+                const majorDimensionDoubles = (modifier?.ADDER || []).find(
+                    (adder) =>
+                        adder.XMLID === "DOUBLEAREA" ||
+                        adder.XMLID === "DOUBLELENGTH",
                 );
-                if (DOUBLEAREA) {
-                    levels *= Math.pow(2, parseInt(DOUBLEAREA.LEVELS));
+                if (majorDimensionDoubles) {
+                    levels *= Math.pow(
+                        2,
+                        parseInt(majorDimensionDoubles.LEVELS),
+                    );
                 }
 
                 if (parseInt(modifier.LEVELS) != levels) {
@@ -2643,6 +2637,32 @@ export class HeroSystem6eItem extends Item {
                         !item.actor?.system?.is5e
                     ) {
                         result += "2m Areas; ";
+                    } else if (modifier.OPTION_ALIAS === "Line") {
+                        const widthDouble = parseInt(
+                            (modifier.ADDER || []).find(
+                                (adder) => adder.XMLID === "DOUBLEWIDTH",
+                            )?.LEVELS || 0,
+                        );
+                        const heightDouble = parseInt(
+                            (modifier.ADDER || []).find(
+                                (adder) => adder.XMLID === "DOUBLEHEIGHT",
+                            )?.LEVELS || 0,
+                        );
+
+                        // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
+                        const actor6e = !item.actor?.system?.is5e;
+                        const width = actor6e
+                            ? widthDouble
+                            : Math.pow(2, widthDouble);
+                        const height = actor6e
+                            ? heightDouble
+                            : Math.pow(2, heightDouble);
+
+                        result += `Long, ${height}${getSystemDisplayUnits(
+                            item.actor,
+                        )} Tall, ${width}${getSystemDisplayUnits(
+                            item.actor,
+                        )} Wide Line; `;
                     } else {
                         result += `${modifier.OPTION_ALIAS}; `;
                     }
