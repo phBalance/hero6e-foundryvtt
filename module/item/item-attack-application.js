@@ -237,7 +237,7 @@ export class ItemAttackFormApplication extends FormApplication {
         };
 
         switch (templateType) {
-            case "radius":
+            case "circle":
                 break;
 
             case "cone":
