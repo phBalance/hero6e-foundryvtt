@@ -369,7 +369,7 @@ export function registerUploadTests(quench) {
                         });
                     });
 
-                    describe.skip("line", async function () {
+                    describe("line", async function () {
                         const contents = `
                             <POWER XMLID="ENERGYBLAST" ID="1707357227575" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
@@ -831,7 +831,7 @@ export function registerUploadTests(quench) {
                         });
                     });
 
-                    describe.skip("line", async function () {
+                    describe("line", async function () {
                         const contents = `
                             <POWER XMLID="ENERGYBLAST" ID="1707276230888" BASECOST="0.0" LEVELS="1" ALIAS="Energy Blast" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
@@ -872,9 +872,7 @@ export function registerUploadTests(quench) {
                         it("description", function () {
                             assert.equal(
                                 item.system.description,
-                                // TODO: This is what it should be.
-                                'Energy Blast 1d6 (ED), Area Of Effect (2" Line; +1 3/4)',
-                                // 'Energy Blast 1d6 (ED), Area Of Effect (4" Long, 2" Tall, 2" Wide Line; +1 3/4)',
+                                'Energy Blast 1d6 (ED), Area Of Effect (4" Long, 2" Tall, 2" Wide Line; +1 3/4)',
                             );
                         });
 
