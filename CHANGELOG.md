@@ -1,6 +1,12 @@
 # Releases
 
-## Version 3.0.57 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.58 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Clear natural healing status effect when BODY returns to max. [#686](https://github.com/dmdorman/hero6e-foundryvtt/issues/686)
+- Improve AOE modifier advantage calculation and descriptions including 5e size calculations.
+
+## Version 3.0.57
+
 - Fix CombatTracker bug introduced in 3.0.55 that added extra Lightning Reflexes tokens repeatedly; caused unresponsiveness and/or crashing.
 
 ## Version 3.0.56 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
