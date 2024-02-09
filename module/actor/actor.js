@@ -1759,7 +1759,6 @@ export class HeroSystem6eActor extends Actor {
           this.system.pointsDetail[item.type] += _realCost;
         }
       }
-
       activePoints += parseInt(item.system?.activePoints || 0);
 
       //_splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
