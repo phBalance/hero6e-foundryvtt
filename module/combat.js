@@ -614,7 +614,7 @@ export class HeroSystem6eCombat extends Combat {
                                 user: game.user.id,
                                 //whisper: ChatMessage.getWhisperRecipients("GM"),
                                 speaker: ChatMessage.getSpeaker({
-                                    actor: this,
+                                    actor: combatant.actor,
                                 }),
                                 //blind: true,
                                 content: content,
