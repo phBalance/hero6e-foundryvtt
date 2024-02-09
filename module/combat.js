@@ -586,7 +586,11 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "npcOnly" && combatant.actor.type == "npc") ||
                 (automation === "pcEndOnly" && combatant.actor.type === "pc")
             ) {
-                if (combatant.actor?.flags?.activeMovement === "flight") {
+                if (
+                    ["flight", "gliding"].includes(
+                        combatant.actor?.flags?.activeMovement,
+                    )
+                ) {
                     //console.log(combatant.actor);
                     if (dragRuler?.getRangesFromSpeedProvider) {
                         if (

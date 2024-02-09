@@ -133,10 +133,15 @@ export class HeroRuler {
                                 let DistancePerEnd = 10;
 
                                 // Find associated MOVEMENT type (if any)
+                                // and adjust DistancePerEnd as appropriate.
+                                // TODO: Only adjust if movement power is used.
+                                //  For example a natural 12m run with a 20m running power;
+                                //  you only need to adjust when you exceed 12m.
                                 const movementPower = actor.items.find(
                                     (o) =>
                                         o.system.XMLID ===
-                                        actor.flags.activeMovement.toUpperCase(),
+                                            actor.flags.activeMovement.toUpperCase() &&
+                                        o.system.active,
                                 );
                                 const reducedEnd =
                                     movementPower?.findModsByXmlid(
