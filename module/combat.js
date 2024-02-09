@@ -602,6 +602,20 @@ export class HeroSystem6eCombat extends Combat {
                             await combatant.actor.update({
                                 "system.characteristics.end.value": endValue,
                             });
+
+                            // ChatCard notification about spending 1 END to hover.
+                            // Players may mistakenly leave FLIGHT on.
+                            const content = `${combatant.token.name} spent 1 END to hover.`;
+                            const chatData = {
+                                user: game.user.id,
+                                //whisper: ChatMessage.getWhisperRecipients("GM"),
+                                speaker: ChatMessage.getSpeaker({
+                                    actor: this,
+                                }),
+                                //blind: true,
+                                content: content,
+                            };
+                            await ChatMessage.create(chatData);
                         }
                     }
                 }
