@@ -1302,9 +1302,7 @@ export class HeroSystem6eActor extends Actor {
                                 };
                                 const item2 = await HeroSystem6eItem.create(
                                     itemData2,
-                                    {
-                                        parent: this,
-                                    }
+                                    { parent: this }
                                 );
                                 await item2._postUpload();
                             }
@@ -1831,6 +1829,7 @@ export class HeroSystem6eActor extends Actor {
         let activePoints = realCost;
 
         this.system.pointsDetail = {};
+
         const powers = getCharacteristicInfoArrayForActor(this);
         for (const powerInfo of powers) {
             realCost += parseInt(
@@ -1860,6 +1859,7 @@ export class HeroSystem6eActor extends Actor {
                     this.system.pointsDetail[item.type] += _realCost;
                 }
             }
+
             activePoints += parseInt(item.system?.activePoints || 0);
 
             //_splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
