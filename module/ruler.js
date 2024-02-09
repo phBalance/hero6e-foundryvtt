@@ -245,17 +245,27 @@ export class HeroRuler {
             if (sceneControls.activeTool !== "select") {
                 return;
             }
-            if (!args?.system?.characteristics) {
+
+            if (
+                !args?.system?.characteristics &&
+                !args?.flags?.activeMovement
+            ) {
                 return;
             }
 
-            const movementPowers = actor?.system.is5e
-                ? CONFIG.HERO.movementPowers5e
-                : CONFIG.HERO.movementPowers;
-
-            if (movementPowers[Object.keys(args.system.characteristics)[0]]) {
-                movementRadioSelectRender();
+            // Kluge to update actor right away so the render has proper data.
+            // There is likely a better way to deal with this, possibly in the refreshToken hook.
+            if (args?.flags?.activeMovement) {
+                actor.flags.activeMovement = args?.flags?.activeMovement;
             }
+
+            // const movementPowers = actor?.system.is5e
+            //     ? CONFIG.HERO.movementPowers5e
+            //     : CONFIG.HERO.movementPowers;
+
+            //if (movementPowers[Object.keys(args.system.characteristics)[0]]) {
+            movementRadioSelectRender();
+            //}
         });
 
         Hooks.on("hdcUpload", function () {
@@ -388,7 +398,6 @@ function setHeroRulerLabel() {
                 }
             }
 
-            //const activeMovement = (movementItems.length === 0) ? "none" : relevantToken.actor.flags.activeMovement || movementItems[0]._id
             const activeMovement =
                 movementItems.length === 0
                     ? "none"
