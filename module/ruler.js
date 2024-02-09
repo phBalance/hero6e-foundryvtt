@@ -99,16 +99,75 @@ export class HeroRuler {
                                 (o) => o.actorId === actor.id,
                             );
                             if (combatant) {
+                                // If no waypoints then we haven't spent any END in this phase yet.
+                                if (
+                                    !combatant.flags.dragRuler.passedWaypoints
+                                ) {
+                                    combatant.update({
+                                        ["flags.dragRuler.spentEnd"]: 0,
+                                    });
+                                    return;
+                                }
+
+                                // Add movement type to last movement waypoint
+                                combatant.flags.dragRuler.passedWaypoints[
+                                    combatant.flags.dragRuler.passedWaypoints
+                                        .length - 1
+                                ].activeMovement = actor.flags?.activeMovement;
+
                                 let spentEnd = parseInt(
                                     combatant.flags.dragRuler.spentEnd || 0,
                                 );
+
+                                // TODO: We are using getMovedDistanceFromToken to get total distance,
+                                // however, we really should seperate distances by activeMovement so
+                                // we can apply END modificaitons to specific movements.
+                                // This is only an issue with split movement types.
                                 let currentDistance =
                                     dragRuler.getMovedDistanceFromToken(
                                         tokenObj,
+                                        actor.flags.activeMovement,
                                     );
 
+                                // DistancePerEnd default is 10m costs 1 END
+                                let DistancePerEnd = 10;
+
+                                // Find associated MOVEMENT type (if any)
+                                const movementPower = actor.items.find(
+                                    (o) =>
+                                        o.system.XMLID ===
+                                        actor.flags.activeMovement.toUpperCase(),
+                                );
+                                const reducedEnd =
+                                    movementPower?.findModsByXmlid(
+                                        "REDUCEDEND",
+                                    );
+                                if (reducedEnd) {
+                                    if (reducedEnd.OPTION === "HALFEND") {
+                                        DistancePerEnd = DistancePerEnd * 2;
+                                    }
+                                    if (reducedEnd.OPTION === "ZERO") {
+                                        return;
+                                    }
+                                }
+                                const increasedEnd =
+                                    movementPower?.findModsByXmlid(
+                                        "INCREASEDEND",
+                                    );
+                                if (increasedEnd) {
+                                    DistancePerEnd /=
+                                        parseInt(
+                                            increasedEnd.OPTION.replace(
+                                                "x",
+                                                "",
+                                            ),
+                                        ) || 1;
+                                }
+
                                 // Assuming every 10 costs 1 endurance
-                                let totalEnd = Math.ceil(currentDistance / 10);
+                                let totalEnd = Math.ceil(
+                                    currentDistance / DistancePerEnd,
+                                );
                                 let costEnd = totalEnd - spentEnd;
                                 if (costEnd > 0) {
                                     actor.update({
