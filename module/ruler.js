@@ -126,7 +126,6 @@ export class HeroRuler {
                                 let currentDistance =
                                     dragRuler.getMovedDistanceFromToken(
                                         tokenObj,
-                                        actor.flags.activeMovement,
                                     );
 
                                 // DistancePerEnd default is 10m costs 1 END

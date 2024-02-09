@@ -587,9 +587,8 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "pcEndOnly" && combatant.actor.type === "pc")
             ) {
                 if (
-                    ["flight", "gliding"].includes(
-                        combatant.actor?.flags?.activeMovement,
-                    )
+                    // gliding costs no endurance
+                    ["flight"].includes(combatant.actor?.flags?.activeMovement)
                 ) {
                     //console.log(combatant.actor);
                     if (dragRuler?.getRangesFromSpeedProvider) {
