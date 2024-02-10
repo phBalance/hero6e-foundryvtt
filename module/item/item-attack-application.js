@@ -312,7 +312,7 @@ export class ItemAttackFormApplication extends FormApplication {
             ]);
         }
 
-        canvas.templates.activate();
+        canvas.templates.activate({ tool: templateType });
         canvas.templates.selectObjects({
             x: templateData.x,
             y: templateData.y,
