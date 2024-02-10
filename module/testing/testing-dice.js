@@ -1690,12 +1690,114 @@ export function registerDiceTests(quench) {
                         );
                     });
 
-                    it("should clamp decreased stun multiplier to a minimum of 1", async function () {
+                    it("should clamp decreased stun multiplier at 2 levels (which means always 1 STUNx) for 6e", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeKillingRoll(true)
-                            .addStunMultiplier(-7)
+                            .addStunMultiplier(-2)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(1);
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult * 1,
+                            TestRollMock.fixedRollResult * 1,
+                            TestRollMock.fixedRollResult * 1,
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * TestRollMock.fixedRollResult * 1,
+                        );
+                    });
+
+                    it("should clamp decreased stun multiplier at 2 levels (which means always 1 STUNx) for 6e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true)
+                            .addStunMultiplier(-3)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(1);
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult * 1,
+                            TestRollMock.fixedRollResult * 1,
+                            TestRollMock.fixedRollResult * 1,
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 * TestRollMock.fixedRollResult * 1,
+                        );
+                    });
+
+                    it("should support decreased stun multiplier at 1 level for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true)
+                            .modifyTo5e(true)
+                            .addStunMultiplier(-1)
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                            TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(
+                            3 * TestRollMock.fixedRollResult,
+                        );
+
+                        expect(roller.getStunMultiplier()).to.equal(
+                            TestRollMock.fixedRollResult - 1 - 1,
+                        );
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            TestRollMock.fixedRollResult *
+                                (TestRollMock.fixedRollResult - 1 - 1),
+                            TestRollMock.fixedRollResult *
+                                (TestRollMock.fixedRollResult - 1 - 1),
+                            TestRollMock.fixedRollResult *
+                                (TestRollMock.fixedRollResult - 1 - 1),
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(
+                            3 *
+                                TestRollMock.fixedRollResult *
+                                (TestRollMock.fixedRollResult - 1 - 1),
+                        );
+                    });
+
+                    it("should clamp decreased stun multiplier at 4 levels (which means always 1 STUNx) for 5e", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeKillingRoll(true)
+                            .modifyTo5e(true)
+                            .addStunMultiplier(-5)
                             .addDice(3);
 
                         await roller.roll();
