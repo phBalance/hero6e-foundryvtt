@@ -3083,6 +3083,11 @@ export class HeroSystem6eItem extends Item {
         if (stunOnly) {
             this.system.stunBodyDamage = "stunonly";
         }
+
+        const doesBody = this.findModsByXmlid("DOESBODY");
+        if (doesBody) {
+            this.system.stunBodyDamage = "stunbody";
+        }
     }
 
     skillRollUpdateValue() {
