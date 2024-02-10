@@ -560,80 +560,8 @@ export class HeroSystem6eItem extends Item {
         return changed;
     }
 
-    async _postUpload() {
-        const configPowerInfo = getPowerInfo({ item: this });
-
-        let changed = this.setInitialItemValueAndMax();
-
-        // CHARGES
-        const CHARGES = this.findModsByXmlid("CHARGES");
-        if (CHARGES) {
-            this.system.charges = {
-                value: parseInt(CHARGES.OPTION_ALIAS),
-                max: parseInt(CHARGES.OPTION_ALIAS),
-                recoverable: (CHARGES.ADDER || []).find(
-                    (o) => o.XMLID == "RECOVERABLE",
-                )
-                    ? true
-                    : false,
-                continuing: (CHARGES.ADDER || []).find(
-                    (o) => o.XMLID == "CONTINUING",
-                )?.OPTIONID,
-            };
-            this.system.charges.value ??= this.system.charges.max;
-
-            changed = true;
-        }
-
-        // DEFENSES
-        if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
-            const newDefenseValue = "defense";
-            if (this.system.subType != newDefenseValue) {
-                this.system.subType = newDefenseValue;
-                this.system.showToggle = true;
-                changed = true;
-
-                if (
-                    this.system.charges?.value > 0 ||
-                    this.system.AFFECTS_TOTAL === false ||
-                    configPowerInfo.duration === "instant"
-                ) {
-                    this.system.active ??= false;
-                } else {
-                    this.system.active ??= true;
-                }
-            }
-        }
-
-        // MOVEMENT
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("movement")
-        ) {
-            const movement = "movement";
-            if (this.system.subType != movement) {
-                this.system.subType = movement;
-                this.system.showToggle = true;
-                changed = true;
-            }
-        }
-
-        // TALENTS
-        // if (this.type === "talent" || this.system.XMLID === "COMBAT_LUCK") {
-        //     if (this.system.active === undefined) {
-        //         this.system.active = true
-        //         changed = true
-        //     }
-        // }
-
-        // SKILLS
-        if (configPowerInfo && configPowerInfo.powerType?.includes("skill")) {
-            const skill = "skill";
-            if (this.system.subType != skill) {
-                this.system.subType = skill;
-                changed = true;
-            }
-        }
+    determinePointCosts() {
+        let changed = false;
 
         if (
             ["MENTAL_COMBAT_LEVELS", "PENALTY_SKILL_LEVELS"].includes(
@@ -650,10 +578,13 @@ export class HeroSystem6eItem extends Item {
                 case "BROAD":
                     this.system.costPerLevel = 6;
                     break;
+                default:
+                    console.error(
+                        `Unknown mental combat levels or penalty skill levels ${this.system.OPTION}`,
+                    );
+                    break;
             }
-        }
-
-        if (this.system.XMLID == "COMBAT_LEVELS") {
+        } else if (this.system.XMLID == "COMBAT_LEVELS") {
             if (this.actor?.system?.is5e) {
                 switch (this.system.OPTION) {
                     case "SINGLE":
@@ -673,6 +604,11 @@ export class HeroSystem6eItem extends Item {
                         break;
                     case "ALL":
                         this.system.costPerLevel = 8;
+                        break;
+                    default:
+                        console.error(
+                            `Unknown 5e combat levels ${this.system.OPTION}`,
+                        );
                         break;
                 }
             } else {
@@ -695,25 +631,14 @@ export class HeroSystem6eItem extends Item {
                     case "ALL":
                         this.system.costPerLevel = 10;
                         break;
+                    default:
+                        console.error(
+                            `Unknown 6e combat levels ${this.system.OPTION}`,
+                        );
+                        break;
                 }
             }
-
-            // Make sure CSL's are defined
-            this.system.csl = {};
-            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] = "ocv";
-            }
-        }
-
-        if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
-            // Make sure CSL's are defined
-            this.system.csl = {};
-            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] = "omcv";
-            }
-        }
-
-        if (this.system.XMLID == "SKILL_LEVELS") {
+        } else if (this.system.XMLID == "SKILL_LEVELS") {
             switch (this.system.OPTION) {
                 case "CHARACTERISTIC":
                     this.system.costPerLevel = 2;
@@ -739,26 +664,18 @@ export class HeroSystem6eItem extends Item {
                 case "OVERALL":
                     this.system.costPerLevel = 12;
                     break;
+                default:
+                    console.error(`Unknown skill levels ${this.system.OPTION}`);
+                    break;
             }
-        }
-
-        if (this.system.XMLID == "STRIKING_APPEARANCE") {
+        } else if (this.system.XMLID == "STRIKING_APPEARANCE") {
             switch (this.system.OPTION) {
                 case "ALL":
                     this.system.costPerLevel = 3;
                     break;
                 default:
                     this.system.costPerLevel = 2;
-            }
-        }
-
-        // ATTACK
-        if (configPowerInfo && configPowerInfo.powerType?.includes("attack")) {
-            const attack = "attack";
-            if (this.system.subType != attack) {
-                this.system.subType = attack;
-                changed = true;
-                this.makeAttack();
+                    break;
             }
         }
 
@@ -876,6 +793,110 @@ export class HeroSystem6eItem extends Item {
         }
 
         changed = this.calcItemPoints() || changed;
+
+        return changed;
+    }
+
+    async _postUpload() {
+        const configPowerInfo = getPowerInfo({ item: this });
+
+        let changed = this.setInitialItemValueAndMax();
+
+        changed = this.determinePointCosts() || changed;
+
+        // CHARGES
+        const CHARGES = this.findModsByXmlid("CHARGES");
+        if (CHARGES) {
+            this.system.charges = {
+                value: parseInt(CHARGES.OPTION_ALIAS),
+                max: parseInt(CHARGES.OPTION_ALIAS),
+                recoverable: (CHARGES.ADDER || []).find(
+                    (o) => o.XMLID == "RECOVERABLE",
+                )
+                    ? true
+                    : false,
+                continuing: (CHARGES.ADDER || []).find(
+                    (o) => o.XMLID == "CONTINUING",
+                )?.OPTIONID,
+            };
+            this.system.charges.value ??= this.system.charges.max;
+
+            changed = true;
+        }
+
+        // DEFENSES
+        if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
+            const newDefenseValue = "defense";
+            if (this.system.subType != newDefenseValue) {
+                this.system.subType = newDefenseValue;
+                this.system.showToggle = true;
+                changed = true;
+
+                if (
+                    this.system.charges?.value > 0 ||
+                    this.system.AFFECTS_TOTAL === false ||
+                    configPowerInfo.duration === "instant"
+                ) {
+                    this.system.active ??= false;
+                } else {
+                    this.system.active ??= true;
+                }
+            }
+        }
+
+        // MOVEMENT
+        if (
+            configPowerInfo &&
+            configPowerInfo.powerType?.includes("movement")
+        ) {
+            const movement = "movement";
+            if (this.system.subType != movement) {
+                this.system.subType = movement;
+                this.system.showToggle = true;
+                changed = true;
+            }
+        }
+
+        // TALENTS
+        // if (this.type === "talent" || this.system.XMLID === "COMBAT_LUCK") {
+        //     if (this.system.active === undefined) {
+        //         this.system.active = true
+        //         changed = true
+        //     }
+        // }
+
+        // SKILLS
+        if (configPowerInfo && configPowerInfo.powerType?.includes("skill")) {
+            const skill = "skill";
+            if (this.system.subType != skill) {
+                this.system.subType = skill;
+                changed = true;
+            }
+        }
+
+        // ATTACK
+        if (configPowerInfo && configPowerInfo.powerType?.includes("attack")) {
+            const attack = "attack";
+            if (this.system.subType != attack) {
+                this.system.subType = attack;
+                changed = true;
+                this.makeAttack();
+            }
+        }
+
+        if (this.system.XMLID == "COMBAT_LEVELS") {
+            // Make sure CSLs are defined
+            this.system.csl = {};
+            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
+                this.system.csl[c] = "ocv";
+            }
+        } else if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
+            // Make sure CSLs are defined
+            this.system.csl = {};
+            for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
+                this.system.csl[c] = "omcv";
+            }
+        }
 
         // DESCRIPTION
         const oldDescription = this.system.description;
