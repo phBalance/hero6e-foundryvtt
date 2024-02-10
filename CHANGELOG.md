@@ -6,6 +6,8 @@
 - Improve AOE modifier advantage calculation and descriptions including 5e size calculations.
 - Movement powers now account for Reduced/Increased END modifiers. Still issues with movements with multiple movement types. [#599](https://github.com/dmdorman/hero6e-foundryvtt/issues/599)
 - Token selected movement is now updated for GM when players make a change via movement radio controls. [#320](https://github.com/dmdorman/hero6e-foundryvtt/issues/320)
+- Powers based on EGO combat value now use ECV for 5e. [#653](https://github.com/dmdorman/hero6e-foundryvtt/issues/653)
+- STUN only powers will no longer show BODY in the roll information provided in chat.
 
 ## Version 3.0.57
 
