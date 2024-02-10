@@ -1277,6 +1277,31 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getFormula()).to.equal("½d6");
                     });
+
+                    it("should support STUN only", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .modifyToNoBody()
+                            .addHalfDice(1)
+                            .addDice(2)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            3, 6, 6, 1,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(16);
+
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            0, 0, 0, 0,
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(0);
+
+                        expect(roller.getFormula()).to.equal("½d6 + 2d6 + 1");
+                    });
                 });
 
                 describe("killing roll", function () {
