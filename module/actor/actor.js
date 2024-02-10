@@ -41,7 +41,7 @@ export class HeroSystem6eActor extends Actor {
 
     async removeActiveEffect(activeEffect) {
         const existingEffect = Array.from(this.allApplicableEffects()).find(
-            (o) => o.id === activeEffect.id
+            (o) => o.id === activeEffect.id,
         );
         if (existingEffect) {
             if (activeEffect.id == "knockedOut") {
@@ -49,7 +49,7 @@ export class HeroSystem6eActor extends Actor {
                 // current STUN total.
                 let newEnd = Math.min(
                     parseInt(this.system.characteristics.stun.value),
-                    parseInt(this.system.characteristics.end.max)
+                    parseInt(this.system.characteristics.end.max),
                 );
                 await this.update({
                     "system.characteristics.end.value": newEnd,
@@ -74,7 +74,7 @@ export class HeroSystem6eActor extends Actor {
 
             // Check if this ActiveEffect already exists
             const existingEffect = this.effects.find((o) =>
-                o.statuses.has(activeEffect.id)
+                o.statuses.has(activeEffect.id),
             );
             if (!existingEffect) {
                 await this.createEmbeddedDocuments("ActiveEffect", [newEffect]);
@@ -84,7 +84,7 @@ export class HeroSystem6eActor extends Actor {
         if (activeEffect.id == "knockedOut") {
             // Knocked Out overrides Stunned
             await this.removeActiveEffect(
-                HeroSystem6eActorActiveEffects.stunEffect
+                HeroSystem6eActorActiveEffects.stunEffect,
             );
         }
     }
@@ -97,7 +97,7 @@ export class HeroSystem6eActor extends Actor {
             actor,
             groupName: "typeChoice",
             choices: Actor.TYPES.filter(
-                (o) => o != "character" && o != "base"
+                (o) => o != "character" && o != "base",
             ).reduce((a, v) => ({ ...a, [v]: v.replace("2", "") }), {}), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         };
@@ -140,7 +140,7 @@ export class HeroSystem6eActor extends Actor {
         attribute,
         value,
         isDelta = false,
-        isBar = true
+        isBar = true,
     ) {
         const current = foundry.utils.getProperty(this.system, attribute);
 
@@ -151,7 +151,7 @@ export class HeroSystem6eActor extends Actor {
                 value = Math.clamped(
                     -99,
                     Number(current.value) + value,
-                    current.max
+                    current.max,
                 ); // a negative bar is typically acceptable
             updates = { [`system.${attribute}.value`]: value };
         } else {
@@ -161,7 +161,7 @@ export class HeroSystem6eActor extends Actor {
         const allowed = Hooks.call(
             "modifyTokenAttribute",
             { attribute, value, isDelta, isBar },
-            updates
+            updates,
         );
         return allowed !== false ? this.update(updates) : this;
     }
@@ -237,7 +237,7 @@ export class HeroSystem6eActor extends Actor {
         if (data?.system?.characteristics?.stun && userId === game.user.id) {
             if (data.system.characteristics.stun.value <= 0) {
                 this.addActiveEffect(
-                    HeroSystem6eActorActiveEffects.knockedOutEffect
+                    HeroSystem6eActorActiveEffects.knockedOutEffect,
                 );
             }
 
@@ -247,7 +247,7 @@ export class HeroSystem6eActor extends Actor {
                 data.system.characteristics.stun.value < -10
             ) {
                 const combatant = game.combat?.combatants.find(
-                    (o) => o.actorId === data._id
+                    (o) => o.actorId === data._id,
                 );
                 if (combatant && !combatant.defeated) {
                     combatant.update({ defeated: true });
@@ -260,7 +260,7 @@ export class HeroSystem6eActor extends Actor {
                 data.system.characteristics.stun.value > -10
             ) {
                 let combatant = game.combat?.combatants?.find(
-                    (o) => o.actorId === data._id
+                    (o) => o.actorId === data._id,
                 );
                 if (combatant && combatant.defeated) {
                     combatant.update({ defeated: false });
@@ -269,7 +269,7 @@ export class HeroSystem6eActor extends Actor {
 
             if (data.system.characteristics.stun.value > 0) {
                 this.removeActiveEffect(
-                    HeroSystem6eActorActiveEffects.knockedOutEffect
+                    HeroSystem6eActorActiveEffects.knockedOutEffect,
                 );
             }
         }
@@ -286,7 +286,7 @@ export class HeroSystem6eActor extends Actor {
                 parseInt(this.system.characteristics.body.max)
         ) {
             const naturalHealingTempEffect = this.temporaryEffects.find(
-                (o) => o.flags.XMLID === "naturalBodyHealing"
+                (o) => o.flags.XMLID === "naturalBodyHealing",
             );
 
             // Fire and forget
@@ -369,7 +369,7 @@ export class HeroSystem6eActor extends Actor {
                 "system.characteristics.stun.value": newStun,
                 "system.characteristics.end.value": newEnd,
             },
-            { hideChatMessage: true }
+            { hideChatMessage: true },
         );
 
         let content = this.name + ` <i>Takes a Recovery</i>`;
@@ -382,14 +382,14 @@ export class HeroSystem6eActor extends Actor {
         // Endurance Reserve Recovery
         if (!asAction) {
             const enduranceReserve = this.items.find(
-                (o) => o.system.XMLID === "ENDURANCERESERVE"
+                (o) => o.system.XMLID === "ENDURANCERESERVE",
             );
             if (enduranceReserve) {
                 let erValue = parseInt(enduranceReserve.system.value);
                 let erMax = parseInt(enduranceReserve.system.max);
                 if (enduranceReserve.system.powers) {
                     const power = enduranceReserve.system.powers.find(
-                        (o) => o.XMLID === "ENDURANCERESERVEREC"
+                        (o) => o.XMLID === "ENDURANCERESERVEREC",
                     );
                     if (power) {
                         let erRec = parseInt(power.LEVELS);
@@ -424,7 +424,7 @@ export class HeroSystem6eActor extends Actor {
             // While not technically part of the rules, it is here as a convenience.
             // For example when Combat Tracker isn't being used.
             await this.removeActiveEffect(
-                HeroSystem6eActorActiveEffects.stunEffect
+                HeroSystem6eActorActiveEffects.stunEffect,
             );
         }
 
@@ -436,7 +436,7 @@ export class HeroSystem6eActor extends Actor {
         if (this.statuses.has("knockedOut")) {
             if (uiNotice)
                 ui.notifications.error(
-                    `${this.name} is KNOCKED OUT and cannot act.`
+                    `${this.name} is KNOCKED OUT and cannot act.`,
                 );
             return false;
         }
@@ -444,7 +444,7 @@ export class HeroSystem6eActor extends Actor {
         if (this.statuses.has("stunned")) {
             if (uiNotice)
                 ui.notifications.error(
-                    `${this.name} is STUNNED and cannot act.`
+                    `${this.name} is STUNNED and cannot act.`,
                 );
             return false;
         }
@@ -452,7 +452,7 @@ export class HeroSystem6eActor extends Actor {
         if (this.statuses.has("aborted")) {
             if (uiNotice)
                 ui.notifications.error(
-                    `${this.name} has ABORTED and cannot act.`
+                    `${this.name} has ABORTED and cannot act.`,
                 );
             return false;
         }
@@ -470,7 +470,7 @@ export class HeroSystem6eActor extends Actor {
         if (this.statuses.has("stunned")) {
             if (uiNotice)
                 ui.notifications.error(
-                    `${this.name} is STUNNED and cannot act.`
+                    `${this.name} is STUNNED and cannot act.`,
                 );
             return false;
         }
@@ -510,7 +510,7 @@ export class HeroSystem6eActor extends Actor {
                 stroke: options?.stroke || 0x00000000,
                 strokeThickness: 4,
                 jitter: 0.25,
-            }
+            },
         );
     }
 
@@ -658,7 +658,7 @@ export class HeroSystem6eActor extends Actor {
             const { strLiftKg } = this.strDetails();
             let encumbrance = 0;
             const itemsWithWeight = this.items.filter(
-                (o) => o.system.WEIGHT && o.system.active
+                (o) => o.system.WEIGHT && o.system.active,
             );
             for (const item of itemsWithWeight) {
                 encumbrance += parseFloat(item.system.WEIGHT);
@@ -669,8 +669,8 @@ export class HeroSystem6eActor extends Actor {
                 parseInt(
                     game.settings.get(
                         game.system.id,
-                        "equipmentWeightPercentage"
-                    )
+                        "equipmentWeightPercentage",
+                    ),
                 ) / 100.0;
             encumbrance *= equipmentWeightPercentage;
 
@@ -698,10 +698,10 @@ export class HeroSystem6eActor extends Actor {
             }
 
             const name = `Encumbered ${Math.floor(
-                (encumbrance / strLiftKg) * 100
+                (encumbrance / strLiftKg) * 100,
             )}%`;
             let prevActiveEffect = this.effects.find(
-                (o) => o.flags?.encumbrance
+                (o) => o.flags?.encumbrance,
             );
             if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
                 let activeEffect = {
@@ -789,14 +789,14 @@ export class HeroSystem6eActor extends Actor {
         // Remove all status effects
         for (let status of this.statuses) {
             let ae = Array.from(this.effects).find((effect) =>
-                effect.statuses.has(status)
+                effect.statuses.has(status),
             );
             await ae.delete();
         }
 
         // Remove temporary effects
         const tempEffects = Array.from(this.effects).filter(
-            (effect) => parseInt(effect.duration?.seconds || 0) > 0
+            (effect) => parseInt(effect.duration?.seconds || 0) > 0,
         );
         for (const ae of tempEffects) {
             await ae.delete();
@@ -838,95 +838,95 @@ export class HeroSystem6eActor extends Actor {
                 (o) =>
                     o.parent instanceof HeroSystem6eItem &&
                     !["DENSITYINCREASE", "GROWTH"].includes(
-                        o.parent.system.XMLID
+                        o.parent.system.XMLID,
                     ) &&
-                    !o.parent.findModsByXmlid("NOFIGURED")
+                    !o.parent.findModsByXmlid("NOFIGURED"),
             )
             .reduce(
                 (partialSum, a) =>
                     partialSum +
                     parseInt(
                         a.changes.find(
-                            (o) => o.key === "system.characteristics.str.max"
-                        )?.value || 0
+                            (o) => o.key === "system.characteristics.str.max",
+                        )?.value || 0,
                     ),
-                0
+                0,
             );
         const _con = this.appliedEffects
             .filter(
                 (o) =>
                     o.parent instanceof HeroSystem6eItem &&
                     !["DENSITYINCREASE", "GROWTH"].includes(
-                        o.parent.system.XMLID
+                        o.parent.system.XMLID,
                     ) &&
-                    !o.parent.findModsByXmlid("NOFIGURED")
+                    !o.parent.findModsByXmlid("NOFIGURED"),
             )
             .reduce(
                 (partialSum, a) =>
                     partialSum +
                     parseInt(
                         a.changes.find(
-                            (o) => o.key === "system.characteristics.con.max"
-                        )?.value || 0
+                            (o) => o.key === "system.characteristics.con.max",
+                        )?.value || 0,
                     ),
-                0
+                0,
             );
         const _dex = this.appliedEffects
             .filter(
                 (o) =>
                     o.parent instanceof HeroSystem6eItem &&
                     !["DENSITYINCREASE", "GROWTH"].includes(
-                        o.parent.system.XMLID
+                        o.parent.system.XMLID,
                     ) &&
-                    !o.parent.findModsByXmlid("NOFIGURED")
+                    !o.parent.findModsByXmlid("NOFIGURED"),
             )
             .reduce(
                 (partialSum, a) =>
                     partialSum +
                     parseInt(
                         a.changes.find(
-                            (o) => o.key === "system.characteristics.dex.max"
-                        )?.value || 0
+                            (o) => o.key === "system.characteristics.dex.max",
+                        )?.value || 0,
                     ),
-                0
+                0,
             );
         const _body = this.appliedEffects
             .filter(
                 (o) =>
                     o.parent instanceof HeroSystem6eItem &&
                     !["DENSITYINCREASE", "GROWTH"].includes(
-                        o.parent.system.XMLID
+                        o.parent.system.XMLID,
                     ) &&
-                    !o.parent.findModsByXmlid("NOFIGURED")
+                    !o.parent.findModsByXmlid("NOFIGURED"),
             )
             .reduce(
                 (partialSum, a) =>
                     partialSum +
                     parseInt(
                         a.changes.find(
-                            (o) => o.key === "system.characteristics.body.max"
-                        )?.value || 0
+                            (o) => o.key === "system.characteristics.body.max",
+                        )?.value || 0,
                     ),
-                0
+                0,
             );
         const _ego = this.appliedEffects
             .filter(
                 (o) =>
                     o.parent instanceof HeroSystem6eItem &&
                     !["DENSITYINCREASE", "GROWTH"].includes(
-                        o.parent.system.XMLID
+                        o.parent.system.XMLID,
                     ) &&
-                    !o.parent.findModsByXmlid("NOFIGURED")
+                    !o.parent.findModsByXmlid("NOFIGURED"),
             )
             .reduce(
                 (partialSum, a) =>
                     partialSum +
                     parseInt(
                         a.changes.find(
-                            (o) => o.key === "system.characteristics.ego.max"
-                        )?.value || 0
+                            (o) => o.key === "system.characteristics.ego.max",
+                        )?.value || 0,
                     ),
-                0
+                0,
             );
 
         // TODO: FIXME: This is, but should never be, called with this.system[characteristic] being undefined. Need to reorder the loading
@@ -939,7 +939,7 @@ export class HeroSystem6eActor extends Actor {
                     getPowerInfo({
                         xmlid: characteristicUpperCase,
                         actor: this,
-                    })?.base
+                    })?.base,
                 ) || 0)
             );
         };
@@ -959,7 +959,7 @@ export class HeroSystem6eActor extends Actor {
                     base +
                     1 +
                     parseFloat(
-                        parseFloat((charBase("DEX") + _dex) / 10).toFixed(1)
+                        parseFloat((charBase("DEX") + _dex) / 10).toFixed(1),
                     )
                 );
 
@@ -1075,7 +1075,7 @@ export class HeroSystem6eActor extends Actor {
                 results.push(item);
             } else {
                 const NONPERSISTENT = (item.system.modifiers || []).find(
-                    (o) => o.XMLID === "NONPERSISTENT"
+                    (o) => o.XMLID === "NONPERSISTENT",
                 );
                 if (NONPERSISTENT) {
                     results.push(item);
@@ -1095,7 +1095,7 @@ export class HeroSystem6eActor extends Actor {
                         getPowerInfo({
                             xmlid: o.flags?.XMLID,
                             actor: this,
-                        })?.duration != "persistent")
+                        })?.duration != "persistent"),
             )
             .sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -1108,7 +1108,7 @@ export class HeroSystem6eActor extends Actor {
                     o.statuses.size === 0 &&
                     o.flags?.XMLID &&
                     getPowerInfo({ xmlid: o.flags?.XMLID, actor: this })
-                        ?.duration === "persistent"
+                        ?.duration === "persistent",
             )
             .sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -1160,13 +1160,13 @@ export class HeroSystem6eActor extends Actor {
         // Remove all existing effects
         await this.deleteEmbeddedDocuments(
             "ActiveEffect",
-            this.effects.map((o) => o.id)
+            this.effects.map((o) => o.id),
         );
 
         // Remove all items from
         await this.deleteEmbeddedDocuments(
             "Item",
-            Array.from(this.items.keys())
+            Array.from(this.items.keys()),
         );
 
         let changes = {};
@@ -1187,7 +1187,7 @@ export class HeroSystem6eActor extends Actor {
                 name: "Test Actor",
                 type: this.type,
             },
-            { temporary: true }
+            { temporary: true },
         );
         const _system = _actor.system;
 
@@ -1211,7 +1211,7 @@ export class HeroSystem6eActor extends Actor {
         // CHARACTERISTICS
         if (heroJson.CHARACTER?.CHARACTERISTICS) {
             for (const [key, value] of Object.entries(
-                heroJson.CHARACTER.CHARACTERISTICS
+                heroJson.CHARACTER.CHARACTERISTICS,
             )) {
                 changes[`system.${key}`] = value;
                 this.system[key] = value;
@@ -1302,7 +1302,7 @@ export class HeroSystem6eActor extends Actor {
                                 };
                                 const item2 = await HeroSystem6eItem.create(
                                     itemData2,
-                                    { parent: this }
+                                    { parent: this },
                                 );
                                 await item2._postUpload();
                             }
@@ -1315,7 +1315,7 @@ export class HeroSystem6eActor extends Actor {
                         //item.id = item.system.XMLID + item.system.POSITION
                         this.items.set(
                             item.system.XMLID + item.system.POSITION,
-                            item
+                            item,
                         );
                         await item._postUpload();
                     }
@@ -1326,7 +1326,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Warn about invalid adjustment targets
         for (const item of this.items.filter((item) =>
-            getPowerInfo({ item: item }).powerType?.includes("adjustment")
+            getPowerInfo({ item: item }).powerType?.includes("adjustment"),
         )) {
             const result = item.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
@@ -1340,7 +1340,7 @@ export class HeroSystem6eActor extends Actor {
                             ? ' Source and target lists should be separated by " -> ".'
                             : ""
                     }`,
-                    { console: true, permanent: true }
+                    { console: true, permanent: true },
                 );
             } else {
                 const maxAllowedEffects =
@@ -1350,7 +1350,7 @@ export class HeroSystem6eActor extends Actor {
                     result.enhancesArray.length > maxAllowedEffects.maxEnhances
                 ) {
                     await ui.notifications.warn(
-                        `${this.name} has too many adjustment targets defined for ${item.name}.`
+                        `${this.name} has too many adjustment targets defined for ${item.name}.`,
                     );
                 }
             }
@@ -1373,7 +1373,7 @@ export class HeroSystem6eActor extends Actor {
             {
                 temporary: this.id ? false : true,
                 parent: this,
-            }
+            },
         );
         await perceptionItem._postUpload();
 
@@ -1457,7 +1457,7 @@ export class HeroSystem6eActor extends Actor {
             } catch (e) {
                 console.error(e);
                 ui.notifications.warn(
-                    `${this.name} failed to upload ${filename}.`
+                    `${this.name} failed to upload ${filename}.`,
                 );
             }
 
@@ -1547,7 +1547,7 @@ export class HeroSystem6eActor extends Actor {
             if (
                 HeroSystem6eItem.ItemXmlChildTags.includes(child.tagName) &&
                 !HeroSystem6eItem.ItemXmlTags.includes(
-                    child.parentElement?.tagName
+                    child.parentElement?.tagName,
                 )
             ) {
                 json[tagName] ??= [];
@@ -1617,7 +1617,7 @@ export class HeroSystem6eActor extends Actor {
             }
 
             let newValue = parseInt(
-                this.system?.[key.toUpperCase()]?.LEVELS || 0
+                this.system?.[key.toUpperCase()]?.LEVELS || 0,
             );
             newValue += this.getCharacteristicBase(key);
             if (this.system.is5e && key === "spd") {
@@ -1695,7 +1695,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Combat Skill Levels - Enumerate attacks that use OCV
         for (let cslItem of this.items.filter((o) =>
-            ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID)
+            ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID),
         )) {
             let _ocv = "ocv";
             if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
@@ -1708,14 +1708,14 @@ export class HeroSystem6eActor extends Actor {
             for (let attack of this.items.filter(
                 (o) =>
                     (o.type == "attack" || o.system.subType == "attack") &&
-                    o.system.uses === _ocv
+                    o.system.uses === _ocv,
             )) {
                 let checked = false;
 
                 // Attempt to determine if attack should be checked
                 if (
                     cslItem.system.OPTION_ALIAS.toLowerCase().indexOf(
-                        attack.name.toLowerCase()
+                        attack.name.toLowerCase(),
                     ) > -1
                 ) {
                     checked = true;
@@ -1793,7 +1793,7 @@ export class HeroSystem6eActor extends Actor {
             if (cslItem._id) {
                 await cslItem.update(
                     { "system.attacks": attacks },
-                    { hideChatMessage: true }
+                    { hideChatMessage: true },
                 );
             }
         }
@@ -1834,7 +1834,7 @@ export class HeroSystem6eActor extends Actor {
         for (const powerInfo of powers) {
             realCost += parseInt(
                 this.system.characteristics[powerInfo.key.toLowerCase()]
-                    ?.realCost || 0
+                    ?.realCost || 0,
             );
         }
         this.system.pointsDetail.characteristics = realCost;
@@ -1847,7 +1847,7 @@ export class HeroSystem6eActor extends Actor {
             (o) =>
                 o.type != "attack" &&
                 o.type != "defense" &&
-                o.type != "movement"
+                o.type != "movement",
         )) {
             // Equipment is typically purchased with money, not character points
             if (item.type != "equipment") {
@@ -1867,11 +1867,11 @@ export class HeroSystem6eActor extends Actor {
 
         // DISAD_POINTS: realCost
         const DISAD_POINTS = parseInt(
-            this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0
+            this.system.CHARACTER?.BASIC_CONFIGURATION?.DISAD_POINTS || 0,
         );
         const _disadPoints = Math.min(
             DISAD_POINTS,
-            this.system.pointsDetail?.disadvantage || 0
+            this.system.pointsDetail?.disadvantage || 0,
         );
         if (_disadPoints != 0) {
             this.system.pointsDetail.MatchingDisads = -_disadPoints;
@@ -1888,7 +1888,7 @@ export class HeroSystem6eActor extends Actor {
                     "system.pointsDetail": this.system.pointsDetail,
                 },
                 { render: false },
-                { hideChatMessage: true }
+                { hideChatMessage: true },
             );
         }
     }
