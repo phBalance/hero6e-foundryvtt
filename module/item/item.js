@@ -3084,21 +3084,10 @@ export class HeroSystem6eItem extends Item {
             this.system.stunBodyDamage = "stunonly";
         }
 
-        // if (item._id) {
-        //     await item.update(changes, { hideChatMessage: true })
-        // }
-
-        // Possibly a QUENCH test
-        // for (let change of Object.keys(changes).filter(o => o != "_id")) {
-        //     let target = item;
-        //     for (let key of change.split('.')) {
-        //         if (typeof target[key] == 'object') {
-        //             target = target[key]
-        //         } else {
-        //             target[key] = changes[change]
-        //         }
-        //     }
-        // }
+        const doesBody = this.findModsByXmlid("DOESBODY");
+        if (doesBody) {
+            this.system.stunBodyDamage = "stunbody";
+        }
     }
 
     skillRollUpdateValue() {

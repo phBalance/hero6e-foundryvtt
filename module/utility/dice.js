@@ -104,6 +104,9 @@ export class HeroRoller {
 
         this._successValue = undefined;
         this._successRolledValue = undefined;
+
+        // STUN only?
+        this._noBody = false;
     }
 
     getType() {
@@ -172,6 +175,19 @@ export class HeroRoller {
         if (apply) {
             this._is5eRoll = true;
             this.makeKillingRoll(this._type === HeroRoller.ROLL_TYPE.KILLING);
+        }
+        return this;
+    }
+
+    modifyToNoBody(apply = true) {
+        if (apply) {
+            if (this._type === HeroRoller.ROLL_TYPE.NORMAL) {
+                this._noBody = true;
+            } else {
+                console.error(
+                    `Doesn't make sense to make non normal attack STUN only`,
+                );
+            }
         }
         return this;
     }
@@ -781,6 +797,8 @@ export class HeroRoller {
             _alreadyHitLocation: this._alreadyHitLocation,
             _hitLocationRoller: this._hitLocationRoller?.toData(),
             _hitSideRoller: this._hitSideRoller?.toData(),
+
+            _noBody: this._noBody,
         };
     }
 
@@ -829,7 +847,7 @@ export class HeroRoller {
             ? HeroRoller.fromData(dataObj._hitSideRoller)
             : undefined;
 
-        // TODO: Check if anything is missing...
+        heroRoller._noBody = dataObj._noBody;
 
         return heroRoller;
     }
@@ -934,6 +952,10 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.FLASH:
             case HeroRoller.ROLL_TYPE.NORMAL:
+                if (this._noBody) {
+                    return 0;
+                }
+
                 // constants for entangle are straight body
                 if (
                     this._type === HeroRoller.ROLL_TYPE.ENTANGLE &&
@@ -1303,9 +1325,11 @@ export class HeroRoller {
                     "calculatedMetadata",
                 );
 
-            const calculatedTermTooltip = !calculatedFormulaPurpose
-                ? ""
-                : `
+            const calculatedTermTooltip =
+                !calculatedFormulaPurpose ||
+                (this._type === HeroRoller.ROLL_TYPE.NORMAL && this._noBody)
+                    ? ""
+                    : `
                         <div class="dice">
                             <header class="part-header flexrow">
                                 <span class="part-formula">${calculatedFormulaPurpose} calculated from ${baseFormula} ${baseFormulaPurpose}</span>
@@ -1806,9 +1830,17 @@ export class HeroRoller {
 
             case HeroRoller.ROLL_TYPE.NORMAL:
                 return {
-                    annotatedTerms: `BODY breakdown: [${this.getBodyTerms()}], STUN breakdown: [${this.getStunTerms()}]`,
-                    terms: `${this.getBodyTerms()}; ${this.getStunTerms()}`,
-                    total: `${this.getBodyTotal()} BODY; ${this.getStunTotal()} STUN`,
+                    annotatedTerms: `${
+                        this._noBody
+                            ? ""
+                            : `BODY breakdown: [${this.getBodyTerms()}], `
+                    }STUN breakdown: [${this.getStunTerms()}]`,
+                    terms: `${
+                        this._noBody ? "" : `${this.getBodyTerms()}; `
+                    }${this.getStunTerms()}`,
+                    total: `${
+                        this._noBody ? "" : `${this.getBodyTotal()} BODY; `
+                    }${this.getStunTotal()} STUN`,
                 };
 
             case HeroRoller.ROLL_TYPE.KILLING:
