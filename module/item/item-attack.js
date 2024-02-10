@@ -323,9 +323,9 @@ export async function AttackToHit(item, options) {
 
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
-    let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
+    const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
-    let automation = game.settings.get("hero6efoundryvttv2", "automation");
+    const automation = game.settings.get("hero6efoundryvttv2", "automation");
 
     const adjustment = getPowerInfo({
         item: item,
