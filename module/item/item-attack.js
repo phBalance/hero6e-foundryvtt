@@ -1069,7 +1069,10 @@ export async function _onRollDamage(event) {
         .addHalfDice(formulaParts.halfDieCount)
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(useStandardEffect)
-        .modifyToNoBody(item.system.stunBodyDamage === "stunonly")
+        .modifyToNoBody(
+            item.system.stunBodyDamage === "stunonly" ||
+                item.system.stunBodyDamage === "effectonly",
+        )
         .addToHitLocation(includeHitLocation, toHitData.aim);
 
     await heroRoller.roll();
