@@ -2965,39 +2965,45 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Armor Piercing
-        let ARMORPIERCING = this.findModsByXmlid("ARMORPIERCING");
-        if (ARMORPIERCING) {
-            this.system.piercing = parseInt(ARMORPIERCING.LEVELS);
+        const armorPiercing = this.findModsByXmlid("ARMORPIERCING");
+        if (armorPiercing) {
+            this.system.piercing = parseInt(armorPiercing.LEVELS);
         }
 
         // Penetrating
-        let PENETRATING = this.findModsByXmlid("PENETRATING");
-        if (PENETRATING) {
-            this.system.penetrating = parseInt(PENETRATING.LEVELS);
+        const penetrating = this.findModsByXmlid("PENETRATING");
+        if (penetrating) {
+            this.system.penetrating = parseInt(penetrating.LEVELS);
         }
 
         // No Knockback
-        let NOKB = this.findModsByXmlid("NOKB");
-        if (NOKB) {
+        const noKb = this.findModsByXmlid("NOKB");
+        if (noKb) {
             this.system.knockbackMultiplier = 0;
         }
 
         // Double Knockback
-        const DOUBLEKB = this.findModsByXmlid("DOUBLEKB");
-        if (DOUBLEKB) {
+        const doubleKb = this.findModsByXmlid("DOUBLEKB");
+        if (doubleKb) {
             this.system.knockbackMultiplier = 2;
         }
 
         // Alternate Combat Value (uses OMCV against DCV)
-        let ACV = this.findModsByXmlid("ACV");
-        if (ACV) {
+        const acv = this.findModsByXmlid("ACV");
+        if (acv) {
             this.system.uses = (
-                ACV.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses
+                acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses
             ).toLowerCase();
             this.system.targets = (
-                ACV.OPTION_ALIAS.match(/against (\w+)/)?.[1] ||
+                acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] ||
                 this.system.targets
             ).toLowerCase();
+        }
+
+        const boecv = this.findModsByXmlid("BOECV");
+        if (boecv) {
+            this.system.targets = "dmcv";
+            this.system.uses = "omcv";
         }
 
         if (this.findModsByXmlid("PLUSONEPIP")) {
