@@ -99,16 +99,79 @@ export class HeroRuler {
                                 (o) => o.actorId === actor.id,
                             );
                             if (combatant) {
+                                // If no waypoints then we haven't spent any END in this phase yet.
+                                if (
+                                    !combatant.flags.dragRuler.passedWaypoints
+                                ) {
+                                    combatant.update({
+                                        ["flags.dragRuler.spentEnd"]: 0,
+                                    });
+                                    return;
+                                }
+
+                                // Add movement type to last movement waypoint
+                                combatant.flags.dragRuler.passedWaypoints[
+                                    combatant.flags.dragRuler.passedWaypoints
+                                        .length - 1
+                                ].activeMovement = actor.flags?.activeMovement;
+
                                 let spentEnd = parseInt(
                                     combatant.flags.dragRuler.spentEnd || 0,
                                 );
+
+                                // TODO: We are using getMovedDistanceFromToken to get total distance,
+                                // however, we really should seperate distances by activeMovement so
+                                // we can apply END modificaitons to specific movements.
+                                // This is only an issue with split movement types.
                                 let currentDistance =
                                     dragRuler.getMovedDistanceFromToken(
                                         tokenObj,
                                     );
 
+                                // DistancePerEnd default is 10m costs 1 END
+                                let DistancePerEnd = 10;
+
+                                // Find associated MOVEMENT type (if any)
+                                // and adjust DistancePerEnd as appropriate.
+                                // TODO: Only adjust if movement power is used.
+                                //  For example a natural 12m run with a 20m running power;
+                                //  you only need to adjust when you exceed 12m.
+                                const movementPower = actor.items.find(
+                                    (o) =>
+                                        o.system.XMLID ===
+                                            actor.flags.activeMovement.toUpperCase() &&
+                                        o.system.active,
+                                );
+                                const reducedEnd =
+                                    movementPower?.findModsByXmlid(
+                                        "REDUCEDEND",
+                                    );
+                                if (reducedEnd) {
+                                    if (reducedEnd.OPTION === "HALFEND") {
+                                        DistancePerEnd = DistancePerEnd * 2;
+                                    }
+                                    if (reducedEnd.OPTION === "ZERO") {
+                                        return;
+                                    }
+                                }
+                                const increasedEnd =
+                                    movementPower?.findModsByXmlid(
+                                        "INCREASEDEND",
+                                    );
+                                if (increasedEnd) {
+                                    DistancePerEnd /=
+                                        parseInt(
+                                            increasedEnd.OPTION.replace(
+                                                "x",
+                                                "",
+                                            ),
+                                        ) || 1;
+                                }
+
                                 // Assuming every 10 costs 1 endurance
-                                let totalEnd = Math.ceil(currentDistance / 10);
+                                let totalEnd = Math.ceil(
+                                    currentDistance / DistancePerEnd,
+                                );
                                 let costEnd = totalEnd - spentEnd;
                                 if (costEnd > 0) {
                                     actor.update({
@@ -186,17 +249,27 @@ export class HeroRuler {
             if (sceneControls.activeTool !== "select") {
                 return;
             }
-            if (!args?.system?.characteristics) {
+
+            if (
+                !args?.system?.characteristics &&
+                !args?.flags?.activeMovement
+            ) {
                 return;
             }
 
-            const movementPowers = actor?.system.is5e
-                ? CONFIG.HERO.movementPowers5e
-                : CONFIG.HERO.movementPowers;
-
-            if (movementPowers[Object.keys(args.system.characteristics)[0]]) {
-                movementRadioSelectRender();
+            // Kluge to update actor right away so the render has proper data.
+            // There is likely a better way to deal with this, possibly in the refreshToken hook.
+            if (args?.flags?.activeMovement) {
+                actor.flags.activeMovement = args?.flags?.activeMovement;
             }
+
+            // const movementPowers = actor?.system.is5e
+            //     ? CONFIG.HERO.movementPowers5e
+            //     : CONFIG.HERO.movementPowers;
+
+            //if (movementPowers[Object.keys(args.system.characteristics)[0]]) {
+            movementRadioSelectRender();
+            //}
         });
 
         Hooks.on("hdcUpload", function () {
@@ -329,7 +402,6 @@ function setHeroRulerLabel() {
                 }
             }
 
-            //const activeMovement = (movementItems.length === 0) ? "none" : relevantToken.actor.flags.activeMovement || movementItems[0]._id
             const activeMovement =
                 movementItems.length === 0
                     ? "none"

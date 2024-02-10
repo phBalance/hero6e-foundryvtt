@@ -586,7 +586,10 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "npcOnly" && combatant.actor.type == "npc") ||
                 (automation === "pcEndOnly" && combatant.actor.type === "pc")
             ) {
-                if (combatant.actor?.flags?.activeMovement === "flight") {
+                if (
+                    // gliding costs no endurance
+                    ["flight"].includes(combatant.actor?.flags?.activeMovement)
+                ) {
                     //console.log(combatant.actor);
                     if (dragRuler?.getRangesFromSpeedProvider) {
                         if (
@@ -602,6 +605,20 @@ export class HeroSystem6eCombat extends Combat {
                             await combatant.actor.update({
                                 "system.characteristics.end.value": endValue,
                             });
+
+                            // ChatCard notification about spending 1 END to hover.
+                            // Players may mistakenly leave FLIGHT on.
+                            const content = `${combatant.token.name} spent 1 END to hover.`;
+                            const chatData = {
+                                user: game.user.id,
+                                //whisper: ChatMessage.getWhisperRecipients("GM"),
+                                speaker: ChatMessage.getSpeaker({
+                                    actor: combatant.actor,
+                                }),
+                                //blind: true,
+                                content: content,
+                            };
+                            await ChatMessage.create(chatData);
                         }
                     }
                 }
