@@ -6,11 +6,12 @@ import {
 import { getSystemDisplayUnits } from "../utility/units.js";
 
 const heroAoeTypeToFoundryAoeTypeConversions = {
-    radius: "circle",
-    cone: "cone",
-    line: "ray",
-    surface: "rect",
     any: "rect",
+    cone: "cone",
+    hex: "circle",
+    line: "ray",
+    radius: "circle",
+    surface: "rect",
 };
 
 export class ItemAttackFormApplication extends FormApplication {
