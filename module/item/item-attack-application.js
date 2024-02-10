@@ -6,11 +6,12 @@ import {
 import { getSystemDisplayUnits } from "../utility/units.js";
 
 const heroAoeTypeToFoundryAoeTypeConversions = {
-    radius: "circle",
-    cone: "cone",
-    line: "ray",
-    surface: "rect",
     any: "rect",
+    cone: "cone",
+    hex: "circle",
+    line: "ray",
+    radius: "circle",
+    surface: "rect",
 };
 
 export class ItemAttackFormApplication extends FormApplication {
@@ -218,21 +219,19 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
-        const sceneGridSize = game.scenes
-            .find((scene) => scene.active)
-            .getDimensions().distance;
+        const sizeConversionToMeters = actorIs6e ? 1 : 2;
 
         const templateData = {
             t: templateType,
             user: game.user.id,
-            distance: aoeValue * (actorIs6e ? 1 : sceneGridSize),
+            distance: aoeValue * sizeConversionToMeters,
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {
                 itemId: item.id,
                 aoeType,
                 aoeValue,
-                sceneGridSize,
+                sizeConversionToMeters,
             },
         };
 
@@ -269,10 +268,10 @@ export class ItemAttackFormApplication extends FormApplication {
                     // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
                     const width = actorIs6e
                         ? widthDouble
-                        : sceneGridSize * Math.pow(2, widthDouble);
+                        : sizeConversionToMeters * Math.pow(2, widthDouble);
                     const height = actorIs6e
                         ? heightDouble
-                        : sceneGridSize * Math.pow(2, heightDouble);
+                        : sizeConversionToMeters * Math.pow(2, heightDouble);
 
                     templateData.width = width;
                     templateData.flags.width = width;
@@ -311,7 +310,7 @@ export class ItemAttackFormApplication extends FormApplication {
             ]);
         }
 
-        canvas.templates.activate();
+        canvas.templates.activate({ tool: templateType });
         canvas.templates.selectObjects({
             x: templateData.x,
             y: templateData.y,
