@@ -690,7 +690,7 @@ export class HeroSystem6eItem extends Item {
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
             if (this.system[key]) {
                 for (const child of this.system[key]) {
-                    let newChildValue;
+                    let newChildBaseCost;
 
                     switch (child.XMLID) {
                         case "AOE":
@@ -724,12 +724,12 @@ export class HeroSystem6eItem extends Item {
                                         ? minLevel
                                         : parseInt(child.LEVELS);
 
-                                newChildValue =
+                                newChildBaseCost =
                                     0.25 *
                                     Math.ceil(Math.log2(levels) - minDoubles);
                             } else {
                                 // Modifier plus any dimension doubling adders
-                                newChildValue = parseFloat(child.BASECOST);
+                                newChildBaseCost = parseFloat(child.BASECOST);
                             }
 
                             break;
@@ -737,20 +737,20 @@ export class HeroSystem6eItem extends Item {
                         case "REQUIRESASKILLROLL":
                             // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                             // This is a limitation not an advantage, not sure why it is positive.  Force it negative.
-                            newChildValue = -Math.abs(
+                            newChildBaseCost = -Math.abs(
                                 parseFloat(child.BASECOST),
                             );
                             break;
 
                         case "EXPLOSION":
                             // Not specified correctly in HDC.
-                            newChildValue =
+                            newChildBaseCost =
                                 parseFloat(child.BASECOST) +
                                 0.25 * (parseInt(child.LEVELS || 1) - 1);
                             break;
 
                         default:
-                            newChildValue = parseFloat(
+                            newChildBaseCost = parseFloat(
                                 getModifierInfo({
                                     xmlid: child.XMLID,
                                     item: this,
@@ -761,15 +761,15 @@ export class HeroSystem6eItem extends Item {
                             break;
                     }
 
-                    if (child.baseCost != newChildValue) {
-                        child.baseCost = newChildValue;
+                    if (child.baseCost != newChildBaseCost) {
+                        child.baseCost = newChildBaseCost;
                         changed = true;
                     }
 
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
                         if (child[key]) {
                             for (const child2 of child[key]) {
-                                const newChild2Value =
+                                const newChild2BaseCost =
                                     parseFloat(
                                         getModifierInfo({
                                             xmlid: child2.XMLID,
@@ -779,10 +779,10 @@ export class HeroSystem6eItem extends Item {
                                             0,
                                     ) +
                                     parseFloat(child2.LVLCOST || 0) *
-                                        parseFloat(child2.LEVELS || 0);
+                                        parseFloat(child2.LEVELS || 0); // TODO: Might need to also consider cost per level
 
-                                if (child2.baseCost != newChild2Value) {
-                                    child2.baseCost = newChild2Value;
+                                if (child2.baseCost != newChild2BaseCost) {
+                                    child2.baseCost = newChild2BaseCost;
                                     changed = true;
                                 }
                             }
@@ -793,6 +793,138 @@ export class HeroSystem6eItem extends Item {
         }
 
         changed = this.calcItemPoints() || changed;
+
+        return changed;
+    }
+
+    /**
+     * Calculate all the AOE related parameters.
+     *
+     * @param {Modifier} modifier
+     * @returns
+     */
+    buildAoeParameters(modifier) {
+        let changed = false;
+
+        // TODO: Explosions
+        // TODO: May be able to get rid of modifier check.
+        if (modifier.XMLID === "AOE") {
+            const item = this; // TODO: FIXME.
+            let levels = 1;
+
+            const widthDouble = parseInt(
+                (modifier.ADDER || []).find(
+                    (adder) => adder.XMLID === "DOUBLEWIDTH",
+                )?.LEVELS || 0,
+            );
+            const heightDouble = parseInt(
+                (modifier.ADDER || []).find(
+                    (adder) => adder.XMLID === "DOUBLEHEIGHT",
+                )?.LEVELS || 0,
+            );
+
+            const is5e = !!item.actor?.system?.is5e;
+
+            // 5e has a calculated size
+            if (is5e) {
+                // not counting the Area Of Effect Advantage.
+                // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
+                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
+                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+                const activePointsWithoutAoeAdvantage = Math.max(
+                    item.system.basePointsPlusAdders,
+                    item.system.activePoints / (1 + modifier.BASECOST_total),
+                );
+                switch (modifier.OPTIONID) {
+                    case "CONE":
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 5,
+                        );
+                        break;
+
+                    case "HEX":
+                        levels = 1;
+                        break;
+
+                    case "LINE":
+                        levels = Math.floor(
+                            (2 * activePointsWithoutAoeAdvantage) / 5,
+                        );
+                        break;
+
+                    case "ANY":
+                    case "RADIUS":
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 10,
+                        );
+                        break;
+
+                    default:
+                        console.error(
+                            `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                        );
+                        break;
+                }
+
+                // Modify major dimension (radius, length, etc). Line is different from all others.
+                const majorDimensionDoubles = (modifier?.ADDER || []).find(
+                    (adder) =>
+                        adder.XMLID === "DOUBLEAREA" ||
+                        adder.XMLID === "DOUBLELENGTH",
+                );
+                if (majorDimensionDoubles) {
+                    levels *= Math.pow(
+                        2,
+                        parseInt(majorDimensionDoubles.LEVELS),
+                    );
+                }
+            } else {
+                levels = parseInt(modifier.LEVELS);
+            }
+
+            // TODO: levels need some work.
+            //       explosion and AOE areas are calculated very differently.
+            // 5e explosion has levels 1..n which is the decay rate (not sure if max range is
+            //    only determined by DC decay)
+            // 5e AOE has levels at base 0 with DOUBLEAREA adders (so x8 is 3 levels)
+            // 6e AOE has levels which represent the radius but the explosion negative adder doesn't
+            //
+            // See ItemAttackFormApplication.getData() for similar behaviour that probably needs to be shared.
+
+            // Set LEVELS equal to the length of the basic dimensions of the shape (length for line, side length for cone, etc.)
+            // TODO: Would be best if we didn't modify the XML unless the power actually changed.
+            if (parseInt(modifier.LEVELS) !== levels) {
+                modifier.LEVELS = levels;
+                changed = true;
+            }
+
+            // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
+            const width = is5e ? Math.pow(2, widthDouble) : widthDouble;
+            const height = is5e ? Math.pow(2, heightDouble) : heightDouble;
+
+            // 5e has a slightly different alias for an Explosive Radius in HDC.
+            // Otherwise, all other shapes seems the same.
+            const type =
+                modifier.OPTION_ALIAS === "Normal (Radius)"
+                    ? "Radius"
+                    : modifier.OPTION_ALIAS;
+            const newAoe = {
+                type: type.toLowerCase(),
+                value: levels,
+                width: width,
+                height: height,
+                isExplosion: this.hasExplosionAdvantage(),
+            };
+
+            if (!foundry.utils.objectsEqual(this.system.areaOfEffect, newAoe)) {
+                this.system.areaOfEffect = {
+                    ...this.system.areaOfEffect,
+                    ...newAoe,
+                };
+
+                changed = true;
+            }
+        }
 
         return changed;
     }
@@ -2559,75 +2691,9 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (["AOE"].includes(modifier.XMLID)) {
-            // 5e has a calculated size
-            if (item.actor?.system?.is5e) {
-                let levels = 1;
-
-                // not counting the Area Of Effect Advantage.
-                // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
-                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
-                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
-                const activePointsWithoutAoeAdvantage = Math.max(
-                    item.system.basePointsPlusAdders,
-                    item.system.activePoints / (1 + modifier.BASECOST_total),
-                );
-                switch (modifier.OPTIONID) {
-                    case "CONE":
-                        levels = Math.floor(
-                            1 + activePointsWithoutAoeAdvantage / 5,
-                        );
-                        break;
-
-                    case "HEX":
-                        levels = 1;
-                        break;
-
-                    case "LINE":
-                        levels = Math.floor(
-                            (2 * activePointsWithoutAoeAdvantage) / 5,
-                        );
-                        break;
-
-                    case "ANY":
-                    case "RADIUS":
-                        levels = Math.floor(
-                            1 + activePointsWithoutAoeAdvantage / 10,
-                        );
-                        break;
-
-                    default:
-                        console.error(
-                            `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
-                        );
-                        break;
-                }
-
-                // Modify major dimension (radius, length, etc). Line is different from all others.
-                const majorDimensionDoubles = (modifier?.ADDER || []).find(
-                    (adder) =>
-                        adder.XMLID === "DOUBLEAREA" ||
-                        adder.XMLID === "DOUBLELENGTH",
-                );
-                if (majorDimensionDoubles) {
-                    levels *= Math.pow(
-                        2,
-                        parseInt(majorDimensionDoubles.LEVELS),
-                    );
-                }
-
-                if (parseInt(modifier.LEVELS) != levels) {
-                    modifier.LEVELS = levels;
-                    if (item.id) {
-                        // TODO: This should be awaiting ... which implies it should be elsewhere.
-                        item.update({
-                            "system.modifiers": item.system.modifiers,
-                        });
-                    }
-                }
-            }
-            if (parseInt(modifier.LEVELS || 0) > 0) {
-                result += `${parseInt(modifier.LEVELS)}${
+        if (modifier.XMLID === "AOE") {
+            if (item.system.areaOfEffect.value > 0) {
+                result += `${item.system.areaOfEffect.value}${
                     modifier.OPTION_ALIAS === "Any Area" &&
                     !item.actor?.system?.is5e
                         ? ""
@@ -2636,7 +2702,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        if (modifier.XMLID == "CUMULATIVE" && parseInt(modifier.LEVELS) > 0) {
+        if (modifier.XMLID === "CUMULATIVE" && parseInt(modifier.LEVELS) > 0) {
             result +=
                 parseInt(system.value) * 6 * (parseInt(modifier.LEVELS) + 1) +
                 " points; ";
@@ -2650,7 +2716,7 @@ export class HeroSystem6eItem extends Item {
                 case "AOE":
                     if (
                         modifier.OPTION_ALIAS === "One Hex" &&
-                        modifier.LEVELS > 1
+                        item.system.areaOfEffect.value > 1
                     ) {
                         result += "Radius; ";
                     } else if (
@@ -2659,25 +2725,8 @@ export class HeroSystem6eItem extends Item {
                     ) {
                         result += "2m Areas; ";
                     } else if (modifier.OPTION_ALIAS === "Line") {
-                        const widthDouble = parseInt(
-                            (modifier.ADDER || []).find(
-                                (adder) => adder.XMLID === "DOUBLEWIDTH",
-                            )?.LEVELS || 0,
-                        );
-                        const heightDouble = parseInt(
-                            (modifier.ADDER || []).find(
-                                (adder) => adder.XMLID === "DOUBLEHEIGHT",
-                            )?.LEVELS || 0,
-                        );
-
-                        // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
-                        const actor6e = !item.actor?.system?.is5e;
-                        const width = actor6e
-                            ? widthDouble
-                            : Math.pow(2, widthDouble);
-                        const height = actor6e
-                            ? heightDouble
-                            : Math.pow(2, heightDouble);
+                        const width = item.system.areaOfEffect.width;
+                        const height = item.system.areaOfEffect.height;
 
                         result += `Long, ${height}${getSystemDisplayUnits(
                             item.actor,
@@ -3043,27 +3092,7 @@ export class HeroSystem6eItem extends Item {
 
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
-            // 5e has a slightly different alias for an Explosive Radius in HDC.
-            // Otherwise, all other shapes seems the same.
-            const type =
-                aoeModifier.OPTION_ALIAS === "Normal (Radius)"
-                    ? "Radius"
-                    : aoeModifier.OPTION_ALIAS;
-
-            // TODO: levels need some work.
-            //       explosion and AOE areas are calculated very differently.
-            // 5e explosion has levels 1..n which is the decay rate (not sure if max range is
-            //    only determined by DC decay)
-            // 5e AOE has levels at base 0 with DOUBLEAREA adders (so x8 is 3 levels)
-            // 6e AOE has levels which represent the radius but the explosion negative adder doesn't
-            //
-            // See ItemAttackFormApplication.getData() for similar behaviour that probably needs to be shared.
-
-            this.system.areaOfEffect = {
-                type: type.toLowerCase(),
-                value: parseInt(aoeModifier.LEVELS),
-                isExplosion: this.hasExplosionAdvantage(),
-            };
+            this.buildAoeParameters(aoeModifier);
         }
 
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
