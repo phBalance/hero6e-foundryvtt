@@ -33,7 +33,7 @@ export function getPowerInfo(options) {
         options.item?.system?.xmlid ||
         options.item?.system?.id;
 
-    const actor = options?.item?.actor || options?.actor;
+    const actor = options?.actor || options?.item?.actor;
     if (!actor) {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
         console.warn(
@@ -78,7 +78,7 @@ export function getModifierInfo(options) {
         options.item?.system?.xmlid ||
         options.item?.system?.id;
 
-    const actor = options?.item?.actor || options?.actor;
+    const actor = options?.actor || options?.item?.actor;
     if (!actor) {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
         console.warn(

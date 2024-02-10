@@ -31,11 +31,19 @@ function itemFullDescription(item) {
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
 function itemName(item) {
-    if (item.system.NAME) {
-        return `<i>${item.system.NAME}</i>`;
-    }
+    try {
+        if (item.system.NAME) {
+            return `<i>${item.system.NAME}</i>`;
+        }
 
-    return item.name;
+        return item.name;
+    } catch (e) {
+        // This should not happen, but one of the test tokens (Venin Vert had this issue).
+        // Possibly due to testing that caused failed initilization of an item.
+        // Possibly the item was null due to an effect source that is no longer available.
+        console.error(e);
+        return "<i>undefined</i>";
+    }
 }
 
 const itemTypeToIcon = {
@@ -646,7 +654,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
-            if (this?.actor?.system?.is5e) {
+            if (this.actor?.system?.is5e) {
                 switch (this.system.OPTION) {
                     case "SINGLE":
                         this.system.costPerLevel = 2;
@@ -755,11 +763,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // BASECOST
-        const newBaseValue = parseFloat(
-            getModifierInfo({ item: this })?.BASECOST ||
-                this.system.BASECOST ||
-                0,
-        );
+        const newBaseValue = parseFloat(this.system.BASECOST || 0);
         if (this.system.baseCost != newBaseValue) {
             this.system.baseCost = newBaseValue;
             changed = true;
@@ -773,110 +777,43 @@ export class HeroSystem6eItem extends Item {
 
                     switch (child.XMLID) {
                         case "AOE":
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "RADIUS" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.25;
+                            if (!this.actor?.system?.is5e) {
+                                let minLevel;
+                                let minDoubles;
 
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 64
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "CONE" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.25;
+                                if (
+                                    child.OPTION === "SURFACE" ||
+                                    child.OPTION === "ANY"
+                                ) {
+                                    minLevel = 2;
+                                    minDoubles = 0;
+                                } else if (child.OPTION === "RADIUS") {
+                                    minLevel = 4;
+                                    minDoubles = 1;
+                                } else if (child.OPTION === "CONE") {
+                                    minLevel = 8;
+                                    minDoubles = 2;
+                                } else if (child.OPTION === "LINE") {
+                                    minLevel = 16;
+                                    minDoubles = 3;
+                                } else {
+                                    console.error(
+                                        `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
+                                    );
+                                }
 
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 125
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 64
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 32
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "LINE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 0.25;
+                                const levels =
+                                    parseInt(child.LEVELS) < minLevel
+                                        ? minLevel
+                                        : parseInt(child.LEVELS);
 
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "SURFACE" &&
-                                parseInt(child.LEVELS) <= 2
-                            )
-                                newChildValue = 0.25;
-
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 16
-                            )
-                                newChildValue = 1.0;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 8
-                            )
-                                newChildValue = 0.75;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 4
-                            )
-                                newChildValue = 0.5;
-                            if (
-                                child.OPTION == "AREA" &&
-                                parseInt(child.LEVELS) <= 2
-                            )
-                                newChildValue = 0.25;
+                                newChildValue =
+                                    0.25 *
+                                    Math.ceil(Math.log2(levels) - minDoubles);
+                            } else {
+                                // Modifier plus any dimension doubling adders
+                                newChildValue = parseFloat(child.BASECOST);
+                            }
 
                             break;
 
@@ -886,6 +823,13 @@ export class HeroSystem6eItem extends Item {
                             newChildValue = -Math.abs(
                                 parseFloat(child.BASECOST),
                             );
+                            break;
+
+                        case "EXPLOSION":
+                            // Not specified correctly in HDC.
+                            newChildValue =
+                                parseFloat(child.BASECOST) +
+                                0.25 * (parseInt(child.LEVELS || 1) - 1);
                             break;
 
                         default:
@@ -900,28 +844,32 @@ export class HeroSystem6eItem extends Item {
                             break;
                     }
 
+                    if (child.baseCost != newChildValue) {
+                        child.baseCost = newChildValue;
+                        changed = true;
+                    }
+
                     for (const key of HeroSystem6eItem.ItemXmlChildTags) {
                         if (child[key]) {
                             for (const child2 of child[key]) {
-                                const newChild2Value = parseFloat(
-                                    getModifierInfo({
-                                        xmlid: child.XMLID,
-                                        item: this,
-                                    })?.BASECOST ||
-                                        child2.BASECOST ||
-                                        0,
-                                );
+                                const newChild2Value =
+                                    parseFloat(
+                                        getModifierInfo({
+                                            xmlid: child2.XMLID,
+                                            item: this,
+                                        })?.BASECOST ||
+                                            child2.BASECOST ||
+                                            0,
+                                    ) +
+                                    parseFloat(child2.LVLCOST || 0) *
+                                        parseFloat(child2.LEVELS || 0);
+
                                 if (child2.baseCost != newChild2Value) {
                                     child2.baseCost = newChild2Value;
                                     changed = true;
                                 }
                             }
                         }
-                    }
-
-                    if (child.baseCost != newChildValue) {
-                        child.baseCost = newChildValue;
-                        changed = true;
                     }
                 }
             }
@@ -1433,6 +1381,7 @@ export class HeroSystem6eItem extends Item {
             let _myAdvantage = 0;
             const modifierBaseCost = parseFloat(modifier.baseCost || 0);
             switch (modifier.XMLID) {
+                case "EXPLOSION":
                 case "AOE":
                     _myAdvantage += modifierBaseCost;
                     break;
@@ -2595,64 +2544,61 @@ export class HeroSystem6eItem extends Item {
                 let levels = 1;
 
                 // not counting the Area Of Effect Advantage.
-                let _activePointsWithoutAoeAdvantage =
-                    item.system.activePoints / (1 + modifier.BASECOST_total);
+                // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
+                //       come up short. We need a raw active cost and build up the advantage multipliers from there.
+                //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+                const activePointsWithoutAoeAdvantage = Math.max(
+                    item.system.basePointsPlusAdders,
+                    item.system.activePoints / (1 + modifier.BASECOST_total),
+                );
                 switch (modifier.OPTIONID) {
                     case "CONE":
-                        // +1 for a Cone with sides (1”+ (1” for
-                        // every 5 Active Points in the power))
-                        // long; double the length of the sides for
-                        // each additional +¼
-                        levels =
-                            1 +
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 5,
-                            );
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 5,
+                        );
                         break;
 
                     case "HEX":
-                        levels = 0;
+                        levels = 1;
                         break;
 
                     case "LINE":
-                        // +1 for a Line 2” long for every 5 Active
-                        // Points in the power; double the length,
-                        // width, or height of the Line for each additional
-                        // +¼
-                        levels =
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 5,
-                            ) * 2;
+                        levels = Math.floor(
+                            (2 * activePointsWithoutAoeAdvantage) / 5,
+                        );
                         break;
 
+                    case "ANY":
                     case "RADIUS":
-                        // +1 for a 1” Radius for every 10 Active
-                        // Points in the power; double the Radius for
-                        // each additional +¼
-                        levels =
-                            1 +
-                            Math.floor(
-                                parseInt(
-                                    _activePointsWithoutAoeAdvantage || 0,
-                                ) / 10,
-                            );
+                        levels = Math.floor(
+                            1 + activePointsWithoutAoeAdvantage / 10,
+                        );
+                        break;
+
+                    default:
+                        console.error(
+                            `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                        );
                         break;
                 }
 
-                const DOUBLEAREA = (modifier?.ADDER || []).find(
-                    (o) => o.XMLID === "DOUBLEAREA",
+                // Modify major dimension (radius, length, etc). Line is different from all others.
+                const majorDimensionDoubles = (modifier?.ADDER || []).find(
+                    (adder) =>
+                        adder.XMLID === "DOUBLEAREA" ||
+                        adder.XMLID === "DOUBLELENGTH",
                 );
-                if (DOUBLEAREA) {
-                    levels *= parseInt(DOUBLEAREA.LEVELS) * 2;
+                if (majorDimensionDoubles) {
+                    levels *= Math.pow(
+                        2,
+                        parseInt(majorDimensionDoubles.LEVELS),
+                    );
                 }
 
                 if (parseInt(modifier.LEVELS) != levels) {
                     modifier.LEVELS = levels;
-                    if (item.update) {
+                    if (item.id) {
+                        // TODO: This should be awaiting ... which implies it should be elsewhere.
                         item.update({
                             "system.modifiers": item.system.modifiers,
                         });
@@ -2660,9 +2606,12 @@ export class HeroSystem6eItem extends Item {
                 }
             }
             if (parseInt(modifier.LEVELS || 0) > 0) {
-                result +=
-                    parseInt(modifier.LEVELS) +
-                    (item.actor?.system?.is5e ? '" ' : "m ");
+                result += `${parseInt(modifier.LEVELS)}${
+                    modifier.OPTION_ALIAS === "Any Area" &&
+                    !item.actor?.system?.is5e
+                        ? ""
+                        : getSystemDisplayUnits(item.actor)
+                } `;
             }
         }
 
@@ -2676,16 +2625,59 @@ export class HeroSystem6eItem extends Item {
             modifier.OPTION_ALIAS &&
             !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)
         ) {
-            result += modifier.OPTION_ALIAS;
             switch (modifier.XMLID) {
+                case "AOE":
+                    if (
+                        modifier.OPTION_ALIAS === "One Hex" &&
+                        modifier.LEVELS > 1
+                    ) {
+                        result += "Radius; ";
+                    } else if (
+                        modifier.OPTION_ALIAS === "Any Area" &&
+                        !item.actor?.system?.is5e
+                    ) {
+                        result += "2m Areas; ";
+                    } else if (modifier.OPTION_ALIAS === "Line") {
+                        const widthDouble = parseInt(
+                            (modifier.ADDER || []).find(
+                                (adder) => adder.XMLID === "DOUBLEWIDTH",
+                            )?.LEVELS || 0,
+                        );
+                        const heightDouble = parseInt(
+                            (modifier.ADDER || []).find(
+                                (adder) => adder.XMLID === "DOUBLEHEIGHT",
+                            )?.LEVELS || 0,
+                        );
+
+                        // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
+                        const actor6e = !item.actor?.system?.is5e;
+                        const width = actor6e
+                            ? widthDouble
+                            : Math.pow(2, widthDouble);
+                        const height = actor6e
+                            ? heightDouble
+                            : Math.pow(2, heightDouble);
+
+                        result += `Long, ${height}${getSystemDisplayUnits(
+                            item.actor,
+                        )} Tall, ${width}${getSystemDisplayUnits(
+                            item.actor,
+                        )} Wide Line; `;
+                    } else {
+                        result += `${modifier.OPTION_ALIAS}; `;
+                    }
+                    break;
+                case "EXPLOSION":
+                    result += `-1 DC/${parseInt(modifier.LEVELS)}"; `;
+                    break;
                 case "EXTRATIME":
-                    result += ", ";
+                    result += `${modifier.OPTION_ALIAS}, `;
                     break;
                 case "CONDITIONALPOWER":
-                    result += " (";
+                    result += `${modifier.OPTION_ALIAS}; (`;
                     break;
                 default:
-                    result += "; ";
+                    result += `${modifier.OPTION_ALIAS}; `;
             }
         }
 
@@ -2693,13 +2685,20 @@ export class HeroSystem6eItem extends Item {
             result += modifier.INPUT + "; ";
         }
 
-        //if (["REQUIRESASKILLROLL", "LIMITEDBODYPARTS"].includes(modifier.XMLID)) result += modifier.COMMENTS + "; "
         if (modifier.COMMENTS) result += modifier.COMMENTS + "; ";
         for (const adder of modifier.ADDER || []) {
             switch (adder.XMLID) {
+                case "DOUBLELENGTH":
+                case "DOUBLEWIDTH":
+                case "DOUBLEHEIGHT":
                 case "DOUBLEAREA":
+                    // These adders relate to AOE and so are displayed as a part of that
                     break;
 
+                case "EXPLOSION":
+                    result += adder.ALIAS + "; ";
+
+                    break;
                 default:
                     result += adder.ALIAS + ", ";
             }
@@ -2758,8 +2757,7 @@ export class HeroSystem6eItem extends Item {
             actor: item?.actor,
         });
 
-        // All Slots?  // This may be a slot in a framework if so get parent
-        // const parent = item.actor.items.find(o => o.system.ID === system.PARENTID);
+        // All Slots? This may be a slot in a framework if so get parent
         if (
             configPowerInfo &&
             configPowerInfo.powerType?.includes("framework")
@@ -2967,39 +2965,45 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Armor Piercing
-        let ARMORPIERCING = this.findModsByXmlid("ARMORPIERCING");
-        if (ARMORPIERCING) {
-            this.system.piercing = parseInt(ARMORPIERCING.LEVELS);
+        const armorPiercing = this.findModsByXmlid("ARMORPIERCING");
+        if (armorPiercing) {
+            this.system.piercing = parseInt(armorPiercing.LEVELS);
         }
 
         // Penetrating
-        let PENETRATING = this.findModsByXmlid("PENETRATING");
-        if (PENETRATING) {
-            this.system.penetrating = parseInt(PENETRATING.LEVELS);
+        const penetrating = this.findModsByXmlid("PENETRATING");
+        if (penetrating) {
+            this.system.penetrating = parseInt(penetrating.LEVELS);
         }
 
         // No Knockback
-        let NOKB = this.findModsByXmlid("NOKB");
-        if (NOKB) {
+        const noKb = this.findModsByXmlid("NOKB");
+        if (noKb) {
             this.system.knockbackMultiplier = 0;
         }
 
         // Double Knockback
-        const DOUBLEKB = this.findModsByXmlid("DOUBLEKB");
-        if (DOUBLEKB) {
+        const doubleKb = this.findModsByXmlid("DOUBLEKB");
+        if (doubleKb) {
             this.system.knockbackMultiplier = 2;
         }
 
         // Alternate Combat Value (uses OMCV against DCV)
-        let ACV = this.findModsByXmlid("ACV");
-        if (ACV) {
+        const acv = this.findModsByXmlid("ACV");
+        if (acv) {
             this.system.uses = (
-                ACV.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses
+                acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses
             ).toLowerCase();
             this.system.targets = (
-                ACV.OPTION_ALIAS.match(/against (\w+)/)?.[1] ||
+                acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] ||
                 this.system.targets
             ).toLowerCase();
+        }
+
+        const boecv = this.findModsByXmlid("BOECV");
+        if (boecv) {
+            this.system.targets = "dmcv";
+            this.system.uses = "omcv";
         }
 
         if (this.findModsByXmlid("PLUSONEPIP")) {
@@ -3086,21 +3090,10 @@ export class HeroSystem6eItem extends Item {
             this.system.stunBodyDamage = "stunonly";
         }
 
-        // if (item._id) {
-        //     await item.update(changes, { hideChatMessage: true })
-        // }
-
-        // Possibly a QUENCH test
-        // for (let change of Object.keys(changes).filter(o => o != "_id")) {
-        //     let target = item;
-        //     for (let key of change.split('.')) {
-        //         if (typeof target[key] == 'object') {
-        //             target = target[key]
-        //         } else {
-        //             target[key] = changes[change]
-        //         }
-        //     }
-        // }
+        const doesBody = this.findModsByXmlid("DOESBODY");
+        if (doesBody) {
+            this.system.stunBodyDamage = "stunbody";
+        }
     }
 
     skillRollUpdateValue() {

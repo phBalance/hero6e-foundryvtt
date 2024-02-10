@@ -175,7 +175,7 @@ Hooks.on("renderChatPopout", (app, html) =>
 );
 
 // When actor SPD is changed we need to setupTurns again
-Hooks.on("updateActor", (document, change /*, _options, _userId */) => {
+Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
     if (
         change?.system?.characteristics?.spd?.value ||
         change?.system?.characteristics?.dex?.value ||
@@ -185,6 +185,10 @@ Hooks.on("updateActor", (document, change /*, _options, _userId */) => {
         for (const combat of game.combats) {
             if (combat.active) {
                 if (combat.combatants.find((o) => o.actorId === document.id)) {
+                    // Reroll Initiative (based on new spd/dex/ego/int changes)
+                    await combat.rollAll();
+
+                    // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
                     combat.setupTurns();
                 }
             }
@@ -498,7 +502,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     const today = dt.valueOf();
 
     // All actors plus any unlinked actors in active scene
-    let actors = Array.from(game.actors);
+    const actors = Array.from(game.actors);
     const currentTokens = game.scenes.current?.tokens || [];
     for (const token of currentTokens) {
         if (
@@ -509,7 +513,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
         }
     }
 
-    for (let actor of actors) {
+    for (const actor of actors) {
         try {
             // Create a natural body healing if needed (requires permissions)
             const naturalBodyHealing = actor.temporaryEffects.find(
@@ -525,10 +529,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     actor.system.characteristics.rec.value,
                 );
                 const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
-                let activeEffect = {
+                const activeEffect = {
                     name: `Natural Body Healing (${bodyPerMonth}/month)`,
                     id: "naturalBodyHealing",
-                    icon: "systems/hero6efoundryvttv2/icons/heartbeat.svg", //'icons/svg/regen.svg',
+                    icon: "systems/hero6efoundryvttv2/icons/heartbeat.svg",
                     duration: {
                         seconds: secondsPerBody,
                     },
@@ -538,11 +542,6 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 };
                 if (game.user.isGM) await actor.addActiveEffect(activeEffect);
             }
-
-            // Delete natural body healing when body value = max (typically by manual adjustment)
-            // if (naturalBodyHealing && parseInt(actor.system.characteristics.body.value) >= parseInt(actor.system.characteristics.body.max)) {
-            //     await naturalBodyHealing.delete();
-            // }
 
             // Active Effects
             let adjustmentChatMessages = [];

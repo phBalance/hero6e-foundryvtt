@@ -1,6 +1,19 @@
 # Releases
 
-## Version 3.0.56 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.58 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Clear natural healing status effect when BODY returns to max. [#686](https://github.com/dmdorman/hero6e-foundryvtt/issues/686)
+- Improve AOE modifier advantage calculation and descriptions including 5e size calculations.
+- Movement powers now account for Reduced/Increased END modifiers. Still issues with movements with multiple movement types. [#599](https://github.com/dmdorman/hero6e-foundryvtt/issues/599)
+- Token selected movement is now updated for GM when players make a change via movement radio controls. [#320](https://github.com/dmdorman/hero6e-foundryvtt/issues/320)
+- Powers based on EGO combat value now use ECV for 5e. [#653](https://github.com/dmdorman/hero6e-foundryvtt/issues/653)
+- STUN only powers will no longer show BODY in the roll information provided in chat.
+
+## Version 3.0.57
+
+- Fix CombatTracker bug introduced in 3.0.55 that added extra Lightning Reflexes tokens repeatedly; caused unresponsiveness and/or crashing.
+
+## Version 3.0.56
 
 - Fix inability to apply damage when hit locations enabled. [#678](https://github.com/dmdorman/hero6e-foundryvtt/issues/678)
 - RAR and RSR now have always success on 3 and failure on 18.

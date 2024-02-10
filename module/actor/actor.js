@@ -279,6 +279,22 @@ export class HeroSystem6eActor extends Actor {
             this.applyEncumbrancePenalty();
         }
 
+        // Ensure natural healing effect is removed when returned to full BODY
+        if (
+            data?.system?.characteristics?.body?.value &&
+            data?.system?.characteristics?.body?.value >=
+                parseInt(this.system.characteristics.body.max)
+        ) {
+            const naturalHealingTempEffect = this.temporaryEffects.find(
+                (o) => o.flags.XMLID === "naturalBodyHealing",
+            );
+
+            // Fire and forget
+            if (naturalHealingTempEffect) {
+                naturalHealingTempEffect.delete();
+            }
+        }
+
         // Display changes from _preUpdate
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);
@@ -1800,32 +1816,9 @@ export class HeroSystem6eActor extends Actor {
     updateRollable(key) {
         const characteristic = this.system.characteristics[key];
         if (characteristic.type === "rollable") {
-            if (characteristic.value === 0) {
-                characteristic.roll = 8;
-            } else if (characteristic.value <= 2) {
+            characteristic.roll = Math.round(9 + characteristic.value * 0.2);
+            if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;
-            } else if (characteristic.value <= 7) {
-                characteristic.roll = 10;
-            } else if (characteristic.value <= 12) {
-                characteristic.roll = 11;
-            } else if (characteristic.value <= 17) {
-                characteristic.roll = 12;
-            } else if (characteristic.value <= 22) {
-                characteristic.roll = 13;
-            } else if (characteristic.value <= 27) {
-                characteristic.roll = 14;
-            } else if (characteristic.value <= 32) {
-                characteristic.roll = 15;
-            } else if (characteristic.value <= 37) {
-                characteristic.roll = 16;
-            } else if (characteristic.value <= 42) {
-                characteristic.roll = 17;
-            } else if (characteristic.value <= 47) {
-                characteristic.roll = 18;
-            } else if (characteristic.value <= 52) {
-                characteristic.roll = 19;
-            } else {
-                characteristic.roll = 20;
             }
         }
     }

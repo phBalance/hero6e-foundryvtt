@@ -3,6 +3,16 @@ import {
     _processAttackOptions,
     _processAttackAoeOptions,
 } from "../item/item-attack.js";
+import { getSystemDisplayUnits } from "../utility/units.js";
+
+const heroAoeTypeToFoundryAoeTypeConversions = {
+    any: "rect",
+    cone: "cone",
+    hex: "circle",
+    line: "ray",
+    radius: "circle",
+    surface: "rect",
+};
 
 export class ItemAttackFormApplication extends FormApplication {
     constructor(data) {
@@ -63,13 +73,14 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const aoe = item.getAoeModifier();
         if (aoe) {
-            // TODO: This needs to change. Shouldn't it be looking at system.areaOfEffect?
             data.aoeText = aoe.OPTION_ALIAS;
             if (aoe.LEVELS) {
-                data.aoeText += ` (${aoe.LEVELS})`;
+                data.aoeText += ` (${aoe.LEVELS}${getSystemDisplayUnits(
+                    item.actor,
+                )})`;
             }
 
-            if (this.aoeTemplate() || game.user.targets.size > 0) {
+            if (this.getAoeTemplate() || game.user.targets.size > 0) {
                 data.rollHide = false;
             } else {
                 data.rollHide = true;
@@ -186,15 +197,17 @@ export class ItemAttackFormApplication extends FormApplication {
 
     async _spawnAreaOfEffect() {
         const item = this.data.item;
-        const aoe = item.getAoeModifier();
-        if (!aoe) return;
+        const aoeModifier = item.getAoeModifier();
+        if (!aoeModifier) return;
 
-        const aoeType = aoe.OPTION.toLowerCase();
+        const aoeType = aoeModifier.OPTION.toLowerCase();
         const aoeValue = Math.max(
             item.actor.system.is5e ? 0.5 : 1,
-            parseInt(aoe.LEVELS || 0),
+            parseInt(aoeModifier.LEVELS || 0),
         ); // Even 1 hex it technically 1m
+
         const actor = item.actor;
+        const actorIs6e = !item.actor?.system?.is5e;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!token) return;
 
@@ -205,35 +218,33 @@ export class ItemAttackFormApplication extends FormApplication {
             }
         }
 
-        const keyConversions = {
-            radius: "circle",
-            cone: "cone",
-            line: "ray",
-            surface: "rect",
-            any: "rect",
-        };
-
-        const templateType = keyConversions[aoeType];
+        const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
+        const sizeConversionToMeters = actorIs6e ? 1 : 2;
 
         const templateData = {
             t: templateType,
             user: game.user.id,
-            distance: aoeValue,
+            distance: aoeValue * sizeConversionToMeters,
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {
                 itemId: item.id,
                 aoeType,
                 aoeValue,
+                sizeConversionToMeters,
             },
         };
 
         switch (templateType) {
-            case "radius":
+            case "circle":
                 break;
 
             case "cone":
-                if ((aoe.adders || []).find((o) => o.XMLID === "THINCONE")) {
+                if (
+                    (aoeModifier.adders || []).find(
+                        (adder) => adder.XMLID === "THINCONE",
+                    )
+                ) {
                     templateData.angle = 31;
                 } else {
                     templateData.angle = 61; // 60 has odd rounding error
@@ -242,7 +253,30 @@ export class ItemAttackFormApplication extends FormApplication {
                 break;
 
             case "ray":
-                templateData.width = 2; //2m = 1 hex
+                {
+                    const widthDouble = parseInt(
+                        (aoeModifier.ADDER || []).find(
+                            (adder) => adder.XMLID === "DOUBLEWIDTH",
+                        )?.LEVELS || 0,
+                    );
+                    const heightDouble = parseInt(
+                        (aoeModifier.ADDER || []).find(
+                            (adder) => adder.XMLID === "DOUBLEHEIGHT",
+                        )?.LEVELS || 0,
+                    );
+
+                    // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
+                    const width = actorIs6e
+                        ? widthDouble
+                        : sizeConversionToMeters * Math.pow(2, widthDouble);
+                    const height = actorIs6e
+                        ? heightDouble
+                        : sizeConversionToMeters * Math.pow(2, heightDouble);
+
+                    templateData.width = width;
+                    templateData.flags.width = width;
+                    templateData.flags.height = height;
+                }
                 break;
 
             case "rect": {
@@ -256,13 +290,14 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             default:
+                console.error(`unsupported template type ${templateType}`);
                 break;
         }
 
         templateData.x = token.center.x;
         templateData.y = token.center.y;
 
-        const existingTemplate = this.aoeTemplate();
+        const existingTemplate = this.getAoeTemplate();
         if (existingTemplate) {
             // reuse exiting template, just update position
             await existingTemplate.update({
@@ -275,7 +310,7 @@ export class ItemAttackFormApplication extends FormApplication {
             ]);
         }
 
-        canvas.templates.activate();
+        canvas.templates.activate({ tool: templateType });
         canvas.templates.selectObjects({
             x: templateData.x,
             y: templateData.y,
@@ -285,7 +320,7 @@ export class ItemAttackFormApplication extends FormApplication {
         });
     }
 
-    aoeTemplate() {
+    getAoeTemplate() {
         return Array.from(canvas.templates.getDocuments()).find(
             (o) =>
                 o.user.id === game.user.id &&

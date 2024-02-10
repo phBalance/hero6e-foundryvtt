@@ -18,6 +18,7 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     async rollInitiative() {
+        //console.log("rollInitiative");
         // Iterate over Combatants, performing an initiative roll for each
         const updates = [];
         for (let [id /*, value*/] of this.combatants.entries()) {
@@ -60,46 +61,57 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     setupTurns() {
+        //console.log("setupTurns");
         // Roll Initiative everytime as DEX/INT/SPD may have changed
-        this.rollAll();
-
+        // await this.rollAll();
         // Determine the turn order and the current turn
         const turnsRaw = this.combatants.contents.sort(this._sortCombatants);
 
-        for (let i = 0; i < turnsRaw.length; i++) {
-            let combatant = turnsRaw[i];
-
-            // Lightning Reflexes
-            const actor = game.actors.get(combatant.actorId);
-            if (!actor) {
+        // Loop thru all combatants, add extra turn if they have LIGHTNING REFLEXES
+        for (const combatant of this.combatants) {
+            if (!combatant.actor) {
                 continue; // Not sure how this could happen
             }
 
-            const item = actor.items.find(
+            const lightningReflexes = combatant.actor.items.find(
                 (o) =>
                     o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
                     o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
             );
-            if (item) {
+            if (lightningReflexes) {
                 const levels =
-                    item.system.LEVELS?.value ||
-                    item.system.LEVELS ||
-                    item.system.levels ||
-                    item.system.other.levels ||
+                    lightningReflexes.system.LEVELS?.value ||
+                    lightningReflexes.system.LEVELS ||
+                    lightningReflexes.system.levels ||
+                    lightningReflexes.system.other.levels ||
                     0;
-                const lightning_reflex_initiative =
-                    combatant.initiative + parseInt(levels);
+                const lightning_reflex_initiative = combatant.initiative
+                    ? combatant.initiative + parseInt(levels)
+                    : null;
                 const alias =
-                    item.system.OPTION_ALIAS ||
-                    item.system.INPUT ||
+                    lightningReflexes.system.OPTION_ALIAS ||
+                    lightningReflexes.system.INPUT ||
                     "All Actions";
                 const lightning_reflex_alias = "(" + alias + ")";
 
-                const combatantLR = new HeroCombatant(combatant);
+                const combatantLR = new Combatant({
+                    tokenId: combatant.tokenId,
+                    sceneId: combatant.sceneId,
+                    actorId: combatant.actor.id,
+                    hidden: combatant.hidden,
+                    _id: combatant.id,
+                });
+
                 combatantLR.initiative = lightning_reflex_initiative;
-                combatantLR.alias = lightning_reflex_alias;
-                combatantLR.isFake = true;
+                combatantLR.flags.lightningReflexesAlias =
+                    lightning_reflex_alias;
+
                 turnsRaw.push(combatantLR);
+
+                // Notice we didn't update the database with combatantLR.
+                // Not really sure how we would do that without really messing things up.
+                // As a result the flags.lightning_reflex_initiative is likely null,
+                // which we will update in the combatTracker::getData()
             }
         }
 
@@ -126,7 +138,11 @@ export class HeroSystem6eCombat extends Combat {
                     )
                 ) {
                     const combatant = new Combatant(turnsRaw[t]);
-                    combatant.flags.segment = s;
+                    combatant.flags = {
+                        ...turnsRaw[t].flags,
+                        segment: s,
+                        turn: turns.length,
+                    };
                     turns.push(combatant);
                 }
             }
@@ -234,27 +250,15 @@ export class HeroSystem6eCombat extends Combat {
 
     /* -------------------------------------------- */
 
-    /**
-     * Begin the combat encounter, advancing to heroRound 1 and heroTurn 1
-     * @return {Promise<Combat>}
-     */
-    // async startCombat() {
-    //     this.setSegment(12)
-    //     return await this.update({ round: 1, turn: 0 });
-    // }
-
-    /* -------------------------------------------- */
-
     /** @inheritdoc */
     _onUpdate(data, options, userId) {
-        console.log("_onUpdate", data, options, userId);
+        //console.log("_onUpdate", data, options, userId);
         super._onUpdate(data, options, userId);
 
-        // Render the sidebar
-        if (data.active === true) {
-            ui.combat.initialize({ combat: this });
-        }
-        ui.combat.scrollToTurn();
+        // _onUpdate isn't async, so can't call await.
+        // Without await is seems to loose track of turn (go from turn=0 to turn=last ).
+        // Instead moved scrollToTurn to combatTracker::_render.
+        //await ui.combat.scrollToTurn();
     }
 
     /* -------------------------------------------- */
@@ -268,7 +272,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         userId,
     ) {
-        console.log("_onCreateDescendantDocuments");
+        //console.log("_onCreateDescendantDocuments");
 
         //Missing actor?
         // let missingActors = documents.filter((o) => !o.actor);
@@ -312,35 +316,6 @@ export class HeroSystem6eCombat extends Combat {
             await this.update({ turn: this.turn });
         }
 
-        // if (oldCombatant) {
-        //     let activeTurn = this.turns.findIndex(
-        //         (o) =>
-        //             o.id === current.id &&
-        //             o.flags.segment === current.flags.segment,
-        //     );
-        //     activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-
-        //     // Edge case where combat tracker is empty and this is the first combatant.
-        //     // Advance to phase 12
-        //     while (
-        //         this.round === 1 &&
-        //         activeTurn < this.turns.length - 1 &&
-        //         this.turns[activeTurn].flags.segment < 12
-        //     ) {
-        //         activeTurn++;
-        //     }
-
-        //     // Another Edge case where combatant has speed of 1 and thus no segment 12
-        //     if (
-        //         this.round === 1 &&
-        //         this.turns[activeTurn].flags.segment != 12
-        //     ) {
-        //         this.round = 2;
-        //     }
-
-        //    await this.update({ turn: this.turn , round: this.round });
-        //}
-
         // Render the collection
         if (this.active) this.collection.render();
     }
@@ -356,7 +331,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         userId,
     ) {
-        console.log("_onDeleteDescendantDocuments");
+        //console.log("_onDeleteDescendantDocuments");
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
 
@@ -364,29 +339,6 @@ export class HeroSystem6eCombat extends Combat {
         const oldCombatant = this.combatant;
         const nextCombatant =
             this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1];
-
-        // Assign new turn to combatants
-        // let j = 0;
-        // for (let _combatant of this.turns) {
-        //     if (!documents.map((o) => o.tokenId).includes(_combatant.tokenId)) {
-        //         _combatant.turn = j++;
-        //     } else {
-        //         _combatant.turn = null;
-        //     }
-        // }
-
-        // Find the expected new active turn
-        //let activeTurn = this.turns.indexOf(current);
-
-        // Advance activeTurn if it has a null turn value (about to be deleted).
-        // while (
-        //     activeTurn > -1 &&
-        //     activeTurn < this.turns.length &&
-        //     this.turns[activeTurn].turn === null
-        // ) {
-        //     activeTurn++;
-        // }
-        // activeTurn = this.turns[activeTurn]?.turn || activeTurn;
 
         // Super
         super._onDeleteDescendantDocuments(
@@ -430,29 +382,6 @@ export class HeroSystem6eCombat extends Combat {
         }
         await this.update({ turn: this.turn, round: this.round });
 
-        // const updateData = {};
-
-        // if (currentTurn< this.turn) {
-        //     this.turn
-        // }
-
-        // // If activeTurn == -1 then combat has not begun
-        // if (activeTurn > -1) {
-        //     // There is an edge case where the last combatant of the round is deleted.
-        //     activeTurn = Math.clamped(activeTurn, 0, this.turns.length - 1);
-        //     //await this.update({ turn: activeTurn });
-        //     updateData.turn = activeTurn;
-        // }
-
-        // // Determine segment
-        // let segment_prev = current?.flags?.segment;
-        // let segment = this.combatant?.flags?.segment;
-        // let advanceTime = segment - segment_prev || 0;
-
-        // const updateOptions = { advanceTime, direction: 1 };
-        // //Hooks.callAll("combatTurn", this, updateData, updateOptions);
-        // await this.update(updateData, updateOptions);
-
         // Render the collection
         if (this.active) this.collection.render();
     }
@@ -468,7 +397,7 @@ export class HeroSystem6eCombat extends Combat {
         options,
         //_userId,
     ) {
-        console.log("_onUpdateDescendantDocuments");
+        //console.log("_onUpdateDescendantDocuments");
 
         //super.super._onUpdateDescendantDocuments(..) would be ideal but not likely necessary and difficult to implement.
 
@@ -478,14 +407,16 @@ export class HeroSystem6eCombat extends Combat {
         this.setupTurns();
         this.#recordPreviousState(priorState);
 
+        // When token (turns) are added or deleted this.turns likely points to the wrong turn.
         // Adjust turn order to keep the current Combatant the same (SEGMENT is important for HeroSystem)
-        const sameTurn = combatant
-            ? this.turns.findIndex(
-                  (t) =>
-                      t.id === combatant.id &&
-                      t.flags.segment === combatant.flags.segment,
-              )
-            : this.turn;
+        let sameTurn = this.turns.findIndex(
+            (t) =>
+                t.id === combatant?.id &&
+                t.flags.segment === combatant?.flags.segment &&
+                t.initiative === combatant?.initiative,
+        );
+        if (sameTurn < 0) sameTurn = this.turn;
+
         const adjustedTurn = sameTurn !== this.turn ? sameTurn : undefined;
         if (options.turnEvents !== false && adjustedTurn) {
             this._manageTurnEvents(adjustedTurn);
@@ -495,27 +426,6 @@ export class HeroSystem6eCombat extends Combat {
         if (this.active && options.render !== false) {
             this.collection.render();
         }
-
-        // super._onUpdateEmbeddedDocuments(...args);
-        // this.setupTurns();
-
-        // // If the current combatant was removed, update the heroTurn order to the next survivor
-        // let heroTurn = this.heroTurn;
-        // if (result.includes(currId)) {
-        //     if (nextSurvivor) heroTurn = this.segments[this.segment].findIndex(t => t.id === nextSurvivor.id);
-        // }
-
-        // // Otherwise keep the combatant the same
-        // else heroTurn = this.segments[this.segment].findIndex(t => t.id === currId);
-
-        // // Update database or perform a local override
-        // heroTurn = Math.max(heroTurn, 0);
-
-        // if (game.user.id === userId) this.update({ heroTurn });
-        // else this.update({ heroTurn });
-
-        // // Render the collection
-        // if (this.active) this.collection.render();
     }
 
     /**
@@ -533,7 +443,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async _onActorDataUpdate(...args) {
-        console.log("_onActorDataUpdate");
+        //console.log("_onActorDataUpdate");
         super._onActorDataUpdate(...args);
         this.setupTurns();
         if (this.active) this.collection.render();
@@ -549,7 +459,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onStartTurn(combatant) {
-        console.log("_onStartTurn", combatant.name, this.current);
+        //console.log("_onStartTurn", combatant.name, this.current);
 
         await super._onStartTurn(combatant);
 
@@ -661,7 +571,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndTurn(combatant) {
-        console.log("_onEndTurn", combatant.name, this.current);
+        //console.log("_onEndTurn", combatant.name, this.current);
 
         const automation = game.settings.get(
             "hero6efoundryvttv2",
@@ -676,8 +586,11 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "npcOnly" && combatant.actor.type == "npc") ||
                 (automation === "pcEndOnly" && combatant.actor.type === "pc")
             ) {
-                if (combatant.actor?.flags?.activeMovement === "flight") {
-                    console.log(combatant.actor);
+                if (
+                    // gliding costs no endurance
+                    ["flight"].includes(combatant.actor?.flags?.activeMovement)
+                ) {
+                    //console.log(combatant.actor);
                     if (dragRuler?.getRangesFromSpeedProvider) {
                         if (
                             dragRuler.getMovedDistanceFromToken(
@@ -692,6 +605,20 @@ export class HeroSystem6eCombat extends Combat {
                             await combatant.actor.update({
                                 "system.characteristics.end.value": endValue,
                             });
+
+                            // ChatCard notification about spending 1 END to hover.
+                            // Players may mistakenly leave FLIGHT on.
+                            const content = `${combatant.token.name} spent 1 END to hover.`;
+                            const chatData = {
+                                user: game.user.id,
+                                //whisper: ChatMessage.getWhisperRecipients("GM"),
+                                speaker: ChatMessage.getSpeaker({
+                                    actor: combatant.actor,
+                                }),
+                                //blind: true,
+                                content: content,
+                            };
+                            await ChatMessage.create(chatData);
                         }
                     }
                 }
@@ -705,11 +632,11 @@ export class HeroSystem6eCombat extends Combat {
             this.turns?.[this.turn]?.flags.segment !=
             this.turns?.[this.turn - 1]?.flags.segment
         ) {
-            console.log(
-                "next segment",
-                this.combatant.flags?.segment,
-                this.current,
-            );
+            //console.log(
+            //     "next segment",
+            //     this.combatant.flags?.segment,
+            //     this.current,
+            // );
             for (let _combatant of this.combatants) {
                 if (
                     _combatant.actor.statuses.has("stunned") ||
@@ -756,7 +683,7 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndRound() {
-        console.log("_onEndRound", this.current);
+        //console.log("_onEndRound", this.current);
 
         super._onEndRound();
 
@@ -844,7 +771,7 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async startCombat() {
-        console.log("startCombat", this.current);
+        //console.log("startCombat", this.current);
 
         // Don't call super because we start on segment 12 which is never turn 0.
         //await super.startCombat();
@@ -1021,18 +948,18 @@ export class HeroSystem6eCombat extends Combat {
     }
 }
 
-class HeroCombatant extends Combatant {
-    constructor(combatant) {
-        super();
-        Object.assign(this, combatant);
-        this.id = combatant.id;
-    }
+// class HeroCombatant extends Combatant {
+//     constructor(combatant) {
+//         super();
+//         Object.assign(this, combatant);
+//         this.id = combatant.id;
+//     }
 
-    id = null;
-    initiative = null; //Override
-    turn = null;
-    segment = null;
-    alias = null;
-    isFake = false;
-    //hasRolled = true; // Initiative is static, but actor DEX/INT/SPD might change
-}
+//     id = null;
+//     initiative = null; //Override
+//     turn = null;
+//     segment = null;
+//     alias = null;
+//     isFake = false;
+//     //hasRolled = true; // Initiative is static, but actor DEX/INT/SPD might change
+// }

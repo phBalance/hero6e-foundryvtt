@@ -320,13 +320,12 @@ export async function AttackToHit(item, options) {
 
     const actor = item.actor;
     const itemData = item.system;
-    let tags = []; // TODO: Remove if using the Roll created tags
 
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
 
-    let toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
+    const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
-    let automation = game.settings.get("hero6efoundryvttv2", "automation");
+    const automation = game.settings.get("hero6efoundryvttv2", "automation");
 
     const adjustment = getPowerInfo({
         item: item,
@@ -363,11 +362,6 @@ export async function AttackToHit(item, options) {
         rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
 
         if (rangePenalty) {
-            tags.push({
-                value: rangePenalty.signedString(),
-                name: "range penalty",
-                title: `${distance}${getSystemDisplayUnits(actor)}`,
-            });
             heroRoller.addNumber(rangePenalty, "Range penalty");
         }
 
@@ -379,8 +373,7 @@ export async function AttackToHit(item, options) {
         if (braceManeuver) {
             let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
             if (brace > 0) {
-                tags.push({ value: brace, name: braceManeuver.name });
-                heroRoller.addNumber(brace, "Bracing");
+                heroRoller.addNumber(brace, braceManeuver.name);
             }
         }
     }
@@ -388,11 +381,7 @@ export async function AttackToHit(item, options) {
     // Combat Skill Levels
     let csl = CombatSkillLevelsForAttack(item);
     if (csl.ocv || csl.omcv > 0) {
-        tags.push({
-            value: csl.ocv.signedString() || csl.omcv,
-            name: csl.item.name,
-        });
-        heroRoller.addNumber(csl.ocv || csl.omcv, "Combat skill levels");
+        heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
     }
 
     let dcv = parseInt(item.system.dcv || 0) + csl.dcv;
@@ -462,14 +451,9 @@ export async function AttackToHit(item, options) {
         options.aim !== "none" &&
         !noHitLocationsPower
     ) {
-        tags.push({
-            value: CONFIG.HERO.hitLocations[options.aim][3].signedString(),
-            name: options.aim,
-            hidePlus: CONFIG.HERO.hitLocations[options.aim][3] < 0,
-        });
         heroRoller.addNumber(
             CONFIG.HERO.hitLocations[options.aim][3],
-            "Hit location aiming",
+            options.aim,
         );
 
         // Penalty Skill Levels
@@ -482,12 +466,7 @@ export async function AttackToHit(item, options) {
                     PENALTY_SKILL_LEVELS.system.LEVELS.value,
                     Math.abs(CONFIG.HERO.hitLocations[options.aim][3]),
                 );
-                tags.push({
-                    value: pslValue.signedString(),
-                    name: PENALTY_SKILL_LEVELS.name,
-                    title: PENALTY_SKILL_LEVELS.system.description,
-                });
-                heroRoller.addNumber(pslValue, "Penalty skill levels");
+                heroRoller.addNumber(pslValue, PENALTY_SKILL_LEVELS.name);
             }
         }
     }
@@ -1069,6 +1048,10 @@ export async function _onRollDamage(event) {
         .addHalfDice(formulaParts.halfDieCount)
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(useStandardEffect)
+        .modifyToNoBody(
+            item.system.stunBodyDamage === "stunonly" ||
+                item.system.stunBodyDamage === "effectonly",
+        )
         .addToHitLocation(includeHitLocation, toHitData.aim);
 
     await heroRoller.roll();
