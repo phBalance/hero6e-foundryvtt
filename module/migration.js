@@ -190,7 +190,7 @@ export async function migrateWorld() {
                     }
                 }
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         }
     }
@@ -308,7 +308,6 @@ export async function migrateWorld() {
     // Default bar3 to TRUE for existing worlds
     // All item's system.characteristic replaced with system.CHARACTERISTIC
     if (foundry.utils.isNewerVersion("3.0.53", lastMigration)) {
-        console.log("bar3");
         if (!game.settings.get(game.system.id, "bar3")) {
             game.settings.set(game.system.id, "bar3", true);
             // Refresh tokens to make sure they show the 3rd bar
@@ -755,7 +754,7 @@ async function migrateActor_3_0_42(actor) {
             }
         }
     } catch (e) {
-        console.log(e);
+        console.error(e);
         if (
             game.user.isGM &&
             game.settings.get(game.system.id, "alphaTesting")
@@ -819,7 +818,7 @@ async function migrateActor_3_0_49(actor) {
             }
         }
     } catch (e) {
-        console.log(e);
+        console.error(e);
         if (
             game.user.isGM &&
             game.settings.get(game.system.id, "alphaTesting")
