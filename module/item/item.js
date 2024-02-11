@@ -3003,52 +3003,52 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Specific power overrides
-        if (xmlid == "ENTANGLE") {
+        if (xmlid === "ENTANGLE") {
             this.system.class = "entangle";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
             this.system.knockbackMultiplier = 0;
-        } else if (xmlid == "DARKNESS") {
+        } else if (xmlid === "DARKNESS") {
             this.system.class = "darkness";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "IMAGES") {
+        } else if (xmlid === "IMAGES") {
             this.system.class = "images";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "ABSORPTION") {
+        } else if (xmlid === "ABSORPTION") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "AID") {
+        } else if (xmlid === "AID") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "DISPEL") {
+        } else if (xmlid === "DISPEL") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "DRAIN") {
+        } else if (xmlid === "DRAIN") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "HEALING") {
+        } else if (xmlid === "HEALING") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "SUPPRESS") {
+        } else if (xmlid === "SUPPRESS") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "TRANSFER") {
+        } else if (xmlid === "TRANSFER") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "MINDSCAN") {
+        } else if (xmlid === "MINDSCAN") {
             this.system.class = "mindscan";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "EGOATTACK") {
+        } else if (xmlid === "EGOATTACK") {
             this.system.class = "mental";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
@@ -3056,7 +3056,7 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.stunBodyDamage = "stunonly";
             this.system.noHitLocations = true;
-        } else if (xmlid == "MINDCONTROL") {
+        } else if (xmlid === "MINDCONTROL") {
             this.system.class = "mindcontrol";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
@@ -3064,21 +3064,25 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.stunBodyDamage = "stunonly";
             this.system.noHitLocations = true;
-        } else if (xmlid == "TELEPATHY") {
+        } else if (xmlid === "TELEPATHY") {
             this.system.class = "telepathy";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "CHANGEENVIRONMENT") {
+        } else if (xmlid === "CHANGEENVIRONMENT") {
             this.system.class = "change enviro";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "FLASH") {
+        } else if (xmlid === "FLASH") {
             this.system.class = "flash";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
+        } else if (xmlid === "ENERGYBLAST") {
+            this.system.usesStrength = false;
+        } else if (xmlid === "RKA") {
+            this.system.usesStrength = false;
         }
 
         // AVAD
