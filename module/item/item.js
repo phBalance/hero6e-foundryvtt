@@ -481,7 +481,6 @@ export class HeroSystem6eItem extends Item {
 
         // TODO: Delete support for old format
         for (const key of ["ADDER", "MODIFIER", "POWER"]) {
-            //'adders', 'modifiers', 'power',
             if (this.system?.[key]) {
                 const value = this.system[key].find((o) => o.XMLID === xmlid);
                 if (value) {
@@ -942,16 +941,7 @@ export class HeroSystem6eItem extends Item {
             levels = parseInt(modifier.LEVELS);
         }
 
-        // TODO: levels need some work.
-        //       explosion and AOE areas are calculated very differently.
-        // 5e explosion has levels 1..n which is the decay rate (not sure if max range is
-        //    only determined by DC decay)
-        // 5e AOE has levels at base 0 with DOUBLEAREA adders (so x8 is 3 levels)
-        // 6e AOE has levels which represent the radius but the explosion negative adder doesn't
-        //
-        // See ItemAttackFormApplication.getData() for similar behaviour that probably needs to be shared.
-
-        // 5e has a slightly different alias for an Explosive Radius in HDC.
+        // 5e has a slightly different alias for an Explosive Radius in HD.
         // Otherwise, all other shapes seems the same.
         const type =
             modifier.OPTION_ALIAS === "Normal (Radius)"
@@ -3013,52 +3003,52 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Specific power overrides
-        if (xmlid == "ENTANGLE") {
+        if (xmlid === "ENTANGLE") {
             this.system.class = "entangle";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
             this.system.knockbackMultiplier = 0;
-        } else if (xmlid == "DARKNESS") {
+        } else if (xmlid === "DARKNESS") {
             this.system.class = "darkness";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "IMAGES") {
+        } else if (xmlid === "IMAGES") {
             this.system.class = "images";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "ABSORPTION") {
+        } else if (xmlid === "ABSORPTION") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "AID") {
+        } else if (xmlid === "AID") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "DISPEL") {
+        } else if (xmlid === "DISPEL") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "DRAIN") {
+        } else if (xmlid === "DRAIN") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "HEALING") {
+        } else if (xmlid === "HEALING") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "SUPPRESS") {
+        } else if (xmlid === "SUPPRESS") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "TRANSFER") {
+        } else if (xmlid === "TRANSFER") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "MINDSCAN") {
+        } else if (xmlid === "MINDSCAN") {
             this.system.class = "mindscan";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "EGOATTACK") {
+        } else if (xmlid === "EGOATTACK") {
             this.system.class = "mental";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
@@ -3066,7 +3056,7 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.stunBodyDamage = "stunonly";
             this.system.noHitLocations = true;
-        } else if (xmlid == "MINDCONTROL") {
+        } else if (xmlid === "MINDCONTROL") {
             this.system.class = "mindcontrol";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
@@ -3074,21 +3064,25 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.stunBodyDamage = "stunonly";
             this.system.noHitLocations = true;
-        } else if (xmlid == "TELEPATHY") {
+        } else if (xmlid === "TELEPATHY") {
             this.system.class = "telepathy";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
             this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "CHANGEENVIRONMENT") {
+        } else if (xmlid === "CHANGEENVIRONMENT") {
             this.system.class = "change enviro";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid == "FLASH") {
+        } else if (xmlid === "FLASH") {
             this.system.class = "flash";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
+        } else if (xmlid === "ENERGYBLAST") {
+            this.system.usesStrength = false;
+        } else if (xmlid === "RKA") {
+            this.system.usesStrength = false;
         }
 
         // AVAD

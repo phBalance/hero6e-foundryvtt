@@ -208,6 +208,10 @@ export function registerUploadTests(quench) {
                         it("end", function () {
                             assert.equal(item.system.end, 1);
                         });
+
+                        it("doesn't use strength", function () {
+                            assert.equal(item.system.usesStrength, false);
+                        });
                     });
 
                     describe("radius", async function () {
@@ -1287,6 +1291,10 @@ export function registerUploadTests(quench) {
 
                 it("chargesRecoverable", function () {
                     assert.equal(item.system.charges.recoverable, false);
+                });
+
+                it("doesn't use strength", function () {
+                    assert.equal(item.system.usesStrength, false);
                 });
             });
 
