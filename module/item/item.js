@@ -844,37 +844,37 @@ export class HeroSystem6eItem extends Item {
      * @param {Modifier} modifier
      * @returns
      */
-    buildAoeParameters(modifier) {
+    buildAoeAttackParameters(modifier) {
+        const is5e = !!this.actor?.system?.is5e;
+
         let changed = false;
 
-        // TODO: Explosions
-        // TODO: May be able to get rid of modifier check.
-        if (modifier.XMLID === "AOE") {
-            const item = this; // TODO: FIXME.
-            let levels = 1;
+        const widthDouble = parseInt(
+            (modifier.ADDER || []).find(
+                (adder) => adder.XMLID === "DOUBLEWIDTH",
+            )?.LEVELS || 0,
+        );
+        const heightDouble = parseInt(
+            (modifier.ADDER || []).find(
+                (adder) => adder.XMLID === "DOUBLEHEIGHT",
+            )?.LEVELS || 0,
+        );
+        // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
+        const width = is5e ? Math.pow(2, widthDouble) : widthDouble;
+        const height = is5e ? Math.pow(2, heightDouble) : heightDouble;
+        let levels = 1;
+        let dcFalloff = 0;
 
-            const widthDouble = parseInt(
-                (modifier.ADDER || []).find(
-                    (adder) => adder.XMLID === "DOUBLEWIDTH",
-                )?.LEVELS || 0,
-            );
-            const heightDouble = parseInt(
-                (modifier.ADDER || []).find(
-                    (adder) => adder.XMLID === "DOUBLEHEIGHT",
-                )?.LEVELS || 0,
-            );
-
-            const is5e = !!item.actor?.system?.is5e;
-
-            // 5e has a calculated size
-            if (is5e) {
+        // 5e has a calculated size
+        if (is5e) {
+            if (modifier.XMLID === "AOE") {
                 // not counting the Area Of Effect Advantage.
                 // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
                 //       come up short. We need a raw active cost and build up the advantage multipliers from there.
                 //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
                 const activePointsWithoutAoeAdvantage = Math.max(
-                    item.system.basePointsPlusAdders,
-                    item.system.activePoints / (1 + modifier.BASECOST_total),
+                    this.system.basePointsPlusAdders,
+                    this.system.activePoints / (1 + modifier.BASECOST_total),
                 );
                 switch (modifier.OPTIONID) {
                     case "CONE":
@@ -920,51 +920,67 @@ export class HeroSystem6eItem extends Item {
                     );
                 }
             } else {
-                levels = parseInt(modifier.LEVELS);
+                // Explosion DC falloff has different defaults based on shape. When
+                // LEVELS are provided they are the absolute value and not additive to the default.
+                if (modifier.OPTIONID === "CONE") {
+                    dcFalloff = 2;
+                } else if (modifier.OPTIONID === "LINE") {
+                    dcFalloff = 3;
+                } else {
+                    dcFalloff = 1;
+                }
+                dcFalloff = parseInt(modifier.LEVELS || 0)
+                    ? parseInt(modifier.LEVELS)
+                    : dcFalloff;
+
+                // TODO: Can we work with DC given all the adders that are possible at the time of attack?
+                const { dc } = convertToDcFromItem(this, {});
+
+                levels = dc * dcFalloff;
             }
+        } else {
+            levels = parseInt(modifier.LEVELS);
+        }
 
-            // TODO: levels need some work.
-            //       explosion and AOE areas are calculated very differently.
-            // 5e explosion has levels 1..n which is the decay rate (not sure if max range is
-            //    only determined by DC decay)
-            // 5e AOE has levels at base 0 with DOUBLEAREA adders (so x8 is 3 levels)
-            // 6e AOE has levels which represent the radius but the explosion negative adder doesn't
-            //
-            // See ItemAttackFormApplication.getData() for similar behaviour that probably needs to be shared.
+        // TODO: levels need some work.
+        //       explosion and AOE areas are calculated very differently.
+        // 5e explosion has levels 1..n which is the decay rate (not sure if max range is
+        //    only determined by DC decay)
+        // 5e AOE has levels at base 0 with DOUBLEAREA adders (so x8 is 3 levels)
+        // 6e AOE has levels which represent the radius but the explosion negative adder doesn't
+        //
+        // See ItemAttackFormApplication.getData() for similar behaviour that probably needs to be shared.
 
-            // Set LEVELS equal to the length of the basic dimensions of the shape (length for line, side length for cone, etc.)
-            // TODO: Would be best if we didn't modify the XML unless the power actually changed.
-            if (parseInt(modifier.LEVELS) !== levels) {
-                modifier.LEVELS = levels;
-                changed = true;
-            }
+        // 5e has a slightly different alias for an Explosive Radius in HDC.
+        // Otherwise, all other shapes seems the same.
+        const type =
+            modifier.OPTION_ALIAS === "Normal (Radius)"
+                ? "Radius"
+                : modifier.OPTION_ALIAS;
+        const newAoe = {
+            type: type.toLowerCase(),
+            value: levels,
+            width: width,
+            height: height,
 
-            // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
-            const width = is5e ? Math.pow(2, widthDouble) : widthDouble;
-            const height = is5e ? Math.pow(2, heightDouble) : heightDouble;
+            isExplosion: this.hasExplosionAdvantage(),
+            dcFalloff: dcFalloff,
+        };
 
-            // 5e has a slightly different alias for an Explosive Radius in HDC.
-            // Otherwise, all other shapes seems the same.
-            const type =
-                modifier.OPTION_ALIAS === "Normal (Radius)"
-                    ? "Radius"
-                    : modifier.OPTION_ALIAS;
-            const newAoe = {
-                type: type.toLowerCase(),
-                value: levels,
-                width: width,
-                height: height,
-                isExplosion: this.hasExplosionAdvantage(),
+        if (!foundry.utils.objectsEqual(this.system.areaOfEffect, newAoe)) {
+            this.system.areaOfEffect = {
+                ...this.system.areaOfEffect,
+                ...newAoe,
             };
 
-            if (!foundry.utils.objectsEqual(this.system.areaOfEffect, newAoe)) {
-                this.system.areaOfEffect = {
-                    ...this.system.areaOfEffect,
-                    ...newAoe,
-                };
+            changed = true;
+        }
 
-                changed = true;
-            }
+        // Set LEVELS equal to the length of the basic dimensions of the shape (length for line, side length for cone, etc.)
+        // TODO: Would be best if we didn't modify the XML unless the power actually changed.
+        if (parseInt(modifier.LEVELS) !== levels) {
+            modifier.LEVELS = levels;
+            changed = true;
         }
 
         return changed;
@@ -1512,7 +1528,7 @@ export class HeroSystem6eItem extends Item {
             adderCost += subAdderCost;
         }
 
-        // Categorized skills cost 2 per catory and +1 per each subcategory.
+        // Categorized skills cost 2 per category and +1 per each subcategory.
         // If no catagories selected then assume 3 pts
         // if (configPowerInfo?.categorized && adderCost >= 4) {
         //     if (adderCost == 0) {
@@ -2779,7 +2795,13 @@ export class HeroSystem6eItem extends Item {
                     }
                     break;
                 case "EXPLOSION":
-                    result += `-1 DC/${parseInt(modifier.LEVELS)}"; `;
+                    {
+                        const shape =
+                            modifier.OPTION_ALIAS === "Normal (Radius)"
+                                ? "Radius"
+                                : modifier.OPTION_ALIAS;
+                        result += `${shape}; -1 DC/${item.system.areaOfEffect.dcFalloff}"; `;
+                    }
                     break;
                 case "EXTRATIME":
                     result += `${modifier.OPTION_ALIAS}, `;
@@ -3133,7 +3155,7 @@ export class HeroSystem6eItem extends Item {
 
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
-            this.buildAoeParameters(aoeModifier);
+            this.buildAoeAttackParameters(aoeModifier);
         }
 
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
