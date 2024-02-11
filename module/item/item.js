@@ -481,7 +481,6 @@ export class HeroSystem6eItem extends Item {
 
         // TODO: Delete support for old format
         for (const key of ["ADDER", "MODIFIER", "POWER"]) {
-            //'adders', 'modifiers', 'power',
             if (this.system?.[key]) {
                 const value = this.system[key].find((o) => o.XMLID === xmlid);
                 if (value) {
@@ -942,16 +941,7 @@ export class HeroSystem6eItem extends Item {
             levels = parseInt(modifier.LEVELS);
         }
 
-        // TODO: levels need some work.
-        //       explosion and AOE areas are calculated very differently.
-        // 5e explosion has levels 1..n which is the decay rate (not sure if max range is
-        //    only determined by DC decay)
-        // 5e AOE has levels at base 0 with DOUBLEAREA adders (so x8 is 3 levels)
-        // 6e AOE has levels which represent the radius but the explosion negative adder doesn't
-        //
-        // See ItemAttackFormApplication.getData() for similar behaviour that probably needs to be shared.
-
-        // 5e has a slightly different alias for an Explosive Radius in HDC.
+        // 5e has a slightly different alias for an Explosive Radius in HD.
         // Otherwise, all other shapes seems the same.
         const type =
             modifier.OPTION_ALIAS === "Normal (Radius)"
