@@ -8,6 +8,7 @@
 - Token selected movement is now updated for GM when players make a change via movement radio controls. [#320](https://github.com/dmdorman/hero6e-foundryvtt/issues/320)
 - Powers based on EGO combat value now use ECV for 5e. [#653](https://github.com/dmdorman/hero6e-foundryvtt/issues/653)
 - STUN only powers will no longer show BODY in the roll information provided in chat.
+- Correct costs for all 5e CSL types.
 
 ## Version 3.0.57
 

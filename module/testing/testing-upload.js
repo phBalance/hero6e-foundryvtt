@@ -1423,47 +1423,801 @@ export function registerUploadTests(quench) {
             });
 
             describe("COMBAT_LEVELS", async function () {
-                const contents = `
-                    <SKILL XMLID="COMBAT_LEVELS" ID="1688944834273" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
-                    <NOTES />
-                    </SKILL>
-                `;
-                let item;
+                describe("5e", async function () {
+                    describe("single single", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLESINGLE" OPTIONID="SINGLESINGLE" OPTION_ALIAS="with any single attack with one specific weapon" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
 
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        { temporary: true },
-                    );
-                    item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
-                        { temporary: true, parent: actor },
-                    );
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
-                    item.skillRollUpdateValue();
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with any single attack with one specific weapon",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 6);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 6);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("single strike", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLESTRIKE" OPTIONID="SINGLESTRIKE" OPTION_ALIAS="with any single Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with any single Strike",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 12);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 12);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 2);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("single strike", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STRIKE" OPTIONID="STRIKE" OPTION_ALIAS="with any Strike" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with any Strike",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 18);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 18);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 3);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("martial maneuvers", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MARTIAL" OPTIONID="MARTIAL" OPTION_ALIAS="with Martial Maneuvers" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with Martial Maneuvers",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 18);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 18);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 3);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("magic", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MAGIC" OPTIONID="MAGIC" OPTION_ALIAS="with Magic" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with Magic",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 18);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 18);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 3);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("broad set", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BROAD" OPTIONID="BROAD" OPTION_ALIAS="with a broadly-defined category of attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with a broadly-defined category of attacks",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 24);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 24);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 4);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("DCV with HTH & Ranged", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHDCV" OPTIONID="HTHDCV" OPTION_ALIAS="DCV with HTH or Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 DCV with HTH or Ranged Combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 24);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 24);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 4);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("DECV vs Mental & attacks", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="DECV" OPTIONID="DECV" OPTION_ALIAS="DECV versus all Mental Powers and attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 DECV versus all Mental Powers and attacks",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 24);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 24);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 4);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("mental", async function () {
+                        const contents = `
+                        <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTAL" OPTIONID="MENTAL" OPTION_ALIAS="with Mental Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <NOTES />
+                        </SKILL>
+                    `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with Mental Combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 30);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 30);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 5);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("ranged combat", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="with Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with Ranged Combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 30);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 30);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 5);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("OCV two categories", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOOCV" OPTIONID="TWOOCV" OPTION_ALIAS="OCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 OCV with any two categories of combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 24);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 24);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 4);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("DCV two categories", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWODCV" OPTIONID="TWODCV" OPTION_ALIAS="DCV with any two categories of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 DCV with any two categories of combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 24);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 24);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 4);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("HTH and Ranged", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHRANGED" OPTIONID="HTHRANGED" OPTION_ALIAS="with HTH and Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with HTH and Ranged Combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 36);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 36);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 6);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("HTH and Mental", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HTHMENTAL" OPTIONID="HTHMENTAL" OPTION_ALIAS="with HTH and Mental Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with HTH and Mental Combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 36);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 36);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 6);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
+
+                    describe("Mental and Ranged", async function () {
+                        const contents = `
+                            <SKILL XMLID="COMBAT_LEVELS" ID="1707675763848" BASECOST="0.0" LEVELS="6" ALIAS="Combat Skill Levels" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTALRANGED" OPTIONID="MENTALRANGED" OPTION_ALIAS="with Mental and Ranged Combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                                <NOTES />
+                            </SKILL>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            actor.system.is5e = true;
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(contents),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "+6 with Mental and Ranged Combat",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 36);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 36);
+                        });
+
+                        it("costPerLevel", function () {
+                            assert.equal(item.system.costPerLevel, 6);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, "0");
+                        });
+                    });
                 });
 
-                it("description", function () {
-                    assert.equal(
-                        item.system.description,
-                        "+1 with any single attack",
-                    );
-                });
+                describe("6e", async function () {
+                    const contents = `
+                        <SKILL XMLID="COMBAT_LEVELS" ID="1688944834273" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                            <NOTES />
+                        </SKILL>
+                    `;
+                    let item;
 
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
-                });
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
 
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 2);
-                });
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "+1 with any single attack",
+                        );
+                    });
 
-                it("end", function () {
-                    assert.equal(item.system.end, "0");
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 2);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, "0");
+                    });
                 });
             });
 

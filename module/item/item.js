@@ -605,27 +605,43 @@ export class HeroSystem6eItem extends Item {
         } else if (this.system.XMLID == "COMBAT_LEVELS") {
             if (this.actor?.system?.is5e) {
                 switch (this.system.OPTION) {
+                    case "SINGLESINGLE":
+                        this.system.costPerLevel = 1;
+                        break;
+                    case "SINGLESTRIKE":
                     case "SINGLE":
                         this.system.costPerLevel = 2;
                         break;
+                    case "MAGIC":
+                    case "MARTIAL":
+                    case "STRIKE":
                     case "TIGHT":
                         this.system.costPerLevel = 3;
                         break;
+                    case "BROAD":
+                    case "DECV":
+                    case "HTHDCV":
+                    case "TWODCV":
+                    case "TWOOCV":
+                        this.system.costPerLevel = 4;
+                        break;
                     case "DCV":
-                        this.system.costPerLevel = 5;
-                        break;
                     case "HTH":
-                        this.system.costPerLevel = 5;
-                        break;
+                    case "MENTAL":
                     case "RANGED":
                         this.system.costPerLevel = 5;
+                        break;
+                    case "HTHMENTAL":
+                    case "HTHRANGED":
+                    case "MENTALRANGED":
+                        this.system.costPerLevel = 6;
                         break;
                     case "ALL":
                         this.system.costPerLevel = 8;
                         break;
                     default:
                         console.error(
-                            `Unknown 5e combat levels ${this.system.OPTION}`,
+                            `Unknown 5e combat level type ${this.system.OPTION}`,
                         );
                         break;
                 }
