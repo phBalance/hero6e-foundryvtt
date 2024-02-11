@@ -762,10 +762,32 @@ export class HeroSystem6eItem extends Item {
                             break;
 
                         case "EXPLOSION":
-                            // Not specified correctly in HDC.
-                            newChildBaseCost =
-                                parseFloat(child.BASECOST) +
-                                0.25 * (parseInt(child.LEVELS || 1) - 1);
+                            {
+                                // Not specified correctly in HDC.
+                                let baseDCFalloffFromShape;
+                                switch (child.OPTION) {
+                                    case "CONE":
+                                        baseDCFalloffFromShape = 2;
+                                        break;
+                                    case "LINE":
+                                        baseDCFalloffFromShape = 3;
+                                        break;
+                                    case "NORMAL":
+                                        baseDCFalloffFromShape = 1;
+                                        break;
+                                    default:
+                                        console.error(
+                                            `unknown 5e explosion shape ${child.OPTION}`,
+                                        );
+                                        break;
+                                }
+
+                                newChildBaseCost =
+                                    parseFloat(child.BASECOST) +
+                                    0.25 *
+                                        (parseInt(child.LEVELS || 1) -
+                                            baseDCFalloffFromShape);
+                            }
                             break;
 
                         default:
