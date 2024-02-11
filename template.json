@@ -238,7 +238,9 @@
             "class": "physical",
             "areaOfEffect": {
                 "type": "none",
-                "value": 0
+                "value": 0,
+                "width": 0,
+                "height": 0
             },
             "stunBodyDamage": "stunbody"
         },
