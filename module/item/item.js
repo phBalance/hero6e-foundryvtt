@@ -568,21 +568,40 @@ export class HeroSystem6eItem extends Item {
                 this.system.XMLID,
             )
         ) {
-            switch (this.system.OPTION) {
-                case "SINGLE":
-                    this.system.costPerLevel = 1;
-                    break;
-                case "TIGHT":
-                    this.system.costPerLevel = 3;
-                    break;
-                case "BROAD":
-                    this.system.costPerLevel = 6;
-                    break;
-                default:
-                    console.error(
-                        `Unknown mental combat levels or penalty skill levels ${this.system.OPTION}`,
-                    );
-                    break;
+            if (this.actor?.system.is5e) {
+                switch (this.system.OPTION) {
+                    case "SINGLE":
+                        this.system.costPerLevel = 2;
+                        break;
+                    case "TIGHT":
+                        this.system.costPerLevel = 2;
+                        break;
+                    case "ALL":
+                        this.system.costPerLevel = 3;
+                        break;
+                    default:
+                        console.error(
+                            `Unknown 5e ${this.system.XMLID} levels ${this.system.OPTION}`,
+                        );
+                        break;
+                }
+            } else {
+                switch (this.system.OPTION) {
+                    case "SINGLE":
+                        this.system.costPerLevel = 1;
+                        break;
+                    case "TIGHT":
+                        this.system.costPerLevel = 3;
+                        break;
+                    case "BROAD":
+                        this.system.costPerLevel = 6;
+                        break;
+                    default:
+                        console.error(
+                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION}`,
+                        );
+                        break;
+                }
             }
         } else if (this.system.XMLID == "COMBAT_LEVELS") {
             if (this.actor?.system?.is5e) {
