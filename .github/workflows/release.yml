@@ -129,7 +129,7 @@ jobs:
       run: wget https://github.com/${{ github.repository }}/releases/download/${{ needs.prepare_release.outputs.release_name }}/system.json
 
     - name: Publish to Foundry
-      uses: Varriount/fvtt-autopublish@v2.0.1
+      uses: Varriount/fvtt-autopublish@latest
       with:
         username: ${{ secrets.FOUNDRY_ADMIN_USERNAME }}
         password: ${{ secrets.FOUNDRY_ADMIN_PASSWORD }}
