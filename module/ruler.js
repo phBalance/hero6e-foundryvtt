@@ -110,10 +110,10 @@ export class HeroRuler {
                                 }
 
                                 // Add movement type to last movement waypoint
-                                combatant.flags.dragRuler.passedWaypoints[
-                                    combatant.flags.dragRuler.passedWaypoints
-                                        .length - 1
-                                ].activeMovement = actor.flags?.activeMovement;
+                                // combatant.flags.dragRuler.passedWaypoints[
+                                //     combatant.flags.dragRuler.passedWaypoints
+                                //         .length - 1
+                                // ].activeMovement = actor.flags?.activeMovement;
 
                                 let spentEnd = parseInt(
                                     combatant.flags.dragRuler.spentEnd || 0,
@@ -139,7 +139,7 @@ export class HeroRuler {
                                 const movementPower = actor.items.find(
                                     (o) =>
                                         o.system.XMLID ===
-                                            actor.flags.activeMovement.toUpperCase() &&
+                                            actor.flags.activeMovement?.toUpperCase() &&
                                         o.system.active,
                                 );
                                 const reducedEnd =
