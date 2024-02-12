@@ -573,10 +573,10 @@ export class HeroSystem6eCombat extends Combat {
     async _onEndTurn(combatant) {
         //console.log("_onEndTurn", combatant.name, this.current);
 
-        const automation = game.settings.get(
-            "hero6efoundryvttv2",
-            "automation",
-        );
+        // const automation = game.settings.get(
+        //     "hero6efoundryvttv2",
+        //     "automation",
+        // );
 
         // https://github.com/dmdorman/hero6e-foundryvtt/issues/722
         // if (this.round > 0) {
