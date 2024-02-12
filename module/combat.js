@@ -573,57 +573,58 @@ export class HeroSystem6eCombat extends Combat {
     async _onEndTurn(combatant) {
         //console.log("_onEndTurn", combatant.name, this.current);
 
-        const automation = game.settings.get(
-            "hero6efoundryvttv2",
-            "automation",
-        );
+        // const automation = game.settings.get(
+        //     "hero6efoundryvttv2",
+        //     "automation",
+        // );
 
-        if (this.round > 0) {
-            // Edge case where Flight was using 1 END when combat begins.  Make sure that doesn't happen.
-            // Hover (flight) uses 1 END
-            if (
-                automation === "all" ||
-                (automation === "npcOnly" && combatant.actor.type == "npc") ||
-                (automation === "pcEndOnly" && combatant.actor.type === "pc")
-            ) {
-                if (
-                    // gliding costs no endurance
-                    ["flight"].includes(combatant.actor?.flags?.activeMovement)
-                ) {
-                    //console.log(combatant.actor);
-                    if (dragRuler?.getRangesFromSpeedProvider) {
-                        if (
-                            dragRuler.getMovedDistanceFromToken(
-                                combatant.token.object,
-                            ) === 0
-                        ) {
-                            let endValue =
-                                parseInt(
-                                    combatant.actor.system.characteristics.end
-                                        .value,
-                                ) - 1;
-                            await combatant.actor.update({
-                                "system.characteristics.end.value": endValue,
-                            });
+        // https://github.com/dmdorman/hero6e-foundryvtt/issues/722
+        // if (this.round > 0) {
+        //     // Edge case where Flight was using 1 END when combat begins.  Make sure that doesn't happen.
+        //     // Hover (flight) uses 1 END
+        //     if (
+        //         automation === "all" ||
+        //         (automation === "npcOnly" && combatant.actor.type == "npc") ||
+        //         (automation === "pcEndOnly" && combatant.actor.type === "pc")
+        //     ) {
+        //         if (
+        //             // gliding costs no endurance
+        //             ["flight"].includes(combatant.actor?.flags?.activeMovement)
+        //         ) {
+        //             //console.log(combatant.actor);
+        //             if (dragRuler?.getRangesFromSpeedProvider) {
+        //                 if (
+        //                     dragRuler.getMovedDistanceFromToken(
+        //                         combatant.token.object,
+        //                     ) === 0
+        //                 ) {
+        //                     let endValue =
+        //                         parseInt(
+        //                             combatant.actor.system.characteristics.end
+        //                                 .value,
+        //                         ) - 1;
+        //                     await combatant.actor.update({
+        //                         "system.characteristics.end.value": endValue,
+        //                     });
 
-                            // ChatCard notification about spending 1 END to hover.
-                            // Players may mistakenly leave FLIGHT on.
-                            const content = `${combatant.token.name} spent 1 END to hover.`;
-                            const chatData = {
-                                user: game.user.id,
-                                //whisper: ChatMessage.getWhisperRecipients("GM"),
-                                speaker: ChatMessage.getSpeaker({
-                                    actor: combatant.actor,
-                                }),
-                                //blind: true,
-                                content: content,
-                            };
-                            await ChatMessage.create(chatData);
-                        }
-                    }
-                }
-            }
-        }
+        //                     // ChatCard notification about spending 1 END to hover.
+        //                     // Players may mistakenly leave FLIGHT on.
+        //                     const content = `${combatant.token.name} spent 1 END to hover.`;
+        //                     const chatData = {
+        //                         user: game.user.id,
+        //                         //whisper: ChatMessage.getWhisperRecipients("GM"),
+        //                         speaker: ChatMessage.getSpeaker({
+        //                             actor: combatant.actor,
+        //                         }),
+        //                         //blind: true,
+        //                         content: content,
+        //                     };
+        //                     await ChatMessage.create(chatData);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         super._onEndTurn(combatant);
 
