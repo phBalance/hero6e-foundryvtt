@@ -121,7 +121,7 @@ jobs:
       manifest_file_path: system.json
 
   publish_release:
-    needs: prepare_release
+    needs: [prepare_release, check_release]
     runs-on: ubuntu-latest
 
     steps:
@@ -135,4 +135,4 @@ jobs:
         password: ${{ secrets.FOUNDRY_ADMIN_PASSWORD }}
         module-id: ${{ secrets.MODULE_ID }}
         manifest-url: https://github.com/${{ github.repository }}/releases/download/${{ needs.prepare_release.outputs.release_name }}/system.json
-        manifest-file: ${{ needs.prepare_release.outputs.manifest_file_path }}
+        module-version: ${{ needs.check_release.outputs.release }}
