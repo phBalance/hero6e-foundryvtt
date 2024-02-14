@@ -396,9 +396,6 @@ export class HeroSystem6eItem extends Item {
         if (["NAKEDMODIFIER", "LIST"].includes(this.system.XMLID)) {
             return false;
         }
-        if (this.system.XMLID === "STR") {
-            console.log("STR");
-        }
 
         // Power must be turned on
         if (this.system.active === false) return false;
