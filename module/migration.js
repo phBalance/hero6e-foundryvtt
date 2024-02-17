@@ -83,9 +83,7 @@ export async function migrateWorld() {
                     // Martial Arts
                     if (item.type === "maneuver" && !item.system.XMLID) {
                         let entry = CONFIG.HERO.combatManeuvers[item.name];
-                        //if (!entry) entry = CONFIG.HERO.combatManeuversOptional[item.name];
                         if (entry) {
-                            //const name = entry[0];
                             const v = entry;
                             const PHASE = v[0];
                             const OCV = v[1];
@@ -355,6 +353,26 @@ export async function migrateWorld() {
         }
     }
 
+    // if lastMigration < 3.0.59
+    // Active Effects for adjustments changed format
+    if (foundry.utils.isNewerVersion("3.0.59", lastMigration)) {
+        const queue = getAllActorsInGame();
+        let dateNow = new Date();
+
+        for (const [index, actor] of queue.entries()) {
+            if (new Date() - dateNow > 4000) {
+                ui.notifications.info(
+                    `Migrating actor's active effects to 3.0.59: (${
+                        queue.length - index
+                    } actors remaining)`,
+                );
+                dateNow = new Date();
+            }
+
+            await migrate_actor_active_effects_to_3_0_59(actor);
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
     {
         let d = new Date();
@@ -410,6 +428,44 @@ async function migrateActorCostDescription(actor) {
             await ui.notifications.warn(
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
+        }
+    }
+}
+
+async function migrate_actor_active_effects_to_3_0_59(actor) {
+    for (const activeEffect of actor.temporaryEffects) {
+        if (
+            activeEffect.flags?.type === "adjustment" &&
+            activeEffect.flags.version === 2
+        ) {
+            const newFormatAdjustmentActiveEffect =
+                foundry.utils.deepClone(activeEffect);
+
+            // Rename property.
+            newFormatAdjustmentActiveEffect.flags.adjustmentActivePoints =
+                activeEffect.flags.activePoints;
+            delete newFormatAdjustmentActiveEffect.flags.activePoints;
+
+            // New property
+            let activePointsThatShouldBeAffected = 0;
+            const nameMatch = newFormatAdjustmentActiveEffect.name.match(
+                /^.+ ([0-9]+) .+ \([0-9]+ AP\) \[.*\]/,
+            );
+            if (nameMatch) {
+                activePointsThatShouldBeAffected =
+                    parseInt(nameMatch[1]) *
+                    Math.sign(
+                        newFormatAdjustmentActiveEffect.flags
+                            .adjustmentActivePoints,
+                    );
+            }
+
+            newFormatAdjustmentActiveEffect.flags.affectedPoints =
+                activePointsThatShouldBeAffected;
+
+            // Delete old active effect and create the new one
+            await activeEffect.delete();
+            await actor.addActiveEffect(newFormatAdjustmentActiveEffect);
         }
     }
 }

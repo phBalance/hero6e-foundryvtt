@@ -1,5 +1,8 @@
-import { determineDefense } from "../utility/defense.js";
+import { HeroSystem6eActor } from "./actor.js";
+
 import { HeroSystem6eItem } from "../item/item.js";
+
+import { determineDefense } from "../utility/defense.js";
 import { presenceAttackPopOut } from "../utility/presence-attack.js";
 import { onManageActiveEffect } from "../utility/effects.js";
 import {
@@ -11,9 +14,8 @@ import {
     convertToDcFromItem,
     convertFromDC,
 } from "../utility/damage.js";
-
-import { HeroSystem6eActor } from "./actor.js";
 import { HeroRoller } from "../utility/dice.js";
+import { getSystemDisplayUnits } from "../utility/units.js";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
@@ -411,10 +413,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                 characteristic.notes = `${Math.max(
                     0,
                     characteristic.value,
-                )}m forward, ${Math.max(
+                )}${getSystemDisplayUnits(data.actor)} forward, ${Math.max(
                     0,
                     Math.round(characteristic.value / 2),
-                )}m upward`;
+                )}${getSystemDisplayUnits(data.actor)} upward`;
 
             characteristic.delta = 0;
             if (data.actor.system.is5e) {
@@ -459,14 +461,14 @@ export class HeroSystemActorSheet extends ActorSheet {
             let ary = [];
             let activeEffects = Array.from(
                 this.actor.allApplicableEffects(),
-            ).filter((o) =>
-                o.changes.find(
+            ).filter((ae) =>
+                ae.changes.find(
                     (p) =>
                         p.key ===
                         `system.characteristics.${powerInfo.key.toLowerCase()}.value`,
                 ),
             );
-            for (let ae of activeEffects) {
+            for (const ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
             }
             if (ary.length > 0) {
@@ -490,10 +492,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                     ) && !o.disabled,
             );
 
-            for (let ae of activeEffects) {
+            for (const ae of activeEffects) {
                 ary.push(`<li>${ae.name}</li>`);
                 if (ae._prepareDuration().duration) {
-                    let change = ae.changes.find(
+                    const change = ae.changes.find(
                         (o) =>
                             o.key ===
                             `system.characteristics.${powerInfo.key.toLowerCase()}.max`,
@@ -1139,13 +1141,13 @@ export class HeroSystemActorSheet extends ActorSheet {
         const input = event.target.querySelector("input");
 
         // Find all associated Active Effects
-        let activeEffects = Array.from(
+        const activeEffects = Array.from(
             this.actor.allApplicableEffects(),
         ).filter((o) => o.changes.find((p) => p.key === input.name));
-        for (let ae of activeEffects) {
+        for (const ae of activeEffects) {
             // Delete status
             if (ae.statuses) {
-                let confirmed = await Dialog.confirm({
+                const confirmed = await Dialog.confirm({
                     title: game.i18n.localize(
                         "HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title",
                     ),
@@ -1153,7 +1155,49 @@ export class HeroSystemActorSheet extends ActorSheet {
                 });
 
                 if (confirmed) {
-                    await ae.delete();
+                    const actionsToAwait = [];
+
+                    if (
+                        ae.flags?.type === "adjustment" &&
+                        ae.flags.version >= 3
+                    ) {
+                        const parent = ae.parent;
+                        for (const target of ae.flags.target) {
+                            if (parent.system.characteristics[target]) {
+                                // Target is a characteristic or movement
+                                const actor = parent;
+                                const newMax =
+                                    actor.system.characteristics[target].max +
+                                    ae.flags.affectedPoints;
+                                const presentValue =
+                                    actor.system.characteristics[target].value;
+
+                                let newValue = 0;
+                                if (ae.flags.affectedPoints < 0) {
+                                    // This is a positive adjustment. When it goes away
+                                    // the points are lost but anything already lost doesn't go away.
+                                    newValue = Math.min(presentValue, newMax);
+                                } else {
+                                    // This is a negative adjustment. When it goes away
+                                    // the points come back.
+                                    newValue =
+                                        presentValue + ae.flags.affectedPoints;
+                                }
+
+                                if (newValue !== presentValue) {
+                                    const change = {};
+                                    change[
+                                        `system.characteristics.${target}.value`
+                                    ] = newValue;
+                                    actionsToAwait.push(actor.update(change));
+                                }
+                            }
+                        }
+                    }
+
+                    actionsToAwait.push(ae.delete());
+
+                    await Promise.all(actionsToAwait);
                 }
                 continue;
             }

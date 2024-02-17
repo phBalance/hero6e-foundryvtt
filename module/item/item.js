@@ -1107,7 +1107,7 @@ export class HeroSystem6eItem extends Item {
             configPowerInfo &&
             configPowerInfo.powerType?.includes("movement")
         ) {
-            let activeEffect = Array.from(this.effects)?.[0] || {};
+            const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
                 (this.name ? `${this.name}: ` : "") +
                 `${this.system.XMLID} +${this.system.value}`;
@@ -1144,7 +1144,7 @@ export class HeroSystem6eItem extends Item {
             this.id &&
             configPowerInfo?.powerType?.includes("characteristic")
         ) {
-            let activeEffect = Array.from(this.effects)?.[0] || {};
+            const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
                 (this.name ? `${this.name}: ` : "") +
                 `${this.system.XMLID} +${this.system.value}`;

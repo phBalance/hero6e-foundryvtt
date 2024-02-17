@@ -588,10 +588,16 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     if (ae.flags.type === "adjustment") {
                         // Fade by 5 Active Points
                         let _fade;
-                        if (ae.flags.activePoints < 0) {
-                            _fade = Math.max(ae.flags.activePoints, -5);
+                        if (ae.flags.adjustmentActivePoints < 0) {
+                            _fade = Math.max(
+                                ae.flags.adjustmentActivePoints,
+                                -5,
+                            );
                         } else {
-                            _fade = Math.min(ae.flags.activePoints, 5);
+                            _fade = Math.min(
+                                ae.flags.adjustmentActivePoints,
+                                5,
+                            );
                         }
 
                         adjustmentChatMessages.push(
@@ -605,6 +611,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                                 actor,
                             ),
                         );
+
+                        // TODO: FIXME: Dirty hack. If the amount remaining in the active effect is 0 we know that
+                        // performAdjustment has deleted the active effect. In this case exit the loop so that
+                        // we don't keep operating on an old view of a deleted active effect.
+                        if (ae.flags.adjustmentActivePoints === 0) {
+                            break;
+                        }
                     } else if (ae.flags.XMLID === "naturalBodyHealing") {
                         let bodyValue = parseInt(
                             actor.system.characteristics.body.value,
@@ -613,7 +626,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                             actor.system.characteristics.body.max,
                         );
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
-                        // await
+                        // TODO: await
                         if (game.user.isGM)
                             actor.update({
                                 "system.characteristics.body.value": bodyValue,
@@ -708,10 +721,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             // Charges Recover each day
             if (today > lastDate) {
                 const itemsWithCharges = actor.items.filter(
-                    (o) => o.system.charges?.max,
+                    (item) => item.system.charges?.max,
                 );
                 let content = "";
-                for (let item of itemsWithCharges) {
+                for (const item of itemsWithCharges) {
                     let value = parseInt(item.system.charges.value);
                     let max = parseInt(item.system.charges.max);
                     if (value < max) {

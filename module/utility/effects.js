@@ -87,7 +87,7 @@ export async function onActiveEffectToggle(effect, newState) {
     }
 
     // Characteristic VALUE should change when toggled on
-    for (let change of effect.changes) {
+    for (const change of effect.changes) {
         // match something like system.characteristics.stun.max
         const charMatch = change.key.match(/characteristics\.(.+)\.max$/);
         if (charMatch) {

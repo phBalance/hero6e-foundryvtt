@@ -1,6 +1,10 @@
 # Releases
 
-## Version 3.0.58 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.58 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Positive adjustment powers now behave better when consumed prior to fading or being manually removed.
+
+## Version 3.0.58
 
 - Clear natural healing status effect when BODY returns to max. [#686](https://github.com/dmdorman/hero6e-foundryvtt/issues/686)
 - Improve AOE modifier advantage calculation and descriptions including 5e size calculations.

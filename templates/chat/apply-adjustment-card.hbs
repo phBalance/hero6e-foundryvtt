@@ -23,7 +23,7 @@
 
   {{#each adjustments as | adj |}}
     <div class="card-section">
-      {{../item.system.XMLID}} {{#if ../isFade}}fade of{{/if}} {{abs ../adjustmentDamageRaw}} Active Points.
+      {{../item.system.XMLID}} {{#if adj.isFade}}fade of{{/if}} {{abs adj.adjustmentDamageRaw}} Active Points.
       {{#if (ne adj.activePointEffectLostDueToMax 0)}} {{abs adj.activePointEffectLostDueToMax}} Active Points of adjustment action lost due to reaching maximum effect.{{/if}}
 
       {{#if (lt adj.adjustmentDamageThisApplication 0)}}
@@ -35,7 +35,7 @@
             {{abs adj.adjustmentDamageThisApplication}} {{adj.adjustmentTarget}} lost.
         {{/if}}
       {{/if}}
-      Total {{../item.system.XMLID}} for this effect is {{abs ../adjustmentTotalActivePointEffect}} AP.
+      Total {{../item.system.XMLID}} for this effect is {{abs adj.adjustmentTotalActivePointEffect}} AP.
     </div>
   {{/each}}
 
