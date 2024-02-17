@@ -186,6 +186,7 @@ export function determineMaxAdjustment(item) {
             default:
                 break;
         }
+
         return maxAdjustment;
     }
 }
@@ -406,6 +407,7 @@ export async function performAdjustment(
     isFade,
     targetActor,
 ) {
+    const isHealing = item.system.XMLID === "HEALING";
     const targetName = targetedPower.toUpperCase();
 
     // Search the target for this power.
@@ -465,6 +467,7 @@ export async function performAdjustment(
             0,
             0,
             0,
+            0,
             defenseDescription,
             potentialCharacteristic,
             isFade,
@@ -483,8 +486,15 @@ export async function performAdjustment(
             targetActor,
             targetSystem,
         );
+
+    // Healing is not cumulative. All else is.
+    const effectiveAdjustmentActivePoints = isHealing
+        ? activePointDamage - activeEffect.flags.adjustmentActivePoints
+        : activePointDamage;
+
     let totalNewAdjustmentActivePoints =
-        activePointDamage + activeEffect.flags.adjustmentActivePoints;
+        effectiveAdjustmentActivePoints +
+        activeEffect.flags.adjustmentActivePoints;
     let activePointEffectLostDueToMax = 0;
 
     // Clamp max change to the max allowed by the power.
@@ -622,6 +632,7 @@ export async function performAdjustment(
         activePointAffectedDifference,
         totalNewAdjustmentActivePoints,
         activePointEffectLostDueToMax,
+        effectiveAdjustmentActivePoints - activePointDamage,
         defenseDescription,
         potentialCharacteristic,
         isFade,
@@ -636,6 +647,7 @@ function _generateAdjustmentChatCard(
     activePointAffectedDifference,
     totalActivePointEffect,
     activePointEffectLostDueToMax,
+    activePointEffectLostDueToNotExceeding,
     defenseDescription,
     potentialCharacteristic, // TODO: Power?
     isFade,
@@ -653,6 +665,7 @@ function _generateAdjustmentChatCard(
             adjustmentTarget: potentialCharacteristic.toUpperCase(),
             adjustmentTotalActivePointEffect: totalActivePointEffect,
             activePointEffectLostDueToMax,
+            activePointEffectLostDueToNotExceeding,
             isFade,
         },
 
