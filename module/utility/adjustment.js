@@ -274,8 +274,9 @@ async function _createNewAdjustmentEffect(
         },
         flags: {
             type: "adjustment",
-            version: 2,
-            activePoints: 0,
+            version: 3,
+            adjustmentActivePoints: 0,
+            affectedPoints: 0,
             XMLID: item?.system.XMLID,
             source: targetActor.name,
             target: [powerTargetName?.uuid || potentialCharacteristic],
@@ -365,6 +366,7 @@ async function _createNewAdjustmentEffect(
                 activeEffect.duration.seconds = 3.154e7 * 100;
                 break;
             default:
+                // TODO: Move this higher up so that this method is not async. Or convert to console.error.
                 await ui.notifications.error(
                     `DELAYEDRETURNRATE has unhandled option ${delayedReturnRate?.OPTIONID}`,
                 );
@@ -415,12 +417,12 @@ export async function performAdjustment(
         targetSystem.system.characteristics?.[potentialCharacteristic] != null
             ? `system.characteristics.${potentialCharacteristic}.value`
             : `system.value`;
-    const targetValue =
+    const targetStartingValue =
         targetActor.system.characteristics?.[potentialCharacteristic] != null
             ? targetActor.system.characteristics?.[potentialCharacteristic]
                   .value
             : targetPower.system.value;
-    const targetMax =
+    const targetStartingMax =
         targetActor.system.characteristics?.[potentialCharacteristic] != null
             ? targetActor.system.characteristics?.[potentialCharacteristic].max
             : targetPower.system.max;
@@ -460,27 +462,27 @@ export async function performAdjustment(
             targetActor,
             targetSystem,
         ));
-    let totalNewActivePoints =
-        activePointDamage + activeEffect.flags.activePoints;
+    let totalNewAdjustmentActivePoints =
+        activePointDamage + activeEffect.flags.adjustmentActivePoints;
     let activePointEffectLostDueToMax = 0;
 
     // Clamp max change to the max allowed by the power.
     // TODO: Healing may not raise max or value above max.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target.
-    if (totalNewActivePoints < 0) {
+    if (totalNewAdjustmentActivePoints < 0) {
         const max = Math.max(
-            totalNewActivePoints,
+            totalNewAdjustmentActivePoints,
             -determineMaxAdjustment(item),
         );
-        activePointEffectLostDueToMax = totalNewActivePoints - max;
-        totalNewActivePoints = max;
+        activePointEffectLostDueToMax = totalNewAdjustmentActivePoints - max;
+        totalNewAdjustmentActivePoints = max;
     } else {
         const min = Math.min(
-            totalNewActivePoints,
+            totalNewAdjustmentActivePoints,
             determineMaxAdjustment(item),
         );
-        activePointEffectLostDueToMax = totalNewActivePoints - min;
-        totalNewActivePoints = min;
+        activePointEffectLostDueToMax = totalNewAdjustmentActivePoints - min;
+        totalNewAdjustmentActivePoints = min;
     }
 
     // Determine how many points of effect there are based on the cost
@@ -490,15 +492,17 @@ export async function performAdjustment(
         targetActor,
     );
     const activePointsThatShouldBeAffected = Math.trunc(
-        totalNewActivePoints / costPerActivePoint,
+        totalNewAdjustmentActivePoints / costPerActivePoint,
     );
     const activePointAffectedDifference =
         activePointsThatShouldBeAffected -
-        Math.trunc(activeEffect.flags.activePoints / costPerActivePoint);
+        Math.trunc(
+            activeEffect.flags.adjustmentActivePoints / costPerActivePoint,
+        );
 
     // Calculate the effect's max value(s)
     activeEffect.changes[0].value =
-        activeEffect.changes[0].value - activePointAffectedDifference;
+        parseInt(activeEffect.changes[0].value) - activePointAffectedDifference;
 
     // If this is 5e then some characteristics are calculated (not figured) based on
     // those. We only need to worry about 2: DEX -> OCV & DCV and EGO -> OMCV & DMCV.
@@ -510,9 +514,9 @@ export async function performAdjustment(
     //       as the characteristic max and value are changing.
     if (targetActor.system.is5e && activeEffect.changes[1]) {
         const newCalculatedValue = RoundFavorPlayerUp(
-            (targetMax - activePointAffectedDifference) / 3,
+            (targetStartingMax - activePointAffectedDifference) / 3,
         );
-        const oldCalculatedValue = RoundFavorPlayerUp(targetMax / 3);
+        const oldCalculatedValue = RoundFavorPlayerUp(targetStartingMax / 3);
 
         activeEffect.changes[1].value =
             parseInt(activeEffect.changes[1].value) +
@@ -528,38 +532,49 @@ export async function performAdjustment(
         activePointsThatShouldBeAffected,
     )} ${(
         targetPower?.name || potentialCharacteristic
-    ).toUpperCase()} (${Math.abs(totalNewActivePoints)} AP) [by ${
+    ).toUpperCase()} (${Math.abs(totalNewAdjustmentActivePoints)} AP) [by ${
         item?.actor.name || "undefined"
     }]`;
 
-    activeEffect.flags.activePoints = totalNewActivePoints;
+    activeEffect.flags.adjustmentActivePoints = totalNewAdjustmentActivePoints;
+    activeEffect.flags.affectedPoints = activePointsThatShouldBeAffected;
 
-    const isEffectFinished = activeEffect.flags.activePoints === 0 && isFade;
+    const promises = [];
+
+    const isEffectFinished =
+        activeEffect.flags.adjustmentActivePoints === 0 && isFade;
     if (isEffectFinished) {
-        await activeEffect.delete();
+        promises.push(activeEffect.delete());
     } else if (!existingEffect) {
-        await targetSystem.addActiveEffect(activeEffect);
+        promises.push(targetSystem.addActiveEffect(activeEffect));
     } else {
-        await activeEffect.update({
-            name: activeEffect.name,
-            changes: activeEffect.changes,
-            flags: activeEffect.flags,
-        });
+        promises.push(
+            activeEffect.update({
+                name: activeEffect.name,
+                changes: activeEffect.changes,
+                flags: activeEffect.flags,
+            }),
+        );
     }
 
     // Calculate the effect value(s)
     // TODO: Pretty sure recovery isn't working as expected for defensive items
-    // TODO: Pretty sure recovery isn't working as expected for expended characteristics (need separate category keeping: value, max, boost)
-    const newValue = targetValue - activePointAffectedDifference;
+    const newValue =
+        activePointAffectedDifference > 0
+            ? Math.max(
+                  targetStartingValue - activePointAffectedDifference, // New value if we just subtract the difference
+                  targetStartingMax - activePointAffectedDifference, // New max value
+              )
+            : targetStartingValue - activePointAffectedDifference;
     const changes = {
         [targetValuePath]: newValue,
     };
 
     if (targetActor.system.is5e && activeEffect.flags.target[1]) {
         const newCalculatedValue = RoundFavorPlayerUp(
-            (targetMax - activePointAffectedDifference) / 3,
+            (targetStartingMax - activePointAffectedDifference) / 3,
         );
-        const oldCalculatedValue = RoundFavorPlayerUp(targetMax / 3);
+        const oldCalculatedValue = RoundFavorPlayerUp(targetStartingMax / 3);
         const char1Value =
             targetActor.system.characteristics[activeEffect.flags.target[1]]
                 .value;
@@ -576,13 +591,15 @@ export async function performAdjustment(
     }
 
     // Update the effect value(s)
-    await targetSystem.update(changes);
+    promises.push(targetSystem.update(changes));
+
+    await Promise.all(promises);
 
     return _generateAdjustmentChatCard(
         item,
         activePointDamage,
         activePointAffectedDifference,
-        totalNewActivePoints,
+        totalNewAdjustmentActivePoints,
         activePointEffectLostDueToMax,
         defenseDescription,
         potentialCharacteristic,
