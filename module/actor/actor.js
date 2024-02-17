@@ -516,127 +516,131 @@ export class HeroSystem6eActor extends Actor {
 
     strDetails() {
         let strLiftText = "0";
-        let strThrow = 0;
+        let strRunningThrow = 0;
         let value = this.system.characteristics.str.value;
         if (value >= 1) {
             strLiftText = "8kg";
-            strThrow = 2;
+            strRunningThrow = 2;
         }
         if (value >= 2) {
             strLiftText = "16kg";
-            strThrow = 3;
+            strRunningThrow = 3;
         }
         if (value >= 3) {
             strLiftText = "25kg";
-            strThrow = 4;
+            strRunningThrow = 4;
         }
         if (value >= 4) {
             strLiftText = "38kg";
-            strThrow = 6;
+            strRunningThrow = 6;
         }
         if (value >= 5) {
             strLiftText = "50kg";
-            strThrow = 8;
+            strRunningThrow = 8;
         }
         if (value >= 8) {
             strLiftText = "75kg";
-            strThrow = 12;
+            strRunningThrow = 12;
         }
         if (value >= 10) {
             strLiftText = "16kg";
-            strThrow = 16;
+            strRunningThrow = 16;
         }
         if (value >= 13) {
             strLiftText = "150kg";
-            strThrow = 20;
+            strRunningThrow = 20;
         }
         if (value >= 15) {
             strLiftText = "200kg";
-            strThrow = 24;
+            strRunningThrow = 24;
         }
         if (value >= 18) {
             strLiftText = "300kg";
-            strThrow = 28;
+            strRunningThrow = 28;
         }
         if (value >= 20) {
             strLiftText = "400kg";
-            strThrow = 32;
+            strRunningThrow = 32;
         }
         if (value >= 23) {
             strLiftText = "600kg";
-            strThrow = 36;
+            strRunningThrow = 36;
         }
         if (value >= 25) {
             strLiftText = "800kg";
-            strThrow = 40;
+            strRunningThrow = 40;
         }
         if (value >= 28) {
             strLiftText = "1,200kg";
-            strThrow = 44;
+            strRunningThrow = 44;
         }
         if (value >= 30) {
             strLiftText = "1,600kg";
-            strThrow = 48;
+            strRunningThrow = 48;
         }
         if (value >= 35) {
             strLiftText = "3,200kg";
-            strThrow = 56;
+            strRunningThrow = 56;
         }
         if (value >= 40) {
             strLiftText = "6,400kg";
-            strThrow = 64;
+            strRunningThrow = 64;
         }
         if (value >= 45) {
             strLiftText = "12.5 tons";
-            strThrow = 72;
+            strRunningThrow = 72;
         }
         if (value >= 50) {
             strLiftText = "25 tons";
-            strThrow = 80;
+            strRunningThrow = 80;
         }
         if (value >= 55) {
             strLiftText = "50 tons";
-            strThrow = 88;
+            strRunningThrow = 88;
         }
         if (value >= 60) {
             strLiftText = "100 tons";
-            strThrow = 96;
+            strRunningThrow = 96;
         }
         if (value >= 65) {
             strLiftText = "200 tons";
-            strThrow = 104;
+            strRunningThrow = 104;
         }
         if (value >= 70) {
             strLiftText = "400 tons";
-            strThrow = 112;
+            strRunningThrow = 112;
         }
         if (value >= 75) {
             strLiftText = "800 tons";
-            strThrow = 120;
+            strRunningThrow = 120;
         }
         if (value >= 80) {
             strLiftText = "1.6 ktons";
-            strThrow = 128;
+            strRunningThrow = 128;
         }
         if (value >= 85) {
             strLiftText = "3.2 ktons";
-            strThrow = 136;
+            strRunningThrow = 136;
         }
         if (value >= 90) {
             strLiftText = "6.4 ktons";
-            strThrow = 144;
+            strRunningThrow = 144;
         }
         if (value >= 95) {
             strLiftText = "12.5 ktons";
-            strThrow = 152;
+            strRunningThrow = 152;
         }
         if (value >= 100) {
             strLiftText = "25 ktons";
-            strThrow = 160;
+            strRunningThrow = 160;
         }
         if (value >= 105) {
             strLiftText = `${50 + Math.floor((value - 105) / 5) * 25} ktons`;
-            strThrow = 168 + Math.floor((value - 105) / 5) * 8;
+            strRunningThrow = 168 + Math.floor((value - 105) / 5) * 8;
+        }
+
+        if (this.system.is5e) {
+            strRunningThrow /= 2;
         }
 
         // Get numeric strLiftKg
@@ -649,7 +653,7 @@ export class HeroSystem6eActor extends Actor {
         m = strLiftText.replace(",", "").match(/(\d+) ktons/);
         strLiftKg = m ? m[1] * 1000 * 1000 : strLiftKg;
 
-        return { strLiftText, strThrow, strLiftKg };
+        return { strLiftText, strThrow: strRunningThrow, strLiftKg };
     }
 
     async applyEncumbrancePenalty() {
