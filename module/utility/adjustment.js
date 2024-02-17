@@ -128,9 +128,9 @@ export function determineMaxAdjustment(item) {
 
     // Certain adjustment powers have no fixed limit. Give them a large integer.
     if (
-        item?.system.XMLID !== "ABSORPTION" &&
-        item?.system.XMLID !== "AID" &&
-        item?.system.XMLID !== "TRANSFER"
+        item.system.XMLID !== "ABSORPTION" &&
+        item.system.XMLID !== "AID" &&
+        item.system.XMLID !== "TRANSFER"
     ) {
         return reallyBigInteger;
     }
@@ -223,7 +223,7 @@ function _findExistingMatchingEffect(
     // Caution: The item may no longer exist.
     return targetSystem.effects.find(
         (effect) =>
-            effect.origin === item?.uuid &&
+            effect.origin === item.uuid &&
             effect.flags.target[0] ===
                 (powerTargetName?.uuid || potentialCharacteristic),
     );
@@ -245,7 +245,83 @@ function _createCharacteristicAEChangeBlock(
     };
 }
 
-async function _createNewAdjustmentEffect(
+function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
+    let durationOptionId;
+
+    // Healing restores permanently. It, however, does have a lockout period.
+    if (item.system.XMLID === "HEALING") {
+        durationOptionId =
+            item.findModsByXmlid("DECREASEDREUSE")?.OPTIONID || "DAY";
+    } else {
+        // DELAYEDRETURNRATE (loss for TRANSFER and all other adjustments) and DELAYEDRETURNRATE2 (gain for TRANSFER)
+        const dRR = item.findModsByXmlid("DELAYEDRETURNRATE");
+        const dRR2 = item.findModsByXmlid("DELAYEDRETURNRATE2");
+        const delayedReturnRate =
+            rawActivePointsDamage > 0
+                ? dRR
+                : item.system.XMLID === "TRANSFER"
+                  ? dRR2
+                  : dRR;
+        durationOptionId = delayedReturnRate
+            ? delayedReturnRate.OPTIONID
+            : "TURN";
+    }
+
+    let durationInSeconds = 12;
+    switch (durationOptionId) {
+        case "TURN": // Not a real OPTIONID from HD
+            durationInSeconds = 12;
+            break;
+        case "MINUTE":
+            durationInSeconds = 60;
+            break;
+        case "FIVEMINUTES":
+            durationInSeconds = 60 * 5;
+            break;
+        case "20MINUTES":
+            durationInSeconds = 60 * 20;
+            break;
+        case "HOUR":
+            durationInSeconds = 60 * 60;
+            break;
+        case "6HOURS":
+            durationInSeconds = 60 * 60 * 6;
+            break;
+        case "DAY":
+            durationInSeconds = 60 * 60 * 24;
+            break;
+        case "WEEK":
+            durationInSeconds = 604800;
+            break;
+        case "MONTH":
+            durationInSeconds = 2.628e6;
+            break;
+        case "SEASON":
+            durationInSeconds = 2.628e6 * 3;
+            break;
+        case "YEAR":
+            durationInSeconds = 3.154e7;
+            break;
+        case "FIVEYEARS":
+            durationInSeconds = 3.154e7 * 5;
+            break;
+        case "TWENTYFIVEYEARS":
+            durationInSeconds = 3.154e7 * 25;
+            break;
+        case "CENTURY":
+            durationInSeconds = 3.154e7 * 100;
+            break;
+        default:
+            console.error(
+                `DELAYEDRETURNRATE for ${item.name}/${item.system.XMLID} has unhandled option ID ${durationOptionId}`,
+            );
+            break;
+    }
+
+    return durationInSeconds;
+}
+
+function _createNewAdjustmentEffect(
     item,
     potentialCharacteristic, // TODO: By this point we should know which it is.
     powerTargetName,
@@ -256,13 +332,13 @@ async function _createNewAdjustmentEffect(
     // Create new ActiveEffect
     // TODO: Add a document field
     const activeEffect = {
-        name: `${item?.system?.XMLID || "undefined"} 0 ${
+        name: `${item.system.XMLID || "undefined"} 0 ${
             (powerTargetName?.name || potentialCharacteristic).toUpperCase() // TODO: This will need to change for multiple effects
-        } (0 AP) [by ${item?.actor.name || "undefined"}]`,
-        id: `${item?.system.XMLID}.${item?.id}.${
+        } (0 AP) [by ${item.actor.name || "undefined"}]`,
+        id: `${item.system.XMLID}.${item.id}.${
             powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
-        icon: item?.img,
+        icon: item.img,
         changes: [
             _createCharacteristicAEChangeBlock(
                 potentialCharacteristic,
@@ -270,19 +346,22 @@ async function _createNewAdjustmentEffect(
             ),
         ],
         duration: {
-            seconds: 12,
+            seconds: _determineEffectDurationInSeconds(
+                item,
+                rawActivePointsDamage,
+            ),
         },
         flags: {
             type: "adjustment",
             version: 3,
             adjustmentActivePoints: 0,
             affectedPoints: 0,
-            XMLID: item?.system.XMLID,
+            XMLID: item.system.XMLID,
             source: targetActor.name,
             target: [powerTargetName?.uuid || potentialCharacteristic],
             key: potentialCharacteristic,
         },
-        origin: item?.uuid,
+        origin: item.uuid,
 
         transfer: true,
         disabled: false,
@@ -312,64 +391,6 @@ async function _createNewAdjustmentEffect(
                 _createCharacteristicAEChangeBlock("dmcv", targetSystem),
             );
             activeEffect.flags.target.push("dmcv");
-        }
-    }
-
-    // DELAYEDRETURNRATE (loss for TRANSFER and all other adjustments) and DELAYEDRETURNRATE2 (gain for TRANSFER)
-    const dRR = item?.findModsByXmlid("DELAYEDRETURNRATE");
-    const dRR2 = item?.findModsByXmlid("DELAYEDRETURNRATE2");
-    const delayedReturnRate =
-        rawActivePointsDamage > 0
-            ? dRR
-            : item?.system.XMLID === "TRANSFER"
-              ? dRR2
-              : dRR;
-    if (delayedReturnRate) {
-        switch (delayedReturnRate.OPTIONID) {
-            case "MINUTE":
-                activeEffect.duration.seconds = 60;
-                break;
-            case "FIVEMINUTES":
-                activeEffect.duration.seconds = 60 * 5;
-                break;
-            case "20MINUTES":
-                activeEffect.duration.seconds = 60 * 20;
-                break;
-            case "HOUR":
-                activeEffect.duration.seconds = 60 * 60;
-                break;
-            case "6HOURS":
-                activeEffect.duration.seconds = 60 * 60 * 6;
-                break;
-            case "DAY":
-                activeEffect.duration.seconds = 60 * 60 * 24;
-                break;
-            case "WEEK":
-                activeEffect.duration.seconds = 604800;
-                break;
-            case "MONTH":
-                activeEffect.duration.seconds = 2.628e6;
-                break;
-            case "SEASON":
-                activeEffect.duration.seconds = 2.628e6 * 3;
-                break;
-            case "YEAR":
-                activeEffect.duration.seconds = 3.154e7;
-                break;
-            case "FIVEYEARS":
-                activeEffect.duration.seconds = 3.154e7 * 5;
-                break;
-            case "TWENTYFIVEYEARS":
-                activeEffect.duration.seconds = 3.154e7 * 25;
-                break;
-            case "CENTURY":
-                activeEffect.duration.seconds = 3.154e7 * 100;
-                break;
-            default:
-                // TODO: Move this higher up so that this method is not async. Or convert to console.error.
-                await ui.notifications.error(
-                    `DELAYEDRETURNRATE has unhandled option ${delayedReturnRate?.OPTIONID}`,
-                );
         }
     }
 
@@ -454,14 +475,14 @@ export async function performAdjustment(
 
     const activeEffect =
         existingEffect ||
-        (await _createNewAdjustmentEffect(
+        _createNewAdjustmentEffect(
             item,
             potentialCharacteristic,
             targetPower,
             rawActivePointsDamage,
             targetActor,
             targetSystem,
-        ));
+        );
     let totalNewAdjustmentActivePoints =
         activePointDamage + activeEffect.flags.adjustmentActivePoints;
     let activePointEffectLostDueToMax = 0;
@@ -528,12 +549,12 @@ export async function performAdjustment(
     }
 
     // Update the effect max value(s)
-    activeEffect.name = `${item?.system.XMLID || "undefined"} ${Math.abs(
+    activeEffect.name = `${item.system.XMLID || "undefined"} ${Math.abs(
         activePointsThatShouldBeAffected,
     )} ${(
         targetPower?.name || potentialCharacteristic
     ).toUpperCase()} (${Math.abs(totalNewAdjustmentActivePoints)} AP) [by ${
-        item?.actor.name || "undefined"
+        item.actor.name || "undefined"
     }]`;
 
     activeEffect.flags.adjustmentActivePoints = totalNewAdjustmentActivePoints;
