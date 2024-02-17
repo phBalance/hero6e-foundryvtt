@@ -611,6 +611,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                                 actor,
                             ),
                         );
+
+                        // TODO: FIXME: Dirty hack. If the amount remaining in the active effect is 0 we know that
+                        // performAdjustment has deleted the active effect. In this case exit the loop so that
+                        // we don't keep operating on an old view of a deleted active effect.
+                        if (ae.flags.adjustmentActivePoints === 0) {
+                            break;
+                        }
                     } else if (ae.flags.XMLID === "naturalBodyHealing") {
                         let bodyValue = parseInt(
                             actor.system.characteristics.body.value,
