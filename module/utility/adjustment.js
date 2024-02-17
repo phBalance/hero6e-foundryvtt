@@ -624,17 +624,17 @@ function _generateAdjustmentChatCard(
     const cardData = {
         item: item,
 
-        adjustmentDamageRaw: activePointDamage,
-        adjustmentTotalActivePointEffect: totalActivePointEffect,
         defenseDescription: defenseDescription,
 
         adjustment: {
+            adjustmentDamageRaw: activePointDamage,
             adjustmentDamageThisApplication: activePointAffectedDifference,
             adjustmentTarget: potentialCharacteristic.toUpperCase(),
+            adjustmentTotalActivePointEffect: totalActivePointEffect,
             activePointEffectLostDueToMax,
+            isFade,
         },
 
-        isFade,
         isEffectFinished,
 
         targetActor: targetActor,
@@ -648,7 +648,7 @@ function _generateAdjustmentChatCard(
  * Renders and creates a number of related adjustment chat messages for the same target
  *
  * @param {*} cardOrCards
- * @returns void
+ * @returns {Promise<void>}
  */
 export async function renderAdjustmentChatCards(cardOrCards) {
     if (!Array.isArray(cardOrCards)) {
@@ -662,20 +662,13 @@ export async function renderAdjustmentChatCards(cardOrCards) {
 
     const cardData = {
         item: cardOrCards[0].item,
-
-        adjustmentDamageRaw: cardOrCards[0].adjustmentDamageRaw,
-        adjustmentTotalActivePointEffect:
-            cardOrCards[0].adjustmentTotalActivePointEffect,
         defenseDescription: cardOrCards[0].defenseDescription,
+        isEffectFinished: cardOrCards[cardOrCards.length - 1].isEffectFinished,
+        targetActor: cardOrCards[0].targetActor,
 
         adjustments: cardOrCards.map((card) => {
             return card.adjustment;
         }),
-
-        isFade: cardOrCards[0].isFade,
-        isEffectFinished: cardOrCards[0].isEffectFinished,
-
-        targetActor: cardOrCards[0].targetActor,
     };
 
     // render card
