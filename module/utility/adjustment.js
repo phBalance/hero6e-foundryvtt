@@ -180,7 +180,7 @@ export function determineMaxAdjustment(item) {
             case "+1":
                 maxAdjustment = maxAdjustment + 1;
                 break;
-            case "1d3":
+            case "+1d3":
                 maxAdjustment = maxAdjustment + 3;
                 break;
             default:
