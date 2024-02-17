@@ -1,5 +1,8 @@
-import { determineDefense } from "../utility/defense.js";
+import { HeroSystem6eActor } from "./actor.js";
+
 import { HeroSystem6eItem } from "../item/item.js";
+
+import { determineDefense } from "../utility/defense.js";
 import { presenceAttackPopOut } from "../utility/presence-attack.js";
 import { onManageActiveEffect } from "../utility/effects.js";
 import {
@@ -11,9 +14,8 @@ import {
     convertToDcFromItem,
     convertFromDC,
 } from "../utility/damage.js";
-
-import { HeroSystem6eActor } from "./actor.js";
 import { HeroRoller } from "../utility/dice.js";
+import { getSystemDisplayUnits } from "../utility/units.js";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
@@ -411,10 +413,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                 characteristic.notes = `${Math.max(
                     0,
                     characteristic.value,
-                )}m forward, ${Math.max(
+                )}${getSystemDisplayUnits(data.actor)} forward, ${Math.max(
                     0,
                     Math.round(characteristic.value / 2),
-                )}m upward`;
+                )}${getSystemDisplayUnits(data.actor)} upward`;
 
             characteristic.delta = 0;
             if (data.actor.system.is5e) {
@@ -1139,13 +1141,13 @@ export class HeroSystemActorSheet extends ActorSheet {
         const input = event.target.querySelector("input");
 
         // Find all associated Active Effects
-        let activeEffects = Array.from(
+        const activeEffects = Array.from(
             this.actor.allApplicableEffects(),
         ).filter((o) => o.changes.find((p) => p.key === input.name));
-        for (let ae of activeEffects) {
+        for (const ae of activeEffects) {
             // Delete status
             if (ae.statuses) {
-                let confirmed = await Dialog.confirm({
+                const confirmed = await Dialog.confirm({
                     title: game.i18n.localize(
                         "HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title",
                     ),
