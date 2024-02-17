@@ -449,6 +449,10 @@ export async function performAdjustment(
         targetActor.system.characteristics?.[potentialCharacteristic] != null
             ? targetActor.system.characteristics?.[potentialCharacteristic].max
             : targetPower.system.max;
+    const targetStartingCore =
+        targetActor.system.characteristics?.[potentialCharacteristic] != null
+            ? targetActor.system.characteristics?.[potentialCharacteristic].core
+            : targetPower.system.core;
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
     // and calculate the total effect
@@ -497,14 +501,27 @@ export async function performAdjustment(
         activeEffect.flags.adjustmentActivePoints;
     let activePointEffectLostDueToMax = 0;
 
+    // TODO: This should be based on the targeted actor ... why is it not?
+    // TODO: The code below might not work correctly with non integer costs per active point
+    const costPerActivePoint = determineCostPerActivePoint(
+        potentialCharacteristic,
+        targetPower,
+        targetActor,
+    );
+
     // Clamp max change to the max allowed by the power.
-    // TODO: Healing may not raise max or value above max.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target.
     if (totalNewAdjustmentActivePoints < 0) {
-        const max = Math.max(
-            totalNewAdjustmentActivePoints,
-            -determineMaxAdjustment(item),
-        );
+        // Healing may not exceed the core (starting value)
+        const activePointsToUse = isHealing
+            ? Math.max(
+                  totalNewAdjustmentActivePoints,
+                  Math.min(targetStartingValue - targetStartingCore, 0) *
+                      costPerActivePoint,
+              )
+            : totalNewAdjustmentActivePoints;
+        const max = Math.max(activePointsToUse, -determineMaxAdjustment(item));
+
         activePointEffectLostDueToMax = totalNewAdjustmentActivePoints - max;
         totalNewAdjustmentActivePoints = max;
     } else {
@@ -517,11 +534,6 @@ export async function performAdjustment(
     }
 
     // Determine how many points of effect there are based on the cost
-    const costPerActivePoint = determineCostPerActivePoint(
-        potentialCharacteristic,
-        targetPower,
-        targetActor,
-    );
     const activePointsThatShouldBeAffected = Math.trunc(
         totalNewAdjustmentActivePoints / costPerActivePoint,
     );
@@ -531,9 +543,12 @@ export async function performAdjustment(
             activeEffect.flags.adjustmentActivePoints / costPerActivePoint,
         );
 
-    // Calculate the effect's max value(s)
-    activeEffect.changes[0].value =
-        parseInt(activeEffect.changes[0].value) - activePointAffectedDifference;
+    // Calculate the effect's change to the maximum. Only healing does not change the maximum.
+    if (!isHealing) {
+        activeEffect.changes[0].value =
+            parseInt(activeEffect.changes[0].value) -
+            activePointAffectedDifference;
+    }
 
     // If this is 5e then some characteristics are calculated (not figured) based on
     // those. We only need to worry about 2: DEX -> OCV & DCV and EGO -> OMCV & DMCV.
@@ -567,8 +582,13 @@ export async function performAdjustment(
         item.actor.name || "undefined"
     }]`;
 
-    activeEffect.flags.adjustmentActivePoints = totalNewAdjustmentActivePoints;
     activeEffect.flags.affectedPoints = activePointsThatShouldBeAffected;
+    activeEffect.flags.adjustmentActivePoints = totalNewAdjustmentActivePoints;
+    // Healing should not accumulate part rolls.
+    if (isHealing) {
+        activeEffect.flags.adjustmentActivePoints -=
+            totalNewAdjustmentActivePoints % costPerActivePoint;
+    }
 
     const promises = [];
 
