@@ -545,7 +545,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
             // Active Effects
             let adjustmentChatMessages = [];
-            for (let ae of actor.temporaryEffects) {
+            for (const ae of actor.temporaryEffects) {
                 // Determine XMLID, ITEM, ACTOR
                 let origin = await fromUuid(ae.origin);
                 let item = origin instanceof HeroSystem6eItem ? origin : null;
@@ -606,7 +606,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                                 ae.flags.target[0],
                                 -_fade,
                                 -_fade,
-                                "None - Beneficial",
+                                "None - Effect Fade",
                                 true,
                                 actor,
                             ),
