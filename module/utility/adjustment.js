@@ -192,23 +192,24 @@ export function determineMaxAdjustment(item) {
 }
 
 export function determineCostPerActivePoint(
-    potentialCharacteristic,
-    powerTargetX,
+    targetCharacteristic,
+    targetPower,
     targetActor,
 ) {
     // TODO: Not sure we need to use the characteristic here...
     const powerInfo = getPowerInfo({
-        xmlid: potentialCharacteristic.toUpperCase(),
+        xmlid: targetCharacteristic.toUpperCase(),
         actor: targetActor,
     });
+
     return (
-        (powerTargetX
+        (targetPower
             ? parseFloat(
-                  powerTargetX.system.activePoints / powerTargetX.system.value,
+                  targetPower.system.activePoints / targetPower.system.value,
               )
             : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel)) *
         defensivePowerAdjustmentMultiplier(
-            potentialCharacteristic.toUpperCase(),
+            targetCharacteristic.toUpperCase(),
             targetActor,
         )
     );
@@ -220,7 +221,6 @@ function _findExistingMatchingEffect(
     powerTargetName,
     targetSystem,
 ) {
-    // TODO: Variable Effect may result in multiple changes on same AE.
     // Caution: The item may no longer exist.
     return targetSystem.effects.find(
         (effect) =>
@@ -230,16 +230,12 @@ function _findExistingMatchingEffect(
     );
 }
 
-function _createCharacteristicAEChangeBlock(
-    potentialCharacteristic,
-    targetSystem,
-) {
+function _createAEChangeBlock(targetCharOrPower, targetSystem) {
     // TODO: Calculate this earlier so we don't have the logic in here
     return {
         key:
-            targetSystem.system.characteristics?.[potentialCharacteristic] !=
-            null
-                ? `system.characteristics.${potentialCharacteristic}.max`
+            targetSystem.system.characteristics?.[targetCharOrPower] != null
+                ? `system.characteristics.${targetCharOrPower}.max`
                 : "system.max",
         value: 0,
         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -340,12 +336,7 @@ function _createNewAdjustmentEffect(
             powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
         icon: item.img,
-        changes: [
-            _createCharacteristicAEChangeBlock(
-                potentialCharacteristic,
-                targetSystem,
-            ),
-        ],
+        changes: [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
         duration: {
             seconds: _determineEffectDurationInSeconds(
                 item,
@@ -374,22 +365,22 @@ function _createNewAdjustmentEffect(
     if (targetActor.system.is5e) {
         if (potentialCharacteristic === "dex") {
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("ocv", targetSystem),
+                _createAEChangeBlock("ocv", targetSystem),
             );
             activeEffect.flags.target.push("ocv");
 
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("dcv", targetSystem),
+                _createAEChangeBlock("dcv", targetSystem),
             );
             activeEffect.flags.target.push("dcv");
         } else if (potentialCharacteristic === "ego") {
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("omcv", targetSystem),
+                _createAEChangeBlock("omcv", targetSystem),
             );
             activeEffect.flags.target.push("omcv");
 
             activeEffect.changes.push(
-                _createCharacteristicAEChangeBlock("dmcv", targetSystem),
+                _createAEChangeBlock("dmcv", targetSystem),
             );
             activeEffect.flags.target.push("dmcv");
         }
@@ -433,25 +424,28 @@ export async function performAdjustment(
 
     // Characteristics target an actor, and powers target an item
     const targetSystem =
-        targetActor.system.characteristics?.[potentialCharacteristic] != null
-            ? targetActor
-            : targetPower;
+        targetCharacteristic != null ? targetActor : targetPower;
+
     const targetValuePath =
-        targetSystem.system.characteristics?.[potentialCharacteristic] != null
+        targetCharacteristic != null
             ? `system.characteristics.${potentialCharacteristic}.value`
             : `system.value`;
+    const targetMaxPath =
+        targetCharacteristic != null
+            ? `system.characteristics.${potentialCharacteristic}.max`
+            : `system.max`;
+
     const targetStartingValue =
-        targetActor.system.characteristics?.[potentialCharacteristic] != null
-            ? targetActor.system.characteristics?.[potentialCharacteristic]
-                  .value
+        targetCharacteristic != null
+            ? targetCharacteristic.value
             : targetPower.system.value;
     const targetStartingMax =
-        targetActor.system.characteristics?.[potentialCharacteristic] != null
-            ? targetActor.system.characteristics?.[potentialCharacteristic].max
+        targetCharacteristic != null
+            ? targetCharacteristic.max
             : targetPower.system.max;
     const targetStartingCore =
-        targetActor.system.characteristics?.[potentialCharacteristic] != null
-            ? targetActor.system.characteristics?.[potentialCharacteristic].core
+        targetCharacteristic != null
+            ? targetCharacteristic.core
             : targetPower.system.core;
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
