@@ -406,7 +406,11 @@ export class HeroSystemActorSheet extends ActorSheet {
             // Notes
             if (powerInfo.key === "STR") {
                 const strDetails = this.actor.strDetails();
-                characteristic.notes = `lift ${strDetails.strLiftText}, throw ${strDetails.strThrow}m`;
+                characteristic.notes = `lift ${
+                    strDetails.strLiftText
+                }, running throw ${strDetails.strThrow}${getSystemDisplayUnits(
+                    data.actor,
+                )}`;
             }
 
             if (powerInfo.key === "LEAPING")

@@ -544,8 +544,9 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             }
 
             // Active Effects
-            let adjustmentChatMessages = [];
-            for (let ae of actor.temporaryEffects) {
+            for (const ae of actor.temporaryEffects) {
+                let adjustmentChatMessages = [];
+
                 // Determine XMLID, ITEM, ACTOR
                 let origin = await fromUuid(ae.origin);
                 let item = origin instanceof HeroSystem6eItem ? origin : null;
@@ -606,7 +607,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                                 ae.flags.target[0],
                                 -_fade,
                                 -_fade,
-                                "None - Beneficial",
+                                "None - Effect Fade",
                                 true,
                                 actor,
                             ),
@@ -615,7 +616,11 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         // TODO: FIXME: Dirty hack. If the amount remaining in the active effect is 0 we know that
                         // performAdjustment has deleted the active effect. In this case exit the loop so that
                         // we don't keep operating on an old view of a deleted active effect.
-                        if (ae.flags.adjustmentActivePoints === 0) {
+                        // Healing doesn't fade. The lockout just ends which guarantees a deleted effect.
+                        if (
+                            ae.flags.adjustmentActivePoints === 0 ||
+                            ae.flags.XMLID === "HEALING"
+                        ) {
                             break;
                         }
                     } else if (ae.flags.XMLID === "naturalBodyHealing") {
@@ -646,9 +651,9 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         }
                     }
                 }
-            }
 
-            await renderAdjustmentChatCards(adjustmentChatMessages);
+                await renderAdjustmentChatCards(adjustmentChatMessages);
+            }
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
