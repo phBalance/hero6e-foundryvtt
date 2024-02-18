@@ -544,8 +544,9 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             }
 
             // Active Effects
-            let adjustmentChatMessages = [];
             for (const ae of actor.temporaryEffects) {
+                let adjustmentChatMessages = [];
+
                 // Determine XMLID, ITEM, ACTOR
                 let origin = await fromUuid(ae.origin);
                 let item = origin instanceof HeroSystem6eItem ? origin : null;
@@ -646,9 +647,9 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         }
                     }
                 }
-            }
 
-            await renderAdjustmentChatCards(adjustmentChatMessages);
+                await renderAdjustmentChatCards(adjustmentChatMessages);
+            }
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
