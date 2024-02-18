@@ -587,43 +587,41 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
                     // What is this effect related to?
                     if (ae.flags.type === "adjustment") {
-                        // Healing is a lockout that just disappears. All other adjustments fade.
-                        if (ae.flags.XMLID === "HEALING") {
-                            await ae.delete();
-                            break;
-                        } else {
-                            // Fade by 5 Active Points
-                            let _fade;
-                            if (ae.flags.adjustmentActivePoints < 0) {
-                                _fade = Math.max(
-                                    ae.flags.adjustmentActivePoints,
-                                    -5,
-                                );
-                            } else {
-                                _fade = Math.min(
-                                    ae.flags.adjustmentActivePoints,
-                                    5,
-                                );
-                            }
-
-                            adjustmentChatMessages.push(
-                                await performAdjustment(
-                                    item,
-                                    ae.flags.target[0],
-                                    -_fade,
-                                    -_fade,
-                                    "None - Effect Fade",
-                                    true,
-                                    actor,
-                                ),
+                        // Fade by 5 Active Points
+                        let _fade;
+                        if (ae.flags.adjustmentActivePoints < 0) {
+                            _fade = Math.max(
+                                ae.flags.adjustmentActivePoints,
+                                -5,
                             );
+                        } else {
+                            _fade = Math.min(
+                                ae.flags.adjustmentActivePoints,
+                                5,
+                            );
+                        }
 
-                            // TODO: FIXME: Dirty hack. If the amount remaining in the active effect is 0 we know that
-                            // performAdjustment has deleted the active effect. In this case exit the loop so that
-                            // we don't keep operating on an old view of a deleted active effect.
-                            if (ae.flags.adjustmentActivePoints === 0) {
-                                break;
-                            }
+                        adjustmentChatMessages.push(
+                            await performAdjustment(
+                                item,
+                                ae.flags.target[0],
+                                -_fade,
+                                -_fade,
+                                "None - Effect Fade",
+                                true,
+                                actor,
+                            ),
+                        );
+
+                        // TODO: FIXME: Dirty hack. If the amount remaining in the active effect is 0 we know that
+                        // performAdjustment has deleted the active effect. In this case exit the loop so that
+                        // we don't keep operating on an old view of a deleted active effect.
+                        // Healing doesn't fade. The lockout just ends which guarantees a deleted effect.
+                        if (
+                            ae.flags.adjustmentActivePoints === 0 ||
+                            ae.flags.XMLID === "HEALING"
+                        ) {
+                            break;
                         }
                     } else if (ae.flags.XMLID === "naturalBodyHealing") {
                         let bodyValue = parseInt(

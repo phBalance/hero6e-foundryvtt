@@ -464,6 +464,29 @@ export async function performAdjustment(
             targetSystem,
         );
 
+    // Healing doesn't fade
+    if (existingEffect && isFade && isHealing) {
+        const deletePromise = existingEffect.delete();
+
+        const chatCard = _generateAdjustmentChatCard(
+            item,
+            existingEffect.flags.adjustmentActivePoints,
+            0,
+            0,
+            0,
+            0,
+            defenseDescription,
+            potentialCharacteristic,
+            true,
+            true,
+            targetActor,
+        );
+
+        await deletePromise;
+
+        return chatCard;
+    }
+
     // Healing is not cumulative. All else is.
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
         ? thisAttackStartingActivePointDamage -
@@ -486,7 +509,7 @@ export async function performAdjustment(
     );
 
     // Clamp max adjustment to the max allowed by the power.
-    // TODO: Combined effects may not exceed the largest source's maximum for a single target.
+    // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.
     if (totalActivePointsStartingEffect < 0) {
         // Healing may not exceed the core (starting value)
         let thisAttackActivePointsToUse = isHealing
