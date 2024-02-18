@@ -457,23 +457,6 @@ export async function performAdjustment(
         targetSystem,
     );
 
-    // Shortcut here in case we have no existing effect and 0 damage is done.
-    if (!existingEffect && activePointDamage === 0) {
-        return _generateAdjustmentChatCard(
-            item,
-            activePointDamage,
-            0,
-            0,
-            0,
-            0,
-            defenseDescription,
-            potentialCharacteristic,
-            isFade,
-            false,
-            targetActor,
-        );
-    }
-
     const activeEffect =
         existingEffect ||
         _createNewAdjustmentEffect(
@@ -536,6 +519,28 @@ export async function performAdjustment(
         Math.trunc(
             activeEffect.flags.adjustmentActivePoints / costPerActivePoint,
         );
+
+    // Shortcut here in case we have 0 adjustment done for performance. This will stop
+    // active effects with 0 AP being created and unnecessary AE and characteristic no-op updates.
+    if (
+        totalNewAdjustmentActivePoints -
+            activeEffect.flags.adjustmentActivePoints ===
+        0
+    ) {
+        return _generateAdjustmentChatCard(
+            item,
+            activePointDamage,
+            activePointAffectedDifference,
+            totalNewAdjustmentActivePoints,
+            activePointEffectLostDueToMax,
+            effectiveAdjustmentActivePoints - activePointDamage,
+            defenseDescription,
+            potentialCharacteristic,
+            isFade,
+            false,
+            targetActor,
+        );
+    }
 
     // Calculate the effect's change to the maximum. Only healing does not change the maximum.
     if (!isHealing) {
