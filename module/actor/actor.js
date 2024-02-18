@@ -1778,7 +1778,7 @@ export class HeroSystem6eActor extends Actor {
                         checked = true;
                     }
 
-                    // For mental BROAD is actuallyl equal to ALL
+                    // For mental BROAD is actually equal to ALL
                     if (cslItem.system.XMLID === "MENTAL_COMBAT_LEVELS") {
                         checked = true;
                     }
@@ -1846,8 +1846,7 @@ export class HeroSystem6eActor extends Actor {
         activePoints = realCost;
 
         // Add in costs for items
-        // let _splitCost = {}
-        for (let item of this.items.filter(
+        for (const item of this.items.filter(
             (o) =>
                 o.type != "attack" &&
                 o.type != "defense" &&
@@ -1865,8 +1864,6 @@ export class HeroSystem6eActor extends Actor {
             }
 
             activePoints += parseInt(item.system?.activePoints || 0);
-
-            //_splitCost[item.type] = (_splitCost[item.type] || 0) + (item.system?.realCost || 0)
         }
 
         // DISAD_POINTS: realCost
