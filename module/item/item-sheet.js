@@ -53,10 +53,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`;
         }
 
-        if (["RKA"].includes(this.item.system.XMLID)) {
-            return `${path}/item-sheet.hbs`;
-        }
-
         return `${path}/item-${this.item.type}-sheet.hbs`;
     }
 
