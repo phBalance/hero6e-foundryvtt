@@ -473,6 +473,9 @@ export async function performAdjustment(
         ? activeEffect.flags.adjustmentActivePoints
         : 0;
     let thisAttackActivePointAdjustmentLostDueToMax;
+    const totalActivePointsStartingEffect =
+        activeEffect.flags.adjustmentActivePoints +
+        thisAttackEffectiveAdjustmentActivePoints;
 
     // TODO: This should be based on the targeted actor ... why is it not?
     // TODO: The code below might not work correctly with non integer costs per active point
@@ -484,7 +487,7 @@ export async function performAdjustment(
 
     // Clamp max adjustment to the max allowed by the power.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target.
-    if (thisAttackStartingActivePointDamage < 0) {
+    if (totalActivePointsStartingEffect < 0) {
         // Healing may not exceed the core (starting value)
         let thisAttackActivePointsToUse = isHealing
             ? Math.max(
@@ -492,8 +495,7 @@ export async function performAdjustment(
                   Math.min(targetStartingValue - targetStartingCore, 0) *
                       costPerActivePoint,
               )
-            : thisAttackEffectiveAdjustmentActivePoints +
-              activeEffect.flags.adjustmentActivePoints;
+            : totalActivePointsStartingEffect;
 
         // Healing should not accumulate part points.
         if (isHealing) {
@@ -506,10 +508,11 @@ export async function performAdjustment(
             -determineMaxAdjustment(item),
         );
 
-        thisAttackActivePointAdjustmentLostDueToMax =
-            thisAttackStartingActivePointDamage -
-            max -
-            thisAttackActivePointEffectLostDueToNotExceeding;
+        thisAttackActivePointAdjustmentLostDueToMax = isHealing
+            ? thisAttackStartingActivePointDamage -
+              max -
+              thisAttackActivePointEffectLostDueToNotExceeding
+            : totalActivePointsStartingEffect - max;
         thisAttackEffectiveAdjustmentActivePoints = max;
     } else {
         const totalAdjustmentBeforeMin =
@@ -528,13 +531,14 @@ export async function performAdjustment(
     }
 
     // New total.
-    let totalNewAdjustmentActivePoints =
-        thisAttackEffectiveAdjustmentActivePoints +
-        activeEffect.flags.adjustmentActivePoints;
+    let totalAdjustmentNewActivePoints = isHealing
+        ? thisAttackEffectiveAdjustmentActivePoints +
+          activeEffect.flags.adjustmentActivePoints
+        : thisAttackEffectiveAdjustmentActivePoints;
 
     // Determine how many points of total effect there are based on the cost.
     const totalActivePointsThatShouldBeAffected = Math.trunc(
-        totalNewAdjustmentActivePoints / costPerActivePoint,
+        totalAdjustmentNewActivePoints / costPerActivePoint,
     );
     const totalActivePointAffectedDifference =
         totalActivePointsThatShouldBeAffected -
@@ -545,7 +549,7 @@ export async function performAdjustment(
     // Shortcut here in case we have 0 adjustment done for performance. This will stop
     // active effects with 0 AP being created and unnecessary AE and characteristic no-op updates.
     if (
-        totalNewAdjustmentActivePoints -
+        totalAdjustmentNewActivePoints -
             activeEffect.flags.adjustmentActivePoints ===
         0
     ) {
@@ -553,7 +557,7 @@ export async function performAdjustment(
             item,
             thisAttackStartingActivePointDamage,
             totalActivePointAffectedDifference,
-            totalNewAdjustmentActivePoints,
+            totalAdjustmentNewActivePoints,
             thisAttackActivePointAdjustmentLostDueToMax,
             thisAttackActivePointEffectLostDueToNotExceeding,
             defenseDescription,
@@ -599,12 +603,12 @@ export async function performAdjustment(
         totalActivePointsThatShouldBeAffected,
     )} ${(
         targetPower?.name || potentialCharacteristic
-    ).toUpperCase()} (${Math.abs(totalNewAdjustmentActivePoints)} AP) [by ${
+    ).toUpperCase()} (${Math.abs(totalAdjustmentNewActivePoints)} AP) [by ${
         item.actor.name || "undefined"
     }]`;
 
     activeEffect.flags.affectedPoints = totalActivePointsThatShouldBeAffected;
-    activeEffect.flags.adjustmentActivePoints = totalNewAdjustmentActivePoints;
+    activeEffect.flags.adjustmentActivePoints = totalAdjustmentNewActivePoints;
 
     const promises = [];
 
@@ -666,7 +670,7 @@ export async function performAdjustment(
         item,
         thisAttackStartingActivePointDamage,
         totalActivePointAffectedDifference,
-        totalNewAdjustmentActivePoints,
+        totalAdjustmentNewActivePoints,
         thisAttackActivePointAdjustmentLostDueToMax,
         thisAttackActivePointEffectLostDueToNotExceeding,
         defenseDescription,
