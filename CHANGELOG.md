@@ -3,7 +3,8 @@
 ## Version 3.0.58 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Positive adjustment powers now behave better when consumed prior to fading or being manually removed.
-- Healing should now work as expected from 1 source. It can no longer increase above the core value.
+- Healing should now work as expected from 1 source. It can no longer increase above the core value. Nor can adjustment powers with only restores to starting value. [#649](https://github.com/dmdorman/hero6e-foundryvtt/issues/649)
+- Implement basic automatic absorption.
 
 ## Version 3.0.58
 

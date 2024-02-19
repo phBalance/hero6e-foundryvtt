@@ -6,6 +6,7 @@ import {
     calculateDiceFormulaParts,
     CombatSkillLevelsForAttack,
     convertToDcFromItem,
+    determineExtraDiceDamage,
 } from "../utility/damage.js";
 import {
     performAdjustment,
@@ -581,7 +582,6 @@ export async function AttackToHit(item, options) {
     }
 
     // Charges
-
     if (item.system.charges?.max > 0) {
         let charges = parseInt(item.system.charges?.value || 0);
         if (charges <= 0) {
@@ -1239,7 +1239,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
-        console.log(damageData.itemid);
+        console.warn(damageData.itemid);
         return ui.notifications.error(
             `Attack details are no longer available.`,
         );
@@ -1290,8 +1290,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             "systems/hero6efoundryvttv2/templates/attack/item-conditional-defense-card.hbs";
 
         let options = [];
-        for (let defense of conditionalDefenses) {
-            let option = {
+        for (const defense of conditionalDefenses) {
+            const option = {
                 id: defense.id,
                 name: defense.name,
                 checked: !avad,
@@ -1555,8 +1555,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     })?.powerType?.includes("adjustment");
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(
-            event,
-            tokenId,
+            item,
+            token,
             damageData,
             defense,
         );
@@ -1566,8 +1566,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     })?.powerType?.includes("sense-affecting");
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(
-            event,
-            tokenId,
+            item,
+            token,
             damageData,
             defense,
         );
@@ -1733,36 +1733,108 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         await token.actor.update(changes);
     }
 
-    return ChatMessage.create(chatData);
+    const damageChatMessage = ChatMessage.create(chatData);
+
+    // Absorption happens after damage is taken unless the GM allows it.
+    const absorptionItems = token.actor.items.filter(
+        (item) => item.system.XMLID === "ABSORPTION",
+    );
+    if (absorptionItems) {
+        await _performAbsorptionForToken(
+            token,
+            absorptionItems,
+            damageDetail,
+            item,
+        );
+    }
+
+    return damageChatMessage;
+}
+
+async function _performAbsorptionForToken(
+    token,
+    absorptionItems,
+    damageDetail,
+    damageItem,
+) {
+    const attackType = damageItem.system.class; // TODO: avad?
+
+    // Match attack against absorption type. If we match we can do some absorption.
+    for (const absorptionItem of absorptionItems) {
+        if (absorptionItem.system.OPTION === attackType.toUpperCase()) {
+            const actor = absorptionItem.actor;
+            let maxAbsorption;
+            if (actor.system.is5e) {
+                const dice = absorptionItem.system.dice;
+                const extraDice = determineExtraDiceDamage(absorptionItem);
+
+                // Absorption allowed based on a roll with the usual requirements
+                const absorptionRoller = new HeroRoller()
+                    .makeAdjustmentRoll()
+                    .addDice(dice)
+                    .addHalfDice(extraDice === "+1d3" ? 1 : 0)
+                    .addNumber(extraDice === "+1" ? 1 : 0);
+                await absorptionRoller.roll();
+                maxAbsorption = absorptionRoller.getAdjustmentTotal();
+
+                // Present the roll.
+                const cardHtml = await absorptionRoller.render(
+                    `Target's ${attackType} absorption`,
+                );
+
+                const speaker = ChatMessage.getSpeaker({
+                    actor: actor,
+                    token,
+                });
+                speaker.alias = actor.name;
+
+                const chatData = {
+                    type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+                    rolls: absorptionRoller.rawRolls(),
+                    user: game.user._id,
+                    content: cardHtml,
+                    speaker: speaker,
+                };
+
+                await ChatMessage.create(chatData);
+            } else {
+                maxAbsorption = parseInt(absorptionItem.system.LEVELS);
+            }
+
+            console.warn("TODO: Not tracking per segment absorption max");
+
+            // Apply the absorption
+            return _onApplyAdjustmentToSpecificToken(
+                absorptionItem,
+                token,
+                {
+                    stundamage: Math.min(
+                        maxAbsorption,
+                        damageDetail.bodyDamage,
+                    ),
+                    defenseValue: 0,
+                    resistantValue: 0,
+                },
+                "Absorption - No Defense",
+            );
+        }
+    }
 }
 
 async function _onApplyAdjustmentToSpecificToken(
-    event,
-    tokenId,
+    adjustmentItem,
+    token,
     damageData,
     defense,
 ) {
-    const item = fromUuidSync(damageData.itemid);
-    if (!item) {
-        // This typically happens when the attack id stored in the damage card no longer exists on the actor.
-        // For example if the attack item was deleted or the HDC was uploaded again.
-        return ui.notifications.error(
-            `Attack details are no longer available.`,
-        );
-    }
-    if (!item.actor) {
-        return ui.notifications.error(
-            `Attack details are no longer available.`,
-        );
-    }
-
-    const token = canvas.tokens.get(tokenId);
     if (
-        item.actor.id === token.actor.id &&
-        ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(item.system.XMLID)
+        adjustmentItem.actor.id === token.actor.id &&
+        ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(
+            adjustmentItem.system.XMLID,
+        )
     ) {
         await ui.notifications.warn(
-            `${item.system.XMLID} attacker/source (${item.actor.name}) and defender/target (${token.actor.name}) are the same.`,
+            `${adjustmentItem.system.XMLID} attacker/source (${adjustmentItem.actor.name}) and defender/target (${token.actor.name}) are the same.`,
         );
     }
 
@@ -1775,7 +1847,7 @@ async function _onApplyAdjustmentToSpecificToken(
     );
 
     const { valid, reducesArray, enhancesArray } =
-        item.splitAdjustmentSourceAndTarget();
+        adjustmentItem.splitAdjustmentSourceAndTarget();
     if (!valid) {
         return ui.notifications.error(
             `Invalid adjustment sources/targets provided. Compute effects manually.`,
@@ -1787,7 +1859,7 @@ async function _onApplyAdjustmentToSpecificToken(
     for (const reduce of reducesArray) {
         reductionChatMessages.push(
             await performAdjustment(
-                item,
+                adjustmentItem,
                 reduce,
                 rawActivePointsDamage,
                 actualActivePointDamage,
@@ -1803,14 +1875,16 @@ async function _onApplyAdjustmentToSpecificToken(
 
     const enhancementChatMessages = [];
     const enhancementTargetActor =
-        item.system.XMLID === "TRANSFER" ? item.actor : token.actor;
+        adjustmentItem.system.XMLID === "TRANSFER"
+            ? adjustmentItem.actor
+            : token.actor;
     for (const enhance of enhancesArray) {
         enhancementChatMessages.push(
             await performAdjustment(
-                item,
+                adjustmentItem,
                 enhance,
                 -rawActivePointsDamage,
-                item.system.XMLID === "TRANSFER"
+                adjustmentItem.system.XMLID === "TRANSFER"
                     ? -actualActivePointDamage
                     : -rawActivePointsDamage,
                 "None - Beneficial",
@@ -1825,30 +1899,13 @@ async function _onApplyAdjustmentToSpecificToken(
 }
 
 async function _onApplySenseAffectingToSpecificToken(
-    event,
-    tokenId,
+    senseAffectingItem,
+    token,
     damageData,
     defense,
 ) {
-    const item = fromUuidSync(damageData.itemid);
-    if (!item) {
-        // This typically happens when the attack id stored in the damage card no longer exists on the actor.
-        // For example if the attack item was deleted or the HDC was uploaded again.
-        return ui.notifications.error(
-            `Attack details are no longer available.`,
-        );
-    }
-
-    const token = canvas.tokens.get(tokenId);
-
-    if (!item.actor) {
-        return ui.notifications.error(
-            `Attack details are no longer available.`,
-        );
-    }
-
     // FLASHDEFENSE
-    const flashDefense = item.actor.items.find(
+    const flashDefense = senseAffectingItem.actor.items.find(
         (o) => o.system.XMLID === "FLASHDEFENSE",
     );
     if (flashDefense) {
@@ -1861,21 +1918,21 @@ async function _onApplySenseAffectingToSpecificToken(
     if (damageData.bodydamage > 0) {
         token.actor.addActiveEffect({
             ...HeroSystem6eActorActiveEffects.blindEffect,
-            name: `${item.system.XMLID} ${damageData.bodydamage} [${item.actor.name}]`,
+            name: `${senseAffectingItem.system.XMLID} ${damageData.bodydamage} [${senseAffectingItem.actor.name}]`,
             duration: {
                 seconds: damageData.bodydamage,
             },
             flags: {
                 bodyDamage: damageData.bodydamage,
-                XMLID: item.system.XMLID,
-                source: item.actor.name,
+                XMLID: senseAffectingItem.system.XMLID,
+                source: senseAffectingItem.actor.name,
             },
-            origin: item.uuid,
+            origin: senseAffectingItem.uuid,
         });
     }
 
     const cardData = {
-        item: item,
+        item: senseAffectingItem,
         // dice rolls
 
         // body
@@ -1892,7 +1949,7 @@ async function _onApplySenseAffectingToSpecificToken(
     const template =
         "systems/hero6efoundryvttv2/templates/chat/apply-sense-affecting-card.hbs";
     const cardHtml = await renderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    const speaker = ChatMessage.getSpeaker({ actor: senseAffectingItem.actor });
 
     const chatData = {
         user: game.user._id,

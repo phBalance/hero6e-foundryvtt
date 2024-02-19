@@ -399,6 +399,8 @@ export async function performAdjustment(
     targetActor,
 ) {
     const isHealing = item.system.XMLID === "HEALING";
+    const isOnlyToStartingValues =
+        item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
     const targetName = targetedPower.toUpperCase();
 
     // Search the target for this power.
@@ -512,7 +514,7 @@ export async function performAdjustment(
     // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.
     if (totalActivePointsStartingEffect < 0) {
         // Healing may not exceed the core (starting value)
-        let thisAttackActivePointsToUse = isHealing
+        let thisAttackActivePointsToUse = isOnlyToStartingValues
             ? Math.max(
                   thisAttackEffectiveAdjustmentActivePoints,
                   Math.min(targetStartingValue - targetStartingCore, 0) *
@@ -531,7 +533,7 @@ export async function performAdjustment(
             -determineMaxAdjustment(item),
         );
 
-        thisAttackActivePointAdjustmentLostDueToMax = isHealing
+        thisAttackActivePointAdjustmentLostDueToMax = isOnlyToStartingValues
             ? thisAttackStartingActivePointDamage -
               max -
               thisAttackActivePointEffectLostDueToNotExceeding
@@ -554,7 +556,7 @@ export async function performAdjustment(
     }
 
     // New total.
-    let totalAdjustmentNewActivePoints = isHealing
+    let totalAdjustmentNewActivePoints = isOnlyToStartingValues
         ? thisAttackEffectiveAdjustmentActivePoints +
           activeEffect.flags.adjustmentActivePoints
         : thisAttackEffectiveAdjustmentActivePoints;
@@ -592,7 +594,7 @@ export async function performAdjustment(
     }
 
     // Calculate the effect's change to the maximum. Only healing does not change the maximum.
-    if (!isHealing) {
+    if (!isOnlyToStartingValues) {
         activeEffect.changes[0].value =
             parseInt(activeEffect.changes[0].value) -
             totalActivePointAffectedDifference;
