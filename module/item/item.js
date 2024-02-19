@@ -573,7 +573,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 5e ${this.system.XMLID} levels ${this.system.OPTION}`,
+                            `Unknown 5e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
@@ -596,7 +596,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION}`,
+                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
@@ -618,7 +618,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION}`,
+                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
@@ -662,7 +662,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 5e combat level type ${this.system.OPTION}`,
+                            `Unknown 5e combat level type ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
@@ -688,7 +688,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 6e combat levels ${this.system.OPTION}`,
+                            `Unknown 6e combat levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
@@ -720,7 +720,9 @@ export class HeroSystem6eItem extends Item {
                     this.system.costPerLevel = 12;
                     break;
                 default:
-                    console.error(`Unknown skill levels ${this.system.OPTION}`);
+                    console.error(
+                        `Unknown skill levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
+                    );
                     break;
             }
         } else if (this.system.XMLID === "STRIKING_APPEARANCE") {
