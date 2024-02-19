@@ -559,11 +559,7 @@ export class HeroSystem6eItem extends Item {
     determinePointCosts() {
         let changed = false;
 
-        if (
-            ["MENTAL_COMBAT_LEVELS", "PENALTY_SKILL_LEVELS"].includes(
-                this.system.XMLID,
-            )
-        ) {
+        if (this.system.XMLID === "PENALTY_SKILL_LEVELS") {
             if (this.actor?.system.is5e) {
                 switch (this.system.OPTION) {
                     case "SINGLE":
@@ -577,10 +573,38 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 5e ${this.system.XMLID} levels ${this.system.OPTION}`,
+                            `Unknown 5e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
+            } else {
+                switch (this.system.OPTION) {
+                    case "SINGLE":
+                        this.system.costPerLevel = 1;
+                        break;
+                    case "THREE":
+                        this.system.costPerLevel = 2;
+                        break;
+                    case "SINGLEDCV":
+                        this.system.costPerLevel = 2;
+                        break;
+                    case "GROUPDCV":
+                        this.system.costPerLevel = 3;
+                        break;
+                    case "ALL":
+                        this.system.costPerLevel = 3;
+                        break;
+                    default:
+                        console.error(
+                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
+                        );
+                        break;
+                }
+            }
+        } else if (this.system.XMLID === "MENTAL_COMBAT_LEVELS") {
+            if (this.actor?.system.is5e) {
+                // MCL doesn't exist in 5e
+                console.error(`Unknown 5e ${this.system.XMLID}`);
             } else {
                 switch (this.system.OPTION) {
                     case "SINGLE":
@@ -594,12 +618,12 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION}`,
+                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
             }
-        } else if (this.system.XMLID == "COMBAT_LEVELS") {
+        } else if (this.system.XMLID === "COMBAT_LEVELS") {
             if (this.actor?.system?.is5e) {
                 switch (this.system.OPTION) {
                     case "SINGLESINGLE":
@@ -638,7 +662,7 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 5e combat level type ${this.system.OPTION}`,
+                            `Unknown 5e combat level type ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
@@ -664,12 +688,12 @@ export class HeroSystem6eItem extends Item {
                         break;
                     default:
                         console.error(
-                            `Unknown 6e combat levels ${this.system.OPTION}`,
+                            `Unknown 6e combat levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
                         );
                         break;
                 }
             }
-        } else if (this.system.XMLID == "SKILL_LEVELS") {
+        } else if (this.system.XMLID === "SKILL_LEVELS") {
             switch (this.system.OPTION) {
                 case "CHARACTERISTIC":
                     this.system.costPerLevel = 2;
@@ -696,10 +720,12 @@ export class HeroSystem6eItem extends Item {
                     this.system.costPerLevel = 12;
                     break;
                 default:
-                    console.error(`Unknown skill levels ${this.system.OPTION}`);
+                    console.error(
+                        `Unknown skill levels ${this.system.OPTION} for ${this.actor}/${this.name}`,
+                    );
                     break;
             }
-        } else if (this.system.XMLID == "STRIKING_APPEARANCE") {
+        } else if (this.system.XMLID === "STRIKING_APPEARANCE") {
             switch (this.system.OPTION) {
                 case "ALL":
                     this.system.costPerLevel = 3;
