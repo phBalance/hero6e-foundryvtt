@@ -34,9 +34,10 @@ export class HeroSystem6eCombat extends Combat {
                 combatant.actor.system?.initiativeCharacteristic || "dex";
             let dexValue =
                 combatant.actor.system.characteristics[characteristic].value;
+            let spdValue = combatant.actor.system.characteristics.spd.value;
             let intValue = combatant.actor.system.characteristics.int.value;
 
-            let initiativeValue = dexValue + intValue / 100;
+            let initiativeValue = dexValue + spdValue / 100 + intValue / 10000;
 
             if (initiativeValue != combatant.initiative) {
                 updates.push({
@@ -640,8 +641,8 @@ export class HeroSystem6eCombat extends Combat {
             // );
             for (let _combatant of this.combatants) {
                 if (
-                    _combatant.actor.statuses.has("stunned") ||
-                    _combatant.actor.statuses.has("knockedout")
+                    _combatant?.actor?.statuses.has("stunned") ||
+                    _combatant?.actor?.statuses.has("knockedout")
                 ) {
                     for (const item of _combatant.actor.getActiveConstantItems()) {
                         await item.toggle();
@@ -715,6 +716,9 @@ export class HeroSystem6eCombat extends Combat {
         let hasHidden = false;
         for (let combatant of this.combatants.filter((o) => !o.defeated)) {
             const actor = combatant.actor;
+
+            // Make sure we have a valid actor
+            if (!actor) continue;
 
             // If this is an NPC and their STUN <= 0 then leave them be.
             // Typically, you should only use the Recovery Time Table for
