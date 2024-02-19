@@ -1,40 +1,46 @@
-Here is a list of Hero System skills, perks, talents, powers, modifiers and complications.  Each is given a support rating:
--  A: Full support and automation.  Power descriptions largely match Hero Designer.
--  B: Good support and automation.  A few rare edge cases may be unsupported, those edge cases may have limited/no automation.  Power descriptions largley match Hero Designer, but power costs may be incorrect.
--  C: Poor support.  Simplistic dice rolling.  Defenses/results are poorly/wrongly applied.  Power description shows name, but some non-damage details may be missing/incorrect and power costs have not been reviewed.
--  D: Minimal support.  Dice rolling is not available, wrong, or otherwise poorly implemented.  No automation.  Power description shows name, but likely missing significant details and power costs have not been reviewed.
--  F: Unknown or No support. HDC upload may not even work.
+# Features
 
+Here is a list of 6e Hero System skills, perks, talents, powers, modifiers and complications. Where the 5e rules are similar, likely the support is the same as 6e. Where 5e differs dramatically, 5e will generally have poorer support than 6e. 
 
-| SKILLS | Support | Comments |
+Our support ratings:
+
+- **A**: Full support and automation. Power descriptions largely match Hero Designer.
+- **B**: Good support and automation. A few rare edge cases may be unsupported, those edge cases may have limited/no automation. Power descriptions largely match Hero Designer, but power costs may be incorrect.
+- **C**: Poor support. Simplistic dice rolling.  Defenses/results are poorly/wrongly applied. Power description shows name, but some non-damage details may be missing/incorrect and power costs have not been reviewed.
+- **D**: Minimal support. Dice rolling is not available, wrong, or otherwise poorly implemented. No automation. Power description shows name, but likely missing significant details and power costs have not been reviewed.
+- **F**: Unknown or No support. HDC upload may not even work.
+
+## Skills
+
+| SKILL NAME | Support | Comments |
 | :--- | :---:  | :--- |
 | ACROBATICS | B | Surprise not supported |
 | ACTING | A | |
 | ANALYZE | A | |
 | ANIMAL HANDLER | A | |
 | AUTOFIRE SKILLS | D | |
-| BREAKFALL | B | potential automation for knockback/throw not supported |
+| BREAKFALL | B | Potential automation for knockback/throw not supported |
 | BRIBERY | A | |
-| BUGGING | B | no support for placing bugs in the scene |
+| BUGGING | B | No support for placing bugs in the scene |
 | BUREAUCRATICS | A | |
 | CHARM | A | |
-| CLIMBING | B | no automation of CV penalties|
-| COMBAT DRIVING | B | no support for vehicle combat |
-| COMBAT PILOTING | B | no support for vehicle combat |
-| COMBAT SKILL LEVELS | B | good overall support, minor issues with HDC as included attacks are not specified |
+| CLIMBING | B | No automation of CV penalties|
+| COMBAT DRIVING | B | No support for vehicle combat |
+| COMBAT PILOTING | B | No support for vehicle combat |
+| COMBAT SKILL LEVELS | B | Good overall support, minor issues with HDC as included attacks are not specified |
 | COMPUTER PROGRAMMING | A | |
-| CONCEALMENT | B | no support for placing items in the scene |
+| CONCEALMENT | B | No support for placing items in the scene |
 | CONTORTIONIST | A | |
 | CONVERSATION | A | |
 | CRAMMING | A | |
 | CRIMINOLOGY | A | |
 | CRYPTOGRAPHY | A | |
 | DEDUCTION | A | |
-| DEFENSE MANEUVER | D | from behind, multiple attackers not supported |
+| DEFENSE MANEUVER | D | From behind, multiple attackers not supported |
 | DEMOLITIONS | A | |
 | DISGUISE | A | |
 | ELECTRONICS | A | |
-| FAST DRAW | D | no clip support, no held action support |
+| FAST DRAW | D | No clip support, no held action support |
 | FORENSIC MEDICINE | A | |
 | FORGERY | A | |
 | GAMBLING | A | |
@@ -45,7 +51,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | LANGUAGE | A | |
 | LIPREADING | A | |
 | LOCKPICKING | A | |
-| MARTIAL ARTS | C | good strike, block, dodge support. No weapon element, no NND, no escape |
+| MARTIAL ARTS | C | Good strike, block, dodge support. No weapon element, no NND, no escape |
 | MECHANICS | A | |
 | MIMICRY | A | |
 | MOVEMENT SKILL LEVELS | D | |
@@ -57,30 +63,29 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | POWER (Varies) | D | |
 | PROFESSIONAL SKILL (Background) | A | |
 | RAPID ATTACK | D | |
-| RIDING | B | no support for vehicle combat |
+| RIDING | B | No support for vehicle combat |
 | SCIENCE SKILL | A | |
 | SECURITY SYSTEMS | A | |
 | SHADOWING | A | |
 | SKILL LEVELS | D | |
 | SLEIGHT OF HAND | A | |
-| STEALTH | B | no automation of stealthing tokens and who can see who |
+| STEALTH | B | No automation of stealthing tokens and who can see who |
 | STREETWISE | A | |
 | SURVIVAL | A | |
 | SYSTEMS OPERATION | A | |
 | TACTICS | A | |
-| TEAMWORK | D | no automation of coordinating attacks |
+| TEAMWORK | D | No automation of coordinating attacks |
 | TRACKING | A | |
 | TRADING | A | |
 | TRANSPORT FAMILIARITY | A | |
-| TWO-WEAPON FIGHTING | A | no Multiple Attack automation |
+| TWO-WEAPON FIGHTING | A | No Multiple Attack automation |
 | VENTRILOQUISM | A | |
 | WEAPON FAMILIARITY | A | |
 | WEAPONSMITH | A | |
 
+## Perks
 
-
-
-| PERKS | Support | Comments |
+| PERK NAME | Support | Comments |
 | :--- | :---:  | :--- |
 | ACCESS | D | |
 | ANONYMITY | D | |
@@ -94,17 +99,16 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | POSITIVE REPUTATION | D | |
 | VEHICLES AND BASES | C | Need a separate character sheet for these, but basic support is present |
 
+## Talents
 
-
-
-| TALENTS | Support | Comments |
+| TALENT NAME | Support | Comments |
 | :--- | :---:  | :--- |
 | ABSOLUTE RANGE SENSE | D | |
 | ABSOLUTE TIME SENSE | D | |
 | AMBIDEXTERITY | D | |
 | ANIMAL FRIENDSHIP | D | |
 | BUMP OF DIRECTION | D | |
-| COMBAT LUCK | B | implemented as resistant defense, PER roll unsupported |
+| COMBAT LUCK | B | Implemented as resistant defense, PER roll unsupported |
 | COMBAT SENSE | D | |
 | DANGER SENSE | D | |
 | DEADLY BLOW | D | |
@@ -123,13 +127,12 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | UNIVERSAL TRANSLATOR | D | |
 | WEAPONMASTER | D | |
 
+## Powers
 
-
-
-| POWERS | Support | Comments |
+| POWER NAME | Support | Comments |
 | :--- | :---:  | :--- |
-| ABSORPTION | D ||
-| AID | B | Works for characteristics, cannot aid powers, no boost support |
+| ABSORPTION | B | Does not support per segment limits |
+| AID | B | Works for characteristics, cannot aid powers |
 | BARRIER | C | Implemented like resistant protection, no support for destroying barriers, no placeables for a barrier |
 | BLAST | A ||
 | CANNOT BE STUNNED | B | Not fully vetted |
@@ -143,10 +146,10 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | DEFLECTION | D ||
 | DENSITY INCREASE | A | Final mass is not shown |
 | DESOLIDIFICATION | D | |
-| DISPEL | C | |
+| DISPEL | C | Adjustments don't work against powers except for movement powers |
 | DOES NOT BLEED | D | |
 | DRAIN | B | Works for characteristics, cannot drain powers |
-| DUPLICATION | F | You will have to create a separate HDC file and import that for each duplicate.  No injury support. |
+| DUPLICATION | F | You will have to create a separate HDC file and import that for each duplicate. No injury support. |
 | ENDURANCE RESERVE | B | Only 1 endurance reserve is supported |
 | ENHANCED SENSES | D | |
 | ENTANGLE | C | |
@@ -158,42 +161,41 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | FLIGHT | B | No turn modes, or gliding. non-combat penalties not automated |
 | GROWTH | D |  |
 | HAND-TO-HAND ATTACK | A |  |
-| HEALING | C |  |
+| HEALING | A | Works for characteristics, cannot drain powers |
 | IMAGES | D |  |
 | INVISIBILITY | D | Recommend using the invisible token effect for now |
 | KILLING ATTACK | A |  |
 | KNOCKBACK RESISTANCE | A |  |
-| LEAPING | B | non-combat penalties not automated |
+| LEAPING | B | Non-combat penalties not automated |
 | LIFE SUPPORT | D |  |
 | LUCK | D |  |
-| MENTAL BLAST | B | mental powers not fully vetted |
-| MENTAL DEFENSE | B | mental powers not fully vetted |
+| MENTAL BLAST | B | Mental powers not fully vetted |
+| MENTAL DEFENSE | B | Mental powers not fully vetted |
 | MENTAL ILLUSIONS | D |  |
 | MIND CONTROL | D |  |
 | MIND LINK | D |  |
 | MIND SCAN | D |  |
-| MULTIFORM | F | You will have to create a separate HDC file and import that for each duplicate.  No injury support. |
+| MULTIFORM | F | You will have to create a separate HDC file and import that for each duplicate. No injury or activation support. |
 | NO HIT LOCATIONS | D |  |
 | POWER DEFENSE | D |  |
 | REFLECTION | D |  |
 | REGENERATION | D |  |
 | RESISTANT PROTECTION | A |  |
-| RUNNING| B | non-combat penalties not automated |
-| SHAPE SHIFT| F | You will have to create a separate HDC file and import that for each duplicate.  No injury support. |
+| RUNNING| B | Non-combat penalties not automated |
+| SHAPE SHIFT| F | You will have to a different token for each form. No sense support. |
 | SHRINKING | D |  |
-| STRETCHING | C | currently the reach of a power is ignored |
+| STRETCHING | C | Currently the reach of a power is ignored |
 | SUMMON | F |  You will have to create a separate HDC file and import that for each duplicate. |
-| SWIMMING | B | non-combat penalties not automated |
-| SWINGING | B | non-combat penalties not automated |
+| SWIMMING | B | Non-combat penalties not automated |
+| SWINGING | B | Non-combat penalties not automated |
 | TAKES NO STUN | B | Not fully vetted |
-| TELEKINESIS | B | TK strength based attacks work.  Multiple TK powers are additive for STR.  Non-attack uses are poorly implemented. |
+| TELEKINESIS | B | TK strength based attacks work.  Multiple TK powers are additive for STR. Non-attack uses are poorly implemented. |
 | TELEPATHY | D |  |
-| TELEPORTATION | B | non-combat penalties not automated |
+| TELEPORTATION | B | Non-combat penalties not automated |
 | TRANSFORM | F | So many possibilities, most of which are unsupported |
-| TUNNELING | B | | non-combat penalties not automated |
+| TUNNELING | B | Non-combat penalties not automated |
 
-
-
+## Power Modifiers
 
 | POWER MODIFIERS | Support | Comments |
 | :--- | :---:  | :--- |
@@ -207,10 +209,10 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | ALTERABLE SIZE | D |  |
 | ALTERNATE COMBAT VALUE | C | Works on some attacks |
 | ALWAYS ON | D |  |
-| AREA OF EFFECT | B | any surface not supported, LINE height/width not supported. |
+| AREA OF EFFECT | B | Any surface not supported |
 | ARMOR PIERCING | A | |
 | ATTACK VERSUS ALTERNATE DEFENSE | D |  |
-| AUTOFIRE | B | good single target support, poor multiple target support  |
+| AUTOFIRE | B | Good single target support, poor multiple target support  |
 | BACKLASH | D |  |
 | BASED ON CON | D |  |
 | BEAM | D |  |
@@ -224,7 +226,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | CANNOT BE USED THROUGH MIND LINK | D |  |
 | CANNOT BE USED WITH [SPECIFIC COMBAT MANEUVER] | D |  |
 | CANNOT USE TARGETING | D |  |
-| CHARGES | B | good support for standard charges. No clips, no fuel support |
+| CHARGES | B | Good support for standard charges. No clips, no fuel support |
 | COMBAT ACCELERATION/DECELERATION | D |  |
 | CONCENTRATION | D |  |
 | CONSTANT | D |  |
@@ -249,9 +251,9 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | EYE CONTACT REQUIRED | D |  |
 | FOCUS | C | The CP limitation is supported, attacking a focus is unsupported |
 | GESTURES | D |  |
-| HARDENED | B | most defenses supported, not sure about flash/power/or other unusual defenses |
+| HARDENED | B | Most defenses supported, not sure about flash/power/or other unusual defenses |
 | HOLE IN THE MIDDLE | D |  |
-| IMPENETRABLE | B | most defenses supported, not sure about flash/power/or other unusual defenses |
+| IMPENETRABLE | B | Most defenses supported, not sure about flash/power/or other unusual defenses |
 | IMPROVED NONCOMBAT MOVEMENT | D |  |
 | INACCURATE | D |  |
 | INCANTATIONS | D |  |
@@ -267,7 +269,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | LIMITED COVERAGE | D |  |
 | LIMITED EFFECT | D |  |
 | LIMITED MANEUVERABILITY | D |  |
-| LIMITED POWER | C | prompted for GM determination |
+| LIMITED POWER | C | Prompted for GM determination |
 | LIMITED RANGE | D |  |
 | LIMITED SPECIAL EFFECT | D |  |
 | LINE OF SIGHT | D |  |
@@ -287,13 +289,13 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | NONPERSISTENT | D |  |
 | NONRESISTANT DEFENSES | D |  |
 | ONE USE AT A TIME | D |  |
-| OONLY IN ALTERNATE IDENTITY (OIAID) | D |  |
+| ONLY IN ALTERNATE IDENTITY (OIAID) | D |  |
 | ONLY PROTECTS BARRIER | D |  |
 | ONLY RESTORES TO STARTING VALUES | D |  |
 | ONLY WORKS AGAINST [LIMITED TYPE OF ATTACK] | D |  |
 | OPAQUE | D |  |
 | PARTIAL COVERAGE | D |  |
-| PENETRATING | B | most attacks supported, not fully vetted against all attacks |
+| PENETRATING | B | Most attacks supported, not fully vetted against all attacks |
 | PERCEIVABLE | D |  |
 | PERSISTENT | D |  |
 | PERSONAL IMMUNITY | D |  |
@@ -311,7 +313,7 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | REDUCED PENETRATION | B | Simplified by applying defenses to body twice |
 | REDUCED RANGE MODIFIER | D |  |
 | REQUIRED HANDS | D |  |
-| REQUIRES A ROLL | B | good support for flat and characteristic rolls, no burnout/jam |
+| REQUIRES A ROLL | B | Good support for flat and characteristic rolls, no burnout/jam |
 | REQUIRES MULTIPLE CHARGES | D |  |
 | REQUIRES MULTIPLE USERS | D |  |
 | RESISTANT | A |  |
@@ -341,16 +343,14 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | VARIABLE SPECIAL EFFECTS | D |  |
 | WORKS AGAINST EGO, NOT [CHARACTERISTIC] | D |  |
 
-
-
+## Frameworks
 
 | POWER FRAMEWORKS | Support | Comments |
 | :--- | :---:  | :--- |
-| MULTIPOWER | B | CP costs work, no enforcement of one slot at a time  |
+| MULTIPOWER | B | CP costs work, no enforcement of point limitations  |
 | VARIABLE POWER POOL | D | |
 
-
-
+## Complications/Disadvantages
 
 | COMPLICATIONS | Support | Comments |
 | :--- | :---:  | :--- |
@@ -368,3 +368,10 @@ Here is a list of Hero System skills, perks, talents, powers, modifiers and comp
 | SUSCEPTIBILITY | D | |
 | UNLUCK | D | |
 | VULNERABILITY | D | |
+
+## Hero Designer Constructs
+
+| HD CONSTRUCTS | Support | Comments |
+| :--- | :---:  | :--- |
+| CAMPAIGN RULES | ? | Uncertain |
+| COMPOUND POWERS | C | Works if all are powers. Does not work with characteristics, skills, etc. |
