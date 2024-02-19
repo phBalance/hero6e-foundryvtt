@@ -46,6 +46,11 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
     async getData(options) {
         const context = await super.getData(options);
 
+        context.alphaTesting = game.settings.get(
+            game.system.id,
+            "alphaTesting",
+        );
+
         // Initialize segments
         context.segments = [];
         for (let s = 1; s <= 12; s++) {
@@ -57,6 +62,24 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             let t = 0;
             for (const combatant of context.combat.turns) {
                 if (!combatant.visible) continue;
+
+                // Shouldn't be needed but #736 seems to suggest otherwise
+                if (!context.turns[t]) {
+                    console.error("context.turns[t] is ", context.turns[t]);
+                    continue;
+                }
+
+                // Sanity check that shouldn't be necessary
+                if (context.turns[t].name != combatant.name) {
+                    console.error(
+                        `${context.turns[t].name} != ${combatant.name}`,
+                    );
+                    continue;
+                }
+
+                if (context.alphaTesting) {
+                    context.turns[t].name += ` [${t}]`;
+                }
 
                 //Lightning Reflexes (kluge), run every time for now.
                 if (combatant.flags.lightningReflexesAlias) {

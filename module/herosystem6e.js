@@ -180,7 +180,8 @@ Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
         change?.system?.characteristics?.spd?.value ||
         change?.system?.characteristics?.dex?.value ||
         change?.system?.characteristics?.ego?.value ||
-        change?.system?.characteristics?.int?.value
+        change?.system?.characteristics?.int?.value ||
+        change?.system?.initiativeCharacteristic
     ) {
         for (const combat of game.combats) {
             if (combat.active) {
@@ -189,7 +190,8 @@ Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
                     await combat.rollAll();
 
                     // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
-                    combat.setupTurns();
+                    // Should no longer be needed now that SPD is part of initiative (handled via rollAll/combat:rollInitiative)
+                    //await combat.setupTurns();
                 }
             }
         }
