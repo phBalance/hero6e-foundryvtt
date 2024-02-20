@@ -555,8 +555,8 @@ export async function performAdjustment(
         thisAttackEffectiveAdjustmentActivePoints = min;
     }
 
-    // New total.
-    let totalAdjustmentNewActivePoints = isOnlyToStartingValues
+    // New effect total.
+    const totalAdjustmentNewActivePoints = isOnlyToStartingValues
         ? thisAttackEffectiveAdjustmentActivePoints +
           activeEffect.flags.adjustmentActivePoints
         : thisAttackEffectiveAdjustmentActivePoints;
@@ -654,7 +654,6 @@ export async function performAdjustment(
     }
 
     // Calculate the effect value(s)
-    // TODO: Pretty sure recovery isn't working as expected for defensive items
     const newValue =
         totalActivePointAffectedDifference > 0
             ? Math.max(
@@ -714,7 +713,7 @@ function _generateAdjustmentChatCard(
     activePointEffectLostDueToMax,
     activePointEffectLostDueToNotExceeding,
     defenseDescription,
-    potentialCharacteristic, // TODO: Power?
+    targetCharOrPower,
     isFade,
     isEffectFinished,
     targetActor,
@@ -727,7 +726,7 @@ function _generateAdjustmentChatCard(
         adjustment: {
             adjustmentDamageRaw: activePointDamage,
             adjustmentDamageThisApplication: activePointAffectedDifference,
-            adjustmentTarget: potentialCharacteristic.toUpperCase(),
+            adjustmentTarget: targetCharOrPower.toUpperCase(),
             adjustmentTotalActivePointEffect: totalActivePointEffect,
             activePointEffectLostDueToMax,
             activePointEffectLostDueToNotExceeding,
