@@ -10,7 +10,7 @@ reserved.
 Fantasy Hero © 2003, 2010 by DOJ, Inc. d/b/a Hero Games. All rights reserved.
 Star Hero © 2003, 2011 by DOJ, Inc. d/b/a Hero Games. All rights reserved.
 All DOJ trademarks and copyrights used with permission.
-For further information about Hero Games and the HERO System, visit www.herogames.com.
+For further information about Hero Games and the HERO System, visit [www.herogames.com](https://www.herogames.com).
 
 Support can be found by creating a [new issue](https://github.com/dmdorman/hero6e-foundryvtt/issues), starting a [new discussion](https://github.com/dmdorman/hero6e-foundryvtt/discussions) or on the Hero-Champions-RPG (unofficial) Foundry-vtt [Discord Channel](https://discord.gg/HcUJvJH).
 
@@ -46,7 +46,7 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
 
 ### Other Automation
 
-- END and Charges are spent for each attack. 
+- END and Charges are spent for each attack.
 - END can be spent from personal endurance or from an endurance reserve.
 - Post Segment 12 recovery: Endurance and Stun
 - END for active powers are spent each phase.
@@ -85,7 +85,6 @@ Custom maneuvers show under attacks.  Basic maneuvers are shown in the maneuver'
 - Untested/limited support for vehicles, automations, computers, etc.
 - Power frameworks are partially supported.
 - The following are largely not implemented
-  - Adjustment powers (Healing).
   - Attack powers that do not do stun/body damage (Change Environment, Darkness, Dispel,  Entangle, Flash, Images, Mental Illusions, Mind Control, Reflection, Transform).
   - Attack powers with NND & AVAD
   - Automation powers (Cannot Be Stunned, Does Not Bleed, No Hit Locations, Takes No STUN).
