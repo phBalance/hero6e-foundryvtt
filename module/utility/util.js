@@ -97,21 +97,29 @@ export function getModifierInfo(options) {
     return modifierOverrideInfo;
 }
 
+function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
+    return (power) =>
+        (power.powerType?.includes("characteristic") ||
+            power.powerType?.includes("movement")) &&
+        !power.ignoreFor?.includes(actor.type) &&
+        !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
+        (!power.onlyFor || power.onlyFor.includes(actor.type));
+}
+
 export function getCharacteristicInfoArrayForActor(actor) {
     let powers = CONFIG.HERO.powers.filter(
-        (o) =>
-            (o.powerType?.includes("characteristic") ||
-                o.powerType?.includes("movement")) &&
-            !o.ignoreFor?.includes(actor.type) &&
-            !o.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
-            (!o.onlyFor || o.onlyFor.includes(actor.type)),
+        _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor),
     );
 
     if (actor.system.is5e) {
-        for (const power5e of CONFIG.HERO.powers5e) {
+        for (const power5e of CONFIG.HERO.powers5e.filter(
+            _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor),
+        )) {
             let idx = powers.findIndex((o) => o.key === power5e.key);
             if (idx > -1) {
                 powers[idx] = { ...powers[idx], ...power5e };
+            } else {
+                powers.push(power5e);
             }
         }
     }
