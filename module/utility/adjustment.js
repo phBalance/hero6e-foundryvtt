@@ -412,13 +412,16 @@ export async function performAdjustment(
     const targetPower = targetActor.items.find(
         (item) => item.system.XMLID === targetUpperCaseName,
     );
-    const targetCharacteristic =
-        targetActor.system.characteristics?.[potentialCharacteristic];
 
-    // A target we understand?
-    // TODO: Targeting a movement power that the targetActor doesn't have will still succeed. This seems wrong.
+    // Find a matching characteristic. Because movement powers are unfortunately setup as
+    // characteristics, we need to check that they effectively exist.
+    const targetCharacteristic =
+        targetActor.system.characteristics?.[potentialCharacteristic]?.core > 0
+            ? targetActor.system.characteristics?.[potentialCharacteristic]
+            : undefined;
+
+    // Do we have a target?
     if (!targetCharacteristic && !targetPower) {
-        // Can't find anything to link this against.
         return;
     }
 
