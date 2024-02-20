@@ -6,6 +6,7 @@
 - Healing should now work as expected from 1 source. It can no longer increase above the core value. Nor can adjustment powers with only restores to starting value. [#649](https://github.com/dmdorman/hero6e-foundryvtt/issues/649)
 - Implement basic automatic absorption.
 - Fix combat tracker where changing combatant SPD caused issues. Initiative is now DEX.SPD instead of DEX.INT. [#736](https://github.com/dmdorman/hero6e-foundryvtt/issues/736)
+- Adjustment powers now prefer characteristics over powers with the same name. [#747](https://github.com/dmdorman/hero6e-foundryvtt/issues/747)
 
 ## Version 3.0.58
 
