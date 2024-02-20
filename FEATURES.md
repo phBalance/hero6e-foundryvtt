@@ -1,6 +1,6 @@
 # Features
 
-Here is a list of 6e Hero System skills, perks, talents, powers, modifiers and complications. Where the 5e rules are similar, likely the support is the same as 6e. Where 5e differs dramatically, 5e will generally have poorer support than 6e. 
+Here is a list of 6e Hero System skills, perks, talents, powers, modifiers and complications. Where the 5e rules are similar, likely the support is the same as 6e. Where 5e differs dramatically, 5e will generally have poorer support than 6e.
 
 Our support ratings:
 
@@ -69,7 +69,7 @@ Our support ratings:
 | SHADOWING | A | |
 | SKILL LEVELS | D | |
 | SLEIGHT OF HAND | A | |
-| STEALTH | B | No automation of stealthing tokens and who can see who |
+| STEALTH | B | No automation of stealthy tokens and who can see who |
 | STREETWISE | A | |
 | SURVIVAL | A | |
 | SYSTEMS OPERATION | A | |
@@ -161,7 +161,7 @@ Our support ratings:
 | FLIGHT | B | No turn modes, or gliding. non-combat penalties not automated |
 | GROWTH | D |  |
 | HAND-TO-HAND ATTACK | A |  |
-| HEALING | A | Works for characteristics, cannot drain powers |
+| HEALING | A | Works for characteristics, cannot heal powers |
 | IMAGES | D |  |
 | INVISIBILITY | D | Recommend using the invisible token effect for now |
 | KILLING ATTACK | A |  |
@@ -182,7 +182,7 @@ Our support ratings:
 | REGENERATION | D |  |
 | RESISTANT PROTECTION | A |  |
 | RUNNING| B | Non-combat penalties not automated |
-| SHAPE SHIFT| F | You will have to a different token for each form. No sense support. |
+| SHAPE SHIFT| F | You will have to have a different token for each form. No sense support. |
 | SHRINKING | D |  |
 | STRETCHING | C | Currently the reach of a power is ignored |
 | SUMMON | F |  You will have to create a separate HDC file and import that for each duplicate. |
@@ -374,4 +374,4 @@ Our support ratings:
 | HD CONSTRUCTS | Support | Comments |
 | :--- | :---:  | :--- |
 | CAMPAIGN RULES | ? | Uncertain |
-| COMPOUND POWERS | C | Works if all are powers. Does not work with characteristics, skills, etc. |
+| COMPOUND POWERS | C | Works if all are powers. Does not work with characteristics, skills, etc. Uses multiple attacks not a single attack. |
