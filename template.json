@@ -159,6 +159,11 @@
                         "max": 0,
                         "core": 0
                     },
+                    "gliding": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0
+                    },
                     "swinging": {
                         "value": 0,
                         "max": 0,
