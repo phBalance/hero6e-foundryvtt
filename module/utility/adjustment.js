@@ -226,7 +226,7 @@ function _findExistingMatchingEffect(
         (effect) =>
             effect.origin === item.uuid &&
             effect.flags.target[0] ===
-                (powerTargetName?.uuid || potentialCharacteristic),
+                (potentialCharacteristic || powerTargetName?.uuid),
     );
 }
 
@@ -330,10 +330,10 @@ function _createNewAdjustmentEffect(
     // TODO: Add a document field
     const activeEffect = {
         name: `${item.system.XMLID || "undefined"} 0 ${
-            (powerTargetName?.name || potentialCharacteristic).toUpperCase() // TODO: This will need to change for multiple effects
+            (potentialCharacteristic || powerTargetName?.name)?.toUpperCase() // TODO: This will need to change for multiple effects
         } (0 AP) [by ${item.actor.name || "undefined"}]`,
         id: `${item.system.XMLID}.${item.id}.${
-            powerTargetName?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
+            potentialCharacteristic || powerTargetName?.name // TODO: This will need to change for multiple effects
         }`,
         icon: item.img,
         changes: [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
@@ -350,7 +350,7 @@ function _createNewAdjustmentEffect(
             affectedPoints: 0,
             XMLID: item.system.XMLID,
             source: targetActor.name,
-            target: [powerTargetName?.uuid || potentialCharacteristic],
+            target: [potentialCharacteristic || powerTargetName?.uuid],
             key: potentialCharacteristic,
         },
         origin: item.uuid,
@@ -391,7 +391,7 @@ function _createNewAdjustmentEffect(
 
 export async function performAdjustment(
     item,
-    targetedPower,
+    nameOfCharOrPower,
     thisAttackRawActivePointsDamage,
     thisAttackStartingActivePointDamage,
     defenseDescription,
@@ -401,26 +401,27 @@ export async function performAdjustment(
     const isHealing = item.system.XMLID === "HEALING";
     const isOnlyToStartingValues =
         item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
-    const targetName = targetedPower.toUpperCase();
+
+    const targetUpperCaseName = nameOfCharOrPower.toUpperCase();
+    const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
 
     // Search the target for this power.
     // TODO: will return first matching power. How can we distinguish without making users
     //       setup the item for a specific? Will likely need to provide a dialog. That gets
     //       us into the thorny question of what powers have been discovered.
     const targetPower = targetActor.items.find(
-        (item) => item.system.XMLID === targetName,
+        (item) => item.system.XMLID === targetUpperCaseName,
     );
-    const potentialCharacteristic = targetPower
-        ? targetPower.system.XMLID
-        : targetName.toLowerCase();
-    const targetCharacteristic =
-        targetActor.system.characteristics?.[potentialCharacteristic];
 
-    // A target we understand?
-    // TODO: Targeting a movement power that the targetActor doesn't have will still succeed. This seems wrong.
-    //       Why are flying, teleportation, etc characteristics?
+    // Find a matching characteristic. Because movement powers are unfortunately setup as
+    // characteristics, we need to check that they effectively exist.
+    const targetCharacteristic =
+        targetActor.system.characteristics?.[potentialCharacteristic]?.core > 0
+            ? targetActor.system.characteristics?.[potentialCharacteristic]
+            : undefined;
+
+    // Do we have a target?
     if (!targetCharacteristic && !targetPower) {
-        // Can't find anything to link this against...meh. Might be caught by the validity check above.
         return;
     }
 
@@ -555,8 +556,8 @@ export async function performAdjustment(
         thisAttackEffectiveAdjustmentActivePoints = min;
     }
 
-    // New total.
-    let totalAdjustmentNewActivePoints = isOnlyToStartingValues
+    // New effect total.
+    const totalAdjustmentNewActivePoints = isOnlyToStartingValues
         ? thisAttackEffectiveAdjustmentActivePoints +
           activeEffect.flags.adjustmentActivePoints
         : thisAttackEffectiveAdjustmentActivePoints;
@@ -627,8 +628,8 @@ export async function performAdjustment(
     activeEffect.name = `${item.system.XMLID || "undefined"} ${Math.abs(
         totalActivePointsThatShouldBeAffected,
     )} ${(
-        targetPower?.name || potentialCharacteristic
-    ).toUpperCase()} (${Math.abs(totalAdjustmentNewActivePoints)} AP) [by ${
+        potentialCharacteristic || targetPower?.name
+    )?.toUpperCase()} (${Math.abs(totalAdjustmentNewActivePoints)} AP) [by ${
         item.actor.name || "undefined"
     }]`;
 
@@ -654,7 +655,6 @@ export async function performAdjustment(
     }
 
     // Calculate the effect value(s)
-    // TODO: Pretty sure recovery isn't working as expected for defensive items
     const newValue =
         totalActivePointAffectedDifference > 0
             ? Math.max(
@@ -714,7 +714,7 @@ function _generateAdjustmentChatCard(
     activePointEffectLostDueToMax,
     activePointEffectLostDueToNotExceeding,
     defenseDescription,
-    potentialCharacteristic, // TODO: Power?
+    targetCharOrPower,
     isFade,
     isEffectFinished,
     targetActor,
@@ -727,7 +727,7 @@ function _generateAdjustmentChatCard(
         adjustment: {
             adjustmentDamageRaw: activePointDamage,
             adjustmentDamageThisApplication: activePointAffectedDifference,
-            adjustmentTarget: potentialCharacteristic.toUpperCase(),
+            adjustmentTarget: targetCharOrPower.toUpperCase(),
             adjustmentTotalActivePointEffect: totalActivePointEffect,
             activePointEffectLostDueToMax,
             activePointEffectLostDueToNotExceeding,
