@@ -23,73 +23,89 @@
                     "str": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "type": "rollable"
                     },
                     "dex": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "type": "rollable"
                     },
                     "con": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "type": "rollable"
                     },
                     "int": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "type": "rollable"
                     },
                     "ego": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "type": "rollable"
                     },
                     "pre": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "type": "rollable"
                     },
                     "com": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "type": "rollable"
                     },
                     "ocv": {
                         "max": 3,
-                        "value": 3
+                        "value": 3,
+                        "core": 3
                     },
                     "dcv": {
                         "max": 3,
-                        "value": 3
+                        "value": 3,
+                        "core": 3
                     },
                     "omcv": {
                         "max": 3,
-                        "value": 3
+                        "value": 3,
+                        "core": 3
                     },
                     "dmcv": {
                         "max": 3,
-                        "value": 3
+                        "value": 3,
+                        "core": 3
                     },
                     "spd": {
                         "value": 2,
-                        "max": 2
+                        "max": 2,
+                        "core": 2
                     },
                     "pd": {
                         "value": 2,
-                        "max": 2
+                        "max": 2,
+                        "core": 2
                     },
                     "ed": {
                         "value": 2,
-                        "max": 2
+                        "max": 2,
+                        "core": 2
                     },
                     "rec": {
                         "value": 4,
-                        "max": 4
+                        "max": 4,
+                        "core": 4
                     },
                     "body": {
                         "value": 10,
                         "max": 10,
+                        "core": 10,
                         "loc": {
                             "Head": 0,
                             "Left Hand": 0,
@@ -111,11 +127,13 @@
                     },
                     "stun": {
                         "value": 20,
-                        "max": 20
+                        "max": 20,
+                        "core": 20
                     },
                     "end": {
                         "value": 20,
-                        "max": 20
+                        "max": 20,
+                        "core": 20
                     },
                     "size": {
                         "value": 0,
@@ -123,31 +141,38 @@
                     },
                     "running": {
                         "value": 12,
-                        "max": 12
+                        "max": 12,
+                        "core": 12
                     },
                     "swimming": {
                         "value": 4,
-                        "max": 4
+                        "max": 4,
+                        "core": 4
                     },
                     "leaping": {
                         "value": 4,
-                        "max": 4
+                        "max": 4,
+                        "core": 4
                     },
                     "flight": {
                         "value": 0,
-                        "max": 0
+                        "max": 0,
+                        "core": 0
                     },
                     "swinging": {
                         "value": 0,
-                        "max": 0
+                        "max": 0,
+                        "core": 0
                     },
                     "teleportation": {
                         "value": 0,
-                        "max": 0
+                        "max": 0,
+                        "core": 0
                     },
                     "tunneling": {
                         "value": 0,
-                        "max": 0
+                        "max": 0,
+                        "core": 0
                     }
                 }
             }
