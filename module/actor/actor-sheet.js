@@ -424,27 +424,27 @@ export class HeroSystemActorSheet extends ActorSheet {
 
             characteristic.delta = 0;
             if (data.actor.system.is5e) {
-                if (powerInfo.key.toLowerCase() == "pd") {
+                if (powerInfo.key.toLowerCase() === "pd") {
                     characteristic.notes = "5e figured STR/5";
                 }
 
-                if (powerInfo.key.toLowerCase() == "ed") {
+                if (powerInfo.key.toLowerCase() === "ed") {
                     characteristic.notes = "5e figured CON/5";
                 }
 
-                if (powerInfo.key.toLowerCase() == "spd") {
+                if (powerInfo.key.toLowerCase() === "spd") {
                     characteristic.notes = "5e figured 1 + DEX/10";
                 }
 
-                if (powerInfo.key.toLowerCase() == "rec") {
+                if (powerInfo.key.toLowerCase() === "rec") {
                     characteristic.notes = "5e figured STR/5 + CON/5";
                 }
 
-                if (powerInfo.key.toLowerCase() == "end") {
+                if (powerInfo.key.toLowerCase() === "end") {
                     characteristic.notes = "5e figured 2 x CON";
                 }
 
-                if (powerInfo.key.toLowerCase() == "stun") {
+                if (powerInfo.key.toLowerCase() === "stun") {
                     characteristic.notes = "5e figured BODY+STR/2+CON/2";
                 }
 
