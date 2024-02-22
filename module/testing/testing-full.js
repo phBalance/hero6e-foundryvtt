@@ -262,6 +262,36 @@ export function registerFullTests(quench) {
                     );
                 });
 
+                it("tunneling.max", async function () {
+                    assert.equal(actor.system.characteristics.tunneling.max, 0);
+                });
+                it("tunneling.realCost", async function () {
+                    assert.equal(
+                        actor.system.characteristics.tunneling.realCost,
+                        0,
+                    );
+                });
+
+                it("flight.max", async function () {
+                    assert.equal(actor.system.characteristics.flight.max, 0);
+                });
+                it("flight.realCost", async function () {
+                    assert.equal(
+                        actor.system.characteristics.flight.realCost,
+                        0,
+                    );
+                });
+
+                it("gliding.max", async function () {
+                    assert.equal(actor.system.characteristics.gliding.max, 0);
+                });
+                it("gliding.realCost", async function () {
+                    assert.equal(
+                        actor.system.characteristics.gliding.realCost,
+                        0,
+                    );
+                });
+
                 it("realCost", async function () {
                     assert.equal(actor.system.realCost, 162);
                 });
@@ -1285,6 +1315,16 @@ export function registerFullTests(quench) {
                 it("leaping.realCost", async function () {
                     assert.equal(
                         actor.system.characteristics.leaping.realCost,
+                        0,
+                    );
+                });
+
+                it("gliding.max", async function () {
+                    assert.equal(actor.system.characteristics.gliding.max, 0);
+                });
+                it("gliding.realCost", async function () {
+                    assert.equal(
+                        actor.system.characteristics.gliding.realCost,
                         0,
                     );
                 });
