@@ -107,22 +107,18 @@ function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {
-    let powers = CONFIG.HERO.powers.filter(
-        _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor),
-    );
-
+    const isCharOrMovePowerForActor =
+        _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor);
+    const powers = CONFIG.HERO.powers.filter(isCharOrMovePowerForActor);
     if (actor.system.is5e) {
-        for (const power5e of CONFIG.HERO.powers5e.filter(
-            _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor),
-        )) {
-            let idx = powers.findIndex((o) => o.key === power5e.key);
-            if (idx > -1) {
+        for (const power5e of CONFIG.HERO.powers5e) {
+            const idx = powers.findIndex((power) => power.key === power5e.key);
+            if (idx > -1 && isCharOrMovePowerForActor(powers[idx])) {
                 powers[idx] = { ...powers[idx], ...power5e };
-            } else {
+            } else if (isCharOrMovePowerForActor(power5e)) {
                 powers.push(power5e);
             }
         }
     }
-
     return powers;
 }

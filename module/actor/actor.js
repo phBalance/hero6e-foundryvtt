@@ -1037,16 +1037,16 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async calcCharacteristicsCost() {
-        let powers = getCharacteristicInfoArrayForActor(this);
+        const powers = getCharacteristicInfoArrayForActor(this);
 
-        let changes = {};
+        const changes = {};
         for (const powerInfo of powers) {
-            let key = powerInfo.key.toLowerCase();
-            let characteristic = this.system.characteristics[key];
-            let core = parseInt(characteristic?.core) || 0;
+            const key = powerInfo.key.toLowerCase();
+            const characteristic = this.system.characteristics[key];
+            const core = parseInt(characteristic?.core) || 0;
 
-            let base = this.getCharacteristicBase(key);
-            let levels = core - base;
+            const base = this.getCharacteristicBase(key);
+            const levels = core - base;
             let cost = Math.round(levels * (powerInfo.cost || 0));
 
             // 5e hack for fractional speed
