@@ -1,5 +1,4 @@
 import { getPowerInfo } from "./util.js";
-import { determineExtraDiceDamage } from "./damage.js";
 import { RoundFavorPlayerUp } from "./round.js";
 
 /**
@@ -139,13 +138,16 @@ export function determineMaxAdjustment(item) {
         // Max pips in a roll is starting max base.
         let maxAdjustment = item.system.dice * 6;
 
-        const extraDice = determineExtraDiceDamage(item);
+        const extraDice = item.system.extraDice;
         switch (extraDice) {
-            case "+1":
+            case "pip":
                 maxAdjustment = maxAdjustment + 1;
                 break;
-            case "+1d3":
+            case "half":
                 maxAdjustment = maxAdjustment + 3;
+                break;
+            case "one-pip":
+                maxAdjustment = maxAdjustment + 5;
                 break;
             default:
                 break;
@@ -175,13 +177,16 @@ export function determineMaxAdjustment(item) {
 
         let maxAdjustment = item.system.dice * 6;
 
-        const extraDice = determineExtraDiceDamage(item);
+        const extraDice = item.system.extraDice;
         switch (extraDice) {
-            case "+1":
+            case "pip":
                 maxAdjustment = maxAdjustment + 1;
                 break;
-            case "+1d3":
+            case "half":
                 maxAdjustment = maxAdjustment + 3;
+                break;
+            case "one-pip":
+                maxAdjustment = maxAdjustment + 5;
                 break;
             default:
                 break;
