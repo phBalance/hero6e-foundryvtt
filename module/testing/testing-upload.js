@@ -1329,7 +1329,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Killing Attack - Ranged 2d6-1 (ED; +1d6 -1)",
+                        "Killing Attack - Ranged 2d6-1 (ED)",
                     );
                 });
 
@@ -3046,7 +3046,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "1d6+1 Mind Scan (Animal; +1 pip; +9 OMCV; Additional Class Of Minds; Additional Class Of Minds; Additional Class Of Minds), Cumulative (+1/2) (60 Active Points); Cannot Attack Through Link (neither the character nor his target can use the link to attack each other mentally, but they can communicate; -1/2)",
+                            "1d6+1 Mind Scan (Animal; +9 OMCV; Additional Class Of Minds; Additional Class Of Minds; Additional Class Of Minds), Cumulative (+1/2) (60 Active Points); Cannot Attack Through Link (neither the character nor his target can use the link to attack each other mentally, but they can communicate; -1/2)",
                         );
                     });
 
@@ -3910,7 +3910,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Aid CON 3d6+1 (+1 pip; Increased Maximum (+8 points) (27 total points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
+                        "Aid CON 3d6+1 (Increased Maximum (+8 points) (27 total points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
                     );
                 });
 

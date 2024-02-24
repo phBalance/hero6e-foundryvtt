@@ -2475,8 +2475,10 @@ export class HeroSystem6eItem extends Item {
                         }
                         break;
 
+                    case "PLUSONEPIP":
+                    case "MINUSONEPIP":
                     case "PLUSONEHALFDIE":
-                        //system.description = system.description.replace(/d6$/, " ") + adder.ALIAS.replace("+", "").replace(" ", "");
+                        // Don't show the +1, 1/2d6, 1d6-1 modifier as it's already included in the description's dice formula
                         break;
 
                     case "COMMONMOTORIZED":
@@ -3190,6 +3192,7 @@ export class HeroSystem6eItem extends Item {
             this.buildAoeAttackParameters(aoeModifier);
         }
 
+        // TODO: Investigate why this is required. It is wrong for 1/2d6 vs d6-1.
         if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
             this.system.killing = true;
 
