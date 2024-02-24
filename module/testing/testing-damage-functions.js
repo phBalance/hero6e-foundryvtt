@@ -2,7 +2,6 @@ import { HeroSystem6eActor } from "../actor/actor.js";
 import { HeroSystem6eItem } from "../item/item.js";
 import {
     determineStrengthDamage,
-    determineExtraDiceDamage,
     convertFromDC,
     addTerms,
     convertToDcFromItem,
@@ -110,47 +109,6 @@ export function registerDamageFunctionTests(quench) {
 
                 it("Str 10", function () {
                     assert.equal(determineStrengthDamage(item, 10), "2d6");
-                });
-            });
-
-            describe("Extra Damage", function () {
-                it("Extra Dice- Zero", function () {
-                    const item = new HeroSystem6eItem({
-                        name: "Test",
-                        type: "attack",
-                        system: {
-                            extraDice: "zero",
-                        },
-                        parent: actor,
-                    });
-
-                    assert.equal(determineExtraDiceDamage(item), "");
-                });
-
-                it("Extra Dice - Pip", function () {
-                    const item = new HeroSystem6eItem({
-                        name: "Test",
-                        type: "attack",
-                        system: {
-                            extraDice: "pip",
-                        },
-                        parent: actor,
-                    });
-
-                    assert.equal(determineExtraDiceDamage(item), "+1");
-                });
-
-                it("Extra Dice - Half", function () {
-                    const item = new HeroSystem6eItem({
-                        name: "Test",
-                        type: "attack",
-                        system: {
-                            extraDice: "half",
-                        },
-                        parent: actor,
-                    });
-
-                    assert.equal(determineExtraDiceDamage(item), "+1d3");
                 });
             });
 

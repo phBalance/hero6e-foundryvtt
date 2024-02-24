@@ -1,5 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
-
 // DAMAGE CLASS (DC)
 //
 // Different dice of damage are not the same – 2d6 of Killing
@@ -55,20 +53,6 @@ export function determineStrengthDamage(item, effectiveStr) {
     }
 
     return strTag;
-}
-
-export function determineExtraDiceDamage(item) {
-    switch (item.system.extraDice) {
-        case "zero":
-            return "";
-        case "pip":
-            return "+1";
-        case "half":
-            return "+1d3";
-        default:
-            HEROSYS.log(false, "Failed to get extra dice");
-            break;
-    }
 }
 
 // Determine DC solely from item/attack
