@@ -147,6 +147,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     let stun = parseInt(item.system.value * 3);
                     if (
                         item.findModsByXmlid("PLUSONEHALFDIE") ||
+                        item.findModsByXmlid("MINUSONEPIP") ||
                         item.findModsByXmlid("PLUSONEPIP")
                     ) {
                         stun += 1;

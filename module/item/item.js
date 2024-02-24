@@ -2592,6 +2592,7 @@ export class HeroSystem6eItem extends Item {
 
             if (
                 this.findModsByXmlid("PLUSONEHALFDIE") ||
+                this.findModsByXmlid("MINUSONEPIP") ||
                 this.findModsByXmlid("PLUSONEPIP")
             ) {
                 stun += 1;
