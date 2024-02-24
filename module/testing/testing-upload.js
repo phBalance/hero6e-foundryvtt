@@ -1261,7 +1261,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Killing Attack - Ranged 2 1/2d6 (ED) (40 Active Points); OAF (-1), 8 Charges (-1/2)",
+                        "Killing Attack - Ranged 2½d6 (ED) (40 Active Points); OAF (-1), 8 Charges (-1/2)",
                     );
                 });
 
@@ -1291,6 +1291,70 @@ export function registerUploadTests(quench) {
 
                 it("chargesRecoverable", function () {
                     assert.equal(item.system.charges.recoverable, false);
+                });
+
+                it("doesn't use strength", function () {
+                    assert.equal(item.system.usesStrength, false);
+                });
+            });
+
+            describe("2d6-1 RKA", async function () {
+                const contents = `
+                    <POWER XMLID="RKA" ID="1708730905311" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="MINUSONEPIP" ID="1708731182810" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Killing Attack - Ranged 2d6-1 (ED; +1d6 -1)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 25);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 25);
+                });
+
+                it("dice", function () {
+                    assert.equal(item.system.dice, 1);
+                });
+
+                it("extraDice", function () {
+                    assert.equal(item.system.extraDice, "one-pip");
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 2);
+                });
+
+                it("charges", function () {
+                    assert.equal(item.system.charges, undefined);
                 });
 
                 it("doesn't use strength", function () {
@@ -2409,7 +2473,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1",
+                        "1/2 Phase, -2 OCV, +0 DCV, HKA 1d6+1",
                     );
                 });
 
@@ -2737,7 +2801,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6",
+                        "Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5½d6",
                     );
                 });
 
@@ -2982,7 +3046,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "1d6 + 1 Mind Scan (Animal; +1 pip; +9 OMCV; Additional Class Of Minds; Additional Class Of Minds; Additional Class Of Minds), Cumulative (+1/2) (60 Active Points); Cannot Attack Through Link (neither the character nor his target can use the link to attack each other mentally, but they can communicate; -1/2)",
+                            "1d6+1 Mind Scan (Animal; +1 pip; +9 OMCV; Additional Class Of Minds; Additional Class Of Minds; Additional Class Of Minds), Cumulative (+1/2) (60 Active Points); Cannot Attack Through Link (neither the character nor his target can use the link to attack each other mentally, but they can communicate; -1/2)",
                         );
                     });
 
@@ -3091,7 +3155,7 @@ export function registerUploadTests(quench) {
                     it("description", async function () {
                         assert.equal(
                             item.system.description,
-                            "Absorption 2 1/2d6 (energy) to STUN",
+                            "Absorption 2½d6 (energy) to STUN",
                         );
                     });
 
@@ -3783,7 +3847,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Suppress Flight 5 1/2d6, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (-1/4)",
+                        "Suppress Flight 5½d6, Armor Piercing (+1/2) (42 Active Points); Range Based On Strength (-1/4)",
                     );
                 });
 
@@ -3846,7 +3910,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Aid CON 3d6 + 1 (+1 pip; Increased Maximum (+8 points) (27 total points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
+                        "Aid CON 3d6+1 (+1 pip; Increased Maximum (+8 points) (27 total points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
                     );
                 });
 
