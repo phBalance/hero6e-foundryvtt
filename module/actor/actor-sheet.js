@@ -140,7 +140,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 );
 
                 // text description of damage
-                item.system.damage = convertFromDC(item, dc).replace(/ /g, "");
+                item.system.damage = convertFromDC(item, dc);
 
                 // Standard Effect
                 if (item.system.USESTANDARDEFFECT) {

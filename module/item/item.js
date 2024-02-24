@@ -1867,11 +1867,11 @@ export class HeroSystem6eItem extends Item {
 
             case "MINDSCAN":
                 {
-                    const dice = convertFromDC(
+                    const diceFormula = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
-                    ).replace("d6 + 1d3", " 1/2d6");
-                    system.description = `${dice} ${system.ALIAS}`;
+                    );
+                    system.description = `${diceFormula} ${system.ALIAS}`;
                 }
                 break;
 
@@ -1926,13 +1926,13 @@ export class HeroSystem6eItem extends Item {
                 {
                     const reduceAndEnhanceTargets =
                         this.splitAdjustmentSourceAndTarget();
-                    const dice = convertFromDC(
+                    const diceFormula = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
-                    ).replace("d6 + 1d3", " 1/2d6");
+                    );
 
                     system.description = `${system.ALIAS} ${
-                        is5e ? `${dice}` : `${system.value} BODY`
+                        is5e ? `${diceFormula}` : `${system.value} BODY`
                     } (${system.OPTION_ALIAS}) to ${
                         reduceAndEnhanceTargets.valid
                             ? reduceAndEnhanceTargets.enhances ||
@@ -1950,17 +1950,17 @@ export class HeroSystem6eItem extends Item {
                 {
                     const reduceAndEnhanceTargets =
                         this.splitAdjustmentSourceAndTarget();
-                    const dice = convertFromDC(
+                    const diceFormula = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
-                    ).replace("d6 + 1d3", " 1/2d6");
+                    );
 
                     system.description = `${system.ALIAS} ${
                         reduceAndEnhanceTargets.valid
                             ? reduceAndEnhanceTargets.enhances ||
                               reduceAndEnhanceTargets.reduces
                             : "unknown"
-                    } ${dice}`;
+                    } ${diceFormula}`;
                 }
                 break;
 
@@ -1968,12 +1968,12 @@ export class HeroSystem6eItem extends Item {
                 {
                     const reduceAndEnhanceTargets =
                         this.splitAdjustmentSourceAndTarget();
-                    const dice = convertFromDC(
+                    const diceFormula = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
-                    ).replace("d6 + 1d3", " 1/2d6");
+                    );
 
-                    system.description = `${system.ALIAS} ${dice} from ${
+                    system.description = `${system.ALIAS} ${diceFormula} from ${
                         reduceAndEnhanceTargets.valid
                             ? reduceAndEnhanceTargets.reduces
                             : "unknown"
@@ -2121,11 +2121,11 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
             case "HANDTOHANDATTACK":
                 {
-                    const dice = convertFromDC(
+                    const diceFormula = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
-                    ).replace("d6 + 1d3", " 1/2d6");
-                    system.description = `${system.ALIAS} ${dice}`;
+                    );
+                    system.description = `${system.ALIAS} ${diceFormula}`;
                 }
                 break;
 
@@ -2180,8 +2180,8 @@ export class HeroSystem6eItem extends Item {
                     if (system.EFFECT) {
                         let dc = convertToDcFromItem(this).dc;
                         if (dc) {
-                            let damageDice = convertFromDC(this, dc);
-                            if (damageDice) {
+                            const damageDiceFormula = convertFromDC(this, dc);
+                            if (damageDiceFormula) {
                                 system.description += `,`;
 
                                 if (
@@ -2192,11 +2192,8 @@ export class HeroSystem6eItem extends Item {
                                 }
                                 system.description += ` ${system.EFFECT.replace(
                                     "[NORMALDC]",
-                                    damageDice,
-                                ).replace(
-                                    "[KILLINGDC]",
-                                    damageDice.replace("+ 1", "+1"),
-                                )}`;
+                                    damageDiceFormula,
+                                ).replace("[KILLINGDC]", damageDiceFormula)}`;
                             }
                         } else {
                             system.description += ", " + system.EFFECT;
@@ -2286,7 +2283,7 @@ export class HeroSystem6eItem extends Item {
                     }
 
                     // singles
-                    let _singles = [];
+                    const _singles = [];
                     for (let addr of (system.ADDER || []).filter(
                         (o) =>
                             o.XMLID.indexOf("GROUP") === -1 &&
@@ -2304,11 +2301,11 @@ export class HeroSystem6eItem extends Item {
                         system.description += " and " + _singles.slice(-1);
                     }
 
-                    const dice = convertFromDC(
+                    const diceFormula = convertFromDC(
                         this,
                         convertToDcFromItem(this).dc,
-                    ).replace("d6 + 1d3", " 1/2d6");
-                    system.description += ` ${system.ALIAS} ${dice}`;
+                    );
+                    system.description += ` ${system.ALIAS} ${diceFormula}`;
                 }
                 break;
 
