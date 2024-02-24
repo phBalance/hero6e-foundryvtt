@@ -1045,6 +1045,7 @@ export async function _onRollDamage(event) {
         )
         .addDice(formulaParts.d6Count)
         .addHalfDice(formulaParts.halfDieCount)
+        .addDiceMinus1(formulaParts.d6Less1DieCount)
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(useStandardEffect)
         .modifyToNoBody(
