@@ -3184,9 +3184,8 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.findModsByXmlid("MINUSONEPIP")) {
-            // Typically only allowed for killing attacks.
-            //  Appears that +1d6-1 is roughly equal to +1/2 d6
-            this.system.extraDice = "half";
+            // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
+            this.system.extraDice = "one-pip";
         }
 
         const aoeModifier = this.getAoeModifier();

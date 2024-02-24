@@ -355,6 +355,7 @@ export async function migrateWorld() {
 
     // if lastMigration < 3.0.59
     // Active Effects for adjustments changed format
+    // d6-1 and 1/2d6 are now distinctly different extra dice
     if (foundry.utils.isNewerVersion("3.0.59", lastMigration)) {
         const queue = getAllActorsInGame();
         let dateNow = new Date();
@@ -370,6 +371,7 @@ export async function migrateWorld() {
             }
 
             await migrate_actor_active_effects_to_3_0_59(actor);
+            await migrate_actor_items_to_3_0_59(actor);
         }
     }
 
@@ -428,6 +430,25 @@ async function migrateActorCostDescription(actor) {
             await ui.notifications.warn(
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
+        }
+    }
+}
+
+// 1/2 d6 and 1d6-1 are not the same roll but are the same DC - make them distinct
+async function migrate_actor_items_to_3_0_59(actor) {
+    for (const item of actor.items) {
+        let newValue;
+        if (item.findModsByXmlid("PLUSONEHALFDIE")) {
+            newValue = "half";
+        } else if (item.findModsByXmlid("MINUSONEPIP")) {
+            // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
+            newValue = "one-pip";
+        }
+
+        if (item.system.extraDice && newValue) {
+            await item.update({
+                "system.extraDice": newValue,
+            });
         }
     }
 }
