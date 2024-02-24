@@ -7,6 +7,7 @@
 - Implement basic automatic absorption.
 - Fix combat tracker where changing combatant SPD caused issues. Initiative is now DEX.SPD instead of DEX.INT. [#736](https://github.com/dmdorman/hero6e-foundryvtt/issues/736)
 - Adjustment powers now prefer characteristics over powers with the same name. [#747](https://github.com/dmdorman/hero6e-foundryvtt/issues/747)
+- Add support for the 1d6-1 damage adder.
 
 ## Version 3.0.58
 

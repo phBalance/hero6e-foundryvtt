@@ -6,7 +6,6 @@ import {
     calculateDiceFormulaParts,
     CombatSkillLevelsForAttack,
     convertToDcFromItem,
-    determineExtraDiceDamage,
 } from "../utility/damage.js";
 import {
     performAdjustment,
@@ -1046,6 +1045,7 @@ export async function _onRollDamage(event) {
         )
         .addDice(formulaParts.d6Count)
         .addHalfDice(formulaParts.halfDieCount)
+        .addDiceMinus1(formulaParts.d6Less1DieCount)
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(useStandardEffect)
         .modifyToNoBody(
@@ -1766,14 +1766,15 @@ async function _performAbsorptionForToken(
             let maxAbsorption;
             if (actor.system.is5e) {
                 const dice = absorptionItem.system.dice;
-                const extraDice = determineExtraDiceDamage(absorptionItem);
+                const extraDice = absorptionItem.system.extraDice;
 
                 // Absorption allowed based on a roll with the usual requirements
                 const absorptionRoller = new HeroRoller()
                     .makeAdjustmentRoll()
                     .addDice(dice)
-                    .addHalfDice(extraDice === "+1d3" ? 1 : 0)
-                    .addNumber(extraDice === "+1" ? 1 : 0);
+                    .addHalfDice(extraDice === "half" ? 1 : 0)
+                    .addDiceMinus1(extraDice === "one-pip" ? 1 : 0)
+                    .addNumber(extraDice === "pip" ? 1 : 0);
                 await absorptionRoller.roll();
                 maxAbsorption = absorptionRoller.getAdjustmentTotal();
 

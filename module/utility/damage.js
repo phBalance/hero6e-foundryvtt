@@ -1,5 +1,3 @@
-import { HEROSYS } from "../herosystem6e.js";
-
 // DAMAGE CLASS (DC)
 //
 // Different dice of damage are not the same – 2d6 of Killing
@@ -57,20 +55,6 @@ export function determineStrengthDamage(item, effectiveStr) {
     return strTag;
 }
 
-export function determineExtraDiceDamage(item) {
-    switch (item.system.extraDice) {
-        case "zero":
-            return "";
-        case "pip":
-            return "+1";
-        case "half":
-            return "+1d3";
-        default:
-            HEROSYS.log(false, "Failed to get extra dice");
-            break;
-    }
-}
-
 // Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
     let actor = item.actor;
@@ -87,6 +71,7 @@ export function convertToDcFromItem(item, options) {
                 dc += 1;
                 break;
             case "half":
+            case "one-pip":
                 dc += 2;
                 break;
         }
@@ -258,7 +243,13 @@ export function convertToDcFromItem(item, options) {
     return { dc: dc, tags: tags, end: end };
 }
 
+/**
+ * This is not perfect as it has to make a guess at if the 2 DC chunks are a 1/2d6 or 1d6-1. Make a guess by looking
+ * at the extraDice for a hint if available. Otherwise default to 1/2d6
+ */
+// TODO: Does 0.2, 0.5, and 1 as partials for 5AP/DC scale correctly when the costs are > 5AP/die?/
 export function calculateDiceFormulaParts(item, dc) {
+    const usesDieLessOne = item.system.extraDice === "one-pip";
     let d6Count = 0;
     let halfDieCount = 0;
     let constant = 0;
@@ -293,52 +284,36 @@ export function calculateDiceFormulaParts(item, dc) {
     return {
         isKilling: item.system.killing,
         d6Count,
-        halfDieCount,
+        halfDieCount: usesDieLessOne ? 0 : halfDieCount,
+        d6Less1DieCount: usesDieLessOne ? halfDieCount : 0,
         constant,
     };
 }
 
-// TODO: Consider removing this as it's primarily for old behaviour as 1d3 is not the same as a 1/2d6 when counting BODY for a normal attack.
 export function convertFromDC(item, DC) {
-    if (DC === 0) {
-        return "";
-    }
-
-    let output = "";
-
     const formulaParts = calculateDiceFormulaParts(item, DC);
 
-    if (formulaParts.d6Count !== 0) {
-        output = addTerms(output, formulaParts.d6Count.toString() + "d6");
-    }
-
-    if (formulaParts.halfDieCount !== 0) {
-        output = addTerms(output, formulaParts.halfDieCount.toString() + "d3");
-    }
-
-    if (formulaParts.constant !== 0) {
-        output = addTerms(output, formulaParts.constant);
-    }
-
-    return output;
-}
-
-export function addTerms(term1, term2) {
-    function isValid(term) {
-        return term !== "" && term !== null;
-    }
-
-    let output = isValid(term1) ? term1 : "";
-
-    if (isValid(term1) && isValid(term2)) {
-        output += " + ";
-    }
-
-    if (isValid(term2)) {
-        output += term2;
-    }
-
-    return output;
+    return `${
+        formulaParts.d6Count +
+            formulaParts.d6Less1DieCount +
+            formulaParts.halfDieCount >
+        0
+            ? `${
+                  formulaParts.d6Count + formulaParts.d6Less1DieCount
+                      ? `${formulaParts.d6Count + formulaParts.d6Less1DieCount}`
+                      : ""
+              }${formulaParts.halfDieCount ? `½` : ""}d6`
+            : ""
+    }${
+        formulaParts.constant
+            ? formulaParts.d6Count +
+                  formulaParts.d6Less1DieCount +
+                  formulaParts.halfDieCount >
+              0
+                ? "+1"
+                : "1"
+            : `${formulaParts.d6Less1DieCount > 0 ? "-1" : ""}`
+    }`;
 }
 
 export function CombatSkillLevelsForAttack(item) {

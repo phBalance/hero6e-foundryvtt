@@ -140,13 +140,14 @@ export class HeroSystemActorSheet extends ActorSheet {
                 );
 
                 // text description of damage
-                item.system.damage = convertFromDC(item, dc).replace(/ /g, "");
+                item.system.damage = convertFromDC(item, dc);
 
                 // Standard Effect
                 if (item.system.USESTANDARDEFFECT) {
                     let stun = parseInt(item.system.value * 3);
                     if (
                         item.findModsByXmlid("PLUSONEHALFDIE") ||
+                        item.findModsByXmlid("MINUSONEPIP") ||
                         item.findModsByXmlid("PLUSONEPIP")
                     ) {
                         stun += 1;

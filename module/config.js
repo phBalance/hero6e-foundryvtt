@@ -8,7 +8,8 @@ HERO.bool = {
 HERO.extraDice = {
     zero: "+0",
     pip: "+1",
-    half: "+1/2D6",
+    half: "+½D6",
+    "one-pip": "+1D6-1",
 };
 
 HERO.attacksWith = {
