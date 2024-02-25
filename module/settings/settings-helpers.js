@@ -277,12 +277,22 @@ class AutomationMenu extends FormApplication {
 
         return {
             settings,
+
             choices: {
-                none: "No Automation",
-                npcOnly: "NPCs Only (end, stun, body)",
-                pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
-                all: "PCs and NPCs (end, stun, body)",
+                none: game.i18n.localize(
+                    "Settings.AutomationPreview.Choices.None",
+                ),
+                npcOnly: game.i18n.localize(
+                    "Settings.AutomationPreview.Choices.NpcOnly",
+                ),
+                pcEndOnly: game.i18n.localize(
+                    "Settings.AutomationPreview.Choices.PcEndOnly",
+                ),
+                all: game.i18n.localize(
+                    "Settings.AutomationPreview.Choices.All",
+                ),
             },
+
             automation,
         };
     }

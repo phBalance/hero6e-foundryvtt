@@ -145,7 +145,13 @@
             }
         },
         "AutomationPreview": {
-            "Name": "Automation Preview"
+            "Name": "Automation Preview",
+            "Choices": {
+                "All": "PCs and NPCs (END, STUN, BODY)",
+                "None": "No Automation",
+                "NpcOnly": "NPCs Only (END, STUN, BODY)",
+                "PcEndOnly": "PCs (END) and NPCs (END, STUN, BODY)"
+            }
         },
         "Bar3": {
             "Name": "Add 3rd Bar and labels",
