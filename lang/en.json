@@ -120,5 +120,58 @@
 
     "EFFECT": {
         "StatusKnockedOut": "Knocked Out"
+    },
+
+    "Settings": {
+        "AlphaTesting": {
+            "Hint": "Enable testing of alpha features and changes. Intended for system developer only.",
+            "Name": "Alpha Testing",
+
+            "LastMigration": {
+                "Name": "Last Migration"
+            }
+        },
+        "Automation": {
+            "Name": "Attack Card Automation",
+            "Choices": {
+                "All": "PCs and NPCs (END, STUN, BODY)",
+                "None": "No Automation",
+                "NpcOnly": "NPCs Only (END, STUN, BODY)",
+                "PcEndOnly": "PCs (END) and NPCs (END, STUN, BODY)"
+            },
+            "Menu": {
+                "Label": "Automation Settings",
+                "Name": "Automation"
+            }
+        },
+        "AutomationPreview": {
+            "Name": "Automation Preview"
+        },
+        "Bar3": {
+            "Name": "Add 3rd Bar and labels",
+            "Hint": "Add a 3rd resource bar to tokens. Each token will have a Body, Stun and Endurance resource bar with an appropriate label. It is recommended this be disabled and instead use the BarBrawl module for custom bars."
+        },
+        "Equipment": {
+            "WeightPercentage": {
+                "Name": "Equipment Weight Percentage",
+                "Hint": "This only applies to equipment (typically found in heroic themed games). Default is 100% and follows standard rules. Setting to 50 will halve the calculated weight of equipment. Setting to 0 will effectively disable encumbrance penalties."
+            }
+        },
+        "HitLocation" : {
+            "Name": "Hit Locations",
+            "Tracking": {
+                "Name": "Hit Location: Track Damage Done to Individual Body Parts",
+                "Choices": {
+                    "DoNotTrack": "Don't track",
+                    "TrackForAll": "Track for all"
+                }
+            }
+        },
+        "OptionalManeuvers": {
+            "Name": "Optional Maneuvers"
+        },
+        "UseEndurance": "Use Endurance",
+        "UseKnockback": "Use Knockback",
+        "UseStunned": "Use Stunned"
     }
 }

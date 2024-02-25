@@ -6,7 +6,7 @@ export default class SettingsHelpers {
         const module = "hero6efoundryvttv2";
 
         game.settings.register(module, "stunned", {
-            name: "Use Stunned",
+            name: game.i18n.localize("Settings.UseStunned"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -15,7 +15,7 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "use endurance", {
-            name: "Use Endurance",
+            name: game.i18n.localize("Settings.UseEndurance"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -24,7 +24,7 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "knockback", {
-            name: "Use Knockback",
+            name: game.i18n.localize("Settings.UseKnockback"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -33,7 +33,7 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "hit locations", {
-            name: "Hit Locations",
+            name: game.i18n.localize("Settings.HitLocation.Name"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -42,20 +42,24 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "hitLocTracking", {
-            name: "Hit Location: Track Damage Done to Individual Body Parts",
+            name: game.i18n.localize("Settings.HitLocation.Tracking.Name"),
             scope: "world",
             config: true,
             type: String,
             choices: {
-                none: "Don't track",
-                all: "Track for all",
+                none: game.i18n.localize(
+                    "Settings.HitLocation.Tracking.Choices.DoNotTrack",
+                ),
+                all: game.i18n.localize(
+                    "Settings.HitLocation.Tracking.Choices.TrackForAll",
+                ),
             },
             default: "none",
             onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "optionalManeuvers", {
-            name: "Optional Maneuvers",
+            name: game.i18n.localize("Settings.OptionalManeuvers.Name"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -64,8 +68,12 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "equipmentWeightPercentage", {
-            name: "Equipment Weight Percentage",
-            hint: "This only applies to equipment (typically found in heroic themed games).  Default is 100% and follows standard rules.  Setting to 50 will halve the calculated weight of equipment.  Setting to 0 will effectively disable encumbrance penalties.",
+            name: game.i18n.localize(
+                "Settings.Equipment.WeightPercentage.Name",
+            ),
+            hint: game.i18n.localize(
+                "Settings.Equipment.WeightPercentage.Hint",
+            ),
             scope: "world",
             config: true,
             type: Number,
@@ -90,22 +98,26 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "automation", {
-            name: "Attack Card Automation",
+            name: game.i18n.localize("Settings.Automation.Name"),
             scope: "world",
             config: false, // UI is now part of AutomationMenu.  Intend to allow improved granularity.
             type: String,
             choices: {
-                none: "No Automation",
-                npcOnly: "NPCs Only (end, stun, body)",
-                pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
-                all: "PCs and NPCs (end, stun, body)",
+                none: game.i18n.localize("Settings.Automation.Choices.None"),
+                npcOnly: game.i18n.localize(
+                    "Settings.Automation.Choices.NpcOnly",
+                ),
+                pcEndOnly: game.i18n.localize(
+                    "Settings.Automation.Choices.PcEndOnly",
+                ),
+                all: game.i18n.localize("Settings.Automation.Choices.All"),
             },
             default: "all",
             onChange: (value) => HEROSYS.log(false, value),
         });
 
         game.settings.register(module, "automation2", {
-            name: "Automation Preview",
+            name: game.i18n.localize("Settings.AutomationPreview.Name"),
             scope: "world",
             config: false, // UI is now part of AutomationMenu.  Intend to allow improved granularity.
             type: Object,
@@ -114,17 +126,16 @@ export default class SettingsHelpers {
         });
 
         game.settings.registerMenu(module, "AutomationMenu", {
-            name: "Automation",
-            label: "Automation Settings", // The text label used in the button
-            //hint: "A description of what will occur in the submenu dialog.",
+            name: game.i18n.localize("Settings.Automation.Menu.Name"),
+            label: game.i18n.localize("Settings.Automation.Menu.Label"), // The text label used in the button
             icon: "fas fa-bars", // A Font Awesome icon used in the submenu button
             type: AutomationMenu, // A FormApplication subclass
-            restricted: true, // Restrict this submenu to gamemaster only?
+            restricted: true, // Restrict this submenu to game master only?
         });
 
         game.settings.register(module, "bar3", {
-            name: "Add 3rd Bar and labels",
-            hint: "Add a 3rd resource bar to tokens.  Each token will have a Body, Stun and Endurance resource bar with an appropriate label.  It is recommended this be disabled and instead use the BarBrawl module for custom bars.",
+            name: game.i18n.localize("Settings.Bar3.Name"),
+            hint: game.i18n.localize("Settings.Bar3.Hint"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -134,8 +145,8 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "alphaTesting", {
-            name: "Alpha Testing",
-            hint: "Enable testing of alpha features and changes.  Intended for system developer only.",
+            name: game.i18n.localize("Settings.AlphaTesting.Name"),
+            hint: game.i18n.localize("Settings.AlphaTesting.Hint"),
             scope: "client",
             config: true,
             type: Boolean,
@@ -145,7 +156,9 @@ export default class SettingsHelpers {
 
         // Keep track of last migration version
         game.settings.register(module, "lastMigration", {
-            name: "Last Migration",
+            name: game.i18n.localize(
+                "Settings.AlphaTesting.LastMigration.Name",
+            ),
             scope: "world",
             config: game.settings.get(game.system.id, "alphaTesting"),
             type: String,
