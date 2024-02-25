@@ -22,39 +22,6 @@
 // Transdimensional, Trigger, Uncontrolled, Usable As Attack,
 // Variable Advantage, and Variable Special Effects.
 
-export function determineStrengthDamage(item, effectiveStr) {
-    if (!item.system.usesStrength && !item.system.usesTk) {
-        return null;
-    }
-
-    const strDamage = Math.floor(Math.max(0, parseInt(effectiveStr)) / 5) || 0;
-
-    if (strDamage === 0) {
-        return null;
-    }
-
-    if (!item.system.killing) {
-        return strDamage.toString() + "d6";
-    }
-
-    const strDice = Math.floor(strDamage / 3);
-
-    const pip = strDamage % 3;
-
-    let strTag = strDice > 0 ? strDice + "d6" : "";
-
-    switch (pip) {
-        case 1:
-            strTag += "+1";
-            break;
-        case 2:
-            strTag += "+1d3";
-            break;
-    }
-
-    return strTag;
-}
-
 // Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
     let actor = item.actor;
