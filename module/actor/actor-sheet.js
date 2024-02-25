@@ -12,7 +12,7 @@ import {
 import {
     CombatSkillLevelsForAttack,
     convertToDcFromItem,
-    convertFromDC,
+    getDiceFormulaFromItemDC,
 } from "../utility/damage.js";
 import { HeroRoller } from "../utility/dice.js";
 import { getSystemDisplayUnits } from "../utility/units.js";
@@ -140,7 +140,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 );
 
                 // text description of damage
-                item.system.damage = convertFromDC(item, dc);
+                item.system.damage = getDiceFormulaFromItemDC(item, dc);
 
                 // Standard Effect
                 if (item.system.USESTANDARDEFFECT) {

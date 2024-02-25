@@ -257,7 +257,7 @@ export function calculateDiceFormulaParts(item, dc) {
     };
 }
 
-export function convertFromDC(item, DC) {
+export function getDiceFormulaFromItemDC(item, DC) {
     const formulaParts = calculateDiceFormulaParts(item, DC);
 
     return `${
