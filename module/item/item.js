@@ -11,7 +11,10 @@ import {
 import { onActiveEffectToggle } from "../utility/effects.js";
 import { getPowerInfo, getModifierInfo } from "../utility/util.js";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.js";
-import { convertToDcFromItem, convertFromDC } from "../utility/damage.js";
+import {
+    convertToDcFromItem,
+    getDiceFormulaFromItemDC,
+} from "../utility/damage.js";
 import { getSystemDisplayUnits } from "../utility/units.js";
 import { HeroRoller } from "../utility/dice.js";
 
@@ -1867,7 +1870,7 @@ export class HeroSystem6eItem extends Item {
 
             case "MINDSCAN":
                 {
-                    const diceFormula = convertFromDC(
+                    const diceFormula = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
                     );
@@ -1926,7 +1929,7 @@ export class HeroSystem6eItem extends Item {
                 {
                     const reduceAndEnhanceTargets =
                         this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = convertFromDC(
+                    const diceFormula = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
                     );
@@ -1950,7 +1953,7 @@ export class HeroSystem6eItem extends Item {
                 {
                     const reduceAndEnhanceTargets =
                         this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = convertFromDC(
+                    const diceFormula = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
                     );
@@ -1968,7 +1971,7 @@ export class HeroSystem6eItem extends Item {
                 {
                     const reduceAndEnhanceTargets =
                         this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = convertFromDC(
+                    const diceFormula = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
                     );
@@ -2121,7 +2124,7 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
             case "HANDTOHANDATTACK":
                 {
-                    const diceFormula = convertFromDC(
+                    const diceFormula = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
                     );
@@ -2180,7 +2183,10 @@ export class HeroSystem6eItem extends Item {
                     if (system.EFFECT) {
                         let dc = convertToDcFromItem(this).dc;
                         if (dc) {
-                            const damageDiceFormula = convertFromDC(this, dc);
+                            const damageDiceFormula = getDiceFormulaFromItemDC(
+                                this,
+                                dc,
+                            );
                             if (damageDiceFormula) {
                                 system.description += `,`;
 
@@ -2301,7 +2307,7 @@ export class HeroSystem6eItem extends Item {
                         system.description += " and " + _singles.slice(-1);
                     }
 
-                    const diceFormula = convertFromDC(
+                    const diceFormula = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
                     );
@@ -2350,7 +2356,7 @@ export class HeroSystem6eItem extends Item {
                     system.description =
                         (system.INPUT ? system.INPUT + " " : "") + _desc;
 
-                    const value2 = convertFromDC(
+                    const value2 = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
                     );
