@@ -543,7 +543,7 @@ export class HeroSystem6eActor extends Actor {
             strRunningThrow = 12;
         }
         if (value >= 10) {
-            strLiftText = "16kg";
+            strLiftText = "100kg";
             strRunningThrow = 16;
         }
         if (value >= 13) {
