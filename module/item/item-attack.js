@@ -1775,8 +1775,13 @@ async function _performAbsorptionForToken(
                     .addHalfDice(extraDice === "half" ? 1 : 0)
                     .addDiceMinus1(extraDice === "one-pip" ? 1 : 0)
                     .addNumber(extraDice === "pip" ? 1 : 0);
-                await absorptionRoller.roll();
-                maxAbsorption = absorptionRoller.getAdjustmentTotal();
+
+                if (dice > 0 || (dice === 0 && extraDice !== "zero")) {
+                    await absorptionRoller.roll();
+                    maxAbsorption = absorptionRoller.getAdjustmentTotal();
+                } else {
+                    maxAbsorption = 0;
+                }
 
                 // Present the roll.
                 const cardHtml = await absorptionRoller.render(
