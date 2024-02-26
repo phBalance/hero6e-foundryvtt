@@ -3,7 +3,7 @@
     "name": "hero6e-foundryvtt-v2",
     "title": "Hero System 6e (Unofficial) v2",
     "description": "The Hero System 6e for FoundryVTT!",
-    "version": "3.0.58",
+    "version": "3.0.59",
     "compatibility": {
         "minimum": 11,
         "verified": "11.315",
@@ -12,7 +12,8 @@
     "authors": [
         { "name": "Jared Levine" },
         { "name": "BoDiddleyBeat" },
-        { "name": "Aaron Auseth" }
+        { "name": "Aaron Auseth" },
+        { "name": "Peter Hunnisett" }
     ],
     "esmodules": ["module/herosystem6e.js", "module/testing/testing-main.js"],
     "styles": ["css/herosystem6e.css", "css/actor-sheet.css"],
