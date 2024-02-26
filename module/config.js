@@ -522,7 +522,7 @@ HERO.powers = [
     {
         key: "ABSORPTION",
         name: "Absorption",
-        powerType: ["adjustment", "standard"],
+        powerType: ["adjustment", "standard", "defense"],
         perceivability: "obvious",
         duration: "constant",
         target: "self only",
@@ -1508,7 +1508,7 @@ HERO.powers5e = [
     },
     {
         key: "ABSORPTION",
-        powerType: ["adjustment", "attack"],
+        powerType: ["adjustment", "attack", "defense"],
         costPerLevel: 5,
     },
     {
