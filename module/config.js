@@ -261,7 +261,9 @@ HERO.movementPowers5e = {
 // Power Info
 // Valid XMLID's for powers
 
-HERO.powers = [
+// Power Info
+// Valid XMLIDs for powers
+HERO.powers6e = [
     {
         key: "STR",
         name: "Strength",

@@ -41,7 +41,7 @@ export function getPowerInfo(options) {
         );
     }
 
-    let powerInfo = CONFIG.HERO.powers.find((o) => o.key === xmlid);
+    let powerInfo = CONFIG.HERO.powers6e.find((o) => o.key === xmlid);
     if (!powerInfo || actor?.system?.is5e) {
         powerInfo = {
             ...powerInfo,
@@ -109,7 +109,7 @@ function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
 export function getCharacteristicInfoArrayForActor(actor) {
     const isCharOrMovePowerForActor =
         _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor);
-    const powers = CONFIG.HERO.powers.filter(isCharOrMovePowerForActor);
+    const powers = CONFIG.HERO.powers6e.filter(isCharOrMovePowerForActor);
     if (actor.system.is5e) {
         for (const power5e of CONFIG.HERO.powers5e) {
             const idx = powers.findIndex((power) => power.key === power5e.key);

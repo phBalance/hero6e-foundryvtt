@@ -1359,10 +1359,10 @@ export class HeroSystem6eItem extends Item {
             type: "power",
         };
 
-        // TODO: This is technically incorrect as it's accessing CONFIG.HERO.powers but ignoring CONFIG.HERO.powers5e
+        // TODO: This is technically incorrect as it's accessing CONFIG.HERO.powers6e but ignoring CONFIG.HERO.powers5e
         for (const itemTag of [
             ...HeroSystem6eItem.ItemXmlTags,
-            ...CONFIG.HERO.powers
+            ...CONFIG.HERO.powers6e
                 .filter(
                     (o) =>
                         o.powerType?.includes("characteristic") ||
@@ -1379,7 +1379,7 @@ export class HeroSystem6eItem extends Item {
                     : [heroJson[itemSubTag]]) {
                     itemData = {
                         name: system?.ALIAS || system?.XMLID || itemTag, // simplistic name for now
-                        type: CONFIG.HERO.powers
+                        type: CONFIG.HERO.powers6e // TODO: Ignoring 5e
                             .filter((o) =>
                                 o.powerType?.includes("characteristic"),
                             )
