@@ -1780,7 +1780,7 @@ async function _performAbsorptionForToken(
 
                 // Present the roll.
                 const cardHtml = await absorptionRoller.render(
-                    `Target's ${attackType} absorption`,
+                    `${attackType} attack vs ${absorptionItem.name}`,
                 );
 
                 const speaker = ChatMessage.getSpeaker({
