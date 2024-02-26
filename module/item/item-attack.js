@@ -1805,7 +1805,7 @@ async function _performAbsorptionForToken(
             console.warn("TODO: Not tracking per segment absorption max");
 
             // Apply the absorption
-            return _onApplyAdjustmentToSpecificToken(
+            await _onApplyAdjustmentToSpecificToken(
                 absorptionItem,
                 token,
                 {
