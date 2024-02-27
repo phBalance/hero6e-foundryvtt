@@ -357,7 +357,7 @@ export class HeroSystem6eItem extends Item {
                     const configPowerInfo = getPowerInfo({ item: item });
                     if (
                         (configPowerInfo &&
-                            configPowerInfo.powerType.includes("defense")) ||
+                            configPowerInfo.type.includes("defense")) ||
                         item.type === "equipment"
                     ) {
                         await item.update({ [attr]: newValue });
@@ -1049,7 +1049,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // DEFENSES
-        if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
+        if (configPowerInfo && configPowerInfo.type?.includes("defense")) {
             const newDefenseValue = "defense";
             if (this.system.subType != newDefenseValue) {
                 this.system.subType = newDefenseValue;
@@ -1069,10 +1069,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MOVEMENT
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("movement")
-        ) {
+        if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
             const movement = "movement";
             if (this.system.subType != movement) {
                 this.system.subType = movement;
@@ -1090,7 +1087,7 @@ export class HeroSystem6eItem extends Item {
         // }
 
         // SKILLS
-        if (configPowerInfo && configPowerInfo.powerType?.includes("skill")) {
+        if (configPowerInfo && configPowerInfo.type?.includes("skill")) {
             const skill = "skill";
             if (this.system.subType != skill) {
                 this.system.subType = skill;
@@ -1099,7 +1096,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
-        if (configPowerInfo && configPowerInfo.powerType?.includes("attack")) {
+        if (configPowerInfo && configPowerInfo.type?.includes("attack")) {
             const attack = "attack";
             if (this.system.subType != attack) {
                 this.system.subType = attack;
@@ -1137,7 +1134,7 @@ export class HeroSystem6eItem extends Item {
             changed &&
             this.id &&
             configPowerInfo &&
-            configPowerInfo.powerType?.includes("movement")
+            configPowerInfo.type?.includes("movement")
         ) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
@@ -1174,7 +1171,7 @@ export class HeroSystem6eItem extends Item {
         if (
             changed &&
             this.id &&
-            configPowerInfo?.powerType?.includes("characteristic")
+            configPowerInfo?.type?.includes("characteristic")
         ) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
@@ -1329,12 +1326,12 @@ export class HeroSystem6eItem extends Item {
 
     getAttacksWith() {
         const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo.powerType.includes("mental")) return "omcv";
+        if (configPowerInfo.type.includes("mental")) return "omcv";
         return "ocv";
     }
     getDefendsWith() {
         const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo.powerType.includes("mental")) return "dmcv";
+        if (configPowerInfo.type.includes("mental")) return "dmcv";
         return "dcv";
     }
 
@@ -1365,8 +1362,8 @@ export class HeroSystem6eItem extends Item {
             ...CONFIG.HERO.powers6e
                 .filter(
                     (o) =>
-                        o.powerType?.includes("characteristic") ||
-                        o.powerType?.includes("framework"),
+                        o.type?.includes("characteristic") ||
+                        o.type?.includes("framework"),
                 )
                 .map((o) => o.key),
         ]) {
@@ -1380,9 +1377,7 @@ export class HeroSystem6eItem extends Item {
                     itemData = {
                         name: system?.ALIAS || system?.XMLID || itemTag, // simplistic name for now
                         type: CONFIG.HERO.powers6e // TODO: Ignoring 5e
-                            .filter((o) =>
-                                o.powerType?.includes("characteristic"),
-                            )
+                            .filter((o) => o.type?.includes("characteristic"))
                             .map((o) => o.key)
                             ? "power"
                             : itemTag.toLowerCase().replace(/s$/, ""),
@@ -1458,7 +1453,7 @@ export class HeroSystem6eItem extends Item {
             system.costPerLevel ||
                 configPowerInfo?.costPerLevel ||
                 configPowerInfo?.cost ||
-                (configPowerInfo?.powerType == "skill" ? 2 : 0) ||
+                (configPowerInfo?.type == "skill" ? 2 : 0) ||
                 baseCost ||
                 1,
         );
@@ -1585,7 +1580,7 @@ export class HeroSystem6eItem extends Item {
         // Skill Enhancer discount (a hidden discount; not shown in item description)
         if (
             configPowerInfoParent &&
-            configPowerInfoParent.powerType?.includes("enhancer")
+            configPowerInfoParent.type?.includes("enhancer")
         ) {
             cost = Math.max(1, cost - 1);
         }
@@ -1665,7 +1660,7 @@ export class HeroSystem6eItem extends Item {
                 xmlid: modifier.XMLID,
                 item: this,
             });
-            if (powerInfo && powerInfo.powerType?.includes("attack")) {
+            if (powerInfo && powerInfo.type?.includes("attack")) {
                 if (modifierInfo && modifierInfo.dc) {
                     advantagesDC += Math.max(0, _myAdvantage);
                 }
@@ -2338,7 +2333,7 @@ export class HeroSystem6eItem extends Item {
                 {
                     if (
                         configPowerInfo &&
-                        configPowerInfo.powerType?.includes("characteristic")
+                        configPowerInfo.type?.includes("characteristic")
                     ) {
                         system.description =
                             "+" + system.value + " " + system.ALIAS;
@@ -2602,7 +2597,7 @@ export class HeroSystem6eItem extends Item {
                 body += 1;
             }
 
-            if (configPowerInfo.powerType.includes("adjustment")) {
+            if (configPowerInfo.type.includes("adjustment")) {
                 system.description +=
                     " (standard effect: " +
                     parseInt(system.value * 3) +
@@ -2703,10 +2698,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MOVEMENT only costs endurance when used.  Typically per round.
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("movement")
-        ) {
+        if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
             system.end = 0;
         }
 
@@ -2926,10 +2918,7 @@ export class HeroSystem6eItem extends Item {
         });
 
         // All Slots? This may be a slot in a framework if so get parent
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("framework")
-        ) {
+        if (configPowerInfo && configPowerInfo.type?.includes("framework")) {
             if (result.match(/^,/)) {
                 result = result.replace(/^,/, ", all slots");
             } else {

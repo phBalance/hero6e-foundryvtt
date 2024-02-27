@@ -51,7 +51,7 @@ export function getPowerInfo(options) {
 
     if (!powerInfo && options?.item?.type == "maneuver") {
         powerInfo = {
-            powerType: ["maneuver"],
+            type: ["maneuver"],
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
@@ -99,8 +99,8 @@ export function getModifierInfo(options) {
 
 function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
     return (power) =>
-        (power.powerType?.includes("characteristic") ||
-            power.powerType?.includes("movement")) &&
+        (power.type?.includes("characteristic") ||
+            power.type?.includes("movement")) &&
         !power.ignoreFor?.includes(actor.type) &&
         !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
         (!power.onlyFor || power.onlyFor.includes(actor.type));

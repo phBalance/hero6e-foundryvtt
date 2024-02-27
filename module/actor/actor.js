@@ -1382,7 +1382,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Warn about invalid adjustment targets
         for (const item of this.items.filter((item) =>
-            getPowerInfo({ item: item }).powerType?.includes("adjustment"),
+            getPowerInfo({ item: item }).type?.includes("adjustment"),
         )) {
             const result = item.splitAdjustmentSourceAndTarget();
             if (!result.valid) {

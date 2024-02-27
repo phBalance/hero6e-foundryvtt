@@ -329,10 +329,10 @@ export async function AttackToHit(item, options) {
 
     const adjustment = getPowerInfo({
         item: item,
-    })?.powerType?.includes("adjustment");
+    })?.type?.includes("adjustment");
     const senseAffecting = getPowerInfo({
         item: item,
-    })?.powerType?.includes("sense-affecting");
+    })?.type?.includes("sense-affecting");
 
     // TODO: Much of this looks similar to the AOE stuff above. Any way to combine?
     // -------------------------------------------------
@@ -1009,10 +1009,10 @@ export async function _onRollDamage(event) {
 
     const adjustment = getPowerInfo({
         item: item,
-    })?.powerType?.includes("adjustment");
+    })?.type?.includes("adjustment");
     const senseAffecting = getPowerInfo({
         item: item,
-    })?.powerType?.includes("sense-affecting");
+    })?.type?.includes("sense-affecting");
     const entangle = item.system.XMLID === "ENTANGLE";
 
     const increasedMultiplierLevels = parseInt(
@@ -1558,7 +1558,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // AID, DRAIN or any adjustment powers
     const adjustment = getPowerInfo({
         item: item,
-    })?.powerType?.includes("adjustment");
+    })?.type?.includes("adjustment");
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(
             item,
@@ -1569,7 +1569,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
     const senseAffecting = getPowerInfo({
         item: item,
-    })?.powerType?.includes("sense-affecting");
+    })?.type?.includes("sense-affecting");
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(
             item,
@@ -1985,10 +1985,10 @@ async function _calcDamage(heroRoller, item, options) {
 
     const adjustmentPower = getPowerInfo({
         item: item,
-    })?.powerType?.includes("adjustment");
+    })?.type?.includes("adjustment");
     const senseAffectingPower = getPowerInfo({
         item: item,
-    })?.powerType?.includes("sense-affecting");
+    })?.type?.includes("sense-affecting");
     const entangle = item.system.XMLID === "ENTANGLE";
 
     let body;
