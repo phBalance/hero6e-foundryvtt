@@ -1399,6 +1399,128 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
 })();
 
+(function addPerksToPowerList() {
+    // TODO: Missing a few....
+    addPower(
+        {
+            key: "ACCESS",
+            type: ["perk"],
+            name: "Access",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ANONYMITY",
+            type: ["perk"],
+            name: "Anonymity",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "COMPUTER_LINK",
+            type: ["perk"],
+            name: "Computer Link",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CONTACT",
+            type: ["perk"],
+            name: "Contact",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOMPERK",
+            type: ["perk"],
+            name: "Custom Perk",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DEEP_COVER",
+            type: ["perk"],
+            name: "Deep Cover",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "FAVOR",
+            type: ["perk"],
+            name: "Favor",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FOLLOWER",
+            type: ["perk"],
+            name: "Follower",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FRINGE_BENEFIT",
+            type: ["perk"],
+            name: "Fringe Benefit",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MONEY",
+            type: ["perk"],
+            name: "Money",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "REPUTATION",
+            type: ["perk", "disadvantage"],
+            name: "Positive Reputation",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RESOURCE_POOL",
+            type: ["perk"],
+            name: "Resource Points",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "VEHICLE_BASE",
+            type: ["perk"],
+            name: "Vehicles & Bases",
+        },
+        {},
+    );
+})();
+
 (function addTalentsToPowerList() {
     addPower(
         {
@@ -1518,16 +1640,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    // TODO: Doesn't exist in 6e
-    addPower(
-        {
-            key: "FOLLOWER",
-            type: ["talent"],
-            name: "Follower",
-        },
-        {},
-    );
-
     addPower(
         {
             key: "LIGHTNING_CALCULATOR",
@@ -1638,29 +1750,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "WEAPON_MASTER",
             type: ["talent"],
             name: "Weapon Master",
-            costPerLevel: 0,
-        },
-        {},
-    );
-})();
-
-(function addPerksToPowerList() {
-    // TODO: Missing a few....
-    addPower(
-        {
-            key: "CONTACT",
-            type: ["perk"],
-            name: "Contact",
-            costPerLevel: 1,
-        },
-        {},
-    );
-
-    addPower(
-        {
-            key: "REPUTATION",
-            type: ["perk", "disadvantage"],
-            name: "Positive Reputation",
             costPerLevel: 0,
         },
         {},
