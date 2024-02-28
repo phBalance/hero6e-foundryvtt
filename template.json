@@ -10,9 +10,10 @@
             "ai"
         ],
         "templates": {
-            "base": {},
-            "characterTemplate": {
-                "templates": ["base"],
+            "base": {
+
+            },
+            "character": {
                 "biography": "",
                 "attributes": {
                     "points": {
@@ -152,10 +153,6 @@
                         "core": 20,
                         "realCost": 0
                     },
-                    "size": {
-                        "value": 0,
-                        "max": 0
-                    },
                     "running": {
                         "value": 12,
                         "max": 12,
@@ -208,25 +205,25 @@
             }
         },
         "pc": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "npc": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "vehicle": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "base2": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "automaton": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "computer": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "ai": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         }
     },
     "Item": {
