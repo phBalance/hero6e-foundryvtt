@@ -1402,8 +1402,53 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addTalentsToPowerList() {
     addPower(
         {
+            key: "ABSOLUTE_RANGE_SENSE",
+            type: ["talent"],
+            name: "Absolute Range Sense",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ABSOLUTE_TIME_SENSE",
+            type: ["talent"],
+            name: "Absolute Time Sense",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "AMBIDEXTERITY",
+            type: ["talent"],
+            name: "Ambidexterity",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ANIMALFRIENDSHIP",
+            type: ["talent"],
+            name: "Animal Friendship",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "BUMP_OF_DIRECTION",
+            type: ["talent"],
+            name: "Bump of Direction",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "COMBAT_LUCK",
             type: ["talent", "defense"], // TODO: Not type defense but has enabled role perhaps...
+            name: "Combat Luck",
+
             duration: "constant",
             costPerLevel: 6,
         },
@@ -1420,14 +1465,49 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "CONTACT",
-            type: ["perk"],
-            name: "Contact",
-            costPerLevel: 1,
+            key: "CUSTOMTALENT",
+            type: ["talent"],
+            name: "Custom Talent",
         },
         {},
     );
 
+    addPower(
+        {
+            key: "DANGER_SENSE",
+            type: ["talent"],
+            name: "Danger Sense",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DEADLYBLOW",
+            type: ["talent"],
+            name: "Deadly Blow",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DOUBLE_JOINTED",
+            type: ["talent"],
+            name: "Double Jointed",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "EIDETIC_MEMORY",
+            type: ["talent"],
+            name: "Eidetic Memory",
+            costPerLevel: 0,
+        },
+        {},
+    );
     addPower(
         {
             key: "ENVIRONMENTAL_MOVEMENT",
@@ -1438,6 +1518,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    // TODO: Doesn't exist in 6e
     addPower(
         {
             key: "FOLLOWER",
@@ -1447,6 +1528,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            key: "LIGHTNING_CALCULATOR",
+            type: ["talent"],
+            name: "Lightning Calculator",
+            costPerLevel: 0,
+        },
+        {},
+    );
     addPower(
         {
             key: "LIGHTNING_REFLEXES_ALL",
@@ -1465,6 +1555,35 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            key: "LIGHTSLEEP",
+            type: ["talent"],
+            name: "Lightsleep",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "PERFECT_PITCH",
+            type: ["talent"],
+            name: "Perfect Pitch",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "OFFHANDDEFENSE",
+            type: ["talent"],
+            name: "Off-Hand Defense",
+            costPerLevel: 0,
+        },
+        {},
+    );
 
     addPower(
         {
@@ -1475,10 +1594,68 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            key: "SIMULATE_DEATH",
+            type: ["talent"],
+            name: "Simulate Death",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SPEED_READING",
+            type: ["talent"],
+            name: "Speed Reading",
+            costPerLevel: 2,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "STRIKING_APPEARANCE",
+            type: ["talent"],
+            name: "Striking Appearance",
+            costPerLevel: 3,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "UNIVERSAL_TRANSLATOR",
+            type: ["talent"],
+            name: "Universal Translator",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "WEAPON_MASTER",
+            type: ["talent"],
+            name: "Weapon Master",
+            costPerLevel: 0,
+        },
+        {},
+    );
 })();
 
 (function addPerksToPowerList() {
     // TODO: Missing a few....
+    addPower(
+        {
+            key: "CONTACT",
+            type: ["perk"],
+            name: "Contact",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
     addPower(
         {
             key: "REPUTATION",
