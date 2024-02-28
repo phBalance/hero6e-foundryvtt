@@ -1678,10 +1678,6 @@ export class HeroSystem6eActor extends Actor {
 
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
-            if (key === "running") {
-                console.log(key);
-            }
-
             let newValue = parseInt(
                 this.system?.[key.toUpperCase()]?.LEVELS || 0,
             );
