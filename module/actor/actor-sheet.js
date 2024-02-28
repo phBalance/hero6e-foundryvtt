@@ -781,10 +781,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                 actor: this.actor,
             });
             let valueTop = Math.max(char.value, char.max);
-            let activePoints = valueTop * powerInfo.cost;
+            let activePoints = valueTop * (powerInfo?.cost || 0);
             if (activePoints > 0) {
                 data.activePointSummary.push({
-                    name: powerInfo.name || key,
+                    name: powerInfo?.name || key,
                     activePoints: activePoints,
                 });
             }
