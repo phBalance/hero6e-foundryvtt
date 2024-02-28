@@ -1482,7 +1482,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REPUTATION",
-            type: ["perk", "skill"], // TODO: Is this a skill?
+            type: ["perk", "disadvantage"],
             name: "Positive Reputation",
             costPerLevel: 0,
         },
@@ -2303,13 +2303,143 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 })();
 
 (function addComplicationsToPowerList() {
-    // TODO: Missing a bunch.
+    addPower(
+        {
+            key: "ACCIDENTALCHANGE",
+            type: ["disadvantage"],
+            name: "Accidental Change",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "GENERICDISADVANTAGE",
+            type: ["disadvantage"],
+            name: "Custom Disadvantage",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DEPENDENCE",
+            type: ["disadvantage"],
+            name: "Dependence",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DEPENDENTNPC",
+            type: ["disadvantage"],
+            name: "Dependent NPC",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DISTINCTIVEFEATURES",
+            type: ["disadvantage"],
+            name: "Distinctive Features",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ENRAGED",
+            type: ["disadvantage"],
+            name: "Enraged/Berserk",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HUNTED",
+            type: ["disadvantage"],
+            name: "Hunted",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HUNTED",
+            type: ["disadvantage"],
+            name: "Hunted",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MONEYDISAD",
+            type: ["disadvantage"],
+            name: "Hunted",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "PHYSICALLIMITATION",
+            type: ["disadvantage"],
+            name: "Physical Limitation",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "PSYCHOLOGICALLIMITATION",
+            type: ["disadvantage"],
+            name: "Psychological Limitation",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "RIVALRY",
+            type: ["disadvantage"],
+            name: "Rivalry",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "SOCIALLIMITATION",
+            type: ["disadvantage"],
+            name: "Social Limitation",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SUSCEPTIBILITY",
+            type: ["disadvantage"],
+            name: "Susceptibility",
+        },
+        {},
+    );
+
     addPower(
         {
             key: "UNLUCK",
             type: ["disadvantage"],
             name: "Unluck",
             costPerLevel: 5,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "VULNERABILITY",
+            type: ["disadvantage"],
+            name: "Vulnerability",
         },
         {},
     );
