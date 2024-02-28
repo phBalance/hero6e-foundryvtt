@@ -1380,9 +1380,19 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        this.items.forEach(async (item) => {
+            const power = getPowerInfo({ item: item });
+            if (!power) {
+                await ui.notifications.error(
+                    `${this.name}/${item.name} has unknown power XMLID: ${item.system.XMLID}. Please report.`,
+                    { console: true, permanent: true },
+                );
+            }
+        });
+
         // Warn about invalid adjustment targets
         for (const item of this.items.filter((item) =>
-            getPowerInfo({ item: item }).type?.includes("adjustment"),
+            getPowerInfo({ item: item })?.type?.includes("adjustment"),
         )) {
             const result = item.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
