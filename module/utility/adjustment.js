@@ -7,8 +7,10 @@ import { RoundFavorPlayerUp } from "./round.js";
 export function adjustmentSourcesPermissive(actor) {
     let choices = {};
 
-    // TODO: This is not considering 5e only powers
-    const powers = CONFIG.HERO.powers6e.filter(
+    const powerList = actor.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+    const powers = powerList.filter(
         (power) =>
             !power.type?.includes("skill") &&
             !power.type?.includes("perk") &&
@@ -41,8 +43,10 @@ export function adjustmentSourcesPermissive(actor) {
 export function adjustmentSourcesStrict(actor) {
     let choices = {};
 
-    // TODO: This is not considering 5e only powers?
-    const powers = CONFIG.HERO.powers6e.filter(
+    const powerList = actor.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+    const powers = powerList.filter(
         (power) =>
             (power.type?.includes("characteristic") ||
                 power.type?.includes("movement")) &&

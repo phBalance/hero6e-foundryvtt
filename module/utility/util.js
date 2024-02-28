@@ -41,13 +41,10 @@ export function getPowerInfo(options) {
         );
     }
 
-    let powerInfo = CONFIG.HERO.powers6e.find((o) => o.key === xmlid);
-    if (!powerInfo || actor?.system?.is5e) {
-        powerInfo = {
-            ...powerInfo,
-            ...CONFIG.HERO.powers5e.find((o) => o.key === xmlid),
-        };
-    }
+    const powerList = actor.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+    let powerInfo = powerList.find((o) => o.key === xmlid);
 
     if (!powerInfo && options?.item?.type == "maneuver") {
         powerInfo = {
@@ -102,23 +99,17 @@ function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
         (power.type?.includes("characteristic") ||
             power.type?.includes("movement")) &&
         !power.ignoreFor?.includes(actor.type) &&
-        !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
         (!power.onlyFor || power.onlyFor.includes(actor.type));
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {
     const isCharOrMovePowerForActor =
         _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor);
-    const powers = CONFIG.HERO.powers6e.filter(isCharOrMovePowerForActor);
-    if (actor.system.is5e) {
-        for (const power5e of CONFIG.HERO.powers5e) {
-            const idx = powers.findIndex((power) => power.key === power5e.key);
-            if (idx > -1 && isCharOrMovePowerForActor(powers[idx])) {
-                powers[idx] = { ...powers[idx], ...power5e };
-            } else if (isCharOrMovePowerForActor(power5e)) {
-                powers.push(power5e);
-            }
-        }
-    }
+    const powerList = actor.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+
+    const powers = powerList.filter(isCharOrMovePowerForActor);
+
     return powers;
 }
