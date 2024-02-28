@@ -837,6 +837,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "ARMORSMITH",
+        type: ["skill"],
+        categorized: true,
+    });
     addPower(
         {
             key: "AUTOFIRE_SKILLS",
@@ -880,7 +885,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CHARM",
             type: ["skill"],
         },
-        {},
+        undefined,
     );
     addPower(
         {
@@ -898,17 +903,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "COMBAT_PILOTING",
+            key: "COMBAT_LEVELS",
             type: ["skill"],
+            rollable: false, // TODO: Hmmm.
+            xmlid: "COMBAT_LEVELS", // TODO: Do we need this?
         },
         {},
     );
     addPower(
         {
-            key: "COMBAT_LEVELS",
+            key: "COMBAT_PILOTING",
             type: ["skill"],
-            rollable: false, // TODO: Hmmm.
-            xmlid: "COMBAT_LEVELS", // TODO: Do we need this?
         },
         {},
     );
@@ -1014,6 +1019,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "FEINT",
+        type: ["skill"],
+    });
     addPower(
         {
             key: "FORENSIC_MEDICINE",
@@ -1046,7 +1055,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "HOIST",
+        type: ["skill"],
+    });
 
+    addPower(undefined, {
+        key: "INSTRUCTOR",
+        type: ["skill"],
+    });
     addPower(
         {
             key: "INTERROGATION",
@@ -1108,12 +1125,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rollable: false,
             xmlid: "MENTAL_COMBAT_LEVELS", // TODO: Hmmm.
         },
-        {},
+        undefined,
     );
     addPower(
         {
             key: "MIMICRY",
             type: ["skill"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MIF",
+            type: ["skill"],
+            name: "Musical Instrument Familiarity",
         },
         {},
     );
@@ -1135,6 +1160,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        key: "PARACHUTING",
+        type: ["skill"],
+    });
     addPower(
         {
             key: "PARAMEDICS",
@@ -1152,6 +1181,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PERSUASION",
+            type: ["skill"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "POISONING",
             type: ["skill"],
         },
         {},
@@ -1178,6 +1214,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "RAPID_ATTACK_RANGED",
+        type: ["skill"],
+    });
+    addPower(undefined, {
+        key: "RESEARCH",
+        type: ["skill"],
+    });
     addPower(
         {
             key: "RIDING",
@@ -1200,6 +1244,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "SEDUCTION",
+        type: ["skill"],
+    });
     addPower(
         {
             key: "SHADOWING",
@@ -1221,6 +1269,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "SPELL",
+        type: ["skill"],
+    });
     addPower(
         {
             key: "STEALTH",
@@ -1294,6 +1346,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "TWO_WEAPON_FIGHTING_RANGED",
+        type: ["skill"],
+    });
 
     addPower(
         {
