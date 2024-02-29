@@ -1456,7 +1456,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 })();
 
 (function addPerksToPowerList() {
-    // TODO: Missing a few....
     addPower(
         {
             key: "ACCESS",
@@ -1466,6 +1465,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "Advanced Tech",
+        type: ["perk"],
+        name: "Advanced Tech",
+        costPerLevel: 1,
+    });
     addPower(
         {
             key: "ANONYMITY",
@@ -1514,6 +1519,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        key: "FALSEIDENTITY",
+        type: ["perk"],
+        name: "False Identity",
+        costPerLevel: 1,
+    });
     addPower(
         {
             key: "FAVOR",
