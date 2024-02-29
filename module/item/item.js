@@ -740,6 +740,32 @@ export class HeroSystem6eItem extends Item {
                     this.system.costPerLevel = 2;
                     break;
             }
+        } else if (this.system.XMLID === "Advanced Tech") {
+            if (this.system.OPTIONID === "NORMAL") {
+                this.system.costPerLevel = 15;
+            } else {
+                this.system.costPerLevel = 10;
+            }
+        } else if (this.system.XMLID === "DEADLYBLOW") {
+            switch (this.system.OPTIONID) {
+                case "VERYLIMITED":
+                    this.system.costPerLevel = 4;
+                    break;
+
+                case "LIMITED":
+                    this.system.costPerLevel = 7;
+                    break;
+
+                case "ANY":
+                    this.system.costPerLevel = 10;
+                    break;
+
+                default:
+                    console.error(
+                        `Unknown skill levels ${this.system.OPTIONID} for ${this.actor.name}/${this.name}`,
+                    );
+                    break;
+            }
         }
 
         // BASECOST
@@ -2060,7 +2086,13 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "CONTACT":
-                system.description = `${system.ALIAS}: `;
+                {
+                    const roll =
+                        system.LEVELS === "1"
+                            ? "8-"
+                            : `${9 + parseInt(system.LEVELS)}-`;
+                    system.description = `${system.ALIAS} ${roll}`;
+                }
                 break;
 
             case "ACCIDENTALCHANGE":
@@ -2327,8 +2359,22 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "Advanced Tech":
             case "AMBIDEXTERITY":
+            case "COMBATSPELLCASTING":
+            case "DEADLYBLOW":
+            case "MONEY":
+            case "SHAPECHANGING":
+            case "SKILLMASTER":
                 system.description = `${system.ALIAS} (${system.OPTION_ALIAS})`;
+                break;
+
+            case "ENVIRONMENTAL_MOVEMENT":
+                system.description = `${system.ALIAS} (${system.INPUT})`;
+                break;
+
+            case "CONTACT":
+                system.description = `${system.ALIAS} `;
                 break;
 
             default:
@@ -3386,7 +3432,7 @@ export class HeroSystem6eItem extends Item {
         } else {
             // This is likely a Skill Enhancer.
             // Skill Enhancers provide a discount to the purchase of associated skills.
-            // They no not change the roll.
+            // They do not change the roll.
             // Skip for now.
             // HEROSYS.log(false, (skillData.XMLID || this.name) + ' was not included in skills.  Likely Skill Enhancer')
             return;

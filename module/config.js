@@ -1469,7 +1469,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "Advanced Tech",
         type: ["perk"],
         name: "Advanced Tech",
-        costPerLevel: 1,
     });
     addPower(
         {
@@ -1711,7 +1710,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEADLYBLOW",
             type: ["talent"],
             name: "Deadly Blow",
-            costPerLevel: 0,
         },
         {},
     );
