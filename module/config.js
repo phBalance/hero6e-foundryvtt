@@ -1622,6 +1622,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        key: "BEASTSPEECH",
+        type: ["talent"],
+        name: "Beast Speech",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "BERSERKFURY",
+        type: ["talent"],
+        name: "Berserk Fury",
+        costPerLevel: 0,
+    });
     addPower(
         {
             key: "BUMP_OF_DIRECTION",
@@ -1632,6 +1644,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        key: "COMBATARCHERY",
+        type: ["talent"],
+        name: "Combat Archery",
+    });
     addPower(
         {
             key: "COMBAT_LUCK",
@@ -1643,6 +1660,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "COMBATREADY",
+        type: ["talent"],
+        name: "Combat Ready",
+    });
     addPower(
         {
             key: "COMBAT_SENSE",
@@ -1652,6 +1674,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "COMBATSHOOTING",
+        type: ["talent"],
+        name: "Combat Shooting",
+    });
+    addPower(undefined, {
+        key: "COMBATSPELLCASTING",
+        type: ["talent"],
+        name: "Combat Spellcasting",
+    });
+    addPower(undefined, {
+        key: "CRIPPLINGBLOW",
+        type: ["talent"],
+        name: "Crippling Blow",
+    });
     addPower(
         {
             key: "CUSTOMTALENT",
@@ -1674,6 +1711,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEADLYBLOW",
             type: ["talent"],
             name: "Deadly Blow",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIVINEFAVOR",
+            type: ["talent"],
+            name: "Divine Favor",
             costPerLevel: 0,
         },
         {},
@@ -1706,7 +1752,61 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "EVASIVE",
+        type: ["talent"],
+        name: "Evasive",
+        costPerLevel: 0,
+    });
 
+    addPower(undefined, {
+        key: "FTLPILOT",
+        type: ["talent"],
+        name: "FTL Pilot",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "FASCINATION",
+        type: ["talent"],
+        name: "Fascination",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "FEARLESS",
+        type: ["talent"],
+        name: "Fearless",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "FOLLOWTHROUGHATTACK",
+        type: ["talent"],
+        name: "Follow Through Attack",
+        costPerLevel: 0,
+    });
+
+    addPower(undefined, {
+        key: "HOTSHOTPILOT",
+        type: ["talent"],
+        name: "Hotshot Pilot",
+        costPerLevel: 0,
+    });
+
+    addPower(undefined, {
+        key: "INSPIRE",
+        type: ["talent"],
+        name: "Inspire",
+        costPerLevel: 0,
+    });
+
+    addPower(
+        {
+            key: "LATENTPSIONIC",
+            type: ["talent"],
+            name: "Latent Psionic",
+            costPerLevel: 0,
+        },
+        {},
+    );
     addPower(
         {
             key: "LIGHTNING_CALCULATOR",
@@ -1744,6 +1844,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        key: "MAGESIGHT",
+        type: ["talent"],
+        name: "Mage Sight",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "MOUNTEDWARRIOR",
+        type: ["talent"],
+        name: "Mounted Warrior",
+        costPerLevel: 0,
+    });
+
     addPower(
         {
             key: "PERFECT_PITCH",
@@ -1764,6 +1877,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        key: "RAPIDARCHERY",
+        type: ["talent"],
+        name: "Rapid Archery",
+        costPerLevel: 1,
+    });
+    addPower(undefined, {
+        key: "RAPIDHEALING",
+        type: ["talent"],
+        name: "Rapid Healing",
+        costPerLevel: 1,
+    });
     addPower(
         {
             key: "RESISTANCE",
@@ -1774,6 +1899,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(undefined, {
+        key: "SHAPECHANGING",
+        type: ["talent"],
+        name: "Shapechanging",
+        costPerLevel: 0,
+    });
     addPower(
         {
             key: "SIMULATE_DEATH",
@@ -1783,6 +1914,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "SKILLMASTER",
+        type: ["talent"],
+        name: "Skill Master",
+        costPerLevel: 1,
+    });
     addPower(
         {
             key: "SPEED_READING",
@@ -1792,6 +1929,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "SPELLAUGMENTATION",
+        type: ["talent"],
+        name: "Spell Augmentation",
+        costPerLevel: 2,
+    });
     addPower(
         {
             key: "STRIKING_APPEARANCE",
@@ -1799,8 +1942,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Striking Appearance",
             costPerLevel: 3,
         },
-        {},
+        undefined,
     );
+
+    addPower(undefined, {
+        key: "TRACKLESSSTRIDE",
+        type: ["talent"],
+        name: "Trackless Stride",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "TURNUNDEAD",
+        type: ["talent"],
+        name: "Turn Undead",
+        costPerLevel: 0,
+    });
 
     addPower(
         {
