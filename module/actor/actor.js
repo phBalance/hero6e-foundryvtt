@@ -1380,6 +1380,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // Validate everything that's been imported
         this.items.forEach(async (item) => {
             const power = getPowerInfo({ item: item });
             if (!power) {
@@ -1877,7 +1878,7 @@ export class HeroSystem6eActor extends Actor {
 
     updateRollable(key) {
         const characteristic = this.system.characteristics[key];
-        if (characteristic.type === "rollable") {
+        if (characteristic && characteristic.type === "rollable") {
             characteristic.roll = Math.round(9 + characteristic.value * 0.2);
             if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;
