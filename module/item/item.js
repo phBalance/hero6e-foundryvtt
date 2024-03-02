@@ -2373,10 +2373,6 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS} (${system.INPUT})`;
                 break;
 
-            case "CONTACT":
-                system.description = `${system.ALIAS} `;
-                break;
-
             default:
                 {
                     if (
