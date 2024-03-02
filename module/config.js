@@ -555,16 +555,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(
-        {
-            key: "DEF",
-            name: "Defense",
-            type: ["characteristic"],
-            duration: "persistent",
-            onlyFor: ["base2", "vehicle"],
-        },
-        {},
-    );
+    addPower(undefined, {
+        key: "DEF",
+        name: "Defense",
+        type: ["characteristic"],
+        duration: "persistent",
+        onlyFor: ["base2", "vehicle"],
+    });
+
     addPower(
         {
             key: "SIZE",
@@ -583,7 +581,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 1",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -593,7 +590,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 2",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -603,7 +599,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 3",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -613,7 +608,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 4",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -623,7 +617,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 5",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -633,7 +626,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 6",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -643,7 +635,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 7",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -653,7 +644,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 8",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -663,7 +653,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 9",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
@@ -673,7 +662,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Custom Characteristic 10",
             type: ["characteristic"],
             duration: "persistent",
-            onlyFor: ["automaton", "vehicle", "base2"],
         },
         {},
     );
