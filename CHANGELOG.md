@@ -1,7 +1,8 @@
 # Releases
 
 ## Version 3.0.60 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Fixes for TELEKINESIS (TK punch/strike).  Also fixed issue where effective STR was specified as part of the attack. [#780](https://github.com/dmdorman/hero6e-foundryvtt/issues/780)
+- Fixes for TELEKINESIS (TK punch/strike). [#780](https://github.com/dmdorman/hero6e-foundryvtt/issues/780)
+- Effective STR specified as part of the attack is no longer ignored.  Allows for attacks at less than full power, thus conserving END.
 
 ## Version 3.0.59
 
