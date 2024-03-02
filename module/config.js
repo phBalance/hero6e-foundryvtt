@@ -679,12 +679,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "Self",
             costEnd: true,
             costPerLevel: 20,
-            // "ignoreFor": [
-            //     "base2",
-            //     "computer",
-            //     "ai"
-            // ],
-            onlyFor: ["none"], // TODO: Hmm.
+            onlyFor: ["base2"],
         },
         {},
     );
