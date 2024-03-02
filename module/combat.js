@@ -750,6 +750,45 @@ export class HeroSystem6eCombat extends Combat {
                         (await combatant.actor.TakeRecovery()) +
                         "</li>";
                 }
+
+                // END RESERVE
+                for (const item of actor.items.filter(
+                    (o) => o.system.XMLID === "ENDURANCERESERVE",
+                )) {
+                    const ENDURANCERESERVEREC = item.findModsByXmlid(
+                        "ENDURANCERESERVEREC",
+                    );
+                    if (ENDURANCERESERVEREC) {
+                        console.log(item);
+                        if (item.system.value < item.system.max) {
+                            item.system.value += parseInt(
+                                ENDURANCERESERVEREC.LEVELS,
+                            );
+                            await item.update({
+                                "system.value": item.system.value,
+                            });
+                            if (!combatant.hidden) {
+                                content +=
+                                    "<li>" +
+                                    `${combatant.token.name} ${
+                                        item.name
+                                    } +${parseInt(
+                                        ENDURANCERESERVEREC.LEVELS,
+                                    )}` +
+                                    "</li>";
+                            } else {
+                                contentHidden +=
+                                    "<li>" +
+                                    `${combatant.token.name} ${
+                                        item.name
+                                    } +${parseInt(
+                                        ENDURANCERESERVEREC.LEVELS,
+                                    )}` +
+                                    "</li>";
+                            }
+                        }
+                    }
+                }
             }
         }
         content += "</ul>";
