@@ -103,7 +103,7 @@ export class HeroSystem6eCombat extends Combat {
                     _id: combatant.id,
                 });
 
-                combatantLR.initiative = 99; //lightning_reflex_initiative;
+                combatantLR.initiative = lightning_reflex_initiative;
                 combatantLR.flags.lightningReflexesAlias =
                     lightning_reflex_alias;
 
