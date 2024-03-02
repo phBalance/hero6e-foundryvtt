@@ -35,9 +35,9 @@ export class HeroSystem6eCombat extends Combat {
             let dexValue =
                 combatant.actor.system.characteristics[characteristic].value;
             let spdValue = combatant.actor.system.characteristics.spd.value;
-            let intValue = combatant.actor.system.characteristics.int.value;
+            //let intValue = combatant.actor.system.characteristics.int.value;
 
-            let initiativeValue = dexValue + spdValue / 100 + intValue / 10000;
+            let initiativeValue = dexValue + spdValue / 100; // + intValue / 10000;
 
             if (initiativeValue != combatant.initiative) {
                 updates.push({

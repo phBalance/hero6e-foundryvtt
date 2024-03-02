@@ -68,7 +68,7 @@ Hooks.once("init", async function () {
      */
     CONFIG.Combat.initiative = {
         formula:
-            "@characteristics.dex.value + (@characteristics.int.value / 100)",
+            "@characteristics.dex.value + (@characteristics.spd.value / 100)",
         decimals: 2,
     };
 
