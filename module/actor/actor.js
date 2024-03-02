@@ -1423,64 +1423,67 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // Perception Skill
-        const itemDataPerception = {
-            name: "Perception",
-            type: "skill",
-            system: {
-                XMLID: "PERCEPTION",
-                ALIAS: "Perception",
-                CHARACTERISTIC: "INT",
-                state: "trained",
-                levels: "0",
-            },
-        };
-        const perceptionItem = await HeroSystem6eItem.create(
-            itemDataPerception,
-            {
-                temporary: this.id ? false : true,
-                parent: this,
-            },
-        );
-        await perceptionItem._postUpload();
-
-        // MANEUVERS
-        for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
-            const name = entry[0];
-            const v = entry[1];
-            const PHASE = v[0];
-            const OCV = v[1];
-            const DCV = v[2];
-            let EFFECT = v[3];
-            if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
-                let divisor = EFFECT.match(/v\/(\d+)/)[1];
-                EFFECT = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`);
-            }
-            const attack = v[4];
-            const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
-            const itemData = {
-                name,
-                type: "maneuver",
+        // Characters get a few things for free that are not in the HDC.
+        if (this.type === "pc" || this.type === "npc") {
+            // Perception Skill
+            const itemDataPerception = {
+                name: "Perception",
+                type: "skill",
                 system: {
-                    PHASE,
-                    OCV,
-                    DCV,
-                    EFFECT,
-                    active: false,
-                    description: EFFECT,
-                    XMLID,
+                    XMLID: "PERCEPTION",
+                    ALIAS: "Perception",
+                    CHARACTERISTIC: "INT",
+                    state: "trained",
+                    levels: "0",
                 },
             };
-
-            // Skip if temporary actor (Quench)
-            if (this.id) {
-                const item = await HeroSystem6eItem.create(itemData, {
+            const perceptionItem = await HeroSystem6eItem.create(
+                itemDataPerception,
+                {
+                    temporary: this.id ? false : true,
                     parent: this,
-                });
-                if (attack) {
-                    await item.makeAttack();
+                },
+            );
+            await perceptionItem._postUpload();
+
+            // MANEUVERS
+            for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
+                const name = entry[0];
+                const v = entry[1];
+                const PHASE = v[0];
+                const OCV = v[1];
+                const DCV = v[2];
+                let EFFECT = v[3];
+                if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
+                    let divisor = EFFECT.match(/v\/(\d+)/)[1];
+                    EFFECT = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`);
                 }
-                await item._postUpload();
+                const attack = v[4];
+                const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
+                const itemData = {
+                    name,
+                    type: "maneuver",
+                    system: {
+                        PHASE,
+                        OCV,
+                        DCV,
+                        EFFECT,
+                        active: false,
+                        description: EFFECT,
+                        XMLID,
+                    },
+                };
+
+                // Skip if temporary actor (Quench)
+                if (this.id) {
+                    const item = await HeroSystem6eItem.create(itemData, {
+                        parent: this,
+                    });
+                    if (attack) {
+                        await item.makeAttack();
+                    }
+                    await item._postUpload();
+                }
             }
         }
 
