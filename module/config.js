@@ -700,6 +700,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
     addPower(
         {
             key: "FLIGHT",
@@ -709,10 +710,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["base2", "computer", "ai"],
         },
         {
-            key: "FLIGHT",
             costPerLevel: 2,
         },
     );
+    addPower(
+        {
+            key: "FTL",
+            name: "Faster-Than-Light Travel",
+            type: ["movement"],
+            costEnd: false,
+            costPerLevel: 2,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
     addPower(undefined, {
         key: "GLIDING",
         type: ["movement"],
@@ -720,6 +732,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: 1,
         ignoreFor: ["base2", "computer", "ai"],
     });
+
     addPower(
         {
             key: "LEAPING",
@@ -737,6 +750,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: 1,
         },
     );
+
     addPower(
         {
             key: "RUNNING",
@@ -752,6 +766,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: 2,
         },
     );
+
     addPower(
         {
             key: "SWIMMING",
@@ -781,6 +796,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: 1,
         },
     );
+
     addPower(
         {
             key: "TELEPORTATION",
@@ -1420,18 +1436,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addFrameworksToPowerList() {
     addPower(
         {
-            key: "LIST",
-            type: ["framework"],
+            key: "COMPOUNDPOWER",
+            type: ["compound"],
         },
         {},
     );
+
     addPower(
         {
-            key: "VPP",
+            key: "DIFFERINGMODIFIER",
+            name: "Differing Modifier",
             type: ["framework"],
         },
         {},
     );
+
     addPower(
         {
             key: "ELEMENTAL_CONTROL",
@@ -1439,6 +1458,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            key: "LIST",
+            type: ["framework"],
+        },
+        {},
+    );
+
     addPower(
         {
             key: "MULTIPOWER",
@@ -1446,10 +1474,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
     addPower(
         {
-            key: "COMPOUNDPOWER",
-            type: ["compound"],
+            key: "VPP",
+            type: ["framework"],
         },
         {},
     );
@@ -2016,18 +2045,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         undefined,
         {
             key: "ARMOR",
-            type: ["defense"],
             name: "Resistant Protection",
+            type: ["defense"],
             duration: "Persistent",
             costPerLevel: 3 / 2,
         },
-        {},
+        {
+            name: "Armor",
+        },
     );
     addPower(
         {
-            key: "AUTOMATON", //CANNOT BE STUNNED
+            key: "AUTOMATON",
+            name: "Takes No Stun",
             type: ["automaton", "special"],
-            name: "Automaton",
             perceivability: "Inobvious",
             duration: "Persistent",
             target: "Self Only",
@@ -2045,7 +2076,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "Obvious",
             duration: "Constant",
             target: "Target’s DCV",
-            range: "Standard",
+            range: "standard",
             costEnd: true,
             costPerLevel: 1,
         },
@@ -2054,6 +2085,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CLAIRSENTIENCE",
+            name: "Clairsentience",
             type: ["sense"],
             range: "standard",
         },
@@ -2072,6 +2104,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOMPOWER",
+            name: "Custom Power",
             type: ["custom"],
         },
         {},
@@ -2080,21 +2113,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DAMAGENEGATION",
-            type: ["defense", "special"],
             name: "Damage Negation",
+            type: ["defense", "special"],
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
             range: "self",
             costEnd: false,
         },
-        {},
+        undefined,
     );
     addPower(
         {
             key: "DAMAGEREDUCTION",
-            type: ["defense", "standard"],
             name: "Damage Reduction",
+            type: ["defense", "standard"],
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
@@ -2121,24 +2154,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DARKNESS",
+            name: "Darkness",
             type: ["sense-affecting", "attack", "standard"],
             duration: "constant",
             range: "standard",
             costEnd: true,
-        },
-        {},
-    );
-    addPower(
-        {
-            key: "DEFLECTION",
-            name: "Deflection",
-            type: ["defense", "standard"],
-            perceivability: "Inobvious",
-            duration: "instant",
-            target: "Target’s OCV (see text)",
-            range: "Standard",
-            costEnd: true,
-            //"cost": 20,
         },
         {},
     );
@@ -2161,8 +2181,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DESOLIDIFICATION",
-            type: ["body-affecting", "standard"], // TODO: Needs on off role
             name: "Desolidification",
+            type: ["body-affecting", "standard"], // TODO: Needs on off role
+            costEnd: true,
         },
         {},
     );
@@ -2177,6 +2198,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "standard",
             costEnd: true,
             costPerLevel: 3,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DOESNOTBLEED",
+            name: "Does Not Bleed",
+            type: ["automaton", "special"],
+            perceivability: "obvious",
+            duration: "persistent",
         },
         {},
     );
@@ -2197,8 +2228,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DUPLICATION",
-            type: ["BodyAffecting", "special"],
             name: "Duplication",
+            type: ["body-affecting", "special"],
             perceivability: "Obvious",
             duration: "persistent",
             target: "Self Only",
@@ -2221,7 +2252,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: 10,
         },
-        {},
+        {
+            name: "Ego Attack",
+        },
     );
     addPower(
         {
@@ -2240,16 +2273,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ENERGYBLAST",
+            name: "Blast",
             type: ["attack"],
             range: "standard",
             costPerLevel: 5,
             costEnd: true,
         },
-        {},
+        {
+            name: "Energy Blast",
+        },
     );
     addPower(
         {
             key: "ENTANGLE",
+            name: "Entangle",
             type: ["attack", "standard"],
             range: "standard",
             costPerLevel: 10,
@@ -2260,16 +2297,40 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "EXTRALIMBS",
+            name: "Extra Limbs",
             type: ["standard"],
             costPerLevel: 0,
         },
         {},
     );
 
+    addPower(undefined, {
+        key: "FINDWEAKNESS",
+        type: ["sense", "special", "skill"],
+    });
     addPower(
         {
-            key: "FINDWEAKNESS",
-            type: ["sense", "special", "skill"],
+            key: "FIXEDLOCATION",
+            name: "Teleportation: Fixed Location",
+            type: ["attack", "sense-affecting", "standard"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "Target’s DCV",
+            range: "standard",
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FLOATINGLOCATION",
+            name: "Teleportation: Floating Fixed Location",
+            type: ["attack", "sense-affecting", "standard"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "Target’s DCV",
+            range: "standard",
+            costEnd: true,
         },
         {},
     );
@@ -2302,7 +2363,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "FORCEFIELD",
-            type: ["defense"],
+            type: ["defense", "standard"],
             name: "Resistant Protection",
             duration: "Persistent",
             perceivability: "inobvious",
@@ -2318,21 +2379,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: 1,
         },
     );
-    addPower(undefined, {
-        key: "FORCEWALL",
-        type: ["defense"],
-        name: "Barrier",
-        duration: "instant",
-        range: "standard",
-        costEnd: true,
-        costPerLevel: 1.5,
-    });
+    addPower(
+        {
+            key: "FORCEWALL",
+            type: ["defense", "standard"],
+            name: "Barrier",
+            duration: "instant",
+            range: "standard",
+            costEnd: true,
+            costPerLevel: 3,
+        },
+        {
+            name: "Force Wall",
+            duration: "constant",
+            costPerLevel: 2.5,
+        },
+    );
 
     addPower(
         {
             key: "GROWTH",
             name: "Growth",
-            type: ["body-affecting", "defense", "size"],
+            type: ["body-affecting", "defense", "size"], // TODO: Not defense type
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -2346,19 +2414,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "HANDTOHANDATTACK",
+            name: "Hand-To-Hand Attack",
             type: ["attack"],
             range: "no range",
             costPerLevel: 5,
-        },
-        {},
-    );
-    addPower(
-        {
-            key: "HKA",
-            type: ["attack"],
-            range: "no range",
-            costPerLevel: 15,
-            costEnd: true,
         },
         {},
     );
@@ -2372,6 +2431,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "no range",
             costEnd: true,
             costPerLevel: 10,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "HKA",
+            name: "Hand-To-Hand Killing Attack",
+            type: ["attack"],
+            range: "no range",
+            costPerLevel: 15,
+            costEnd: true,
         },
         {},
     );
@@ -2477,7 +2547,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALILLUSIONS",
             name: "Mental Illusions",
-            type: ["attack", "mental"], // TODO: Not attack but dice role
+            type: ["attack", "mental"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -2491,7 +2561,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDCONTROL",
             name: "Mind Control",
-            type: ["attack", "mental"], // TODO: Not attack but dice role
+            type: ["attack", "mental"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -2518,7 +2588,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MINDSCAN",
-            type: ["attack", "mental"], // TODO: Not attack but dice role
+            type: ["attack", "mental", "sense"], // TODO: Not attack but dice role
             perceivability: "imperceptible",
             duration: "constant",
             target: "dmcv",
@@ -2530,8 +2600,24 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "MISSILEDEFLECTION",
+            name: "Deflection",
+            type: ["defense", "standard"],
+            perceivability: "Inobvious",
+            duration: "instant",
+            target: "Target’s OCV", // TODO: Do we need to repeat "Target's..."?
+            range: "standard",
+            costEnd: true,
+        },
+        {
+            name: "Missile Deflection and Reflection",
+            duration: "constant",
+        },
+    );
+    addPower(
+        {
             key: "MULTIFORM",
-            type: ["BodyAffecting", "special"], // TODO: Wrong type I think.
+            type: ["body-affecting", "standard"],
             name: "Multiform",
             perceivability: "Obvious",
             duration: "persistent",
@@ -2553,7 +2639,31 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            key: "NOHITLOCATIONS",
+            name: "No Hit Locations",
+            type: ["automaton"],
+            costEnd: true,
+            costPerLevel: 0,
+        },
+        undefined,
+    );
 
+    addPower(
+        {
+            key: "POSSESSION",
+            type: ["attack", "mental"],
+            name: "Possession",
+            perceivability: "obvious",
+            duration: "constant",
+            target: "DMCV",
+            range: "los",
+            costEnd: true,
+            costPerLevel: 0.5,
+        },
+        undefined,
+    );
     addPower(
         {
             key: "POWERDEFENSE",
@@ -2576,6 +2686,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "REFLECTION",
+            type: ["attack", "standard"],
+            perceivability: "imperceptible",
+            duration: "instant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 3 / 2,
+        },
+        undefined,
+    );
+    addPower(
+        {
             key: "REGENERATION",
             type: ["special"],
             perceivability: "imperceptible",
@@ -2584,11 +2707,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
         },
-        {},
+        undefined,
     );
     addPower(
         {
             key: "RKA",
+            name: "Ranged Killing Attack",
             type: ["attack"],
             range: "standard",
             costPerLevel: 15,
@@ -2621,6 +2745,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "SHRINKING",
+            name: "Shrinking",
+            type: ["body-affecting", "size"],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 6,
+        },
+        { costPerLevel: 10 },
+    );
+    addPower(
+        {
             key: "STRETCHING",
             type: ["body-affecting", "standard"],
             perceivability: "obvious",
@@ -2628,36 +2766,42 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: true,
-            costPerLevel: 5,
+            costPerLevel: 1,
         },
-        {},
+        { costPerLevel: 5 },
     );
     addPower(
         {
             key: "SUMMON",
+            name: "Summon",
             type: ["standard"],
+            duration: "instant",
+            target: "n/a",
+            range: "self",
+            costPerLevel: 1 / 5,
         },
         {},
     );
-    addPower(
-        undefined, // TODO: Ignore for 6e or is undefined a better way to do it?
-        {
-            key: "SUPPRESS",
-            name: "Suppress",
-            type: ["adjustment", "attack"],
-            perceivability: "obvious",
-            duration: "constant",
-            target: "target’s DCV",
-            range: "standard",
-            costEnd: true,
-            costPerLevel: 5,
-        },
-    );
+    addPower(undefined, {
+        key: "SUPPRESS",
+        name: "Suppress",
+        type: ["adjustment", "attack"],
+        perceivability: "obvious",
+        duration: "constant",
+        target: "target’s DCV",
+        range: "standard",
+        costEnd: true,
+        costPerLevel: 5,
+    });
 
     addPower(
         {
             key: "TELEKINESIS",
+            name: "Telekinesis",
             type: ["attack"],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "target’s DCV",
             range: "standard",
             costEnd: true,
             costPerLevel: 1.5,
@@ -2667,7 +2811,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "TELEPATHY",
-            type: ["mental", "attack"],
+            type: ["mental", "attack"], // TODO: Not an attack power but needs dice
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -2696,9 +2840,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "target's DCV",
-            range: "Standard", // TODO: capital "Standard" doesn't match other powers.
+            range: "standard",
             costEnd: true,
-            //cost: See Transform Table
         },
         {},
     );
