@@ -750,6 +750,40 @@ export class HeroSystem6eCombat extends Combat {
                         (await combatant.actor.TakeRecovery()) +
                         "</li>";
                 }
+
+                // END RESERVE
+                for (const item of actor.items.filter(
+                    (o) => o.system.XMLID === "ENDURANCERESERVE",
+                )) {
+                    const ENDURANCERESERVEREC = item.findModsByXmlid(
+                        "ENDURANCERESERVEREC",
+                    );
+                    if (ENDURANCERESERVEREC) {
+                        const newValue = Math.min(
+                            item.system.max,
+                            item.system.value +
+                                parseInt(ENDURANCERESERVEREC.LEVELS),
+                        );
+                        if (newValue > item.system.value) {
+                            const delta = newValue - item.system.value;
+                            await item.update({
+                                "system.value": newValue,
+                            });
+
+                            if (!combatant.hidden) {
+                                content +=
+                                    "<li>" +
+                                    `${combatant.token.name} ${item.name} +${delta}` +
+                                    "</li>";
+                            } else {
+                                contentHidden +=
+                                    "<li>" +
+                                    `${combatant.token.name} ${item.name} +${delta}` +
+                                    "</li>";
+                            }
+                        }
+                    }
+                }
             }
         }
         content += "</ul>";
