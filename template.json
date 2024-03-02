@@ -10,9 +10,6 @@
             "ai"
         ],
         "templates": {
-            "base": {
-
-            },
             "character": {
                 "biography": "",
                 "attributes": {
@@ -211,10 +208,116 @@
             "templates": ["character"]
         },
         "vehicle": {
-            "templates": ["character"]
+            "templates": ["character"],
+            "characteristics": {
+                "size": {
+                    "value": 0,
+                    "max": 0,
+                    "core": 0,
+                    "realCost": 0
+                },
+                "str": {
+                    "value": 10,
+                    "max": 10,
+                    "core": 10,
+                    "realCost": 0,
+                    "type": "rollable"
+                },
+                "dex": {
+                    "value": 10,
+                    "max": 10,
+                    "core": 10,
+                    "realCost": 0,
+                    "type": "rollable"
+                },
+                "ocv": {
+                    "max": 3,
+                    "value": 3,
+                    "core": 3
+                },
+                "dcv": {
+                    "max": 3,
+                    "value": 3,
+                    "core": 3,
+                    "realCost": 0
+                },
+                "spd": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "pd": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "ed": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "def": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "body": {
+                    "value": 10,
+                    "max": 10,
+                    "core": 10,
+                    "realCost": 0
+                },
+                "running": {
+                    "value": 12,
+                    "max": 12,
+                    "core": 12,
+                    "realCost": 0
+                },
+                "swimming": {
+                    "value": 4,
+                    "max": 4,
+                    "core": 4,
+                    "realCost": 0
+                }
+            }
         },
         "base2": {
-            "templates": ["character"]
+            "characteristics": {
+                "basesize": {
+                    "value": 0,
+                    "max": 0,
+                    "core": 0,
+                    "realCost": 0                
+                },
+                "body": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "pd": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "ed": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "def": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                }
+            }
         },
         "automaton": {
             "templates": ["character"]
