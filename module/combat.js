@@ -759,31 +759,26 @@ export class HeroSystem6eCombat extends Combat {
                         "ENDURANCERESERVEREC",
                     );
                     if (ENDURANCERESERVEREC) {
-                        console.log(item);
-                        if (item.system.value < item.system.max) {
-                            item.system.value += parseInt(
-                                ENDURANCERESERVEREC.LEVELS,
-                            );
+                        const newValue = Math.min(
+                            item.system.max,
+                            item.system.value +
+                                parseInt(ENDURANCERESERVEREC.LEVELS),
+                        );
+                        if (newValue > item.system.value) {
+                            const delta = newValue - item.system.value;
                             await item.update({
-                                "system.value": item.system.value,
+                                "system.value": newValue,
                             });
+
                             if (!combatant.hidden) {
                                 content +=
                                     "<li>" +
-                                    `${combatant.token.name} ${
-                                        item.name
-                                    } +${parseInt(
-                                        ENDURANCERESERVEREC.LEVELS,
-                                    )}` +
+                                    `${combatant.token.name} ${item.name} +${delta}` +
                                     "</li>";
                             } else {
                                 contentHidden +=
                                     "<li>" +
-                                    `${combatant.token.name} ${
-                                        item.name
-                                    } +${parseInt(
-                                        ENDURANCERESERVEREC.LEVELS,
-                                    )}` +
+                                    `${combatant.token.name} ${item.name} +${delta}` +
                                     "</li>";
                             }
                         }
