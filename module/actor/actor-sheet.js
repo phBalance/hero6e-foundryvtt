@@ -907,14 +907,15 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     /** @override */
-    async _updateObject(event, formData) {
+    async _updateObject(_event, formData) {
         let expandedData = foundry.utils.expandObject(formData);
 
         const characteristics = ["body", "stun", "end"];
         for (const characteristic of characteristics) {
             if (
+                this.actor.system.characteristics[characteristic] &&
                 expandedData.Xsystem.characteristics[characteristic].value !==
-                this.actor.system.characteristics[characteristic].value
+                    this.actor.system.characteristics[characteristic].value
             ) {
                 expandedData.system.characteristics[characteristic].value =
                     expandedData.Xsystem.characteristics[characteristic].value;
