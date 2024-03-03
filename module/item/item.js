@@ -3455,6 +3455,10 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 skillData.roll = `${11 + level}-`;
+            } else if (configPowerInfo?.type.includes("characteristic")) {
+                // Characteristics can be bought as powers. We don't give them a roll in this case as they will be
+                // rolled from the characteristics tab.
+                skillData.roll = null;
             } else {
                 console.warn(
                     `Don't know how to build non characteristic based roll information for ${skillData.XMLID}`,
