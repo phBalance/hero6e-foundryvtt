@@ -959,7 +959,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMBAT_LEVELS",
             type: ["skill"],
             behaviors: [],
-            xmlid: "COMBAT_LEVELS", // TODO: Do we need this?
         },
         {},
     );
@@ -1206,7 +1205,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MENTAL_COMBAT_LEVELS",
             type: ["skill"],
             behaviors: [],
-            xmlid: "MENTAL_COMBAT_LEVELS", // TODO: Hmmm.
         },
         undefined,
     );

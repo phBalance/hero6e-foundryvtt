@@ -1851,7 +1851,7 @@ export class HeroSystem6eItem extends Item {
             xmlid: system.XMLID,
             actor: this.actor,
         });
-        const powerXmlId = configPowerInfo?.xmlid || system.XMLID;
+        const powerXmlId = system.XMLID;
 
         switch (powerXmlId) {
             case "DENSITYINCREASE":
@@ -2980,20 +2980,10 @@ export class HeroSystem6eItem extends Item {
     makeAttack() {
         const xmlid = this.system.XMLID;
 
-        // Confirm this is an attack
-        const configPowerInfo = getPowerInfo({
-            xmlid: xmlid,
-            actor: this.actor,
-        });
-
         // Name
         let description = this.system.ALIAS;
         let name =
-            this.system.NAME ||
-            description ||
-            configPowerInfo?.xmlid ||
-            this.system.name ||
-            this.name;
+            this.system.NAME || description || this.system.name || this.name;
         this.name = name;
 
         let levels =

@@ -41,7 +41,7 @@ export function getPowerInfo(options) {
         );
     }
 
-    const powerList = actor.system.is5e
+    const powerList = actor?.system.is5e
         ? CONFIG.HERO.powers5e
         : CONFIG.HERO.powers6e;
     let powerInfo = powerList.find((o) => o.key === xmlid);
@@ -56,6 +56,7 @@ export function getPowerInfo(options) {
         };
     }
 
+    // TODO: Why are we modifying the power entries from config here?
     if (powerInfo) {
         powerInfo.xmlid = xmlid;
         powerInfo.XMLID = xmlid;
