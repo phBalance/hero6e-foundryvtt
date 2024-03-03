@@ -1383,9 +1383,16 @@ export class HeroSystem6eActor extends Actor {
         // Validate everything that's been imported
         this.items.forEach(async (item) => {
             const power = getPowerInfo({ item: item });
+
+            // Power needs to exist
             if (!power) {
                 await ui.notifications.error(
                     `${this.name}/${item.name} has unknown power XMLID: ${item.system.XMLID}. Please report.`,
+                    { console: true, permanent: true },
+                );
+            } else if (!power.behaviors) {
+                await ui.notifications.error(
+                    `${this.name}/${item.name}/${item.system.XMLID} does not have behaviors defined. Please report.`,
                     { console: true, permanent: true },
                 );
             }
@@ -1881,7 +1888,11 @@ export class HeroSystem6eActor extends Actor {
 
     updateRollable(key) {
         const characteristic = this.system.characteristics[key];
-        if (characteristic && characteristic.type === "rollable") {
+        const charPowerEntry = getPowerInfo({
+            xmlid: key.toUpperCase(),
+            actor: this,
+        });
+        if (characteristic && charPowerEntry?.behaviors.includes("roll")) {
             characteristic.roll = Math.round(9 + characteristic.value * 0.2);
             if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;

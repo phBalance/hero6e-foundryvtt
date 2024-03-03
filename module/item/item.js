@@ -3285,8 +3285,12 @@ export class HeroSystem6eItem extends Item {
 
         skillData.tags = [];
 
-        // SKILL LEVELS
-        if (skillData.XMLID === "SKILL_LEVELS") {
+        const configPowerInfo = getPowerInfo({
+            xmlid: skillData.XMLID,
+            actor: this.actor,
+        });
+
+        if (!configPowerInfo || !configPowerInfo.behaviors.includes("roll")) {
             skillData.roll = null;
             return;
         }
@@ -3352,20 +3356,10 @@ export class HeroSystem6eItem extends Item {
 
                 skillData.roll = `${perkRollValue}-`;
             } else {
+                // TODO: Still required?
                 skillData.roll = null;
             }
 
-            return;
-        }
-
-        const configPowerInfo = getPowerInfo({
-            xmlid: skillData.XMLID,
-            actor: this.actor,
-        });
-
-        // Combat Skill Levels are not rollable
-        if (configPowerInfo && configPowerInfo.rollable === false) {
-            skillData.roll = null;
             return;
         }
 
