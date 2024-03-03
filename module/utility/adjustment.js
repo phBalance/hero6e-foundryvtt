@@ -57,7 +57,7 @@ export function adjustmentSourcesStrict(actor) {
 
     // Attack powers
     for (const item of actor.items.filter(
-        (item) => item.type === "power" && item.system.XMLID != "MULTIPOWER",
+        (item) => item.type === "power" && item.system.XMLID !== "MULTIPOWER",
     )) {
         powers.push({ key: item.system.XMLID });
     }
