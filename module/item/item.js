@@ -207,7 +207,7 @@ export class HeroSystem6eItem extends Item {
                 return this.toggle();
 
             case "skill":
-            default:
+            default: {
                 const powerInfo = getPowerInfo({
                     item: this,
                 });
@@ -228,6 +228,7 @@ export class HeroSystem6eItem extends Item {
                         `${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`,
                     );
                 }
+            }
         }
     }
 
