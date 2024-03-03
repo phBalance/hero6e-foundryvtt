@@ -32,6 +32,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 "DISPEL",
                 "DRAIN",
                 "HEALING",
+                "SUCCOR",
                 "SUPPRESS",
                 "TRANSFER",
             ].includes(this.item.system.XMLID)
@@ -174,6 +175,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             item.system.XMLID === "HEALING" ||
             item.system.XMLID === "DISPEL" ||
             item.system.XMLID === "DRAIN" ||
+            item.system.XMLID === "SUCCOR" ||
             item.system.XMLID === "SUPPRESS" ||
             item.system.XMLID === "TRANSFER"
         ) {
@@ -182,6 +184,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             const enhancesValidator =
                 item.system.XMLID === "AID" ||
                 item.system.XMLID === "ABSORPTION" ||
+                item.system.XMLID === "SUCCOR" ||
                 item.system.XMLID === "TRANSFER"
                     ? adjustmentSourcesStrict
                     : adjustmentSourcesPermissive;
@@ -351,6 +354,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 this.item.system.XMLID === "DISPEL" ||
                 this.item.system.XMLID === "DRAIN" ||
                 this.item.system.XMLID === "SUPPRESS" ||
+                this.item.system.XMLID === "SUCCOR" ||
                 this.item.system.XMLID === "TRANSFER")
         ) {
             let newInputStr;

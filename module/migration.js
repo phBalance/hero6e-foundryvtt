@@ -924,7 +924,7 @@ async function migrateActorDefenseMovementData(actor) {
     // Place a migrationTag in the actor with today's date.
     // This allows us to skip this migration in the future.
     // Specifically it allows custom defenses to be manually added
-    // without deleting it eveytime world loads.
+    // without deleting it every time the world loads.
     //if (actor.system.migrationTag != migrationTag) {
     for (let item of actor.items.filter(
         (o) => o.type == "defense" || o.type == "movement",

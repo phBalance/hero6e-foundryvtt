@@ -7,11 +7,14 @@ import { RoundFavorPlayerUp } from "./round.js";
 export function adjustmentSourcesPermissive(actor) {
     let choices = {};
 
-    const powers = CONFIG.HERO.powers.filter(
+    const powerList = actor.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+    const powers = powerList.filter(
         (power) =>
-            !power.powerType?.includes("skill") &&
-            !power.powerType?.includes("perk") &&
-            !power.powerType?.includes("talent"),
+            !power.type?.includes("skill") &&
+            !power.type?.includes("perk") &&
+            !power.type?.includes("talent"),
     );
 
     for (const power of powers) {
@@ -40,10 +43,13 @@ export function adjustmentSourcesPermissive(actor) {
 export function adjustmentSourcesStrict(actor) {
     let choices = {};
 
-    const powers = CONFIG.HERO.powers.filter(
+    const powerList = actor.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+    const powers = powerList.filter(
         (power) =>
-            (power.powerType?.includes("characteristic") ||
-                power.powerType?.includes("movement")) &&
+            (power.type?.includes("characteristic") ||
+                power.type?.includes("movement")) &&
             !power.ignoreFor?.includes(actor.type) &&
             !power.ignoreFor?.includes(actor.system.is5e ? "5e" : "6e") &&
             (!power.onlyFor || power.onlyFor.includes(actor.type)),
@@ -51,7 +57,7 @@ export function adjustmentSourcesStrict(actor) {
 
     // Attack powers
     for (const item of actor.items.filter(
-        (item) => item.type === "power" && item.system.XMLID != "MULTIPOWER",
+        (item) => item.type === "power" && item.system.XMLID !== "MULTIPOWER",
     )) {
         powers.push({ key: item.system.XMLID });
     }
@@ -117,7 +123,7 @@ export function defensivePowerAdjustmentMultiplier(XMLID, actor) {
         return 2;
     }
 
-    if (configPowerInfo.powerType?.includes("defense")) return 2;
+    if (configPowerInfo.type?.includes("defense")) return 2;
 
     return 1;
 }
@@ -129,6 +135,7 @@ export function determineMaxAdjustment(item) {
     if (
         item.system.XMLID !== "ABSORPTION" &&
         item.system.XMLID !== "AID" &&
+        item.system.XMLID !== "SUCCOR" &&
         item.system.XMLID !== "TRANSFER"
     ) {
         return reallyBigInteger;

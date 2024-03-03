@@ -335,9 +335,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 }
             }
 
-            if (item.system.subType || item.type == "skill") {
-                item.skillRollUpdateValue();
-            }
+            item.skillRollUpdateValue();
 
             // Charges
             if (parseInt(item.system.charges?.max || 0) > 0) {
@@ -781,10 +779,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                 actor: this.actor,
             });
             let valueTop = Math.max(char.value, char.max);
-            let activePoints = valueTop * powerInfo.cost;
+            let activePoints = valueTop * (powerInfo?.cost || 0);
             if (activePoints > 0) {
                 data.activePointSummary.push({
-                    name: powerInfo.name || key,
+                    name: powerInfo?.name || key,
                     activePoints: activePoints,
                 });
             }
@@ -907,14 +905,15 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     /** @override */
-    async _updateObject(event, formData) {
+    async _updateObject(_event, formData) {
         let expandedData = foundry.utils.expandObject(formData);
 
         const characteristics = ["body", "stun", "end"];
         for (const characteristic of characteristics) {
             if (
+                this.actor.system.characteristics[characteristic] &&
                 expandedData.Xsystem.characteristics[characteristic].value !==
-                this.actor.system.characteristics[characteristic].value
+                    this.actor.system.characteristics[characteristic].value
             ) {
                 expandedData.system.characteristics[characteristic].value =
                     expandedData.Xsystem.characteristics[characteristic].value;

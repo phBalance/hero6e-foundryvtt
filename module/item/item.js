@@ -156,12 +156,16 @@ export class HeroSystem6eItem extends Item {
             case "defense":
                 return true;
         }
-        return false;
+
+        return getPowerInfo({ item: this })?.behaviors.includes("success")
+            ? true
+            : false;
     }
 
     async roll(event) {
         if (!this.actor.canAct(true)) return;
 
+        // TODO: Convert to behaviors when powers are fully updated
         switch (this.system.subType || this.type) {
             case "attack":
                 switch (this.system.XMLID) {
@@ -174,6 +178,7 @@ export class HeroSystem6eItem extends Item {
                     case "AID":
                     case "DRAIN":
                     case "HEALING":
+                    case "SUCCOR":
                     case "TRANSFER":
                     case "STRIKE":
                     case "FLASH":
@@ -203,12 +208,28 @@ export class HeroSystem6eItem extends Item {
                 return this.toggle();
 
             case "skill":
-                this.skillRollUpdateValue();
-                if (!(await RequiresASkillRollCheck(this))) return;
-                return createSkillPopOutFromItem(this, this.actor);
+            default: {
+                const powerInfo = getPowerInfo({
+                    item: this,
+                });
+                const hasSuccessRoll = powerInfo?.behaviors.includes("success");
+                const isSkill = powerInfo?.type.includes("skill");
 
-            default:
-                ui.notifications.warn(`${this.name} roll is not supported`);
+                if (hasSuccessRoll && isSkill) {
+                    this.skillRollUpdateValue();
+                    if (!(await RequiresASkillRollCheck(this))) return;
+                    return createSkillPopOutFromItem(this, this.actor);
+                } else if (hasSuccessRoll) {
+                    // Handle any type of non skill based success roll with a basic roll
+                    // TODO: Basic roll.
+                    this.skillRollUpdateValue();
+                    return createSkillPopOutFromItem(this, this.actor);
+                } else {
+                    ui.notifications.warn(
+                        `${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`,
+                    );
+                }
+            }
         }
     }
 
@@ -357,7 +378,7 @@ export class HeroSystem6eItem extends Item {
                     const configPowerInfo = getPowerInfo({ item: item });
                     if (
                         (configPowerInfo &&
-                            configPowerInfo.powerType.includes("defense")) ||
+                            configPowerInfo.type.includes("defense")) ||
                         item.type === "equipment"
                     ) {
                         await item.update({ [attr]: newValue });
@@ -740,6 +761,32 @@ export class HeroSystem6eItem extends Item {
                     this.system.costPerLevel = 2;
                     break;
             }
+        } else if (this.system.XMLID === "Advanced Tech") {
+            if (this.system.OPTIONID === "NORMAL") {
+                this.system.costPerLevel = 15;
+            } else {
+                this.system.costPerLevel = 10;
+            }
+        } else if (this.system.XMLID === "DEADLYBLOW") {
+            switch (this.system.OPTIONID) {
+                case "VERYLIMITED":
+                    this.system.costPerLevel = 4;
+                    break;
+
+                case "LIMITED":
+                    this.system.costPerLevel = 7;
+                    break;
+
+                case "ANY":
+                    this.system.costPerLevel = 10;
+                    break;
+
+                default:
+                    console.error(
+                        `Unknown skill levels ${this.system.OPTIONID} for ${this.actor.name}/${this.name}`,
+                    );
+                    break;
+            }
         }
 
         // BASECOST
@@ -1049,7 +1096,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // DEFENSES
-        if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
+        if (configPowerInfo && configPowerInfo.type?.includes("defense")) {
             const newDefenseValue = "defense";
             if (this.system.subType != newDefenseValue) {
                 this.system.subType = newDefenseValue;
@@ -1069,10 +1116,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MOVEMENT
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("movement")
-        ) {
+        if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
             const movement = "movement";
             if (this.system.subType != movement) {
                 this.system.subType = movement;
@@ -1090,7 +1134,7 @@ export class HeroSystem6eItem extends Item {
         // }
 
         // SKILLS
-        if (configPowerInfo && configPowerInfo.powerType?.includes("skill")) {
+        if (configPowerInfo && configPowerInfo.type?.includes("skill")) {
             const skill = "skill";
             if (this.system.subType != skill) {
                 this.system.subType = skill;
@@ -1099,7 +1143,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
-        if (configPowerInfo && configPowerInfo.powerType?.includes("attack")) {
+        if (configPowerInfo && configPowerInfo.type?.includes("attack")) {
             const attack = "attack";
             if (this.system.subType != attack) {
                 this.system.subType = attack;
@@ -1137,7 +1181,7 @@ export class HeroSystem6eItem extends Item {
             changed &&
             this.id &&
             configPowerInfo &&
-            configPowerInfo.powerType?.includes("movement")
+            configPowerInfo.type?.includes("movement")
         ) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
@@ -1174,7 +1218,7 @@ export class HeroSystem6eItem extends Item {
         if (
             changed &&
             this.id &&
-            configPowerInfo?.powerType?.includes("characteristic")
+            configPowerInfo?.type?.includes("characteristic")
         ) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
@@ -1329,12 +1373,12 @@ export class HeroSystem6eItem extends Item {
 
     getAttacksWith() {
         const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo.powerType.includes("mental")) return "omcv";
+        if (configPowerInfo.type.includes("mental")) return "omcv";
         return "ocv";
     }
     getDefendsWith() {
         const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo.powerType.includes("mental")) return "dmcv";
+        if (configPowerInfo.type.includes("mental")) return "dmcv";
         return "dcv";
     }
 
@@ -1359,14 +1403,16 @@ export class HeroSystem6eItem extends Item {
             type: "power",
         };
 
-        // TODO: This is technically incorrect as it's accessing CONFIG.HERO.powers but ignoring CONFIG.HERO.powers5e
+        const powerList = this.actor?.system.is5e
+            ? CONFIG.HERO.powers5e
+            : CONFIG.HERO.powers6e;
         for (const itemTag of [
             ...HeroSystem6eItem.ItemXmlTags,
-            ...CONFIG.HERO.powers
+            ...powerList
                 .filter(
                     (o) =>
-                        o.powerType?.includes("characteristic") ||
-                        o.powerType?.includes("framework"),
+                        o.type?.includes("characteristic") ||
+                        o.type?.includes("framework"),
                 )
                 .map((o) => o.key),
         ]) {
@@ -1379,10 +1425,8 @@ export class HeroSystem6eItem extends Item {
                     : [heroJson[itemSubTag]]) {
                     itemData = {
                         name: system?.ALIAS || system?.XMLID || itemTag, // simplistic name for now
-                        type: CONFIG.HERO.powers
-                            .filter((o) =>
-                                o.powerType?.includes("characteristic"),
-                            )
+                        type: powerList
+                            .filter((o) => o.type?.includes("characteristic"))
                             .map((o) => o.key)
                             ? "power"
                             : itemTag.toLowerCase().replace(/s$/, ""),
@@ -1458,7 +1502,7 @@ export class HeroSystem6eItem extends Item {
             system.costPerLevel ||
                 configPowerInfo?.costPerLevel ||
                 configPowerInfo?.cost ||
-                (configPowerInfo?.powerType == "skill" ? 2 : 0) ||
+                (configPowerInfo?.type == "skill" ? 2 : 0) ||
                 baseCost ||
                 1,
         );
@@ -1585,7 +1629,7 @@ export class HeroSystem6eItem extends Item {
         // Skill Enhancer discount (a hidden discount; not shown in item description)
         if (
             configPowerInfoParent &&
-            configPowerInfoParent.powerType?.includes("enhancer")
+            configPowerInfoParent.type?.includes("enhancer")
         ) {
             cost = Math.max(1, cost - 1);
         }
@@ -1665,7 +1709,7 @@ export class HeroSystem6eItem extends Item {
                 xmlid: modifier.XMLID,
                 item: this,
             });
-            if (powerInfo && powerInfo.powerType?.includes("attack")) {
+            if (powerInfo && powerInfo.type?.includes("attack")) {
                 if (modifierInfo && modifierInfo.dc) {
                     advantagesDC += Math.max(0, _myAdvantage);
                 }
@@ -1828,7 +1872,7 @@ export class HeroSystem6eItem extends Item {
             xmlid: system.XMLID,
             actor: this.actor,
         });
-        const powerXmlId = configPowerInfo?.xmlid || system.XMLID;
+        const powerXmlId = system.XMLID;
 
         switch (powerXmlId) {
             case "DENSITYINCREASE":
@@ -1948,6 +1992,7 @@ export class HeroSystem6eItem extends Item {
             case "AID":
             case "DISPEL":
             case "DRAIN":
+            case "SUCCOR":
             case "SUPPRESS":
             case "HEALING":
                 {
@@ -2063,7 +2108,13 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "CONTACT":
-                system.description = `${system.ALIAS}: `;
+                {
+                    const roll =
+                        system.LEVELS === "1"
+                            ? "8-"
+                            : `${9 + parseInt(system.LEVELS)}-`;
+                    system.description = `${system.ALIAS} ${roll}`;
+                }
                 break;
 
             case "ACCIDENTALCHANGE":
@@ -2330,15 +2381,25 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "Advanced Tech":
             case "AMBIDEXTERITY":
+            case "COMBATSPELLCASTING":
+            case "DEADLYBLOW":
+            case "MONEY":
+            case "SHAPECHANGING":
+            case "SKILLMASTER":
                 system.description = `${system.ALIAS} (${system.OPTION_ALIAS})`;
+                break;
+
+            case "ENVIRONMENTAL_MOVEMENT":
+                system.description = `${system.ALIAS} (${system.INPUT})`;
                 break;
 
             default:
                 {
                     if (
                         configPowerInfo &&
-                        configPowerInfo.powerType?.includes("characteristic")
+                        configPowerInfo.type?.includes("characteristic")
                     ) {
                         system.description =
                             "+" + system.value + " " + system.ALIAS;
@@ -2602,7 +2663,7 @@ export class HeroSystem6eItem extends Item {
                 body += 1;
             }
 
-            if (configPowerInfo.powerType.includes("adjustment")) {
+            if (configPowerInfo.type.includes("adjustment")) {
                 system.description +=
                     " (standard effect: " +
                     parseInt(system.value * 3) +
@@ -2703,10 +2764,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MOVEMENT only costs endurance when used.  Typically per round.
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("movement")
-        ) {
+        if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
             system.end = 0;
         }
 
@@ -2926,10 +2984,7 @@ export class HeroSystem6eItem extends Item {
         });
 
         // All Slots? This may be a slot in a framework if so get parent
-        if (
-            configPowerInfo &&
-            configPowerInfo.powerType?.includes("framework")
-        ) {
+        if (configPowerInfo && configPowerInfo.type?.includes("framework")) {
             if (result.match(/^,/)) {
                 result = result.replace(/^,/, ", all slots");
             } else {
@@ -2947,20 +3002,10 @@ export class HeroSystem6eItem extends Item {
     makeAttack() {
         const xmlid = this.system.XMLID;
 
-        // Confirm this is an attack
-        const configPowerInfo = getPowerInfo({
-            xmlid: xmlid,
-            actor: this.actor,
-        });
-
         // Name
         let description = this.system.ALIAS;
         let name =
-            this.system.NAME ||
-            description ||
-            configPowerInfo?.xmlid ||
-            this.system.name ||
-            this.name;
+            this.system.NAME || description || this.system.name || this.name;
         this.name = name;
 
         let levels =
@@ -3065,7 +3110,7 @@ export class HeroSystem6eItem extends Item {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid === "AID") {
+        } else if (xmlid === "AID" || xmlid === "SUCCOR") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
@@ -3252,11 +3297,21 @@ export class HeroSystem6eItem extends Item {
 
         skillData.tags = [];
 
-        // SKILL LEVELS
-        if (skillData.XMLID === "SKILL_LEVELS") {
+        const configPowerInfo = getPowerInfo({
+            xmlid: skillData.XMLID,
+            actor: this.actor,
+        });
+
+        if (
+            !configPowerInfo ||
+            !configPowerInfo.behaviors.includes("success")
+        ) {
             skillData.roll = null;
             return;
         }
+
+        // TODO: Can this be simplified. Should we add some test cases?
+        // TODO: Luck and unluck...
 
         // No Characteristic = no roll (Skill Enhancers for example) except for FINDWEAKNESS
         const characteristicBased = skillData.CHARACTERISTIC;
@@ -3312,27 +3367,105 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
 
-                skillData.tags.push({
-                    value: perkRollValue,
-                    name: "Base Reputation",
-                });
-
                 skillData.roll = `${perkRollValue}-`;
+            } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
+                const changeChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "CHANCETOCHANGE",
+                )?.OPTION_ALIAS;
+
+                if (!changeChance) {
+                    // Shouldn't happen. Give it a default.
+                    console.error(
+                        `ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`,
+                    );
+                }
+
+                skillData.roll = changeChance ? changeChance : "8-";
+            } else if (
+                skillData.XMLID === "DEPENDENTNPC" ||
+                skillData.XMLID === "HUNTED"
+            ) {
+                const appearanceChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "APPEARANCE",
+                )?.OPTION_ALIAS;
+
+                if (!appearanceChance) {
+                    // Shouldn't happen. Give it a default.
+                    console.error(
+                        `${skillData.XMLID} doesn't have a APPEARANCE adder. Defaulting to 8-`,
+                    );
+                }
+
+                skillData.roll = appearanceChance ? appearanceChance : "8-";
+            } else if (skillData.XMLID === "ENRAGED") {
+                const enrageChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "CHANCETOGO",
+                )?.OPTIONID;
+
+                if (!enrageChance) {
+                    // Shouldn't happen. Give it a default.
+                    console.error(
+                        `ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`,
+                    );
+                }
+
+                skillData.roll = enrageChance ? enrageChance : "8-";
+            } else if (skillData.XMLID === "SOCIALLIMITATION") {
+                const occurChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "OCCUR",
+                )?.OPTIONID;
+                let rollValue;
+
+                if (occurChance === "OCCASIONALLY") {
+                    rollValue = 8;
+                } else if (occurChance === "FREQUENTLY") {
+                    rollValue = 11;
+                } else if (occurChance === "VERYFREQUENTLY") {
+                    rollValue = 14;
+                } else {
+                    console.error(
+                        `unknown occurChance ${occurChance} for REPUTATION`,
+                    );
+                    rollValue = 14;
+                }
+
+                skillData.roll = `${rollValue}-`;
+            } else if (skillData.XMLID === "CONTACT") {
+                let rollValue;
+
+                if (skillData.LEVELS === "1") {
+                    rollValue = 8;
+                } else if (skillData.LEVELS === "2") {
+                    rollValue = 11;
+                } else {
+                    console.error(
+                        `unknown levels ${skillData.LEVELS} for CONTACT`,
+                    );
+                    rollValue = 8;
+                }
+
+                skillData.roll = `${rollValue}-`;
+            } else if (skillData.XMLID === "DANGER_SENSE") {
+                const level = parseInt(skillData.LEVELS || 0);
+
+                if (!skillData.LEVELS) {
+                    console.error(
+                        `unknown levels ${skillData.LEVELS} for DANGER_SENSE`,
+                    );
+                }
+
+                skillData.roll = `${11 + level}-`;
+            } else if (configPowerInfo?.type.includes("characteristic")) {
+                // Characteristics can be bought as powers. We don't give them a roll in this case as they will be
+                // rolled from the characteristics tab.
+                skillData.roll = null;
             } else {
+                console.warn(
+                    `Don't know how to build non characteristic based roll information for ${skillData.XMLID}`,
+                );
                 skillData.roll = null;
             }
 
-            return;
-        }
-
-        const configPowerInfo = getPowerInfo({
-            xmlid: skillData.XMLID,
-            actor: this.actor,
-        });
-
-        // Combat Skill Levels are not rollable
-        if (configPowerInfo && configPowerInfo.rollable === false) {
-            skillData.roll = null;
             return;
         }
 
@@ -3395,7 +3528,7 @@ export class HeroSystem6eItem extends Item {
         } else {
             // This is likely a Skill Enhancer.
             // Skill Enhancers provide a discount to the purchase of associated skills.
-            // They no not change the roll.
+            // They do not change the roll.
             // Skip for now.
             // HEROSYS.log(false, (skillData.XMLID || this.name) + ' was not included in skills.  Likely Skill Enhancer')
             return;
@@ -3405,12 +3538,13 @@ export class HeroSystem6eItem extends Item {
     _areAllAdjustmentTargetsInListValid(targetsList, mustBeStrict) {
         if (!targetsList) return false;
 
-        // ABSORPTION, AID, and TRANSFER target characteristics/powers are the only adjustment powers that must match
+        // ABSORPTION, AID + SUCCOR/BOOST, and TRANSFER target characteristics/powers are the only adjustment powers that must match
         // the character's characteristics/powers (i.e. they can't create new characteristics or powers). All others just
         // have to match actual possible characteristics/powers.
         const validator =
             this.system.XMLID === "AID" ||
             this.system.XMLID === "ABSORPTION" ||
+            this.system.XMLID === "SUCCOR" ||
             (this.system.XMLID === "TRANSFER" && mustBeStrict)
                 ? adjustmentSourcesStrict
                 : adjustmentSourcesPermissive;
@@ -3468,13 +3602,15 @@ export class HeroSystem6eItem extends Item {
             valid = this._areAllAdjustmentTargetsInListValid(
                 this.system.INPUT,
                 this.system.XMLID === "AID" ||
-                    this.system.XMLID === "ABSORPTION",
+                    this.system.XMLID === "ABSORPTION" ||
+                    this.system.XMLID === "SUCCOR",
             );
 
             if (
                 this.system.XMLID === "AID" ||
                 this.system.XMLID === "ABSORPTION" ||
-                this.system.XMLID === "HEALING"
+                this.system.XMLID === "HEALING" ||
+                this.system.XMLID === "SUCCOR"
             ) {
                 enhances = this.system.INPUT;
             } else {
@@ -3532,7 +3668,8 @@ export class HeroSystem6eItem extends Item {
             } else if (
                 this.system.XMLID === "AID" ||
                 this.system.XMLID === "ABSORPTION" ||
-                this.system.XMLID === "HEALING"
+                this.system.XMLID === "HEALING" ||
+                this.system.XMLID === "SUCCOR"
             ) {
                 return {
                     maxReduces: 0,
@@ -3558,7 +3695,8 @@ export class HeroSystem6eItem extends Item {
         if (
             this.system.XMLID === "AID" ||
             this.system.XMLID === "ABSORPTION" ||
-            this.system.XMLID === "HEALING"
+            this.system.XMLID === "HEALING" ||
+            this.system.XMLID === "SUCCOR"
         ) {
             return {
                 maxReduces: 0,

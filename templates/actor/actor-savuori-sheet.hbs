@@ -773,8 +773,15 @@
                             {{{itemFullDescription item}}}
                         </td>
                         <td>
-                            <input class="item-toggle" type="checkbox" {{checked item.system.active}}
-                                data-dtype="Boolean" />
+                            {{#if item.system.roll}}
+                                <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
+                                    data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
+                                    sign=false}}-</button>
+                            {{/if}}
+                            {{#if item.system.showToggle}}
+                                <input class="item-toggle" type="checkbox" {{checked item.system.active}}
+                                    data-dtype="Boolean" />
+                            {{/if}}
                         </td>
                         <td class="right">
                             <a class="item-control item-chat" title="Send to chat"><i

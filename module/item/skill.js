@@ -1,3 +1,5 @@
+import { HeroRoller } from "../utility/dice.js";
+
 async function _renderSkillForm(item, actor, stateData) {
     const token = actor.token;
 
@@ -23,7 +25,7 @@ async function _renderSkillForm(item, actor, stateData) {
     return await renderTemplate(path, templateData);
 }
 
-async function createSkillPopOutFromItem(item, actor) {
+export async function createSkillPopOutFromItem(item, actor) {
     const content = await _renderSkillForm(item, actor, {});
 
     // Attack Card as a Pop Out
@@ -36,12 +38,12 @@ async function createSkillPopOutFromItem(item, actor) {
             title: "Roll Skill",
             content: content,
             buttons: {
-                rollToHit: {
+                rollSkill: {
                     label: "Roll Skill",
                     callback: (html) => resolve(skillRoll(item, actor, html)),
                 },
             },
-            default: "rollToHit",
+            default: "rollSkill",
             close: () => resolve({}),
         };
 
@@ -50,68 +52,77 @@ async function createSkillPopOutFromItem(item, actor) {
 }
 
 async function skillRoll(item, actor, html) {
-    let form = html[0].querySelector("form");
+    const form = html[0].querySelector("form");
+    const skillRoller = new HeroRoller().addDice(3);
 
-    let tags = item.system.tags;
+    const tags = foundry.utils.deepClone(item.system.tags);
 
-    let rollEquation = "3D6";
+    // Build success requirement from the base tags
+    let successValue = 0;
+    for (const tag of tags) {
+        successValue = successValue + tag.value;
+    }
 
     // Skill Levels
     const skillLevelInputs = form.querySelectorAll("INPUT:checked");
-    for (const skillLevelinput of skillLevelInputs) {
-        const skillLevel = actor.items.get(skillLevelinput.id);
-        const level = parseInt(skillLevel.system.LEVELS.value);
+    for (const skillLevelInput of skillLevelInputs) {
+        const skillLevel = actor.items.get(skillLevelInput.id);
+        const level = parseInt(skillLevel.system.LEVELS || 0);
         if (level > 0) {
             tags.push({
                 value: level,
                 name: skillLevel.name,
                 title: skillLevel.system.description,
             });
-            //rollEquation = modifyRollEquation(rollEquation, level)
-            //targetNumber += level;
+            successValue = successValue + level;
         }
     }
 
     // Roll Modifier (from form)
-    let modValue = parseInt(form.mod.value || 0);
-    if (modValue != 0) {
+    const modValue = parseInt(form.mod.value || 0);
+    if (modValue > 0) {
         tags.push({ value: modValue, name: "Roll Mod" });
-        //rollEquation = modifyRollEquation(rollEquation, modValue);
-        //targetNumber += modValue;
+        successValue = successValue + modValue;
     }
 
-    let content = `<div class="tags"><div class="tags" style="line-height: 14px;">`;
-    for (let tag of tags) {
-        content += `<span class="tag tag_transparent" title="${
-            tag.title || ""
-        }" >${tag.name} ${tag.value.signedString()}</span>`;
-    }
-    content += `</div></div>`;
+    await skillRoller.makeSuccessRoll(true, successValue).roll();
+    const succeeded = skillRoller.getSuccess();
+    const autoSuccess = skillRoller.getAutoSuccess();
+    const total = skillRoller.getSuccessTotal();
+    const margin = successValue - total;
 
-    let roll = new Roll(rollEquation, actor.getRollData());
+    const flavor = `${item.name.toUpperCase()} (${successValue}-) roll ${
+        succeeded ? "succeeded" : "failed"
+    } by ${
+        autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
+    }`;
+    const rollHtml = await skillRoller.render(flavor);
 
-    let targetNumber = 0;
-    for (let tag of tags) {
-        targetNumber += tag.value;
-    }
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+    speaker.alias = actor.name;
 
-    roll.evaluate({ async: true }).then(function (result) {
-        let margin = parseInt(targetNumber) - result.total;
+    // render card
+    const cardData = {
+        tags: tags.map((tag) => {
+            return { ...tag, value: tag.value.signedString() };
+        }),
+        rolls: skillRoller.rawRolls(),
+        renderedRoll: rollHtml,
+        user: game.user._id,
+        speaker: speaker,
+    };
+    const template =
+        "systems/hero6efoundryvttv2/templates/chat/skill-success-roll-card.hbs";
+    const cardHtml = await renderTemplate(template, cardData);
 
-        result.toMessage({
-            speaker: ChatMessage.getSpeaker({ actor: actor }),
-            flavor:
-                content +
-                item.name.toUpperCase() +
-                " ( " +
-                targetNumber +
-                "- ) roll " +
-                (margin >= 0 ? "succeeded" : "failed") +
-                " by " +
-                Math.abs(margin),
-            borderColor: margin >= 0 ? 0x00ff00 : 0xff0000,
-        });
-    });
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: skillRoller.rawRolls(),
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
 }
-
-export { createSkillPopOutFromItem };

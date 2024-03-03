@@ -10,9 +10,7 @@
             "ai"
         ],
         "templates": {
-            "base": {},
-            "characterTemplate": {
-                "templates": ["base"],
+            "character": {
                 "biography": "",
                 "attributes": {
                     "points": {
@@ -152,9 +150,65 @@
                         "core": 20,
                         "realCost": 0
                     },
-                    "size": {
+                    "custom1": {
                         "value": 0,
-                        "max": 0
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom2": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom3": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom4": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom5": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom6": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom7": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom8": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom9": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom10": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
                     },
                     "running": {
                         "value": 12,
@@ -174,7 +228,19 @@
                         "core": 4,
                         "realCost": 0
                     },
+                    "extradimensionalmovement": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
                     "flight": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "ftl": {
                         "value": 0,
                         "max": 0,
                         "core": 0,
@@ -208,25 +274,131 @@
             }
         },
         "pc": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "npc": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "vehicle": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"],
+            "characteristics": {
+                "size": {
+                    "value": 0,
+                    "max": 0,
+                    "core": 0,
+                    "realCost": 0
+                },
+                "str": {
+                    "value": 10,
+                    "max": 10,
+                    "core": 10,
+                    "realCost": 0,
+                    "type": "rollable"
+                },
+                "dex": {
+                    "value": 10,
+                    "max": 10,
+                    "core": 10,
+                    "realCost": 0,
+                    "type": "rollable"
+                },
+                "ocv": {
+                    "max": 3,
+                    "value": 3,
+                    "core": 3
+                },
+                "dcv": {
+                    "max": 3,
+                    "value": 3,
+                    "core": 3,
+                    "realCost": 0
+                },
+                "spd": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "pd": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "ed": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "def": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "body": {
+                    "value": 10,
+                    "max": 10,
+                    "core": 10,
+                    "realCost": 0
+                },
+                "running": {
+                    "value": 12,
+                    "max": 12,
+                    "core": 12,
+                    "realCost": 0
+                },
+                "swimming": {
+                    "value": 4,
+                    "max": 4,
+                    "core": 4,
+                    "realCost": 0
+                }
+            }
         },
         "base2": {
-            "templates": ["characterTemplate"]
+            "characteristics": {
+                "basesize": {
+                    "value": 0,
+                    "max": 0,
+                    "core": 0,
+                    "realCost": 0                
+                },
+                "body": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "pd": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "ed": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                },
+                "def": {
+                    "value": 2,
+                    "max": 2,
+                    "core": 2,
+                    "realCost": 0
+                }
+            }
         },
         "automaton": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "computer": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         },
         "ai": {
-            "templates": ["characterTemplate"]
+            "templates": ["character"]
         }
     },
     "Item": {

@@ -241,6 +241,7 @@ HERO.combatManeuversOptional = {
     ],
 };
 
+// TODO: This could be created from powers.
 HERO.movementPowers = {
     extradimensionalmovement: "Extra Dimensional Movement",
     flight: "Flight",
@@ -258,1388 +259,3344 @@ HERO.movementPowers5e = {
     gliding: "Gliding",
 };
 
-// Power Info
-// Valid XMLID's for powers
+HERO.powers6e = [];
+HERO.powers5e = [];
 
-HERO.powers = [
-    {
-        key: "STR",
-        name: "Strength",
-        base: 10,
-        cost: 1,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        costEnd: true,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "DEX",
-        name: "Dexterity.",
-        base: 10,
-        cost: 2,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["base2"],
-    },
-    {
-        key: "CON",
-        name: "Constitution",
-        base: 10,
-        cost: 1,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["vehicle", "base2", "computer", "ai"],
-    },
-    {
-        key: "INT",
-        name: "Intelligence",
-        base: 10,
-        cost: 1,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["vehicle", "base2"],
-    },
-    {
-        key: "EGO",
-        name: "Ego",
-        base: 10,
-        cost: 1,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["automaton", "vehicle", "base2", "computer"],
-    },
-    {
-        key: "PRE",
-        name: "Presence",
-        base: 10,
-        cost: 1,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["vehicle", "base2", "computer", "ai"],
-    },
-    {
+/**
+ * @typedef {Object} PowerDescription
+ * @param {string} key - Hero Designer XMLID of the power
+ * @param {string} name - Human readable name of the power
+ * @param {string} base - Base cost in character points
+ * @param {string} cost - Cost in character points per additional level
+ * @param {Array<string>} type - A list of types associated with this power
+ *
+ * @param {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
+ * @param {boolean} [costEnd] - If the power costs endurance to use. true if it does, false or undefined if it doesn't
+ * @param {}
+ */
+
+/**
+ *
+ * @param {PowerDescription} powerDescription6e
+ * @param {PowerDescription} [powerOverrideFor5e]
+ */
+function addPower(powerDescription6e, powerOverrideFor5e) {
+    if (powerDescription6e) {
+        HERO.powers6e.push(powerDescription6e);
+    }
+
+    if (powerOverrideFor5e) {
+        HERO.powers5e.push(
+            Object.assign(
+                powerDescription6e ? powerDescription6e : {},
+                powerOverrideFor5e,
+            ),
+        );
+    }
+}
+
+(function addCharacteristicsToPowerList() {
+    addPower(
+        {
+            key: "STR",
+            name: "Strength",
+            base: 10,
+            cost: 1,
+            type: ["characteristic"],
+            behaviors: ["success"],
+            duration: "persistent",
+            costEnd: true,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DEX",
+            name: "Dexterity",
+            base: 10,
+            cost: 2,
+            type: ["characteristic"],
+            behaviors: ["success"],
+            duration: "persistent",
+            ignoreFor: ["base2"],
+        },
+        {
+            cost: 3,
+        },
+    );
+    addPower(
+        {
+            key: "CON",
+            name: "Constitution",
+            base: 10,
+            cost: 1,
+            type: ["characteristic"],
+            behaviors: ["success"],
+            duration: "persistent",
+            ignoreFor: ["vehicle", "base2", "computer", "ai"],
+        },
+        {
+            cost: 2,
+        },
+    );
+    addPower(
+        {
+            key: "INT",
+            name: "Intelligence",
+            base: 10,
+            cost: 1,
+            type: ["characteristic"],
+            behaviors: ["success"],
+            duration: "persistent",
+            ignoreFor: ["vehicle", "base2"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "EGO",
+            name: "Ego",
+            base: 10,
+            cost: 1,
+            type: ["characteristic"],
+            behaviors: ["success"],
+            duration: "persistent",
+            ignoreFor: ["automaton", "vehicle", "base2", "computer"],
+        },
+        {
+            cost: 2,
+        },
+    );
+    addPower(
+        {
+            key: "PRE",
+            name: "Presence",
+            base: 10,
+            cost: 1,
+            type: ["characteristic"],
+            behaviors: ["success"],
+            duration: "persistent",
+            ignoreFor: ["vehicle", "base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(undefined, {
         key: "COM",
         name: "Comeliness",
-        powerType: ["characteristic"],
+        type: ["characteristic"],
+        behaviors: ["success"],
         duration: "persistent",
         ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"],
-    },
-    {
-        key: "OCV",
-        name: "Offensive Combat Value",
-        base: 3,
-        cost: 5,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["base2"],
-    },
-    {
-        key: "DCV",
-        name: "Defensive Combat Value",
-        base: 3,
-        cost: 5,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["base2"],
-    },
-    {
-        key: "OMCV",
-        name: "Offensive Mental Combat Value",
-        base: 3,
-        cost: 3,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["automaton", "vehicle", "base2"],
-    },
-    {
-        key: "DMCV",
-        name: "Defensive Mental Combat Value",
-        base: 3,
-        cost: 3,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["automaton", "vehicle", "base2"],
-    },
-    {
-        key: "SPD",
-        name: "Speed",
-        base: 2,
-        cost: 10,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["base2"],
-    },
-    {
-        key: "PD",
-        name: "Physical Defense",
-        base: 2,
-        cost: 1,
-        powerType: ["characteristic", "defense"],
-        duration: "persistent",
-        ignoreFor: ["computer", "ai"],
-    },
-    {
-        key: "ED",
-        name: "Energy Defense",
-        base: 2,
-        cost: 1,
-        powerType: ["characteristic", "defense"],
-        duration: "persistent",
-        ignoreFor: ["computer", "ai"],
-    },
-    {
-        key: "REC",
-        name: "Recovery",
-        base: 4,
-        cost: 1,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["vehicle", "base2", "computer", "ai"],
-    },
-    {
-        key: "END",
-        name: "Endurance",
-        base: 20,
-        cost: 1 / 5,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["vehicle", "base2", "computer", "ai"],
-    },
-    {
-        key: "BODY",
-        name: "Body",
         base: 10,
-        cost: 1,
-        powerType: ["characteristic"],
-        duration: "persistent",
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "STUN",
-        name: "Stun",
-        base: 20,
         cost: 1 / 2,
-        powerType: ["characteristic"],
+    });
+    addPower(
+        {
+            key: "OCV",
+            name: "Offensive Combat Value",
+            base: 3,
+            cost: 5,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["base2"],
+        },
+        {
+            cost: 0,
+        },
+    );
+    addPower(
+        {
+            key: "DCV",
+            name: "Defensive Combat Value",
+            base: 3,
+            cost: 5,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["base2"],
+        },
+        {
+            cost: 0,
+        },
+    );
+    addPower(
+        {
+            key: "OMCV",
+            name: "Offensive Mental Combat Value",
+            base: 3,
+            cost: 3,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["automaton", "vehicle", "base2"],
+        },
+        {
+            cost: 0,
+        },
+    );
+    addPower(
+        {
+            key: "DMCV",
+            name: "Defensive Mental Combat Value",
+            base: 3,
+            cost: 3,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["automaton", "vehicle", "base2"],
+        },
+        {
+            cost: 0,
+        },
+    );
+    addPower(
+        {
+            key: "SPD",
+            name: "Speed",
+            base: 2,
+            cost: 10,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["base2"],
+        },
+        {
+            base: 0,
+        },
+    );
+    addPower(
+        {
+            key: "PD",
+            name: "Physical Defense",
+            base: 2,
+            cost: 1,
+            type: ["characteristic", "defense"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["computer", "ai"],
+        },
+        {
+            base: 0,
+            cost: 1,
+        },
+    );
+    addPower(
+        {
+            key: "ED",
+            name: "Energy Defense",
+            base: 2,
+            cost: 1,
+            type: ["characteristic", "defense"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["computer", "ai"],
+        },
+        {
+            base: 0,
+            cost: 1,
+        },
+    );
+    addPower(
+        {
+            key: "REC",
+            name: "Recovery",
+            base: 4,
+            cost: 1,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["vehicle", "base2", "computer", "ai"],
+        },
+        {
+            base: 0,
+            cost: 2,
+        },
+    );
+    addPower(
+        {
+            key: "END",
+            name: "Endurance",
+            base: 20,
+            cost: 1 / 5,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["vehicle", "base2", "computer", "ai"],
+        },
+        {
+            base: 0,
+            cost: 1 / 2,
+        },
+    );
+    addPower(
+        {
+            key: "BODY",
+            name: "Body",
+            base: 10,
+            cost: 1,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            cost: 2,
+        },
+    );
+    addPower(
+        {
+            key: "STUN",
+            name: "Stun",
+            base: 20,
+            cost: 1 / 2,
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            ignoreFor: ["vehicle", "base2", "computer", "ai"],
+        },
+        {
+            base: 0,
+            cost: 1,
+        },
+    );
+
+    addPower(
+        {
+            key: "BASESIZE",
+            name: "Base Size",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            onlyFor: ["base2"],
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "DEF",
+        name: "Defense",
+        type: ["characteristic"],
+        behaviors: [],
         duration: "persistent",
-        ignoreFor: ["vehicle", "base2", "computer", "ai"],
-    },
-    {
-        key: "RUNNING",
-        name: "Running",
-        base: 12,
-        cost: 1,
-        powerType: ["movement"],
-        costEnd: true,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "SWIMMING",
-        name: "Swimming",
-        base: 4,
-        cost: 1 / 2,
-        powerType: ["movement"],
-        costEnd: true,
-        costPerLevel: 1 / 2,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "LEAPING",
-        name: "Leaping",
-        base: 4,
-        cost: 1 / 2,
-        powerType: ["movement"],
-        costEnd: true,
-        costPerLevel: 0.5,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "BASESIZE",
-        name: "Base Size",
-        powerType: ["characteristic"],
-        duration: "persistent",
-        onlyFor: ["automaton", "vehicle", "base2"],
-    },
-    {
-        key: "CLINGING",
-        name: "Clinging",
-        powerType: ["standard"],
+        onlyFor: ["base2", "vehicle"],
+    });
+
+    addPower(
+        {
+            key: "SIZE",
+            name: "Vehicle Size",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+            onlyFor: ["vehicle"],
+        },
+        {},
+    );
+
+    // HD extendable characteristics
+    addPower(
+        {
+            key: "CUSTOM1",
+            name: "Custom Characteristic 1",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM2",
+            name: "Custom Characteristic 2",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM3",
+            name: "Custom Characteristic 3",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM4",
+            name: "Custom Characteristic 4",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM5",
+            name: "Custom Characteristic 5",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM6",
+            name: "Custom Characteristic 6",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM7",
+            name: "Custom Characteristic 7",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM8",
+            name: "Custom Characteristic 8",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM9",
+            name: "Custom Characteristic 9",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOM10",
+            name: "Custom Characteristic 10",
+            type: ["characteristic"],
+            behaviors: [],
+            duration: "persistent",
+        },
+        {},
+    );
+})();
+
+(function addMovementToPowerList() {
+    addPower(
+        {
+            key: "EXTRADIMENSIONALMOVEMENT",
+            type: ["movement"],
+            behaviors: [],
+            name: "Extra-Dimensional Movement",
+            perceivability: "Inobvious",
+            duration: "instant",
+            target: "Self Only",
+            range: "Self",
+            costEnd: true,
+            costPerLevel: 20,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "FLIGHT",
+            type: ["movement"],
+            behaviors: [],
+            costEnd: true,
+            costPerLevel: 1,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            costPerLevel: 2,
+        },
+    );
+    addPower(
+        {
+            key: "FTL",
+            name: "Faster-Than-Light Travel",
+            type: ["movement"],
+            behaviors: [],
+            costEnd: false,
+            costPerLevel: 2,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "GLIDING",
+        type: ["movement"],
+        behaviors: [],
         costEnd: false,
-        costPerLevel: 1 / 3,
-    },
-    {
-        key: "EXTRALIMBS",
-        powerType: ["standard"],
+        costPerLevel: 1,
+        ignoreFor: ["base2", "computer", "ai"],
+    });
+
+    addPower(
+        {
+            key: "LEAPING",
+            name: "Leaping",
+            base: 4,
+            cost: 1 / 2,
+            type: ["movement"],
+            behaviors: [],
+            costEnd: true,
+            costPerLevel: 0.5,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            base: 2,
+            cost: 1,
+            costPerLevel: 1,
+        },
+    );
+
+    addPower(
+        {
+            key: "RUNNING",
+            name: "Running",
+            base: 12,
+            cost: 1,
+            type: ["movement"],
+            behaviors: [],
+            costEnd: true,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            base: 6,
+            cost: 2,
+        },
+    );
+
+    addPower(
+        {
+            key: "SWIMMING",
+            name: "Swimming",
+            base: 4,
+            cost: 1 / 2,
+            type: ["movement"],
+            behaviors: [],
+            costEnd: true,
+            costPerLevel: 1 / 2,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            base: 2,
+            cost: 1,
+            costPerLevel: 1,
+        },
+    );
+    addPower(
+        {
+            key: "SWINGING",
+            type: ["movement"],
+            behaviors: [],
+            costEnd: true,
+            costPerLevel: 0.5,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            costPerLevel: 1,
+        },
+    );
+
+    addPower(
+        {
+            key: "TELEPORTATION",
+            type: ["movement"],
+            behaviors: [],
+            costEnd: true,
+            costPerLevel: 1,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            costPerLevel: 2,
+        },
+    );
+    addPower(
+        {
+            key: "TUNNELING",
+            type: ["movement"],
+            behaviors: [],
+            costEnd: true,
+            costPerLevel: 1,
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {
+            costPerLevel: 5,
+        },
+    );
+})();
+
+(function addSkillsToPowerList() {
+    addPower(
+        {
+            key: "ACROBATICS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ACTING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ANALYZE",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ANIMAL_HANDLER",
+            type: ["skill"],
+            behaviors: ["success"],
+            categorized: true,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "ARMORSMITH",
+        type: ["skill"],
+        behaviors: ["success"],
+        categorized: true,
+    });
+    addPower(
+        {
+            key: "AUTOFIRE_SKILLS",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "BREAKFALL",
+            type: ["skill"],
+            behaviors: ["success"],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "BRIBERY",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "BUGGING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "BUREAUCRATICS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "CHARM",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "CLIMBING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "COMBAT_DRIVING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "COMBAT_LEVELS",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "COMBAT_PILOTING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "COMPUTER_PROGRAMMING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CONCEALMENT",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CONTORTIONIST",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CONVERSATION",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CRAMMING",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CRIMINOLOGY",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CRYPTOGRAPHY",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOMSKILL",
+            type: ["skill"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DEDUCTION",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DEFENSE_MANEUVER",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DEMOLITIONS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DISGUISE",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ELECTRONICS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "FAST_DRAW",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "FEINT",
+        type: ["skill"],
+        behaviors: ["success"],
+    });
+    addPower(
+        {
+            key: "FORENSIC_MEDICINE",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FORGERY",
+            type: ["skill"],
+            behaviors: ["success"],
+            categorized: true,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "GAMBLING",
+            type: ["skill"],
+            behaviors: ["success"],
+            categorized: true,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HIGH_SOCIETY",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "HOIST",
+        type: ["skill"],
+        behaviors: ["success"],
+    });
+
+    addPower(undefined, {
+        key: "INSTRUCTOR",
+        type: ["skill"],
+        behaviors: ["success"],
+    });
+    addPower(
+        {
+            key: "INTERROGATION",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "INVENTOR",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "KNOWLEDGE_SKILL",
+            type: ["skill"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "LANGUAGES",
+            type: ["skill"],
+            behaviors: [],
+            rollable: false,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LIPREADING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LOCKPICKING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    // TODO: Martial arts?
+    addPower(
+        {
+            key: "MECHANICS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MENTAL_COMBAT_LEVELS",
+            type: ["skill"],
+            behaviors: [],
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "MIMICRY",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MIF",
+            type: ["skill"],
+            behaviors: [],
+            name: "Musical Instrument Familiarity",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "NAVIGATION",
+            type: ["skill"],
+            behaviors: ["success"],
+            categorized: true,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "NEGATIVECOMBATSKILLLEVELS",
+        type: ["skill"],
+        behaviors: [],
+    });
+    addPower(undefined, {
+        key: "NEGATIVEPENALTYSKILLLEVELS",
+        type: ["skill"],
+        behaviors: [],
+    });
+    addPower(undefined, {
+        key: "NEGATIVESKILLLEVELS",
+        type: ["skill"],
+        behaviors: [],
+    });
+
+    addPower(
+        {
+            key: "ORATORY",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "PARACHUTING",
+        type: ["skill"],
+        behaviors: ["success"],
+    });
+    addPower(
+        {
+            key: "PARAMEDICS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "PENALTY_SKILL_LEVELS",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "PERSUASION",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "POISONING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "POWERSKILL",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "PROFESSIONAL_SKILL",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "RAPID_ATTACK_HTH",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "RAPID_ATTACK_RANGED",
+        type: ["skill"],
+        behaviors: [],
+    });
+    addPower(undefined, {
+        key: "RESEARCH",
+        type: ["skill"],
+        behaviors: ["success"],
+    });
+    addPower(
+        {
+            key: "RIDING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "SCIENCE_SKILL",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SECURITY_SYSTEMS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "SEDUCTION",
+        type: ["skill"],
+        behaviors: ["success"],
+    });
+    addPower(
+        {
+            key: "SHADOWING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SKILL_LEVELS",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SLEIGHT_OF_HAND",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "SPELL",
+        type: ["skill"],
+        behaviors: ["success"],
+    });
+    addPower(
+        {
+            key: "STEALTH",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "STREETWISE",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SURVIVAL",
+            type: ["skill"],
+            behaviors: ["success"],
+            categorized: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SYSTEMS_OPERATION",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "TACTICS",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TEAMWORK",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRACKING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRADING",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRANSPORT_FAMILIARITY",
+            type: ["skill"],
+            behaviors: [],
+            rollable: false,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TWO_WEAPON_FIGHTING_HTH",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "TWO_WEAPON_FIGHTING_RANGED",
+        type: ["skill"],
+        behaviors: [],
+    });
+
+    addPower(
+        {
+            key: "VENTRILOQUISM",
+            type: ["skill"],
+            behaviors: ["success"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "WEAPON_FAMILIARITY",
+            type: ["skill"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "WEAPONSMITH",
+            type: ["skill"],
+            behaviors: ["success"],
+            categorized: true,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "JACK_OF_ALL_TRADES",
+            type: ["skill", "enhancer"],
+            behaviors: [],
+            rollable: false,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LINGUIST",
+            type: ["skill", "enhancer"],
+            behaviors: [],
+            rollable: false,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SCHOLAR",
+            type: ["skill", "enhancer"],
+            behaviors: [],
+            rollable: false,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SCIENTIST",
+            type: ["skill", "enhancer"],
+            behaviors: [],
+            rollable: false,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRAVELER",
+            type: ["skill", "enhancer"],
+            behaviors: [],
+            rollable: false,
+        },
+        {},
+    );
+})();
+
+(function addFrameworksToPowerList() {
+    addPower(
+        {
+            key: "COMPOUNDPOWER",
+            type: ["compound"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DIFFERINGMODIFIER",
+            name: "Differing Modifier",
+            type: ["framework"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ELEMENTAL_CONTROL",
+            type: ["framework"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "LIST",
+            type: ["framework"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MULTIPOWER",
+            type: ["framework"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "VPP",
+            type: ["framework"],
+            behaviors: [],
+        },
+        {},
+    );
+})();
+
+(function addPerksToPowerList() {
+    addPower(
+        {
+            key: "ACCESS",
+            type: ["perk"],
+            behaviors: [],
+            name: "Access",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "Advanced Tech",
+        type: ["perk"],
+        behaviors: [],
+        name: "Advanced Tech",
+    });
+    addPower(
+        {
+            key: "ANONYMITY",
+            type: ["perk"],
+            behaviors: [],
+            name: "Anonymity",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "COMPUTER_LINK",
+            type: ["perk"],
+            behaviors: [],
+            name: "Computer Link",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CONTACT",
+            type: ["perk"],
+            behaviors: ["success"],
+            name: "Contact",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOMPERK",
+            type: ["perk"],
+            behaviors: [],
+            name: "Custom Perk",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DEEP_COVER",
+            type: ["perk"],
+            behaviors: [],
+            name: "Deep Cover",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "FALSEIDENTITY",
+        type: ["perk"],
+        behaviors: [],
+        name: "False Identity",
+        costPerLevel: 1,
+    });
+    addPower(
+        {
+            key: "FAVOR",
+            type: ["perk"],
+            behaviors: [],
+            name: "Favor",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FOLLOWER",
+            type: ["perk"],
+            behaviors: [],
+            name: "Follower",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FRINGE_BENEFIT",
+            type: ["perk"],
+            behaviors: [],
+            name: "Fringe Benefit",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MONEY",
+            type: ["perk"],
+            behaviors: [],
+            name: "Money",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "REPUTATION",
+            type: ["perk", "disadvantage"],
+            behaviors: ["success"],
+            name: "Positive Reputation",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RESOURCE_POOL",
+            type: ["perk"],
+            behaviors: [],
+            name: "Resource Points",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "VEHICLE_BASE",
+            type: ["perk"],
+            behaviors: [],
+            name: "Vehicles & Bases",
+        },
+        {},
+    );
+})();
+
+(function addTalentsToPowerList() {
+    addPower(
+        {
+            key: "ABSOLUTE_RANGE_SENSE",
+            type: ["talent"],
+            behaviors: [],
+            name: "Absolute Range Sense",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ABSOLUTE_TIME_SENSE",
+            type: ["talent"],
+            behaviors: [],
+            name: "Absolute Time Sense",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "AMBIDEXTERITY",
+            type: ["talent"],
+            behaviors: [],
+            name: "Ambidexterity",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ANIMALFRIENDSHIP",
+            type: ["talent"],
+            behaviors: [],
+            name: "Animal Friendship",
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "BEASTSPEECH",
+        type: ["talent"],
+        behaviors: [],
+        name: "Beast Speech",
         costPerLevel: 0,
-    },
-    {
-        key: "SUMMON",
-        powerType: ["standard"],
-    },
-    {
-        key: "DESOLIDIFICATION",
-        powerType: ["body-affecting", "standard"],
-        name: "Desolidification",
-    },
-    {
-        key: "REGENERATION",
-        powerType: ["special"],
-        perceivability: "imperceptible",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-    },
-    {
-        key: "HEALING",
-        powerType: ["adjustment", "attack"],
-        perceivability: "obvious",
-        duration: "instant",
-        target: "target's dcv",
-        range: "no range",
-        costEnd: true,
-        costPerLevel: 10,
-    },
-    {
-        key: "STRETCHING",
-        powerType: ["body-affecting", "standard"],
-        perceivability: "obvious",
-        duration: "constant",
-        target: "self only",
-        range: "self",
-        costEnd: true,
-        costPerLevel: 5,
-    },
-    {
-        key: "LIFESUPPORT",
-        name: "Life Support",
-        powerType: ["standard"],
-        perceivability: "imperceptible",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-    },
-    {
-        key: "ABSORPTION",
-        name: "Absorption",
-        powerType: ["adjustment", "standard", "defense"],
-        perceivability: "obvious",
-        duration: "constant",
-        target: "self only",
-        range: "self",
-        costEnd: false,
+    });
+    addPower(undefined, {
+        key: "BERSERKFURY",
+        type: ["talent"],
+        behaviors: [],
+        name: "Berserk Fury",
+        costPerLevel: 0,
+    });
+    addPower(
+        {
+            key: "BUMP_OF_DIRECTION",
+            type: ["talent"],
+            behaviors: [],
+            name: "Bump of Direction",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "COMBATARCHERY",
+        type: ["talent"],
+        behaviors: [],
+        name: "Combat Archery",
+    });
+    addPower(
+        {
+            key: "COMBAT_LUCK",
+            type: ["talent", "defense"], // TODO: Not type defense but has enabled role perhaps...
+            behaviors: [],
+            name: "Combat Luck",
+
+            duration: "constant",
+            costPerLevel: 6,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "COMBATREADY",
+        type: ["talent"],
+        behaviors: [],
+        name: "Combat Ready",
+    });
+    addPower(
+        {
+            key: "COMBAT_SENSE",
+            type: ["talent"],
+            behaviors: ["success"],
+            name: "Combat Sense",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "COMBATSHOOTING",
+        type: ["talent"],
+        behaviors: [],
+        name: "Combat Shooting",
+    });
+    addPower(undefined, {
+        key: "COMBATSPELLCASTING",
+        type: ["talent"],
+        behaviors: [],
+        name: "Combat Spellcasting",
+    });
+    addPower(undefined, {
+        key: "CRIPPLINGBLOW",
+        type: ["talent"],
+        behaviors: [],
+        name: "Crippling Blow",
+    });
+    addPower(
+        {
+            key: "CUSTOMTALENT",
+            type: ["talent"],
+            behaviors: [],
+            name: "Custom Talent",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DANGER_SENSE",
+            type: ["talent"],
+            behaviors: ["success"],
+            name: "Danger Sense",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DEADLYBLOW",
+            type: ["talent"],
+            behaviors: [],
+            name: "Deadly Blow",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIVINEFAVOR",
+            type: ["talent"],
+            behaviors: [],
+            name: "Divine Favor",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DOUBLE_JOINTED",
+            type: ["talent"],
+            behaviors: [],
+            name: "Double Jointed",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "EIDETIC_MEMORY",
+            type: ["talent"],
+            behaviors: [],
+            name: "Eidetic Memory",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ENVIRONMENTAL_MOVEMENT",
+            type: ["talent"],
+            behaviors: [],
+            name: "Environmental Movement",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "EVASIVE",
+        type: ["talent"],
+        behaviors: [],
+        name: "Evasive",
+        costPerLevel: 0,
+    });
+
+    addPower(undefined, {
+        key: "FTLPILOT",
+        type: ["talent"],
+        behaviors: [],
+        name: "FTL Pilot",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "FASCINATION",
+        type: ["talent"],
+        behaviors: [],
+        name: "Fascination",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "FEARLESS",
+        type: ["talent"],
+        behaviors: [],
+        name: "Fearless",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "FOLLOWTHROUGHATTACK",
+        type: ["talent"],
+        behaviors: [],
+        name: "Follow Through Attack",
+        costPerLevel: 0,
+    });
+
+    addPower(undefined, {
+        key: "HOTSHOTPILOT",
+        type: ["talent"],
+        behaviors: [],
+        name: "Hotshot Pilot",
+        costPerLevel: 0,
+    });
+
+    addPower(undefined, {
+        key: "INSPIRE",
+        type: ["talent"],
+        behaviors: [],
+        name: "Inspire",
+        costPerLevel: 0,
+    });
+
+    addPower(
+        {
+            key: "LATENTPSIONIC",
+            type: ["talent"],
+            behaviors: [],
+            name: "Latent Psionic",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LIGHTNING_CALCULATOR",
+            type: ["talent"],
+            behaviors: [],
+            name: "Lightning Calculator",
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LIGHTNING_REFLEXES_ALL",
+            type: ["talent"],
+            behaviors: [],
+            name: "Lightning Reflexes",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LIGHTNING_REFLEXES_SINGLE",
+            type: ["talent"],
+            behaviors: [],
+            name: "Lightning Reflexes",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LIGHTSLEEP",
+            type: ["talent"],
+            behaviors: [],
+            name: "Lightsleep",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "MAGESIGHT",
+        type: ["talent"],
+        behaviors: [],
+        name: "Mage Sight",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "MOUNTEDWARRIOR",
+        type: ["talent"],
+        behaviors: [],
+        name: "Mounted Warrior",
+        costPerLevel: 0,
+    });
+
+    addPower(
+        {
+            key: "PERFECT_PITCH",
+            type: ["talent"],
+            behaviors: [],
+            name: "Perfect Pitch",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "OFFHANDDEFENSE",
+            type: ["talent"],
+            behaviors: [],
+            name: "Off-Hand Defense",
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "RAPIDARCHERY",
+        type: ["talent"],
+        behaviors: [],
+        name: "Rapid Archery",
         costPerLevel: 1,
-    },
-    {
-        key: "AID",
-        name: "Aid",
-        powerType: ["adjustment", "attack"],
-        perceivability: "obvious",
-        duration: "instant",
-        target: "target’s DCV",
-        range: "no range",
-        costEnd: true,
-        costPerLevel: 6,
-    },
-    {
-        key: "DRAIN",
-        name: "Drain",
-        powerType: ["adjustment", "attack"],
-        perceivability: "obvious",
-        duration: "instant",
-        target: "target’s DCV",
-        range: "standard",
-        costEnd: true,
-        costPerLevel: 10,
-    },
-    {
-        key: "DISPEL",
-        name: "Dispel",
-        powerType: ["adjustment", "attack"],
-        perceivability: "obvious",
-        duration: "instant",
-        target: "target’s DCV",
-        range: "standard",
-        costEnd: true,
-        costPerLevel: 3,
-    },
-    {
-        key: "TRANSFER",
-        name: "Transfer",
-        powerType: ["adjustment", "attack"],
-        perceivability: "obvious",
-        duration: "instant",
-        target: "target’s DCV",
-        range: "no range",
-        costEnd: true,
-        costPerLevel: 15,
-    },
-    {
-        key: "SHAPESHIFT",
-        name: "Shape Shift",
-        powerType: ["body-affecting"],
-        perceivability: "obvious",
-        duration: "constant",
-        target: "self only",
-        range: "self",
-        costEnd: true,
-    },
-    {
-        key: "DENSITYINCREASE",
-        name: "Density Increase",
-        powerType: ["body-affecting", "standard", "defense"],
-        perceivability: "obvious",
-        duration: "constant",
-        target: "self only",
-        range: "self",
-        costEnd: true,
-        costPerLevel: 4,
-    },
-    {
-        key: "DEFLECTION",
-        name: "Deflection",
-        powerType: ["defense", "standard"],
-        perceivability: "Inobvious",
-        duration: "instant",
-        target: "Target’s OCV (see text)",
-        range: "Standard",
-        costEnd: true,
-        //"cost": 20,
-    },
-    {
-        key: "NAKEDMODIFIER",
-        powerType: ["special"],
-        //"duration": "instant",  // Not true, hack for isPercievable
-        costEnd: true,
+    });
+    addPower(undefined, {
+        key: "RAPIDHEALING",
+        type: ["talent"],
+        behaviors: [],
+        name: "Rapid Healing",
         costPerLevel: 1,
-    },
-    {
-        key: "GROWTH",
-        name: "Growth",
-        powerType: ["body-affecting", "defense", "size"],
-        perceivability: "obvious",
-        duration: "constant",
-        target: "self only",
-        range: "self",
-        costEnd: true,
-        costPerLevel: 5,
-    },
-    {
-        key: "LUCK",
-        name: "Luck",
-        powerType: ["special"],
-        perceivability: "imperceptible",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        costPerLevel: 5,
-    },
-    {
-        key: "ENDURANCERESERVE",
-        name: "Endurance Reserve",
-        powerType: ["special"],
-        perceivability: "imperceptible",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        costPerLevel: 0.25,
-    },
-    {
-        key: "MINDSCAN",
-        powerType: ["attack", "mental"],
-        perceivability: "imperceptible",
-        duration: "constant",
-        target: "dmcv",
-        range: "special",
-        costEnd: true,
-        costPerLevel: 5,
-    },
-    {
-        key: "TELEPATHY",
-        powerType: ["mental", "attack"],
-        perceivability: "imperceptible",
-        duration: "instant",
-        target: "dmcv",
-        range: "los",
-        costEnd: true,
-        costPerLevel: 5,
-    },
-    {
-        key: "EGOATTACK",
-        name: "Mental Blast",
-        powerType: ["attack", "mental"],
-        perceivability: "imperceptible",
-        duration: "instant",
-        target: "dmcv",
-        range: "los",
-        costEnd: true,
-        costPerLevel: 10,
-    },
-    {
-        key: "MENTALILLUSIONS",
-        name: "Mental Illusions",
-        powerType: ["attack", "mental"],
-        perceivability: "imperceptible",
-        duration: "instant",
-        target: "dmcv",
-        range: "los",
-        costEnd: true,
-        costPerLevel: 5,
-    },
-    {
-        key: "MINDCONTROL",
-        name: "Mind Control",
-        powerType: ["attack", "mental"],
-        perceivability: "imperceptible",
-        duration: "instant",
-        target: "dmcv",
-        range: "los",
-        costEnd: true,
-        costPerLevel: 5,
-    },
-    {
-        key: "MINDLINK",
-        name: "Mind Link",
-        powerType: ["mental"],
-        perceivability: "imperceptible",
-        duration: "persistent",
-        target: "dmcv",
-        range: "los",
-        costEnd: false,
-        costPerLevel: 5,
-    },
-    {
-        key: "CLAIRSENTIENCE",
-        powerType: ["sense"],
-        range: "standard",
-    },
-    {
-        key: "NIGHTVISION",
-        powerType: ["sense"],
-    },
-    {
-        key: "ENHANCEDPERCEPTION",
-        powerType: ["sense"],
-    },
-    {
-        key: "MENTALAWARENESS",
-        powerType: ["sense"],
-        senseGroup: "mental",
-        senseType: "passive",
-    },
-    {
-        key: "PENETRATIVE",
-        powerType: ["sense"],
-    },
-    {
-        key: "DETECT",
-        powerType: ["sense"],
+    });
+    addPower(
+        {
+            key: "RESISTANCE",
+            type: ["talent"],
+            behaviors: [],
+            name: "Resistance",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "SHAPECHANGING",
+        type: ["talent"],
+        behaviors: [],
+        name: "Shapechanging",
+        costPerLevel: 0,
+    });
+    addPower(
+        {
+            key: "SIMULATE_DEATH",
+            type: ["talent"],
+            behaviors: [],
+            name: "Simulate Death",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "SKILLMASTER",
+        type: ["talent"],
+        behaviors: [],
+        name: "Skill Master",
         costPerLevel: 1,
-    },
-    {
-        key: "TARGETINGSENSE",
-        powerType: ["sense"],
-    },
-    {
-        key: "TRACKINGSENSE",
-        powerType: ["sense"],
-    },
-    {
+    });
+    addPower(
+        {
+            key: "SPEED_READING",
+            type: ["talent"],
+            behaviors: [],
+            name: "Speed Reading",
+            costPerLevel: 2,
+        },
+        {},
+    );
+    addPower(undefined, {
+        key: "SPELLAUGMENTATION",
+        type: ["talent"],
+        behaviors: [],
+        name: "Spell Augmentation",
+        costPerLevel: 2,
+    });
+    addPower(
+        {
+            key: "STRIKING_APPEARANCE",
+            type: ["talent"],
+            behaviors: [],
+            name: "Striking Appearance",
+            costPerLevel: 3,
+        },
+        undefined,
+    );
+
+    addPower(undefined, {
+        key: "TRACKLESSSTRIDE",
+        type: ["talent"],
+        behaviors: [],
+        name: "Trackless Stride",
+        costPerLevel: 0,
+    });
+    addPower(undefined, {
+        key: "TURNUNDEAD",
+        type: ["talent"],
+        behaviors: [],
+        name: "Turn Undead",
+        costPerLevel: 0,
+    });
+
+    addPower(
+        {
+            key: "UNIVERSAL_TRANSLATOR",
+            type: ["talent"],
+            behaviors: [],
+            name: "Universal Translator",
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "WEAPON_MASTER",
+            type: ["talent"],
+            behaviors: [],
+            name: "Weapon Master",
+            costPerLevel: 0,
+        },
+        {},
+    );
+})();
+
+(function addPowersToPowerList() {
+    addPower(
+        {
+            key: "ABSORPTION",
+            name: "Absorption",
+            type: ["adjustment", "standard", "defense"], // TODO: Not defense type but needs can be enabled role
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 1,
+        },
+        {
+            type: ["adjustment", "attack", "defense"], // TODO: Not defense type but needs can be enabled role
+            costPerLevel: 5,
+        },
+    );
+    addPower(
+        {
+            key: "AID",
+            name: "Aid",
+            type: ["adjustment", "attack"],
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "target’s DCV",
+            range: "no range",
+            costEnd: true,
+            costPerLevel: 6,
+        },
+        {
+            costEnd: false,
+            costPerLevel: 10,
+        },
+    );
+    addPower(
+        undefined,
+        {
+            key: "ARMOR",
+            name: "Resistant Protection",
+            type: ["defense"],
+            behaviors: [],
+            duration: "Persistent",
+            costPerLevel: 3 / 2,
+        },
+        {
+            name: "Armor",
+        },
+    );
+    addPower(
+        {
+            key: "AUTOMATON",
+            name: "Takes No Stun",
+            type: ["automaton", "special"],
+            behaviors: [],
+            perceivability: "Inobvious",
+            duration: "Persistent",
+            target: "Self Only",
+            range: "Self",
+            costEnd: false,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "CHANGEENVIRONMENT",
+            name: "Change Environment",
+            type: ["attack"],
+            behaviors: ["attack"],
+            perceivability: "Obvious",
+            duration: "Constant",
+            target: "Target’s DCV",
+            range: "standard",
+            costEnd: true,
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CLAIRSENTIENCE",
+            name: "Clairsentience",
+            type: ["sense"],
+            behaviors: [],
+            range: "standard",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CLINGING",
+            name: "Clinging",
+            type: ["standard"],
+            behaviors: [],
+            costEnd: false,
+            costPerLevel: 1 / 3,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "CUSTOMPOWER",
+            name: "Custom Power",
+            type: ["custom"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DAMAGENEGATION",
+            name: "Damage Negation",
+            type: ["defense", "special"],
+            behaviors: [],
+            perceivability: "inobvious",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "DAMAGEREDUCTION",
+            name: "Damage Reduction",
+            type: ["defense", "standard"],
+            behaviors: [],
+            perceivability: "inobvious",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+        },
+        {},
+    );
+    addPower(
+        undefined,
+        {
+            key: "DAMAGERESISTANCE",
+            name: "Damage Resistance",
+            type: ["defense"],
+            behaviors: [],
+            //perceivability: "obvious",
+            duration: "instant",
+            target: "Self Only",
+            range: "Self",
+            costEnd: false,
+            costPerLevel: 1 / 2,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DARKNESS",
+            name: "Darkness",
+            type: ["sense-affecting", "attack", "standard"],
+            behaviors: ["attack"],
+            duration: "constant",
+            range: "standard",
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DENSITYINCREASE",
+            name: "Density Increase",
+            type: ["body-affecting", "standard", "defense"], // TODO: needs on off role
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 4,
+        },
+        {
+            costPerLevel: 5,
+        },
+    );
+    addPower(
+        {
+            key: "DESOLIDIFICATION",
+            name: "Desolidification",
+            type: ["body-affecting", "standard"], // TODO: Needs on off role
+            behaviors: [],
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DISPEL",
+            name: "Dispel",
+            type: ["adjustment", "attack"],
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "target’s DCV",
+            range: "standard",
+            costEnd: true,
+            costPerLevel: 3,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DOESNOTBLEED",
+            name: "Does Not Bleed",
+            type: ["automaton", "special"],
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "persistent",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DRAIN",
+            name: "Drain",
+            type: ["adjustment", "attack"],
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "target’s DCV",
+            range: "standard",
+            costEnd: true,
+            costPerLevel: 10,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DUPLICATION",
+            name: "Duplication",
+            type: ["body-affecting", "special"],
+            behaviors: [],
+            perceivability: "Obvious",
+            duration: "persistent",
+            target: "Self Only",
+            range: "Self",
+            costEnd: false,
+            costPerLevel: 0.2,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "EGOATTACK",
+            name: "Mental Blast",
+            type: ["attack", "mental"],
+            behaviors: ["attack"],
+            perceivability: "imperceptible",
+            duration: "instant",
+            target: "dmcv",
+            range: "los",
+            costEnd: true,
+            costPerLevel: 10,
+        },
+        {
+            name: "Ego Attack",
+        },
+    );
+    addPower(
+        {
+            key: "ENDURANCERESERVE",
+            name: "Endurance Reserve",
+            type: ["special"],
+            behaviors: [],
+            perceivability: "imperceptible",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 1 / 4,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ENERGYBLAST",
+            name: "Blast",
+            type: ["attack"],
+            behaviors: ["attack"],
+            range: "standard",
+            costPerLevel: 5,
+            costEnd: true,
+        },
+        {
+            name: "Energy Blast",
+        },
+    );
+    addPower(
+        {
+            key: "ENTANGLE",
+            name: "Entangle",
+            type: ["attack", "standard"],
+            behaviors: ["attack"],
+            range: "standard",
+            costPerLevel: 10,
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "EXTRALIMBS",
+            name: "Extra Limbs",
+            type: ["standard"],
+            behaviors: [],
+            costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(undefined, {
         key: "FINDWEAKNESS",
-        powerType: ["sense", "special", "skill"],
-    },
-    {
-        key: "HANDTOHANDATTACK",
-        powerType: ["attack"],
-        range: "no range",
-        costPerLevel: 5,
-    },
-    {
-        key: "HKA",
-        powerType: ["attack"],
-        range: "no range",
-        costPerLevel: 15,
-        costEnd: true,
-    },
-    {
-        key: "TELEKINESIS",
-        powerType: ["attack"],
-        range: "standard",
-        costEnd: true,
-        costPerLevel: 1.5,
-    },
-    {
-        key: "RKA",
-        powerType: ["attack"],
-        range: "standard",
-        costPerLevel: 15,
-        costEnd: true,
-        sheet: {
-            INPUT: {
-                label: "Vs.",
-                selectOptions: {
-                    ED: "ED",
-                    PD: "PD",
+        type: ["sense", "special", "skill"],
+        behaviors: ["success"],
+    });
+    addPower(
+        {
+            key: "FIXEDLOCATION",
+            name: "Teleportation: Fixed Location",
+            type: ["attack", "sense-affecting", "standard"],
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "Target’s DCV",
+            range: "standard",
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FLOATINGLOCATION",
+            name: "Teleportation: Floating Fixed Location",
+            type: ["attack", "sense-affecting", "standard"],
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "Target’s DCV",
+            range: "standard",
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FLASH",
+            type: ["attack", "sense-affecting", "standard"],
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "Target’s DCV",
+            range: "standard",
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FLASHDEFENSE",
+            type: ["defense", "special"],
+            behaviors: [],
+            name: "Flash Defense",
+            perceivability: "inobvious",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FORCEFIELD",
+            type: ["defense", "standard"],
+            behaviors: [],
+            name: "Resistant Protection",
+            duration: "Persistent",
+            perceivability: "inobvious",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 1.5,
+        },
+        {
+            name: "Force Field",
+            duration: "Constant",
+            costEnd: true,
+            costPerLevel: 1,
+        },
+    );
+    addPower(
+        {
+            key: "FORCEWALL",
+            type: ["defense", "standard"],
+            behaviors: [],
+            name: "Barrier",
+            duration: "instant",
+            range: "standard",
+            costEnd: true,
+            costPerLevel: 3,
+        },
+        {
+            name: "Force Wall",
+            duration: "constant",
+            costPerLevel: 2.5,
+        },
+    );
+
+    addPower(
+        {
+            key: "GROWTH",
+            name: "Growth",
+            type: ["body-affecting", "defense", "size"], // TODO: Not defense type
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 5,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HANDTOHANDATTACK",
+            name: "Hand-To-Hand Attack",
+            type: ["attack"],
+            behaviors: ["attack"],
+            range: "no range",
+            costPerLevel: 5,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "HEALING",
+            type: ["adjustment", "attack"], // TODO: Not attack type ... but needs attack role
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "target's dcv",
+            range: "no range",
+            costEnd: true,
+            costPerLevel: 10,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "HKA",
+            name: "Hand-To-Hand Killing Attack",
+            type: ["attack"],
+            behaviors: ["attack"],
+            range: "no range",
+            costPerLevel: 15,
+            costEnd: true,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "IMAGES",
+            name: "Images",
+            type: ["attack", "sense-affecting", "standard"],
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "area (see text)",
+            range: "standard",
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "INVISIBILITY",
+            name: "Invisibility",
+            type: ["sense-affecting", "defense"],
+            behaviors: [],
+            perceivability: "Special",
+            duration: "Constant",
+            target: "Self Only",
+            range: "Self",
+            costEnd: true,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "KBRESISTANCE",
+            type: ["defense", "standard"],
+            behaviors: [],
+            name: "Knockback Resistance",
+            perceivability: "imperceptible",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 1,
+        },
+        {
+            costPerLevel: 2,
+        },
+    );
+
+    addPower(undefined, {
+        key: "LACKOFWEAKNESS",
+        type: ["defense", "special"],
+        behaviors: [],
+        name: "Knockback Resistance",
+        perceivability: "imperceptible",
+        duration: "persistent",
+        target: "self only",
+        range: "self",
+        costEnd: false,
+        costPerLevel: 1,
+    });
+    addPower(
+        {
+            key: "LIFESUPPORT",
+            name: "Life Support",
+            type: ["standard"],
+            behaviors: [],
+            perceivability: "imperceptible",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "LUCK",
+            name: "Luck",
+            type: ["special"],
+            behaviors: ["roll"],
+            perceivability: "imperceptible",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 5,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MENTALDEFENSE",
+            type: ["defense", "special"],
+            behaviors: [],
+            name: "Mental Defense",
+            perceivability: "Imperceptible",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            duration: "Persistent",
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MENTALILLUSIONS",
+            name: "Mental Illusions",
+            type: ["attack", "mental"],
+            behaviors: ["attack"],
+            perceivability: "imperceptible",
+            duration: "instant",
+            target: "dmcv",
+            range: "los",
+            costEnd: true,
+            costPerLevel: 5,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MINDCONTROL",
+            name: "Mind Control",
+            type: ["attack", "mental"],
+            behaviors: ["attack"],
+            perceivability: "imperceptible",
+            duration: "instant",
+            target: "dmcv",
+            range: "los",
+            costEnd: true,
+            costPerLevel: 5,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MINDLINK",
+            name: "Mind Link",
+            type: ["mental"],
+            behaviors: ["attack"],
+            perceivability: "imperceptible",
+            duration: "persistent",
+            target: "dmcv",
+            range: "los",
+            costEnd: false,
+            costPerLevel: 5,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MINDSCAN",
+            type: ["attack", "mental", "sense"], // TODO: Not attack but dice role
+            behaviors: ["attack"],
+            perceivability: "imperceptible",
+            duration: "constant",
+            target: "dmcv",
+            range: "special",
+            costEnd: true,
+            costPerLevel: 5,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MISSILEDEFLECTION",
+            name: "Deflection",
+            type: ["defense", "standard"],
+            behaviors: ["attack"],
+            perceivability: "Inobvious",
+            duration: "instant",
+            target: "Target’s OCV", // TODO: Do we need to repeat "Target's..."?
+            range: "standard",
+            costEnd: true,
+        },
+        {
+            name: "Missile Deflection and Reflection",
+            duration: "constant",
+        },
+    );
+    addPower(
+        {
+            key: "MULTIFORM",
+            type: ["body-affecting", "standard"],
+            behaviors: [],
+            name: "Multiform",
+            perceivability: "Obvious",
+            duration: "persistent",
+            target: "Self Only",
+            range: "Self",
+            costEnd: false,
+            costPerLevel: 0.2,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "NAKEDMODIFIER",
+            type: ["special"],
+            behaviors: [],
+            //"duration": "instant",  // TODO: Not true, hack for isPerceivable
+            costEnd: true,
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "NOHITLOCATIONS",
+            name: "No Hit Locations",
+            type: ["automaton"],
+            behaviors: [],
+            costEnd: true,
+            costPerLevel: 0,
+        },
+        undefined,
+    );
+
+    addPower(
+        {
+            key: "POSSESSION",
+            type: ["attack", "mental"],
+            behaviors: ["attack"],
+            name: "Possession",
+            perceivability: "obvious",
+            duration: "constant",
+            target: "DMCV",
+            range: "los",
+            costEnd: true,
+            costPerLevel: 0.5,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "POWERDEFENSE",
+            type: ["defense", "special"],
+            behaviors: [],
+            name: "Power Defense",
+            perceivability: "inobvious",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    // {
+    // TODO: Do we need it in the system or not?
+    //     key: "naturalBodyHealing",
+    // },
+
+    addPower(
+        {
+            key: "REFLECTION",
+            type: ["attack", "standard"],
+            behaviors: ["attack"],
+            perceivability: "imperceptible",
+            duration: "instant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 3 / 2,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "REGENERATION",
+            type: ["special"],
+            behaviors: [],
+            perceivability: "imperceptible",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "RKA",
+            name: "Ranged Killing Attack",
+            type: ["attack"],
+            behaviors: ["attack"],
+            range: "standard",
+            costPerLevel: 15,
+            costEnd: true,
+            sheet: {
+                INPUT: {
+                    label: "Vs.",
+                    selectOptions: {
+                        ED: "ED",
+                        PD: "PD",
+                    },
                 },
             },
         },
-    },
-    {
-        key: "ENERGYBLAST",
-        powerType: ["attack"],
-        range: "standard",
-        costPerLevel: 5,
-        costEnd: true,
-    },
-    {
-        key: "DARKNESS",
-        powerType: ["sense-affecting", "attack", "standard"],
-        duration: "constant",
-        range: "standard",
-        costEnd: true,
-    },
-    {
-        key: "DISPEL",
-        powerType: ["attack", "standard"],
-        range: "standard",
-        costPerLevel: 3,
-    },
-    {
-        key: "ENTANGLE",
-        powerType: ["attack", "standard"],
-        range: "standard",
-        costPerLevel: 10,
-        costEnd: true,
-    },
-    {
-        key: "FLASH",
-        powerType: ["attack", "sense-affecting", "standard"],
-        perceivability: "obvious",
-        duration: "instant",
-        target: "Target’s DCV",
-        range: "standard",
-        costEnd: true,
-    },
-    {
-        key: "IMAGES",
-        name: "Images",
-        powerType: ["attack", "sense-affecting", "standard"],
-        perceivability: "obvious",
-        duration: "constant",
-        target: "area (see text)",
-        range: "standard",
-        costEnd: true,
-    },
-    {
-        key: "EXTRADC",
-        powerType: ["martial"],
-        costPerLevel: 4,
-    },
-    {
-        key: "RANGEDDC",
-        powerType: ["martial"],
-        costPerLevel: 4,
-    },
-    {
-        key: "MANEUVER",
-        powerType: ["martial", "attack"],
-    },
-    {
-        key: "CHANGEENVIRONMENT",
-        name: "Change Environment",
-        powerType: ["attack"],
-        perceivability: "Obvious",
-        duration: "Constant",
-        target: "Target’s DCV",
-        range: "Standard",
-        costEnd: true,
-        costPerLevel: 1,
-    },
-    {
-        key: "INVISIBILITY",
-        name: "Invisibility",
-        powerType: ["sense-affecting", "defense"],
-        perceivability: "Special",
-        duration: "Constant",
-        target: "Self Only",
-        range: "Self",
-        costEnd: true,
-    },
-    {
-        key: "FORCEWALL",
-        powerType: ["defense"],
-        name: "Barrier",
-        duration: "instant",
-        range: "standard",
-        costEnd: true,
-        costPerLevel: 1.5,
-    },
-    {
-        key: "FORCEFIELD",
-        powerType: ["defense"],
-        name: "Resistant Protection",
-        duration: "Persistent",
-        perceivability: "inobvious",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        costPerLevel: 1.5,
-    },
-    {
-        key: "FLASHDEFENSE",
-        powerType: ["defense", "special"],
-        name: "Flash Defense",
-        perceivability: "inobvious",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        costPerLevel: 1,
-    },
-    {
-        key: "MENTALDEFENSE",
-        powerType: ["defense", "special"],
-        name: "Mental Defense",
-        perceivability: "Imperceptible",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        duration: "Persistent",
-        costPerLevel: 1,
-    },
-    {
-        key: "POWERDEFENSE",
-        powerType: ["defense", "special"],
-        name: "Power Defense",
-        perceivability: "inobvious",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        costPerLevel: 1,
-    },
-    {
-        key: "DAMAGENEGATION",
-        powerType: ["defense", "special"],
-        name: "Damage Negation",
-        perceivability: "inobvious",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-    },
-    {
-        key: "DAMAGEREDUCTION",
-        powerType: ["defense", "standard"],
-        name: "Damage Reduction",
-        perceivability: "inobvious",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-    },
-    {
-        key: "KBRESISTANCE",
-        powerType: ["defense", "standard"],
-        name: "Knockback Resistance",
-        perceivability: "imperceptible",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        costPerLevel: 1,
-    },
-    {
-        key: "LACKOFWEAKNESS",
-        powerType: ["defense", "special"],
-        name: "Knockback Resistance",
-        perceivability: "imperceptible",
-        duration: "persistent",
-        target: "self only",
-        range: "self",
-        costEnd: false,
-        costPerLevel: 1,
-    },
+        {},
+    );
 
-    {
-        key: "FLIGHT",
-        powerType: ["movement"],
-        costEnd: true,
-        costPerLevel: 1,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "TELEPORTATION",
-        powerType: ["movement"],
-        costEnd: true,
-        costPerLevel: 1,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "SWINGING",
-        powerType: ["movement"],
-        costEnd: true,
-        costPerLevel: 0.5,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "TUNNELING",
-        powerType: ["movement"],
-        costEnd: true,
-        costPerLevel: 1,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-
-    {
-        key: "EXTRADIMENSIONALMOVEMENT",
-        powerType: ["movement"],
-        name: "Extra-Dimensional Movement",
-        perceivability: "Inobvious",
-        duration: "instant",
-        target: "Self Only",
-        range: "Self",
-        costEnd: true,
-        costPerLevel: 20,
-        // "ignoreFor": [
-        //     "base2",
-        //     "computer",
-        //     "ai"
-        // ],
-        onlyFor: ["none"],
-    },
-    {
-        key: "ENVIRONMENTAL_MOVEMENT",
-        powerType: ["talent"],
-        name: "Environmental Movement",
-        costPerLevel: 0,
-    },
-    {
-        key: "REPUTATION",
-        powerType: ["perk", "skill"],
-        name: "Positive Reputation",
-        costPerLevel: 0,
-    },
-    {
-        key: "FOLLOWER",
-        powerType: ["talent"],
-        name: "Follower",
-    },
-
-    {
-        key: "CONTACT",
-        powerType: ["perk"],
-        name: "Contact",
-        costPerLevel: 1,
-    },
-    {
-        key: "COMBAT_LUCK",
-        powerType: ["talent", "defense"],
-        duration: "constant",
-        costPerLevel: 6,
-    },
-    {
-        key: "LIGHTNING_REFLEXES_ALL",
-        powerType: ["talent"],
-        name: "Lightning Reflexes",
-        costPerLevel: 1,
-    },
-    {
-        key: "LIGHTNING_REFLEXES_SINGLE",
-        powerType: ["talent"],
-        name: "Lightning Reflexes",
-        costPerLevel: 1,
-    },
-    {
-        key: "COMBAT_SENSE",
-        powerType: ["talent"],
-        name: "Combat Sense",
-        costPerLevel: 1,
-    },
-    {
-        key: "RESISTANCE",
-        powerType: ["talent"],
-        name: "Resistance",
-        costPerLevel: 1,
-    },
-    {
-        key: "ACROBATICS",
-        powerType: ["skill"],
-    },
-    {
-        key: "ACTING",
-        powerType: ["skill"],
-    },
-    {
-        key: "ANALYZE",
-        powerType: ["skill"],
-    },
-    {
-        key: "ANIMAL_HANDLER",
-        powerType: ["skill"],
-        categorized: true,
-    },
-    {
-        key: "AUTOFIRE_SKILLS",
-        powerType: ["skill"],
-    },
-    {
-        key: "BREAKFALL",
-        powerType: ["skill"],
-        costPerLevel: 1,
-    },
-    {
-        key: "BRIBERY",
-        powerType: ["skill"],
-    },
-    {
-        key: "BUGGING",
-        powerType: ["skill"],
-    },
-    {
-        key: "BUREAUCRATICS",
-        powerType: ["skill"],
-    },
-    {
-        key: "CHARM",
-        powerType: ["skill"],
-    },
-    {
-        key: "CLIMBING",
-        powerType: ["skill"],
-    },
-    {
-        key: "COMBAT_DRIVING",
-        powerType: ["skill"],
-    },
-    {
-        key: "COMBAT_PILOTING",
-        powerType: ["skill"],
-    },
-    {
-        key: "COMBAT_LEVELS",
-        powerType: ["skill"],
-        rollable: false,
-        xmlid: "COMBAT_LEVELS",
-    },
-    {
-        key: "COMPUTER_PROGRAMMING",
-        powerType: ["skill"],
-    },
-    {
-        key: "CONCEALMENT",
-        powerType: ["skill"],
-    },
-    {
-        key: "CONTORTIONIST",
-        powerType: ["skill"],
-    },
-    {
-        key: "CONVERSATION",
-        powerType: ["skill"],
-    },
-    {
-        key: "CRAMMING",
-        powerType: ["skill"],
-    },
-    {
-        key: "CRIMINOLOGY",
-        powerType: ["skill"],
-    },
-    {
-        key: "CRYPTOGRAPHY",
-        powerType: ["skill"],
-    },
-    {
-        key: "CUSTOMSKILL",
-        powerType: ["skill"],
-        costPerLevel: 1,
-    },
-    {
-        key: "DEDUCTION",
-        powerType: ["skill"],
-    },
-    {
-        key: "DEFENSE_MANEUVER",
-        powerType: ["skill"],
-    },
-    {
-        key: "DEMOLITIONS",
-        powerType: ["skill"],
-    },
-    {
-        key: "DISGUISE",
-        powerType: ["skill"],
-    },
-    {
-        key: "ELECTRONICS",
-        powerType: ["skill"],
-    },
-    {
-        key: "FAST_DRAW",
-        powerType: ["skill"],
-    },
-    {
-        key: "FORENSIC_MEDICINE",
-        powerType: ["skill"],
-    },
-    {
-        key: "FORGERY",
-        powerType: ["skill"],
-        categorized: true,
-    },
-    {
-        key: "GAMBLING",
-        powerType: ["skill"],
-        categorized: true,
-    },
-    {
-        key: "HIGH_SOCIETY",
-        powerType: ["skill"],
-    },
-    {
-        key: "INTERROGATION",
-        powerType: ["skill"],
-    },
-    {
-        key: "INVENTOR",
-        powerType: ["skill"],
-    },
-    {
-        key: "KNOWLEDGE_SKILL",
-        powerType: ["skill"],
-        costPerLevel: 1,
-    },
-    {
-        key: "LANGUAGES",
-        powerType: ["skill"],
-        rollable: false,
-    },
-    {
-        key: "LIPREADING",
-        powerType: ["skill"],
-    },
-    {
-        key: "LOCKPICKING",
-        powerType: ["skill"],
-    },
-    {
-        key: "MECHANICS",
-        powerType: ["skill"],
-    },
-    {
-        key: "MENTAL_COMBAT_LEVELS",
-        powerType: ["skill"],
-        rollable: false,
-        xmlid: "MENTAL_COMBAT_LEVELS",
-    },
-    {
-        key: "MIMICRY",
-        powerType: ["skill"],
-    },
-    {
-        key: "NAVIGATION",
-        powerType: ["skill"],
-        categorized: true,
-    },
-    {
-        key: "ORATORY",
-        powerType: ["skill"],
-    },
-    {
-        key: "PARAMEDICS",
-        powerType: ["skill"],
-    },
-    {
-        key: "PENALTY_SKILL_LEVELS",
-        powerType: ["skill"],
-    },
-    {
-        key: "PERSUASION",
-        powerType: ["skill"],
-    },
-    {
-        key: "POWERSKILL",
-        powerType: ["skill"],
-    },
-    {
-        key: "PROFESSIONAL_SKILL",
-        powerType: ["skill"],
-    },
-    {
-        key: "RAPID_ATTACK_HTH",
-        powerType: ["skill"],
-    },
-    {
-        key: "RIDING",
-        powerType: ["skill"],
-    },
-    {
-        key: "SCIENCE_SKILL",
-        powerType: ["skill"],
-    },
-    {
-        key: "SECURITY_SYSTEMS",
-        powerType: ["skill"],
-    },
-    {
-        key: "SHADOWING",
-        powerType: ["skill"],
-    },
-    {
-        key: "SKILL_LEVELS",
-        powerType: ["skill"],
-    },
-    {
-        key: "SLEIGHT_OF_HAND",
-        powerType: ["skill"],
-    },
-    {
-        key: "STEALTH",
-        powerType: ["skill"],
-    },
-    {
-        key: "STREETWISE",
-        powerType: ["skill"],
-    },
-    {
-        key: "SURVIVAL",
-        powerType: ["skill"],
-        categorized: true,
-    },
-    {
-        key: "SYSTEMS_OPERATION",
-        powerType: ["skill"],
-    },
-    {
-        key: "TACTICS",
-        powerType: ["skill"],
-    },
-    {
-        key: "TEAMWORK",
-        powerType: ["skill"],
-    },
-    {
-        key: "TRACKING",
-        powerType: ["skill"],
-    },
-    {
-        key: "TRADING",
-        powerType: ["skill"],
-    },
-    {
-        key: "TRANSPORT_FAMILIARITY",
-        powerType: ["skill"],
-        rollable: false,
-    },
-    {
-        key: "TWO_WEAPON_FIGHTING_HTH",
-        powerType: ["skill"],
-    },
-    {
-        key: "VENTRILOQUISM",
-        powerType: ["skill"],
-    },
-    {
-        key: "WEAPON_FAMILIARITY",
-        powerType: ["skill"],
-    },
-    {
-        key: "WEAPONSMITH",
-        powerType: ["skill"],
-        categorized: true,
-    },
-    {
-        key: "JACK_OF_ALL_TRADES",
-        powerType: ["skill", "enhancer"],
-        rollable: false,
-    },
-    {
-        key: "LINGUIST",
-        powerType: ["skill", "enhancer"],
-        rollable: false,
-    },
-    {
-        key: "SCIENTIST",
-        powerType: ["skill", "enhancer"],
-        rollable: false,
-    },
-    {
-        key: "SCHOLAR",
-        powerType: ["skill", "enhancer"],
-        rollable: false,
-    },
-    {
-        key: "TRAVELER",
-        powerType: ["skill", "enhancer"],
-        rollable: false,
-    },
-    {
-        key: "LIST",
-        powerType: ["framework"],
-    },
-    {
-        key: "VPP",
-        powerType: ["framework"],
-    },
-    {
-        key: "ELEMENTAL_CONTROL",
-        powerType: ["framework"],
-    },
-    {
-        key: "MULTIPOWER",
-        powerType: ["framework"],
-    },
-    {
-        key: "COMPOUNDPOWER",
-        powerType: ["compound"],
-    },
-    {
-        key: "DUPLICATION",
-        powerType: ["BodyAffecting", "special"],
-        name: "Duplication",
-        perceivability: "Obvious",
-        duration: "persistent",
-        target: "Self Only",
-        range: "Self",
-        costEnd: false,
-        costPerLevel: 0.2,
-    },
-    {
-        key: "MULTIFORM",
-        powerType: ["BodyAffecting", "special"],
-        name: "Multiform",
-        perceivability: "Obvious",
-        duration: "persistent",
-        target: "Self Only",
-        range: "Self",
-        costEnd: false,
-        costPerLevel: 0.2,
-    },
-
-    {
-        key: "CUSTOMPOWER",
-        powerType: ["custom"],
-    },
-    {
-        key: "naturalBodyHealing",
-    },
-
-    {
-        key: "AUTOMATON", //CANNOT BE STUNNED
-        powerType: ["automaton", "special"],
-        name: "Automaton",
-        perceivability: "Inobvious",
-        duration: "Persistent",
-        target: "Self Only",
-        range: "Self",
-        costEnd: false,
-    },
-];
-
-HERO.powers5e = [
-    {
-        key: "DEX",
-        cost: 3,
-    },
-    {
-        key: "CON",
-        cost: 2,
-    },
-    {
-        key: "EGO",
-        cost: 2,
-    },
-    {
-        key: "BODY",
-        cost: 2,
-    },
-    {
-        key: "PD",
-        base: 0,
-        cost: 1,
-    },
-    {
-        key: "ED",
-        base: 0,
-        cost: 1,
-    },
-    {
-        key: "SPD",
-        base: 0,
-        cost: 10,
-    },
-    {
-        key: "REC",
-        base: 0,
-        cost: 2,
-    },
-    {
-        key: "END",
-        base: 0,
-        cost: 1 / 2,
-    },
-    {
-        key: "STUN",
-        base: 0,
-        cost: 1,
-    },
-    {
-        key: "COM",
-        base: 10,
-        cost: 1 / 2,
-    },
-    {
-        key: "OCV",
-        cost: 0,
-    },
-    {
-        key: "DCV",
-        cost: 0,
-    },
-    {
-        key: "OMCV",
-        cost: 0,
-    },
-    {
-        key: "DMCV",
-        cost: 0,
-    },
-    {
-        key: "ABSORPTION",
-        powerType: ["adjustment", "attack", "defense"],
-        costPerLevel: 5,
-    },
-    {
-        key: "AID",
-        costEnd: false,
-        costPerLevel: 10,
-    },
-    {
+    addPower(
+        {
+            key: "SHAPESHIFT",
+            name: "Shape Shift",
+            type: ["body-affecting"],
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SHRINKING",
+            name: "Shrinking",
+            type: ["body-affecting", "size"],
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 6,
+        },
+        { costPerLevel: 10 },
+    );
+    addPower(
+        {
+            key: "STRETCHING",
+            type: ["body-affecting", "standard"],
+            behaviors: [],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 1,
+        },
+        { costPerLevel: 5 },
+    );
+    addPower(
+        {
+            key: "SUCCOR",
+            name: "Boost",
+            type: ["adjustment", "attack"], // TODO: Should not be attack type
+            behaviors: [],
+            duration: "constant",
+            target: "target's DCV",
+            range: "no range",
+            costEnd: true,
+            costPerLevel: 5,
+        },
+        {
+            name: "Succor",
+        },
+    );
+    addPower(
+        {
+            key: "SUMMON",
+            name: "Summon",
+            type: ["standard"],
+            behaviors: [],
+            duration: "instant",
+            target: "n/a",
+            range: "self",
+            costPerLevel: 1 / 5,
+        },
+        {},
+    );
+    addPower(undefined, {
         key: "SUPPRESS",
         name: "Suppress",
-        powerType: ["adjustment", "attack"],
+        type: ["adjustment", "attack"],
+        behaviors: ["attack"],
         perceivability: "obvious",
         duration: "constant",
         target: "target’s DCV",
         range: "standard",
         costEnd: true,
         costPerLevel: 5,
-    },
-    {
+    });
+
+    addPower(
+        {
+            key: "TELEKINESIS",
+            name: "Telekinesis",
+            type: ["attack", "standard"],
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "constant",
+            target: "target’s DCV",
+            range: "standard",
+            costEnd: true,
+            costPerLevel: 1.5,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TELEPATHY",
+            type: ["mental"],
+            behaviors: ["attack"],
+            perceivability: "imperceptible",
+            duration: "instant",
+            target: "dmcv",
+            range: "los",
+            costEnd: true,
+            costPerLevel: 5,
+        },
+        {},
+    );
+    addPower(undefined, {
         key: "TRANSFER",
         name: "Transfer",
-        powerType: ["adjustment", "attack"],
+        type: ["adjustment", "attack"],
+        behaviors: ["attack"],
         perceivability: "obvious",
         duration: "instant",
         target: "target's DCV",
         range: "no range",
         costEnd: true,
         costPerLevel: 15,
-    },
-    {
-        key: "TRANSFORM",
-        name: "Transform",
-        powerType: ["attack", "standard"],
-        perceivability: "obvious",
-        duration: "instant",
-        target: "target's DCV",
-        range: "Standard",
-        costEnd: true,
-        //cost: See Transform Table
-    },
-    {
-        key: "ARMOR",
-        powerType: ["defense"],
-        name: "Resistant Protection",
-        duration: "Persistent",
-        costPerLevel: 3 / 2,
-    }, // AKA RESISTANT PROTECTION
-    {
-        key: "DAMAGERESISTANCE",
-        name: "Damage Resistance",
-        powerType: ["defense"],
-        //perceivability: "obvious",
-        duration: "instant",
-        target: "Self Only",
-        range: "Self",
-        costEnd: false,
-        costPerLevel: 1 / 2,
-    },
-    {
-        key: "FORCEFIELD",
-        powerType: ["defense"],
-        name: "Force Field",
-        duration: "Constant",
-        costEnd: true,
-        costPerLevel: 1,
-    },
+    });
+    addPower(
+        {
+            key: "TRANSFORM",
+            name: "Transform",
+            type: ["attack", "standard"],
+            behaviors: ["attack"],
+            perceivability: "obvious",
+            duration: "instant",
+            target: "target's DCV",
+            range: "standard",
+            costEnd: true,
+        },
+        {},
+    );
+})();
 
-    {
-        key: "UNLUCK",
-        powerType: ["disadvantage"],
-        name: "Unluck",
-        costPerLevel: 5,
-    },
+(function addMartialToPowerList() {
+    addPower(
+        {
+            key: "EXTRADC",
+            type: ["martial"],
+            behaviors: [],
+            costPerLevel: 4,
+        },
+        {},
+    );
 
-    {
-        key: "DENSITYINCREASE",
-        name: "Density Increase",
-        powerType: ["body-affecting", "standard", "defense"],
-        perceivability: "obvious",
-        duration: "constant",
-        target: "self only",
-        range: "self",
-        costEnd: true,
-        costPerLevel: 5,
-    },
+    addPower(
+        {
+            // TODO: Needed?
+            key: "MANEUVER",
+            type: ["martial", "attack"],
+            behaviors: ["attack"],
+        },
+        {},
+    );
 
-    {
-        key: "FLIGHT",
-        costPerLevel: 2,
-    },
-    {
-        key: "GLIDING",
-        powerType: ["movement"],
-        costEnd: false,
-        costPerLevel: 1,
-        ignoreFor: ["base2", "computer", "ai"],
-    },
-    {
-        key: "LEAPING",
-        base: 2,
-        cost: 1,
-        costPerLevel: 1,
-    },
-    {
-        key: "RUNNING",
-        base: 6,
-        cost: 2,
-    },
-    {
-        key: "SWIMMING",
-        base: 2,
-        cost: 1,
-        costPerLevel: 1,
-    },
-    {
-        key: "SWINGING",
-        costPerLevel: 1,
-    },
-    {
-        key: "TELEPORTATION",
-        costPerLevel: 2,
-    },
-    {
-        key: "TUNNELING",
-        costPerLevel: 5,
-    },
-    {
-        key: "KBRESISTANCE",
-        costPerLevel: 2,
-    },
-];
+    addPower(
+        {
+            key: "RANGEDDC",
+            type: ["martial"],
+            behaviors: [],
+            costPerLevel: 4,
+        },
+        {},
+    );
+})();
+
+(function addSensesToPowerList() {
+    addPower(
+        {
+            key: "ACTIVESONAR",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ADJACENTFIXED",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "ADJACENT",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "ANALYZESENSE",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "CONCEALED",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DETECT",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALSINGLE",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALGROUP",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALALL",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DISCRIMINATORY",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ENHANCEDPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HRRP",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "INCREASEDARC240",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "INCREASEDARC360",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "INFRAREDPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MAKEASENSE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MENTALAWARENESS",
+            type: ["sense"],
+            behaviors: [],
+            senseGroup: "mental",
+            senseType: "passive",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MICROSCOPIC",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "NIGHTVISION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "NRAYPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "PARTIALLYPENETRATIVE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "PENETRATIVE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        undefined,
+    );
+
+    addPower(
+        {
+            key: "RADAR",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RADIOPERCEIVETRANSMIT",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RADIOPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RANGE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RAPID",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "SPATIALAWARENESS",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "TARGETINGSENSE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TELESCOPIC",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRACKINGSENSE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRANSMIT",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ULTRASONICPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ULTRAVIOLETPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+})();
+
+(function addComplicationsToPowerList() {
+    addPower(
+        {
+            key: "ACCIDENTALCHANGE",
+            type: ["disadvantage"],
+            behaviors: ["success"],
+            name: "Accidental Change",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "GENERICDISADVANTAGE",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Custom Disadvantage",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DEPENDENCE",
+            type: ["disadvantage"],
+            behaviors: ["roll"],
+            name: "Dependence",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DEPENDENTNPC",
+            type: ["disadvantage"],
+            behaviors: ["success"],
+            name: "Dependent NPC",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DISTINCTIVEFEATURES",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Distinctive Features",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ENRAGED",
+            type: ["disadvantage"],
+            behaviors: ["success"],
+            name: "Enraged/Berserk",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HUNTED",
+            type: ["disadvantage"],
+            behaviors: ["success"],
+            name: "Hunted",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MONEYDISAD",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Hunted",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "PHYSICALLIMITATION",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Physical Limitation",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "PSYCHOLOGICALLIMITATION",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Psychological Limitation",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "RIVALRY",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Rivalry",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "SOCIALLIMITATION",
+            type: ["disadvantage"],
+            behaviors: ["success"],
+            name: "Social Limitation",
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SUSCEPTIBILITY",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Susceptibility",
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "UNLUCK",
+            type: ["disadvantage"],
+            behaviors: ["roll"],
+            name: "Unluck",
+            costPerLevel: 5,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "VULNERABILITY",
+            type: ["disadvantage"],
+            behaviors: [],
+            name: "Vulnerability",
+        },
+        {},
+    );
+})();
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
 HERO.ModifierOverride = {

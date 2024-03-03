@@ -1327,6 +1327,7 @@ export class HeroSystem6eActor extends Actor {
                         case "DRAIN":
                         case "HEALING":
                         case "TRANSFER":
+                        case "SUCCOR":
                         case "SUPPRESS":
                             if (!system.NAME) {
                                 itemData.name =
@@ -1380,9 +1381,27 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // Validate everything that's been imported
+        this.items.forEach(async (item) => {
+            const power = getPowerInfo({ item: item });
+
+            // Power needs to exist
+            if (!power) {
+                await ui.notifications.error(
+                    `${this.name}/${item.name} has unknown power XMLID: ${item.system.XMLID}. Please report.`,
+                    { console: true, permanent: true },
+                );
+            } else if (!power.behaviors) {
+                await ui.notifications.error(
+                    `${this.name}/${item.name}/${item.system.XMLID} does not have behaviors defined. Please report.`,
+                    { console: true, permanent: true },
+                );
+            }
+        });
+
         // Warn about invalid adjustment targets
         for (const item of this.items.filter((item) =>
-            getPowerInfo({ item: item }).powerType?.includes("adjustment"),
+            getPowerInfo({ item: item })?.type?.includes("adjustment"),
         )) {
             const result = item.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
@@ -1412,64 +1431,67 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // Perception Skill
-        const itemDataPerception = {
-            name: "Perception",
-            type: "skill",
-            system: {
-                XMLID: "PERCEPTION",
-                ALIAS: "Perception",
-                CHARACTERISTIC: "INT",
-                state: "trained",
-                levels: "0",
-            },
-        };
-        const perceptionItem = await HeroSystem6eItem.create(
-            itemDataPerception,
-            {
-                temporary: this.id ? false : true,
-                parent: this,
-            },
-        );
-        await perceptionItem._postUpload();
-
-        // MANEUVERS
-        for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
-            const name = entry[0];
-            const v = entry[1];
-            const PHASE = v[0];
-            const OCV = v[1];
-            const DCV = v[2];
-            let EFFECT = v[3];
-            if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
-                let divisor = EFFECT.match(/v\/(\d+)/)[1];
-                EFFECT = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`);
-            }
-            const attack = v[4];
-            const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
-            const itemData = {
-                name,
-                type: "maneuver",
+        // Characters get a few things for free that are not in the HDC.
+        if (this.type === "pc" || this.type === "npc") {
+            // Perception Skill
+            const itemDataPerception = {
+                name: "Perception",
+                type: "skill",
                 system: {
-                    PHASE,
-                    OCV,
-                    DCV,
-                    EFFECT,
-                    active: false,
-                    description: EFFECT,
-                    XMLID,
+                    XMLID: "PERCEPTION",
+                    ALIAS: "Perception",
+                    CHARACTERISTIC: "INT",
+                    state: "trained",
+                    levels: "0",
                 },
             };
-
-            // Skip if temporary actor (Quench)
-            if (this.id) {
-                const item = await HeroSystem6eItem.create(itemData, {
+            const perceptionItem = await HeroSystem6eItem.create(
+                itemDataPerception,
+                {
+                    temporary: this.id ? false : true,
                     parent: this,
-                });
-                if (attack) {
-                    await item.makeAttack();
+                },
+            );
+            await perceptionItem._postUpload();
+
+            // MANEUVERS
+            for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
+                const name = entry[0];
+                const v = entry[1];
+                const PHASE = v[0];
+                const OCV = v[1];
+                const DCV = v[2];
+                let EFFECT = v[3];
+                if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
+                    let divisor = EFFECT.match(/v\/(\d+)/)[1];
+                    EFFECT = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`);
                 }
-                await item._postUpload();
+                const attack = v[4];
+                const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
+                const itemData = {
+                    name,
+                    type: "maneuver",
+                    system: {
+                        PHASE,
+                        OCV,
+                        DCV,
+                        EFFECT,
+                        active: false,
+                        description: EFFECT,
+                        XMLID,
+                    },
+                };
+
+                // Skip if temporary actor (Quench)
+                if (this.id) {
+                    const item = await HeroSystem6eItem.create(itemData, {
+                        parent: this,
+                    });
+                    if (attack) {
+                        await item.makeAttack();
+                    }
+                    await item._postUpload();
+                }
             }
         }
 
@@ -1668,10 +1690,6 @@ export class HeroSystem6eActor extends Actor {
 
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
-            if (key === "running") {
-                console.log(key);
-            }
-
             let newValue = parseInt(
                 this.system?.[key.toUpperCase()]?.LEVELS || 0,
             );
@@ -1871,7 +1889,11 @@ export class HeroSystem6eActor extends Actor {
 
     updateRollable(key) {
         const characteristic = this.system.characteristics[key];
-        if (characteristic.type === "rollable") {
+        const charPowerEntry = getPowerInfo({
+            xmlid: key.toUpperCase(),
+            actor: this,
+        });
+        if (characteristic && charPowerEntry?.behaviors.includes("success")) {
             characteristic.roll = Math.round(9 + characteristic.value * 0.2);
             if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;
