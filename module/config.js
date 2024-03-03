@@ -1235,6 +1235,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        key: "NEGATIVECOMBATSKILLLEVELS",
+        type: ["skill"],
+        behaviors: [],
+    });
+    addPower(undefined, {
+        key: "NEGATIVEPENALTYSKILLLEVELS",
+        type: ["skill"],
+        behaviors: [],
+    });
+    addPower(undefined, {
+        key: "NEGATIVESKILLLEVELS",
+        type: ["skill"],
+        behaviors: [],
+    });
 
     addPower(
         {
