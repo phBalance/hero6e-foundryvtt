@@ -150,6 +150,66 @@
                         "core": 20,
                         "realCost": 0
                     },
+                    "custom1": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom2": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom3": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom4": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom5": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom6": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom7": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom8": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom9": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "custom10": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
                     "running": {
                         "value": 12,
                         "max": 12,
@@ -168,7 +228,19 @@
                         "core": 4,
                         "realCost": 0
                     },
+                    "extradimensionalmovement": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
                     "flight": {
+                        "value": 0,
+                        "max": 0,
+                        "core": 0,
+                        "realCost": 0
+                    },
+                    "ftl": {
                         "value": 0,
                         "max": 0,
                         "core": 0,
