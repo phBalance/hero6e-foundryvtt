@@ -99,7 +99,8 @@ function _isNonIgnoredCharacteristicsAndMovementPowerForActor(actor) {
         (power.type?.includes("characteristic") ||
             power.type?.includes("movement")) &&
         !power.ignoreFor?.includes(actor.type) &&
-        (!power.onlyFor || power.onlyFor.includes(actor.type));
+        (!power.onlyFor || power.onlyFor.includes(actor.type)) &&
+        !power.key.match(/^CUSTOM[0-9]+.*/); // Ignore CUSTOM characteristics until supported.
 }
 
 export function getCharacteristicInfoArrayForActor(actor) {
