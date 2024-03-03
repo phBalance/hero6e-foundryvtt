@@ -156,12 +156,16 @@ export class HeroSystem6eItem extends Item {
             case "defense":
                 return true;
         }
-        return false;
+
+        return getPowerInfo({ item: this })?.behaviors.includes("success")
+            ? true
+            : false;
     }
 
     async roll(event) {
         if (!this.actor.canAct(true)) return;
 
+        // TODO: Convert to behaviors when powers are fully updated
         switch (this.system.subType || this.type) {
             case "attack":
                 switch (this.system.XMLID) {
@@ -203,12 +207,27 @@ export class HeroSystem6eItem extends Item {
                 return this.toggle();
 
             case "skill":
-                this.skillRollUpdateValue();
-                if (!(await RequiresASkillRollCheck(this))) return;
-                return createSkillPopOutFromItem(this, this.actor);
-
             default:
-                ui.notifications.warn(`${this.name} roll is not supported`);
+                const powerInfo = getPowerInfo({
+                    item: this,
+                });
+                const hasSuccessRoll = powerInfo?.behaviors.includes("success");
+                const isSkill = powerInfo?.type.includes("skill");
+
+                if (hasSuccessRoll && isSkill) {
+                    this.skillRollUpdateValue();
+                    if (!(await RequiresASkillRollCheck(this))) return;
+                    return createSkillPopOutFromItem(this, this.actor);
+                } else if (hasSuccessRoll) {
+                    // Handle any type of non skill based success roll with a basic roll
+                    // TODO: Basic roll.
+                    this.skillRollUpdateValue();
+                    return createSkillPopOutFromItem(this, this.actor);
+                } else {
+                    ui.notifications.warn(
+                        `${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`,
+                    );
+                }
         }
     }
 
@@ -3288,6 +3307,9 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
+        // TODO: Can this be simplified. Should we add some test cases?
+        // TODO: Luck and unluck...
+
         // No Characteristic = no roll (Skill Enhancers for example) except for FINDWEAKNESS
         const characteristicBased = skillData.CHARACTERISTIC;
         if (!characteristicBased) {
@@ -3342,14 +3364,98 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
 
-                skillData.tags.push({
-                    value: perkRollValue,
-                    name: "Base Reputation",
-                });
-
                 skillData.roll = `${perkRollValue}-`;
+            } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
+                const changeChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "CHANCETOCHANGE",
+                )?.OPTION_ALIAS;
+
+                if (!changeChance) {
+                    // Shouldn't happen. Give it a default.
+                    console.error(
+                        `ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`,
+                    );
+                }
+
+                skillData.roll = changeChance ? changeChance : "8-";
+            } else if (
+                skillData.XMLID === "DEPENDENTNPC" ||
+                skillData.XMLID === "HUNTED"
+            ) {
+                const appearanceChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "APPEARANCE",
+                )?.OPTION_ALIAS;
+
+                if (!appearanceChance) {
+                    // Shouldn't happen. Give it a default.
+                    console.error(
+                        `${skillData.XMLID} doesn't have a APPEARANCE adder. Defaulting to 8-`,
+                    );
+                }
+
+                skillData.roll = appearanceChance ? appearanceChance : "8-";
+            } else if (skillData.XMLID === "ENRAGED") {
+                const enrageChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "CHANCETOGO",
+                )?.OPTIONID;
+
+                if (!enrageChance) {
+                    // Shouldn't happen. Give it a default.
+                    console.error(
+                        `ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`,
+                    );
+                }
+
+                skillData.roll = enrageChance ? enrageChance : "8-";
+            } else if (skillData.XMLID === "SOCIALLIMITATION") {
+                const occurChance = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "OCCUR",
+                )?.OPTIONID;
+                let rollValue;
+
+                if (occurChance === "OCCASIONALLY") {
+                    rollValue = 8;
+                } else if (occurChance === "FREQUENTLY") {
+                    rollValue = 11;
+                } else if (occurChance === "VERYFREQUENTLY") {
+                    rollValue = 14;
+                } else {
+                    console.error(
+                        `unknown occurChance ${occurChance} for REPUTATION`,
+                    );
+                    rollValue = 14;
+                }
+
+                skillData.roll = `${rollValue}-`;
+            } else if (skillData.XMLID === "CONTACT") {
+                let rollValue;
+
+                if (skillData.LEVELS === "1") {
+                    rollValue = 8;
+                } else if (skillData.LEVELS === "2") {
+                    rollValue = 11;
+                } else {
+                    console.error(
+                        `unknown levels ${skillData.LEVELS} for CONTACT`,
+                    );
+                    rollValue = 8;
+                }
+
+                skillData.roll = `${rollValue}-`;
+            } else if (skillData.XMLID === "DANGER_SENSE") {
+                const level = parseInt(skillData.LEVELS || 0);
+
+                if (!skillData.LEVELS) {
+                    console.error(
+                        `unknown levels ${skillData.LEVELS} for DANGER_SENSE`,
+                    );
+                }
+
+                skillData.roll = `${11 + level}-`;
             } else {
-                // TODO: Still required?
+                console.warn(
+                    `Don't know how to build non characteristic based roll information for ${skillData.XMLID}`,
+                );
                 skillData.roll = null;
             }
 

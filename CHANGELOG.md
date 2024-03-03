@@ -7,6 +7,7 @@
 - Fixes for ENDURANCERESERVE. [#783](https://github.com/dmdorman/hero6e-foundryvtt/issues/783)
 - 5e now shows proper lift capacities for STR values under 5. [#709](https://github.com/dmdorman/hero6e-foundryvtt/issues/709)
 - Skill levels now apply when rolling skills. Skill rolls can now auto succeed or fail.
+- A number of perks/talents/disadvantages/complications should now be rollable and can be dragged to the macro bar too.
 
 ## Version 3.0.59
 
