@@ -3265,7 +3265,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PHYSICALLIMITATION",
             type: ["disadvantage"],
-            behaviors: ["success"],
+            behaviors: [],
             name: "Physical Limitation",
         },
         {},
@@ -3274,7 +3274,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PSYCHOLOGICALLIMITATION",
             type: ["disadvantage"],
-            behaviors: ["success"],
+            behaviors: [],
             name: "Psychological Limitation",
         },
         {},
