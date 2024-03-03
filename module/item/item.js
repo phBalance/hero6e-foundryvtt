@@ -178,6 +178,7 @@ export class HeroSystem6eItem extends Item {
                     case "AID":
                     case "DRAIN":
                     case "HEALING":
+                    case "SUCCOR":
                     case "TRANSFER":
                     case "STRIKE":
                     case "FLASH":
@@ -1991,6 +1992,7 @@ export class HeroSystem6eItem extends Item {
             case "AID":
             case "DISPEL":
             case "DRAIN":
+            case "SUCCOR":
             case "SUPPRESS":
             case "HEALING":
                 {
@@ -3108,7 +3110,7 @@ export class HeroSystem6eItem extends Item {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid === "AID") {
+        } else if (xmlid === "AID" || xmlid === "SUCCOR") {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
@@ -3532,12 +3534,13 @@ export class HeroSystem6eItem extends Item {
     _areAllAdjustmentTargetsInListValid(targetsList, mustBeStrict) {
         if (!targetsList) return false;
 
-        // ABSORPTION, AID, and TRANSFER target characteristics/powers are the only adjustment powers that must match
+        // ABSORPTION, AID + SUCCOR/BOOST, and TRANSFER target characteristics/powers are the only adjustment powers that must match
         // the character's characteristics/powers (i.e. they can't create new characteristics or powers). All others just
         // have to match actual possible characteristics/powers.
         const validator =
             this.system.XMLID === "AID" ||
             this.system.XMLID === "ABSORPTION" ||
+            this.system.XMLID === "SUCCOR" ||
             (this.system.XMLID === "TRANSFER" && mustBeStrict)
                 ? adjustmentSourcesStrict
                 : adjustmentSourcesPermissive;
@@ -3595,13 +3598,15 @@ export class HeroSystem6eItem extends Item {
             valid = this._areAllAdjustmentTargetsInListValid(
                 this.system.INPUT,
                 this.system.XMLID === "AID" ||
-                    this.system.XMLID === "ABSORPTION",
+                    this.system.XMLID === "ABSORPTION" ||
+                    this.system.XMLID === "SUCCOR",
             );
 
             if (
                 this.system.XMLID === "AID" ||
                 this.system.XMLID === "ABSORPTION" ||
-                this.system.XMLID === "HEALING"
+                this.system.XMLID === "HEALING" ||
+                this.system.XMLID === "SUCCOR"
             ) {
                 enhances = this.system.INPUT;
             } else {
@@ -3659,7 +3664,8 @@ export class HeroSystem6eItem extends Item {
             } else if (
                 this.system.XMLID === "AID" ||
                 this.system.XMLID === "ABSORPTION" ||
-                this.system.XMLID === "HEALING"
+                this.system.XMLID === "HEALING" ||
+                this.system.XMLID === "SUCCOR"
             ) {
                 return {
                     maxReduces: 0,
@@ -3685,7 +3691,8 @@ export class HeroSystem6eItem extends Item {
         if (
             this.system.XMLID === "AID" ||
             this.system.XMLID === "ABSORPTION" ||
-            this.system.XMLID === "HEALING"
+            this.system.XMLID === "HEALING" ||
+            this.system.XMLID === "SUCCOR"
         ) {
             return {
                 maxReduces: 0,

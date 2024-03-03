@@ -708,7 +708,8 @@ export async function AttackToHit(item, options) {
         if (
             hit === "Hit" ||
             item.system.XMLID == "AID" ||
-            item.system.XMLID === "HEALING"
+            item.system.XMLID === "HEALING" ||
+            item.system.XMLID === "SUCCOR"
         ) {
             targetIds.push(target.id);
         }
@@ -1288,10 +1289,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         conditionalDefenses.push(...lifeSupport);
     }
 
-    if (
-        conditionalDefenses.length > 0 &&
-        !["AID"].includes(item.system.XMLID)
-    ) {
+    if (conditionalDefenses.length > 0) {
         const template2 =
             "systems/hero6efoundryvttv2/templates/attack/item-conditional-defense-card.hbs";
 

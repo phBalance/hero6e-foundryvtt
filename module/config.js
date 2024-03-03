@@ -3006,6 +3006,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "SUCCOR",
+            name: "Boost",
+            type: ["adjustment", "attack"], // TODO: Should not be attack type
+            behaviors: [],
+            duration: "constant",
+            target: "target's DCV",
+            range: "no range",
+            costEnd: true,
+            costPerLevel: 5,
+        },
+        {
+            name: "Succor",
+        },
+    );
+    addPower(
+        {
             key: "SUMMON",
             name: "Summon",
             type: ["standard"],

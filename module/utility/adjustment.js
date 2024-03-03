@@ -135,6 +135,7 @@ export function determineMaxAdjustment(item) {
     if (
         item.system.XMLID !== "ABSORPTION" &&
         item.system.XMLID !== "AID" &&
+        item.system.XMLID !== "SUCCOR" &&
         item.system.XMLID !== "TRANSFER"
     ) {
         return reallyBigInteger;

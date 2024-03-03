@@ -135,6 +135,7 @@ Our support ratings:
 | AID | B | Works for characteristics, cannot aid powers |
 | BARRIER | C | Implemented like resistant protection, no support for destroying barriers, no placeables for a barrier |
 | BLAST | A ||
+| BOOST | C | Works for characteristics, cannot boost powers, continuous END requirement doesn't work |
 | CANNOT BE STUNNED | B | Not fully vetted |
 | CHANGE ENVIRONMENT | D ||
 | CHARACTERISTICS | A ||
