@@ -3118,7 +3118,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
 })();
 
-(function addMartial() {
+(function addMartialToPowerList() {
     addPower(
         {
             key: "EXTRADC",
@@ -3150,8 +3150,54 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
 })();
 
-// TODO: Not sure if these should be added as powers. They are something else.
-(function addSenseStuff() {
+(function addSensesToPowerList() {
+    addPower(
+        {
+            key: "ACTIVESONAR",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ADJACENTFIXED",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "ADJACENT",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "ANALYZESENSE",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "CONCEALED",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
     addPower(
         {
             key: "DETECT",
@@ -3163,7 +3209,87 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "DIMENSIONALSINGLE",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALGROUP",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIMENSIONALALL",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DISCRIMINATORY",
+            type: ["sense"],
+            behaviors: [],
+            costPerLevel: 1,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "ENHANCEDPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HRRP",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "INCREASEDARC240",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "INCREASEDARC360",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "INFRAREDPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MAKEASENSE",
             type: ["sense"],
             behaviors: [],
         },
@@ -3181,33 +3307,143 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "NIGHTVISION",
-            behaviors: [],
+            key: "MICROSCOPIC",
             type: ["sense"],
+            behaviors: [],
         },
         {},
+    );
+
+    addPower(
+        {
+            key: "NIGHTVISION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "NRAYPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "PARTIALLYPENETRATIVE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        undefined,
     );
     addPower(
         {
             key: "PENETRATIVE",
-            behaviors: [],
             type: ["sense"],
+            behaviors: [],
+        },
+        undefined,
+    );
+
+    addPower(
+        {
+            key: "RADAR",
+            type: ["sense"],
+            behaviors: [],
         },
         {},
     );
     addPower(
         {
-            key: "TARGETINGSENSE",
-            behaviors: [],
+            key: "RADIOPERCEIVETRANSMIT",
             type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RADIOPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RANGE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "RAPID",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "SPATIALAWARENESS",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "TARGETINGSENSE",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TELESCOPIC",
+            type: ["sense"],
+            behaviors: [],
         },
         {},
     );
     addPower(
         {
             key: "TRACKINGSENSE",
-            behaviors: [],
             type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "TRANSMIT",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "ULTRASONICPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "ULTRAVIOLETPERCEPTION",
+            type: ["sense"],
+            behaviors: [],
         },
         {},
     );
