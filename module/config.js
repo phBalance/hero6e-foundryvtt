@@ -303,7 +303,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 10,
             cost: 1,
             type: ["characteristic"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             duration: "persistent",
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
@@ -317,7 +317,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 10,
             cost: 2,
             type: ["characteristic"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             duration: "persistent",
             ignoreFor: ["base2"],
         },
@@ -332,7 +332,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 10,
             cost: 1,
             type: ["characteristic"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             duration: "persistent",
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
         },
@@ -347,7 +347,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 10,
             cost: 1,
             type: ["characteristic"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             duration: "persistent",
             ignoreFor: ["vehicle", "base2"],
         },
@@ -360,7 +360,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 10,
             cost: 1,
             type: ["characteristic"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             duration: "persistent",
             ignoreFor: ["automaton", "vehicle", "base2", "computer"],
         },
@@ -375,7 +375,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 10,
             cost: 1,
             type: ["characteristic"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             duration: "persistent",
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
         },
@@ -385,7 +385,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "COM",
         name: "Comeliness",
         type: ["characteristic"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
         duration: "persistent",
         ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"],
         base: 10,
@@ -852,7 +852,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACROBATICS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -860,7 +860,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACTING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -868,7 +868,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ANALYZE",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -876,7 +876,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ANIMAL_HANDLER",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             categorized: true,
         },
         {},
@@ -884,7 +884,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "ARMORSMITH",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
         categorized: true,
     });
     addPower(
@@ -900,7 +900,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BREAKFALL",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             costPerLevel: 1,
         },
         {},
@@ -909,7 +909,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BRIBERY",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -917,7 +917,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BUGGING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -925,7 +925,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "BUREAUCRATICS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -934,7 +934,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CHARM",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         undefined,
     );
@@ -942,7 +942,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLIMBING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -950,7 +950,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COMBAT_DRIVING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -967,7 +967,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COMBAT_PILOTING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -975,7 +975,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COMPUTER_PROGRAMMING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -983,7 +983,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONCEALMENT",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -991,7 +991,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONTORTIONIST",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -999,7 +999,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONVERSATION",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1015,7 +1015,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CRIMINOLOGY",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1023,7 +1023,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CRYPTOGRAPHY",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1041,7 +1041,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DEDUCTION",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1057,7 +1057,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DEMOLITIONS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1065,7 +1065,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DISGUISE",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1074,7 +1074,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ELECTRONICS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1083,20 +1083,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FAST_DRAW",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
     addPower(undefined, {
         key: "FEINT",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
     addPower(
         {
             key: "FORENSIC_MEDICINE",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1104,7 +1104,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FORGERY",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             categorized: true,
         },
         {},
@@ -1114,7 +1114,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GAMBLING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             categorized: true,
         },
         {},
@@ -1124,26 +1124,26 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HIGH_SOCIETY",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
     addPower(undefined, {
         key: "HOIST",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
 
     addPower(undefined, {
         key: "INSTRUCTOR",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
     addPower(
         {
             key: "INTERROGATION",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1151,7 +1151,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INVENTOR",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1179,7 +1179,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LIPREADING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1187,7 +1187,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LOCKPICKING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1197,7 +1197,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MECHANICS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1214,7 +1214,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MIMICRY",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1232,7 +1232,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NAVIGATION",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             categorized: true,
         },
         {},
@@ -1242,7 +1242,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ORATORY",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1250,13 +1250,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "PARACHUTING",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
     addPower(
         {
             key: "PARAMEDICS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1272,7 +1272,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PERSUASION",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1280,7 +1280,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "POISONING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1317,13 +1317,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "RESEARCH",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
     addPower(
         {
             key: "RIDING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1340,20 +1340,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SECURITY_SYSTEMS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
     addPower(undefined, {
         key: "SEDUCTION",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
     addPower(
         {
             key: "SHADOWING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1369,20 +1369,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SLEIGHT_OF_HAND",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
     addPower(undefined, {
         key: "SPELL",
         type: ["skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
     addPower(
         {
             key: "STEALTH",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1390,7 +1390,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STREETWISE",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1398,7 +1398,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SURVIVAL",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             categorized: true,
         },
         {},
@@ -1407,7 +1407,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SYSTEMS_OPERATION",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1416,7 +1416,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TACTICS",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1424,7 +1424,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TEAMWORK",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1432,7 +1432,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TRACKING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1440,7 +1440,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TRADING",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1471,7 +1471,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VENTRILOQUISM",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
         },
         {},
     );
@@ -1488,7 +1488,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "WEAPONSMITH",
             type: ["skill"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             categorized: true,
         },
         {},
@@ -1640,7 +1640,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CONTACT",
             type: ["perk"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Contact",
             costPerLevel: 1,
         },
@@ -1718,7 +1718,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REPUTATION",
             type: ["perk", "disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Positive Reputation",
             costPerLevel: 0,
         },
@@ -1836,7 +1836,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COMBAT_SENSE",
             type: ["talent"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Combat Sense",
             costPerLevel: 1,
         },
@@ -1874,7 +1874,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DANGER_SENSE",
             type: ["talent"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Danger Sense",
         },
         {},
@@ -2509,7 +2509,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "FINDWEAKNESS",
         type: ["sense", "special", "skill"],
-        behaviors: ["roll"],
+        behaviors: ["success"],
     });
     addPower(
         {
@@ -3189,7 +3189,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ACCIDENTALCHANGE",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Accidental Change",
         },
         {},
@@ -3218,7 +3218,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DEPENDENTNPC",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Dependent NPC",
         },
         {},
@@ -3237,7 +3237,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ENRAGED",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Enraged/Berserk",
         },
         {},
@@ -3247,7 +3247,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HUNTED",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Hunted",
         },
         {},
@@ -3267,7 +3267,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PHYSICALLIMITATION",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Physical Limitation",
         },
         {},
@@ -3276,7 +3276,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PSYCHOLOGICALLIMITATION",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Psychological Limitation",
         },
         {},
@@ -3296,7 +3296,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SOCIALLIMITATION",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["success"],
             name: "Social Limitation",
         },
         {},
@@ -3305,7 +3305,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SUSCEPTIBILITY",
             type: ["disadvantage"],
-            behaviors: ["roll"],
             behaviors: [],
             name: "Susceptibility",
         },
@@ -3327,7 +3326,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "VULNERABILITY",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: [],
             name: "Vulnerability",
         },
         {},

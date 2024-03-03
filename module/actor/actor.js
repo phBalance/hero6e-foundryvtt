@@ -1892,7 +1892,7 @@ export class HeroSystem6eActor extends Actor {
             xmlid: key.toUpperCase(),
             actor: this,
         });
-        if (characteristic && charPowerEntry?.behaviors.includes("roll")) {
+        if (characteristic && charPowerEntry?.behaviors.includes("success")) {
             characteristic.roll = Math.round(9 + characteristic.value * 0.2);
             if (!this.system.is5e && characteristic.value < 0) {
                 characteristic.roll = 9;

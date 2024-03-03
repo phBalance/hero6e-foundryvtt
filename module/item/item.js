@@ -3290,7 +3290,10 @@ export class HeroSystem6eItem extends Item {
             actor: this.actor,
         });
 
-        if (!configPowerInfo || !configPowerInfo.behaviors.includes("roll")) {
+        if (
+            !configPowerInfo ||
+            !configPowerInfo.behaviors.includes("success")
+        ) {
             skillData.roll = null;
             return;
         }
