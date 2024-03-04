@@ -9,6 +9,8 @@
 - Skill levels now apply when rolling skills. Skill rolls can now auto succeed or fail.
 - A number of perks/talents/disadvantages/complications should now be rollable and can be dragged to the macro bar too.
 - AOE no longer needs to be associated with an attack power. [#779](https://github.com/dmdorman/hero6e-foundryvtt/issues/779)
+- Fixed Penalty Skill Levels with attacks.
+- Fixed resistant ED when purchased as a power.
 
 ## Version 3.0.59
 
