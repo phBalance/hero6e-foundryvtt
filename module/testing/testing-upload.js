@@ -2714,7 +2714,10 @@ export function registerUploadTests(quench) {
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, "(20 END, 5 REC)");
+                    assert.equal(
+                        item.system.description,
+                        "Endurance Reserve (20 END, 5 REC)",
+                    );
                 });
 
                 it("realCost", function () {
