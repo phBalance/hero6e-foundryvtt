@@ -282,7 +282,7 @@ HERO.powers5e = [];
  */
 function addPower(powerDescription6e, powerOverrideFor5e) {
     if (powerDescription6e) {
-        HERO.powers6e.push(powerDescription6e);
+        HERO.powers6e.push(foundry.utils.deepClone(powerDescription6e));
     }
 
     if (powerOverrideFor5e) {
