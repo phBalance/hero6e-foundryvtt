@@ -76,7 +76,7 @@ function determineDefense(targetActor, attackItem, options) {
     // ED bought as resistant
     for (const item of activeDefenses.filter((o) => o.system.XMLID == "ED")) {
         if (item.findModsByXmlid("RESISTANT")) {
-            const levels = parseInt(item.system.LEVELS.value) || 0;
+            const levels = parseInt(item.system.value) || 0;
             ED -= levels;
             rED += levels;
         }
