@@ -435,7 +435,7 @@ export async function AttackToHit(item, options) {
             );
             if (PENALTY_SKILL_LEVELS) {
                 let pslValue = Math.min(
-                    PENALTY_SKILL_LEVELS.system.LEVELS.value,
+                    PENALTY_SKILL_LEVELS.system.LEVELS,
                     Math.abs(CONFIG.HERO.hitLocations[options.aim][3]),
                 );
                 heroRoller.addNumber(pslValue, PENALTY_SKILL_LEVELS.name);
