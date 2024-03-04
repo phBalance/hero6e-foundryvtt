@@ -1891,7 +1891,7 @@ async function _onApplySenseAffectingToSpecificToken(
         (o) => o.system.XMLID === "FLASHDEFENSE",
     );
     if (flashDefense) {
-        const value = parseInt(flashDefense.system.LEVELS.value || 0);
+        const value = parseInt(flashDefense.system.LEVELS || 0);
         damageData.bodydamage = Math.max(0, damageData.bodydamage - value);
         defense = `${value} Flash Defense`;
     }
