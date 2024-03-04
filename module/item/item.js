@@ -3387,16 +3387,32 @@ export class HeroSystem6eItem extends Item {
             ) {
                 const appearanceChance = skillData.ADDER.find(
                     (adder) => adder.XMLID === "APPEARANCE",
-                )?.OPTION_ALIAS;
+                )?.OPTIONID;
+                let chance;
 
-                if (!appearanceChance) {
+                if (
+                    appearanceChance === "EIGHT" ||
+                    appearanceChance === "8ORLESS"
+                ) {
+                    chance = 8;
+                } else if (
+                    appearanceChance === "ELEVEN" ||
+                    appearanceChance === "11ORLESS"
+                ) {
+                    chance = 11;
+                } else if (
+                    appearanceChance === "FOURTEEN" ||
+                    appearanceChance === "14ORLESS"
+                ) {
+                    chance = 14;
+                } else {
                     // Shouldn't happen. Give it a default.
                     console.error(
-                        `${skillData.XMLID} doesn't have a APPEARANCE adder. Defaulting to 8-`,
+                        `${skillData.XMLID} unknown APPEARANCE adder ${appearanceChance}. Defaulting to 8-`,
                     );
                 }
 
-                skillData.roll = appearanceChance ? appearanceChance : "8-";
+                skillData.roll = `${chance ? chance : 8}-`;
             } else if (skillData.XMLID === "ENRAGED") {
                 const enrageChance = skillData.ADDER.find(
                     (adder) => adder.XMLID === "CHANCETOGO",
