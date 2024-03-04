@@ -2641,6 +2641,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["attack"],
             behaviors: ["attack"],
             range: "no range",
+            costEnd: true,
             costPerLevel: 5,
         },
         {},
