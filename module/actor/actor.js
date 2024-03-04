@@ -379,37 +379,6 @@ export class HeroSystem6eActor extends Actor {
             content += ".";
         }
 
-        // Endurance Reserve Recovery
-        if (!asAction) {
-            const enduranceReserve = this.items.find(
-                (o) => o.system.XMLID === "ENDURANCERESERVE",
-            );
-            if (enduranceReserve) {
-                let erValue = parseInt(enduranceReserve.system.value);
-                let erMax = parseInt(enduranceReserve.system.max);
-                if (enduranceReserve.system.powers) {
-                    const power = enduranceReserve.system.powers.find(
-                        (o) => o.XMLID === "ENDURANCERESERVEREC",
-                    );
-                    if (power) {
-                        let erRec = parseInt(power.LEVELS);
-                        let deltaEndReserve = Math.min(erRec, erMax - erValue);
-                        if (deltaEndReserve) {
-                            erValue += deltaEndReserve;
-                            enduranceReserve.system.LEVELS.value = erValue;
-                            enduranceReserve.updateItemDescription();
-                            await enduranceReserve.update({
-                                "system.LEVELS": enduranceReserve.system.LEVELS,
-                                "system.description":
-                                    enduranceReserve.system.description,
-                            });
-                            content += ` ${enduranceReserve.name} +${deltaEndReserve} END.`;
-                        }
-                    }
-                }
-            }
-        }
-
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,

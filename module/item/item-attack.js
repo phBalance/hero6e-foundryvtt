@@ -140,36 +140,8 @@ export async function AttackOptions(item) {
         }
     }
 
-    // Combat Skill Levels
-    const csl = CombatSkillLevelsForAttack(item);
-    if (csl && csl.skill) {
-        let _ocv = csl.omcv > 0 ? "omcv" : "ocv";
-        data.cslChoices = { [_ocv]: _ocv };
-        if (csl.skill.system.OPTION != "SINGLE") {
-            data.cslChoices.dcv = "dcv";
-            data.cslChoices.dc = "dc";
-        }
-
-        // CSL radioBoxes names
-        data.csl = [];
-        for (let c = 0; c < parseInt(csl.skill.system.LEVELS.value); c++) {
-            data.csl.push({
-                name: `system.csl.${c}`,
-                value: csl.skill.system.csl
-                    ? csl.skill.system.csl[c]
-                    : "undefined",
-            });
-        }
-    }
-
-    const template =
-        "systems/hero6efoundryvttv2/templates/attack/item-attack-card.hbs";
-    await renderTemplate(template, data);
-
-    // Testing out a replacement for the dialog box.
-    // This would allow for more interactive CSL.
-    // This may allow better workflow for AOE and placement of templates.
-    delete (await new ItemAttackFormApplication(data).render(true));
+    // ItemAttackFormApplication allows for more interactivivity (CSL).
+    await new ItemAttackFormApplication(data).render(true);
 }
 
 export async function _processAttackOptions(item, formData) {
