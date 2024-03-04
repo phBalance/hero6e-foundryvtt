@@ -114,16 +114,20 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Naked Advantage for up to 70 Active points, Reduced Endurance (0 END; +1/2) (35 Active Points); Gestures (Requires both hands, -1/2), Visible (Tattoos of flames encompass the biceps and shoulders.  When this power is active, these flames appear to burn, emitting firelight.; -1/4)",
+                            "Naked Advantage for up to 53 Active points of STR (STR), Area Of Effect (8m Radius; +1/2) (26 Active Points); Linked (Greater Power is Constant or in use most or all of the time, Lesser Power can only be used when character uses greater Power at full value, -1/2), Linked (Greater Power is Constant or in use most or all of the time, Lesser Power can only be used when character uses greater Power at full value, -1/2), Only In Alternate Identity (-1/4), Perceivable (-1/4)",
                         );
                     });
 
                     it("realCost", function () {
-                        assert.equal(item.system.realCost, "20");
+                        assert.equal(item.system.realCost, "10");
                     });
 
                     it("activePoints", function () {
-                        assert.equal(item.system.activePoints, "35");
+                        assert.equal(item.system.activePoints, "26");
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 3);
                     });
                 });
             });
