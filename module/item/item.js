@@ -1152,6 +1152,11 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        const aoeModifier = this.getAoeModifier();
+        if (aoeModifier) {
+            this.buildAoeAttackParameters(aoeModifier);
+        }
+
         if (this.system.XMLID == "COMBAT_LEVELS") {
             // Make sure CSLs are defined
             this.system.csl = {};
@@ -3234,11 +3239,6 @@ export class HeroSystem6eItem extends Item {
         if (this.findModsByXmlid("MINUSONEPIP")) {
             // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
             this.system.extraDice = "one-pip";
-        }
-
-        const aoeModifier = this.getAoeModifier();
-        if (aoeModifier) {
-            this.buildAoeAttackParameters(aoeModifier);
         }
 
         // TODO: Investigate why this is required. It is wrong for 1/2d6 vs d6-1.
