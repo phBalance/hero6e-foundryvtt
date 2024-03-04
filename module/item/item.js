@@ -3367,20 +3367,38 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
 
+                skillData.tags.push({
+                    value: perkRollValue,
+                    name: "How Recognized",
+                });
+
                 skillData.roll = `${perkRollValue}-`;
             } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
                 const changeChance = skillData.ADDER.find(
                     (adder) => adder.XMLID === "CHANCETOCHANGE",
-                )?.OPTION_ALIAS;
+                )?.OPTIONID;
+                let rollValue;
 
-                if (!changeChance) {
+                if (changeChance === "INFREQUENT") {
+                    rollValue = 8;
+                } else if (changeChance === "FREQUENT") {
+                    rollValue = 11;
+                } else if (changeChance === "VERYFREQUENT") {
+                    rollValue = 14;
+                } else if (!changeChance) {
                     // Shouldn't happen. Give it a default.
                     console.error(
                         `ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`,
                     );
+                    rollValue = 8;
                 }
 
-                skillData.roll = changeChance ? changeChance : "8-";
+                skillData.tags.push({
+                    value: rollValue,
+                    name: "Change Chance",
+                });
+
+                skillData.roll = `${rollValue}-`;
             } else if (
                 skillData.XMLID === "DEPENDENTNPC" ||
                 skillData.XMLID === "HUNTED"
@@ -3412,20 +3430,38 @@ export class HeroSystem6eItem extends Item {
                     );
                 }
 
+                skillData.tags.push({
+                    value: chance,
+                    name: "Appearance Chance",
+                });
+
                 skillData.roll = `${chance ? chance : 8}-`;
             } else if (skillData.XMLID === "ENRAGED") {
                 const enrageChance = skillData.ADDER.find(
                     (adder) => adder.XMLID === "CHANCETOGO",
                 )?.OPTIONID;
+                let rollValue;
 
-                if (!enrageChance) {
+                if (enrageChance === "8-") {
+                    rollValue = 8;
+                } else if (enrageChance === "11-") {
+                    rollValue = 11;
+                } else if (enrageChance === "14-") {
+                    rollValue = 14;
+                } else if (!enrageChance) {
                     // Shouldn't happen. Give it a default.
                     console.error(
                         `ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`,
                     );
+                    rollValue = 8;
                 }
 
-                skillData.roll = enrageChance ? enrageChance : "8-";
+                skillData.tags.push({
+                    value: rollValue,
+                    name: "Become Enraged",
+                });
+
+                skillData.roll = `${rollValue}-`;
             } else if (skillData.XMLID === "SOCIALLIMITATION") {
                 const occurChance = skillData.ADDER.find(
                     (adder) => adder.XMLID === "OCCUR",
@@ -3445,6 +3481,11 @@ export class HeroSystem6eItem extends Item {
                     rollValue = 14;
                 }
 
+                skillData.tags.push({
+                    value: rollValue,
+                    name: "Occurrence Chance",
+                });
+
                 skillData.roll = `${rollValue}-`;
             } else if (skillData.XMLID === "CONTACT") {
                 let rollValue;
@@ -3460,6 +3501,11 @@ export class HeroSystem6eItem extends Item {
                     rollValue = 8;
                 }
 
+                skillData.tags.push({
+                    value: rollValue,
+                    name: "Contact Chance",
+                });
+
                 skillData.roll = `${rollValue}-`;
             } else if (skillData.XMLID === "DANGER_SENSE") {
                 const level = parseInt(skillData.LEVELS || 0);
@@ -3470,13 +3516,18 @@ export class HeroSystem6eItem extends Item {
                     );
                 }
 
+                skillData.tags.push({
+                    value: 11 + level,
+                    name: "Sense Danger",
+                });
+
                 skillData.roll = `${11 + level}-`;
             } else if (configPowerInfo?.type.includes("characteristic")) {
                 // Characteristics can be bought as powers. We don't give them a roll in this case as they will be
                 // rolled from the characteristics tab.
                 skillData.roll = null;
             } else {
-                console.warn(
+                console.error(
                     `Don't know how to build non characteristic based roll information for ${skillData.XMLID}`,
                 );
                 skillData.roll = null;
