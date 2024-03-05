@@ -796,6 +796,13 @@ export class HeroSystemActorSheet extends ActorSheet {
                 actor: this.actor,
             });
 
+            if (!powerInfo) {
+                console.warn(
+                    `${item?.system?.XMLID} (${item?.name}) has no powerInfo`,
+                );
+                continue;
+            }
+
             let activePoints = item.system.activePoints;
 
             if (

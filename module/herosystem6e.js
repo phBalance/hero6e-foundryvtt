@@ -432,8 +432,19 @@ Hooks.on("renderDialog", (dialog, html) => {
 });
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
-    //html.find('header h4').append(`<span>${data.actor.type.toUpperCase()}</span>`)
     html.find("header h4").append(`<span>${game.system.version}</span>`);
+
+    try {
+        if (data?.actor?.system?.versionHeroSystem6eUpload) {
+            html.find("header h4").append(
+                ` <span title='Actor version at time of HDC upload'>(${
+                    data?.actor?.system?.versionHeroSystem6eUpload || ""
+                })</span>`,
+            );
+        }
+    } catch (err) {
+        console.log(err);
+    }
 
     let element = document.createElement("a");
     element.setAttribute(`data-id`, data.actor.id);
