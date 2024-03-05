@@ -1,8 +1,11 @@
 # Releases
 
-## Version 3.0.60 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.61 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Power & Skill descriptions are now readonly as they are not intended to be edited.  Descriptions are automatically generated using the Power/Skill properties. [#801](https://github.com/dmdorman/hero6e-foundryvtt/issues/801)
 
-- Fixes for TELEKINESIS (TK punch/strike). [#780](https://github.com/dmdorman/hero6e-foundryvtt/issues/780)
+## Version 3.0.60
+
+- Fixes for TELEKINESIS (TK punch/strike). 
 - Effective STR specified as part of the attack is no longer ignored.  Allows for attacks at less than full power, thus conserving END.
 - Fixes for ENDURANCERESERVE. [#783](https://github.com/dmdorman/hero6e-foundryvtt/issues/783)
 - 5e now shows proper lift capacities for STR values under 5. [#709](https://github.com/dmdorman/hero6e-foundryvtt/issues/709)
