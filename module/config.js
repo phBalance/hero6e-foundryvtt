@@ -700,6 +700,308 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
 })();
 
+(function addManeuversToPowerList() {
+    // TODO: Use this list rather than HERO.combatManeuvers. This is also correct for 6e vs 5e which that is not.
+    // TODO: This also includes optional combat maneuvers. If we include them perhaps they should be a configured thing?
+    addPower(undefined, {
+        key: "BLAZINGAWAY",
+        type: ["maneuver"],
+        behaviors: ["non-hd"],
+        name: "Blazing Away",
+        ignoreFor: ["base2", "computer", "ai"],
+    });
+    addPower(
+        {
+            key: "BLOCK",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Block",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "BRACE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Brace",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "CHOKE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Choke",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "CLUBWEAPON",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Club Weapon",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "COVER",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Cover",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "DISARM",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Disarm",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DIVEFORCOVER",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Dive For Cover",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "DODGE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Dodge",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "GRAB",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Grab",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "GRABBY",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Grab By",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "HAYMAKER",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Haymaker",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "HIPSHOT",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Hipshot",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "MOVEBY",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Move By",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "MOVETHROUGH",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Move Through",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            // TODO: not in combatManeuvers
+            key: "MULTIPLEATTACK",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Multiple Attack",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "PULLINGAPUNCH",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Pulling A Punch",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(undefined, {
+        key: "RAPIDFIRE",
+        type: ["maneuver"],
+        behaviors: ["non-hd"],
+        name: "Rapid Fire",
+        ignoreFor: ["base2", "computer", "ai"],
+    });
+    addPower(
+        {
+            key: "ROLLWITHAPUNCH",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Roll With A Punch",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "SET",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Set",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        // TODO: Mentioned in 1 place (6e)... double check
+        {
+            key: "SETANDBRACE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Set And Brace",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SHOVE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Shove",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "SNAPSHOT",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Snap Shot",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "STRAFE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Strafe",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "STRIKE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Strike",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SUPPRESSIONFIRE",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Suppression Fire",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "SWEEP",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Sweep",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "THROW",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Throw",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        undefined,
+    );
+    addPower(
+        {
+            key: "TRIP",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Trip",
+            ignoreFor: ["base2", "computer", "ai"],
+        },
+        {},
+    );
+
+    // TODO: Include Other Attacks?
+})();
+
 (function addMovementToPowerList() {
     addPower(
         {
