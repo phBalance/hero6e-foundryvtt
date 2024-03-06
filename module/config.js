@@ -270,6 +270,7 @@ HERO.powers5e = [];
  * @param {string} cost - Cost in character points per additional level
  * @param {Array<string>} type - A list of types associated with this power
  * @param {Array<"success">} behaviors - A list of the behavior types this power exhibits in the code
+ *                                       "non-hd" - this is not an XMLID that comes from Hero Designer
  *                                       "success" - can roll some kind of success roll for this power
  *
  * @param {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
@@ -1283,11 +1284,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
     addPower(
-        // This is a "fake" power that doesn't exist in HD but we provide for simplicity
         {
             key: "PERCEPTION",
             type: ["skill"],
-            behaviors: ["success"],
+            behaviors: ["success", "non-hd"],
         },
         {},
     );
