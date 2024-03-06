@@ -3444,10 +3444,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // TODO: Needed?
             key: "MANEUVER",
-            type: ["martial", "attack"],
-            behaviors: ["attack"],
+            type: ["martial", "attack"], // TODO: Not all of these are attacks
+            behaviors: [],
         },
         {},
     );
@@ -3458,6 +3457,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["martial"],
             behaviors: [],
             costPerLevel: 4,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "WEAPON_ELEMENT",
+            type: ["martial"],
+            behaviors: [],
+            categorized: true,
         },
         {},
     );
