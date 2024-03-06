@@ -269,10 +269,11 @@ HERO.powers5e = [];
  * @param {string} base - Base cost in character points
  * @param {string} cost - Cost in character points per additional level
  * @param {Array<string>} type - A list of types associated with this power
+ * @param {Array<"success">} behaviors - A list of the behavior types this power exhibits in the code
+ *                                       "success" - can roll some kind of success roll for this power
  *
  * @param {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
  * @param {boolean} [costEnd] - If the power costs endurance to use. true if it does, false or undefined if it doesn't
- * @param {}
  */
 
 /**
@@ -1278,6 +1279,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PENALTY_SKILL_LEVELS",
             type: ["skill"],
             behaviors: [],
+        },
+        {},
+    );
+    addPower(
+        // This is a "fake" power that doesn't exist in HD but we provide for simplicity
+        {
+            key: "PERCEPTION",
+            type: ["skill"],
+            behaviors: ["success"],
         },
         {},
     );
