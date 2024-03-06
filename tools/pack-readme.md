@@ -12,5 +12,9 @@ Current Configuration: {
 ```
 
 Unpack existing compendium.  Creates a /packs/heroMacros/_source folder with a json entry per macro.
-`fvtt package unpack "heroMacros"`
+`fvtt package unpack -c "heroMacros"`
 
+Packing the compendium should be done in two places.
+1. `npm run build` should pack the macros.  Probably can't use GULP because foundryvtt-cli refuses to work with open compendiums.
+2. /.github/workflows/release.yml should include pack macro commands.
+`fvtt package pack "heroMacros"`
