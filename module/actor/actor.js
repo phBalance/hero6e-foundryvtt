@@ -1350,56 +1350,6 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        // Validate everything that's been imported
-        this.items.forEach(async (item) => {
-            const power = getPowerInfo({ item: item });
-
-            // Power needs to exist
-            if (!power) {
-                await ui.notifications.error(
-                    `${this.name}/${item.name} has unknown power XMLID: ${item.system.XMLID}. Please report.`,
-                    { console: true, permanent: true },
-                );
-            } else if (!power.behaviors) {
-                await ui.notifications.error(
-                    `${this.name}/${item.name}/${item.system.XMLID} does not have behaviors defined. Please report.`,
-                    { console: true, permanent: true },
-                );
-            }
-        });
-
-        // Warn about invalid adjustment targets
-        for (const item of this.items.filter((item) =>
-            getPowerInfo({ item: item })?.type?.includes("adjustment"),
-        )) {
-            const result = item.splitAdjustmentSourceAndTarget();
-            if (!result.valid) {
-                await ui.notifications.warn(
-                    `${this.name} has an unsupported adjustment target "${
-                        item.system.INPUT
-                    }" for "${
-                        item.name
-                    }". Use characteristic abbreviations or power names separated by commas for automation support.${
-                        item.system.XMLID === "TRANSFER"
-                            ? ' Source and target lists should be separated by " -> ".'
-                            : ""
-                    }`,
-                    { console: true, permanent: true },
-                );
-            } else {
-                const maxAllowedEffects =
-                    item.numberOfSimultaneousAdjustmentEffects();
-                if (
-                    result.reducesArray.length > maxAllowedEffects.maxReduces ||
-                    result.enhancesArray.length > maxAllowedEffects.maxEnhances
-                ) {
-                    await ui.notifications.warn(
-                        `${this.name} has too many adjustment targets defined for ${item.name}.`,
-                    );
-                }
-            }
-        }
-
         // Characters get a few things for free that are not in the HDC.
         if (this.type === "pc" || this.type === "npc") {
             // Perception Skill
@@ -1460,6 +1410,56 @@ export class HeroSystem6eActor extends Actor {
                         await item.makeAttack();
                     }
                     await item._postUpload();
+                }
+            }
+        }
+
+        // Validate everything that's been imported
+        this.items.forEach(async (item) => {
+            const power = getPowerInfo({ item: item });
+
+            // Power needs to exist
+            if (!power) {
+                await ui.notifications.error(
+                    `${this.name}/${item.name} has unknown power XMLID: ${item.system.XMLID}. Please report.`,
+                    { console: true, permanent: true },
+                );
+            } else if (!power.behaviors) {
+                await ui.notifications.error(
+                    `${this.name}/${item.name}/${item.system.XMLID} does not have behaviors defined. Please report.`,
+                    { console: true, permanent: true },
+                );
+            }
+        });
+
+        // Warn about invalid adjustment targets
+        for (const item of this.items.filter((item) =>
+            getPowerInfo({ item: item })?.type?.includes("adjustment"),
+        )) {
+            const result = item.splitAdjustmentSourceAndTarget();
+            if (!result.valid) {
+                await ui.notifications.warn(
+                    `${this.name} has an unsupported adjustment target "${
+                        item.system.INPUT
+                    }" for "${
+                        item.name
+                    }". Use characteristic abbreviations or power names separated by commas for automation support.${
+                        item.system.XMLID === "TRANSFER"
+                            ? ' Source and target lists should be separated by " -> ".'
+                            : ""
+                    }`,
+                    { console: true, permanent: true },
+                );
+            } else {
+                const maxAllowedEffects =
+                    item.numberOfSimultaneousAdjustmentEffects();
+                if (
+                    result.reducesArray.length > maxAllowedEffects.maxReduces ||
+                    result.enhancesArray.length > maxAllowedEffects.maxEnhances
+                ) {
+                    await ui.notifications.warn(
+                        `${this.name} has too many adjustment targets defined for ${item.name}.`,
+                    );
                 }
             }
         }
