@@ -653,16 +653,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         );
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
 
-                        // TODO: await
-                        actor.update({
+                        await actor.update({
                             "system.characteristics.body.value": bodyValue,
                         });
 
                         if (bodyValue === bodyMax) {
                             ae.delete();
                             break;
-                        } else {
-                            //await ae.update({ duration: ae.duration });
                         }
                     } else {
                         // Default is to delete the expired AE
