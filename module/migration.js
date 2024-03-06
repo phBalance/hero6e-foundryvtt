@@ -379,23 +379,23 @@ export async function migrateWorld() {
         }
     }
 
-    // if lastMigration < 3.0.61
+    // if lastMigration < 3.0.62
     // Correct maneuvers for 5e and 6e.
-    if (foundry.utils.isNewerVersion("3.0.61", lastMigration)) {
+    if (foundry.utils.isNewerVersion("3.0.62", lastMigration)) {
         const queue = getAllActorsInGame();
         let dateNow = new Date();
 
         for (const [index, actor] of queue.entries()) {
             if (new Date() - dateNow > 4000) {
                 ui.notifications.info(
-                    `Migrating actor's active effects to 3.0.61: (${
+                    `Migrating actor's active effects to 3.0.62: (${
                         queue.length - index
                     } actors remaining)`,
                 );
                 dateNow = new Date();
             }
 
-            await migrate_actor_maneuvers_to_3_0_61(actor);
+            await migrate_actor_maneuvers_to_3_0_62(actor);
         }
     }
 
@@ -458,7 +458,7 @@ async function migrateActorCostDescription(actor) {
     }
 }
 
-async function migrate_actor_maneuvers_to_3_0_61(actor) {
+async function migrate_actor_maneuvers_to_3_0_62(actor) {
     actor.items
         .filter((item) => item.type === "maneuver")
         .forEach(async (maneuver) => {
