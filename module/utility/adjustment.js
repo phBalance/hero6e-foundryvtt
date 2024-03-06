@@ -426,7 +426,8 @@ export async function performAdjustment(
     );
 
     // Find a matching characteristic. Because movement powers are unfortunately setup as
-    // characteristics, we need to check that they effectively exist.
+    // characteristics and always exist as properties, we need to check that they actually
+    // have been bought or naturally exist (core > 0).
     const targetCharacteristic =
         targetActor.system.characteristics?.[potentialCharacteristic]?.core > 0
             ? targetActor.system.characteristics?.[potentialCharacteristic]
