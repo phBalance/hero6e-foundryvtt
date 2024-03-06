@@ -1,6 +1,6 @@
 # Releases
 
-## Version 3.0.61 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.61 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Power & Skill descriptions are now readonly as they are not intended to be edited. Descriptions are automatically generated using the Power/Skill properties. [#801](https://github.com/dmdorman/hero6e-foundryvtt/issues/801)
 - Actor shows systemVersion at time of HDC upload on actor sheet. [#800](https://github.com/dmdorman/hero6e-foundryvtt/issues/800)
