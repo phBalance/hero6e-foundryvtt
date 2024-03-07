@@ -1374,44 +1374,47 @@ export class HeroSystem6eActor extends Actor {
             await perceptionItem._postUpload();
 
             // MANEUVERS
-            for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
-                const name = entry[0];
-                const v = entry[1];
-                const PHASE = v[0];
-                const OCV = v[1];
-                const DCV = v[2];
-                let EFFECT = v[3];
-                if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
-                    let divisor = EFFECT.match(/v\/(\d+)/)[1];
-                    EFFECT = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`);
-                }
-                const attack = v[4];
-                const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
-                const itemData = {
-                    name,
-                    type: "maneuver",
-                    system: {
-                        PHASE,
-                        OCV,
-                        DCV,
-                        EFFECT,
-                        active: false,
-                        description: EFFECT,
-                        XMLID,
-                    },
-                };
+            const powerList = this.system.is5e
+                ? CONFIG.HERO.powers5e
+                : CONFIG.HERO.powers6e;
 
-                // Skip if temporary actor (Quench)
-                if (this.id) {
-                    const item = await HeroSystem6eItem.create(itemData, {
-                        parent: this,
-                    });
-                    if (attack) {
-                        await item.makeAttack();
+            powerList
+                .filter((power) => power.type.includes("maneuver"))
+                .forEach(async (maneuver) => {
+                    const name = maneuver.name;
+                    const XMLID = maneuver.key;
+
+                    const maneuverDetails = maneuver.maneuverDesc;
+                    const PHASE = maneuverDetails.phase;
+                    const OCV = maneuverDetails.ocv;
+                    const DCV = maneuverDetails.dcv;
+                    const EFFECT = maneuverDetails.effect;
+
+                    const itemData = {
+                        name,
+                        type: "maneuver",
+                        system: {
+                            PHASE,
+                            OCV,
+                            DCV,
+                            EFFECT,
+                            active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
+                            description: EFFECT,
+                            XMLID,
+                        },
+                    };
+
+                    // Skip if temporary actor (Quench)
+                    if (this.id) {
+                        const item = await HeroSystem6eItem.create(itemData, {
+                            parent: this,
+                        });
+                        if (maneuverDetails.attack) {
+                            await item.makeAttack();
+                        }
+                        await item._postUpload();
                     }
-                    await item._postUpload();
-                }
-            }
+                });
         }
 
         // Validate everything that's been imported
