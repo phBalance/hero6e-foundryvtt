@@ -1,5 +1,4 @@
 import { HeroSystem6eItem } from "./item/item.js";
-import { getPowerInfo } from "./utility/util.js";
 import { determineCostPerActivePoint } from "./utility/adjustment.js";
 import { RoundFavorPlayerUp } from "./utility/round.js";
 
@@ -82,7 +81,7 @@ export async function migrateWorld() {
 
                     // Martial Arts
                     if (item.type === "maneuver" && !item.system.XMLID) {
-                        let entry = CONFIG.HERO.combatManeuvers[item.name];
+                        let entry = migrationOnly_combatManeuvers[item.name];
                         if (entry) {
                             const v = entry;
                             const PHASE = v[0];
@@ -140,24 +139,27 @@ export async function migrateWorld() {
                                 system: foundry.utils.deepClone(item.system),
                             };
                             fakeItem.system.XMLID = item.name.toUpperCase();
-                            let configPowerInfo = getPowerInfo({
-                                item: fakeItem,
-                            });
+                            let configPowerInfo =
+                                migrationOnly_Pre3_0_61_getPowerInfo({
+                                    item: fakeItem,
+                                });
                             if (!configPowerInfo) {
                                 fakeItem.system.XMLID =
                                     fakeItem.system.XMLID.replace(/ /g, "_")
                                         .replace("(", "")
                                         .replace(")", "");
-                                configPowerInfo = getPowerInfo({
-                                    item: fakeItem,
-                                });
+                                configPowerInfo =
+                                    migrationOnly_Pre3_0_61_getPowerInfo({
+                                        item: fakeItem,
+                                    });
                             }
                             if (!configPowerInfo) {
                                 fakeItem.system.XMLID =
                                     fakeItem.system.XMLID.replace("SKILL_", "");
-                                configPowerInfo = getPowerInfo({
-                                    item: fakeItem,
-                                });
+                                configPowerInfo =
+                                    migrationOnly_Pre3_0_61_getPowerInfo({
+                                        item: fakeItem,
+                                    });
                             }
                             if (!configPowerInfo) {
                                 if (fakeItem.system.XMLID === "TF")
@@ -166,9 +168,10 @@ export async function migrateWorld() {
                                 if (fakeItem.system.XMLID === "WF")
                                     fakeItem.system.XMLID =
                                         "WEAPON_FAMILIARITY";
-                                configPowerInfo = getPowerInfo({
-                                    item: fakeItem,
-                                });
+                                configPowerInfo =
+                                    migrationOnly_Pre3_0_61_getPowerInfo({
+                                        item: fakeItem,
+                                    });
                             }
                             if (
                                 configPowerInfo &&
@@ -375,6 +378,26 @@ export async function migrateWorld() {
         }
     }
 
+    // if lastMigration < 3.0.62
+    // Correct maneuvers for 5e and 6e.
+    if (foundry.utils.isNewerVersion("3.0.62", lastMigration)) {
+        const queue = getAllActorsInGame();
+        let dateNow = new Date();
+
+        for (const [index, actor] of queue.entries()) {
+            if (new Date() - dateNow > 4000) {
+                ui.notifications.info(
+                    `Migrating actor's active effects to 3.0.62: (${
+                        queue.length - index
+                    } actors remaining)`,
+                );
+                dateNow = new Date();
+            }
+
+            await migrate_actor_maneuvers_to_3_0_62(actor);
+        }
+    }
+
     // Reparse all items (description, cost, etc) on every migration
     {
         let d = new Date();
@@ -432,6 +455,59 @@ async function migrateActorCostDescription(actor) {
             );
         }
     }
+}
+
+async function migrate_actor_maneuvers_to_3_0_62(actor) {
+    // Delete a previous maneuvers then add all maneuvers again for the system version for this actor.
+    const deletePromises = actor.items
+        .filter((item) => item.type === "maneuver")
+        .map(async (maneuver) => {
+            return maneuver.delete();
+        });
+    await Promise.all(deletePromises);
+
+    // Add all maneuvers for this actor's system version.
+    const powerList = actor.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+
+    powerList
+        .filter((power) => power.type.includes("maneuver"))
+        .forEach(async (maneuver) => {
+            const name = maneuver.name;
+            const XMLID = maneuver.key;
+
+            const maneuverDetails = maneuver.maneuverDesc;
+            const PHASE = maneuverDetails.phase;
+            const OCV = maneuverDetails.ocv;
+            const DCV = maneuverDetails.dcv;
+            const EFFECT = maneuverDetails.effects;
+
+            const itemData = {
+                name,
+                type: "maneuver",
+                system: {
+                    PHASE,
+                    OCV,
+                    DCV,
+                    EFFECT,
+                    active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
+                    description: EFFECT,
+                    XMLID,
+                },
+            };
+
+            // Skip if temporary actor (Quench)
+            if (actor.id) {
+                const item = await HeroSystem6eItem.create(itemData, {
+                    parent: actor,
+                });
+                if (maneuverDetails.attack) {
+                    await item.makeAttack();
+                }
+                await item._postUpload();
+            }
+        });
 }
 
 // 1/2 d6 and 1d6-1 are not the same roll but are the same DC - make them distinct
@@ -498,7 +574,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
             const origin = await fromUuid(activeEffect.origin);
             const item = origin instanceof HeroSystem6eItem ? origin : null;
 
-            const powerInfo = getPowerInfo({
+            const powerInfo = migrationOnly_Pre3_0_61_getPowerInfo({
                 actor: actor,
                 xmlid: activeEffect.flags?.XMLID,
                 item: item,
@@ -849,14 +925,14 @@ async function migrateActor_3_0_49(actor) {
         if (!actor.system.is5e) return;
 
         for (let item of actor.items.filter((o) => o.type === "maneuver")) {
-            let entry = CONFIG.HERO.combatManeuvers[item.name];
+            let entry = migrationOnly_combatManeuvers[item.name];
             if (!entry) {
-                for (let key of Object.keys(CONFIG.HERO.combatManeuvers)) {
+                for (let key of Object.keys(migrationOnly_combatManeuvers)) {
                     if (
                         key.toUpperCase().replace(" ", "") ===
                         item.name.toUpperCase().replace(" ", "")
                     ) {
-                        entry = CONFIG.HERO.combatManeuvers[key];
+                        entry = migrationOnly_combatManeuvers[key];
                         await item.update({ name: key });
                         break;
                     }
@@ -944,7 +1020,9 @@ async function migrateActorDefenseMovementData(actor) {
     // Apply AE to movement items
     let itemsToCreate = [];
     for (let item of actor.items) {
-        const configPowerInfo = getPowerInfo({ item: item });
+        const configPowerInfo = migrationOnly_Pre3_0_61_getPowerInfo({
+            item: item,
+        });
         if (configPowerInfo && configPowerInfo.powerType.includes("movement")) {
             // You can't just add AE to items owned by actor. A flaw in Foundry v10.
             // So we will create a new item with proper AE, then delete the old item.
@@ -993,7 +1071,10 @@ async function migrationOnlyMakeAttack(item) {
     const xmlid = item.system.XMLID || item.system.xmlid || item.system.rules;
 
     // Confirm this is an attack
-    const configPowerInfo = getPowerInfo({ xmlid: xmlid, actor: item.actor });
+    const configPowerInfo = migrationOnly_Pre3_0_61_getPowerInfo({
+        xmlid: xmlid,
+        actor: item.actor,
+    });
 
     let changes = {};
 
@@ -1353,7 +1434,7 @@ async function migrationOnlyMakeAttack(item) {
 }
 
 async function migrationCreateEffects(itemData, actor) {
-    const configPowerInfo = getPowerInfo({
+    const configPowerInfo = migrationOnly_Pre3_0_61_getPowerInfo({
         xmlid: itemData.system.XMLID || itemData.system.rules,
         actor: actor || this?.actor,
     });
@@ -1466,7 +1547,9 @@ async function migrationCreateEffects(itemData, actor) {
 async function migrationOnlyUpdateItemSubTypes(actor, removeDups) {
     // Update Item SubType
     for (const item of actor.items) {
-        const configPowerInfo = getPowerInfo({ item: item });
+        const configPowerInfo = migrationOnly_Pre3_0_61_getPowerInfo({
+            item: item,
+        });
 
         // Defenses
         if (configPowerInfo && configPowerInfo.powerType?.includes("defense")) {
@@ -1517,3 +1600,113 @@ async function migrationOnlyUpdateItemSubTypes(actor, removeDups) {
         }
     }
 }
+
+function migrationOnly_Pre3_0_61_getPowerInfo(options) {
+    const xmlid =
+        options.xmlid ||
+        options.item?.system?.XMLID ||
+        options.item?.system?.xmlid ||
+        options.item?.system?.id;
+
+    const actor = options?.actor || options?.item?.actor;
+    if (!actor) {
+        // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
+        console.warn(
+            `${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`,
+        );
+    }
+
+    const powerList = actor?.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+    let powerInfo = powerList.find((o) => o.key === xmlid);
+
+    if (!powerInfo && options?.item?.type == "maneuver") {
+        powerInfo = {
+            type: ["maneuver"],
+            perceivability: "obvious",
+            duration: "instant",
+            costEnd: false,
+            target: "target's dcv",
+        };
+    }
+
+    // TODO: Why are we modifying the power entries from config here?
+    if (powerInfo) {
+        powerInfo.xmlid = xmlid;
+        powerInfo.XMLID = xmlid;
+    }
+
+    // LowerCase
+    if (powerInfo?.duration)
+        powerInfo.duration = powerInfo.duration.toLowerCase();
+
+    return powerInfo;
+}
+
+const migrationOnly_combatManeuvers = {
+    // Maneuver : [phase, OCV, DCV, Effects, Attack]
+    Block: ["1/2", "+0", "+0", "Blocks HTH attacks, Abort", true],
+    Brace: ["0", "+2", "1/2", "+2 OCV only to offset the Range Modifier"],
+    Disarm: [
+        "1/2",
+        "-2",
+        "+0",
+        "Disarm target, requires STR vs. STR Roll",
+        true,
+    ],
+    Dodge: ["1/2", "--", "+3", "Dodge all attacks, Abort", true],
+    Grab: [
+        "1/2",
+        "-1",
+        "-2",
+        "Grab Two Limbs; can Squeeze, Slam, or Throw",
+        true,
+    ],
+    "Grab By": [
+        "1/2 †",
+        "-3",
+        "-4",
+        "Move and Grab object, +(v/10) to STR",
+        true,
+    ],
+    Haymaker: ["1/2*", "+0", "-5", "+4 Damage Classes to any attack"],
+    "Move By": [
+        "1/2 †",
+        "-2",
+        "-2",
+        "((STR/2) + (v/10))d6; attacker takes 1/3 damage",
+        true,
+    ],
+    "Move Through": [
+        "1/2 †",
+        "-v/10",
+        "-3",
+        "(STR + (v/6))d6; attacker takes 1/2 or full damage",
+        true,
+    ],
+    //"Multiple Attack": ["1", "var", "1/2", "Attack one or more targets multiple times"],
+    Set: [
+        "1",
+        "+1",
+        "+0",
+        "Take extra time to aim a Ranged attack at a target",
+    ],
+    Shove: ["1/2", "-1", "-1", "Push target back 1m per 5 STR used", true],
+    Strike: ["1/2", "+0", "+0", "STR damage or by weapon type", true],
+    Throw: [
+        "1/2",
+        "+0",
+        "+0",
+        "Throw object or character, does STR damage",
+        true,
+    ],
+    Trip: [
+        "1/2",
+        "-1",
+        "-2",
+        "Knock a target to the ground, making him Prone",
+        true,
+    ],
+    //"Other Attacks": ["1/2", "+0", "+0", ""],
+};

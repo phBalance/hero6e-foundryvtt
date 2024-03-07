@@ -1385,6 +1385,73 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // Characters get a few things for free that are not in the HDC.
+        if (this.type === "pc" || this.type === "npc") {
+            // Perception Skill
+            const itemDataPerception = {
+                name: "Perception",
+                type: "skill",
+                system: {
+                    XMLID: "PERCEPTION",
+                    ALIAS: "Perception",
+                    CHARACTERISTIC: "INT",
+                    state: "trained",
+                    levels: "0",
+                },
+            };
+            const perceptionItem = await HeroSystem6eItem.create(
+                itemDataPerception,
+                {
+                    temporary: this.id ? false : true,
+                    parent: this,
+                },
+            );
+            await perceptionItem._postUpload();
+
+            // MANEUVERS
+            const powerList = this.system.is5e
+                ? CONFIG.HERO.powers5e
+                : CONFIG.HERO.powers6e;
+
+            powerList
+                .filter((power) => power.type.includes("maneuver"))
+                .forEach(async (maneuver) => {
+                    const name = maneuver.name;
+                    const XMLID = maneuver.key;
+
+                    const maneuverDetails = maneuver.maneuverDesc;
+                    const PHASE = maneuverDetails.phase;
+                    const OCV = maneuverDetails.ocv;
+                    const DCV = maneuverDetails.dcv;
+                    const EFFECT = maneuverDetails.effects;
+
+                    const itemData = {
+                        name,
+                        type: "maneuver",
+                        system: {
+                            PHASE,
+                            OCV,
+                            DCV,
+                            EFFECT,
+                            active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
+                            description: EFFECT,
+                            XMLID,
+                        },
+                    };
+
+                    // Skip if temporary actor (Quench)
+                    if (this.id) {
+                        const item = await HeroSystem6eItem.create(itemData, {
+                            parent: this,
+                        });
+                        if (maneuverDetails.attack) {
+                            await item.makeAttack();
+                        }
+                        await item._postUpload();
+                    }
+                });
+        }
+
         // Validate everything that's been imported
         this.items.forEach(async (item) => {
             const power = getPowerInfo({ item: item });
@@ -1431,70 +1498,6 @@ export class HeroSystem6eActor extends Actor {
                     await ui.notifications.warn(
                         `${this.name} has too many adjustment targets defined for ${item.name}.`,
                     );
-                }
-            }
-        }
-
-        // Characters get a few things for free that are not in the HDC.
-        if (this.type === "pc" || this.type === "npc") {
-            // Perception Skill
-            const itemDataPerception = {
-                name: "Perception",
-                type: "skill",
-                system: {
-                    XMLID: "PERCEPTION",
-                    ALIAS: "Perception",
-                    CHARACTERISTIC: "INT",
-                    state: "trained",
-                    levels: "0",
-                },
-            };
-            const perceptionItem = await HeroSystem6eItem.create(
-                itemDataPerception,
-                {
-                    temporary: this.id ? false : true,
-                    parent: this,
-                },
-            );
-            await perceptionItem._postUpload();
-
-            // MANEUVERS
-            for (const entry of Object.entries(CONFIG.HERO.combatManeuvers)) {
-                const name = entry[0];
-                const v = entry[1];
-                const PHASE = v[0];
-                const OCV = v[1];
-                const DCV = v[2];
-                let EFFECT = v[3];
-                if (this.system.is5e && EFFECT.match(/v\/(\d+)/)) {
-                    let divisor = EFFECT.match(/v\/(\d+)/)[1];
-                    EFFECT = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`);
-                }
-                const attack = v[4];
-                const XMLID = name.toUpperCase().replace(" ", ""); // A fake XMLID
-                const itemData = {
-                    name,
-                    type: "maneuver",
-                    system: {
-                        PHASE,
-                        OCV,
-                        DCV,
-                        EFFECT,
-                        active: false,
-                        description: EFFECT,
-                        XMLID,
-                    },
-                };
-
-                // Skip if temporary actor (Quench)
-                if (this.id) {
-                    const item = await HeroSystem6eItem.create(itemData, {
-                        parent: this,
-                    });
-                    if (attack) {
-                        await item.makeAttack();
-                    }
-                    await item._postUpload();
                 }
             }
         }

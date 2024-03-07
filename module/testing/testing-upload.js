@@ -4667,6 +4667,94 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("CONTACT", async function () {
+                describe("CONTACT 8-", async function () {
+                    const contents = `
+                        <PERK XMLID="CONTACT" ID="1709783993407" BASECOST="0.0" LEVELS="1" ALIAS="Contact" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                        </PERK>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Contact 8-");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 1);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 1);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 1);
+                    });
+                });
+
+                describe("CONTACT 11-", async function () {
+                    const contents = `
+                    <PERK XMLID="CONTACT" ID="1709783993407" BASECOST="0.0" LEVELS="2" ALIAS="Contact" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                    </PERK>
+                `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Contact 11-");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 2);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 2);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
