@@ -513,7 +513,7 @@
                         <th></th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (and (eq item.type "power") (filterItem item ../options.itemFilters.power))}}
+                    {{#if (and (or (eq item.type "power") item.system.PARENTID) (filterItem item ../options.itemFilters.power))}}
                         {{#if (eq item.system.XMLID "LIST")}}
                             <tr class="item">
                                 <td height="24"></td>
