@@ -46,16 +46,6 @@ export function getPowerInfo(options) {
         : CONFIG.HERO.powers6e;
     let powerInfo = powerList.find((o) => o.key === xmlid);
 
-    if (!powerInfo && options?.item?.type == "maneuver") {
-        powerInfo = {
-            type: ["maneuver"],
-            perceivability: "obvious",
-            duration: "instant",
-            costEnd: false,
-            target: "target's dcv",
-        };
-    }
-
     // TODO: Why are we modifying the power entries from config here?
     if (powerInfo) {
         powerInfo.xmlid = xmlid;

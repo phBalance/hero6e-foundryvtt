@@ -493,7 +493,8 @@ let lastDate = 0;
 Hooks.on("updateWorldTime", async (worldTime, options) => {
     const start = new Date();
 
-    // Guard
+    // Ensure that this only runs for 1 user to we don't have multiple user attempting to
+    // initiate actions. For simplicity we will limit it to the GM.
     if (!game.user.isGM) return;
     if (!lastDate) game.user.getFlag(game.system.id, "lastDate") || 0;
 
@@ -553,7 +554,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         XMLID: "naturalBodyHealing",
                     },
                 };
-                if (game.user.isGM) await actor.addActiveEffect(activeEffect);
+                await actor.addActiveEffect(activeEffect);
             }
 
             let adjustmentChatMessages = [];
@@ -578,7 +579,6 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 if (
                     !powerInfo &&
                     ae.statuses.size === 0 &&
-                    game.user.isGM &&
                     game.settings.get(game.system.id, "alphaTesting") &&
                     ae.duration?.seconds < 3.154e7 * 100
                 ) {
@@ -594,9 +594,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     // Add duration to startTime
                     ae.duration.startTime += d.duration;
                     d = ae._prepareDuration();
-                    if (game.user.isGM) {
-                        await ae.update({ duration: ae.duration });
-                    }
+                    await ae.update({ duration: ae.duration });
 
                     // What is this effect related to?
                     if (ae.flags.type === "adjustment") {
@@ -614,17 +612,27 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                             );
                         }
 
-                        adjustmentChatMessages.push(
-                            await performAdjustment(
-                                item,
-                                ae.flags.target[0],
-                                -_fade,
-                                -_fade,
-                                "None - Effect Fade",
-                                true,
-                                actor,
-                            ),
-                        );
+                        if (item) {
+                            adjustmentChatMessages.push(
+                                await performAdjustment(
+                                    item,
+                                    ae.flags.target[0],
+                                    -_fade,
+                                    -_fade,
+                                    "None - Effect Fade",
+                                    true,
+                                    actor,
+                                ),
+                            );
+                        } else {
+                            // The item must have been deleted which makes it impossible to properly adjust the
+                            // adjustment power. Just delete it and soldier on.
+                            ui.notifications.warn(
+                                `The originating item ${ae.origin} of adjustment ${ae.name} appears to have been deleted. Deleting adjustment's active effect.`,
+                            );
+                            ae.delete();
+                            break;
+                        }
 
                         // TODO: FIXME: Dirty hack. If the amount remaining in the active effect is 0 we know that
                         // performAdjustment has deleted the active effect. In this case exit the loop so that
@@ -644,22 +652,19 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                             actor.system.characteristics.body.max,
                         );
                         bodyValue = Math.min(bodyValue + 1, bodyMax);
-                        // TODO: await
-                        if (game.user.isGM)
-                            actor.update({
-                                "system.characteristics.body.value": bodyValue,
-                            });
+
+                        await actor.update({
+                            "system.characteristics.body.value": bodyValue,
+                        });
 
                         if (bodyValue === bodyMax) {
-                            if (game.user.isGM) ae.delete();
+                            ae.delete();
                             break;
-                        } else {
-                            //await ae.update({ duration: ae.duration });
                         }
                     } else {
                         // Default is to delete the expired AE
                         if (powerInfo) {
-                            if (game.user.isGM) await ae.delete();
+                            await ae.delete();
                             break;
                         }
                     }
@@ -718,21 +723,17 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                                 rec,
                         );
 
-                        if (game.user.isGM)
-                            await actor.removeActiveEffect(
-                                HeroSystem6eActorActiveEffects.stunEffect,
-                            );
+                        await actor.removeActiveEffect(
+                            HeroSystem6eActorActiveEffects.stunEffect,
+                        );
 
-                        if (game.user.isGM)
-                            await actor.update(
-                                {
-                                    "system.characteristics.end.value":
-                                        endValue,
-                                    "system.characteristics.stun.value":
-                                        stunValue,
-                                },
-                                { render: true },
-                            );
+                        await actor.update(
+                            {
+                                "system.characteristics.end.value": endValue,
+                                "system.characteristics.stun.value": stunValue,
+                            },
+                            { render: true },
+                        );
                     }
                 }
 
@@ -803,12 +804,8 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     // If there are lots of actors updateWorldTime may result in performance issues.
     // Notify GM when this is a concern.
     const deltaMs = new Date() - start;
-    if (
-        game.user.isGM &&
-        game.settings.get(game.system.id, "alphaTesting") &&
-        deltaMs > 100
-    ) {
-        return ui.notifications.warn(
+    if (game.settings.get(game.system.id, "alphaTesting") && deltaMs > 100) {
+        ui.notifications.warn(
             `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
         );
     }
