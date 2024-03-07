@@ -193,7 +193,6 @@ export class HeroSystem6eItem extends Item {
                     case "HEALING":
                     case "SUCCOR":
                     case "TRANSFER":
-                    case "STRIKE":
                     case "FLASH":
                     case "BLOCK":
                     case "DODGE":
