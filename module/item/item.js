@@ -2139,11 +2139,10 @@ export class HeroSystem6eItem extends Item {
 
             case "CONTACT":
                 {
-                    const roll =
-                        system.LEVELS === "1"
-                            ? "8-"
-                            : `${9 + parseInt(system.LEVELS)}-`;
-                    system.description = `${system.ALIAS} ${roll}`;
+                    const levels = parseInt(system.LEVELS || 1);
+                    system.description = `${system.ALIAS} ${
+                        levels === 1 ? "8-" : `${9 + levels}-`
+                    }`;
                 }
                 break;
 
@@ -3513,17 +3512,13 @@ export class HeroSystem6eItem extends Item {
 
                 skillData.roll = `${rollValue}-`;
             } else if (skillData.XMLID === "CONTACT") {
+                const levels = parseInt(skillData.LEVELS || 1);
                 let rollValue;
 
-                if (skillData.LEVELS === "1") {
+                if (levels === 1) {
                     rollValue = 8;
-                } else if (skillData.LEVELS === "2") {
-                    rollValue = 11;
                 } else {
-                    console.error(
-                        `unknown levels ${skillData.LEVELS} for CONTACT`,
-                    );
-                    rollValue = 8;
+                    rollValue = 9 + levels;
                 }
 
                 skillData.tags.push({
