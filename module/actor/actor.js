@@ -1388,7 +1388,7 @@ export class HeroSystem6eActor extends Actor {
                     const PHASE = maneuverDetails.phase;
                     const OCV = maneuverDetails.ocv;
                     const DCV = maneuverDetails.dcv;
-                    const EFFECT = maneuverDetails.effect;
+                    const EFFECT = maneuverDetails.effects;
 
                     const itemData = {
                         name,
