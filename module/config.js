@@ -140,6 +140,7 @@ HERO.hitLocations = {
     Foot: [1, 0.5, 0.5, -8],
 };
 
+// TODO: Remove
 HERO.combatManeuvers = {
     // Maneuver : [phase, OCV, DCV, Effects, Attack]
     Block: ["1/2", "+0", "+0", "Blocks HTH attacks, Abort", true],
@@ -207,6 +208,7 @@ HERO.combatManeuvers = {
     //"Other Attacks": ["1/2", "+0", "+0", ""],
 };
 
+// TODO: REmove.
 HERO.combatManeuversOptional = {
     // Maneuver : [phase, OCV, DCV, Effects]
     Choke: ["1/2", "-2", "-2", "NND 1d6, Grab One Limb"],
@@ -218,7 +220,7 @@ HERO.combatManeuversOptional = {
     ],
     Cover: ["1/2", "-2", "+0", "Target held at gunpoint"],
     "Dive For Cover": ["1/2", "+0", "+0", "Character avoids attack; Abort"],
-    Hipshot: ["1/2", "-1", "+0", "+1", "DEX only for purposes of initiative"],
+    Hipshot: ["1/2", "-1", "+0", "DEX only for purposes of initiative"],
     "Pulling A Punch": [
         "1/2",
         "-1/5d6",
@@ -271,7 +273,11 @@ HERO.powers5e = [];
  * @param {Array<string>} type - A list of types associated with this power
  * @param {Array<"success">} behaviors - A list of the behavior types this power exhibits in the code
  *                                       "non-hd" - this is not an XMLID that comes from Hero Designer
+ *                                       "optional-maneuver" - this is an optional combat maneuver
  *                                       "success" - can roll some kind of success roll for this power
+ *                                       "dice" - a damage/effect dice roll is associated with this power
+ *                                       "attack" - a to-hit dice roll is associated with this power
+ *                                       "on-off" - this power can be turned on or off
  *
  * @param {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
  * @param {boolean} [costEnd] - If the power costs endurance to use. true if it does, false or undefined if it doesn't
@@ -389,7 +395,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["characteristic"],
         behaviors: ["success"],
         duration: "persistent",
-        ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"],
+        ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"], // TODO: Remove the 6e here.
         base: 10,
         cost: 1 / 2,
     });
@@ -706,13 +712,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "BLAZINGAWAY",
         type: ["maneuver"],
-        behaviors: ["non-hd"],
+        behaviors: ["non-hd", "optional-maneuver"],
         name: "Blazing Away",
         perceivability: "obvious",
         duration: "instant",
         costEnd: false,
         target: "target's dcv",
         ignoreFor: ["base2", "computer", "ai"],
+        maneuverDesc: {
+            phase: "1/2",
+            ocv: "+0",
+            dcv: "+0",
+            effects: "Make as many attacks as desired, only hit on a 3",
+            attack: true, // TODO: Do we want this property? Should likely be part of the behaviors. Same comment for all maneuvers.
+        },
     });
     addPower(
         {
@@ -725,6 +738,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "+0",
+                dcv: "+0",
+                effects: "Blocks HTH attacks, Abort",
+                attack: true, // TODO: Should be false as it's not an attack. It does, however, require dice.
+            },
         },
         {},
     );
@@ -739,6 +759,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "0",
+                ocv: "+2",
+                dcv: "1/2",
+                effects: "+2 OCV only to offset the Range Modifier",
+                attack: false,
+            },
         },
         {},
     );
@@ -747,13 +774,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CHOKE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Choke",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-2",
+                dcv: "-2",
+                effects: "NND 1d6, Grab One Limb",
+                attack: true,
+            },
         },
         undefined,
     );
@@ -761,13 +795,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLUBWEAPON",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Club Weapon",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "+0",
+                dcv: "+0",
+                effects: "Killing weapon does equivalent Normal Damage",
+                attack: true,
+            },
         },
         {},
     );
@@ -775,13 +816,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COVER",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Cover",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-2",
+                dcv: "+0",
+                effects: "Target held at gunpoint",
+                attack: true,
+            },
         },
         {},
     );
@@ -797,6 +845,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-2",
+                dcv: "+0",
+                effects: "Disarm target, requires STR vs. STR Roll",
+                attack: true,
+            },
         },
         {},
     );
@@ -804,13 +859,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DIVEFORCOVER",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Dive For Cover",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "+0",
+                dcv: "+0",
+                effects: "Character avoids attack; Abort",
+                attack: true,
+            },
         },
         {},
     );
@@ -825,6 +887,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "--",
+                dcv: "+3",
+                effects: "Dodge all attacks, Abort",
+                attack: true,
+            },
         },
         {},
     );
@@ -840,8 +909,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-1",
+                dcv: "-2",
+                effects: "Grab Two Limbs; can Squeeze, Slam, or Throw",
+                attack: true,
+            },
         },
-        {},
+        {
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-1",
+                dcv: "-2",
+                effects: "Grab Two Limbs; can Squeeze or Throw",
+                attack: true,
+            },
+        },
     );
     addPower(
         {
@@ -854,8 +938,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2 †",
+                ocv: "-3",
+                dcv: "-4",
+                effects: "Move and Grab object, +(v/10) to STR",
+                attack: true,
+            },
         },
-        {},
+        {
+            maneuverDesc: {
+                phase: "1/2 †",
+                ocv: "-3",
+                dcv: "-4",
+                effects: "Move and Grab object, +(v/5) to STR",
+                attack: true,
+            },
+        },
     );
 
     addPower(
@@ -865,6 +964,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["non-hd"],
             name: "Haymaker",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2 *",
+                ocv: "+0",
+                dcv: "-5",
+                effects: "+4 Damage Classes to any attack",
+                attack: false,
+            },
         },
         {},
     );
@@ -872,16 +978,41 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HIPSHOT",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Hipshot",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-1",
+                dcv: "+0",
+                effects: "+1 DEX only for purposes of initiative",
+                attack: true,
+            },
         },
         {},
     );
+    addPower(undefined, {
+        key: "HURRY",
+        type: ["maneuver"],
+        behaviors: ["non-hd", "optional-maneuver"],
+        name: "Hurry",
+        perceivability: "obvious",
+        duration: "instant",
+        costEnd: false,
+        target: "target's dcv",
+        ignoreFor: ["base2", "computer", "ai"],
+        maneuverDesc: {
+            phase: "1/2",
+            ocv: "-2",
+            dcv: "-2",
+            effects: "+1d6 DEX only for purposes of initiative",
+            attack: false,
+        },
+    });
 
     addPower(
         {
@@ -894,8 +1025,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2 †",
+                ocv: "-2",
+                dcv: "-2",
+                effects: "((STR/2) + (v/10))d6; attacker takes ⅓ damage",
+                attack: true,
+            },
         },
-        {},
+        {
+            maneuverDesc: {
+                phase: "1/2 †",
+                ocv: "-2",
+                dcv: "-2",
+                effects: "((STR/2) + (v/5))d6; attacker takes ⅓ damage",
+                attack: true,
+            },
+        },
     );
     addPower(
         {
@@ -908,12 +1054,26 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2 †",
+                ocv: "-v/10",
+                dcv: "-3",
+                effects: "(STR + (v/6))d6; attacker takes ½ or full damage",
+                attack: true,
+            },
         },
-        {},
+        {
+            maneuverDesc: {
+                phase: "1/2 †",
+                ocv: "-v/5",
+                dcv: "-3",
+                effects: "(STR + (v/3))d6; attacker takes ½ or full damage",
+                attack: true,
+            },
+        },
     );
     addPower(
         {
-            // TODO: not in combatManeuvers
             key: "MULTIPLEATTACK",
             type: ["maneuver"],
             behaviors: ["non-hd"],
@@ -923,21 +1083,57 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1",
+                ocv: "var",
+                dcv: "1/2",
+                effects: "Attack one or more targets multiple times",
+                attack: true,
+            },
         },
-        {},
+        undefined,
+    );
+
+    addPower(
+        {
+            key: "OTHERATTACKS",
+            type: ["maneuver"],
+            behaviors: ["non-hd"],
+            name: "Other Attacks",
+            perceivability: "obvious",
+            duration: "instant",
+            costEnd: false,
+            target: "target's dcv",
+            ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "+0",
+                dcv: "+0",
+                effects: "For unlisted attacks",
+                attack: true,
+            },
+        },
+        undefined,
     );
 
     addPower(
         {
             key: "PULLINGAPUNCH",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Pulling A Punch",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-1/5d6",
+                dcv: "+0",
+                effects: "Strike, normal STUN damage, 1/2 BODY damage",
+                attack: true,
+            },
         },
         {},
     );
@@ -945,25 +1141,39 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "RAPIDFIRE",
         type: ["maneuver"],
-        behaviors: ["non-hd"],
+        behaviors: ["non-hd", "optional-maneuver"],
         name: "Rapid Fire",
         perceivability: "obvious",
         duration: "instant",
         costEnd: false,
         target: "target's dcv",
         ignoreFor: ["base2", "computer", "ai"],
+        maneuverDesc: {
+            phase: "1",
+            ocv: "-1/x",
+            dcv: "+x1/2",
+            effects: "Strike, normal STUN damage, 1/2 BODY damage",
+            attack: true,
+        },
     });
     addPower(
         {
             key: "ROLLWITHAPUNCH",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Roll With A Punch",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-2",
+                dcv: "-2",
+                effects: "Block after being hit, take 1/2 damage; Abort",
+                attack: true,
+            },
         },
         {},
     );
@@ -979,11 +1189,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1",
+                ocv: "+1",
+                dcv: "+0",
+                effects: "Take extra time to aim a Ranged attack at a target",
+                attack: false,
+            },
         },
         {},
     );
     addPower(
-        // TODO: Mentioned in 1 place (6e)... double check
         {
             key: "SETANDBRACE",
             type: ["maneuver"],
@@ -994,6 +1210,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1",
+                ocv: "+3",
+                dcv: "1/2",
+                effects:
+                    "Take extra time to aim a Ranged attack at a target, +2 OCV only to offset the Range Modifier",
+                attack: false,
+            },
         },
         {},
     );
@@ -1008,6 +1232,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-1",
+                dcv: "-1",
+                effects: "Push target back 1m per 5 STR used",
+                attack: true,
+            },
         },
         undefined,
     );
@@ -1015,13 +1246,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SNAPSHOT",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Snap Shot",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1",
+                ocv: "-1",
+                dcv: "+0",
+                effects: "Lets character duck back behind cover",
+                attack: true,
+            },
         },
         {},
     );
@@ -1029,15 +1267,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STRAFE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Strafe",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2 †",
+                ocv: "-v/6",
+                dcv: "-2",
+                effects: "Make Ranged attack while moving",
+                attack: true,
+            },
         },
-        {},
+        undefined,
     );
     addPower(
         {
@@ -1050,6 +1295,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "+0",
+                dcv: "+0",
+                effects: "STR damage or by weapon type",
+                attack: true,
+            },
         },
         {},
     );
@@ -1057,30 +1309,49 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SUPPRESSIONFIRE",
             type: ["maneuver"],
-            behaviors: ["non-hd"],
+            behaviors: ["non-hd", "optional-maneuver"],
             name: "Suppression Fire",
             perceivability: "obvious",
             duration: "instant",
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-2",
+                dcv: "+0",
+                effects: "Continuous fire through an area, must be Autofire",
+                attack: true,
+            },
         },
-        {},
-    );
-    addPower(
         {
-            key: "SWEEP",
-            type: ["maneuver"],
-            behaviors: ["non-hd"],
-            name: "Sweep",
-            perceivability: "obvious",
-            duration: "instant",
-            costEnd: false,
-            target: "target's dcv",
-            ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-2",
+                dcv: "+0",
+                effects: "Continuous fire on hex(es), must be Autofire",
+                attack: true,
+            },
         },
-        {},
     );
+    addPower(undefined, {
+        key: "SWEEP",
+        type: ["maneuver"],
+        behaviors: ["non-hd", "optional-maneuver"],
+        name: "Sweep",
+        perceivability: "obvious",
+        duration: "instant",
+        costEnd: false,
+        target: "target's dcv",
+        ignoreFor: ["base2", "computer", "ai"],
+        maneuverDesc: {
+            phase: "1",
+            ocv: "-2/x",
+            dcv: "x1/2",
+            effects: "Make multiple HTH attacks",
+            attack: true,
+        },
+    });
 
     addPower(
         {
@@ -1093,6 +1364,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "+0",
+                dcv: "+0",
+                effects: "Throw object or character, does STR damage",
+                attack: true,
+            },
         },
         undefined,
     );
@@ -1107,8 +1385,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             target: "target's dcv",
             ignoreFor: ["base2", "computer", "ai"],
+            maneuverDesc: {
+                phase: "1/2",
+                ocv: "-1",
+                dcv: "-2",
+                effects: "Knock a target to the ground, making him Prone",
+                attack: true,
+            },
         },
-        {},
+        undefined,
     );
 
     // TODO: Include Other Attacks?
