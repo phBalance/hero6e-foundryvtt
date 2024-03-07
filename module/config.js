@@ -140,109 +140,6 @@ HERO.hitLocations = {
     Foot: [1, 0.5, 0.5, -8],
 };
 
-// TODO: Remove
-HERO.combatManeuvers = {
-    // Maneuver : [phase, OCV, DCV, Effects, Attack]
-    Block: ["1/2", "+0", "+0", "Blocks HTH attacks, Abort", true],
-    Brace: ["0", "+2", "1/2", "+2 OCV only to offset the Range Modifier"],
-    Disarm: [
-        "1/2",
-        "-2",
-        "+0",
-        "Disarm target, requires STR vs. STR Roll",
-        true,
-    ],
-    Dodge: ["1/2", "--", "+3", "Dodge all attacks, Abort", true],
-    Grab: [
-        "1/2",
-        "-1",
-        "-2",
-        "Grab Two Limbs; can Squeeze, Slam, or Throw",
-        true,
-    ],
-    "Grab By": [
-        "1/2 †",
-        "-3",
-        "-4",
-        "Move and Grab object, +(v/10) to STR",
-        true,
-    ],
-    Haymaker: ["1/2*", "+0", "-5", "+4 Damage Classes to any attack"],
-    "Move By": [
-        "1/2 †",
-        "-2",
-        "-2",
-        "((STR/2) + (v/10))d6; attacker takes 1/3 damage",
-        true,
-    ],
-    "Move Through": [
-        "1/2 †",
-        "-v/10",
-        "-3",
-        "(STR + (v/6))d6; attacker takes 1/2 or full damage",
-        true,
-    ],
-    //"Multiple Attack": ["1", "var", "1/2", "Attack one or more targets multiple times"],
-    Set: [
-        "1",
-        "+1",
-        "+0",
-        "Take extra time to aim a Ranged attack at a target",
-    ],
-    Shove: ["1/2", "-1", "-1", "Push target back 1m per 5 STR used", true],
-    Strike: ["1/2", "+0", "+0", "STR damage or by weapon type", true],
-    Throw: [
-        "1/2",
-        "+0",
-        "+0",
-        "Throw object or character, does STR damage",
-        true,
-    ],
-    Trip: [
-        "1/2",
-        "-1",
-        "-2",
-        "Knock a target to the ground, making him Prone",
-        true,
-    ],
-    //"Other Attacks": ["1/2", "+0", "+0", ""],
-};
-
-// TODO: REmove.
-HERO.combatManeuversOptional = {
-    // Maneuver : [phase, OCV, DCV, Effects]
-    Choke: ["1/2", "-2", "-2", "NND 1d6, Grab One Limb"],
-    "Club Weapon": [
-        "1/2",
-        "+0",
-        "+0",
-        "Killing weapon does equivalent Normal Damage",
-    ],
-    Cover: ["1/2", "-2", "+0", "Target held at gunpoint"],
-    "Dive For Cover": ["1/2", "+0", "+0", "Character avoids attack; Abort"],
-    Hipshot: ["1/2", "-1", "+0", "DEX only for purposes of initiative"],
-    "Pulling A Punch": [
-        "1/2",
-        "-1/5d6",
-        "+0",
-        "Strike, normal STUN damage, 1/2 BODY damage",
-    ],
-    "Roll With A Punch": [
-        "1/2",
-        "-2",
-        "-2",
-        "Block after being hit, take 1/2 damage; Abort",
-    ],
-    "Snap Shot": ["1", "-1", "+0", "Lets character duck back behind cover"],
-    Strafe: ["1/2 †", "-v/6", "-2", "Make Ranged attack while moving"],
-    "Suppression Fire": [
-        "1/2",
-        "-2",
-        "+0",
-        "Continuous fire through an area, must be Autofire",
-    ],
-};
-
 // TODO: This could be created from powers.
 HERO.movementPowers = {
     extradimensionalmovement: "Extra Dimensional Movement",
@@ -707,8 +604,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 })();
 
 (function addManeuversToPowerList() {
-    // TODO: Use this list rather than HERO.combatManeuvers. This is also correct for 6e vs 5e which that is not.
-    // TODO: This also includes optional combat maneuvers. If we include them perhaps they should be a configured thing?
     addPower(undefined, {
         key: "BLAZINGAWAY",
         type: ["maneuver"],
@@ -1131,7 +1026,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 phase: "1/2",
                 ocv: "-1/5d6",
                 dcv: "+0",
-                effects: "Strike, normal STUN damage, 1/2 BODY damage",
+                effects: "Strike, normal STUN damage, ½ BODY damage",
                 attack: true,
             },
         },
@@ -1152,7 +1047,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             phase: "1",
             ocv: "-1/x",
             dcv: "+x1/2",
-            effects: "Strike, normal STUN damage, 1/2 BODY damage",
+            effects: "Strike, normal STUN damage, ½ BODY damage",
             attack: true,
         },
     });
@@ -1171,7 +1066,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 phase: "1/2",
                 ocv: "-2",
                 dcv: "-2",
-                effects: "Block after being hit, take 1/2 damage; Abort",
+                effects: "Block after being hit, take ½ damage; Abort",
                 attack: true,
             },
         },
