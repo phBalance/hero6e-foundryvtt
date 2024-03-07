@@ -3,7 +3,7 @@
 ## Version 3.0.62 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Add all 5e/6e maneuvers and optional maneuvers to actors. Will show on sheet when configuration option selected, but they may not work correctly.
-- Improved COMPOUNDPOWER to support characteristics & skills. [#711](https://github.com/dmdorman/hero6e-foundryvtt/issues/801)
+- Improved COMPOUNDPOWER to support characteristics & skills. [#711](https://github.com/dmdorman/hero6e-foundryvtt/issues/711)
 
 ## Version 3.0.61
 
