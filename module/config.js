@@ -1290,8 +1290,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         undefined,
     );
-
-    // TODO: Include Other Attacks?
 })();
 
 (function addMovementToPowerList() {

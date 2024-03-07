@@ -182,26 +182,47 @@ export class HeroSystem6eItem extends Item {
                     case "TRANSFER":
                     case "STRIKE":
                     case "FLASH":
-                    case undefined:
-                        return await Attack.AttackOptions(this, event);
+                    case "BLOCK":
+                    case "DODGE":
+                    case "HAYMAKER":
+                    case "SET":
+                    case "STRIKE":
+                        return Attack.AttackOptions(this, event);
 
                     case "ABSORPTION":
                     case "DISPEL":
                     case "SUPPRESS":
+                    case "BLAZINGAWAY":
+                    case "BRACE":
+                    case "CHOKE":
+                    case "CLUBWEAPON":
+                    case "COVER":
+                    case "DISARM":
+                    case "DIVEFORCOVER":
+                    case "GRAB":
+                    case "GRABBY":
+                    case "HIPSHOT":
+                    case "HURRY":
+                    case "MOVEBY":
+                    case "MOVETHROUGH":
+                    case "MULTIPLEATTACK":
+                    case "OTHERATTACKS":
+                    case "PULLINGAPUNCH":
+                    case "RAPIDFIRE":
+                    case "ROLLWITHAPUNCH":
+                    case "SETANDBRACE":
+                    case "SHOVE":
+                    case "SNAPSHOT":
+                    case "STRAFE":
+                    case "SUPPRESSIONFIRE":
+                    case "SWEEP":
+                    case "THROW":
+                    case "TRIP":
                     default:
-                        if (
-                            !this.system.EFFECT ||
-                            (this.system.EFFECT.toLowerCase().indexOf(
-                                "block",
-                            ) === 0 &&
-                                this.system.EFFECT.toLowerCase().indexOf(
-                                    "dodge",
-                                ) === 0)
-                        )
-                            ui.notifications.warn(
-                                `${this.system.XMLID} roll is not fully supported`,
-                            );
-                        return await Attack.AttackOptions(this);
+                        ui.notifications.warn(
+                            `${this.system.XMLID} roll is not fully supported`,
+                        );
+                        return Attack.AttackOptions(this);
                 }
 
             case "defense":
@@ -1136,7 +1157,7 @@ export class HeroSystem6eItem extends Item {
         // SKILLS
         if (configPowerInfo && configPowerInfo.type?.includes("skill")) {
             const skill = "skill";
-            if (this.system.subType != skill) {
+            if (this.system.subType !== skill) {
                 this.system.subType = skill;
                 changed = true;
             }
@@ -1145,7 +1166,7 @@ export class HeroSystem6eItem extends Item {
         // ATTACK
         if (configPowerInfo && configPowerInfo.type?.includes("attack")) {
             const attack = "attack";
-            if (this.system.subType != attack) {
+            if (this.system.subType !== attack) {
                 this.system.subType = attack;
                 changed = true;
                 this.makeAttack();
