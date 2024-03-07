@@ -1311,27 +1311,62 @@ export class HeroSystem6eActor extends Actor {
                         });
                         await item._postUpload();
 
-                        // Treat like a MULTIPOWER for now
+                        // COMPOUNDPOWER is similar to a MULTIPOWER.
+                        // MULTIPOWER uses PARENTID referenes.
+                        // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
                         if (system.XMLID === "COMPOUNDPOWER") {
-                            for (let system2 of system.POWER) {
-                                let itemData2 = {
-                                    name:
-                                        system2.NAME ||
-                                        system2.ALIAS ||
-                                        system2.XMLID,
-                                    type: "power",
-                                    system: {
-                                        ...system2,
-                                        PARENTID: system.ID,
-                                        POSITION: parseInt(system2.POSITION),
-                                    },
-                                };
-                                const item2 = await HeroSystem6eItem.create(
-                                    itemData2,
-                                    { parent: this },
-                                );
-                                await item2._postUpload();
+                            for (const [key, system2] of Object.entries(
+                                system,
+                            )) {
+                                if (system2.XMLID) {
+                                    const power = getPowerInfo({
+                                        xmlid: system2.XMLID,
+                                    });
+                                    let itemData2 = {
+                                        name:
+                                            system2.NAME ||
+                                            system2.ALIAS ||
+                                            system2.XMLID,
+                                        type: power.type.includes("skill")
+                                            ? "skill"
+                                            : "power",
+                                        system: {
+                                            ...system2,
+                                            PARENTID: system.ID,
+                                            POSITION: parseInt(
+                                                system2.POSITION,
+                                            ),
+                                        },
+                                    };
+                                    const item2 = await HeroSystem6eItem.create(
+                                        itemData2,
+                                        { parent: this },
+                                    );
+                                    await item2._postUpload();
+                                } else {
+                                    console.log(key);
+                                }
                             }
+
+                            // for (let system2 of system.POWER || []) {
+                            //     let itemData2 = {
+                            //         name:
+                            //             system2.NAME ||
+                            //             system2.ALIAS ||
+                            //             system2.XMLID,
+                            //         type: "power",
+                            //         system: {
+                            //             ...system2,
+                            //             PARENTID: system.ID,
+                            //             POSITION: parseInt(system2.POSITION),
+                            //         },
+                            //     };
+                            //     const item2 = await HeroSystem6eItem.create(
+                            //         itemData2,
+                            //         { parent: this },
+                            //     );
+                            //     await item2._postUpload();
+                            // }
                         }
                     } else {
                         const item = await HeroSystem6eItem.create(itemData, {
