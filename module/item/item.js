@@ -21,6 +21,8 @@ import { HeroRoller } from "../utility/dice.js";
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
     Handlebars.registerHelper("itemName", itemName);
+    Handlebars.registerHelper("itemIsManeuver", itemIsManeuver);
+    Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -42,11 +44,22 @@ function itemName(item) {
         return item.name;
     } catch (e) {
         // This should not happen, but one of the test tokens (Venin Vert had this issue).
-        // Possibly due to testing that caused failed initilization of an item.
+        // Possibly due to testing that caused failed initialization of an item.
         // Possibly the item was null due to an effect source that is no longer available.
         console.error(e);
         return "<i>undefined</i>";
     }
+}
+
+function itemIsManeuver(item) {
+    return item.type === "maneuver";
+}
+
+function itemIsOptionalManeuver(item) {
+    return (
+        itemIsManeuver(item) &&
+        !!getPowerInfo({ item: item })?.behaviors.includes("optional-maneuver")
+    );
 }
 
 const itemTypeToIcon = {
@@ -1145,14 +1158,6 @@ export class HeroSystem6eItem extends Item {
                 changed = true;
             }
         }
-
-        // TALENTS
-        // if (this.type === "talent" || this.system.XMLID === "COMBAT_LUCK") {
-        //     if (this.system.active === undefined) {
-        //         this.system.active = true
-        //         changed = true
-        //     }
-        // }
 
         // SKILLS
         if (configPowerInfo && configPowerInfo.type?.includes("skill")) {

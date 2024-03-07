@@ -1,6 +1,10 @@
 # Releases
 
-## Version 3.0.61 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.62 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Add all 5e/6e maneuvers and optional maneuvers to actors. Will show on sheet when configuration option selected, but they may not work correctly.
+
+## Version 3.0.61
 
 - Power & Skill descriptions are now readonly as they are not intended to be edited. Descriptions are automatically generated using the Power/Skill properties. [#801](https://github.com/dmdorman/hero6e-foundryvtt/issues/801)
 - Actor shows systemVersion at time of HDC upload on actor sheet. [#800](https://github.com/dmdorman/hero6e-foundryvtt/issues/800)
