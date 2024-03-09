@@ -2806,6 +2806,7 @@ export class HeroSystem6eItem extends Item {
             .replace(";,", ";")
             .replace("; ,", ";")
             .replace("; ;", ";")
+            .replace(/;$/, "") // Remove ";" at the end of the description string
             .trim();
 
         // Endurance
