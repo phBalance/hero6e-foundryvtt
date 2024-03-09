@@ -4,6 +4,7 @@
 
 - Add all 5e/6e maneuvers and optional maneuvers to actors. Will show on sheet when configuration option selected, but they may not work correctly.
 - Improved COMPOUNDPOWER to support characteristics & skills. [#711](https://github.com/dmdorman/hero6e-foundryvtt/issues/711)
+- PS/KS/SS descriptions, rolls, and costs improved.
 
 ## Version 3.0.61
 

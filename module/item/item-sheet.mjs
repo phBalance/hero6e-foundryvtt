@@ -378,7 +378,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         // If Description changed, update it
         this.item.updateItemDescription();
-        if (description != this.item.system.description) {
+        if (description !== this.item.system.description) {
             this.item.update({
                 "system.description": this.item.system.description,
             });

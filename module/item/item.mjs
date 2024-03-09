@@ -1487,10 +1487,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     calcBasePointsPlusAdders() {
-        let system = this.system;
-        let actor = this.actor;
+        const system = this.system;
+        const actor = this.actor;
 
-        let old = system.basePointsPlusAdders;
+        const old = system.basePointsPlusAdders;
 
         if (!system.XMLID) return 0;
 
@@ -2130,11 +2130,14 @@ export class HeroSystem6eItem extends Item {
 
             case "PROFESSIONAL_SKILL":
             case "KNOWLEDGE_SKILL":
-                // KS: types of brain matter 11- or  PS: Appraise 11-
-                system.description = `${
-                    system.ALIAS ? system.ALIAS + ": " : ""
-                }${system.INPUT}`;
-
+            case "SCIENCE_SKILL":
+                {
+                    // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
+                    const { roll } = this._getSkillRollComponents(system);
+                    system.description = `${
+                        system.ALIAS ? system.ALIAS + ": " : ""
+                    }${system.INPUT} ${roll}`;
+                }
                 break;
 
             case "CONTACT":
@@ -2480,6 +2483,7 @@ export class HeroSystem6eItem extends Item {
 
                 case "PROFESSIONAL_SKILL":
                 case "KNOWLEDGE_SKILL":
+                case "SCIENCE_SKILL":
                     break;
 
                 default:
@@ -3556,16 +3560,32 @@ export class HeroSystem6eItem extends Item {
             return;
         }
 
+        const { roll, tags } = this._getSkillRollComponents(skillData);
+        skillData.roll = roll;
+        skillData.tags = tags;
+    }
+
+    _getSkillRollComponents(skillData) {
+        let roll = null;
+        const tags = [];
+
         if (skillData.EVERYMAN) {
-            skillData.roll = "8-";
-            skillData.tags.push({ value: 8, name: "Everyman" });
+            if (skillData.XMLID === "PROFESSIONAL_SKILL") {
+                // Assume that there's only 1 everyman professional skill. It will be an 11- as HD doesn't distinguish
+                // between the 1st PS and the 2nd PS. All other everyman skill are 8-.
+                roll = "11-";
+                tags.push({ value: 11, name: "Everyman PS" });
+            } else {
+                roll = "8-";
+                tags.push({ value: 8, name: "Everyman" });
+            }
         } else if (skillData.FAMILIARITY) {
-            skillData.roll = "8-";
-            skillData.tags.push({ value: 8, name: "Familiarity" });
+            roll = "8-";
+            tags.push({ value: 8, name: "Familiarity" });
         } else if (skillData.PROFICIENCY) {
-            skillData.roll = "10-";
-            skillData.tags.push({ value: 10, name: "Proficiency" });
-        } else if (characteristicBased) {
+            roll = "10-";
+            tags.push({ value: 10, name: "Proficiency" });
+        } else if (skillData.CHARACTERISTIC) {
             const characteristic = skillData.CHARACTERISTIC.toLowerCase();
 
             const baseRollValue =
@@ -3589,7 +3609,7 @@ export class HeroSystem6eItem extends Item {
 
             // Provide up to 3 tags to explain how the roll was calculated:
             // 1. Base skill value without modifier due to characteristics
-            skillData.tags.push({ value: baseRollValue, name: "Base Skill" });
+            tags.push({ value: baseRollValue, name: "Base Skill" });
 
             // 2. Adjustment value due to characteristics.
             //    NOTE: Don't show for things like Knowledge Skills which are GENERAL, not characteristic based, or if we have a 0 adjustment
@@ -3597,7 +3617,7 @@ export class HeroSystem6eItem extends Item {
                 skillData.CHARACTERISTIC !== "GENERAL" &&
                 characteristicAdjustment
             ) {
-                skillData.tags.push({
+                tags.push({
                     value: characteristicAdjustment,
                     name: characteristic,
                 });
@@ -3605,21 +3625,22 @@ export class HeroSystem6eItem extends Item {
 
             // 3. Adjustments due to level
             if (levelsAdjustment) {
-                skillData.tags.push({
+                tags.push({
                     value: levelsAdjustment,
                     name: "Levels",
                 });
             }
 
-            skillData.roll = rollVal.toString() + "-";
+            roll = rollVal.toString() + "-";
         } else {
             // This is likely a Skill Enhancer.
             // Skill Enhancers provide a discount to the purchase of associated skills.
             // They do not change the roll.
             // Skip for now.
             // HEROSYS.log(false, (skillData.XMLID || this.name) + ' was not included in skills.  Likely Skill Enhancer')
-            return;
         }
+
+        return { roll: roll, tags: tags };
     }
 
     _areAllAdjustmentTargetsInListValid(targetsList, mustBeStrict) {
