@@ -23,6 +23,9 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemName", itemName);
     Handlebars.registerHelper("itemIsManeuver", itemIsManeuver);
     Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
+    Handlebars.registerHelper("filterItem", filterItem);
+    Handlebars.registerHelper("parentItem", parentItem);
+    Handlebars.registerHelper("parentItemType", parentItemType);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -60,6 +63,41 @@ function itemIsOptionalManeuver(item) {
         itemIsManeuver(item) &&
         !!getPowerInfo({ item: item })?.behaviors.includes("optional-maneuver")
     );
+}
+
+function filterItem(item, filterString) {
+    if (!filterString) return item;
+
+    if (
+        item.name.toLowerCase().includes(filterString.toLowerCase()) ||
+        (item.system.description &&
+            item.system.description
+                .toLowerCase()
+                .includes(filterString.toLowerCase())) ||
+        (item.system.XMLID &&
+            item.system.XMLID.toLowerCase().includes(
+                filterString.toLowerCase(),
+            ))
+    ) {
+        return item;
+    }
+}
+
+function parentItem(item) {
+    if (item.system.PARENTID) {
+        return null;
+    }
+
+    const parent = item.actor.items.find(
+        (actorItem) => actorItem.system.ID === item.system.PARENTID,
+    );
+    return parent;
+}
+
+function parentItemType(item, type) {
+    const parent = parentItem(item);
+
+    return parent?.system.type === type;
 }
 
 const itemTypeToIcon = {
