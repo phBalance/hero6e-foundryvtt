@@ -2131,11 +2131,13 @@ export class HeroSystem6eItem extends Item {
             case "PROFESSIONAL_SKILL":
             case "KNOWLEDGE_SKILL":
             case "SCIENCE_SKILL":
-                // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
-                const { roll } = this._getSkillRollComponents(system);
-                system.description = `${
-                    system.ALIAS ? system.ALIAS + ": " : ""
-                }${system.INPUT} ${roll}`;
+                {
+                    // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
+                    const { roll } = this._getSkillRollComponents(system);
+                    system.description = `${
+                        system.ALIAS ? system.ALIAS + ": " : ""
+                    }${system.INPUT} ${roll}`;
+                }
                 break;
 
             case "CONTACT":
