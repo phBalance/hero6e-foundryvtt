@@ -15,7 +15,7 @@
         { "name": "Aaron Auseth" },
         { "name": "Peter Hunnisett" }
     ],
-    "esmodules": ["module/herosystem6e.js", "module/testing/testing-main.js"],
+    "esmodules": ["module/herosystem6e.mjs"],
     "styles": ["css/herosystem6e.css", "css/actor-sheet.css"],
     "scripts": [],
     "packs": [
