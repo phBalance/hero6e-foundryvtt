@@ -4042,7 +4042,7 @@ export function registerUploadTests(quench) {
                     it("power description", function () {
                         assert.equal(
                             item.system.description,
-                            "Ego Attack 1d6 (10 Active Points);",
+                            "Ego Attack 1d6 (10 Active Points)",
                         );
                     });
 
