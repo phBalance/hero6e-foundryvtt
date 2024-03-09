@@ -751,39 +751,66 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         } else if (this.system.XMLID === "SKILL_LEVELS") {
-            switch (this.system.OPTION) {
-                case "CHARACTERISTIC":
-                    this.system.costPerLevel = 2;
-                    break;
-                case "RELATED":
-                    this.system.costPerLevel = 3;
-                    break;
-                case "GROUP":
-                    this.system.costPerLevel = 4;
-                    break;
-                case "AGILITY":
-                    this.system.costPerLevel = 6;
-                    break;
-                case "NONCOMBAT":
-                    this.system.costPerLevel = 10;
-                    break;
-                case "SINGLEMOVEMENT":
-                    this.system.costPerLevel = 2;
-                    break;
-                case "ALLMOVEMENT":
-                    this.system.costPerLevel = 3;
-                    break;
-                case "SIMILAR":
-                    this.system.costPerLevel = 5;
-                    break;
-                case "OVERALL":
-                    this.system.costPerLevel = 12;
-                    break;
-                default:
-                    console.error(
-                        `Unknown skill levels ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                    );
-                    break;
+            if (this.actor?.system?.is5e) {
+                switch (this.system.OPTION) {
+                    case "CHARACTERISTIC":
+                    case "SINGLEMOVEMENT":
+                        this.system.costPerLevel = 2;
+                        break;
+                    case "ALLMOVEMENT":
+                    case "RELATED":
+                        this.system.costPerLevel = 3;
+                        break;
+                    case "SIMILAR":
+                        this.system.costPerLevel = 5;
+                        break;
+                    case "NONCOMBAT":
+                        this.system.costPerLevel = 8;
+                        break;
+                    case "OVERALL":
+                        this.system.costPerLevel = 10;
+                        break;
+                    default:
+                        console.error(
+                            `Unknown 5e SKILL_LEVELS ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
+                        );
+                        break;
+                }
+            } else {
+                switch (this.system.OPTION) {
+                    case "CHARACTERISTIC":
+                        this.system.costPerLevel = 2;
+                        break;
+                    case "RELATED":
+                        this.system.costPerLevel = 3;
+                        break;
+                    case "GROUP":
+                        this.system.costPerLevel = 4;
+                        break;
+                    case "AGILITY":
+                        this.system.costPerLevel = 6;
+                        break;
+                    case "NONCOMBAT":
+                        this.system.costPerLevel = 10;
+                        break;
+                    case "SINGLEMOVEMENT":
+                        this.system.costPerLevel = 2;
+                        break;
+                    case "ALLMOVEMENT":
+                        this.system.costPerLevel = 3;
+                        break;
+                    case "SIMILAR":
+                        this.system.costPerLevel = 5;
+                        break;
+                    case "OVERALL":
+                        this.system.costPerLevel = 12;
+                        break;
+                    default:
+                        console.error(
+                            `Unknown 6e SKILL_LEVELS ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
+                        );
+                        break;
+                }
             }
         } else if (this.system.XMLID === "STRIKING_APPEARANCE") {
             switch (this.system.OPTION) {
