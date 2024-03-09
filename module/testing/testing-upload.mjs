@@ -3075,31 +3075,31 @@ export function registerUploadTests(quench) {
                 }),
                 describe("MINDSCAN", async function () {
                     const contents = `
-                    <POWER XMLID="MINDSCAN" ID="1700619562891" BASECOST="0.0" LEVELS="1" ALIAS="Mind Scan" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="MIND SCAN" INPUT="Animal" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                        <NOTES/>
-                        <ADDER XMLID="PLUSONEPIP" ID="1700708893537" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                        <POWER XMLID="MINDSCAN" ID="1700619562891" BASECOST="0.0" LEVELS="1" ALIAS="Mind Scan" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="MIND SCAN" INPUT="Animal" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES/>
-                        </ADDER>
-                        <ADDER XMLID="ECVBONUS" ID="1700708893538" BASECOST="0.0" LEVELS="9" ALIAS="+9 OMCV" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="2.0" LVLVAL="1.0" SELECTED="YES">
-                            <NOTES/>
-                        </ADDER>
-                        <ADDER XMLID="MULTIPLECLASSES" ID="1700708893539" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
-                            <NOTES/>
-                        </ADDER>
-                        <ADDER XMLID="MULTIPLECLASSES" ID="1700708893540" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
-                            <NOTES/>
-                        </ADDER>
-                        <ADDER XMLID="MULTIPLECLASSES" ID="1700708893541" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
-                            <NOTES/>
-                        </ADDER>
-                        <MODIFIER XMLID="CUMULATIVE" ID="1700708899538" BASECOST="0.5" LEVELS="0" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES/>
-                        </MODIFIER>
-                        <MODIFIER XMLID="CANNOTATTACK" ID="1700709064472" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Attack Through Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMUNICATE" OPTIONID="COMMUNICATE" OPTION_ALIAS="neither the character nor his target can use the link to attack each other mentally, but they can communicate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            <NOTES/>
-                        </MODIFIER>
-                    </POWER>
-                `;
+                            <ADDER XMLID="PLUSONEPIP" ID="1700708893537" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES/>
+                            </ADDER>
+                            <ADDER XMLID="ECVBONUS" ID="1700708893538" BASECOST="0.0" LEVELS="9" ALIAS="+9 OMCV" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="2.0" LVLVAL="1.0" SELECTED="YES">
+                                <NOTES/>
+                            </ADDER>
+                            <ADDER XMLID="MULTIPLECLASSES" ID="1700708893539" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES/>
+                            </ADDER>
+                            <ADDER XMLID="MULTIPLECLASSES" ID="1700708893540" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES/>
+                            </ADDER>
+                            <ADDER XMLID="MULTIPLECLASSES" ID="1700708893541" BASECOST="5.0" LEVELS="0" ALIAS="Additional Class Of Minds" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES/>
+                            </ADDER>
+                            <MODIFIER XMLID="CUMULATIVE" ID="1700708899538" BASECOST="0.5" LEVELS="0" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES/>
+                            </MODIFIER>
+                            <MODIFIER XMLID="CANNOTATTACK" ID="1700709064472" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Attack Through Link" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMUNICATE" OPTIONID="COMMUNICATE" OPTION_ALIAS="neither the character nor his target can use the link to attack each other mentally, but they can communicate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES/>
+                            </MODIFIER>
+                        </POWER>
+                    `;
                     let item;
 
                     before(async () => {
@@ -3143,15 +3143,16 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-            describe("General Skills", () => {
-                describe("No Levels", () => {
+            describe("Skill Rolls", () => {
+                describe("KS: GENERAL with no Levels", () => {
                     const contents = `
                         <SKILL XMLID="KNOWLEDGE_SKILL" ID="1701473559272" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Broken General? Should show 11- on the dice" INPUT="How to Code General Skills" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
                             <NOTES/>
                         </SKILL>
                     `;
+                    let item;
 
-                    it("roll", async function () {
+                    before(async () => {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3159,26 +3160,57 @@ export function registerUploadTests(quench) {
                             },
                             { temporary: true },
                         );
-                        actor.system.characteristics.dex.value = 15;
-                        const item = await new HeroSystem6eItem(
+                        item = await new HeroSystem6eItem(
                             HeroSystem6eItem.itemDataFromXml(contents),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
                         actor.items.set(item.system.XMLID, item);
                         item.skillRollUpdateValue();
-                        assert.equal(item.system.roll, "11-");
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal(
+                            "KS: How to Code General Skills 11-",
+                        );
+                    });
+
+                    it("roll", async function () {
+                        expect(item.system.roll).to.be.equal("11-");
+                    });
+
+                    it("tags", async function () {
+                        expect(item.system.tags).to.be.deep.equal([
+                            { value: 11, name: "Base Skill" },
+                        ]);
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 0);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 2);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
                     });
                 });
 
-                describe("Some Levels", () => {
+                describe("KS: GENERAL with some Levels", () => {
                     const contents = `
                         <SKILL XMLID="KNOWLEDGE_SKILL" ID="1701473559272" BASECOST="2.0" LEVELS="2" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Broken General? Should show 13- on the dice" INPUT="How to Code General Skills" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
                             <NOTES/>
                         </SKILL>
                     `;
+                    let item;
 
-                    it("roll", async function () {
+                    before(async () => {
                         const actor = new HeroSystem6eActor(
                             {
                                 name: "Quench Actor",
@@ -3186,15 +3218,292 @@ export function registerUploadTests(quench) {
                             },
                             { temporary: true },
                         );
-                        actor.system.characteristics.dex.value = 15;
-                        const item = await new HeroSystem6eItem(
+                        item = await new HeroSystem6eItem(
                             HeroSystem6eItem.itemDataFromXml(contents),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
                         actor.items.set(item.system.XMLID, item);
                         item.skillRollUpdateValue();
-                        assert.equal(item.system.roll, "13-");
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal(
+                            "KS: How to Code General Skills 13-",
+                        );
+                    });
+
+                    it("roll", async function () {
+                        expect(item.system.roll).to.be.equal("13-");
+                    });
+
+                    it("tags", async function () {
+                        expect(item.system.tags).to.be.deep.equal([
+                            { value: 11, name: "Base Skill" },
+                            {
+                                value: 2,
+                                name: "Levels",
+                            },
+                        ]);
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 2);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 4);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 4);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("SS: INT with 0 Levels", () => {
+                    const contents = `
+                        <SKILL XMLID="SCIENCE_SKILL" ID="1042169893315" BASECOST="3.0" LEVELS="0" ALIAS="SS" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1236046710927" NAME="" INPUT="Astronomy" CHARACTERISTIC="INT" FAMILIARITY="No" LEVELSONLY="No">
+                            <NOTES />
+                        </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.characteristics.int.value = 25;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal(
+                            "SS: Astronomy 14-",
+                        );
+                    });
+
+                    it("roll", async function () {
+                        expect(item.system.roll).to.be.equal("14-");
+                    });
+
+                    it("tags", async function () {
+                        expect(item.system.tags).to.be.deep.equal([
+                            { value: 9, name: "Base Skill" },
+                            { value: 5, name: "int" },
+                        ]);
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 0);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 3);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 3);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("SS: INT with 3 Levels", () => {
+                    const contents = `
+                        <SKILL XMLID="SCIENCE_SKILL" ID="1042169958518" BASECOST="3.0" LEVELS="3" ALIAS="SS" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1236046710927" NAME="" INPUT="Robotics" CHARACTERISTIC="INT" FAMILIARITY="No" LEVELSONLY="No">
+                            <NOTES />
+                        </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.characteristics.int.value = 13;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal(
+                            "SS: Robotics 15-",
+                        );
+                    });
+
+                    it("roll", async function () {
+                        expect(item.system.roll).to.be.equal("15-");
+                    });
+
+                    it("tags", async function () {
+                        expect(item.system.tags).to.be.deep.equal([
+                            { value: 9, name: "Base Skill" },
+                            { value: 3, name: "int" },
+                            { value: 3, name: "Levels" },
+                        ]);
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 3);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 6);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 6);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("PS: Familiarity", () => {
+                    const contents = `
+                        <SKILL XMLID="PROFESSIONAL_SKILL" ID="1709961543498" BASECOST="1.0" LEVELS="0" ALIAS="PS" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Appraise" CHARACTERISTIC="GENERAL" FAMILIARITY="Yes" PROFICIENCY="No" LEVELSONLY="No" EVERYMAN="No">
+                            <NOTES />
+                        </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.characteristics.int.value = 13;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal(
+                            "PS: Appraise 8-",
+                        );
+                    });
+
+                    it("roll", async function () {
+                        expect(item.system.roll).to.be.equal("8-");
+                    });
+
+                    it("tags", async function () {
+                        expect(item.system.tags).to.be.deep.equal([
+                            { value: 8, name: "Familiarity" },
+                        ]);
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 0);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 1);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("PS: Everyman", () => {
+                    const contents = `
+                        <SKILL XMLID="PROFESSIONAL_SKILL" ID="1709961556501" BASECOST="0.0" LEVELS="0" ALIAS="PS" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Bailiff" CHARACTERISTIC="GENERAL" FAMILIARITY="Yes" PROFICIENCY="No" LEVELSONLY="No" EVERYMAN="Yes">
+                            <NOTES />
+                        </SKILL>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.characteristics.int.value = 13;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal(
+                            "PS: Bailiff 11-",
+                        );
+                    });
+
+                    it("roll", async function () {
+                        expect(item.system.roll).to.be.equal("11-");
+                    });
+
+                    it("tags", async function () {
+                        expect(item.system.tags).to.be.deep.equal([
+                            { value: 11, name: "Everyman PS" },
+                        ]);
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 0);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 0);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 0);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
                     });
                 });
             });
@@ -4186,103 +4495,6 @@ export function registerUploadTests(quench) {
 
                 it("levels", function () {
                     assert.equal(item.system.value, 0);
-                });
-            });
-
-            describe("Professional Skill", async function () {
-                const contents = `
-                    <SKILL XMLID="PROFESSIONAL_SKILL" ID="1702245797229" BASECOST="2.0" LEVELS="0" ALIAS="PS" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Appraiser" INPUT="Appraise" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                        <NOTES/>
-                    </SKILL>
-                `;
-                let item;
-
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        { temporary: true },
-                    );
-
-                    item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
-                        { temporary: true, parent: actor },
-                    );
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
-                    item.skillRollUpdateValue();
-                });
-
-                it("description", function () {
-                    assert.equal(item.system.description, "PS: Appraise");
-                });
-
-                it("roll", function () {
-                    assert.equal(item.system.roll, "11-");
-                });
-
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 2);
-                });
-
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 2);
-                });
-
-                it("levels", function () {
-                    assert.equal(item.system.value, 0);
-                });
-            });
-
-            describe("Knowledge Skill", async function () {
-                const contents = `
-                    <SKILL XMLID="KNOWLEDGE_SKILL" ID="1703368216761" BASECOST="3.0" LEVELS="10" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="SUPA brain" INPUT="types of brain matter" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
-                        <NOTES/>
-                    </SKILL>
-                `;
-                let item;
-
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        { temporary: true },
-                    );
-
-                    item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
-                        { temporary: true, parent: actor },
-                    );
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
-                    item.skillRollUpdateValue();
-                });
-
-                it("description", function () {
-                    assert.equal(
-                        item.system.description,
-                        "KS: types of brain matter",
-                    );
-                });
-
-                it("roll", function () {
-                    assert.equal(item.system.roll, "21-");
-                });
-
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 13);
-                });
-
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 13);
-                });
-
-                it("levels", function () {
-                    assert.equal(item.system.value, 10);
                 });
             });
 

@@ -1912,6 +1912,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PROFESSIONAL_SKILL",
             type: ["skill"],
             behaviors: ["success"],
+            costPerLevel: 1,
         },
         {},
     );
@@ -1947,7 +1948,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SCIENCE_SKILL",
             type: ["skill"],
-            behaviors: [],
+            behaviors: ["success"],
+            costPerLevel: 1,
         },
         {},
     );
