@@ -1312,7 +1312,7 @@ export class HeroSystem6eActor extends Actor {
                         await item._postUpload();
 
                         // COMPOUNDPOWER is similar to a MULTIPOWER.
-                        // MULTIPOWER uses PARENTID referenes.
+                        // MULTIPOWER uses PARENTID references.
                         // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
                         if (system.XMLID === "COMPOUNDPOWER") {
                             for (const [key, value] of Object.entries(system)) {
@@ -1321,6 +1321,7 @@ export class HeroSystem6eActor extends Actor {
                                     if (system2.XMLID) {
                                         const power = getPowerInfo({
                                             xmlid: system2.XMLID,
+                                            actor: this,
                                         });
                                         let itemData2 = {
                                             name:
