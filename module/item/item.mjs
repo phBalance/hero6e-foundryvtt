@@ -84,14 +84,7 @@ function filterItem(item, filterString) {
 }
 
 function parentItem(item) {
-    if (item.system.PARENTID) {
-        return null;
-    }
-
-    const parent = item.actor.items.find(
-        (actorItem) => actorItem.system.ID === item.system.PARENTID,
-    );
-    return parent;
+    return item.getHdcParent();
 }
 
 function parentItemType(item, type) {
@@ -1580,16 +1573,6 @@ export class HeroSystem6eItem extends Item {
         // Base Cost is typically extracted directly from HDC
         let baseCost = system.baseCost;
 
-        // Power Framework might be important
-        let parentItem = this.getHdcParent();
-        let configPowerInfoParent = null;
-        if (parentItem) {
-            configPowerInfoParent = getPowerInfo({
-                item: parentItem,
-                actor: actor,
-            });
-        }
-
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
@@ -1721,14 +1704,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Skill Enhancer discount (a hidden discount; not shown in item description)
-        if (
-            configPowerInfoParent &&
-            configPowerInfoParent.type?.includes("enhancer")
-        ) {
-            cost = Math.max(1, cost - 1);
-        }
-
         cost += adderCost;
 
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
@@ -1738,7 +1713,7 @@ export class HeroSystem6eItem extends Item {
             for (let modifier of (system.MODIFIER || []).filter(
                 (o) => !o.PRIVATE,
             )) {
-                advantages += modifier.baseCost; //parseFloat(modifier.BASECOST)
+                advantages += modifier.baseCost;
             }
             cost = cost * advantages;
         }
@@ -1834,7 +1809,8 @@ export class HeroSystem6eItem extends Item {
     }
 
     calcRealCost() {
-        let system = this.system;
+        const system = this.system;
+
         // Real Cost = Active Cost / (1 + total value of all Limitations)
 
         // This may be a slot in a framework if so get parent
@@ -1867,7 +1843,7 @@ export class HeroSystem6eItem extends Item {
                 if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
                     system.title =
                         (system.title || "") +
-                        "Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. ";
+                        "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
                     adderBaseCost = 0;
                 }
 
@@ -1887,7 +1863,7 @@ export class HeroSystem6eItem extends Item {
                 _myLimitation = 0.25;
                 system.title =
                     (system.title || "") +
-                    "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations. ";
+                    "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
             }
 
             //console.log("limitation", modifier.ALIAS, _myLimitation)
@@ -1897,6 +1873,20 @@ export class HeroSystem6eItem extends Item {
         }
 
         let _realCost = system.activePoints;
+
+        // Skill Enhancer discount
+        if (parent) {
+            const configPowerInfoParent = getPowerInfo({
+                item: parent,
+            });
+
+            if (
+                configPowerInfoParent &&
+                configPowerInfoParent.type?.includes("enhancer")
+            ) {
+                _realCost = Math.max(1, _realCost - 1);
+            }
+        }
 
         // Power cost in Power Framework is applied before limitations
         let costSuffix = "";
