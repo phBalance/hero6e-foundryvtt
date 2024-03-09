@@ -1,6 +1,5 @@
 // Import Modules
 import { HERO } from "./config.mjs";
-import { POWERS } from "./powers/powers-rules.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
 import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
@@ -54,8 +53,6 @@ Hooks.once("init", async function () {
     };
 
     CONFIG.HERO = HERO;
-
-    CONFIG.POWERS = POWERS;
 
     CONFIG.Combat.documentClass = HeroSystem6eCombat;
     CONFIG.Combat.defeatedStatusId = "dead";
