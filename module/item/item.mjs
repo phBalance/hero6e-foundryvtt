@@ -1498,11 +1498,13 @@ export class HeroSystem6eItem extends Item {
             ...HeroSystem6eItem.ItemXmlTags,
             ...powerList
                 .filter(
-                    (o) =>
-                        o.type?.includes("characteristic") ||
-                        o.type?.includes("framework"),
+                    (power) =>
+                        power.type.includes("characteristic") ||
+                        power.type.includes("framework") ||
+                        (power.type.includes("skill") &&
+                            power.type.includes("enhancer")),
                 )
-                .map((o) => o.key),
+                .map((power) => power.key),
         ]) {
             const itemSubTag = itemTag
                 .replace(/S$/, "")
