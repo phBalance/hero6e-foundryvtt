@@ -4926,10 +4926,10 @@ export function registerUploadTests(quench) {
 
                 describe("CONTACT 11-", async function () {
                     const contents = `
-                    <PERK XMLID="CONTACT" ID="1709783993407" BASECOST="0.0" LEVELS="2" ALIAS="Contact" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
-                        <NOTES />
-                    </PERK>
-                `;
+                        <PERK XMLID="CONTACT" ID="1709783993407" BASECOST="0.0" LEVELS="2" ALIAS="Contact" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                        </PERK>
+                    `;
                     let item;
 
                     before(async () => {
@@ -4965,6 +4965,87 @@ export function registerUploadTests(quench) {
                     it("levels", function () {
                         assert.equal(item.system.value, 2);
                     });
+                });
+            });
+
+            describe("Skill enhancers", async function () {
+                const skillEnhancerContents = `
+                    <SCIENTIST XMLID="SCIENTIST" ID="1236046710927" BASECOST="3.0" LEVELS="0" ALIAS="Scientist" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INTBASED="NO">
+                        <NOTES />
+                    </SCIENTIST>
+                `;
+                const contents = `
+                    <SKILL XMLID="SCIENCE_SKILL" ID="1042169893315" BASECOST="3.0" LEVELS="0" ALIAS="SS" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1236046710927" NAME="" INPUT="Astronomy" CHARACTERISTIC="INT" FAMILIARITY="No" LEVELSONLY="No">
+                        <NOTES />
+                    </SKILL>
+                `;
+                let skillItem;
+                let skillEnhancerItem;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+
+                    skillEnhancerItem = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(skillEnhancerContents),
+                        { temporary: true, parent: actor },
+                    );
+                    await skillEnhancerItem._postUpload();
+                    actor.items.set(
+                        skillEnhancerItem.system.XMLID,
+                        skillEnhancerItem,
+                    );
+
+                    skillItem = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await skillItem._postUpload();
+                    actor.items.set(skillItem.system.XMLID, skillItem);
+                    skillItem.skillRollUpdateValue();
+                });
+
+                it("skill enhancer description", function () {
+                    assert.equal(
+                        skillEnhancerItem.system.description,
+                        "Scientist",
+                    );
+                });
+
+                it("skill enhancer realCost", function () {
+                    assert.equal(skillEnhancerItem.system.realCost, 3);
+                });
+
+                it("skill enhancer activePoints", function () {
+                    assert.equal(skillEnhancerItem.system.activePoints, 3);
+                });
+
+                it("skill enhancer levels", function () {
+                    assert.equal(skillEnhancerItem.system.value, 0);
+                });
+
+                it("skill description", function () {
+                    assert.equal(
+                        skillItem.system.description,
+                        "SS: Astronomy 11- (3 Active Points)",
+                    );
+                });
+
+                it("skill realCost", function () {
+                    assert.equal(skillItem.system.realCost, 2);
+                });
+
+                it("skill activePoints", function () {
+                    assert.equal(skillItem.system.activePoints, 3);
+                });
+
+                it("skill levels", function () {
+                    assert.equal(skillItem.system.value, 0);
                 });
             });
         },

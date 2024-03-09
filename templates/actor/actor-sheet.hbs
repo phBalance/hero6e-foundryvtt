@@ -513,58 +513,57 @@
                         <th></th>
                     </tr>
                     {{#each items as |item id|}}
-                    {{#if (and (or (eq item.type "power") item.system.PARENTID) (filterItem item ../options.itemFilters.power))}}
-                        {{#if (eq item.system.XMLID "LIST")}}
-                            <tr class="item">
-                                <td height="24"></td>
-                                <td></td>
-                                <td class="left">{{item.system.ALIAS}}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        {{else}}
-                            <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
-                                data-item-id="{{item._id}}">
-                                <td>
-                                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                            height="24" /></div>
-                                </td>
-                                <td>{{item.system.realCost}}</td>
-                                <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
-                                    {{#if item.system.childIdx}}
-                                        {{item.system.childIdx}})
-                                    {{/if}}
-                                    {{{itemFullDescription item}}}
-                                </td>
-                                <td>{{item.system.endEstimate}}</td>
-
-                                <td>
-                                    {{#if (ne item.system.subType "attack")}}
-                                        {{#if item.system.showToggle}}
-                                            <input class="item-toggle" type="checkbox"
-                                                Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
-                                                data-action="toggle" />
+                        {{!-- Show powers and things in a framework or compound power --}}
+                        {{#if (and (or (eq item.type "power") (parentItemType item "framework") (parentItemType item "compound")) (filterItem item ../options.itemFilters.power))}}
+                            {{#if (eq item.system.XMLID "LIST")}}
+                                <tr class="item">
+                                    <td height="24"></td>
+                                    <td></td>
+                                    <td class="left">{{item.system.ALIAS}}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            {{else}}
+                                <tr class="item {{#if (gt item.system.value item.system.max)}}overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
+                                    data-item-id="{{item._id}}">
+                                    <td>
+                                        <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
+                                                height="24" /></div>
+                                    </td>
+                                    <td>{{item.system.realCost}}</td>
+                                    <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
+                                        {{#if item.system.childIdx}}
+                                            {{item.system.childIdx}})
                                         {{/if}}
-                                    {{else}}
-                                        <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
-                                    {{/if}}
-                                </td>
-                                <td>
-                                    <a class="item-control item-chat" title="Send to chat"><i
-                                            class="fas fa-comment-alt"></i></a>
-                                    <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    <a class="item-control item-delete" title="Delete Item">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                                        {{{itemFullDescription item}}}
+                                    </td>
+                                    <td>{{item.system.endEstimate}}</td>
+
+                                    <td>
+                                        {{#if (ne item.system.subType "attack")}}
+                                            {{#if item.system.showToggle}}
+                                                <input class="item-toggle" type="checkbox"
+                                                    Xname="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
+                                                    data-action="toggle" />
+                                            {{/if}}
+                                        {{else}}
+                                            <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
+                                        {{/if}}
+                                    </td>
+                                    <td>
+                                        <a class="item-control item-chat" title="Send to chat"><i
+                                                class="fas fa-comment-alt"></i></a>
+                                        <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                        <a class="item-control item-delete" title="Delete Item">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {{/if}}
                         {{/if}}
-                    {{/if}}
                     {{/each}}
-
                 </table>
-
             </div> {{!-- Powers Tab --}}
 
 

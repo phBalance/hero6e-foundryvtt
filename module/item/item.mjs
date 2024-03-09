@@ -23,6 +23,9 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemName", itemName);
     Handlebars.registerHelper("itemIsManeuver", itemIsManeuver);
     Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
+    Handlebars.registerHelper("filterItem", filterItem);
+    Handlebars.registerHelper("parentItem", parentItem);
+    Handlebars.registerHelper("parentItemType", parentItemType);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -60,6 +63,34 @@ function itemIsOptionalManeuver(item) {
         itemIsManeuver(item) &&
         !!getPowerInfo({ item: item })?.behaviors.includes("optional-maneuver")
     );
+}
+
+function filterItem(item, filterString) {
+    if (!filterString) return item;
+
+    if (
+        item.name.toLowerCase().includes(filterString.toLowerCase()) ||
+        (item.system.description &&
+            item.system.description
+                .toLowerCase()
+                .includes(filterString.toLowerCase())) ||
+        (item.system.XMLID &&
+            item.system.XMLID.toLowerCase().includes(
+                filterString.toLowerCase(),
+            ))
+    ) {
+        return item;
+    }
+}
+
+function parentItem(item) {
+    return item.getHdcParent();
+}
+
+function parentItemType(item, type) {
+    const parent = parentItem(item);
+
+    return parent?.system.type === type;
 }
 
 const itemTypeToIcon = {
@@ -1467,11 +1498,13 @@ export class HeroSystem6eItem extends Item {
             ...HeroSystem6eItem.ItemXmlTags,
             ...powerList
                 .filter(
-                    (o) =>
-                        o.type?.includes("characteristic") ||
-                        o.type?.includes("framework"),
+                    (power) =>
+                        power.type.includes("characteristic") ||
+                        power.type.includes("framework") ||
+                        (power.type.includes("skill") &&
+                            power.type.includes("enhancer")),
                 )
-                .map((o) => o.key),
+                .map((power) => power.key),
         ]) {
             const itemSubTag = itemTag
                 .replace(/S$/, "")
@@ -1541,16 +1574,6 @@ export class HeroSystem6eItem extends Item {
 
         // Base Cost is typically extracted directly from HDC
         let baseCost = system.baseCost;
-
-        // Power Framework might be important
-        let parentItem = this.getHdcParent();
-        let configPowerInfoParent = null;
-        if (parentItem) {
-            configPowerInfoParent = getPowerInfo({
-                item: parentItem,
-                actor: actor,
-            });
-        }
 
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
@@ -1683,14 +1706,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Skill Enhancer discount (a hidden discount; not shown in item description)
-        if (
-            configPowerInfoParent &&
-            configPowerInfoParent.type?.includes("enhancer")
-        ) {
-            cost = Math.max(1, cost - 1);
-        }
-
         cost += adderCost;
 
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
@@ -1700,7 +1715,7 @@ export class HeroSystem6eItem extends Item {
             for (let modifier of (system.MODIFIER || []).filter(
                 (o) => !o.PRIVATE,
             )) {
-                advantages += modifier.baseCost; //parseFloat(modifier.BASECOST)
+                advantages += modifier.baseCost;
             }
             cost = cost * advantages;
         }
@@ -1796,7 +1811,8 @@ export class HeroSystem6eItem extends Item {
     }
 
     calcRealCost() {
-        let system = this.system;
+        const system = this.system;
+
         // Real Cost = Active Cost / (1 + total value of all Limitations)
 
         // This may be a slot in a framework if so get parent
@@ -1829,7 +1845,7 @@ export class HeroSystem6eItem extends Item {
                 if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
                     system.title =
                         (system.title || "") +
-                        "Limitations are below the minumum of -1/4; \nConsider removing unnecessary limitations. ";
+                        "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
                     adderBaseCost = 0;
                 }
 
@@ -1849,7 +1865,7 @@ export class HeroSystem6eItem extends Item {
                 _myLimitation = 0.25;
                 system.title =
                     (system.title || "") +
-                    "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations. ";
+                    "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
             }
 
             //console.log("limitation", modifier.ALIAS, _myLimitation)
@@ -1859,6 +1875,20 @@ export class HeroSystem6eItem extends Item {
         }
 
         let _realCost = system.activePoints;
+
+        // Skill Enhancer discount
+        if (parent) {
+            const configPowerInfoParent = getPowerInfo({
+                item: parent,
+            });
+
+            if (
+                configPowerInfoParent &&
+                configPowerInfoParent.type?.includes("enhancer")
+            ) {
+                _realCost = Math.max(1, _realCost - 1);
+            }
+        }
 
         // Power cost in Power Framework is applied before limitations
         let costSuffix = "";
@@ -2778,6 +2808,7 @@ export class HeroSystem6eItem extends Item {
             .replace(";,", ";")
             .replace("; ,", ";")
             .replace("; ;", ";")
+            .replace(/;$/, "") // Remove ";" at the end of the description string
             .trim();
 
         // Endurance
