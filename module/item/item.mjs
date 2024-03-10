@@ -1620,12 +1620,16 @@ export class HeroSystem6eItem extends Item {
                 "3 CP per 2 points; \n+1 level may cost nothing. ";
         }
 
-        // FORCEWALL/BARRIER
-        if (system.XMLID == "FORCEWALL") {
+        if (system.XMLID === "FORCEWALL") {
+            // FORCEWALL/BARRIER
             baseCost += parseInt(system.BODYLEVELS) || 0;
             baseCost += parseInt(system.LENGTHLEVELS) || 0;
             baseCost += parseInt(system.HEIGHTLEVELS) || 0;
             baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness
+        } else if (system.XMLID === "DUPLICATION") {
+            const points = parseInt(system.POINTS || 0);
+            const cost = points * configPowerInfo.costPerLevel;
+            baseCost += cost;
         }
 
         // Start adding up the costs
@@ -2498,6 +2502,13 @@ export class HeroSystem6eItem extends Item {
 
             case "ENVIRONMENTAL_MOVEMENT":
                 system.description = `${system.ALIAS} (${system.INPUT})`;
+                break;
+
+            case "DUPLICATION":
+                {
+                    const points = parseInt(system.POINTS);
+                    system.description = `${system.ALIAS} (creates ${points}-point form)`;
+                }
                 break;
 
             default:

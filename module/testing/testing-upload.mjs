@@ -1184,7 +1184,7 @@ export function registerUploadTests(quench) {
             describe("Offensive Strike", async function () {
                 const contents = `
                     <MANEUVER XMLID="MANEUVER" ID="1688340787607" BASECOST="5.0" LEVELS="0" ALIAS="Offensive Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Offensive Strike" OCV="-2" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
-                    <NOTES />
+                        <NOTES />
                     </MANEUVER>
                 `;
                 let item;
@@ -5160,6 +5160,59 @@ export function registerUploadTests(quench) {
                     it("end", function () {
                         assert.equal(item.system.end, 0);
                     });
+                });
+            });
+
+            describe("DUPLICATION", async function () {
+                const contents = `
+                    <POWER XMLID="DUPLICATION" ID="1042168627862" BASECOST="0.0" LEVELS="0" ALIAS="Duplication" POSITION="56" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Detachable Head" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" NUMBER="1" POINTS="962">
+                        <NOTES />
+                        <MODIFIER XMLID="GENERIC_OBJECT" ID="1236097637040" BASECOST="-1.0" LEVELS="0" ALIAS="Original Is Incapacitated And Helpless While Duplicate Exists" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="No" NAME="" COMMENTS="" PRIVATE="No">
+                            <NOTES />
+                        </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Duplication (creates 962-point form) (192 Active Points); Original Is Incapacitated And Helpless While Duplicate Exists (-1)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 96);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 192);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 0);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
                 });
             });
         },
