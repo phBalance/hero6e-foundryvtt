@@ -424,10 +424,6 @@ export class HeroSystem6eItem extends Item {
 
         const attr = "system.active";
         const newValue = !foundry.utils.getProperty(item, attr);
-
-        // const firstAE =
-        //     item.effects[0] ||
-        //     item.actor.effects.find((o) => o.origin === item.uuid);
         const firstAE = item.effects.contents[0];
 
         switch (this.type) {
@@ -1187,9 +1183,12 @@ export class HeroSystem6eItem extends Item {
         }
 
         // DEFENSES
-        if (configPowerInfo && configPowerInfo.type?.includes("defense")) {
+        if (
+            configPowerInfo &&
+            configPowerInfo.behaviors.includes("activatable")
+        ) {
             const newDefenseValue = "defense";
-            if (this.system.subType != newDefenseValue) {
+            if (this.system.subType !== newDefenseValue) {
                 this.system.subType = newDefenseValue;
                 this.system.showToggle = true;
                 changed = true;
@@ -1226,7 +1225,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
-        if (configPowerInfo && configPowerInfo.type?.includes("attack")) {
+        if (
+            configPowerInfo &&
+            (configPowerInfo.behaviors.includes("attack") ||
+                configPowerInfo.behaviors.includes("dice"))
+        ) {
             const attack = "attack";
             if (this.system.subType !== attack) {
                 this.system.subType = attack;
@@ -1733,11 +1736,12 @@ export class HeroSystem6eItem extends Item {
         let advantages = 0;
         let advantagesDC = 0;
         let minAdvantage = 0;
+        let endModifierCost = 0;
 
         for (const modifier of (system.MODIFIER || []).filter(
-            (o) =>
-                (system.XMLID != "NAKEDMODIFIER" || o.PRIVATE) &&
-                parseFloat(o.baseCost) >= 0,
+            (mod) =>
+                (system.XMLID != "NAKEDMODIFIER" || mod.PRIVATE) &&
+                parseFloat(mod.baseCost) >= 0,
         )) {
             let _myAdvantage = 0;
             const modifierBaseCost = parseFloat(modifier.baseCost || 0);
@@ -1751,6 +1755,21 @@ export class HeroSystem6eItem extends Item {
                     // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
                     _myAdvantage +=
                         modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
+                    break;
+
+                case "REDUCEDEND":
+                    {
+                        // Reduced endurance is double the cost if it's applying against a power with autofire
+                        const autofire = (system.MODIFIER || []).find(
+                            (mod) => mod.XMLID === "AUTOFIRE",
+                        );
+                        if (autofire) {
+                            endModifierCost = 2 * modifierBaseCost;
+                        } else {
+                            endModifierCost = modifierBaseCost;
+                        }
+                        _myAdvantage = _myAdvantage + endModifierCost;
+                    }
                     break;
 
                 default:
@@ -1793,20 +1812,18 @@ export class HeroSystem6eItem extends Item {
             system.basePointsPlusAdders * (1 + advantagesDC),
         );
 
-        // This may be a slot in a framework if so get parent
-        // const parent = item.actor.items.find(o=> o.system.ID === system.PARENTID);
-
         // HALFEND is based on active points without the HALFEND modifier
         if (this.findModsByXmlid("REDUCEDEND")) {
             system._activePointsWithoutEndMods =
-                system.basePointsPlusAdders * (1 + advantages - 0.25);
+                system.basePointsPlusAdders *
+                (1 + advantages - endModifierCost);
         }
 
         let old = system.activePoints;
         system.activePoints = RoundFavorPlayerDown(_activePoints || 0);
 
         //return RoundFavorPlayerDown(_activePoints)
-        const changed = old != system.activePoints;
+        const changed = old !== system.activePoints;
         return changed;
     }
 
@@ -2309,7 +2326,6 @@ export class HeroSystem6eItem extends Item {
 
                     // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
                     // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
-                    //`${system.ALIAS}:`
                     if (system.PHASE)
                         system.description += ` ${system.PHASE} Phase`;
                     const ocv = parseInt(system.ocv || system.OCV);
@@ -2831,8 +2847,7 @@ export class HeroSystem6eItem extends Item {
                     10,
             );
             system.end = Math.max(1, RoundFavorPlayerDown(system.end / 2));
-        }
-        if (reducedEnd && reducedEnd.OPTION === "ZERO") {
+        } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             system.end = 0;
         }
 

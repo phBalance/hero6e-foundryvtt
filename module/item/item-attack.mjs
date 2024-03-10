@@ -1008,7 +1008,7 @@ export async function _onRollDamage(event) {
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         (item.system.noHitLocations || true);
 
-    const heroRoller = new HeroRoller()
+    const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
         .makeNormalRoll(
             !senseAffecting && !adjustment && !formulaParts.isKilling,
@@ -1033,11 +1033,11 @@ export async function _onRollDamage(event) {
         )
         .addToHitLocation(includeHitLocation, toHitData.aim);
 
-    await heroRoller.roll();
+    await damageRoller.roll();
 
-    const damageRenderedResult = await heroRoller.render();
+    const damageRenderedResult = await damageRoller.render();
 
-    const damageDetail = await _calcDamage(heroRoller, item, toHitData);
+    const damageDetail = await _calcDamage(damageRoller, item, toHitData);
 
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
@@ -1051,7 +1051,7 @@ export async function _onRollDamage(event) {
         if (token) {
             let targetToken = {
                 token,
-                roller: heroRoller.toJSON(),
+                roller: damageRoller.toJSON(),
             };
 
             // TODO: Add in explosion handling (or flattening)
@@ -1075,10 +1075,10 @@ export async function _onRollDamage(event) {
                     //       true for normal attacks but not always.
                     //       This ignores explosion modifiers for DC falloff.
                     const termsToRemove = Math.floor(
-                        pct * (heroRoller.getBaseTerms().length - 1),
+                        pct * (damageRoller.getBaseTerms().length - 1),
                     );
 
-                    const heroRollerClone = heroRoller.clone();
+                    const heroRollerClone = damageRoller.clone();
                     heroRollerClone.removeNHighestRankTerms(termsToRemove);
 
                     targetToken = {
@@ -1122,7 +1122,7 @@ export async function _onRollDamage(event) {
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
 
-        roller: heroRoller.toJSON(),
+        roller: damageRoller.toJSON(),
 
         // misc
         targetIds: toHitData.targetids,
@@ -1140,7 +1140,7 @@ export async function _onRollDamage(event) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        rolls: heroRoller.rawRolls(),
+        rolls: damageRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -1737,7 +1737,10 @@ async function _performAbsorptionForToken(
 
     // Match attack against absorption type. If we match we can do some absorption.
     for (const absorptionItem of absorptionItems) {
-        if (absorptionItem.system.OPTION === attackType.toUpperCase()) {
+        if (
+            absorptionItem.system.OPTION === attackType.toUpperCase() &&
+            absorptionItem.system.active
+        ) {
             const actor = absorptionItem.actor;
             let maxAbsorption;
             if (actor.system.is5e) {

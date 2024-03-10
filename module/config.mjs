@@ -174,7 +174,7 @@ HERO.powers5e = [];
  *                                       "success" - can roll some kind of success roll for this power
  *                                       "dice" - a damage/effect dice roll is associated with this power
  *                                       "attack" - a to-hit dice roll is associated with this power
- *                                       "on-off" - this power can be turned on or off
+ *                                       "activatable" - this power can be turned on/off/activated/deactivated
  *
  * @param {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
  * @param {boolean} [costEnd] - If the power costs endurance to use. true if it does, false or undefined if it doesn't
@@ -1297,7 +1297,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EXTRADIMENSIONALMOVEMENT",
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Extra-Dimensional Movement",
             perceivability: "Inobvious",
             duration: "instant",
@@ -1314,7 +1314,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FLIGHT",
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: true,
             costPerLevel: 1,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1328,7 +1328,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FTL",
             name: "Faster-Than-Light Travel",
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: false,
             costPerLevel: 2,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1339,7 +1339,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "GLIDING",
         type: ["movement"],
-        behaviors: [],
+        behaviors: ["activatable"],
         costEnd: false,
         costPerLevel: 1,
         ignoreFor: ["base2", "computer", "ai"],
@@ -1352,7 +1352,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 4,
             cost: 1 / 2,
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: true,
             costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1371,7 +1371,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 12,
             cost: 1,
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
         },
@@ -1388,7 +1388,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: 4,
             cost: 1 / 2,
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: true,
             costPerLevel: 1 / 2,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1403,7 +1403,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SWINGING",
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: true,
             costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1417,7 +1417,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TELEPORTATION",
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: true,
             costPerLevel: 1,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1430,7 +1430,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TUNNELING",
             type: ["movement"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: true,
             costPerLevel: 1,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1785,7 +1785,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    // TODO: Martial arts?
     addPower(
         {
             key: "MECHANICS",
@@ -2410,7 +2409,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "BERSERKFURY",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         name: "Berserk Fury",
         costPerLevel: 0,
     });
@@ -2434,8 +2433,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "COMBAT_LUCK",
-            type: ["talent", "defense"], // TODO: Not type defense but has enabled role perhaps...
-            behaviors: [],
+            type: ["talent"],
+            behaviors: ["activatable"],
             name: "Combat Luck",
 
             duration: "constant",
@@ -2474,7 +2473,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "CRIPPLINGBLOW",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         name: "Crippling Blow",
     });
     addPower(
@@ -2715,7 +2714,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "SHAPECHANGING",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         name: "Shapechanging",
         costPerLevel: 0,
     });
@@ -2723,7 +2722,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SIMULATE_DEATH",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Simulate Death",
             costPerLevel: 1,
         },
@@ -2774,7 +2773,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "TURNUNDEAD",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         name: "Turn Undead",
         costPerLevel: 0,
     });
@@ -2807,8 +2806,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ABSORPTION",
             name: "Absorption",
-            type: ["adjustment", "standard", "defense"], // TODO: Not defense type but needs can be enabled role
-            behaviors: [],
+            type: ["adjustment", "standard"],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -2817,7 +2816,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: 1,
         },
         {
-            type: ["adjustment", "attack", "defense"], // TODO: Not defense type but needs can be enabled role
+            type: ["adjustment", "attack"],
+            behaviors: ["activatable", "dice"],
             costPerLevel: 5,
         },
     );
@@ -2826,7 +2826,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "AID",
             name: "Aid",
             type: ["adjustment", "attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
@@ -2845,7 +2845,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ARMOR",
             name: "Resistant Protection",
             type: ["defense"],
-            behaviors: [],
+            behaviors: ["activatable"],
             duration: "Persistent",
             costPerLevel: 3 / 2,
         },
@@ -2873,7 +2873,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CHANGEENVIRONMENT",
             name: "Change Environment",
             type: ["attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "Obvious",
             duration: "Constant",
             target: "Target’s DCV",
@@ -2898,7 +2898,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CLINGING",
             name: "Clinging",
             type: ["standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             costEnd: false,
             costPerLevel: 1 / 3,
         },
@@ -2908,7 +2908,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CUSTOMPOWER",
             name: "Custom Power",
-            type: ["custom"],
+            type: ["custom", "activatable"],
             behaviors: [],
         },
         {},
@@ -2919,7 +2919,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DAMAGENEGATION",
             name: "Damage Negation",
             type: ["defense", "special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
@@ -2933,7 +2933,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DAMAGEREDUCTION",
             name: "Damage Reduction",
             type: ["defense", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "inobvious",
             duration: "persistent",
             target: "self only",
@@ -2948,7 +2948,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DAMAGERESISTANCE",
             name: "Damage Resistance",
             type: ["defense"],
-            behaviors: [],
+            behaviors: ["activatable"],
             //perceivability: "obvious",
             duration: "instant",
             target: "Self Only",
@@ -2974,8 +2974,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DENSITYINCREASE",
             name: "Density Increase",
-            type: ["body-affecting", "standard", "defense"], // TODO: needs on off role
-            behaviors: [],
+            type: ["body-affecting", "standard"],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -2991,8 +2991,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DESOLIDIFICATION",
             name: "Desolidification",
-            type: ["body-affecting", "standard"], // TODO: Needs on off role
-            behaviors: [],
+            type: ["body-affecting", "standard"],
+            behaviors: ["activatable"],
             costEnd: true,
         },
         {},
@@ -3002,7 +3002,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DISPEL",
             name: "Dispel",
             type: ["adjustment", "attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
@@ -3017,7 +3017,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DOESNOTBLEED",
             name: "Does Not Bleed",
             type: ["automaton", "special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "persistent",
         },
@@ -3028,7 +3028,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DRAIN",
             name: "Drain",
             type: ["adjustment", "attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
@@ -3043,7 +3043,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DUPLICATION",
             name: "Duplication",
             type: ["body-affecting", "special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "Obvious",
             duration: "persistent",
             target: "Self Only",
@@ -3059,7 +3059,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EGOATTACK",
             name: "Mental Blast",
             type: ["attack", "mental"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -3091,7 +3091,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ENERGYBLAST",
             name: "Blast",
             type: ["attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             range: "standard",
             costPerLevel: 5,
             costEnd: true,
@@ -3105,7 +3105,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ENTANGLE",
             name: "Entangle",
             type: ["attack", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             range: "standard",
             costPerLevel: 10,
             costEnd: true,
@@ -3133,7 +3133,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FIXEDLOCATION",
             name: "Teleportation: Fixed Location",
             type: ["attack", "sense-affecting", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
@@ -3147,7 +3147,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FLOATINGLOCATION",
             name: "Teleportation: Floating Fixed Location",
             type: ["attack", "sense-affecting", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
@@ -3160,7 +3160,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FLASH",
             type: ["attack", "sense-affecting", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
@@ -3173,7 +3173,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FLASHDEFENSE",
             type: ["defense", "special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Flash Defense",
             perceivability: "inobvious",
             duration: "persistent",
@@ -3188,7 +3188,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FORCEFIELD",
             type: ["defense", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Resistant Protection",
             duration: "Persistent",
             perceivability: "inobvious",
@@ -3208,7 +3208,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FORCEWALL",
             type: ["defense", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Barrier",
             duration: "instant",
             range: "standard",
@@ -3226,8 +3226,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GROWTH",
             name: "Growth",
-            type: ["body-affecting", "defense", "size"], // TODO: Not defense type
-            behaviors: [],
+            type: ["body-affecting", "size"],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -3243,7 +3243,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HANDTOHANDATTACK",
             name: "Hand-To-Hand Attack",
             type: ["attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             range: "no range",
             costEnd: true,
             costPerLevel: 5,
@@ -3253,8 +3253,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "HEALING",
-            type: ["adjustment", "attack"], // TODO: Not attack type ... but needs attack role
-            behaviors: ["attack"],
+            type: ["adjustment"],
+            behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target's dcv",
@@ -3269,7 +3269,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HKA",
             name: "Hand-To-Hand Killing Attack",
             type: ["attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             range: "no range",
             costPerLevel: 15,
             costEnd: true,
@@ -3282,7 +3282,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "IMAGES",
             name: "Images",
             type: ["attack", "sense-affecting", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "constant",
             target: "area (see text)",
@@ -3295,8 +3295,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INVISIBILITY",
             name: "Invisibility",
-            type: ["sense-affecting", "defense"],
-            behaviors: [],
+            type: ["sense-affecting", "standard"],
+            behaviors: ["activatable"],
             perceivability: "Special",
             duration: "Constant",
             target: "Self Only",
@@ -3310,7 +3310,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "KBRESISTANCE",
             type: ["defense", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Knockback Resistance",
             perceivability: "imperceptible",
             duration: "persistent",
@@ -3327,7 +3327,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "LACKOFWEAKNESS",
         type: ["defense", "special"],
-        behaviors: [],
+        behaviors: ["activatable"],
         name: "Knockback Resistance",
         perceivability: "imperceptible",
         duration: "persistent",
@@ -3341,7 +3341,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LIFESUPPORT",
             name: "Life Support",
             type: ["standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
@@ -3355,7 +3355,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LUCK",
             name: "Luck",
             type: ["special"],
-            behaviors: ["roll"],
+            behaviors: ["dice"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
@@ -3370,7 +3370,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALDEFENSE",
             type: ["defense", "special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Mental Defense",
             perceivability: "Imperceptible",
             target: "self only",
@@ -3386,7 +3386,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MENTALILLUSIONS",
             name: "Mental Illusions",
             type: ["attack", "mental"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -3401,7 +3401,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MINDCONTROL",
             name: "Mind Control",
             type: ["attack", "mental"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -3416,7 +3416,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MINDLINK",
             name: "Mind Link",
             type: ["mental"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "activatable", "dice"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "dmcv",
@@ -3429,8 +3429,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MINDSCAN",
-            type: ["attack", "mental", "sense"], // TODO: Not attack but dice role
-            behaviors: ["attack"],
+            type: ["mental", "sense"],
+            behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "constant",
             target: "dmcv",
@@ -3445,10 +3445,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MISSILEDEFLECTION",
             name: "Deflection",
             type: ["defense", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "activatable"],
             perceivability: "Inobvious",
             duration: "instant",
-            target: "Target’s OCV", // TODO: Do we need to repeat "Target's..."?
+            target: "target’s OCV",
             range: "standard",
             costEnd: true,
         },
@@ -3461,7 +3461,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MULTIFORM",
             type: ["body-affecting", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Multiform",
             perceivability: "Obvious",
             duration: "persistent",
@@ -3477,7 +3477,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NAKEDMODIFIER",
             type: ["special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             //"duration": "instant",  // TODO: Not true, hack for isPerceivable
             costEnd: true,
             costPerLevel: 1,
@@ -3500,7 +3500,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "POSSESSION",
             type: ["attack", "mental"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             name: "Possession",
             perceivability: "obvious",
             duration: "constant",
@@ -3515,7 +3515,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "POWERDEFENSE",
             type: ["defense", "special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             name: "Power Defense",
             perceivability: "inobvious",
             duration: "persistent",
@@ -3527,16 +3527,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    // {
-    // TODO: Do we need it in the system or not?
-    //     key: "naturalBodyHealing",
-    // },
-
     addPower(
         {
             key: "REFLECTION",
             type: ["attack", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "activatable"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "self only",
@@ -3550,7 +3545,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REGENERATION",
             type: ["special"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
@@ -3564,7 +3559,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RKA",
             name: "Ranged Killing Attack",
             type: ["attack"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             range: "standard",
             costPerLevel: 15,
             costEnd: true,
@@ -3586,7 +3581,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SHAPESHIFT",
             name: "Shape Shift",
             type: ["body-affecting"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -3600,7 +3595,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SHRINKING",
             name: "Shrinking",
             type: ["body-affecting", "size"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -3614,7 +3609,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STRETCHING",
             type: ["body-affecting", "standard"],
-            behaviors: [],
+            behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
@@ -3628,8 +3623,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SUCCOR",
             name: "Boost",
-            type: ["adjustment", "attack"], // TODO: Should not be attack type
-            behaviors: [],
+            type: ["adjustment"],
+            behaviors: ["attack", "dice"],
             duration: "constant",
             target: "target's DCV",
             range: "no range",
@@ -3645,7 +3640,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SUMMON",
             name: "Summon",
             type: ["standard"],
-            behaviors: [],
+            behaviors: ["attack", "dice"],
             duration: "instant",
             target: "n/a",
             range: "self",
@@ -3657,7 +3652,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "SUPPRESS",
         name: "Suppress",
         type: ["adjustment", "attack"],
-        behaviors: ["attack"],
+        behaviors: ["attack", "dice"],
         perceivability: "obvious",
         duration: "constant",
         target: "target’s DCV",
@@ -3671,7 +3666,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TELEKINESIS",
             name: "Telekinesis",
             type: ["attack", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice", "activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "target’s DCV",
@@ -3685,7 +3680,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TELEPATHY",
             type: ["mental"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
             target: "dmcv",
@@ -3698,7 +3693,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "TRANSFER",
         name: "Transfer",
-        type: ["adjustment", "attack"],
+        type: ["adjustment", "attack", "dice"],
         behaviors: ["attack"],
         perceivability: "obvious",
         duration: "instant",
@@ -4184,7 +4179,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SUSCEPTIBILITY",
             type: ["disadvantage"],
-            behaviors: [],
+            behaviors: ["dice"],
             name: "Susceptibility",
         },
         {},
@@ -4194,7 +4189,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "UNLUCK",
             type: ["disadvantage"],
-            behaviors: ["roll"],
+            behaviors: ["dice"],
             name: "Unluck",
             costPerLevel: 5,
         },
