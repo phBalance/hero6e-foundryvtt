@@ -1737,7 +1737,10 @@ async function _performAbsorptionForToken(
 
     // Match attack against absorption type. If we match we can do some absorption.
     for (const absorptionItem of absorptionItems) {
-        if (absorptionItem.system.OPTION === attackType.toUpperCase()) {
+        if (
+            absorptionItem.system.OPTION === attackType.toUpperCase() &&
+            absorptionItem.system.active
+        ) {
             const actor = absorptionItem.actor;
             let maxAbsorption;
             if (actor.system.is5e) {

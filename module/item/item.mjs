@@ -424,10 +424,6 @@ export class HeroSystem6eItem extends Item {
 
         const attr = "system.active";
         const newValue = !foundry.utils.getProperty(item, attr);
-
-        // const firstAE =
-        //     item.effects[0] ||
-        //     item.actor.effects.find((o) => o.origin === item.uuid);
         const firstAE = item.effects.contents[0];
 
         switch (this.type) {
@@ -1187,9 +1183,12 @@ export class HeroSystem6eItem extends Item {
         }
 
         // DEFENSES
-        if (configPowerInfo && configPowerInfo.type?.includes("defense")) {
+        if (
+            configPowerInfo &&
+            configPowerInfo.behaviors.includes("activatable")
+        ) {
             const newDefenseValue = "defense";
-            if (this.system.subType != newDefenseValue) {
+            if (this.system.subType !== newDefenseValue) {
                 this.system.subType = newDefenseValue;
                 this.system.showToggle = true;
                 changed = true;
@@ -1226,7 +1225,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
-        if (configPowerInfo && configPowerInfo.type?.includes("attack")) {
+        if (
+            configPowerInfo &&
+            (configPowerInfo.behaviors.includes("attack") ||
+                configPowerInfo.behaviors.includes("dice"))
+        ) {
             const attack = "attack";
             if (this.system.subType !== attack) {
                 this.system.subType = attack;
