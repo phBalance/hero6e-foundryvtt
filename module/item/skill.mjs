@@ -78,9 +78,9 @@ async function skillRoll(item, actor, html) {
         }
     }
 
-    // Roll Modifier (from form)
+    // Roll Modifier, from form, which can be negative or positive.
     const modValue = parseInt(form.mod.value || 0);
-    if (modValue > 0) {
+    if (modValue !== 0) {
         tags.push({ value: modValue, name: "Roll Mod" });
         successValue = successValue + modValue;
     }
