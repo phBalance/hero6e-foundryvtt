@@ -1758,16 +1758,18 @@ export class HeroSystem6eItem extends Item {
                     break;
 
                 case "REDUCEDEND":
-                    // Reduced endurance is double the cost if it's applying against a power with autofire
-                    const autofire = (system.MODIFIER || []).find(
-                        (mod) => mod.XMLID === "AUTOFIRE",
-                    );
-                    if (autofire) {
-                        endModifierCost = 2 * modifierBaseCost;
-                    } else {
-                        endModifierCost = modifierBaseCost;
+                    {
+                        // Reduced endurance is double the cost if it's applying against a power with autofire
+                        const autofire = (system.MODIFIER || []).find(
+                            (mod) => mod.XMLID === "AUTOFIRE",
+                        );
+                        if (autofire) {
+                            endModifierCost = 2 * modifierBaseCost;
+                        } else {
+                            endModifierCost = modifierBaseCost;
+                        }
+                        _myAdvantage = _myAdvantage + endModifierCost;
                     }
-                    _myAdvantage = _myAdvantage + endModifierCost;
                     break;
 
                 default:
@@ -2324,7 +2326,6 @@ export class HeroSystem6eItem extends Item {
 
                     // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
                     // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
-                    //`${system.ALIAS}:`
                     if (system.PHASE)
                         system.description += ` ${system.PHASE} Phase`;
                     const ocv = parseInt(system.ocv || system.OCV);
