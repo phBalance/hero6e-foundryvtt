@@ -3733,7 +3733,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MANEUVER",
             type: ["martial", "attack"], // TODO: Not all of these are attacks
-            behaviors: [],
+            behaviors: ["dice"],
         },
         {},
     );
