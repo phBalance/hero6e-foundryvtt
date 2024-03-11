@@ -54,23 +54,6 @@ jobs:
     - name: validate formatting (via prettier) and perform static analysis (via eslint)
       run: npm run validate
 
-    - name: Pack packs
-      run: |
-        mkdir -p ./Data
-        fvtt configure set dataPath "./Data"
-        fvtt package workon "hero6efoundryvttv2" --type "System"
-        if [ -z "$(ls -A ./packs)" ]; then
-          echo "No Packs... skipping"
-        else
-          echo "Packing packs"
-          cd ./packs
-          for f in *; do
-              if [ -d "$f" ]; then
-                fvtt package pack -n "$f" --in "./$f/_source" --out ./
-              fi
-          done
-        fi 
-
     - name: Update release version in system.json
       run: |
         sed -i 's|"manifest": "[^"]*",|"manifest": "https://github.com/dmdorman/hero6e-foundryvtt/releases/download/${{ needs.check_release.outputs.release }}/system.json",|' system.json
