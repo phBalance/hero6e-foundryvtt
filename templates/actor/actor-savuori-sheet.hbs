@@ -640,7 +640,7 @@
                     <tr class="characteristic">
                         <td data-tooltip="{{{characteristic.valueTitle}}}"
                             class="{{#if characteristic.valueTitle}}characteristic-locked{{/if}}">
-                            <input name="system.characteristics.{{characteristic.key}}.value" type="text"
+                            <input name="system.characteristics.{{characteristic.key}}.value" type="number"
                                 value="{{characteristic.value}}" data-dtype="Number"
                                 class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
                                 {{#if characteristic.valueTitle}}disabled{{/if}}
@@ -648,14 +648,14 @@
                         </td>
                         <td data-tooltip="{{{characteristic.maxTitle}}}"
                             class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
-                            <input name="system.characteristics.{{characteristic.key}}.max" type="text"
+                            <input name="system.characteristics.{{characteristic.key}}.max" type="number"
                                 class="{{#if (gt characteristic.delta 0)}} overMax{{/if}}{{#if (lt characteristic.delta 0)}} underMax{{/if}}"
                                 value="{{characteristic.max}}" data-dtype="Number" {{#if
                                 characteristic.maxTitle}}disabled{{/if}}>
                         </td>
                         <td>
                             {{#unless (eq characteristic.core null)}}
-                            <input name="system.characteristics.{{characteristic.key}}.core" type="text"
+                            <input name="system.characteristics.{{characteristic.key}}.core" type="number"
                                 value="{{characteristic.core}}" data-dtype="Number" {{#if (eq characteristic.core
                                 null)}}disabled{{/if}}>
                             {{/unless}}
