@@ -13,7 +13,7 @@
     "prettier:fix": "gulp prettierAutoFix",
     "validate": "gulp validate",
     "watch": "gulp",
-    "pack": "fvtt package pack heroMacros"
+    "pack:macros": "fvtt package pack heroMacros"
   },
   "browserslist": [
     "last 3 versions"
@@ -22,6 +22,7 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
+    "@foundryvtt/foundryvtt-cli": "^1.0.2",
     "@stylistic/eslint-plugin-js": "^1.4.1",
     "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.1.0",
