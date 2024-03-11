@@ -375,4 +375,4 @@ Our support ratings:
 | HD CONSTRUCTS | Support | Comments |
 | :--- | :---:  | :--- |
 | CAMPAIGN RULES | ? | Uncertain |
-| COMPOUND POWERS | C | Works if all are powers. Does not work with characteristics, skills, etc. Uses multiple attacks not a single attack. |
+| COMPOUND POWERS | B | Display of compound powers can be confusing, doesn't link powers, costing wrong |
