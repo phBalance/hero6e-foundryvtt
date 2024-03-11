@@ -13,7 +13,7 @@
     "prettier:fix": "gulp prettierAutoFix",
     "validate": "gulp validate",
     "watch": "gulp",
-    "pack": "fvtt package pack heroMacros"
+    "pack:macros": "fvtt package pack heroMacros"
   },
   "browserslist": [
     "last 3 versions"
