@@ -15,7 +15,7 @@ export class HeroProgressBar {
 
         if (++HeroProgressBar.#concurrentProgressBarCount > 1) {
             ui.notification.error(
-                `${ProgressBar.#concurrentProgressBarCount} progress bars are fighting for control of the scene navigation`,
+                `${HeroProgressBar.#concurrentProgressBarCount} progress bars are fighting for control of the scene navigation`,
             );
         }
 
