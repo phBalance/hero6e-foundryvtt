@@ -5,6 +5,7 @@ import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
 } from "../utility/util.mjs";
+import { HeroProgressBar } from "../utility/progress-bar.mjs";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -1269,11 +1270,31 @@ export class HeroSystem6eActor extends Actor {
             await this.update({ "system.is5e": this.system.is5e });
         }
 
+        const xmlItemsToProcess =
+            1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
+            heroJson.CHARACTER.DISADVANTAGES.length +
+            heroJson.CHARACTER.EQUIPMENT.length +
+            heroJson.CHARACTER.MARTIALARTS.length +
+            heroJson.CHARACTER.PERKS.length +
+            heroJson.CHARACTER.POWERS.length +
+            heroJson.CHARACTER.SKILLS.length +
+            heroJson.CHARACTER.TALENTS.length +
+            // TODO: Would be nice to include extra stuff we add for pc and npcs
+            1 + // Validating adjustment and powers
+            1 + // Images
+            1 + // Final save
+            1; // Restore retained damage
+        const uploadProgressBar = new HeroProgressBar(
+            "Processing HDC file",
+            xmlItemsToProcess,
+            1,
+        );
+
         // ITEMS
-        for (let itemTag of HeroSystem6eItem.ItemXmlTags) {
+        for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
             if (heroJson.CHARACTER[itemTag]) {
-                for (let system of heroJson.CHARACTER[itemTag]) {
-                    let itemData = {
+                for (const system of heroJson.CHARACTER[itemTag]) {
+                    const itemData = {
                         name:
                             system.NAME ||
                             system?.ALIAS ||
@@ -1304,6 +1325,11 @@ export class HeroSystem6eActor extends Actor {
                             }
                             break;
                     }
+
+                    // Indicate we're processing this aspect of the HDC. If it crashes it should remain showing this progress note.
+                    uploadProgressBar.advance(
+                        `Adding ${itemTag} ${itemData.name}`,
+                    );
 
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, {
@@ -1350,26 +1376,6 @@ export class HeroSystem6eActor extends Actor {
                                     }
                                 }
                             }
-
-                            // for (let system2 of system.POWER || []) {
-                            //     let itemData2 = {
-                            //         name:
-                            //             system2.NAME ||
-                            //             system2.ALIAS ||
-                            //             system2.XMLID,
-                            //         type: "power",
-                            //         system: {
-                            //             ...system2,
-                            //             PARENTID: system.ID,
-                            //             POSITION: parseInt(system2.POSITION),
-                            //         },
-                            //     };
-                            //     const item2 = await HeroSystem6eItem.create(
-                            //         itemData2,
-                            //         { parent: this },
-                            //     );
-                            //     await item2._postUpload();
-                            // }
                         }
                     } else {
                         const item = await HeroSystem6eItem.create(itemData, {
@@ -1390,6 +1396,11 @@ export class HeroSystem6eActor extends Actor {
 
         // Characters get a few things for free that are not in the HDC.
         if (this.type === "pc" || this.type === "npc") {
+            uploadProgressBar.advance(
+                `Adding non HDC items for PCs and NPCs`,
+                0,
+            );
+
             // Perception Skill
             const itemDataPerception = {
                 name: "Perception",
@@ -1455,6 +1466,8 @@ export class HeroSystem6eActor extends Actor {
                 });
         }
 
+        uploadProgressBar.advance("Validating powers", 1);
+
         // Validate everything that's been imported
         this.items.forEach(async (item) => {
             const power = getPowerInfo({ item: item });
@@ -1504,6 +1517,8 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
         }
+
+        uploadProgressBar.advance("Uploading image", 0);
 
         // Images
         if (heroJson.CHARACTER.IMAGE) {
@@ -1555,6 +1570,8 @@ export class HeroSystem6eActor extends Actor {
             changes["img"] = CONST.DEFAULT_TOKEN;
         }
 
+        uploadProgressBar.advance("Saving core changes");
+
         // Non ITEMS stuff in CHARACTER
         changes = {
             ...changes,
@@ -1577,6 +1594,8 @@ export class HeroSystem6eActor extends Actor {
         // Set base values to HDC LEVELs and calculate costs of things.
         await this._postUpload(true);
 
+        uploadProgressBar.advance("Restoring retained damage");
+
         // Apply retained damage
         if (retainDamage.body || retainDamage.stun || retainDamage.end) {
             this.system.characteristics.body.value -= retainDamage.body;
@@ -1593,6 +1612,8 @@ export class HeroSystem6eActor extends Actor {
                 });
             }
         }
+
+        uploadProgressBar.close(`Done uploading ${this.name}`);
     }
 
     static _xmlToJsonNode(json, children) {
