@@ -55,6 +55,7 @@
         "Roll": "readable",
         "RollTerm": "readable",
         "Ruler": "readable",
+        "SceneNavigation": "readable",
         "SimpleCalendar": "readable",
         "TextEditor": "readable",
         "Token": "readable",
