@@ -22,50 +22,43 @@
                         "value": 10,
                         "max": 10,
                         "core": 10,
-                        "realCost": 0,
-                        "type": "rollable"
+                        "realCost": 0
                     },
                     "dex": {
                         "value": 10,
                         "max": 10,
                         "core": 10,
-                        "realCost": 0,
-                        "type": "rollable"
+                        "realCost": 0
                     },
                     "con": {
                         "value": 10,
                         "max": 10,
                         "core": 10,
-                        "realCost": 0,
-                        "type": "rollable"
+                        "realCost": 0
                     },
                     "int": {
                         "value": 10,
                         "max": 10,
                         "core": 10,
-                        "realCost": 0,
-                        "type": "rollable"
+                        "realCost": 0
                     },
                     "ego": {
                         "value": 10,
                         "max": 10,
                         "core": 10,
-                        "realCost": 0,
-                        "type": "rollable"
+                        "realCost": 0
                     },
                     "pre": {
                         "value": 10,
                         "max": 10,
                         "core": 10,
-                        "realCost": 0,
-                        "type": "rollable"
+                        "realCost": 0
                     },
                     "com": {
                         "value": 10,
                         "max": 10,
                         "core": 10,
-                        "realCost": 0,
-                        "type": "rollable"
+                        "realCost": 0
                     },
                     "ocv": {
                         "max": 3,
@@ -292,15 +285,13 @@
                     "value": 10,
                     "max": 10,
                     "core": 10,
-                    "realCost": 0,
-                    "type": "rollable"
+                    "realCost": 0
                 },
                 "dex": {
                     "value": 10,
                     "max": 10,
                     "core": 10,
-                    "realCost": 0,
-                    "type": "rollable"
+                    "realCost": 0
                 },
                 "ocv": {
                     "max": 3,

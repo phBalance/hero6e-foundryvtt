@@ -170,11 +170,11 @@ function validatePowers() {
         (power) =>
             !power.duration &&
             (power.type.includes("adjustment ") ||
-                power.type.includes("attack") ||
+                (power.type.includes("attack") &&
+                    !power.type.includes("martial")) ||
                 power.type.includes("defense") ||
                 power.type.includes("movement") ||
-                power.type.includes("skills")) &&
-            !power.type.includes("martial"),
+                power.type.includes("skills")),
     );
     if (powersWithoutDuration.length > 0) {
         console.log(`Powers without duration field: `, powersWithoutDuration);
@@ -1965,7 +1965,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            rollable: false, // TODO: REmove this field
         },
         {},
     );
@@ -2422,7 +2421,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            rollable: false,
         },
         {},
     );
@@ -2496,7 +2494,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            rollable: false,
         },
         {},
     );
@@ -2509,7 +2506,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            rollable: false,
         },
         {},
     );
@@ -2522,7 +2518,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            rollable: false,
         },
         {},
     );
@@ -2535,7 +2530,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            rollable: false,
         },
         {},
     );
@@ -2548,7 +2542,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            rollable: false,
         },
         {},
     );
