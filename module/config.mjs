@@ -158,8 +158,40 @@ HERO.movementPowers5e = {
     gliding: "Gliding",
 };
 
+function validatePowers() {
+    // Has behaviors field
+    const powersWithoutBehaviors = this.filter((power) => !power.behaviors);
+    if (powersWithoutBehaviors.length > 0) {
+        console.log(`Powers without behaviors field: `, powersWithoutBehaviors);
+    }
+
+    // A power without duration field?
+    const powersWithoutDuration = this.filter(
+        (power) =>
+            !power.duration &&
+            (power.type.includes("adjustment ") ||
+                power.type.includes("attack") ||
+                power.type.includes("defense") ||
+                power.type.includes("movement") ||
+                power.type.includes("skills")) &&
+            !power.type.includes("martial"),
+    );
+    if (powersWithoutDuration.length > 0) {
+        console.log(`Powers without duration field: `, powersWithoutDuration);
+    }
+
+    if (
+        powersWithoutBehaviors.length === 0 &&
+        powersWithoutDuration.length === 0
+    ) {
+        console.log(`Powers look valid`);
+    }
+}
+
 HERO.powers6e = [];
+HERO.powers6e.validate = validatePowers;
 HERO.powers5e = [];
+HERO.powers5e.validate = validatePowers;
 
 /**
  * @typedef {Object} PowerDescription
@@ -1315,6 +1347,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FLIGHT",
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "constant",
             costEnd: true,
             costPerLevel: 1,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1329,6 +1362,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Faster-Than-Light Travel",
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "constant",
             costEnd: false,
             costPerLevel: 2,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1340,6 +1374,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "GLIDING",
         type: ["movement"],
         behaviors: ["activatable"],
+        duration: "constant",
         costEnd: false,
         costPerLevel: 1,
         ignoreFor: ["base2", "computer", "ai"],
@@ -1353,6 +1388,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: 1 / 2,
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "constant",
             costEnd: true,
             costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1372,6 +1408,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: 1,
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "constant",
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
         },
@@ -1389,6 +1426,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: 1 / 2,
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "constant",
             costEnd: true,
             costPerLevel: 1 / 2,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1404,6 +1442,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SWINGING",
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "constant",
             costEnd: true,
             costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1418,6 +1457,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TELEPORTATION",
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "instant",
             costEnd: true,
             costPerLevel: 1,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1431,6 +1471,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TUNNELING",
             type: ["movement"],
             behaviors: ["activatable"],
+            duration: "constant",
             costEnd: true,
             costPerLevel: 1,
             ignoreFor: ["base2", "computer", "ai"],
@@ -1447,6 +1488,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ACROBATICS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1455,6 +1500,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ACTING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1463,6 +1512,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ANALYZE",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1472,6 +1525,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             categorized: true,
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1480,12 +1537,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["skill"],
         behaviors: ["success"],
         categorized: true,
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(
         {
             key: "AUTOFIRE_SKILLS",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1495,7 +1560,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BREAKFALL",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
             costPerLevel: 1,
+            costEnd: false,
         },
         {},
     );
@@ -1504,6 +1573,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BRIBERY",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1512,6 +1585,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BUGGING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1520,6 +1597,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BUREAUCRATICS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1529,6 +1610,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CHARM",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         undefined,
     );
@@ -1537,6 +1622,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CLIMBING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1545,6 +1634,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMBAT_DRIVING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1553,6 +1646,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMBAT_LEVELS",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            costEnd: false,
+            range: "self",
         },
         {},
     );
@@ -1561,6 +1658,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMBAT_PILOTING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1569,6 +1670,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMPUTER_PROGRAMMING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1577,6 +1682,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONCEALMENT",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1585,6 +1694,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONTORTIONIST",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1593,6 +1706,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CONVERSATION",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1601,6 +1718,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CRAMMING",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1609,6 +1730,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CRIMINOLOGY",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1617,6 +1742,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CRYPTOGRAPHY",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1626,6 +1755,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             costPerLevel: 1,
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1635,6 +1768,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEDUCTION",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1643,6 +1780,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEFENSE_MANEUVER",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1651,6 +1792,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEMOLITIONS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1659,6 +1804,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DISGUISE",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1668,6 +1817,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ELECTRONICS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1677,6 +1830,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FAST_DRAW",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1684,12 +1841,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "FEINT",
         type: ["skill"],
         behaviors: ["success"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(
         {
             key: "FORENSIC_MEDICINE",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1699,6 +1864,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             categorized: true,
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1709,6 +1878,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             categorized: true,
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1718,6 +1891,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HIGH_SOCIETY",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1725,18 +1902,30 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "HOIST",
         type: ["skill"],
         behaviors: ["success"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
 
     addPower(undefined, {
         key: "INSTRUCTOR",
         type: ["skill"],
         behaviors: ["success"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(
         {
             key: "INTERROGATION",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1745,6 +1934,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INVENTOR",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1754,6 +1947,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "KNOWLEDGE_SKILL",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -1764,7 +1961,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LANGUAGES",
             type: ["skill"],
             behaviors: [],
-            rollable: false,
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            rollable: false, // TODO: REmove this field
         },
         {},
     );
@@ -1773,6 +1974,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LIPREADING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1781,6 +1986,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LOCKPICKING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1790,6 +1999,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MECHANICS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1798,6 +2011,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MENTAL_COMBAT_LEVELS",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         undefined,
     );
@@ -1806,6 +2023,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MIMICRY",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1815,6 +2036,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: [],
             name: "Musical Instrument Familiarity",
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1825,6 +2050,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             categorized: true,
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1832,16 +2061,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "NEGATIVECOMBATSKILLLEVELS",
         type: ["skill"],
         behaviors: [],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(undefined, {
         key: "NEGATIVEPENALTYSKILLLEVELS",
         type: ["skill"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         behaviors: [],
     });
     addPower(undefined, {
         key: "NEGATIVESKILLLEVELS",
         type: ["skill"],
         behaviors: [],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
 
     addPower(
@@ -1849,6 +2090,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ORATORY",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1857,12 +2102,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "PARACHUTING",
         type: ["skill"],
         behaviors: ["success"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(
         {
             key: "PARAMEDICS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1871,6 +2124,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PENALTY_SKILL_LEVELS",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1879,6 +2136,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PERCEPTION",
             type: ["skill"],
             behaviors: ["success", "non-hd"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1887,6 +2148,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PERSUASION",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1895,6 +2160,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "POISONING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1903,6 +2172,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "POWERSKILL",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1911,6 +2184,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PROFESSIONAL_SKILL",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -1921,6 +2198,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RAPID_ATTACK_HTH",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1928,17 +2209,29 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "RAPID_ATTACK_RANGED",
         type: ["skill"],
         behaviors: [],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(undefined, {
         key: "RESEARCH",
         type: ["skill"],
         behaviors: ["success"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(
         {
             key: "RIDING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1948,6 +2241,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SCIENCE_SKILL",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -1957,6 +2254,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SECURITY_SYSTEMS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1964,12 +2265,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "SEDUCTION",
         type: ["skill"],
         behaviors: ["success"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(
         {
             key: "SHADOWING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1978,6 +2287,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SKILL_LEVELS",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1986,6 +2299,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SLEIGHT_OF_HAND",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -1993,12 +2310,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "SPELL",
         type: ["skill"],
         behaviors: ["success"],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(
         {
             key: "STEALTH",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2007,6 +2332,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STREETWISE",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2016,6 +2345,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["skill"],
             behaviors: ["success"],
             categorized: true,
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2024,6 +2357,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SYSTEMS_OPERATION",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2033,6 +2370,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TACTICS",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2041,6 +2382,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TEAMWORK",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2049,6 +2394,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRACKING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2057,6 +2406,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRADING",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2065,6 +2418,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRANSPORT_FAMILIARITY",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             rollable: false,
         },
         {},
@@ -2074,6 +2431,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TWO_WEAPON_FIGHTING_HTH",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2081,6 +2442,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "TWO_WEAPON_FIGHTING_RANGED",
         type: ["skill"],
         behaviors: [],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
 
     addPower(
@@ -2088,6 +2453,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "VENTRILOQUISM",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2097,6 +2466,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "WEAPON_FAMILIARITY",
             type: ["skill"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
@@ -2105,6 +2478,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "WEAPONSMITH",
             type: ["skill"],
             behaviors: ["success"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             categorized: true,
         },
         {},
@@ -2115,6 +2492,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "JACK_OF_ALL_TRADES",
             type: ["skill", "enhancer"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             rollable: false,
         },
         {},
@@ -2124,6 +2505,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LINGUIST",
             type: ["skill", "enhancer"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             rollable: false,
         },
         {},
@@ -2133,6 +2518,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SCHOLAR",
             type: ["skill", "enhancer"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             rollable: false,
         },
         {},
@@ -2142,6 +2531,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SCIENTIST",
             type: ["skill", "enhancer"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             rollable: false,
         },
         {},
@@ -2151,6 +2544,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRAVELER",
             type: ["skill", "enhancer"],
             behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             rollable: false,
         },
         {},
@@ -3094,6 +3491,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Blast",
             type: ["attack"],
             behaviors: ["attack", "dice"],
+            duration: "instant",
             range: "standard",
             costPerLevel: 5,
             costEnd: true,
@@ -3108,6 +3506,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Entangle",
             type: ["attack", "standard"],
             behaviors: ["attack", "dice"],
+            duration: "instant",
             range: "standard",
             costPerLevel: 10,
             costEnd: true,
@@ -3246,6 +3645,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Hand-To-Hand Attack",
             type: ["attack"],
             behaviors: ["attack", "dice"],
+            duration: "instant",
             range: "no range",
             costEnd: true,
             costPerLevel: 5,
@@ -3272,6 +3672,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Hand-To-Hand Killing Attack",
             type: ["attack"],
             behaviors: ["attack", "dice"],
+            duration: "instant",
             range: "no range",
             costPerLevel: 15,
             costEnd: true,
@@ -3562,6 +3963,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Ranged Killing Attack",
             type: ["attack"],
             behaviors: ["attack", "dice"],
+            duration: "instant",
             range: "standard",
             costPerLevel: 15,
             costEnd: true,
