@@ -23,7 +23,7 @@ export class HeroProgressBar {
     }
 
     toString() {
-        return `HeroProgressBar(${HeroProgressBar.#concurrentProgressBarCount}) (label = ${this._label}, count = ${this._count}, max = ${this._max})`;
+        return `HeroProgressBar(${HeroProgressBar.#concurrentProgressBarCount}) (label = ${this._label}, count = ${this._count}, max = ${this._max}, inProgress=${this._inProgress})`;
     }
 
     /**
