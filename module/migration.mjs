@@ -1,6 +1,7 @@
 import { HeroSystem6eItem } from "./item/item.mjs";
 import { determineCostPerActivePoint } from "./utility/adjustment.mjs";
 import { RoundFavorPlayerUp } from "./utility/round.mjs";
+import { HeroProgressBar } from "./utility/progress-bar.mjs";
 
 function getAllActorsInGame() {
     return [
@@ -10,6 +11,41 @@ function getAllActorsInGame() {
             .map((token) => token.actorLink)
             .filter((actorLink) => actorLink),
     ];
+}
+
+async function migrateToVersion(
+    migratesToVersion,
+    lastMigration,
+    queue,
+    queueType,
+    asyncFn,
+) {
+    if (
+        !lastMigration ||
+        foundry.utils.isNewerVersion(migratesToVersion, lastMigration)
+    ) {
+        const originalTotal = queue.length;
+        const migrationProgressBar = new HeroProgressBar(
+            `Migrating ${originalTotal} ${queueType} to ${migratesToVersion}`,
+            originalTotal + 1,
+        );
+
+        while (queue.length > 0) {
+            const queueElement = queue.pop();
+
+            migrationProgressBar.advance(
+                `Migrating ${queueType} ${
+                    originalTotal - queue.length
+                } of ${originalTotal} to ${migratesToVersion}`,
+            );
+
+            await asyncFn(queueElement);
+        }
+
+        migrationProgressBar.close(
+            `Done migrating ${originalTotal} ${queueType} to ${migratesToVersion}`,
+        );
+    }
 }
 
 export async function migrateWorld() {
@@ -380,44 +416,24 @@ export async function migrateWorld() {
 
     // if lastMigration < 3.0.62
     // Correct maneuvers for 5e and 6e.
-    if (foundry.utils.isNewerVersion("3.0.62", lastMigration)) {
-        const queue = getAllActorsInGame();
-        let dateNow = new Date();
-
-        for (const [index, actor] of queue.entries()) {
-            if (new Date() - dateNow > 4000) {
-                ui.notifications.info(
-                    `Migrating actor's active effects to 3.0.62: (${
-                        queue.length - index
-                    } actors remaining)`,
-                );
-                dateNow = new Date();
-            }
-
-            await migrate_actor_maneuvers_to_3_0_62(actor);
-        }
-    }
+    await migrateToVersion(
+        "3.0.62",
+        lastMigration,
+        getAllActorsInGame(),
+        "actors' maneuvers",
+        async (actor) => await migrate_actor_maneuvers_to_3_0_62(actor),
+    );
 
     // Reparse all items (description, cost, etc) on every migration
-    {
-        let d = new Date();
-        const queue = getAllActorsInGame();
+    await migrateToVersion(
+        game.system.version,
+        undefined,
+        getAllActorsInGame(),
+        "actors' items' cost and description",
+        async (actor) => await migrateActorCostDescription(actor),
+    );
 
-        ui.notifications.info(`Migrating actor data`);
-
-        while (queue.length > 0) {
-            if (new Date() - d > 4000) {
-                ui.notifications.info(
-                    `Migrating actor data (${queue.length} remaining)`,
-                );
-                d = new Date();
-            }
-            const actor = queue.pop();
-            await migrateActorCostDescription(actor);
-        }
-    }
-
-    await ui.notifications.info(`Migrating complete.`);
+    await ui.notifications.info(`Migration complete to ${game.system.version}`);
 }
 
 async function migrateActorCostDescription(actor) {

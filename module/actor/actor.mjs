@@ -1279,13 +1279,13 @@ export class HeroSystem6eActor extends Actor {
             heroJson.CHARACTER.POWERS.length +
             heroJson.CHARACTER.SKILLS.length +
             heroJson.CHARACTER.TALENTS.length +
-            // TODO: Would be nice to include extra stuff we add for pc and npcs
+            (this.type === "pc" || this.type === "npc" ? 1 : 0) +
             1 + // Validating adjustment and powers
             1 + // Images
             1 + // Final save
             1; // Restore retained damage
         const uploadProgressBar = new HeroProgressBar(
-            "Processing HDC file",
+            `${this.name}: Processing HDC file`,
             xmlItemsToProcess,
             1,
         );
@@ -1328,7 +1328,7 @@ export class HeroSystem6eActor extends Actor {
 
                     // Indicate we're processing this aspect of the HDC. If it crashes it should remain showing this progress note.
                     uploadProgressBar.advance(
-                        `Adding ${itemTag} ${itemData.name}`,
+                        `${this.name}: Adding ${itemTag} ${itemData.name}`,
                     );
 
                     if (this.id) {
@@ -1397,7 +1397,7 @@ export class HeroSystem6eActor extends Actor {
         // Characters get a few things for free that are not in the HDC.
         if (this.type === "pc" || this.type === "npc") {
             uploadProgressBar.advance(
-                `Adding non HDC items for PCs and NPCs`,
+                `${this.name}: Adding non HDC items for PCs and NPCs`,
                 0,
             );
 
@@ -1466,7 +1466,7 @@ export class HeroSystem6eActor extends Actor {
                 });
         }
 
-        uploadProgressBar.advance("Validating powers", 1);
+        uploadProgressBar.advance(`${this.name}: Validating powers`);
 
         // Validate everything that's been imported
         this.items.forEach(async (item) => {
@@ -1518,7 +1518,7 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
-        uploadProgressBar.advance("Uploading image", 0);
+        uploadProgressBar.advance(`${this.name}: Uploading image`);
 
         // Images
         if (heroJson.CHARACTER.IMAGE) {
@@ -1570,7 +1570,7 @@ export class HeroSystem6eActor extends Actor {
             changes["img"] = CONST.DEFAULT_TOKEN;
         }
 
-        uploadProgressBar.advance("Saving core changes");
+        uploadProgressBar.advance(`${this.name}: Saving core changes`);
 
         // Non ITEMS stuff in CHARACTER
         changes = {
@@ -1594,7 +1594,7 @@ export class HeroSystem6eActor extends Actor {
         // Set base values to HDC LEVELs and calculate costs of things.
         await this._postUpload(true);
 
-        uploadProgressBar.advance("Restoring retained damage");
+        uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
 
         // Apply retained damage
         if (retainDamage.body || retainDamage.stun || retainDamage.end) {
@@ -1910,10 +1910,6 @@ export class HeroSystem6eActor extends Actor {
 
         // Update actor sidebar (needed when name is changed)
         ui.actors.render();
-
-        //ui.notifications.info(`${this.name} upload complete`)
-
-        //Hooks.call('hdcUpload')
 
         return changed;
     }
