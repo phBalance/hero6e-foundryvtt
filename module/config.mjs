@@ -174,6 +174,8 @@ function validatePowers() {
                     !power.type.includes("martial")) ||
                 power.type.includes("defense") ||
                 power.type.includes("movement") ||
+                power.type.includes("body-affecting") ||
+                power.type.includes("standard") ||
                 power.type.includes("skills")),
     );
     if (powersWithoutDuration.length > 0) {
@@ -3385,6 +3387,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Desolidification",
             type: ["body-affecting", "standard"],
             behaviors: ["activatable"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
             costEnd: true,
         },
         {},
@@ -3512,6 +3517,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Extra Limbs",
             type: ["standard"],
             behaviors: [],
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
