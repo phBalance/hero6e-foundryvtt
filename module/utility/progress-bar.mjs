@@ -7,6 +7,12 @@
 export class HeroProgressBar {
     static #concurrentProgressBarCount = 0;
 
+    /**
+     *
+     * @param {string} label
+     * @param {number} max
+     * @param {number} [startCount]
+     */
     constructor(label, max, startCount = 0) {
         this._label = label;
         this._max = max;
