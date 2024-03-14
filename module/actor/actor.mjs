@@ -1911,10 +1911,6 @@ export class HeroSystem6eActor extends Actor {
         // Update actor sidebar (needed when name is changed)
         ui.actors.render();
 
-        //ui.notifications.info(`${this.name} upload complete`)
-
-        //Hooks.call('hdcUpload')
-
         return changed;
     }
 
