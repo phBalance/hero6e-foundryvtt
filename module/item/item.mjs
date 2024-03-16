@@ -1208,7 +1208,7 @@ export class HeroSystem6eItem extends Item {
         // MOVEMENT
         if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
             const movement = "movement";
-            if (this.system.subType != movement) {
+            if (this.system.subType !== movement) {
                 this.system.subType = movement;
                 this.system.showToggle = true;
                 changed = true;
@@ -2511,6 +2511,10 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "SHAPESHIFT":
+                system.description = `${system.ALIAS} (${system.OPTION_ALIAS})`;
+                break;
+
             default:
                 {
                     if (
@@ -2577,7 +2581,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (system?.ADDER?.length > 0 || _adderArray.length > 0) {
-            for (let adder of system?.ADDER || []) {
+            for (const adder of system?.ADDER || []) {
                 switch (adder.XMLID) {
                     case "DIMENSIONS":
                         system.description += `, ${adder.ALIAS}`;
