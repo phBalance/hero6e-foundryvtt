@@ -245,7 +245,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             if (!item.system.attacks) item.system.attacks = {};
             for (let attack of item.actor.items.filter(
                 (o) =>
-                    (o.type == "attack" || o.system.subType == "attack") &&
+                    (o.type === "attack" || o.system.subType === "attack") &&
                     o.system.uses === _ocv,
             )) {
                 if (!item.system.attacks[attack.id])

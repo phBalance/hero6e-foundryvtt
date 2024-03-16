@@ -1810,9 +1810,9 @@ export class HeroSystem6eActor extends Actor {
             let attacks = {};
             let checkedCount = 0;
 
-            for (let attack of this.items.filter(
+            for (const attack of this.items.filter(
                 (o) =>
-                    (o.type == "attack" || o.system.subType == "attack") &&
+                    (o.type === "attack" || o.system.subType === "attack") &&
                     o.system.uses === _ocv,
             )) {
                 let checked = false;
