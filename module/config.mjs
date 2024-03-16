@@ -174,6 +174,8 @@ function validatePowers() {
                     !power.type.includes("martial")) ||
                 power.type.includes("defense") ||
                 power.type.includes("movement") ||
+                power.type.includes("body-affecting") ||
+                power.type.includes("standard") ||
                 power.type.includes("skills")),
     );
     if (powersWithoutDuration.length > 0) {
@@ -2553,6 +2555,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMPOUNDPOWER",
             type: ["compound"],
             behaviors: [],
+            costEnd: false,
         },
         {},
     );
@@ -2563,24 +2566,24 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Differing Modifier",
             type: ["framework"],
             behaviors: [],
+            costEnd: false,
         },
         {},
     );
 
-    addPower(
-        {
-            key: "ELEMENTAL_CONTROL",
-            type: ["framework"],
-            behaviors: [],
-        },
-        {},
-    );
+    addPower(undefined, {
+        key: "ELEMENTAL_CONTROL",
+        type: ["framework"],
+        behaviors: [],
+        costEnd: false,
+    });
 
     addPower(
         {
             key: "LIST",
             type: ["framework"],
             behaviors: [],
+            costEnd: false,
         },
         {},
     );
@@ -2590,6 +2593,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MULTIPOWER",
             type: ["framework"],
             behaviors: [],
+            costEnd: false,
         },
         {},
     );
@@ -2599,6 +2603,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "VPP",
             type: ["framework"],
             behaviors: [],
+            costEnd: false,
         },
         {},
     );
@@ -2611,6 +2616,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Access",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2620,6 +2626,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["perk"],
         behaviors: [],
         name: "Advanced Tech",
+        costEnd: false,
     });
     addPower(
         {
@@ -2627,6 +2634,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Anonymity",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2638,6 +2646,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Computer Link",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2648,6 +2657,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: ["success"],
             name: "Contact",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2658,6 +2668,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Custom Perk",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2669,6 +2680,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Deep Cover",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2679,6 +2691,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["perk"],
         behaviors: [],
         name: "False Identity",
+        costEnd: false,
         costPerLevel: 1,
     });
     addPower(
@@ -2687,6 +2700,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Favor",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2697,6 +2711,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Follower",
+            costEnd: false,
         },
         {},
     );
@@ -2706,6 +2721,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Fringe Benefit",
+            costEnd: false,
         },
         {},
     );
@@ -2716,6 +2732,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Money",
+            costEnd: false,
         },
         {},
     );
@@ -2726,6 +2743,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk", "disadvantage"],
             behaviors: ["success"],
             name: "Positive Reputation",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -2736,6 +2754,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Resource Points",
+            costEnd: false,
         },
         {},
     );
@@ -2746,6 +2765,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["perk"],
             behaviors: [],
             name: "Vehicles & Bases",
+            costEnd: false,
         },
         {},
     );
@@ -2758,6 +2778,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Absolute Range Sense",
+            costEnd: false,
         },
         {},
     );
@@ -2767,6 +2788,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Absolute Time Sense",
+            costEnd: false,
         },
         {},
     );
@@ -2776,6 +2798,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Ambidexterity",
+            costEnd: false,
         },
         {},
     );
@@ -2785,30 +2808,46 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Animal Friendship",
+            costEnd: false,
         },
         {},
     );
 
-    addPower(undefined, {
-        key: "BEASTSPEECH",
-        type: ["talent"],
-        behaviors: [],
-        name: "Beast Speech",
-        costPerLevel: 0,
-    });
-    addPower(undefined, {
-        key: "BERSERKFURY",
-        type: ["talent"],
-        behaviors: ["activatable"],
-        name: "Berserk Fury",
-        costPerLevel: 0,
-    });
+    addPower(
+        {
+            key: "BEASTSPEECH",
+            type: ["talent"],
+            behaviors: [],
+            name: "Beast Speech",
+            duration: "instant",
+            target: "dmcv",
+            range: "no range",
+            costEnd: false,
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "BERSERKFURY",
+            type: ["talent"],
+            behaviors: [],
+            name: "Berserk Fury",
+            duration: "instant",
+            target: "self only",
+            range: "self",
+            costEnd: true,
+            costPerLevel: 0,
+        },
+        {},
+    );
     addPower(
         {
             key: "BUMP_OF_DIRECTION",
             type: ["talent"],
             behaviors: [],
             name: "Bump of Direction",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -2818,6 +2857,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "COMBATARCHERY",
         type: ["talent"],
         behaviors: [],
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         name: "Combat Archery",
     });
     addPower(
@@ -2826,8 +2869,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["activatable"],
             name: "Combat Luck",
-
             duration: "constant",
+            costEnd: false,
             costPerLevel: 6,
         },
         {},
@@ -2837,6 +2880,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Combat Ready",
+        costEnd: false,
     });
     addPower(
         {
@@ -2844,6 +2888,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["success"],
             name: "Combat Sense",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -2853,18 +2898,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Combat Shooting",
+        costEnd: false,
     });
     addPower(undefined, {
         key: "COMBATSPELLCASTING",
         type: ["talent"],
         behaviors: [],
         name: "Combat Spellcasting",
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
     });
     addPower(undefined, {
         key: "CRIPPLINGBLOW",
         type: ["talent"],
-        behaviors: ["activatable"],
+        behaviors: [],
         name: "Crippling Blow",
+        duration: "instant",
+        target: "target's dcv",
+        range: "no range",
+        costEnd: false,
     });
     addPower(
         {
@@ -2872,6 +2926,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Custom Talent",
+            costEnd: false,
         },
         {},
     );
@@ -2882,6 +2937,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["success"],
             name: "Danger Sense",
+            costEnd: false,
         },
         {},
     );
@@ -2891,6 +2947,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Deadly Blow",
+            costEnd: false,
         },
         {},
     );
@@ -2900,6 +2957,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Divine Favor",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+
             costPerLevel: 0,
         },
         {},
@@ -2910,6 +2972,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Double Jointed",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -2921,6 +2984,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Eidetic Memory",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -2931,6 +2995,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Environmental Movement",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -2940,6 +3005,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Evasive",
+        duration: "instant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         costPerLevel: 0,
     });
 
@@ -2948,35 +3017,58 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "FTL Pilot",
+        costEnd: false,
         costPerLevel: 0,
     });
-    addPower(undefined, {
-        key: "FASCINATION",
-        type: ["talent"],
-        behaviors: [],
-        name: "Fascination",
-        costPerLevel: 0,
-    });
-    addPower(undefined, {
-        key: "FEARLESS",
-        type: ["talent"],
-        behaviors: [],
-        name: "Fearless",
-        costPerLevel: 0,
-    });
-    addPower(undefined, {
-        key: "FOLLOWTHROUGHATTACK",
-        type: ["talent"],
-        behaviors: [],
-        name: "Follow Through Attack",
-        costPerLevel: 0,
-    });
+    addPower(
+        {
+            key: "FASCINATION",
+            type: ["talent"],
+            behaviors: [],
+            name: "Fascination",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FEARLESS",
+            type: ["talent"],
+            behaviors: [],
+            name: "Fearless",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 0,
+        },
+        {},
+    );
+    addPower(
+        {
+            key: "FOLLOWTHROUGHATTACK",
+            type: ["talent"],
+            behaviors: [],
+            name: "Follow Through Attack",
+            duration: "instant",
+            target: "target's dcv",
+            range: "no range",
+            costEnd: false,
+            costPerLevel: 0,
+        },
+        {},
+    );
 
     addPower(undefined, {
         key: "HOTSHOTPILOT",
         type: ["talent"],
         behaviors: [],
         name: "Hotshot Pilot",
+        costEnd: false,
         costPerLevel: 0,
     });
 
@@ -2985,6 +3077,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Inspire",
+        costEnd: false,
         costPerLevel: 0,
     });
 
@@ -2994,6 +3087,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Latent Psionic",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -3004,6 +3098,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Lightning Calculator",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -3014,6 +3109,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Lightning Reflexes",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -3024,6 +3120,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Lightning Reflexes",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -3034,6 +3131,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Lightsleep",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -3044,6 +3142,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Mage Sight",
+        duration: "persistent",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         costPerLevel: 0,
     });
     addPower(undefined, {
@@ -3051,6 +3153,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Mounted Warrior",
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         costPerLevel: 0,
     });
 
@@ -3060,6 +3166,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Perfect Pitch",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -3071,6 +3178,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Off-Hand Defense",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -3081,6 +3189,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Rapid Archery",
+        duration: "instant",
+        target: "self only",
+        range: "standard",
+        costEnd: false,
         costPerLevel: 1,
     });
     addPower(undefined, {
@@ -3088,6 +3200,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Rapid Healing",
+        duration: "persistent",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         costPerLevel: 1,
     });
     addPower(
@@ -3096,6 +3212,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Resistance",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -3104,8 +3221,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "SHAPECHANGING",
         type: ["talent"],
-        behaviors: ["activatable"],
+        behaviors: [],
         name: "Shapechanging",
+        duration: "instant",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         costPerLevel: 0,
     });
     addPower(
@@ -3114,6 +3235,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: ["activatable"],
             name: "Simulate Death",
+            duration: "instant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -3123,6 +3248,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Skill Master",
+        costEnd: false,
         costPerLevel: 1,
     });
     addPower(
@@ -3131,6 +3257,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Speed Reading",
+            costEnd: false,
             costPerLevel: 2,
         },
         {},
@@ -3140,6 +3267,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: [],
         name: "Spell Augmentation",
+        costEnd: false,
         costPerLevel: 2,
     });
     addPower(
@@ -3148,6 +3276,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Striking Appearance",
+            costEnd: false,
             costPerLevel: 3,
         },
         undefined,
@@ -3156,8 +3285,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(undefined, {
         key: "TRACKLESSSTRIDE",
         type: ["talent"],
-        behaviors: [],
+        behaviors: ["activatable"],
         name: "Trackless Stride",
+        duration: "constant",
+        target: "self only",
+        range: "self",
+        costEnd: true,
         costPerLevel: 0,
     });
     addPower(undefined, {
@@ -3165,6 +3298,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["talent"],
         behaviors: ["activatable"],
         name: "Turn Undead",
+        duration: "persistent",
+        target: "self only",
+        range: "self",
+        costEnd: false,
         costPerLevel: 0,
     });
 
@@ -3174,6 +3311,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Universal Translator",
+            costEnd: false,
             costPerLevel: 1,
         },
         {},
@@ -3185,6 +3323,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["talent"],
             behaviors: [],
             name: "Weapon Master",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -3385,6 +3524,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Desolidification",
             type: ["body-affecting", "standard"],
             behaviors: ["activatable"],
+            duration: "constant",
+            target: "self only",
+            range: "self",
             costEnd: true,
         },
         {},
@@ -3512,6 +3654,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Extra Limbs",
             type: ["standard"],
             behaviors: [],
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
             costPerLevel: 0,
         },
         {},
@@ -3873,8 +4019,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NAKEDMODIFIER",
             type: ["special"],
-            behaviors: ["activatable"],
-            //"duration": "instant",  // TODO: Not true, hack for isPerceivable
+            behaviors: [],
             costEnd: true,
             costPerLevel: 1,
         },

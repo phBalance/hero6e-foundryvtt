@@ -348,7 +348,7 @@ function rollItemMacro(itemName, itemType) {
                   i.name === itemName &&
                   (!itemType ||
                       i.type == itemType ||
-                      i.system.subType == itemType),
+                      i.system.subType === itemType),
           )
         : null;
 
@@ -363,7 +363,7 @@ function rollItemMacro(itemName, itemType) {
                     i.name === itemName &&
                     (!itemType ||
                         i.type == itemType ||
-                        i.system.subType == itemType),
+                        i.system.subType === itemType),
             );
             if (item) {
                 break;
