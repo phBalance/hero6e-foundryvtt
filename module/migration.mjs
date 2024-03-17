@@ -1035,7 +1035,6 @@ async function migrateActor_3_0_49(actor) {
                         key.toUpperCase().replace(" ", "") ===
                         item.name.toUpperCase().replace(" ", "")
                     ) {
-                        range: "self";
                         entry = migrationOnly_combatManeuvers[key];
                         await item.update({ name: key });
                         break;

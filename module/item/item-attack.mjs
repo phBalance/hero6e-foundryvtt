@@ -213,7 +213,7 @@ export async function AttackAoeToHit(item, options) {
     ) {
         const factor = actor.system.is5e ? 4 : 8;
 
-        const rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
+        let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
         rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
         if (rangePenalty) {
             attackHeroRoller.addNumber(rangePenalty, "Range penalty");
