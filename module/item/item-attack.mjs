@@ -195,11 +195,26 @@ export async function AttackAoeToHit(item, options) {
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .subNumber(parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
 
-    if (item.system.uses === "ocv") {
-        let factor = actor.system.is5e ? 4 : 8;
+    if (item.system.range === "self") {
+        // TODO: Should not be able to use this on anyone else. Should add a check.
+    }
+
+    // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
+    //       in case the system has calculated it incorrectly.
+
+    // There are no range penalties if this is a line of sight power or it has been bought with
+    // no range modifiers.
+    if (
+        !(
+            item.system.range === "los" ||
+            item.system.range === "no range modifiers" ||
+            item.system.range === "limited normal range"
+        )
+    ) {
+        const factor = actor.system.is5e ? 4 : 8;
+
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
         rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
-
         if (rangePenalty) {
             attackHeroRoller.addNumber(rangePenalty, "Range penalty");
         }
@@ -321,8 +336,23 @@ export async function AttackToHit(item, options) {
         .addNumber(parseInt(options.ocvMod), "OCV modifier")
         .addNumber(parseInt(setManeuver?.system.ocv) || 0, "Maneuver OCV");
 
-    // Calc Distance if we have a target (and using ocv; dcv is typically line of sight)
-    if (game.user.targets.size > 0 && itemData?.uses === "ocv") {
+    if (item.system.range === "self") {
+        // TODO: Should not be able to use this on anyone else. Should add a check.
+    }
+
+    // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
+    //       in case the system has calculated it incorrectly.
+
+    // There are no range penalties if this is a line of sight power or it has been bought with
+    // no range modifiers.
+    if (
+        game.user.targets.size > 0 &&
+        !(
+            item.system.range === "los" ||
+            item.system.range === "no range modifiers" ||
+            item.system.range === "limited normal range"
+        )
+    ) {
         // Educated guess for token
         let token = actor.getActiveTokens()[0];
         let target = game.user.targets.first();

@@ -640,6 +640,22 @@ export class HeroSystem6eItem extends Item {
         return changed;
     }
 
+    setInitialRange(power) {
+        let changed = false;
+
+        if (power) {
+            this.system.range = power.range;
+
+            changed = true;
+        } else {
+            ui.notifications.warn(
+                `${this.actor?.name}/${this.name} doesn't have power (${power}) defined`,
+            );
+        }
+
+        return changed;
+    }
+
     determinePointCosts() {
         let changed = false;
 
@@ -1155,10 +1171,75 @@ export class HeroSystem6eItem extends Item {
         return changed;
     }
 
+    buildRangeParameters() {
+        const originalRange = this.system.range;
+
+        // Range Modifiers "self", "no range", "standard", or "los" based on power
+        const ranged = this.findModsByXmlid("RANGED");
+        const noRange = this.findModsByXmlid("NORANGE");
+        const limitedRange = this.findModsByXmlid("LIMITEDRANGE");
+        const rangeBasedOnStrength = this.findModsByXmlid("RANGEBASEDONSTR");
+        const los = this.findModsByXmlid("LOS");
+        const normalLimitedRange = this.findModsByXmlid("NORMALRANGE");
+        const noRangeModifiers = this.findModsByXmlid("NORANGEMODIFIER");
+        const usableOnOthers = this.findModsByXmlid("UOO");
+        const boecv = this.findModsByXmlid("BOECV");
+
+        // Based on EGO combat value comes with line of sight
+        if (boecv) {
+            this.system.range = "los";
+        }
+
+        // Self only powers cannot be bought to have range unless they become usable on others at which point
+        // they gain no range.
+        if (this.system.range === "self") {
+            if (usableOnOthers) {
+                this.system.range = "no range";
+            }
+        }
+
+        // No range can be bought to have range.
+        if (this.system.range === "no range") {
+            if (ranged) {
+                this.system.range = "standard";
+            }
+        }
+
+        // Standard range can be bought up or bought down.
+        if (this.system.range === "standard") {
+            if (noRange) {
+                this.system.range = "no range";
+            } else if (los) {
+                this.system.range = "los";
+            } else if (limitedRange) {
+                this.system.range = "limited range";
+            } else if (rangeBasedOnStrength) {
+                this.system.range = "range based on str";
+            } else if (noRangeModifiers) {
+                this.system.range = "no range modifiers";
+            }
+        }
+
+        // Line of sight can be bought down
+        if (this.system.range === "los") {
+            if (normalLimitedRange) {
+                this.system.range = "limited normal range";
+            } else if (rangeBasedOnStrength) {
+                this.system.range = "range based on str";
+            } else if (noRange) {
+                this.system.range = "no range";
+            }
+        }
+
+        return originalRange === this.system.range;
+    }
+
     async _postUpload() {
         const configPowerInfo = getPowerInfo({ item: this });
 
         let changed = this.setInitialItemValueAndMax();
+
+        changed = this.setInitialRange(configPowerInfo) || changed;
 
         changed = this.determinePointCosts() || changed;
 
@@ -1183,6 +1264,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // DEFENSES
+        // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
         if (
             configPowerInfo &&
             configPowerInfo.behaviors.includes("activatable")
@@ -1225,6 +1307,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
+        // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach. Should probably for anything with range != self
         if (
             configPowerInfo &&
             (configPowerInfo.behaviors.includes("attack") ||
@@ -1237,6 +1320,8 @@ export class HeroSystem6eItem extends Item {
                 this.makeAttack();
             }
         }
+
+        changed = this.buildRangeParameters() || changed;
 
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {
@@ -1483,7 +1568,7 @@ export class HeroSystem6eItem extends Item {
         return results;
     }
 
-    static itemDataFromXml(xml) {
+    static itemDataFromXml(xml, actor) {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xml, "text/xml");
         const heroJson = {};
@@ -1494,7 +1579,7 @@ export class HeroSystem6eItem extends Item {
             type: "power",
         };
 
-        const powerList = this.actor?.system.is5e
+        const powerList = actor.system.is5e
             ? CONFIG.HERO.powers5e
             : CONFIG.HERO.powers6e;
         for (const itemTag of [
@@ -3136,7 +3221,7 @@ export class HeroSystem6eItem extends Item {
         const ocv = parseInt(this.system.OCV) || 0;
         const dcv = parseInt(this.system.DCV) || 0;
 
-        // Check if this is a MARTIAL attack.  If so then EXTRA DC's may be present
+        // Check if this is a MARTIAL attack.  If so then EXTRA DCs may be present
         if (this.system.XMLID == "MANEUVER") {
             let EXTRADC = null;
 
@@ -3182,10 +3267,6 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-
-        // Active cost is required for endurance calculation.
-        // It should include all advantages (which we don't handle very well at the moment)
-        // However this should be calculated during power upload (not here)
 
         this.system.subType = "attack";
         this.system.class = input === "ED" ? "energy" : "physical";
@@ -3392,6 +3473,7 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
         }
 
+        // Damage effect/type modifiers
         const noStrBonus = this.findModsByXmlid("NOSTRBONUS");
         if (noStrBonus) {
             this.system.usesStrength = false;

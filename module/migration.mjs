@@ -424,6 +424,16 @@ export async function migrateWorld() {
         async (actor) => await migrate_actor_maneuvers_to_3_0_62(actor),
     );
 
+    // if lastMigration < 3.0.63
+    // move to new item.system.range values
+    await migrateToVersion(
+        "3.0.63",
+        lastMigration,
+        getAllActorsInGame(),
+        "actors' items' range",
+        async (actor) => await migrate_actor_items_to_3_0_63(actor),
+    );
+
     // Reparse all items (description, cost, etc) on every migration
     await migrateToVersion(
         game.system.version,
@@ -470,6 +480,83 @@ async function migrateActorCostDescription(actor) {
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
         }
+    }
+}
+
+/**
+ * items now have an item.system.range property
+ * @param {Object} actor
+ */
+async function migrate_actor_items_to_3_0_63(actor) {
+    for (const item of actor.items) {
+        const configPowerInfo = migrationOnly_Pre_XXX_getPowerInfo({
+            item: item,
+        });
+        if (configPowerInfo) {
+            item.system.range = configPowerInfo.range;
+        } else {
+            continue;
+        }
+
+        const noRange = item.findModsByXmlid("NORANGE");
+        const limitedRange = item.findModsByXmlid("LIMITEDRANGE");
+        const rangeBasedOnStrength = item.findModsByXmlid("RANGEBASEDONSTR");
+        const los = item.findModsByXmlid("LOS");
+        const normalRange = item.findModsByXmlid("NORMALRANGE");
+        const noRangeModifiers = item.findModsByXmlid("NORANGEMODIFIER");
+        const usableOnOthers = item.findModsByXmlid("UOO");
+
+        // Based on EGO combat value gets line of sight by default
+        const boecv = item.findModsByXmlid("BOECV");
+        if (boecv) {
+            item.system.range = "los";
+        }
+
+        // Self only powers cannot be bought to have range unless they become usable on others at which point
+        // they gain no range.
+        if (item.system.range === "self") {
+            if (usableOnOthers) {
+                item.system.range = "no range";
+            }
+        }
+
+        // No range can be bought to have range.
+        if (item.system.range === "no range") {
+            const ranged = item.findModsByXmlid("RANGED");
+            if (ranged) {
+                item.system.range = "standard";
+            }
+        }
+
+        // Standard range can be bought up or bought down.
+        if (item.system.range === "standard") {
+            if (noRange) {
+                item.system.range = "no range";
+            } else if (los) {
+                item.system.range = "los";
+            } else if (limitedRange) {
+                item.system.range = "limited range";
+            } else if (rangeBasedOnStrength) {
+                item.system.range = "range based on str";
+            } else if (noRangeModifiers) {
+                item.system.range = "no range modifiers";
+            }
+        }
+
+        // Line of sight can be bought down
+        if (item.system.range === "los") {
+            if (normalRange) {
+                item.system.range = "limited normal range";
+            } else if (rangeBasedOnStrength) {
+                item.system.range = "range based on str";
+            } else if (noRange) {
+                item.system.range = "no range";
+            }
+        }
+
+        await item.update({
+            "system.range": item.system.range,
+        });
     }
 }
 
@@ -1654,6 +1741,42 @@ function migrationOnly_Pre3_0_61_getPowerInfo(options) {
     }
 
     // LowerCase
+    if (powerInfo?.duration)
+        powerInfo.duration = powerInfo.duration.toLowerCase();
+
+    return powerInfo;
+}
+
+// This is good enough for everything for the time being. Added to migration
+// in 3.0.63.
+export function migrationOnly_Pre_XXX_getPowerInfo(options) {
+    const xmlid =
+        options.xmlid ||
+        options.item?.system?.XMLID ||
+        options.item?.system?.xmlid ||
+        options.item?.system?.id;
+
+    const actor = options?.actor || options?.item?.actor;
+    if (!actor) {
+        // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
+        console.warn(
+            `${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`,
+        );
+    }
+
+    const powerList = actor?.system.is5e
+        ? CONFIG.HERO.powers5e
+        : CONFIG.HERO.powers6e;
+    let powerInfo = powerList.find((o) => o.key === xmlid);
+
+    // TODO: Why are we modifying the power entries from config here?
+    if (powerInfo) {
+        powerInfo.xmlid = xmlid;
+        powerInfo.XMLID = xmlid;
+    }
+
+    // LowerCase
+    // TODO: Make powers correct and remove this
     if (powerInfo?.duration)
         powerInfo.duration = powerInfo.duration.toLowerCase();
 

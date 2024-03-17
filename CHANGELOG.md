@@ -3,6 +3,7 @@
 ## Version 3.0.63 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Potentially long running activities (HDC upload and migration) now sport a progress bar.
+- Support for ranged, line of sight, no range powers with support for a number of modifiers that improve or reduce range. [#789](https://github.com/dmdorman/hero6e-foundryvtt/issues/789)
 
 ## Version 3.0.62
 
