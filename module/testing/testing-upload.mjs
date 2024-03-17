@@ -5307,6 +5307,241 @@ export function registerUploadTests(quench) {
             });
 
             describe("Range modifiers", async function () {
+                describe("self", async function () {
+                    const contents = `
+                        <POWER XMLID="FLIGHT" ID="1710708328360" BASECOST="0.0" LEVELS="4" ALIAS="Flight" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, 'Flight 4"');
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 8);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 8);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 4);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0); // TODO: endurance is 0 for movement
+                    });
+
+                    it("range", function () {
+                        assert.equal(item.system.range, "self");
+                    });
+                });
+
+                describe("self -> no range", async function () {
+                    const contents = `
+                        <POWER XMLID="FLIGHT" ID="1710708341564" BASECOST="0.0" LEVELS="1" ALIAS="Flight" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="UOO" ID="1710708506783" BASECOST="0.25" LEVELS="0" ALIAS="Usable By Other" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UBO" OPTIONID="UBO" OPTION_ALIAS="Usable By Other" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            'Flight 1", Usable By Other (Usable By Other; +1/4)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 2);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 2);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0); // TODO: endurance is 0 for movement
+                    });
+
+                    it("range", function () {
+                        assert.equal(item.system.range, "no range");
+                    });
+                });
+
+                describe("self -> standard", async function () {
+                    const contents = `
+                        <POWER XMLID="FLIGHT" ID="1710708465351" BASECOST="0.0" LEVELS="1" ALIAS="Flight" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="UOO" ID="1710708631692" BASECOST="0.25" LEVELS="0" ALIAS="Usable By Other" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UBO" OPTIONID="UBO" OPTION_ALIAS="Usable By Other" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="RANGED" ID="1710708641441" BASECOST="0.5" LEVELS="0" ALIAS="Ranged" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="Ranged" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            'Flight 1", Usable By Other (Usable By Other; +1/4), Ranged (Ranged; +1/2)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 3);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 3);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0); // TODO: endurance is 0 for movement
+                    });
+
+                    it("range", function () {
+                        assert.equal(item.system.range, "standard");
+                    });
+                });
+
+                describe("self -> los", async function () {
+                    const contents = `
+                        <POWER XMLID="FLIGHT" ID="1710708487220" BASECOST="0.0" LEVELS="1" ALIAS="Flight" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="UOO" ID="1710708654233" BASECOST="0.25" LEVELS="0" ALIAS="Usable By Other" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UBO" OPTIONID="UBO" OPTION_ALIAS="Usable By Other" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="RANGED" ID="1710708659774" BASECOST="0.5" LEVELS="0" ALIAS="Ranged" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGED" OPTIONID="RANGED" OPTION_ALIAS="Ranged" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="LOS" ID="1710708665903" BASECOST="0.5" LEVELS="0" ALIAS="Line Of Sight" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            'Flight 1", Usable By Other (Usable By Other; +1/4), Ranged (Ranged; +1/2), Line Of Sight (+1/2)',
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 4);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 4);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0); // TODO: endurance is 0 for movement
+                    });
+
+                    it("range", function () {
+                        assert.equal(item.system.range, "los");
+                    });
+                });
+
                 describe("no range", async function () {
                     const contents = `
                         <POWER XMLID="DRAIN" ID="1710634909738" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="No Range Drain" INPUT="EGO" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -5529,6 +5764,63 @@ export function registerUploadTests(quench) {
 
                     it("range", function () {
                         assert.equal(item.system.range, "los");
+                    });
+                });
+
+                describe("standard -> no range modifier", async function () {
+                    const contents = `
+                        <POWER XMLID="ENERGYBLAST" ID="1710707358747" BASECOST="0.0" LEVELS="6" ALIAS="Energy Blast" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="NORANGEMODIFIER" ID="1710707526641" BASECOST="0.5" LEVELS="0" ALIAS="No Range Modifier" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Energy Blast 6d6 (ED), No Range Modifier (+1/2)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 45);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 45);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 6);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 4);
+                    });
+
+                    it("range", function () {
+                        assert.equal(item.system.range, "no range modifiers");
                     });
                 });
 

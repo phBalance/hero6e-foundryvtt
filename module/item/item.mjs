@@ -1171,12 +1171,70 @@ export class HeroSystem6eItem extends Item {
         return changed;
     }
 
+    buildRangeParameters() {
+        const originalRange = this.system.range;
+
+        // Range Modifiers "self", "no range", "standard", or "los" based on power
+        const ranged = this.findModsByXmlid("RANGED");
+        const noRange = this.findModsByXmlid("NORANGE");
+        const limitedRange = this.findModsByXmlid("LIMITEDRANGE");
+        const rangeBasedOnStrength = this.findModsByXmlid("RANGEBASEDONSTR");
+        const los = this.findModsByXmlid("LOS");
+        const normalRange = this.findModsByXmlid("NORMALRANGE");
+        const noRangeModifiers = this.findModsByXmlid("NORANGEMODIFIER");
+        const usableOnOthers = this.findModsByXmlid("UOO");
+
+        // Self only powers cannot be bought to have range unless they become usable on others at which point
+        // they gain no range.
+        if (this.system.range === "self") {
+            if (usableOnOthers) {
+                this.system.range = "no range";
+            }
+        }
+
+        // No range can be bought to have range.
+        if (this.system.range === "no range") {
+            if (ranged) {
+                this.system.range = "standard";
+            }
+        }
+
+        // Standard range can be bought up or bought down.
+        if (this.system.range === "standard") {
+            if (noRange) {
+                this.system.range = "no range";
+            } else if (los) {
+                this.system.range = "los";
+            } else if (limitedRange) {
+                this.system.range = "limited range";
+            } else if (rangeBasedOnStrength) {
+                this.system.range = "range based on str";
+            } else if (noRangeModifiers) {
+                this.system.range = "no range modifiers";
+            }
+        }
+
+        // Line of sight can be bought down
+        if (this.system.range === "los") {
+            if (normalRange) {
+                this.system.range = "standard";
+            } else if (rangeBasedOnStrength) {
+                this.system.range = "range based on str";
+            } else if (noRange) {
+                this.system.range = "no range";
+            }
+        }
+
+        return originalRange === this.system.range;
+    }
+
     async _postUpload() {
         const configPowerInfo = getPowerInfo({ item: this });
 
         let changed = this.setInitialItemValueAndMax();
 
-        changed = this.setInitialRange(configPowerInfo);
+        changed = this.setInitialRange(configPowerInfo) || changed;
+        changed = this.buildRangeParameters() || changed;
 
         changed = this.determinePointCosts() || changed;
 
@@ -1244,7 +1302,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
-        // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach.
+        // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach. Should probably for anything with range != self
         if (
             configPowerInfo &&
             (configPowerInfo.behaviors.includes("attack") ||
@@ -3422,46 +3480,6 @@ export class HeroSystem6eItem extends Item {
         const doesBody = this.findModsByXmlid("DOESBODY");
         if (doesBody) {
             this.system.stunBodyDamage = "stunbody";
-        }
-
-        // TODO: Should verify that target and range are not used anywhere as I fixed them up in config.
-        // Range Modifiers "self", "no range", "standard", or "los" based on power
-        const noRange = this.findModsByXmlid("NORANGE");
-        const limitedRange = this.findModsByXmlid("LIMITEDRANGE");
-        const rangeBasedOnStrength = this.findModsByXmlid("RANGEBASEDONSTR");
-        const los = this.findModsByXmlid("LOS");
-        const normalRange = this.findModsByXmlid("NORMALRANGE");
-
-        // No range can be bought to have range. Self only cannot be bought to have range.
-        if (this.system.range === "no range") {
-            const ranged = this.findModsByXmlid("RANGED");
-            if (ranged) {
-                this.system.range = "standard";
-            }
-        }
-
-        // Standard range can be bought up or bought down.
-        if (this.system.range === "standard") {
-            if (noRange) {
-                this.system.range = "no range";
-            } else if (los) {
-                this.system.range = "los";
-            } else if (limitedRange) {
-                this.system.range = "limited range";
-            } else if (rangeBasedOnStrength) {
-                this.system.range = "range based on str";
-            }
-        }
-
-        // Line of sight can be bought down
-        if (this.system.range === "los") {
-            if (normalRange) {
-                this.system.range = "standard";
-            } else if (rangeBasedOnStrength) {
-                this.system.range = "range based on str";
-            } else if (noRange) {
-                this.system.range = "no range";
-            }
         }
     }
 
