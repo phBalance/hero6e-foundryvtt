@@ -1503,7 +1503,7 @@ export class HeroSystem6eItem extends Item {
         return results;
     }
 
-    static itemDataFromXml(xml) {
+    static itemDataFromXml(xml, actor) {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xml, "text/xml");
         const heroJson = {};
@@ -1514,7 +1514,7 @@ export class HeroSystem6eItem extends Item {
             type: "power",
         };
 
-        const powerList = this.actor?.system.is5e
+        const powerList = actor.system.is5e
             ? CONFIG.HERO.powers5e
             : CONFIG.HERO.powers6e;
         for (const itemTag of [

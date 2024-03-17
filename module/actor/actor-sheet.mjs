@@ -548,7 +548,10 @@ export class HeroSystemActorSheet extends ActorSheet {
             </POWER>
         `;
         const pdAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(pdContentsAttack),
+            HeroSystem6eItem.itemDataFromXml(
+                pdContentsAttack,
+                defenseCalculationActor,
+            ),
             { temporary: true, parent: defenseCalculationActor },
         );
         await pdAttack._postUpload();
@@ -594,7 +597,10 @@ export class HeroSystemActorSheet extends ActorSheet {
             </POWER>
         `;
         const edAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(edContentsAttack),
+            HeroSystem6eItem.itemDataFromXml(
+                edContentsAttack,
+                defenseCalculationActor,
+            ),
             { temporary: true, parent: defenseCalculationActor },
         );
         await edAttack._postUpload();
@@ -641,7 +647,10 @@ export class HeroSystemActorSheet extends ActorSheet {
             </POWER>
         `;
         const mdAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(mdContentsAttack),
+            HeroSystem6eItem.itemDataFromXml(
+                mdContentsAttack,
+                defenseCalculationActor,
+            ),
             { temporary: true, parent: defenseCalculationActor },
         );
         await mdAttack._postUpload();
@@ -688,7 +697,10 @@ export class HeroSystemActorSheet extends ActorSheet {
             </POWER>
         `;
         const drainAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(drainContentsAttack),
+            HeroSystem6eItem.itemDataFromXml(
+                drainContentsAttack,
+                defenseCalculationActor,
+            ),
             { temporary: true, parent: defenseCalculationActor },
         );
         await drainAttack._postUpload();

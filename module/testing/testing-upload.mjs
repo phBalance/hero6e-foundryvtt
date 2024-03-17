@@ -38,7 +38,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -105,7 +105,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -151,7 +151,7 @@ export function registerUploadTests(quench) {
                     );
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -199,7 +199,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.dex.value = 15;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -251,7 +251,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -307,7 +310,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -362,7 +368,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -414,7 +423,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -472,7 +484,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -530,7 +545,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -582,7 +600,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -646,7 +667,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -711,7 +735,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -767,7 +794,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -823,7 +853,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -885,7 +918,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -941,7 +977,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -995,7 +1034,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = true;
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -1048,7 +1087,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = true;
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -1101,7 +1140,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = true;
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -1152,7 +1191,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.dex.value = 15;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -1199,7 +1238,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.dex.value = 15;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -1265,7 +1304,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.ego.value = 38;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -1323,7 +1362,7 @@ export function registerUploadTests(quench) {
                         { temporary: true },
                     );
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -1391,7 +1430,7 @@ export function registerUploadTests(quench) {
                         { temporary: true },
                     );
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -1453,7 +1492,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.ego.value = 38;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -1523,7 +1562,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.ego.value = 38;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -1579,7 +1618,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1629,7 +1671,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1679,7 +1724,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1729,7 +1777,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1779,7 +1830,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1829,7 +1883,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1879,7 +1936,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1929,7 +1989,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -1979,7 +2042,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -2029,7 +2095,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -2079,7 +2148,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -2129,7 +2201,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -2179,7 +2254,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -2229,7 +2307,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -2279,7 +2360,10 @@ export function registerUploadTests(quench) {
                             );
                             actor.system.is5e = true;
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -2329,7 +2413,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -2378,7 +2462,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -2428,7 +2512,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -2487,7 +2571,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -2535,7 +2619,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.str.value = 10;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -2591,7 +2675,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.str.value = 15;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -2657,7 +2741,7 @@ export function registerUploadTests(quench) {
                     );
                     actor.system.characteristics.str.value = 15;
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -2709,7 +2793,7 @@ export function registerUploadTests(quench) {
                         { temporary: true },
                     );
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -2754,7 +2838,7 @@ export function registerUploadTests(quench) {
                         { temporary: true },
                     );
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -2799,7 +2883,7 @@ export function registerUploadTests(quench) {
                         { temporary: true },
                     );
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -2866,7 +2950,7 @@ export function registerUploadTests(quench) {
                         { temporary: true },
                     );
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -2927,7 +3011,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -2978,7 +3062,10 @@ export function registerUploadTests(quench) {
                                 { temporary: true },
                             );
                             item = await new HeroSystem6eItem(
-                                HeroSystem6eItem.itemDataFromXml(contents),
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
                                 { temporary: true, parent: actor },
                             );
                             await item._postUpload();
@@ -3042,7 +3129,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3111,7 +3198,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3161,7 +3248,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3219,7 +3306,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3283,7 +3370,7 @@ export function registerUploadTests(quench) {
                         actor.system.characteristics.int.value = 25;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3344,7 +3431,7 @@ export function registerUploadTests(quench) {
                         actor.system.characteristics.int.value = 13;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3406,7 +3493,7 @@ export function registerUploadTests(quench) {
                         actor.system.characteristics.int.value = 13;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3466,7 +3553,7 @@ export function registerUploadTests(quench) {
                         actor.system.characteristics.int.value = 13;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3530,7 +3617,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = true;
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3579,7 +3666,7 @@ export function registerUploadTests(quench) {
                         );
                         actor.system.is5e = false;
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3632,7 +3719,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3686,7 +3773,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3749,7 +3836,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3796,7 +3883,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3852,7 +3939,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3904,7 +3991,7 @@ export function registerUploadTests(quench) {
                             { temporary: true },
                         );
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -3964,7 +4051,7 @@ export function registerUploadTests(quench) {
                     );
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4025,14 +4112,14 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         mpItem = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(mpContents),
+                            HeroSystem6eItem.itemDataFromXml(mpContents, actor),
                             { temporary: true, parent: actor },
                         );
                         await mpItem._postUpload();
                         actor.items.set(mpItem.system.XMLID, mpItem);
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4105,14 +4192,14 @@ export function registerUploadTests(quench) {
                         );
 
                         mpItem = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(mpContents),
+                            HeroSystem6eItem.itemDataFromXml(mpContents, actor),
                             { temporary: true, parent: actor },
                         );
                         await mpItem._postUpload();
                         actor.items.set(mpItem.system.XMLID, mpItem);
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4190,7 +4277,7 @@ export function registerUploadTests(quench) {
 
                         // Elemental Control
                         ecItem = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(ecContents),
+                            HeroSystem6eItem.itemDataFromXml(ecContents, actor),
                             { temporary: true, parent: actor },
                         );
                         await ecItem._postUpload();
@@ -4198,7 +4285,7 @@ export function registerUploadTests(quench) {
 
                         // Power in Elemental Control
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4277,7 +4364,7 @@ export function registerUploadTests(quench) {
                     actor.system.is5e = true;
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4340,7 +4427,7 @@ export function registerUploadTests(quench) {
                     actor.system.is5e = true;
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4394,7 +4481,7 @@ export function registerUploadTests(quench) {
                     actor.system.is5e = true;
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4466,7 +4553,7 @@ export function registerUploadTests(quench) {
                     actor.system.is5e = true;
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4522,7 +4609,7 @@ export function registerUploadTests(quench) {
                     );
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4587,7 +4674,7 @@ export function registerUploadTests(quench) {
                     );
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4640,7 +4727,7 @@ export function registerUploadTests(quench) {
                     );
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4690,7 +4777,7 @@ export function registerUploadTests(quench) {
                     );
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -4738,7 +4825,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4789,7 +4876,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4849,7 +4936,7 @@ export function registerUploadTests(quench) {
                         actor.system.is5e = true;
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4899,7 +4986,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4942,7 +5029,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -4992,7 +5079,10 @@ export function registerUploadTests(quench) {
                     );
 
                     skillEnhancerItem = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(skillEnhancerContents),
+                        HeroSystem6eItem.itemDataFromXml(
+                            skillEnhancerContents,
+                            actor,
+                        ),
                         { temporary: true, parent: actor },
                     );
                     await skillEnhancerItem._postUpload();
@@ -5002,7 +5092,7 @@ export function registerUploadTests(quench) {
                     );
 
                     skillItem = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await skillItem._postUpload();
@@ -5074,7 +5164,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5130,7 +5220,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5184,7 +5274,7 @@ export function registerUploadTests(quench) {
                     );
 
                     item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await item._postUpload();
@@ -5235,7 +5325,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5289,7 +5379,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5349,7 +5439,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5406,7 +5496,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5463,7 +5553,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5520,7 +5610,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5574,7 +5664,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5628,7 +5718,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5685,7 +5775,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();
@@ -5742,7 +5832,7 @@ export function registerUploadTests(quench) {
                         );
 
                         item = await new HeroSystem6eItem(
-                            HeroSystem6eItem.itemDataFromXml(contents),
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
                             { temporary: true, parent: actor },
                         );
                         await item._postUpload();

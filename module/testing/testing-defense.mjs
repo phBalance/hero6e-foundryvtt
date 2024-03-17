@@ -28,14 +28,14 @@ export function registerDefenseTests(quench) {
                         </POWER>
                     `;
                     const itemDefense = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await itemDefense._postUpload();
                     actor.items.set(itemDefense.system.XMLID, itemDefense);
 
                     const itemAttack = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack, actor),
                         { temporary: true, parent: actor },
                     );
                     await itemAttack._postUpload();
@@ -63,14 +63,14 @@ export function registerDefenseTests(quench) {
                         </POWER>
                     `;
                     const itemDefense = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await itemDefense._postUpload();
                     actor.items.set(itemDefense.system.XMLID, itemDefense);
 
                     const itemAttack = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack, actor),
                         { temporary: true, parent: actor },
                     );
                     await itemAttack._postUpload();
@@ -99,14 +99,14 @@ export function registerDefenseTests(quench) {
                         </POWER>
                     `;
                     const itemDefense = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await itemDefense._postUpload();
                     actor.items.set(itemDefense.system.XMLID, itemDefense);
 
                     const itemAttack = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack, actor),
                         { temporary: true, parent: actor },
                     );
                     await itemAttack._postUpload();
@@ -135,14 +135,14 @@ export function registerDefenseTests(quench) {
                     </POWER>
                 `;
                     const itemDefense = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents),
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
                         { temporary: true, parent: actor },
                     );
                     await itemDefense._postUpload();
                     actor.items.set(itemDefense.system.XMLID, itemDefense);
 
                     const itemAttack = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contentsAttack),
+                        HeroSystem6eItem.itemDataFromXml(contentsAttack, actor),
                         { temporary: true, parent: actor },
                     );
 
