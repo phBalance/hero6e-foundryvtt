@@ -53,6 +53,7 @@ export function getPowerInfo(options) {
     }
 
     // LowerCase
+    // TODO: Make powers correct and remove this
     if (powerInfo?.duration)
         powerInfo.duration = powerInfo.duration.toLowerCase();
 
