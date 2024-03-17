@@ -640,6 +640,22 @@ export class HeroSystem6eItem extends Item {
         return changed;
     }
 
+    setInitialRange(power) {
+        let changed = false;
+
+        if (power) {
+            this.system.range = power.range;
+
+            changed = true;
+        } else {
+            ui.notifications.warn(
+                `${this.actor?.name}/${this.name} doesn't have power (${power}) defined`,
+            );
+        }
+
+        return changed;
+    }
+
     determinePointCosts() {
         let changed = false;
 
@@ -1160,6 +1176,8 @@ export class HeroSystem6eItem extends Item {
 
         let changed = this.setInitialItemValueAndMax();
 
+        changed = this.setInitialRange(configPowerInfo);
+
         changed = this.determinePointCosts() || changed;
 
         // CHARGES
@@ -1183,6 +1201,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // DEFENSES
+        // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
         if (
             configPowerInfo &&
             configPowerInfo.behaviors.includes("activatable")
@@ -1225,6 +1244,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
+        // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach.
         if (
             configPowerInfo &&
             (configPowerInfo.behaviors.includes("attack") ||
@@ -3136,7 +3156,7 @@ export class HeroSystem6eItem extends Item {
         const ocv = parseInt(this.system.OCV) || 0;
         const dcv = parseInt(this.system.DCV) || 0;
 
-        // Check if this is a MARTIAL attack.  If so then EXTRA DC's may be present
+        // Check if this is a MARTIAL attack.  If so then EXTRA DCs may be present
         if (this.system.XMLID == "MANEUVER") {
             let EXTRADC = null;
 
@@ -3182,10 +3202,6 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         }
-
-        // Active cost is required for endurance calculation.
-        // It should include all advantages (which we don't handle very well at the moment)
-        // However this should be calculated during power upload (not here)
 
         this.system.subType = "attack";
         this.system.class = input === "ED" ? "energy" : "physical";
@@ -3392,6 +3408,7 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
         }
 
+        // Damage effect/type modifiers
         const noStrBonus = this.findModsByXmlid("NOSTRBONUS");
         if (noStrBonus) {
             this.system.usesStrength = false;
@@ -3405,6 +3422,46 @@ export class HeroSystem6eItem extends Item {
         const doesBody = this.findModsByXmlid("DOESBODY");
         if (doesBody) {
             this.system.stunBodyDamage = "stunbody";
+        }
+
+        // TODO: Should verify that target and range are not used anywhere as I fixed them up in config.
+        // Range Modifiers "self", "no range", "standard", or "los" based on power
+        const noRange = this.findModsByXmlid("NORANGE");
+        const limitedRange = this.findModsByXmlid("LIMITEDRANGE");
+        const rangeBasedOnStrength = this.findModsByXmlid("RANGEBASEDONSTR");
+        const los = this.findModsByXmlid("LOS");
+        const normalRange = this.findModsByXmlid("NORMALRANGE");
+
+        // No range can be bought to have range. Self only cannot be bought to have range.
+        if (this.system.range === "no range") {
+            const ranged = this.findModsByXmlid("RANGED");
+            if (ranged) {
+                this.system.range = "standard";
+            }
+        }
+
+        // Standard range can be bought up or bought down.
+        if (this.system.range === "standard") {
+            if (noRange) {
+                this.system.range = "no range";
+            } else if (los) {
+                this.system.range = "los";
+            } else if (limitedRange) {
+                this.system.range = "limited range";
+            } else if (rangeBasedOnStrength) {
+                this.system.range = "range based on str";
+            }
+        }
+
+        // Line of sight can be bought down
+        if (this.system.range === "los") {
+            if (normalRange) {
+                this.system.range = "standard";
+            } else if (rangeBasedOnStrength) {
+                this.system.range = "range based on str";
+            } else if (noRange) {
+                this.system.range = "no range";
+            }
         }
     }
 
