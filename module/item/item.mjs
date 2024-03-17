@@ -1180,9 +1180,15 @@ export class HeroSystem6eItem extends Item {
         const limitedRange = this.findModsByXmlid("LIMITEDRANGE");
         const rangeBasedOnStrength = this.findModsByXmlid("RANGEBASEDONSTR");
         const los = this.findModsByXmlid("LOS");
-        const normalRange = this.findModsByXmlid("NORMALRANGE");
+        const normalLimitedRange = this.findModsByXmlid("NORMALRANGE");
         const noRangeModifiers = this.findModsByXmlid("NORANGEMODIFIER");
         const usableOnOthers = this.findModsByXmlid("UOO");
+        const boecv = this.findModsByXmlid("BOECV");
+
+        // Based on EGO combat value comes with line of sight
+        if (boecv) {
+            this.system.range = "los";
+        }
 
         // Self only powers cannot be bought to have range unless they become usable on others at which point
         // they gain no range.
@@ -1216,8 +1222,8 @@ export class HeroSystem6eItem extends Item {
 
         // Line of sight can be bought down
         if (this.system.range === "los") {
-            if (normalRange) {
-                this.system.range = "standard";
+            if (normalLimitedRange) {
+                this.system.range = "limited normal range";
             } else if (rangeBasedOnStrength) {
                 this.system.range = "range based on str";
             } else if (noRange) {
@@ -1234,7 +1240,6 @@ export class HeroSystem6eItem extends Item {
         let changed = this.setInitialItemValueAndMax();
 
         changed = this.setInitialRange(configPowerInfo) || changed;
-        changed = this.buildRangeParameters() || changed;
 
         changed = this.determinePointCosts() || changed;
 
@@ -1315,6 +1320,8 @@ export class HeroSystem6eItem extends Item {
                 this.makeAttack();
             }
         }
+
+        changed = this.buildRangeParameters() || changed;
 
         const aoeModifier = this.getAoeModifier();
         if (aoeModifier) {

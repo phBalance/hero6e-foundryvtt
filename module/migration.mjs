@@ -506,6 +506,12 @@ async function migrate_actor_items_to_3_0_63(actor) {
         const noRangeModifiers = item.findModsByXmlid("NORANGEMODIFIER");
         const usableOnOthers = item.findModsByXmlid("UOO");
 
+        // Based on EGO combat value gets line of sight by default
+        const boecv = item.findModsByXmlid("BOECV");
+        if (boecv) {
+            item.system.range = "los";
+        }
+
         // Self only powers cannot be bought to have range unless they become usable on others at which point
         // they gain no range.
         if (item.system.range === "self") {
@@ -540,7 +546,7 @@ async function migrate_actor_items_to_3_0_63(actor) {
         // Line of sight can be bought down
         if (item.system.range === "los") {
             if (normalRange) {
-                item.system.range = "standard";
+                item.system.range = "limited normal range";
             } else if (rangeBasedOnStrength) {
                 item.system.range = "range based on str";
             } else if (noRange) {

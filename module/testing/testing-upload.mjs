@@ -6046,7 +6046,7 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                describe("los -> standard range", async function () {
+                describe("los -> limited normal range", async function () {
                     const contents = `
                         <POWER XMLID="EGOATTACK" ID="1710649328008" BASECOST="0.0" LEVELS="1" ALIAS="Ego Attack" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
@@ -6099,7 +6099,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "standard");
+                        assert.equal(item.system.range, "limited normal range");
                     });
                 });
 
@@ -6157,6 +6157,64 @@ export function registerUploadTests(quench) {
 
                     it("range", function () {
                         assert.equal(item.system.range, "range based on str");
+                    });
+                });
+
+                describe("BOECV", async function () {
+                    const contents = `
+                        <POWER XMLID="DRAIN" ID="1710713242438" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="BOECV Drain" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="BOECV" ID="1710713433315" BASECOST="1.0" LEVELS="0" ALIAS="Based On EGO Combat Value" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MENTAL" OPTIONID="MENTAL" OPTION_ALIAS="Mental Defense applies" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(contents, actor),
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Drain BODY 1d6, Based On EGO Combat Value (Mental Defense applies; +1)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 20);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 20);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 1);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 2);
+                    });
+
+                    it("range", function () {
+                        assert.equal(item.system.range, "los");
                     });
                 });
             });
