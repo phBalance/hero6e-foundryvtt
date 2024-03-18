@@ -206,6 +206,17 @@ export class HeroSystem6eItem extends Item {
             : false;
     }
 
+    hasSuccessRoll() {
+        const powerInfo = getPowerInfo({
+            item: this,
+        });
+        return (
+            powerInfo?.behaviors.includes("success") ||
+            (this.system.XMLID === "CUSTOMSKILL" &&
+                parseInt(this.system.ROLL) > 0)
+        );
+    }
+
     async roll(event) {
         if (!this.actor.canAct(true)) return;
 
@@ -276,7 +287,7 @@ export class HeroSystem6eItem extends Item {
                 const powerInfo = getPowerInfo({
                     item: this,
                 });
-                const hasSuccessRoll = powerInfo?.behaviors.includes("success");
+                const hasSuccessRoll = this.hasSuccessRoll();
                 const isSkill = powerInfo?.type.includes("skill");
 
                 if (hasSuccessRoll && isSkill) {
@@ -3500,10 +3511,7 @@ export class HeroSystem6eItem extends Item {
             actor: this.actor,
         });
 
-        if (
-            !configPowerInfo ||
-            !configPowerInfo.behaviors.includes("success")
-        ) {
+        if (!this.hasSuccessRoll()) {
             skillData.roll = null;
             return;
         }
@@ -3755,6 +3763,17 @@ export class HeroSystem6eItem extends Item {
         } else if (skillData.PROFICIENCY) {
             roll = "10-";
             tags.push({ value: 10, name: "Proficiency" });
+        } else if (skillData.XMLID === "CUSTOMSKILL") {
+            const rollValue = parseInt(skillData.ROLL || 0);
+            if (!rollValue) {
+                roll = null;
+            } else {
+                roll = `${rollValue}-`;
+                tags.push({
+                    value: rollValue,
+                    name: skillData.NAME || skillData.ALIAS,
+                });
+            }
         } else if (skillData.CHARACTERISTIC) {
             const characteristic = skillData.CHARACTERISTIC.toLowerCase();
 
