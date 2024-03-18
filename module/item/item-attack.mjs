@@ -2024,7 +2024,7 @@ async function _calcDamage(heroRoller, item, options) {
     //       or the fact that there is no impenetrable in 5e which uses hardened instead.
     // Penetrating
     const penetratingBody = item.system.penetrating
-        ? Math.max(0, body - options.impenetrableValue)
+        ? Math.max(0, body - (options.impenetrableValue || 0))
         : 0;
 
     // get hit location
