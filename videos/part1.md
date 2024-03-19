@@ -1,9 +1,9 @@
 ## Introduction
 Welcome to the Unofficial Hero System for FoundryVTT.
-To get started the game master will need to purchase a FoundryVTT license key for $50.
-It is highly recommended that the game master purchase HERO Designer for $25.
+To get started the game master will need to purchase a FoundryVTT license key for $50 USD.
+It is highly recommended that the game master purchase HERO Designer for $25 USD.
   - The built in editing of characters is limited.  HD provides a richer and complete character editing experience.
-The game master (and possibly players) will also need an appropriate HERO System rulebook ($15 or more)
+The game master (and possibly players) will also need an appropriate HERO System rulebook ($15 USD or more)
 
 ## History & Background
 Hero v1 transistioned into Hero v2: Ability to import HDC files. Many common powers and skills are automated, but there are still some powers that do not supported.  Activley being developed by very small group of fans.  Support for 6e and 5e.
@@ -11,27 +11,23 @@ Official Hero System Basic: No HDC support.  Includes HERO system text of rules.
 
 ## Foundry Getting Started Videos
 Provide link in video and in YouTube comments/text.
+https://foundryvtt.com/article/tutorial/
 
 ## Setup
 Adding system to Foundry
 Adding drag ruler module
 
-## Creating HDC file with HD
-step thru launching HD and creating a simple PC with a blast attack and simple defenses. Save HDC file.
-step thru launching HD and creating a simple NPC with a blast attack and simple defenses. Save HDC file.
-point out 5e/6e templates
-Create Actor Tokens
-Upload from HDC
-
-Open actors and compare with HD.
+## Creating Actors
+Upload 6e sample actor. Simple PC with a blast attack and simple defenses. Save HDC file.
 Defense summary.
 Explain each tab.
 Editing characteristics and abilities.
 
 ## Create Scene
-reference to other FoundryVTT tutorials on how to make a better scene.  
-Not discussing walls, height.
-add actor to scene as a token
+Create Actor Tokens by draging to scene.
+
+## Create Scene
+Create Actor Tokens by draging to scene.
 
 ## Sample attack
 targeting
