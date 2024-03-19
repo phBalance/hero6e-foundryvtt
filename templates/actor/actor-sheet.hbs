@@ -722,7 +722,10 @@
                                     height="24" /></div>
                         </td>
                         <td>{{item.system.realCost}}</td>
-                        <td class="left">
+                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
+                            {{#if item.system.childIdx}}
+                                {{item.system.childIdx}})
+                            {{/if}}
                             {{{itemFullDescription item}}}
                         </td>
                         <td>
