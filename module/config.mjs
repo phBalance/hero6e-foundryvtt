@@ -2666,19 +2666,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-
-    addPower(
-        {
-            key: "WELL_CONNECTED",
-            type: ["perk", "enhancer"],
-            behaviors: [],
-            duration: "constant",
-            target: "self only",
-            range: "self",
-            costEnd: false,
-        },
-        {},
-    );
 })();
 
 (function addFrameworksToPowerList() {
@@ -3457,6 +3444,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Weapon Master",
             costEnd: false,
             costPerLevel: 0,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            key: "WELL_CONNECTED",
+            type: ["perk", "enhancer"],
+            behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
         },
         {},
     );
