@@ -1,3 +1,84 @@
+const DICE_SO_NICE_CUSTOM_SETS = {
+    STUNx: {
+        colorset: "Stun Multiplier",
+        foreground: "white",
+        background: "blue",
+        edge: "blue",
+        material: "wood",
+        fontScale: {
+            d6: 1.1,
+        },
+        visibility: "visible",
+    },
+    HIT_LOC: {
+        colorset: "Hit Location - Body Part",
+        foreground: "black",
+        background: "red",
+        edge: "red",
+        material: "wood",
+        fontScale: {
+            d6: 1.1,
+        },
+        visibility: "visible",
+    },
+    HIT_LOC_SIDE: {
+        colorset: "Hit Location - Body Side",
+        foreground: "black",
+        background: "green",
+        edge: "green",
+        material: "wood",
+        fontScale: {
+            d6: 1.1,
+        },
+        visibility: "visible",
+    },
+};
+
+const DICE_SO_NICE_CATEGORY_NAME = "Hero System 6e (Unofficial) V2";
+
+/**
+ * Add colour sets into Dice So Nice! This allows users to see what the colour set is for each function.
+ * Players can then choose to use that theme for maximum confusion as to which are their rolls and which
+ * are the extras for hit location or stun multiplier.
+ */
+Hooks.once("diceSoNiceReady", (diceSoNice) => {
+    diceSoNice.addColorset(
+        {
+            ...{
+                name: "Stun Multiplier",
+                description: "Stun Multiplier Dice",
+                category: DICE_SO_NICE_CATEGORY_NAME,
+            },
+            ...DICE_SO_NICE_CUSTOM_SETS.STUNx,
+        },
+        "default",
+    );
+
+    diceSoNice.addColorset(
+        {
+            ...{
+                name: "Hit Location - Body Part",
+                description: "Hit Location - Body Part Dice",
+                category: DICE_SO_NICE_CATEGORY_NAME,
+            },
+            ...DICE_SO_NICE_CUSTOM_SETS.HIT_LOC,
+        },
+        "default",
+    );
+
+    diceSoNice.addColorset(
+        {
+            ...{
+                name: "Hit Location - Body Side",
+                description: "Hit Location - Body Side Dice",
+                category: DICE_SO_NICE_CATEGORY_NAME,
+            },
+            ...DICE_SO_NICE_CUSTOM_SETS.HIT_LOC_SIDE,
+        },
+        "default",
+    );
+});
+
 /**
  * @typedef {Object} TermMetadataEntry
  * @param {string} term
@@ -67,6 +148,17 @@ export class HeroRoller {
 
     static #extractPropertyFromTermsCluster(termsCluster, property) {
         return termsCluster.map((termCluster) => termCluster[property]);
+    }
+
+    /**
+     * Add Dice So Nice dice skinning to rolls.
+     */
+    static #addDiceSoNiceSkinning(roll) {
+        if (roll?.options?.appearance) {
+            roll.dice[0].options.appearance = roll.options.appearance;
+        }
+
+        return roll;
     }
 
     /**
@@ -428,10 +520,14 @@ export class HeroRoller {
      */
     rawRolls() {
         return [
-            this._rollObj,
-            this._killingStunMultiplierHeroRoller?.rawRolls(),
-            this._hitLocationRoller?.rawRolls(),
-            this._hitSideRoller?.rawRolls(),
+            HeroRoller.#addDiceSoNiceSkinning(this._rollObj),
+            HeroRoller.#addDiceSoNiceSkinning(
+                this._killingStunMultiplierHeroRoller?.rawRolls(),
+            ),
+            HeroRoller.#addDiceSoNiceSkinning(
+                this._hitLocationRoller?.rawRolls(),
+            ),
+            HeroRoller.#addDiceSoNiceSkinning(this._hitSideRoller?.rawRolls()),
         ]
             .flat()
             .filter(Boolean);
@@ -878,7 +974,13 @@ export class HeroRoller {
             // NOTE: It appears there is no standard effect for the STUNx per APG p 53
             //       although there don't appear to be any mention of this in other books.
             this._killingStunMultiplierHeroRoller = new HeroRoller(
-                {},
+                game.settings.get(game.system.id, "alphaTesting")
+                    ? {
+                          appearance: foundry.utils.deepClone(
+                              DICE_SO_NICE_CUSTOM_SETS.STUNx,
+                          ),
+                      }
+                    : {},
                 this._buildRollClass,
             )
                 .makeBasicRoll()
@@ -903,14 +1005,32 @@ export class HeroRoller {
             (this._type === HeroRoller.ROLL_TYPE.NORMAL ||
                 this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
-            this._hitLocationRoller = new HeroRoller({}, this._buildRollClass)
+            this._hitLocationRoller = new HeroRoller(
+                game.settings.get(game.system.id, "alphaTesting")
+                    ? {
+                          appearance: foundry.utils.deepClone(
+                              DICE_SO_NICE_CUSTOM_SETS.HIT_LOC,
+                          ),
+                      }
+                    : {},
+                this._buildRollClass,
+            )
                 .makeBasicRoll()
                 .addDice(3);
             await this._hitLocationRoller.roll();
 
             const locationRollTotal = this._hitLocationRoller.getBasicTotal();
 
-            this._hitSideRoller = new HeroRoller({}, this._buildRollClass)
+            this._hitSideRoller = new HeroRoller(
+                game.settings.get(game.system.id, "alphaTesting")
+                    ? {
+                          appearance: foundry.utils.deepClone(
+                              DICE_SO_NICE_CUSTOM_SETS.HIT_LOC_SIDE,
+                          ),
+                      }
+                    : {},
+                this._buildRollClass,
+            )
                 .makeBasicRoll()
                 .addDice(1);
             await this._hitSideRoller.roll();
