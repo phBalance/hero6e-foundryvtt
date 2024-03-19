@@ -2,8 +2,9 @@
 
 ## Version 3.0.64 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Actors that were upload prior to 3.0.34 are no longer supported.  You will need to re-upload these HDC files.  You will see a limited number of warnings during migration.  Advanced users can view all warnings in the browser developer console. [#856](https://github.com/dmdorman/hero6e-foundryvtt/issues/856)
+- Actors that were upload prior to 3.0.35 are no longer supported.  You will need to re-upload these HDC files.  You will see a limited number of warnings during migration.  Advanced users can view all warnings in the browser developer console. [#856](https://github.com/dmdorman/hero6e-foundryvtt/issues/856)
 - Removed ability to create manual attacks, skills, powers, etc.  Any manually created items breaks some of the new codebase. [#856](https://github.com/dmdorman/hero6e-foundryvtt/issues/856)
+- Actors with existing manual attacks, skills, powers, etc will show errors during migration and when the actor sheet is opened.  You can either delete the offending manual items, or (better yet) re-upload from HDC.  We realize that there are missing features in the current system, however we believe you can create equivalant HDC powers to represent any need for a manually created attack.  For example KNOCKBACK (missing feature) can be simulated with a HAND ATTACK with NO STR and NO END modifiers. Please reach out on Discord or GitHub if you are unable to create an attack to get around any missing features. [#856](https://github.com/dmdorman/hero6e-foundryvtt/issues/856)
 
 
 
