@@ -42,6 +42,16 @@ export class HeroSystemActorSheet extends ActorSheet {
     async getData() {
         const data = super.getData();
 
+        // Show unsupported warning when sheet opens.
+        if (
+            !data.actor.system?.versionHeroSystem6eUpload &&
+            this._priorState <= 0
+        ) {
+            ui.notifications.warn(
+                `The Actor "${data.actor.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
+            );
+        }
+
         const equipmentWeightPercentage =
             parseInt(
                 game.settings.get(game.system.id, "equipmentWeightPercentage"),
