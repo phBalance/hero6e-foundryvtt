@@ -2,6 +2,7 @@ import { HeroSystem6eItem } from "./item/item.mjs";
 import { determineCostPerActivePoint } from "./utility/adjustment.mjs";
 import { RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
+import { HeroSystem6eActor } from "./actor/actor.mjs";
 
 function getAllActorsInGame() {
     return [
@@ -12,6 +13,8 @@ function getAllActorsInGame() {
             .filter((actorLink) => actorLink),
     ];
 }
+
+let skippedBecauseOld = 0;
 
 async function migrateToVersion(
     migratesToVersion,
@@ -38,6 +41,29 @@ async function migrateToVersion(
                     originalTotal - queue.length
                 } of ${originalTotal} to ${migratesToVersion}`,
             );
+
+            // Skip super old actors without versionHeroSystem6eUpload
+            if (queueElement instanceof HeroSystem6eActor) {
+                if (!queueElement.system?.versionHeroSystem6eUpload) {
+                    skippedBecauseOld++;
+
+                    if (skippedBecauseOld < 3) {
+                        ui.notifications.warn(
+                            `The Actor "${queueElement.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
+                        );
+                    } else {
+                        if (skippedBecauseOld === 3) {
+                            ui.notifications.warn(
+                                `Several additional actors are no longer supported.  Please re-upload them from their HDCs.`,
+                            );
+                        }
+                        console.warn(
+                            `The Actor "${queueElement.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
+                        );
+                    }
+                    continue;
+                }
+            }
 
             await asyncFn(queueElement);
         }
