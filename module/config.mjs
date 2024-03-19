@@ -2666,6 +2666,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            key: "WELL_CONNECTED",
+            type: ["perk", "enhancer"],
+            behaviors: [],
+            duration: "constant",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+        },
+        {},
+    );
 })();
 
 (function addFrameworksToPowerList() {
