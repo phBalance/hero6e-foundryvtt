@@ -1005,21 +1005,29 @@ export class HeroRoller {
             (this._type === HeroRoller.ROLL_TYPE.NORMAL ||
                 this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
-            this._hitLocationRoller = new HeroRoller(
-                game.settings.get(game.system.id, "alphaTesting")
-                    ? {
-                          appearance: foundry.utils.deepClone(
-                              DICE_SO_NICE_CUSTOM_SETS.HIT_LOC,
-                          ),
-                      }
-                    : {},
-                this._buildRollClass,
-            )
-                .makeBasicRoll()
-                .addDice(3);
-            await this._hitLocationRoller.roll();
+            let locationName;
 
-            const locationRollTotal = this._hitLocationRoller.getBasicTotal();
+            if (this._alreadyHitLocation === "none") {
+                this._hitLocationRoller = new HeroRoller(
+                    game.settings.get(game.system.id, "alphaTesting")
+                        ? {
+                              appearance: foundry.utils.deepClone(
+                                  DICE_SO_NICE_CUSTOM_SETS.HIT_LOC,
+                              ),
+                          }
+                        : {},
+                    this._buildRollClass,
+                )
+                    .makeBasicRoll()
+                    .addDice(3);
+                await this._hitLocationRoller.roll();
+                const locationRollTotal =
+                    this._hitLocationRoller.getBasicTotal();
+
+                locationName = CONFIG.HERO.hitLocationsToHit[locationRollTotal];
+            } else {
+                locationName = this._alreadyHitLocation;
+            }
 
             this._hitSideRoller = new HeroRoller(
                 game.settings.get(game.system.id, "alphaTesting")
@@ -1037,10 +1045,6 @@ export class HeroRoller {
 
             const locationSideRollTotal = this._hitSideRoller.getBasicTotal();
 
-            const locationName =
-                this._alreadyHitLocation && this._alreadyHitLocation !== "none"
-                    ? this._alreadyHitLocation
-                    : CONFIG.HERO.hitLocationsToHit[locationRollTotal];
             const locationSide = locationSideRollTotal >= 4 ? "Right" : "Left";
 
             this._hitLocation = {
