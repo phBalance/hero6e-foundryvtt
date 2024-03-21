@@ -1053,8 +1053,8 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
-                            side: "Right",
-                            fullName: "Right Foot",
+                            side: "none",
+                            fullName: "Foot",
                             stunMultiplier: 0.5,
                             bodyMultiplier: 0.5,
                         });
@@ -1077,7 +1077,7 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Head",
-                            side: "Left",
+                            side: "none",
                             fullName: "Head",
                             stunMultiplier: 2,
                             bodyMultiplier: 2,
@@ -1101,7 +1101,7 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Head",
-                            side: "Left",
+                            side: "none",
                             fullName: "Head",
                             stunMultiplier: 2,
                             bodyMultiplier: 2,
@@ -1125,8 +1125,56 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
-                            side: "Left",
-                            fullName: "Left Foot",
+                            side: "none",
+                            fullName: "Foot",
+                            stunMultiplier: 0.5,
+                            bodyMultiplier: 0.5,
+                        });
+                    });
+
+                    it("should work with guaranteed hit location but no hit side", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addToHitLocation(true, "Foot", false, "none")
+                            .addDice(3)
+                            .addDiceMinus1(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // But we should be able to get a hit location that is not
+                        // determined by standard effect.
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "none",
+                            fullName: "Foot",
+                            stunMultiplier: 0.5,
+                            bodyMultiplier: 0.5,
+                        });
+                    });
+
+                    it("should work with guaranteed hit location and hit side", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeNormalRoll()
+                            .addToHitLocation(true, "Foot", true, "Right")
+                            .addDice(3)
+                            .addDiceMinus1(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        // But we should be able to get a hit location that is not
+                        // determined by standard effect.
+                        const hitLocation = roller.getHitLocation();
+                        expect(hitLocation).to.deep.equal({
+                            name: "Foot",
+                            side: "Right",
+                            fullName: "Right Foot",
                             stunMultiplier: 0.5,
                             bodyMultiplier: 0.5,
                         });
@@ -1974,8 +2022,8 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
-                            side: "Right",
-                            fullName: "Right Foot",
+                            side: "none",
+                            fullName: "Foot",
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -2019,8 +2067,8 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
-                            side: "Right",
-                            fullName: "Right Foot",
+                            side: "none",
+                            fullName: "Foot",
                             stunMultiplier: 8,
                             bodyMultiplier: 0.5,
                         });
@@ -2064,8 +2112,8 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
-                            side: "Right",
-                            fullName: "Right Foot",
+                            side: "none",
+                            fullName: "Foot",
                             stunMultiplier: 0,
                             bodyMultiplier: 0.5,
                         });
@@ -2086,8 +2134,8 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
-                            side: "Right",
-                            fullName: "Right Foot",
+                            side: "none",
+                            fullName: "Foot",
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -2108,7 +2156,7 @@ export function registerDiceTests(quench) {
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Head",
-                            side: "Left",
+                            side: "none",
                             fullName: "Head",
                             stunMultiplier: 5,
                             bodyMultiplier: 2,

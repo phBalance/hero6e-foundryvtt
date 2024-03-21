@@ -140,6 +140,11 @@ HERO.hitLocations = {
     Foot: [1, 0.5, 0.5, -8],
 };
 
+HERO.hitLocationSide = {
+    Left: "Left",
+    Right: "Right",
+};
+
 // TODO: This could be created from powers.
 HERO.movementPowers = {
     extradimensionalmovement: "Extra Dimensional Movement",

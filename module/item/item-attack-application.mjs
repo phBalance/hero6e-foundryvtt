@@ -87,6 +87,10 @@ export class ItemAttackFormApplication extends FormApplication {
             }
         }
 
+        // Initialize aim to the default option values
+        this.data.aim ??= "none";
+        this.data.aimSide ??= "none";
+
         data.ocvMod ??= item.system.ocv;
         data.dcvMod ??= item.system.dcv;
         data.effectiveStr ??= data.str;
@@ -109,7 +113,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.cslChoices.dc = "dc";
             }
 
-            // CSL radioBoxes namesF
+            // CSL radioBoxes names
             data.csl = [];
             for (let c = 0; c < parseInt(csl.skill.system.LEVELS || 0); c++) {
                 data.csl.push({
@@ -161,6 +165,30 @@ export class ItemAttackFormApplication extends FormApplication {
         this._updateCsl(event, formData);
 
         this.data.aim = formData.aim;
+        this.data.aimSide = formData.aimSide;
+
+        // Confirm that the aimed location and side are appropriate.
+        // If we have full hit location damage tracking enabled then we need to
+        // have a side provided with the hit location (e.g. left arm). If we don't
+        // have a valid combinations of these then disable the roll button.
+        // If we just have hit locations then we don't care about the side matching
+        if (
+            game.settings.get("hero6efoundryvttv2", "hit locations") &&
+            game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all"
+        ) {
+            if (
+                CONFIG.HERO.sidedLocations.has(this.data.aim) &&
+                this.data.aimSide === "none"
+            ) {
+                this.data.aimSide = "Left";
+            } else if (
+                !CONFIG.HERO.sidedLocations.has(this.data.aim) &&
+                this.data.aimSide !== "none"
+            ) {
+                this.data.aimSide = "none";
+            }
+        }
+
         this.data.ocvMod = formData.ocvMod;
         this.data.dcvMod = formData.dcvMod;
         this.data.effectiveStr = formData.effectiveStr;
@@ -171,6 +199,9 @@ export class ItemAttackFormApplication extends FormApplication {
                 this.data.item.charges?.value - 1,
             ),
         );
+
+        // Show any changes
+        this.render();
     }
 
     async _updateCsl(event, formData) {

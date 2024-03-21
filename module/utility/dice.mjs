@@ -194,6 +194,9 @@ export class HeroRoller {
         this._useHitLocation = false;
         this._alreadyHitLocation = "none";
 
+        this._useHitLocationSide = false;
+        this._alreadyHitLocationSide = "none";
+
         this._successValue = undefined;
         this._successRolledValue = undefined;
 
@@ -284,10 +287,20 @@ export class HeroRoller {
         return this;
     }
 
-    addToHitLocation(apply = true, alreadyHitLocation) {
-        if (apply) {
-            this._useHitLocation = true;
-            this._alreadyHitLocation = alreadyHitLocation || "none";
+    addToHitLocation(
+        useHitLocation = true,
+        alreadyHitLocation = "none",
+        useHitLocationSide = false,
+        alreadyHitLocationSide = "none",
+    ) {
+        if (useHitLocation) {
+            this._useHitLocation = useHitLocation;
+            this._alreadyHitLocation = alreadyHitLocation;
+
+            this._useHitLocationSide = useHitLocationSide;
+            if (useHitLocationSide) {
+                this._alreadyHitLocationSide = alreadyHitLocationSide;
+            }
         }
         return this;
     }
@@ -891,6 +904,8 @@ export class HeroRoller {
             _hitLocation: this._hitLocation,
             _useHitLocation: this._useHitLocation,
             _alreadyHitLocation: this._alreadyHitLocation,
+            _useHitLocationSide: this._useHitLocationSide,
+            _alreadyHitLocationSide: this._alreadyHitLocationSide,
             _hitLocationRoller: this._hitLocationRoller?.toData(),
             _hitSideRoller: this._hitSideRoller?.toData(),
 
@@ -936,6 +951,8 @@ export class HeroRoller {
         heroRoller._hitLocation = dataObj._hitLocation;
         heroRoller._useHitLocation = dataObj._useHitLocation;
         heroRoller._alreadyHitLocation = dataObj._alreadyHitLocation;
+        heroRoller._useHitLocationSide = dataObj._useHitLocationSide;
+        heroRoller._alreadyHitLocationSide = dataObj._alreadyHitLocationSide;
         heroRoller._hitLocationRoller = dataObj._hitLocationRoller
             ? HeroRoller.fromData(dataObj._hitLocationRoller)
             : undefined;
@@ -1029,30 +1046,42 @@ export class HeroRoller {
                 locationName = this._alreadyHitLocation;
             }
 
-            this._hitSideRoller = new HeroRoller(
-                game.settings.get(game.system.id, "alphaTesting")
-                    ? {
-                          appearance: foundry.utils.deepClone(
-                              DICE_SO_NICE_CUSTOM_SETS.HIT_LOC_SIDE,
-                          ),
-                      }
-                    : {},
-                this._buildRollClass,
-            )
-                .makeBasicRoll()
-                .addDice(1);
-            await this._hitSideRoller.roll();
+            let locationSide;
+            if (
+                this._useHitLocationSide &&
+                CONFIG.HERO.sidedLocations.has(locationName) &&
+                this._alreadyHitLocationSide === "none"
+            ) {
+                this._hitSideRoller = new HeroRoller(
+                    game.settings.get(game.system.id, "alphaTesting")
+                        ? {
+                              appearance: foundry.utils.deepClone(
+                                  DICE_SO_NICE_CUSTOM_SETS.HIT_LOC_SIDE,
+                              ),
+                          }
+                        : {},
+                    this._buildRollClass,
+                )
+                    .makeBasicRoll()
+                    .addDice(1);
+                await this._hitSideRoller.roll();
 
-            const locationSideRollTotal = this._hitSideRoller.getBasicTotal();
+                const locationSideRollTotal =
+                    this._hitSideRoller.getBasicTotal();
 
-            const locationSide = locationSideRollTotal >= 4 ? "Right" : "Left";
+                locationSide = locationSideRollTotal >= 4 ? "Right" : "Left";
+            } else {
+                locationSide = this._alreadyHitLocationSide;
+            }
 
             this._hitLocation = {
                 name: locationName,
                 side: locationSide,
-                fullName: CONFIG.HERO.sidedLocations.has(locationName)
-                    ? `${locationSide} ${locationName}`
-                    : locationName,
+                fullName:
+                    CONFIG.HERO.sidedLocations.has(locationName) &&
+                    this._useHitLocationSide
+                        ? `${locationSide} ${locationName}`
+                        : locationName,
                 stunMultiplier: Math.max(
                     0,
                     (this._type === HeroRoller.ROLL_TYPE.KILLING
