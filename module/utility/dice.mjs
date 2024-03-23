@@ -1422,29 +1422,31 @@ export class HeroRoller {
             groupedCluster[originalTerm].push(termCluster);
         });
 
-        return groupedCluster.filter(Boolean).reduce((soFar, termCluster) => {
-            const baseCluster = HeroRoller.#extractPropertyFromTermsCluster(
-                termCluster,
-                "base",
-            );
-            const baseTotal = HeroRoller.#sum(baseCluster);
-
-            const baseMetadataCluster =
-                HeroRoller.#extractPropertyFromTermsCluster(
+        let tooltipWithDice = groupedCluster
+            .filter(Boolean)
+            .reduce((soFar, termCluster) => {
+                const baseCluster = HeroRoller.#extractPropertyFromTermsCluster(
                     termCluster,
-                    "baseMetadata",
+                    "base",
                 );
-            const baseFormula = this.#buildFormulaForTerm(
-                baseMetadataCluster[0],
-                false,
-            );
-            const baseFormulaPurpose = this.#buildFormulaBasePurpose();
+                const baseTotal = HeroRoller.#sum(baseCluster);
 
-            const baseTermTooltip =
-                this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
-                this._type === HeroRoller.ROLL_TYPE.FLASH
-                    ? ""
-                    : `
+                const baseMetadataCluster =
+                    HeroRoller.#extractPropertyFromTermsCluster(
+                        termCluster,
+                        "baseMetadata",
+                    );
+                const baseFormula = this.#buildFormulaForTerm(
+                    baseMetadataCluster[0],
+                    false,
+                );
+                const baseFormulaPurpose = this.#buildFormulaBasePurpose();
+
+                const baseTermTooltip =
+                    this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+                    this._type === HeroRoller.ROLL_TYPE.FLASH
+                        ? ""
+                        : `
                     <div class="dice">
                         <header class="part-header flexrow">
                             <span class="part-formula">${baseFormula}${
@@ -1470,25 +1472,25 @@ export class HeroRoller {
                     </div>
                 `;
 
-            const calculatedCluster =
-                HeroRoller.#extractPropertyFromTermsCluster(
-                    termCluster,
-                    "calculated",
-                );
-            const calculatedTotal = HeroRoller.#sum(calculatedCluster);
-            const calculatedFormulaPurpose =
-                this.#buildFormulaCalculatedPurpose();
-            const calculatedMetadataCluster =
-                HeroRoller.#extractPropertyFromTermsCluster(
-                    termCluster,
-                    "calculatedMetadata",
-                );
+                const calculatedCluster =
+                    HeroRoller.#extractPropertyFromTermsCluster(
+                        termCluster,
+                        "calculated",
+                    );
+                const calculatedTotal = HeroRoller.#sum(calculatedCluster);
+                const calculatedFormulaPurpose =
+                    this.#buildFormulaCalculatedPurpose();
+                const calculatedMetadataCluster =
+                    HeroRoller.#extractPropertyFromTermsCluster(
+                        termCluster,
+                        "calculatedMetadata",
+                    );
 
-            const calculatedTermTooltip =
-                !calculatedFormulaPurpose ||
-                (this._type === HeroRoller.ROLL_TYPE.NORMAL && this._noBody)
-                    ? ""
-                    : `
+                const calculatedTermTooltip =
+                    !calculatedFormulaPurpose ||
+                    (this._type === HeroRoller.ROLL_TYPE.NORMAL && this._noBody)
+                        ? ""
+                        : `
                         <div class="dice">
                             <header class="part-header flexrow">
                                 <span class="part-formula">${calculatedFormulaPurpose} calculated from ${baseFormula} ${baseFormulaPurpose}</span>
@@ -1504,8 +1506,58 @@ export class HeroRoller {
                         </div>
                     `;
 
-            return `${soFar}${baseTermTooltip}${calculatedTermTooltip}`;
-        }, preliminaryTooltip);
+                return `${soFar}${baseTermTooltip}${calculatedTermTooltip}`;
+            }, preliminaryTooltip);
+
+        // Show hit location dice?
+        if (this._useHitLocation && this._alreadyHitLocation === "none") {
+            tooltipWithDice =
+                tooltipWithDice +
+                `
+                    <div class="dice">
+                        <header class="part-header flexrow">
+                            <span class="part-formula">Random Hit Location</span>
+                            <span class="part-total">${
+                                this._hitLocation.name
+                            } (${this._hitLocationRoller.getBaseTotal()})</span>
+                        </header>
+                        <ol class="dice-rolls">
+                        ${this._hitLocationRoller
+                            .getBaseTerms()
+                            .reduce((soFar, term) => {
+                                return `${soFar}<li class="roll d6">${term}</li>`;
+                            }, "")}
+                        </ol>
+                    </div>`;
+        }
+
+        // Show hit location side dice?
+        if (
+            this._useHitLocationSide &&
+            CONFIG.HERO.sidedLocations.has(this._hitLocation.name) &&
+            this._alreadyHitLocationSide === "none"
+        ) {
+            tooltipWithDice =
+                tooltipWithDice +
+                `
+                <div class="dice">
+                    <header class="part-header flexrow">
+                        <span class="part-formula">Random Hit Location Side</span>
+                        <span class="part-total">${
+                            this._hitLocation.side
+                        } (${this._hitSideRoller.getBaseTotal()})</span>
+                    </header>
+                    <ol class="dice-rolls">
+                        ${this._hitSideRoller
+                            .getBaseTerms()
+                            .reduce((soFar, term) => {
+                                return `${soFar}<li class="roll d6">${term}</li>`;
+                            }, "")}
+                    </ol>
+                </div>`;
+        }
+
+        return tooltipWithDice;
     }
 
     #buildFormulaForTerm(termMetadata, showOperator) {
