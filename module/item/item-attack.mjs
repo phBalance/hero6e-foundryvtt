@@ -2027,13 +2027,17 @@ async function _calcDamage(heroRoller, item, options) {
         stun = heroRoller.getStunTotal();
     }
 
-    let hasStunMultiplierRoll = !!itemData.killing;
+    const noHitLocationsPower = item.system.noHitLocations || false;
+    const hasStunMultiplierRoll =
+        !!itemData.killing &&
+        !(
+            game.settings.get("hero6efoundryvttv2", "hit locations") &&
+            !noHitLocationsPower
+        );
 
-    let stunMultiplier = hasStunMultiplierRoll
+    const stunMultiplier = hasStunMultiplierRoll
         ? heroRoller.getStunMultiplier()
         : 1;
-
-    const noHitLocationsPower = item.system.noHitLocations || false;
 
     // TODO: FIXME: This calculation is buggy as it doesn't consider:
     //       multiple levels of penetrating vs hardened/impenetrable
@@ -2227,8 +2231,6 @@ async function _calcDamage(heroRoller, item, options) {
             " STUN x" +
             hitLocationBodyMultiplier +
             " BODY)";
-
-        hasStunMultiplierRoll = false;
     }
 
     // apply damage reduction

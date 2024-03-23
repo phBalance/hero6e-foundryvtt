@@ -1984,7 +1984,7 @@ export function registerDiceTests(quench) {
                         );
                     });
 
-                    it("should not use hit location and stun multiplier with killing attacks", async function () {
+                    it("should use hit location and not stun multiplier with killing attacks", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -2003,12 +2003,7 @@ export function registerDiceTests(quench) {
                             3 * TestRollMock.fixedRollResult,
                         );
 
-                        expect(roller.getStunMultiplier()).to.equal(
-                            Math.max(
-                                1,
-                                Math.ceil(TestRollMock.fixedRollResult / 2),
-                            ),
-                        );
+                        expect(() => roller.getStunMultiplier()).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             1 * TestRollMock.fixedRollResult,
@@ -2029,7 +2024,7 @@ export function registerDiceTests(quench) {
                         });
                     });
 
-                    it("should not use hit location and increased stun multiplier with killing attacks", async function () {
+                    it("should use hit location and not increased stun multiplier with killing attacks", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -2049,12 +2044,7 @@ export function registerDiceTests(quench) {
                             3 * TestRollMock.fixedRollResult,
                         );
 
-                        expect(roller.getStunMultiplier()).to.equal(
-                            Math.max(
-                                1,
-                                Math.ceil(TestRollMock.fixedRollResult / 2) + 7,
-                            ),
-                        );
+                        expect(() => roller.getStunMultiplier()).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             1 * TestRollMock.fixedRollResult,
@@ -2074,7 +2064,7 @@ export function registerDiceTests(quench) {
                         });
                     });
 
-                    it("should not use hit location and decreased stun multiplier with killing attacks", async function () {
+                    it("should use hit location and not decreased stun multiplier with killing attacks", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -2094,12 +2084,7 @@ export function registerDiceTests(quench) {
                             3 * TestRollMock.fixedRollResult,
                         );
 
-                        expect(roller.getStunMultiplier()).to.equal(
-                            Math.max(
-                                1,
-                                Math.ceil(TestRollMock.fixedRollResult / 2) - 1,
-                            ),
-                        );
+                        expect(() => roller.getStunMultiplier()).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
                             1 * TestRollMock.fixedRollResult,

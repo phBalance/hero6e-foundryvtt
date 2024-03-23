@@ -668,12 +668,15 @@ export class HeroRoller {
         );
     }
     getStunMultiplier() {
-        if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.KILLING &&
+            !this._useHitLocation
+        ) {
             return this.getBaseMultiplier();
         }
 
         throw new Error(
-            `asking for stun multiplier from type ${this._type} doesn't make sense`,
+            `asking for stun multiplier from type ${this._type}/${this._useHitLocation} doesn't make sense`,
         );
     }
 
@@ -987,7 +990,10 @@ export class HeroRoller {
     }
 
     async #calculateStunMultiplierIfAppropriate() {
-        if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.KILLING &&
+            !this._useHitLocation
+        ) {
             // NOTE: It appears there is no standard effect for the STUNx per APG p 53
             //       although there don't appear to be any mention of this in other books.
             this._killingStunMultiplierHeroRoller = new HeroRoller(
