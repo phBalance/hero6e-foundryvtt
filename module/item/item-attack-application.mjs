@@ -167,28 +167,6 @@ export class ItemAttackFormApplication extends FormApplication {
         this.data.aim = formData.aim;
         this.data.aimSide = formData.aimSide;
 
-        // Confirm that the aimed location and side are appropriate.
-        // If we have full hit location damage tracking enabled then we need to
-        // have a side provided with the hit location (e.g. left arm). If we don't
-        // have a valid combinations of these then disable the roll button.
-        // If we just have hit locations then we don't care about the side matching
-        if (
-            game.settings.get("hero6efoundryvttv2", "hit locations") &&
-            game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all"
-        ) {
-            if (
-                CONFIG.HERO.sidedLocations.has(this.data.aim) &&
-                this.data.aimSide === "none"
-            ) {
-                this.data.aimSide = "Left";
-            } else if (
-                !CONFIG.HERO.sidedLocations.has(this.data.aim) &&
-                this.data.aimSide !== "none"
-            ) {
-                this.data.aimSide = "none";
-            }
-        }
-
         this.data.ocvMod = formData.ocvMod;
         this.data.dcvMod = formData.dcvMod;
         this.data.effectiveStr = formData.effectiveStr;

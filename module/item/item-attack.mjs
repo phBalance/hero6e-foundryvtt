@@ -1076,7 +1076,7 @@ export async function _onRollDamage(event) {
             includeHitLocation &&
                 game.settings.get("hero6efoundryvttv2", "hitLocTracking") ===
                     "all",
-            toHitData.aimSide,
+            toHitData.aim === "none" ? "none" : toHitData.aimSide, // Can't just select a side to hit as that doesn't have a penalty
         );
 
     await damageRoller.roll();
