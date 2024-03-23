@@ -130,6 +130,10 @@ export async function AttackOptions(item) {
     ) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
+        data.hitLocSide =
+            game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all"
+                ? CONFIG.HERO.hitLocationSide
+                : null;
 
         // Penalty Skill Levels
         const PENALTY_SKILL_LEVELS = actor.items.find(
@@ -140,7 +144,7 @@ export async function AttackOptions(item) {
         }
     }
 
-    // ItemAttackFormApplication allows for more interactivivity (CSL).
+    // ItemAttackFormApplication allows for more interactivity (CSL).
     await new ItemAttackFormApplication(data).render(true);
 }
 
@@ -446,16 +450,21 @@ export async function AttackToHit(item, options) {
     }
 
     // [x Stun, x N Stun, x Body, OCV modifier]
-    let noHitLocationsPower = item.system.noHitLocations || false;
+    const noHitLocationsPower = item.system.noHitLocations || false;
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         options.aim &&
         options.aim !== "none" &&
         !noHitLocationsPower
     ) {
+        const aimTargetLocation =
+            game.settings.get("hero6efoundryvttv2", "hitLocTracking") ===
+                "all" && options.aimSide !== "none"
+                ? `${options.aimSide} ${options.aim}`
+                : options.aim;
         heroRoller.addNumber(
             CONFIG.HERO.hitLocations[options.aim][3],
-            options.aim,
+            aimTargetLocation,
         );
 
         // Penalty Skill Levels
@@ -1061,7 +1070,14 @@ export async function _onRollDamage(event) {
             item.system.stunBodyDamage === "stunonly" ||
                 item.system.stunBodyDamage === "effectonly",
         )
-        .addToHitLocation(includeHitLocation, toHitData.aim);
+        .addToHitLocation(
+            includeHitLocation,
+            toHitData.aim,
+            includeHitLocation &&
+                game.settings.get("hero6efoundryvttv2", "hitLocTracking") ===
+                    "all",
+            toHitData.aim === "none" ? "none" : toHitData.aimSide, // Can't just select a side to hit as that doesn't have a penalty
+        );
 
     await damageRoller.roll();
 
@@ -2011,13 +2027,17 @@ async function _calcDamage(heroRoller, item, options) {
         stun = heroRoller.getStunTotal();
     }
 
-    let hasStunMultiplierRoll = !!itemData.killing;
+    const noHitLocationsPower = item.system.noHitLocations || false;
+    const hasStunMultiplierRoll =
+        !!itemData.killing &&
+        !(
+            game.settings.get("hero6efoundryvttv2", "hit locations") &&
+            !noHitLocationsPower
+        );
 
-    let stunMultiplier = hasStunMultiplierRoll
+    const stunMultiplier = hasStunMultiplierRoll
         ? heroRoller.getStunMultiplier()
         : 1;
-
-    let noHitLocationsPower = item.system.noHitLocations || false;
 
     // TODO: FIXME: This calculation is buggy as it doesn't consider:
     //       multiple levels of penetrating vs hardened/impenetrable
@@ -2211,8 +2231,6 @@ async function _calcDamage(heroRoller, item, options) {
             " STUN x" +
             hitLocationBodyMultiplier +
             " BODY)";
-
-        hasStunMultiplierRoll = false;
     }
 
     // apply damage reduction

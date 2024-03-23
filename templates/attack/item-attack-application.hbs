@@ -8,30 +8,39 @@
 
 
     {{#if useHitLoc}}
-    <div class="form-group">
-      <label>Aim</label>
-      <select name="aim" id="aim">
-        <option value="none">None</option>
-        {{#each hitLoc as |hitLoc key|}}
-        <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
-        {{/each}}
-      </select>
-    </div>
+      <div class="form-group">
+        <label>Aim</label>
+        <select name="aim" id="aim">
+          <option value="none">None</option>
+          {{#each hitLoc as |hitLoc key|}}
+            <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
+          {{/each}}
+        </select>
+      </div>
 
+      {{#if hitLocSide}}
+        <div class="form-group">
+          <label>Aim Side</label>
+          <select name="aimSide" id="aimSide">
+            <option value="none">None</option>
+            {{#each hitLocSide as |hitLocSide key|}}
+              <option value={{key}}{{#if (eq key @root/aimSide)}} selected{{/if}}>{{key}}</option>
+            {{/each}}
+          </select>
+        </div>
+      {{/if}}
 
-    {{#if PENALTY_SKILL_LEVELS}}
-    <div class="description"><b>{{PENALTY_SKILL_LEVELS.name}}
-        {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
-      </b>: {{PENALTY_SKILL_LEVELS.system.description}}
-    </div>
+      {{#if PENALTY_SKILL_LEVELS}}
+        <div class="description"><b>{{PENALTY_SKILL_LEVELS.name}}
+            {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
+          </b>: {{PENALTY_SKILL_LEVELS.system.description}}
+        </div>
 
-    <div class="form-group">
-      <label>Use Penalty Skill Levels</label>
-      <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
-    </div>
-    {{/if}}
-
-
+        <div class="form-group">
+          <label>Use Penalty Skill Levels</label>
+          <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
+        </div>
+      {{/if}}
     {{/if}}
 
     <div class="form-group">
@@ -98,9 +107,9 @@
     <button type="submit" name="roll" {{#if rollHide}}disabled
       title="You must select at least 1 target token, preferably by using the AOE template." {{/if}}>
       {{#if aoeText}}
-      Roll Placement
+        Roll Placement
       {{else}}
-      Roll to Hit
+        Roll to Hit
       {{/if}}
     </button>
   </footer>

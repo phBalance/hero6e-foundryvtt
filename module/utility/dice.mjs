@@ -1,3 +1,84 @@
+const DICE_SO_NICE_CUSTOM_SETS = {
+    STUNx: {
+        colorset: "Stun Multiplier",
+        foreground: "white",
+        background: "blue",
+        edge: "blue",
+        material: "wood",
+        fontScale: {
+            d6: 1.1,
+        },
+        visibility: "visible",
+    },
+    HIT_LOC: {
+        colorset: "Hit Location - Body Part",
+        foreground: "black",
+        background: "red",
+        edge: "red",
+        material: "wood",
+        fontScale: {
+            d6: 1.1,
+        },
+        visibility: "visible",
+    },
+    HIT_LOC_SIDE: {
+        colorset: "Hit Location - Body Side",
+        foreground: "black",
+        background: "green",
+        edge: "green",
+        material: "wood",
+        fontScale: {
+            d6: 1.1,
+        },
+        visibility: "visible",
+    },
+};
+
+const DICE_SO_NICE_CATEGORY_NAME = "Hero System 6e (Unofficial) V2";
+
+/**
+ * Add colour sets into Dice So Nice! This allows users to see what the colour set is for each function.
+ * Players can then choose to use that theme for maximum confusion as to which are their rolls and which
+ * are the extras for hit location or stun multiplier.
+ */
+Hooks.once("diceSoNiceReady", (diceSoNice) => {
+    diceSoNice.addColorset(
+        {
+            ...{
+                name: "Stun Multiplier",
+                description: "Stun Multiplier Dice",
+                category: DICE_SO_NICE_CATEGORY_NAME,
+            },
+            ...DICE_SO_NICE_CUSTOM_SETS.STUNx,
+        },
+        "default",
+    );
+
+    diceSoNice.addColorset(
+        {
+            ...{
+                name: "Hit Location - Body Part",
+                description: "Hit Location - Body Part Dice",
+                category: DICE_SO_NICE_CATEGORY_NAME,
+            },
+            ...DICE_SO_NICE_CUSTOM_SETS.HIT_LOC,
+        },
+        "default",
+    );
+
+    diceSoNice.addColorset(
+        {
+            ...{
+                name: "Hit Location - Body Side",
+                description: "Hit Location - Body Side Dice",
+                category: DICE_SO_NICE_CATEGORY_NAME,
+            },
+            ...DICE_SO_NICE_CUSTOM_SETS.HIT_LOC_SIDE,
+        },
+        "default",
+    );
+});
+
 /**
  * @typedef {Object} TermMetadataEntry
  * @param {string} term
@@ -70,6 +151,17 @@ export class HeroRoller {
     }
 
     /**
+     * Add Dice So Nice dice skinning to rolls.
+     */
+    static #addDiceSoNiceSkinning(roll) {
+        if (roll?.options?.appearance) {
+            roll.dice[0].options.appearance = roll.options.appearance;
+        }
+
+        return roll;
+    }
+
+    /**
      * @type {TermClusterEntry[]}
      */
     _termsCluster;
@@ -101,6 +193,9 @@ export class HeroRoller {
         };
         this._useHitLocation = false;
         this._alreadyHitLocation = "none";
+
+        this._useHitLocationSide = false;
+        this._alreadyHitLocationSide = "none";
 
         this._successValue = undefined;
         this._successRolledValue = undefined;
@@ -192,10 +287,20 @@ export class HeroRoller {
         return this;
     }
 
-    addToHitLocation(apply = true, alreadyHitLocation) {
-        if (apply) {
-            this._useHitLocation = true;
-            this._alreadyHitLocation = alreadyHitLocation || "none";
+    addToHitLocation(
+        useHitLocation = true,
+        alreadyHitLocation = "none",
+        useHitLocationSide = false,
+        alreadyHitLocationSide = "none",
+    ) {
+        if (useHitLocation) {
+            this._useHitLocation = useHitLocation;
+            this._alreadyHitLocation = alreadyHitLocation;
+
+            this._useHitLocationSide = useHitLocationSide;
+            if (useHitLocationSide) {
+                this._alreadyHitLocationSide = alreadyHitLocationSide;
+            }
         }
         return this;
     }
@@ -428,10 +533,14 @@ export class HeroRoller {
      */
     rawRolls() {
         return [
-            this._rollObj,
-            this._killingStunMultiplierHeroRoller?.rawRolls(),
-            this._hitLocationRoller?.rawRolls(),
-            this._hitSideRoller?.rawRolls(),
+            HeroRoller.#addDiceSoNiceSkinning(this._rollObj),
+            HeroRoller.#addDiceSoNiceSkinning(
+                this._killingStunMultiplierHeroRoller?.rawRolls(),
+            ),
+            HeroRoller.#addDiceSoNiceSkinning(
+                this._hitLocationRoller?.rawRolls(),
+            ),
+            HeroRoller.#addDiceSoNiceSkinning(this._hitSideRoller?.rawRolls()),
         ]
             .flat()
             .filter(Boolean);
@@ -559,12 +668,15 @@ export class HeroRoller {
         );
     }
     getStunMultiplier() {
-        if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.KILLING &&
+            !this._useHitLocation
+        ) {
             return this.getBaseMultiplier();
         }
 
         throw new Error(
-            `asking for stun multiplier from type ${this._type} doesn't make sense`,
+            `asking for stun multiplier from type ${this._type}/${this._useHitLocation} doesn't make sense`,
         );
     }
 
@@ -795,6 +907,8 @@ export class HeroRoller {
             _hitLocation: this._hitLocation,
             _useHitLocation: this._useHitLocation,
             _alreadyHitLocation: this._alreadyHitLocation,
+            _useHitLocationSide: this._useHitLocationSide,
+            _alreadyHitLocationSide: this._alreadyHitLocationSide,
             _hitLocationRoller: this._hitLocationRoller?.toData(),
             _hitSideRoller: this._hitSideRoller?.toData(),
 
@@ -840,6 +954,8 @@ export class HeroRoller {
         heroRoller._hitLocation = dataObj._hitLocation;
         heroRoller._useHitLocation = dataObj._useHitLocation;
         heroRoller._alreadyHitLocation = dataObj._alreadyHitLocation;
+        heroRoller._useHitLocationSide = dataObj._useHitLocationSide;
+        heroRoller._alreadyHitLocationSide = dataObj._alreadyHitLocationSide;
         heroRoller._hitLocationRoller = dataObj._hitLocationRoller
             ? HeroRoller.fromData(dataObj._hitLocationRoller)
             : undefined;
@@ -874,11 +990,20 @@ export class HeroRoller {
     }
 
     async #calculateStunMultiplierIfAppropriate() {
-        if (this._type === HeroRoller.ROLL_TYPE.KILLING) {
+        if (
+            this._type === HeroRoller.ROLL_TYPE.KILLING &&
+            !this._useHitLocation
+        ) {
             // NOTE: It appears there is no standard effect for the STUNx per APG p 53
             //       although there don't appear to be any mention of this in other books.
             this._killingStunMultiplierHeroRoller = new HeroRoller(
-                {},
+                game.settings.get(game.system.id, "alphaTesting")
+                    ? {
+                          appearance: foundry.utils.deepClone(
+                              DICE_SO_NICE_CUSTOM_SETS.STUNx,
+                          ),
+                      }
+                    : {},
                 this._buildRollClass,
             )
                 .makeBasicRoll()
@@ -903,32 +1028,66 @@ export class HeroRoller {
             (this._type === HeroRoller.ROLL_TYPE.NORMAL ||
                 this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
-            this._hitLocationRoller = new HeroRoller({}, this._buildRollClass)
-                .makeBasicRoll()
-                .addDice(3);
-            await this._hitLocationRoller.roll();
+            let locationName;
 
-            const locationRollTotal = this._hitLocationRoller.getBasicTotal();
+            if (this._alreadyHitLocation === "none") {
+                this._hitLocationRoller = new HeroRoller(
+                    game.settings.get(game.system.id, "alphaTesting")
+                        ? {
+                              appearance: foundry.utils.deepClone(
+                                  DICE_SO_NICE_CUSTOM_SETS.HIT_LOC,
+                              ),
+                          }
+                        : {},
+                    this._buildRollClass,
+                )
+                    .makeBasicRoll()
+                    .addDice(3);
+                await this._hitLocationRoller.roll();
+                const locationRollTotal =
+                    this._hitLocationRoller.getBasicTotal();
 
-            this._hitSideRoller = new HeroRoller({}, this._buildRollClass)
-                .makeBasicRoll()
-                .addDice(1);
-            await this._hitSideRoller.roll();
+                locationName = CONFIG.HERO.hitLocationsToHit[locationRollTotal];
+            } else {
+                locationName = this._alreadyHitLocation;
+            }
 
-            const locationSideRollTotal = this._hitSideRoller.getBasicTotal();
+            let locationSide;
+            if (
+                this._useHitLocationSide &&
+                CONFIG.HERO.sidedLocations.has(locationName) &&
+                this._alreadyHitLocationSide === "none"
+            ) {
+                this._hitSideRoller = new HeroRoller(
+                    game.settings.get(game.system.id, "alphaTesting")
+                        ? {
+                              appearance: foundry.utils.deepClone(
+                                  DICE_SO_NICE_CUSTOM_SETS.HIT_LOC_SIDE,
+                              ),
+                          }
+                        : {},
+                    this._buildRollClass,
+                )
+                    .makeBasicRoll()
+                    .addDice(1);
+                await this._hitSideRoller.roll();
 
-            const locationName =
-                this._alreadyHitLocation && this._alreadyHitLocation !== "none"
-                    ? this._alreadyHitLocation
-                    : CONFIG.HERO.hitLocationsToHit[locationRollTotal];
-            const locationSide = locationSideRollTotal >= 4 ? "Right" : "Left";
+                const locationSideRollTotal =
+                    this._hitSideRoller.getBasicTotal();
+
+                locationSide = locationSideRollTotal >= 4 ? "Right" : "Left";
+            } else {
+                locationSide = this._alreadyHitLocationSide;
+            }
 
             this._hitLocation = {
                 name: locationName,
                 side: locationSide,
-                fullName: CONFIG.HERO.sidedLocations.has(locationName)
-                    ? `${locationSide} ${locationName}`
-                    : locationName,
+                fullName:
+                    CONFIG.HERO.sidedLocations.has(locationName) &&
+                    this._useHitLocationSide
+                        ? `${locationSide} ${locationName}`
+                        : locationName,
                 stunMultiplier: Math.max(
                     0,
                     (this._type === HeroRoller.ROLL_TYPE.KILLING
@@ -1263,29 +1422,31 @@ export class HeroRoller {
             groupedCluster[originalTerm].push(termCluster);
         });
 
-        return groupedCluster.filter(Boolean).reduce((soFar, termCluster) => {
-            const baseCluster = HeroRoller.#extractPropertyFromTermsCluster(
-                termCluster,
-                "base",
-            );
-            const baseTotal = HeroRoller.#sum(baseCluster);
-
-            const baseMetadataCluster =
-                HeroRoller.#extractPropertyFromTermsCluster(
+        let tooltipWithDice = groupedCluster
+            .filter(Boolean)
+            .reduce((soFar, termCluster) => {
+                const baseCluster = HeroRoller.#extractPropertyFromTermsCluster(
                     termCluster,
-                    "baseMetadata",
+                    "base",
                 );
-            const baseFormula = this.#buildFormulaForTerm(
-                baseMetadataCluster[0],
-                false,
-            );
-            const baseFormulaPurpose = this.#buildFormulaBasePurpose();
+                const baseTotal = HeroRoller.#sum(baseCluster);
 
-            const baseTermTooltip =
-                this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
-                this._type === HeroRoller.ROLL_TYPE.FLASH
-                    ? ""
-                    : `
+                const baseMetadataCluster =
+                    HeroRoller.#extractPropertyFromTermsCluster(
+                        termCluster,
+                        "baseMetadata",
+                    );
+                const baseFormula = this.#buildFormulaForTerm(
+                    baseMetadataCluster[0],
+                    false,
+                );
+                const baseFormulaPurpose = this.#buildFormulaBasePurpose();
+
+                const baseTermTooltip =
+                    this._type === HeroRoller.ROLL_TYPE.ENTANGLE ||
+                    this._type === HeroRoller.ROLL_TYPE.FLASH
+                        ? ""
+                        : `
                     <div class="dice">
                         <header class="part-header flexrow">
                             <span class="part-formula">${baseFormula}${
@@ -1311,25 +1472,25 @@ export class HeroRoller {
                     </div>
                 `;
 
-            const calculatedCluster =
-                HeroRoller.#extractPropertyFromTermsCluster(
-                    termCluster,
-                    "calculated",
-                );
-            const calculatedTotal = HeroRoller.#sum(calculatedCluster);
-            const calculatedFormulaPurpose =
-                this.#buildFormulaCalculatedPurpose();
-            const calculatedMetadataCluster =
-                HeroRoller.#extractPropertyFromTermsCluster(
-                    termCluster,
-                    "calculatedMetadata",
-                );
+                const calculatedCluster =
+                    HeroRoller.#extractPropertyFromTermsCluster(
+                        termCluster,
+                        "calculated",
+                    );
+                const calculatedTotal = HeroRoller.#sum(calculatedCluster);
+                const calculatedFormulaPurpose =
+                    this.#buildFormulaCalculatedPurpose();
+                const calculatedMetadataCluster =
+                    HeroRoller.#extractPropertyFromTermsCluster(
+                        termCluster,
+                        "calculatedMetadata",
+                    );
 
-            const calculatedTermTooltip =
-                !calculatedFormulaPurpose ||
-                (this._type === HeroRoller.ROLL_TYPE.NORMAL && this._noBody)
-                    ? ""
-                    : `
+                const calculatedTermTooltip =
+                    !calculatedFormulaPurpose ||
+                    (this._type === HeroRoller.ROLL_TYPE.NORMAL && this._noBody)
+                        ? ""
+                        : `
                         <div class="dice">
                             <header class="part-header flexrow">
                                 <span class="part-formula">${calculatedFormulaPurpose} calculated from ${baseFormula} ${baseFormulaPurpose}</span>
@@ -1345,8 +1506,58 @@ export class HeroRoller {
                         </div>
                     `;
 
-            return `${soFar}${baseTermTooltip}${calculatedTermTooltip}`;
-        }, preliminaryTooltip);
+                return `${soFar}${baseTermTooltip}${calculatedTermTooltip}`;
+            }, preliminaryTooltip);
+
+        // Show hit location dice?
+        if (this._useHitLocation && this._alreadyHitLocation === "none") {
+            tooltipWithDice =
+                tooltipWithDice +
+                `
+                    <div class="dice">
+                        <header class="part-header flexrow">
+                            <span class="part-formula">Random Hit Location</span>
+                            <span class="part-total">${
+                                this._hitLocation.name
+                            } (${this._hitLocationRoller.getBaseTotal()})</span>
+                        </header>
+                        <ol class="dice-rolls">
+                        ${this._hitLocationRoller
+                            .getBaseTerms()
+                            .reduce((soFar, term) => {
+                                return `${soFar}<li class="roll d6">${term}</li>`;
+                            }, "")}
+                        </ol>
+                    </div>`;
+        }
+
+        // Show hit location side dice?
+        if (
+            this._useHitLocationSide &&
+            CONFIG.HERO.sidedLocations.has(this._hitLocation.name) &&
+            this._alreadyHitLocationSide === "none"
+        ) {
+            tooltipWithDice =
+                tooltipWithDice +
+                `
+                <div class="dice">
+                    <header class="part-header flexrow">
+                        <span class="part-formula">Random Hit Location Side</span>
+                        <span class="part-total">${
+                            this._hitLocation.side
+                        } (${this._hitSideRoller.getBaseTotal()})</span>
+                    </header>
+                    <ol class="dice-rolls">
+                        ${this._hitSideRoller
+                            .getBaseTerms()
+                            .reduce((soFar, term) => {
+                                return `${soFar}<li class="roll d6">${term}</li>`;
+                            }, "")}
+                    </ol>
+                </div>`;
+        }
+
+        return tooltipWithDice;
     }
 
     #buildFormulaForTerm(termMetadata, showOperator) {

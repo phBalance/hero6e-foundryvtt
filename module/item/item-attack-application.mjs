@@ -87,6 +87,10 @@ export class ItemAttackFormApplication extends FormApplication {
             }
         }
 
+        // Initialize aim to the default option values
+        this.data.aim ??= "none";
+        this.data.aimSide ??= "none";
+
         data.ocvMod ??= item.system.ocv;
         data.dcvMod ??= item.system.dcv;
         data.effectiveStr ??= data.str;
@@ -109,7 +113,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.cslChoices.dc = "dc";
             }
 
-            // CSL radioBoxes namesF
+            // CSL radioBoxes names
             data.csl = [];
             for (let c = 0; c < parseInt(csl.skill.system.LEVELS || 0); c++) {
                 data.csl.push({
@@ -161,6 +165,8 @@ export class ItemAttackFormApplication extends FormApplication {
         this._updateCsl(event, formData);
 
         this.data.aim = formData.aim;
+        this.data.aimSide = formData.aimSide;
+
         this.data.ocvMod = formData.ocvMod;
         this.data.dcvMod = formData.dcvMod;
         this.data.effectiveStr = formData.effectiveStr;
@@ -171,6 +177,9 @@ export class ItemAttackFormApplication extends FormApplication {
                 this.data.item.charges?.value - 1,
             ),
         );
+
+        // Show any changes
+        this.render();
     }
 
     async _updateCsl(event, formData) {
