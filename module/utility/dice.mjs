@@ -1158,7 +1158,8 @@ export class HeroRoller {
 
             case HeroRoller.ROLL_TYPE.KILLING:
                 if (this._useHitLocation) {
-                    return adjustedResult;
+                    // Use the hit location STUNx
+                    return adjustedResult * this._hitLocation.stunMultiplier;
                 }
 
                 return adjustedResult * this.getBaseMultiplier();
