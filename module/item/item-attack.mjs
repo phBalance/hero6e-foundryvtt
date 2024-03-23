@@ -2034,6 +2034,7 @@ async function _calcDamage(heroRoller, item, options) {
         body = heroRoller.getBodyTotal();
         stun = heroRoller.getStunTotal();
 
+        // TODO: Doesn't handle a 1 point killing attack which is explicitly called out as doing 1 penetrating BODY.
         if (itemData.killing) {
             bodyForPenetrating = (
                 await heroRoller.cloneWhileModifyingType(
@@ -2046,12 +2047,10 @@ async function _calcDamage(heroRoller, item, options) {
     }
 
     const noHitLocationsPower = item.system.noHitLocations || false;
-    const hasStunMultiplierRoll =
-        !!itemData.killing &&
-        !(
-            game.settings.get("hero6efoundryvttv2", "hit locations") &&
-            !noHitLocationsPower
-        );
+    const useHitLocations =
+        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        !noHitLocationsPower;
+    const hasStunMultiplierRoll = itemData.killing && !useHitLocations;
 
     const stunMultiplier = hasStunMultiplierRoll
         ? heroRoller.getStunMultiplier()
@@ -2069,10 +2068,7 @@ async function _calcDamage(heroRoller, item, options) {
     let hitLocation = "None";
     let useHitLoc = false;
 
-    if (
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        !noHitLocationsPower
-    ) {
+    if (useHitLocations) {
         useHitLoc = true;
 
         if (
@@ -2122,7 +2118,6 @@ async function _calcDamage(heroRoller, item, options) {
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
-
     if (itemData.killing) {
         stun =
             stun - (options.defenseValue || 0) - (options.resistantValue || 0);
@@ -2138,10 +2133,7 @@ async function _calcDamage(heroRoller, item, options) {
     body = RoundFavorPlayerDown(body < 0 ? 0 : body);
 
     let hitLocText = "";
-    if (
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        !noHitLocationsPower
-    ) {
+    if (useHitLocations) {
         const hitLocationBodyMultiplier =
             heroRoller.getHitLocation().bodyMultiplier;
         const hitLocationStunMultiplier =
@@ -2184,20 +2176,17 @@ async function _calcDamage(heroRoller, item, options) {
         effects +=
             `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
             `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
-            `A character automatically takes 1 STUN for every 1 point of BODY
-        damage that gets through their defenses. They can Recover this STUN
-        normally; they don't have to heal the BODY damage first.` +
+            `Characters take at least 1 STUN for every 1 point of BODY
+             damage that gets through their defenses.` +
             `"></i> `;
     }
 
-    // The body of a penetrating attack is the minimum damage
-    if (penetratingBody > body) {
-        if (itemData.killing) {
-            body = penetratingBody;
-            stun = body * stunMultiplier;
-        } else {
-            stun = penetratingBody;
-        }
+    // Penetrating attack minimum damage
+    if (itemData.killing && penetratingBody > body) {
+        body = penetratingBody;
+        effects += "penetrating damage; ";
+    } else if (!itemData.killing && penetratingBody > stun) {
+        stun = penetratingBody;
         effects += "penetrating damage; ";
     }
 
