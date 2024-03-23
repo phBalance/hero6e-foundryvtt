@@ -517,6 +517,12 @@ export class HeroRoller {
             async: true,
         });
 
+        await this.#calculateResults();
+
+        return this;
+    }
+
+    async #calculateResults() {
         await this.#calculateStunMultiplierIfAppropriate();
 
         await this.#calculateHitLocationIfAppropriate();
@@ -524,8 +530,6 @@ export class HeroRoller {
         this.#calculate();
 
         this.#calculateAutoSuccessOrFailureIfAppropriate();
-
-        return this;
     }
 
     /**
@@ -881,9 +885,19 @@ export class HeroRoller {
     }
 
     clone() {
-        // TODO: Clone. Is this the best approach?
-
         return HeroRoller.fromJSON(this.toJSON());
+    }
+
+    async cloneWhileModifyingType(newType) {
+        const data = this.toData();
+        data._type = newType;
+
+        const newRoller = HeroRoller.fromJSON(JSON.stringify(data));
+        if (newRoller._rollObj) {
+            await newRoller.#calculateResults();
+        }
+
+        return newRoller;
     }
 
     toData() {

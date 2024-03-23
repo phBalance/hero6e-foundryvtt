@@ -2012,19 +2012,37 @@ async function _calcDamage(heroRoller, item, options) {
 
     let body;
     let stun;
+    let bodyForPenetrating = 0;
 
     if (adjustmentPower) {
         body = 0;
         stun = heroRoller.getAdjustmentTotal();
+        bodyForPenetrating = (
+            await heroRoller.cloneWhileModifyingType(
+                HeroRoller.ROLL_TYPE.NORMAL,
+            )
+        ).getBodyTotal();
     } else if (senseAffectingPower) {
         body = heroRoller.getFlashTotal();
         stun = 0;
+        bodyForPenetrating = 0;
     } else if (entangle) {
         body = heroRoller.getEntangleTotal();
         stun = 0;
+        bodyForPenetrating = 0;
     } else {
         body = heroRoller.getBodyTotal();
         stun = heroRoller.getStunTotal();
+
+        if (itemData.killing) {
+            bodyForPenetrating = (
+                await heroRoller.cloneWhileModifyingType(
+                    HeroRoller.ROLL_TYPE.NORMAL,
+                )
+            ).getBodyTotal();
+        } else {
+            bodyForPenetrating = body;
+        }
     }
 
     const noHitLocationsPower = item.system.noHitLocations || false;
@@ -2044,7 +2062,7 @@ async function _calcDamage(heroRoller, item, options) {
     //       or the fact that there is no impenetrable in 5e which uses hardened instead.
     // Penetrating
     const penetratingBody = item.system.penetrating
-        ? Math.max(0, body - (options.impenetrableValue || 0))
+        ? Math.max(0, bodyForPenetrating - (options.impenetrableValue || 0))
         : 0;
 
     // get hit location
