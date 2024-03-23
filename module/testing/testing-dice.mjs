@@ -1055,7 +1055,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
-                            stunMultiplier: 0.5,
+                            stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
                     });
@@ -1108,7 +1108,7 @@ export function registerDiceTests(quench) {
                         });
                     });
 
-                    it("should work with guaranteed hit location", async function () {
+                    it("should work with a guaranteed hit location", async function () {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -1127,12 +1127,12 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
-                            stunMultiplier: 0.5,
+                            stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
                     });
 
-                    it("should work with guaranteed hit location but no hit side", async function () {
+                    it("should work with a guaranteed hit location but no hit side", async function () {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -1151,12 +1151,12 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
-                            stunMultiplier: 0.5,
+                            stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
                     });
 
-                    it("should work with guaranteed hit location and hit side", async function () {
+                    it("should work with a guaranteed hit location and hit side", async function () {
                         const TestRollMock = Roll1Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -1175,7 +1175,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "Right",
                             fullName: "Right Foot",
-                            stunMultiplier: 0.5,
+                            stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
                     });
@@ -2024,12 +2024,13 @@ export function registerDiceTests(quench) {
                         });
                     });
 
-                    it("should use hit location and not increased stun multiplier with killing attacks", async function () {
+                    it("should use hit location with increased stun multiplier with killing attacks", async function () {
                         const TestRollMock = Roll6Mock;
+                        const increasedStunMultiplier = 7;
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeKillingRoll(true)
-                            .addStunMultiplier(7)
+                            .addStunMultiplier(increasedStunMultiplier)
                             .addToHitLocation()
                             .addDice(3);
 
@@ -2047,12 +2048,17 @@ export function registerDiceTests(quench) {
                         expect(() => roller.getStunMultiplier()).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
+                            (1 + increasedStunMultiplier) *
+                                TestRollMock.fixedRollResult,
+                            (1 + increasedStunMultiplier) *
+                                TestRollMock.fixedRollResult,
+                            (1 + increasedStunMultiplier) *
+                                TestRollMock.fixedRollResult,
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * 1 * TestRollMock.fixedRollResult,
+                            3 *
+                                (1 + increasedStunMultiplier) *
+                                TestRollMock.fixedRollResult,
                         );
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
@@ -2064,7 +2070,7 @@ export function registerDiceTests(quench) {
                         });
                     });
 
-                    it("should use hit location and not decreased stun multiplier with killing attacks", async function () {
+                    it("should use hit location with decreased stun multiplier (floor 1) with killing attacks", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock)
@@ -2099,7 +2105,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
-                            stunMultiplier: 0,
+                            stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
                     });

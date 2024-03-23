@@ -8,9 +8,9 @@
 - Initial support for WELL_CONNECTED perk enhancer.
 - Color coded diced based on purpose are now shown if using the Dice So Nice! module. The purpose of each extra dice's color can be seen in Dice So Nice! configuration under theme. (**only visible if alpha testing enabled**)
 - Extra dice (stun multiplier, hit location, and hit location side) are only shown when actually required for automation support. [#793](https://github.com/dmdorman/hero6e-foundryvtt/issues/793)
-
 - Hit location and hit location side dice roll results can now been seen in the dice roll tooltip.
 - Can now aim for a location and side (e.g. left arm) when hit location and individual body part damage tracking are selected.
+- Killing attack STUN should now be correct when using hit locations. [#824](https://github.com/dmdorman/hero6e-foundryvtt/issues/824)
 
 ## Version 3.0.63
 

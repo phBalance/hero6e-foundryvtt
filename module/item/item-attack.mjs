@@ -2089,16 +2089,150 @@ async function _calcDamage(heroRoller, item, options) {
     }
 
     // determine knockback
-    let useKnockBack = false;
+    const {
+        useKnockback,
+        knockbackMessage,
+        knockbackRenderedResult,
+        knockbackTags,
+    } = await _calcKnockback(
+        body,
+        item,
+        options,
+        parseInt(itemData.knockbackMultiplier),
+    );
+
+    // -------------------------------------------------
+    // determine effective damage
+    // -------------------------------------------------
+
+    if (itemData.killing) {
+        stun =
+            stun - (options.defenseValue || 0) - (options.resistantValue || 0);
+        body = body - (options.resistantValue || 0);
+    } else {
+        stun =
+            stun - (options.defenseValue || 0) - (options.resistantValue || 0);
+        body =
+            body - (options.defenseValue || 0) - (options.resistantValue || 0);
+    }
+
+    stun = RoundFavorPlayerDown(stun < 0 ? 0 : stun);
+    body = RoundFavorPlayerDown(body < 0 ? 0 : body);
+
+    let hitLocText = "";
+    if (
+        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        !noHitLocationsPower
+    ) {
+        const hitLocationBodyMultiplier =
+            heroRoller.getHitLocation().bodyMultiplier;
+        const hitLocationStunMultiplier =
+            heroRoller.getHitLocation().stunMultiplier;
+
+        if (itemData.killing) {
+            // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
+            // Location : [x Stun, x N Stun, x Body, OCV modifier]
+            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
+        } else {
+            // stun attacks apply N STUN hit location and BODY multiplier after defenses have been subtracted
+            stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
+            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
+        }
+
+        hitLocText =
+            "Hit " +
+            hitLocation +
+            " (x" +
+            hitLocationStunMultiplier +
+            " STUN x" +
+            hitLocationBodyMultiplier +
+            " BODY)";
+    }
+
+    // apply damage reduction
+    if (options.damageReductionValue > 0) {
+        //defense += "; damage reduction " + options.damageReductionValue + "%";
+        stun = RoundFavorPlayerDown(
+            stun * (1 - options.damageReductionValue / 100),
+        );
+        body = RoundFavorPlayerDown(
+            body * (1 - options.damageReductionValue / 100),
+        );
+    }
+
+    // minimum damage rule
+    if (stun < body) {
+        stun = body;
+        effects +=
+            `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
+            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
+            `A character automatically takes 1 STUN for every 1 point of BODY
+        damage that gets through their defenses. They can Recover this STUN
+        normally; they don't have to heal the BODY damage first.` +
+            `"></i> `;
+    }
+
+    // The body of a penetrating attack is the minimum damage
+    if (penetratingBody > body) {
+        if (itemData.killing) {
+            body = penetratingBody;
+            stun = body * stunMultiplier;
+        } else {
+            stun = penetratingBody;
+        }
+        effects += "penetrating damage; ";
+    }
+
+    // StunOnly?
+    if (item.system.stunBodyDamage === "stunonly") {
+        body = 0;
+    }
+
+    // BodyOnly?
+    if (item.system.stunBodyDamage === "bodyonly") {
+        stun = 0;
+    }
+
+    // EffectOnly?
+    if (item.system.stunBodyDamage === "effectonly") {
+        stun = 0;
+        body = 0;
+    }
+
+    stun = RoundFavorPlayerDown(stun);
+    body = RoundFavorPlayerDown(body);
+
+    // TODO: Should this be entirely within the HeroRoller itself and extractable as required?
+    damageDetail.body = body;
+    damageDetail.stun = stun;
+    damageDetail.effects = effects;
+    damageDetail.stunDamage = stunDamage;
+    damageDetail.bodyDamage = bodyDamage;
+    damageDetail.stunMultiplier = stunMultiplier;
+    damageDetail.hasStunMultiplierRoll = hasStunMultiplierRoll;
+    damageDetail.useHitLoc = useHitLoc;
+    damageDetail.hitLocText = hitLocText;
+    damageDetail.hitLocation = hitLocation;
+
+    damageDetail.knockbackMessage = knockbackMessage;
+    damageDetail.useKnockBack = useKnockback;
+    damageDetail.knockbackRenderedResult = knockbackRenderedResult;
+    damageDetail.knockbackTags = knockbackTags;
+
+    return damageDetail;
+}
+
+async function _calcKnockback(body, item, options, knockbackMultiplier) {
+    let useKnockback = false;
     let knockbackMessage = "";
     let knockbackRenderedResult = null;
-    const knockbackMultiplier = parseInt(itemData.knockbackMultiplier);
     let knockbackTags = [];
+
     if (
         game.settings.get("hero6efoundryvttv2", "knockback") &&
         knockbackMultiplier
     ) {
-        useKnockBack = true;
+        useKnockback = true;
 
         let knockbackDice = 2;
 
@@ -2184,124 +2318,10 @@ async function _calcDamage(heroRoller, item, options) {
         }
     }
 
-    // -------------------------------------------------
-    // determine effective damage
-    // -------------------------------------------------
-
-    if (itemData.killing) {
-        stun =
-            stun - (options.defenseValue || 0) - (options.resistantValue || 0);
-        body = body - (options.resistantValue || 0);
-    } else {
-        stun =
-            stun - (options.defenseValue || 0) - (options.resistantValue || 0);
-        body =
-            body - (options.defenseValue || 0) - (options.resistantValue || 0);
-    }
-
-    stun = RoundFavorPlayerDown(stun < 0 ? 0 : stun);
-    body = RoundFavorPlayerDown(body < 0 ? 0 : body);
-
-    let hitLocText = "";
-    if (
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        !noHitLocationsPower
-    ) {
-        const hitLocationBodyMultiplier =
-            heroRoller.getHitLocation().bodyMultiplier;
-        const hitLocationStunMultiplier =
-            heroRoller.getHitLocation().stunMultiplier;
-
-        if (itemData.killing) {
-            // killing attacks apply hit location multiplier after resistant damage protection has been subtracted
-            // Location : [x Stun, x N Stun, x Body, OCV modifier]
-            // TODO: Should this also be round down?
-            body = body * hitLocationBodyMultiplier;
-        } else {
-            // stun attacks apply N STUN hit location multiplier after defenses
-            stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
-            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
-        }
-
-        hitLocText =
-            "Hit " +
-            hitLocation +
-            " (x" +
-            hitLocationStunMultiplier +
-            " STUN x" +
-            hitLocationBodyMultiplier +
-            " BODY)";
-    }
-
-    // apply damage reduction
-    if (options.damageReductionValue > 0) {
-        //defense += "; damage reduction " + options.damageReductionValue + "%";
-        stun = RoundFavorPlayerDown(
-            stun * (1 - options.damageReductionValue / 100),
-        );
-        body = RoundFavorPlayerDown(
-            body * (1 - options.damageReductionValue / 100),
-        );
-    }
-
-    // minimum damage rule
-    if (stun < body) {
-        stun = body;
-        effects +=
-            `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
-            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
-            `A character automatically takes 1 STUN for every 1 point of BODY
-        damage that gets through their defenses. They can Recover this STUN
-        normally; they don't have to heal the BODY damage first.` +
-            `"></i> `;
-    }
-
-    // The body of a penetrating attack is the minimum damage
-    if (penetratingBody > body) {
-        if (itemData.killing) {
-            body = penetratingBody;
-            stun = body * stunMultiplier;
-        } else {
-            stun = penetratingBody;
-        }
-        effects += "penetrating damage; ";
-    }
-
-    // StunOnly?
-    if (item.system.stunBodyDamage === "stunonly") {
-        body = 0;
-    }
-
-    // BodyOnly?
-    if (item.system.stunBodyDamage === "bodyonly") {
-        stun = 0;
-    }
-
-    // EffectOnly?
-    if (item.system.stunBodyDamage === "effectonly") {
-        stun = 0;
-        body = 0;
-    }
-
-    stun = RoundFavorPlayerDown(stun);
-    body = RoundFavorPlayerDown(body);
-
-    // TODO: Should this be entirely within the HeroRoller itself and extractable as required?
-    damageDetail.body = body;
-    damageDetail.stun = stun;
-    damageDetail.effects = effects;
-    damageDetail.stunDamage = stunDamage;
-    damageDetail.bodyDamage = bodyDamage;
-    damageDetail.stunMultiplier = stunMultiplier;
-    damageDetail.hasStunMultiplierRoll = hasStunMultiplierRoll;
-    damageDetail.useHitLoc = useHitLoc;
-    damageDetail.hitLocText = hitLocText;
-    damageDetail.hitLocation = hitLocation;
-
-    damageDetail.knockbackMessage = knockbackMessage;
-    damageDetail.useKnockBack = useKnockBack;
-    damageDetail.knockbackRenderedResult = knockbackRenderedResult;
-    damageDetail.knockbackTags = knockbackTags;
-
-    return damageDetail;
+    return {
+        useKnockback,
+        knockbackMessage,
+        knockbackRenderedResult,
+        knockbackTags,
+    };
 }
