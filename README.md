@@ -14,6 +14,15 @@ For further information about Hero Games and the HERO System, visit [www.herogam
 
 Support can be found by creating a [new issue](https://github.com/dmdorman/hero6e-foundryvtt/issues), starting a [new discussion](https://github.com/dmdorman/hero6e-foundryvtt/discussions) or on the Hero-Champions-RPG (unofficial) Foundry-vtt [Discord Channel](https://discord.gg/HcUJvJH).
 
+## How To Videos
+- [https://youtu.be/UltOIIrIv_Q](Hero System 6e (Unofficial) v2 part1)
+  - What you need to get started
+  - Initial setup
+  - Creating actors
+  - Sample attack
+  - Combat tracker
+​
+
 ## Functionality
 
 This system is a work in progress. The following features are supported
