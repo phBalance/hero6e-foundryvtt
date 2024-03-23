@@ -2089,106 +2089,24 @@ async function _calcDamage(heroRoller, item, options) {
     }
 
     // determine knockback
-    let useKnockBack = false;
-    let knockbackMessage = "";
-    let knockbackRenderedResult = null;
-    const knockbackMultiplier = parseInt(itemData.knockbackMultiplier);
-    let knockbackTags = [];
-    if (
-        game.settings.get("hero6efoundryvttv2", "knockback") &&
-        knockbackMultiplier
-    ) {
-        useKnockBack = true;
-
-        let knockbackDice = 2;
-
-        // Target is in the air -1d6
-        // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
-        //       when more than 0m off the ground? This same effect should also be considered for gliding.
-        if (options.targetToken?.actor?.flags?.activeMovement === "flight") {
-            knockbackDice -= 1;
-            knockbackTags.push({
-                value: "-1d6KB",
-                name: "target is in the air",
-                title: "Knockback Modifier",
-            });
-        }
-
-        // TODO: Target Rolled With A Punch -1d6
-        // TODO: Target is in zero gravity -1d6
-
-        // Target is underwater +1d6
-        if (options.targetToken?.actor?.statuses?.has("underwater")) {
-            knockbackDice += 1;
-            knockbackTags.push({
-                value: "+1d6KB",
-                name: "target is underwater",
-                title: "Knockback Modifier",
-            });
-        }
-
-        // TODO: Target is using Clinging +1d6
-
-        // Attack did Killing Damage +1d6
-        if (item.system.killing) {
-            knockbackDice += 1;
-            knockbackTags.push({
-                value: "+1d6KB",
-                name: "attack did Killing Damage",
-                title: "Knockback Modifier",
-            });
-        }
-
-        // Attack used a Martial Maneuver +1d6
-        if (["martialart", "martial"].includes(item.type)) {
-            knockbackDice += 1;
-            knockbackTags.push({
-                value: "+1d6",
-                name: "attack used a Martial Maneuver",
-                title: "Knockback Modifier",
-            });
-        }
-
-        const knockbackHeroRoller = new HeroRoller()
-            .makeBasicRoll()
-            .addNumber(
-                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
-                "Max potential knockback",
-            )
-            .subNumber(
-                parseInt(options.knockbackResistance || 0),
-                "Knockback resistance",
-            )
-            .addDice(
-                parseInt(options.knockbackMod || options.knockbadmod || 0),
-                "Knockback modifier", // knockback modifier added on an attack by attack basis
-            )
-            .subDice(Math.max(0, knockbackDice));
-        await knockbackHeroRoller.roll();
-
-        const knockbackResultTotal = Math.round(
-            knockbackHeroRoller.getBasicTotal(),
-        );
-
-        knockbackRenderedResult = await knockbackHeroRoller.render();
-
-        if (knockbackResultTotal < 0) {
-            knockbackMessage = "No Knockback";
-        } else if (knockbackResultTotal == 0) {
-            knockbackMessage = "Inflicts Knockdown";
-        } else {
-            // If the result is positive, the target is Knocked Back 1" or 2m times the result
-            knockbackMessage = `Knocked Back ${
-                knockbackResultTotal * (item.actor.system.is5e ? 1 : 2)
-            }${getSystemDisplayUnits(item.actor)}`;
-        }
-    }
+    const {
+        useKnockback,
+        knockbackMessage,
+        knockbackRenderedResult,
+        knockbackTags,
+    } = await _calcKnockback(
+        body,
+        item,
+        options,
+        parseInt(itemData.knockbackMultiplier),
+    );
 
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
 
     if (itemData.killing) {
+        // TODO: there is only defense against STUN from KA if there is at least some resistant defense
         stun =
             stun - (options.defenseValue || 0) - (options.resistantValue || 0);
         body = body - (options.resistantValue || 0);
@@ -2299,9 +2217,113 @@ async function _calcDamage(heroRoller, item, options) {
     damageDetail.hitLocation = hitLocation;
 
     damageDetail.knockbackMessage = knockbackMessage;
-    damageDetail.useKnockBack = useKnockBack;
+    damageDetail.useKnockBack = useKnockback;
     damageDetail.knockbackRenderedResult = knockbackRenderedResult;
     damageDetail.knockbackTags = knockbackTags;
 
     return damageDetail;
+}
+
+async function _calcKnockback(body, item, options, knockbackMultiplier) {
+    let useKnockback = false;
+    let knockbackMessage = "";
+    let knockbackRenderedResult = null;
+    let knockbackTags = [];
+
+    if (
+        game.settings.get("hero6efoundryvttv2", "knockback") &&
+        knockbackMultiplier
+    ) {
+        useKnockback = true;
+
+        let knockbackDice = 2;
+
+        // Target is in the air -1d6
+        // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
+        //       when more than 0m off the ground? This same effect should also be considered for gliding.
+        if (options.targetToken?.actor?.flags?.activeMovement === "flight") {
+            knockbackDice -= 1;
+            knockbackTags.push({
+                value: "-1d6KB",
+                name: "target is in the air",
+                title: "Knockback Modifier",
+            });
+        }
+
+        // TODO: Target Rolled With A Punch -1d6
+        // TODO: Target is in zero gravity -1d6
+
+        // Target is underwater +1d6
+        if (options.targetToken?.actor?.statuses?.has("underwater")) {
+            knockbackDice += 1;
+            knockbackTags.push({
+                value: "+1d6KB",
+                name: "target is underwater",
+                title: "Knockback Modifier",
+            });
+        }
+
+        // TODO: Target is using Clinging +1d6
+
+        // Attack did Killing Damage +1d6
+        if (item.system.killing) {
+            knockbackDice += 1;
+            knockbackTags.push({
+                value: "+1d6KB",
+                name: "attack did Killing Damage",
+                title: "Knockback Modifier",
+            });
+        }
+
+        // Attack used a Martial Maneuver +1d6
+        if (["martialart", "martial"].includes(item.type)) {
+            knockbackDice += 1;
+            knockbackTags.push({
+                value: "+1d6",
+                name: "attack used a Martial Maneuver",
+                title: "Knockback Modifier",
+            });
+        }
+
+        const knockbackHeroRoller = new HeroRoller()
+            .makeBasicRoll()
+            .addNumber(
+                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
+                "Max potential knockback",
+            )
+            .subNumber(
+                parseInt(options.knockbackResistance || 0),
+                "Knockback resistance",
+            )
+            .addDice(
+                parseInt(options.knockbackMod || options.knockbadmod || 0),
+                "Knockback modifier", // knockback modifier added on an attack by attack basis
+            )
+            .subDice(Math.max(0, knockbackDice));
+        await knockbackHeroRoller.roll();
+
+        const knockbackResultTotal = Math.round(
+            knockbackHeroRoller.getBasicTotal(),
+        );
+
+        knockbackRenderedResult = await knockbackHeroRoller.render();
+
+        if (knockbackResultTotal < 0) {
+            knockbackMessage = "No Knockback";
+        } else if (knockbackResultTotal == 0) {
+            knockbackMessage = "Inflicts Knockdown";
+        } else {
+            // If the result is positive, the target is Knocked Back 1" or 2m times the result
+            knockbackMessage = `Knocked Back ${
+                knockbackResultTotal * (item.actor.system.is5e ? 1 : 2)
+            }${getSystemDisplayUnits(item.actor)}`;
+        }
+    }
+
+    return {
+        useKnockback,
+        knockbackMessage,
+        knockbackRenderedResult,
+        knockbackTags,
+    };
 }
