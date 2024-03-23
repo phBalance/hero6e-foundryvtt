@@ -2106,7 +2106,6 @@ async function _calcDamage(heroRoller, item, options) {
     // -------------------------------------------------
 
     if (itemData.killing) {
-        // TODO: there is only defense against STUN from KA if there is at least some resistant defense
         stun =
             stun - (options.defenseValue || 0) - (options.resistantValue || 0);
         body = body - (options.resistantValue || 0);
@@ -2131,12 +2130,11 @@ async function _calcDamage(heroRoller, item, options) {
             heroRoller.getHitLocation().stunMultiplier;
 
         if (itemData.killing) {
-            // killing attacks apply hit location multiplier after resistant damage protection has been subtracted
+            // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
             // Location : [x Stun, x N Stun, x Body, OCV modifier]
-            // TODO: Should this also be round down?
-            body = body * hitLocationBodyMultiplier;
+            body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         } else {
-            // stun attacks apply N STUN hit location multiplier after defenses
+            // stun attacks apply N STUN hit location and BODY multiplier after defenses have been subtracted
             stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
