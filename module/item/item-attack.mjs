@@ -1042,10 +1042,9 @@ export async function _onRollDamage(event) {
     });
     const formulaParts = calculateDiceFormulaParts(item, dc);
 
-    // TODO: Should also include AOE considerations. Does AOE preclude hit locations? The code is not consistent.
     const includeHitLocation =
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        (item.system.noHitLocations || true);
+        !item.system.noHitLocations;
 
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
@@ -2046,7 +2045,7 @@ async function _calcDamage(heroRoller, item, options) {
         }
     }
 
-    const noHitLocationsPower = item.system.noHitLocations || false;
+    const noHitLocationsPower = !!item.system.noHitLocations;
     const useHitLocations =
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         !noHitLocationsPower;
