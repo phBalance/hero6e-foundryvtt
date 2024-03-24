@@ -12,6 +12,7 @@
 - Can now aim for a location and side (e.g. left arm) when hit location and individual body part damage tracking are selected.
 - Killing attack STUN should now be correct when using hit locations. [#824](https://github.com/dmdorman/hero6e-foundryvtt/issues/824)
 - Improve penetrating BODY and STUN calculations for killing attacks and adjustments. [#851](https://github.com/dmdorman/hero6e-foundryvtt/issues/851)
+- Support for Heroic Action Points. Enable in settings. Shown on actor sheet left sidebar. [#844](https://github.com/dmdorman/hero6e-foundryvtt/issues/844)
 
 ## Version 3.0.63
 
