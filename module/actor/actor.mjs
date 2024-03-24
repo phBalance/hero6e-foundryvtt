@@ -1157,6 +1157,7 @@ export class HeroSystem6eActor extends Actor {
             end:
                 parseInt(this.system.characteristics?.end?.max) -
                 parseInt(this.system.characteristics?.end?.value),
+            hap: this.system.hap.value,
         };
         if (retainDamage.body || retainDamage.stun || retainDamage.end) {
             let content = `${this.name} has:<ul>`;
@@ -1233,6 +1234,9 @@ export class HeroSystem6eActor extends Actor {
         }
 
         changes = {};
+
+        // Heroic Action Points (always keep the value)
+        changes["system.hap.value"] = retainDamage.hap;
 
         // CHARACTERISTICS
         if (heroJson.CHARACTER?.CHARACTERISTICS) {

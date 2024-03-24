@@ -7,7 +7,7 @@
                 width="100" />
 
             <section class="flexrow">
-                <ul class="attributes flexrow">
+                <ul class="attributes flexcol">
 
                     <li class="attribute health" data-ability="end">
                         <h4 class="attribute-name box-title">Endurance</h4>
@@ -48,6 +48,17 @@
                         </div>
                     </li>
 
+                    {{#if useHAP }}
+                    <li class="attribute health" data-ability="hap">
+                        <h4 class="attribute-name box-title" title="Heroic Action Points">HAP</h4>
+                        <div class="attribute-value multiple characteristic">
+                            <input name="system.hap.value" type="text"
+                                value="{{actor.system.hap.value}}" data-dtype="Number"
+                                >
+                        </div>
+                    </li>
+                    {{/if}}
+
 
                     <ul class="defenses">
                         <li title="{{defense.PDtags}}"><span>PD={{defense.PD}}</span></li>
@@ -79,7 +90,7 @@
                         <button type="button" class="actor-description-button"
                             title="Show Actor Description and all perceivable powers">Actor Description</button>
                     </div>
-
+                </ul>
             </section>
         </div>
     </aside>
@@ -159,10 +170,10 @@
                         <th>{{localize "ActorSheet.Aoe"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
-                            {{!-- <span class="item-controls">
+                            <span class="item-controls">
                                 <a class="item-control item-create" title="Create attack" data-type="attack"><i
                                         class="fas fa-plus"></i> Add attack</a>
-                            </span> --}}
+                            </span>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -280,8 +291,8 @@
                         <th>{{localize "ActorSheet.End"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
-                            {{!-- <a class="item-control item-create" title="Create defense" data-type="defense">
-                                <i class="fas fa-plus"></i> Add defense</a> --}}
+                            <a class="item-control item-create" title="Create defense" data-type="defense">
+                                <i class="fas fa-plus"></i> Add defense</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -336,8 +347,8 @@
                         <th>{{localize "ActorSheet.Char"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
-                            {{!-- <a class="item-control item-create" title="Create skill" data-type="skill">
-                                <i class="fas fa-plus"></i> Add Skill</a> --}}
+                            <a class="item-control item-create" title="Create skill" data-type="skill">
+                                <i class="fas fa-plus"></i> Add Skill</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -402,8 +413,8 @@
                         <th>{{localize "ActorSheet.DCV"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
-                            {{!-- <a class="item-control item-create" title="Create maneuver" data-type="maneuver">
-                                <i class="fas fa-plus"></i> Add Maneuver</a> --}}
+                            <a class="item-control item-create" title="Create maneuver" data-type="maneuver">
+                                <i class="fas fa-plus"></i> Add Maneuver</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -710,8 +721,8 @@
                         <th class="left">{{localize "ActorSheet.Perk"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
-                            {{!-- <a class="item-control item-create" title="Create perk" data-type="perk">
-                                <i class="fas fa-plus"></i> Add Perk</a> --}}
+                            <a class="item-control item-create" title="Create perk" data-type="perk">
+                                <i class="fas fa-plus"></i> Add Perk</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -722,10 +733,7 @@
                                     height="24" /></div>
                         </td>
                         <td>{{item.system.realCost}}</td>
-                        <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
-                            {{#if item.system.childIdx}}
-                                {{item.system.childIdx}})
-                            {{/if}}
+                        <td class="left">
                             {{{itemFullDescription item}}}
                         </td>
                         <td>
@@ -758,8 +766,8 @@
                         <th class="left">{{localize "ActorSheet.Talent"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
-                            {{!-- <a class="item-control item-create" title="Create talent" data-type="talent">
-                                <i class="fas fa-plus"></i> Add Talent</a> --}}
+                            <a class="item-control item-create" title="Create talent" data-type="talent">
+                                <i class="fas fa-plus"></i> Add Talent</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -807,8 +815,8 @@
                         <th class="left">{{localize "ActorSheet.Complication"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
-                            {{!-- <a class="item-control item-create" title="Create complication" data-type="complication">
-                                <i class="fas fa-plus"></i> Add Complication</a> --}}
+                            <a class="item-control item-create" title="Create complication" data-type="complication">
+                                <i class="fas fa-plus"></i> Add Complication</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}

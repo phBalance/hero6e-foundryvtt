@@ -67,6 +67,16 @@ export default class SettingsHelpers {
             onChange: (value) => HEROSYS.log(false, value),
         });
 
+        game.settings.register(module, "HAP", {
+            name: game.i18n.localize("Settings.HAP.Name"),
+            hint: game.i18n.localize("Settings.HAP.Hint"),
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: false,
+            onChange: (value) => HEROSYS.log(false, value),
+        });
+
         game.settings.register(module, "equipmentWeightPercentage", {
             name: game.i18n.localize(
                 "Settings.Equipment.WeightPercentage.Name",
