@@ -123,6 +123,7 @@ export async function AttackOptions(item) {
 
     const aoe = item.getAoeModifier();
 
+    // TODO: This needs to be considered. AOE does not preclude hit locations.
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         !item.system.noHitLocations &&
@@ -450,7 +451,7 @@ export async function AttackToHit(item, options) {
     }
 
     // [x Stun, x N Stun, x Body, OCV modifier]
-    const noHitLocationsPower = item.system.noHitLocations || false;
+    const noHitLocationsPower = !!item.system.noHitLocations;
     if (
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
         options.aim &&
@@ -1042,10 +1043,9 @@ export async function _onRollDamage(event) {
     });
     const formulaParts = calculateDiceFormulaParts(item, dc);
 
-    // TODO: Should also include AOE considerations. Does AOE preclude hit locations? The code is not consistent.
     const includeHitLocation =
         game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        (item.system.noHitLocations || true);
+        !item.system.noHitLocations;
 
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
@@ -1147,6 +1147,7 @@ export async function _onRollDamage(event) {
         item: item,
         adjustment,
         senseAffecting,
+
         // dice rolls
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
@@ -1159,7 +1160,6 @@ export async function _onRollDamage(event) {
         // body
         bodyDamage: damageDetail.bodyDamage,
         bodyDamageEffective: damageDetail.body,
-        countedBody: damageDetail.countedBody,
 
         // stun
         stunDamage: damageDetail.stunDamage,
@@ -1580,6 +1580,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             item,
             token,
             damageData,
+            damageDetail,
             defense,
         );
     }
@@ -1591,6 +1592,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             item,
             token,
             damageData,
+            damageDetail,
             defense,
         );
     }
@@ -1691,11 +1693,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         roller: heroRoller,
         renderedDamageRoll: damageRenderedResult,
         renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
+        knockbackRoll: damageDetail.knockbackRoller,
 
         // body
         bodyDamage: damageDetail.bodyDamage,
         bodyDamageEffective: damageDetail.body,
-        countedBody: damageDetail.countedBody,
 
         // stun
         stunDamage: damageDetail.stunDamage,
@@ -1704,7 +1706,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         stunMultiplier: damageDetail.stunMultiplier,
         hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
 
+        // damage info
         damageString: heroRoller.getTotalSummary(),
+        useHitLoc: damageDetail.useHitLoc,
+        hitLocText: damageDetail.hitLocText,
 
         // effects
         effects: effectsFinal,
@@ -1839,13 +1844,14 @@ async function _performAbsorptionForToken(
                 absorptionItem,
                 token,
                 {
-                    stundamage: Math.min(
+                    stunDamage: Math.min(
                         maxAbsorption,
                         damageDetail.bodyDamage,
                     ),
                     defenseValue: 0,
                     resistantValue: 0,
                 },
+                undefined,
                 "Absorption - No Defense",
             );
         }
@@ -1856,6 +1862,7 @@ async function _onApplyAdjustmentToSpecificToken(
     adjustmentItem,
     token,
     damageData,
+    damageDetail, // TODO: Need to use this at some point.
     defense,
 ) {
     if (
@@ -1869,7 +1876,7 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
 
-    const rawActivePointsDamage = parseInt(damageData.stundamage);
+    const rawActivePointsDamage = parseInt(damageData.stunDamage);
     const actualActivePointDamage = Math.max(
         0,
         rawActivePointsDamage -
@@ -1893,7 +1900,7 @@ async function _onApplyAdjustmentToSpecificToken(
                 adjustmentItem,
                 reduce,
                 rawActivePointsDamage,
-                actualActivePointDamage,
+                rawActivePointsDamage, // TODO: Remove this extra parameter as it's no longer needed?
                 defense,
                 false,
                 reductionTargetActor,
@@ -1941,20 +1948,20 @@ async function _onApplySenseAffectingToSpecificToken(
     );
     if (flashDefense) {
         const value = parseInt(flashDefense.system.LEVELS || 0);
-        damageData.bodydamage = Math.max(0, damageData.bodydamage - value);
+        damageData.bodyDamage = Math.max(0, damageData.bodyDamage - value);
         defense = `${value} Flash Defense`;
     }
 
     // Create new ActiveEffect
-    if (damageData.bodydamage > 0) {
+    if (damageData.bodyDamage > 0) {
         token.actor.addActiveEffect({
             ...HeroSystem6eActorActiveEffects.blindEffect,
-            name: `${senseAffectingItem.system.XMLID} ${damageData.bodydamage} [${senseAffectingItem.actor.name}]`,
+            name: `${senseAffectingItem.system.XMLID} ${damageData.bodyDamage} [${senseAffectingItem.actor.name}]`,
             duration: {
-                seconds: damageData.bodydamage,
+                seconds: damageData.bodyDamage,
             },
             flags: {
-                bodyDamage: damageData.bodydamage,
+                bodyDamage: damageData.bodyDamage,
                 XMLID: senseAffectingItem.system.XMLID,
                 source: senseAffectingItem.actor.name,
             },
@@ -2012,28 +2019,45 @@ async function _calcDamage(heroRoller, item, options) {
 
     let body;
     let stun;
+    let bodyForPenetrating = 0;
 
     if (adjustmentPower) {
         body = 0;
         stun = heroRoller.getAdjustmentTotal();
+        bodyForPenetrating = (
+            await heroRoller.cloneWhileModifyingType(
+                HeroRoller.ROLL_TYPE.NORMAL,
+            )
+        ).getBodyTotal();
     } else if (senseAffectingPower) {
         body = heroRoller.getFlashTotal();
         stun = 0;
+        bodyForPenetrating = 0;
     } else if (entangle) {
         body = heroRoller.getEntangleTotal();
         stun = 0;
+        bodyForPenetrating = 0;
     } else {
         body = heroRoller.getBodyTotal();
         stun = heroRoller.getStunTotal();
+
+        // TODO: Doesn't handle a 1 point killing attack which is explicitly called out as doing 1 penetrating BODY.
+        if (itemData.killing) {
+            bodyForPenetrating = (
+                await heroRoller.cloneWhileModifyingType(
+                    HeroRoller.ROLL_TYPE.NORMAL,
+                )
+            ).getBodyTotal();
+        } else {
+            bodyForPenetrating = body;
+        }
     }
 
-    const noHitLocationsPower = item.system.noHitLocations || false;
-    const hasStunMultiplierRoll =
-        !!itemData.killing &&
-        !(
-            game.settings.get("hero6efoundryvttv2", "hit locations") &&
-            !noHitLocationsPower
-        );
+    const noHitLocationsPower = !!item.system.noHitLocations;
+    const useHitLocations =
+        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        !noHitLocationsPower;
+    const hasStunMultiplierRoll = itemData.killing && !useHitLocations;
 
     const stunMultiplier = hasStunMultiplierRoll
         ? heroRoller.getStunMultiplier()
@@ -2044,17 +2068,14 @@ async function _calcDamage(heroRoller, item, options) {
     //       or the fact that there is no impenetrable in 5e which uses hardened instead.
     // Penetrating
     const penetratingBody = item.system.penetrating
-        ? Math.max(0, body - (options.impenetrableValue || 0))
+        ? Math.max(0, bodyForPenetrating - (options.impenetrableValue || 0))
         : 0;
 
     // get hit location
     let hitLocation = "None";
     let useHitLoc = false;
 
-    if (
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        !noHitLocationsPower
-    ) {
+    if (useHitLocations) {
         useHitLoc = true;
 
         if (
@@ -2094,6 +2115,7 @@ async function _calcDamage(heroRoller, item, options) {
         knockbackMessage,
         knockbackRenderedResult,
         knockbackTags,
+        knockbackRoller,
     } = await _calcKnockback(
         body,
         item,
@@ -2104,7 +2126,6 @@ async function _calcDamage(heroRoller, item, options) {
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
-
     if (itemData.killing) {
         stun =
             stun - (options.defenseValue || 0) - (options.resistantValue || 0);
@@ -2120,10 +2141,7 @@ async function _calcDamage(heroRoller, item, options) {
     body = RoundFavorPlayerDown(body < 0 ? 0 : body);
 
     let hitLocText = "";
-    if (
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
-        !noHitLocationsPower
-    ) {
+    if (useHitLocations) {
         const hitLocationBodyMultiplier =
             heroRoller.getHitLocation().bodyMultiplier;
         const hitLocationStunMultiplier =
@@ -2166,35 +2184,26 @@ async function _calcDamage(heroRoller, item, options) {
         effects +=
             `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
             `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
-            `A character automatically takes 1 STUN for every 1 point of BODY
-        damage that gets through their defenses. They can Recover this STUN
-        normally; they don't have to heal the BODY damage first.` +
+            `Characters take at least 1 STUN for every 1 point of BODY
+             damage that gets through their defenses.` +
             `"></i> `;
     }
 
-    // The body of a penetrating attack is the minimum damage
-    if (penetratingBody > body) {
-        if (itemData.killing) {
-            body = penetratingBody;
-            stun = body * stunMultiplier;
-        } else {
-            stun = penetratingBody;
-        }
+    // Penetrating attack minimum damage
+    if (itemData.killing && penetratingBody > body) {
+        body = penetratingBody;
+        effects += "penetrating damage; ";
+    } else if (!itemData.killing && penetratingBody > stun) {
+        stun = penetratingBody;
         effects += "penetrating damage; ";
     }
 
-    // StunOnly?
+    // Special effects that change damage?
     if (item.system.stunBodyDamage === "stunonly") {
         body = 0;
-    }
-
-    // BodyOnly?
-    if (item.system.stunBodyDamage === "bodyonly") {
+    } else if (item.system.stunBodyDamage === "bodyonly") {
         stun = 0;
-    }
-
-    // EffectOnly?
-    if (item.system.stunBodyDamage === "effectonly") {
+    } else if (item.system.stunBodyDamage === "effectonly") {
         stun = 0;
         body = 0;
     }
@@ -2202,7 +2211,6 @@ async function _calcDamage(heroRoller, item, options) {
     stun = RoundFavorPlayerDown(stun);
     body = RoundFavorPlayerDown(body);
 
-    // TODO: Should this be entirely within the HeroRoller itself and extractable as required?
     damageDetail.body = body;
     damageDetail.stun = stun;
     damageDetail.effects = effects;
@@ -2218,6 +2226,7 @@ async function _calcDamage(heroRoller, item, options) {
     damageDetail.useKnockBack = useKnockback;
     damageDetail.knockbackRenderedResult = knockbackRenderedResult;
     damageDetail.knockbackTags = knockbackTags;
+    damageDetail.knockbackRoller = knockbackRoller;
 
     return damageDetail;
 }
@@ -2227,6 +2236,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackMessage = "";
     let knockbackRenderedResult = null;
     let knockbackTags = [];
+    let knockbackRoller = null;
 
     if (
         game.settings.get("hero6efoundryvttv2", "knockback") &&
@@ -2283,7 +2293,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             });
         }
 
-        const knockbackHeroRoller = new HeroRoller()
+        knockbackRoller = new HeroRoller()
             .makeBasicRoll()
             .addNumber(
                 body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
@@ -2298,13 +2308,13 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
                 "Knockback modifier", // knockback modifier added on an attack by attack basis
             )
             .subDice(Math.max(0, knockbackDice));
-        await knockbackHeroRoller.roll();
+        await knockbackRoller.roll();
 
         const knockbackResultTotal = Math.round(
-            knockbackHeroRoller.getBasicTotal(),
+            knockbackRoller.getBasicTotal(),
         );
 
-        knockbackRenderedResult = await knockbackHeroRoller.render();
+        knockbackRenderedResult = await knockbackRoller.render();
 
         if (knockbackResultTotal < 0) {
             knockbackMessage = "No Knockback";
@@ -2323,5 +2333,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         knockbackMessage,
         knockbackRenderedResult,
         knockbackTags,
+        knockbackRoller,
     };
 }

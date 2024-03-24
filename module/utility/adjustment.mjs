@@ -404,7 +404,7 @@ function _createNewAdjustmentEffect(
 export async function performAdjustment(
     item,
     nameOfCharOrPower,
-    thisAttackRawActivePointsDamage,
+    thisAttackRawActivePointsDamage, // TODO: Remove this extra parameter as it's no longer needed?
     thisAttackStartingActivePointDamage,
     defenseDescription,
     isFade,

@@ -477,9 +477,10 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        const postRoller = HeroRoller.fromJSON(roller.toJSON());
-                        expect(roller.getBaseTerms()).to.deep.equal(
-                            postRoller.getBaseTerms(),
+                        const postRoller = roller.clone();
+
+                        expect(roller.getSuccessTerms()).to.deep.equal(
+                            postRoller.getSuccessTerms(),
                         );
                         expect(roller.getFormula()).to.equal(
                             postRoller.getFormula(),
@@ -495,7 +496,103 @@ export function registerDiceTests(quench) {
                             .addHalfDice(2)
                             .addNumber(1);
 
-                        const postRoller = HeroRoller.fromJSON(roller.toJSON());
+                        const postRoller = roller.clone();
+
+                        await postRoller.roll();
+
+                        expect(roller.getSuccessTerms()).to.not.deep.equal(
+                            postRoller.getSuccessTerms(),
+                        );
+                        expect(roller.getFormula()).to.not.equal(
+                            postRoller.getFormula(),
+                        );
+                    });
+
+                    it("should be possible to modify the roll type on a clone to easily get normal body from killing attacks", async function () {
+                        const roller = new HeroRoller({})
+                            .makeKillingRoll()
+                            .addDice(2);
+
+                        await roller.roll();
+
+                        const postRoller = await roller.cloneWhileModifyingType(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
+
+                        expect(roller._type).to.equal(
+                            HeroRoller.ROLL_TYPE.KILLING,
+                        );
+                        expect(postRoller._type).to.equal(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
+
+                        expect(roller.getFormula()).to.equal(
+                            postRoller.getFormula(),
+                        );
+
+                        // Works for full dice terms only
+                        function simplisticNormalBodyCalculation(value) {
+                            if (value >= 6) return 2;
+                            else if (value <= 1) return 0;
+                            else return 1;
+                        }
+                        const origBodyTerms = roller.getBodyTerms();
+                        expect(postRoller.getBodyTerms()).to.deep.equal(
+                            origBodyTerms.map((term) =>
+                                simplisticNormalBodyCalculation(term),
+                            ),
+                        );
+                    });
+
+                    it("should be possible to modify the roll type to the same type on a clone to get the same results as a clone", async function () {
+                        const roller = new HeroRoller()
+                            .makeNormalRoll()
+                            .addDice(7)
+                            .addNumber(7)
+                            .addDiceMinus1(3)
+                            .addHalfDice(2)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        const postRoller = await roller.cloneWhileModifyingType(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
+
+                        expect(roller._type).to.equal(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
+                        expect(postRoller._type).to.equal(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
+
+                        expect(roller.getBaseTerms()).to.deep.equal(
+                            postRoller.getBaseTerms(),
+                        );
+                        expect(roller.getFormula()).to.equal(
+                            postRoller.getFormula(),
+                        );
+                    });
+
+                    it("should be possible to modify the roll type to the same type on a clone to get the same results as a clone and roll afterwards", async function () {
+                        const roller = new HeroRoller()
+                            .makeNormalRoll()
+                            .addDice(7)
+                            .addNumber(7)
+                            .addDiceMinus1(3)
+                            .addHalfDice(2)
+                            .addNumber(1);
+
+                        const postRoller = await roller.cloneWhileModifyingType(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
+
+                        expect(roller._type).to.equal(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
+                        expect(postRoller._type).to.equal(
+                            HeroRoller.ROLL_TYPE.NORMAL,
+                        );
 
                         await postRoller.roll();
 

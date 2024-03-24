@@ -34,8 +34,9 @@
 
         <div data-visibility="gm">
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
-                data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}" data-roller="{{roller}}"
-                data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
+                data-body-damage="{{bodyDamage}}" data-body-damage-effective="{{bodyDamageEffective}}"
+                data-stun-damage="{{stunDamage}}" data-stun-damage-effective="{{stunDamageEffective}}"
+                data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}">
                 {{#if (or adjustment senseAffecting)}}
                 Apply {{item.system.XMLID}}
                 {{else}}
@@ -45,9 +46,10 @@
 
             {{#each targetTokens as |target id|}}
             <button class="apply-damage" title="Apply damage to {{target.token.name}}." data-itemId="{{../item.uuid}}"
-                data-target-token-id="{{target.token.id}}" data-bodyDamage="{{../bodyDamage}}"
-                data-stunDamage="{{../stunDamage}}" data-roller="{{target.roller}}"
-                data-stunMultiplier="{{../stunMultiplier}}" data-hit-Location="{{../hitLocation}}">
+                data-target-token-id="{{target.token.id}}"
+                data-body-damage="{{../bodyDamage}}" data-body-damage-effective="{{../bodyDamageEffective}}"
+                data-stun-damage="{{../stunDamage}}" data-stun-damage-effective="{{../stunDamageEffective}}"
+                data-roller="{{target.roller}}" data-stun-multiplier="{{../stunMultiplier}}" data-hit-location="{{../hitLocation}}">
                 {{#if ../adjustment}}
                 Apply {{../item.system.XMLID}} to <b>{{target.token.name}}</b>
                 {{else}}
@@ -58,8 +60,10 @@
 
             {{#if targetIds}}
             <button class="apply-damage" title="Apply damage to ALL tokens that were hit." data-itemId="{{item.uuid}}"
-                data-target-Ids="{{targetIds}}" data-bodyDamage="{{bodyDamage}}" data-stunDamage="{{stunDamage}}"
-                data-roller="{{roller}}" data-stunMultiplier="{{stunMultiplier}}" data-hit-Location="{{hitLocation}}">
+                data-target-Ids="{{targetIds}}"
+                data-body-damage="{{bodyDamage}}" data-body-damage-effective="{{bodyDamageEffective}}"
+                data-stun-damage="{{stunDamage}}" data-stun-damage-effective="{{stunDamageEffective}}"
+                data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}">
                 {{#if adjustment}}
                 Apply {{item.system.XMLID}} to <b>ALL</b>
                 {{else}}
