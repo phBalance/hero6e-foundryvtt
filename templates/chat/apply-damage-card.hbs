@@ -16,6 +16,9 @@
 
   <div class="apply-damage-amount">
     <span title="{{incomingAnnotatedDamageTerms}}">{{incomingDamageSummary}}</span>
+    {{#if useHitLoc}}
+      <div class="description-tiny">{{ hitLocText }}</div>
+    {{/if}}
   </div>
 
   <div class="tags">
