@@ -178,6 +178,10 @@
         },
         "UseEndurance": "Use Endurance",
         "UseKnockback": "Use Knockback",
-        "UseStunned": "Use Stunned"
+        "UseStunned": "Use Stunned",
+        "HAP": {
+            "Name": "Heroic Action Points",
+            "Hint": "Optional 6e Rule, where each character rolls 2d6 to gain HAPs for that session.  Characters may spend HAPs for a variety of GM approved actions, typically to improve a failed dice roll."
+        }
     }
 }

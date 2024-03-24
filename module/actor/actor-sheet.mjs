@@ -871,6 +871,9 @@ export class HeroSystemActorSheet extends ActorSheet {
             (o) => o.activePoints >= topActivePoints * 0.5,
         );
 
+        // Display Heroic Action Points
+        data.useHAP = game.settings.get(game.system.id, "HAP");
+
         return data;
     }
 
