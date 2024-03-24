@@ -6,42 +6,40 @@
       <h3 class="item-name">{{{itemName item}}}</h3>
     </header>
 
+    {{!-- Aim (hit location) form group --}}
+    <div class="form-group" {{#unless useHitLoc}}style="display: none;"{{/unless}}>
+      <label>Aim</label>
+      <select name="aim" id="aim">
+        <option value="none">None</option>
+        {{#each hitLoc as |hitLoc key|}}
+          <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
+        {{/each}}
+      </select>
+    </div>
 
-    {{#if useHitLoc}}
-      <div class="form-group">
-        <label>Aim</label>
-        <select name="aim" id="aim">
-          <option value="none">None</option>
-          {{#each hitLoc as |hitLoc key|}}
-            <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
-          {{/each}}
-        </select>
-      </div>
+    {{!-- Aim side (hit location side) form group --}}
+    <div class="form-group" {{#unless hitLocSide}}style="display: none;"{{/unless}}>
+      <label>Aim Side</label>
+      <select name="aimSide" id="aimSide">
+        <option value="none">None</option>
+        {{#each hitLocSide as |hitLocSide key|}}
+          <option value={{key}}{{#if (eq key @root/aimSide)}} selected{{/if}}>{{key}}</option>
+        {{/each}}
+      </select>
+    </div>
 
-      {{#if hitLocSide}}
-        <div class="form-group">
-          <label>Aim Side</label>
-          <select name="aimSide" id="aimSide">
-            <option value="none">None</option>
-            {{#each hitLocSide as |hitLocSide key|}}
-              <option value={{key}}{{#if (eq key @root/aimSide)}} selected{{/if}}>{{key}}</option>
-            {{/each}}
-          </select>
-        </div>
-      {{/if}}
+    {{!-- Penalty skill levels --}}
+    <div class="description" {{#unless PENALTY_SKILL_LEVELS}}style="display: none;"{{/unless}}>
+      <b>{{PENALTY_SKILL_LEVELS.name}}
+        {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
+      </b>: {{PENALTY_SKILL_LEVELS.system.description}}
+    </div>
 
-      {{#if PENALTY_SKILL_LEVELS}}
-        <div class="description"><b>{{PENALTY_SKILL_LEVELS.name}}
-            {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
-          </b>: {{PENALTY_SKILL_LEVELS.system.description}}
-        </div>
+    <div class="form-group" {{#unless PENALTY_SKILL_LEVELS}}style="display: none;"{{/unless}}>
+      <label>Use Penalty Skill Levels</label>
+      <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
+    </div>
 
-        <div class="form-group">
-          <label>Use Penalty Skill Levels</label>
-          <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
-        </div>
-      {{/if}}
-    {{/if}}
 
     <div class="form-group">
       <label>{{localize "Items.Attack.OcvMod"}}</label>
