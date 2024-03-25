@@ -1,6 +1,6 @@
 # Releases
 
-## Version 3.0.64 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.64 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Actors that were uploaded prior to 3.0.35 (October 2023) are no longer supported. You will need to re-upload these HDC files. You will see a limited number of warnings during migration. Advanced users can view all warnings in the browser developer console. [#856](https://github.com/dmdorman/hero6e-foundryvtt/issues/856)
 - Removed ability to create manual attacks, skills, powers, etc. Any manually created items breaks some of the new codebase. [#856](https://github.com/dmdorman/hero6e-foundryvtt/issues/856)
