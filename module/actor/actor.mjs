@@ -1146,8 +1146,8 @@ export class HeroSystem6eActor extends Actor {
             xml = parser.parseFromString(xml.trim(), "text/xml");
         }
 
-        // Ask if BODY damage should be retained
-        let retainDamage = {
+        // Ask if certain values should be retained across the upload
+        const retainValuesOnUpload = {
             body:
                 parseInt(this.system.characteristics?.body?.max) -
                 parseInt(this.system.characteristics?.body?.value),
@@ -1157,29 +1157,34 @@ export class HeroSystem6eActor extends Actor {
             end:
                 parseInt(this.system.characteristics?.end?.max) -
                 parseInt(this.system.characteristics?.end?.value),
-            hap: this.system.hap.value,
+            hap: this.system.hap?.value,
         };
-        if (retainDamage.body || retainDamage.stun || retainDamage.end) {
+        if (
+            retainValuesOnUpload.body ||
+            retainValuesOnUpload.stun ||
+            retainValuesOnUpload.end
+        ) {
             let content = `${this.name} has:<ul>`;
-            if (retainDamage.body)
-                content += `<li>${retainDamage.body} BODY damage</li>`;
-            if (retainDamage.stun)
-                content += `<li>${retainDamage.stun} STUN damage</li>`;
-            if (retainDamage.end)
-                content += `<li>${retainDamage.end} END used</li>`;
+            if (retainValuesOnUpload.body)
+                content += `<li>${retainValuesOnUpload.body} BODY damage</li>`;
+            if (retainValuesOnUpload.stun)
+                content += `<li>${retainValuesOnUpload.stun} STUN damage</li>`;
+            if (retainValuesOnUpload.end)
+                content += `<li>${retainValuesOnUpload.end} END used</li>`;
             content += `</ul><p>Do you want to apply this damage after the upload?</p>`;
             const confirmed = await Dialog.confirm({
                 title: "Retain damage after upload?",
                 content: content,
             });
             if (confirmed === null) {
-                return ui.notifications.warn(`${this.name} upload cancled.`);
+                return ui.notifications.warn(`${this.name} upload canceled.`);
             }
             if (!confirmed) {
-                retainDamage = {
+                retainValuesOnUpload = {
                     body: 0,
                     stun: 0,
                     end: 0,
+                    /* always retain hap (heroic action points) - don't overwrite */
                 };
             }
         }
@@ -1236,7 +1241,7 @@ export class HeroSystem6eActor extends Actor {
         changes = {};
 
         // Heroic Action Points (always keep the value)
-        changes["system.hap.value"] = retainDamage.hap;
+        changes["system.hap.value"] = retainValuesOnUpload.hap;
 
         // CHARACTERISTICS
         if (heroJson.CHARACTER?.CHARACTERISTICS) {
@@ -1601,10 +1606,14 @@ export class HeroSystem6eActor extends Actor {
         uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
 
         // Apply retained damage
-        if (retainDamage.body || retainDamage.stun || retainDamage.end) {
-            this.system.characteristics.body.value -= retainDamage.body;
-            this.system.characteristics.stun.value -= retainDamage.stun;
-            this.system.characteristics.end.value -= retainDamage.end;
+        if (
+            retainValuesOnUpload.body ||
+            retainValuesOnUpload.stun ||
+            retainValuesOnUpload.end
+        ) {
+            this.system.characteristics.body.value -= retainValuesOnUpload.body;
+            this.system.characteristics.stun.value -= retainValuesOnUpload.stun;
+            this.system.characteristics.end.value -= retainValuesOnUpload.end;
             if (this.id) {
                 await this.update({
                     "system.characteristics.body.value":
