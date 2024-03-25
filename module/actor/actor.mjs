@@ -1147,7 +1147,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Ask if certain values should be retained across the upload
-        let retainValuesOnUpload = {
+        const retainValuesOnUpload = {
             body:
                 parseInt(this.system.characteristics?.body?.max) -
                 parseInt(this.system.characteristics?.body?.value),
@@ -1178,14 +1178,10 @@ export class HeroSystem6eActor extends Actor {
             });
             if (confirmed === null) {
                 return ui.notifications.warn(`${this.name} upload canceled.`);
-            }
-            if (!confirmed) {
-                retainValuesOnUpload = {
-                    body: 0,
-                    stun: 0,
-                    end: 0,
-                    /* always retain hap (heroic action points) - don't overwrite */
-                };
+            } else if (!confirmed) {
+                retainValuesOnUpload.body = 0;
+                retainValuesOnUpload.stun = 0;
+                retainValuesOnUpload.end = 0;
             }
         }
 
