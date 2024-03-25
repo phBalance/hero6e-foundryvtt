@@ -12,6 +12,7 @@
 - Killing attack STUN should now be correct when using hit locations. [#824](https://github.com/dmdorman/hero6e-foundryvtt/issues/824)
 - Improve penetrating BODY and STUN calculations for killing attacks and adjustments. [#851](https://github.com/dmdorman/hero6e-foundryvtt/issues/851)
 - Support for Heroic Action Points. Enable in settings. Shown on actor sheet left sidebar. [#844](https://github.com/dmdorman/hero6e-foundryvtt/issues/844)
+- We have a [YouTube channel](https://www.youtube.com/channel/UCcmq0WFFNZNhRSGwuEHOgRg) with an introductory how to video.
 
 ## Version 3.0.63
 
