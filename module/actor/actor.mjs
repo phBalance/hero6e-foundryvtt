@@ -1147,7 +1147,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Ask if certain values should be retained across the upload
-        const retainValuesOnUpload = {
+        let retainValuesOnUpload = {
             body:
                 parseInt(this.system.characteristics?.body?.max) -
                 parseInt(this.system.characteristics?.body?.value),
