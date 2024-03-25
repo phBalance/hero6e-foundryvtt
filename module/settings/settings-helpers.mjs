@@ -43,6 +43,7 @@ export default class SettingsHelpers {
 
         game.settings.register(module, "hitLocTracking", {
             name: game.i18n.localize("Settings.HitLocation.Tracking.Name"),
+            hint: game.i18n.localize("Settings.HitLocation.Tracking.Hint"),
             scope: "world",
             config: true,
             type: String,
