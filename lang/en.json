@@ -166,7 +166,8 @@
         "HitLocation" : {
             "Name": "Hit Locations",
             "Tracking": {
-                "Name": "Hit Location: Track Damage Done to Individual Body Parts",
+                "Name": "Hit Location Left/Right",
+                "Hint": "Allows diferentation between left and right sides of the body. Currently there is no automation that deals with Impairing or Disabling a specific body part.",
                 "Choices": {
                     "DoNotTrack": "Don't track",
                     "TrackForAll": "Track for all"
