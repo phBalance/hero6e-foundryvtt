@@ -42,9 +42,16 @@ export class HeroSystemActorSheet extends ActorSheet {
     async getData() {
         const data = super.getData();
 
-        // Show unsupported warning when sheet opens.
+        // Show an unsupported actor warning when the sheet opens. An actor can be unsupported if:
+        // 1) It was uploaded and is of an unsupported version (system.versionHeroSystem6eUpload is undefined)
+        // 2) Has not been uploaded but was created long enough ago that a basic character isn't supported (right now this is pre 3.0.64 but it
+        //    probably should have been introduced at the same time we introduced the upload check).
         if (
-            !data.actor.system?.versionHeroSystem6eUpload &&
+            !data.actor.system.versionHeroSystem6eUpload &&
+            !foundry.utils.isNewerVersion(
+                data.actor.system.versionHeroSystem6eCreated,
+                "3.0.63",
+            ) &&
             this._priorState <= 0
         ) {
             ui.notifications.warn(

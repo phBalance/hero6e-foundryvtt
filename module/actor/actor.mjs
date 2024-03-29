@@ -37,7 +37,12 @@ export class HeroSystem6eActor extends Actor {
             };
         }
 
-        this.updateSource({ prototypeToken });
+        this.updateSource({
+            prototypeToken: prototypeToken,
+            system: {
+                versionHeroSystem6eCreated: game.system.version,
+            },
+        });
     }
 
     async removeActiveEffect(activeEffect) {
