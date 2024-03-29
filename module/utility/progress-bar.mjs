@@ -31,7 +31,7 @@ export class HeroProgressBar {
         progressBarLabel.setProperty("width", "0%");
 
         if (++HeroProgressBar.#concurrentProgressBarCount > 1) {
-            ui.notification.error(
+            ui.notifications.warn(
                 `${HeroProgressBar.#concurrentProgressBarCount} progress bars are fighting for control of the scene navigation`,
             );
         }
