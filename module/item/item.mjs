@@ -2702,6 +2702,18 @@ export class HeroSystem6eItem extends Item {
                     case "DEFBONUS":
                         break;
 
+                    case "DAMAGE":
+                        // Unfortunately DAMAGE is used as an adder for both SUSCEPTIBILITY and CHANGEENVIRONMENT. They do not
+                        // share a structure.
+                        if (powerXmlId === "CHANGEENVIRONMENT") {
+                            _adderArray.push(`, ${adder.ALIAS}`);
+                        } else {
+                            _adderArray.push(
+                                adder.OPTION_ALIAS.replace("(", ""),
+                            );
+                        }
+                        break;
+
                     case "APPEARANCE":
                     case "CAPABILITIES":
                     case "CHANCETOGO":
@@ -2709,7 +2721,6 @@ export class HeroSystem6eItem extends Item {
                     case "CIRCUMSTANCES":
                     case "CONCEALABILITY":
                     case "CONDITION":
-                    case "DAMAGE":
                     case "DESCRIPTION":
                     case "DICE":
                     case "EFFECT":

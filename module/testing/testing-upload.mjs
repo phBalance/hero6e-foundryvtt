@@ -6278,6 +6278,114 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.end, 0);
                 });
             });
+
+            describe("CHANGEENVIRONMENT", async function () {
+                const contents = `
+                    <POWER XMLID="CHANGEENVIRONMENT" ID="1709333795869" BASECOST="0.0" LEVELS="0" ALIAS="Change Environment" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                        <ADDER XMLID="ALTERABLEORIGIN" ID="1711727581621" BASECOST="5.0" LEVELS="0" ALIAS="Alterable Origin Point" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="REDUCEDNEGATION" ID="1711727582769" BASECOST="0.0" LEVELS="1" ALIAS="Reduced Negation (1)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="2.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="VARYINGCOMBATEFFECTS" ID="1711727583977" BASECOST="10.0" LEVELS="0" ALIAS="Varying Combat Effects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="PERROLL" ID="1711727584820" BASECOST="0.0" LEVELS="1" ALIAS="-1 PER Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Normal Hearing" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="2.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="CHARORSKILLROLL" ID="1711727586863" BASECOST="0.0" LEVELS="1" ALIAS="-1 to Characteristic Roll or Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="MOVEMENT6E" ID="1711727588192" BASECOST="0.0" LEVELS="1" ALIAS="-1m of any mode of Movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="1.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="MOVEMENT" ID="1711727589448" BASECOST="0.0" LEVELS="1" ALIAS="-1 Wind Levels" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="MOVEMENTINCREASE" ID="1711727592167" BASECOST="0.0" LEVELS="1" ALIAS="+1 Wind Levels" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="TEMPERATURE" ID="1711727594479" BASECOST="0.0" LEVELS="1" ALIAS="-1 Temperature Level Adjustment" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="TEMPERATUREINCREASE" ID="1711727595589" BASECOST="0.0" LEVELS="1" ALIAS="+1 Temperature Level Adjustment" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="CHARANDSKILLROLL" ID="1711727596677" BASECOST="0.0" LEVELS="1" ALIAS="-1 Characteristic Roll and all Skill Rolls based on Characteristic" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="4.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="OCVDCV" ID="1711727599105" BASECOST="0.0" LEVELS="1" ALIAS="-1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RANGEMODIFIER" OPTIONID="RANGEMODIFIER" OPTION_ALIAS="Range Modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="EGO" ID="1711727601026" BASECOST="0.0" LEVELS="1" ALIAS="-1 point of EGO" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="BREAKOUT" ID="1711727603898" BASECOST="0.0" LEVELS="1" ALIAS="-1 to Breakout Rolls" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="3.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="DAMAGE" ID="1711727606218" BASECOST="0.0" LEVELS="1" ALIAS="+1 Points of Damage" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="SUFFOCATION" ID="1711727607626" BASECOST="20.0" LEVELS="0" ALIAS="Suffocation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="STUNNING" ID="1711727608484" BASECOST="30.0" LEVELS="0" ALIAS="Stunning" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="TKSTR" ID="1711727609552" BASECOST="0.0" LEVELS="1" ALIAS="+1 Points of Telekinetic STR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="LONG" ID="1711727610739" BASECOST="2.0" LEVELS="0" ALIAS="Long-Lasting" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1TURN" OPTIONID="1TURN" OPTION_ALIAS="1 Turn" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    actor.system.is5e = true;
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Change Environment (Alterable Origin Point; Reduced Negation (1); Varying Combat Effects; -1 PER Roll; -1 to Characteristic Roll or Skill Roll; -1m of any mode of Movement; -1 Wind Levels; +1 Wind Levels; -1 Temperature Level Adjustment; +1 Temperature Level Adjustment; -1 Characteristic Roll and all Skill Rolls based on Characteristic; -1; -1 point of EGO; -1 to Breakout Rolls; +1 Points of Damage; Suffocation; Stunning; +1 Points of Telekinetic STR; Long-Lasting)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 116);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 116);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 0);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 12);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
