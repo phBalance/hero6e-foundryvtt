@@ -1607,7 +1607,8 @@ export class HeroSystem6eItem extends Item {
         ]) {
             const itemSubTag = itemTag
                 .replace(/S$/, "")
-                .replace("MARTIALART", "MANEUVER");
+                .replace("MARTIALART", "MANEUVER")
+                .replace("DISADVANTAGE", "DISAD");
             if (heroJson[itemSubTag]) {
                 for (const system of Array.isArray(heroJson[itemSubTag])
                     ? heroJson[itemSubTag]

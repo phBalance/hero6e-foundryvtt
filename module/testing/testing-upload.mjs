@@ -6218,6 +6218,66 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("SUSCEPTIBILITY", async function () {
+                const contents = `
+                    <DISAD XMLID="SUSCEPTIBILITY" ID="1709445759247" BASECOST="0.0" LEVELS="0" ALIAS="Susceptibility" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                        <ADDER XMLID="DICE" ID="1709447177129" BASECOST="0.0" LEVELS="0" ALIAS="Number of Dice" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1D6" OPTIONID="1D6" OPTION_ALIAS="1d6 damage" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="DAMAGE" ID="1709447177142" BASECOST="0.0" LEVELS="0" ALIAS="Take Damage Every" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="INSTANT" OPTIONID="INSTANT" OPTION_ALIAS="Instant" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="CONDITION" ID="1709447177148" BASECOST="5.0" LEVELS="0" ALIAS="Condition Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UNCOMMON" OPTIONID="UNCOMMON" OPTION_ALIAS="(Uncommon" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </DISAD>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    actor.system.is5e = true;
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Susceptibility:  (1d6 damage; Instant; Uncommon)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 5);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 5);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 0);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
