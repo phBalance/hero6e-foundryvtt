@@ -132,7 +132,7 @@
 
         <a class="item-nav" data-tab="attacks">Attacks</a>
         {{#if hasMartialArts}}
-        <a class="item-nav" data-tab="martialArts">MartialArts</a>
+            <a class="item-nav" data-tab="martialArts">MartialArts</a>
         {{/if}}
         <a class="item-nav" data-tab="defenses">Defenses</a>
         <a class="item-nav" data-tab="skills">Skills</a>
@@ -142,7 +142,7 @@
         <a class="item-nav" data-tab="powers">Powers</a>
 
         {{#if hasEquipment}}
-        <a class="item-nav" data-tab="equipment">Equipment</a>
+            <a class="item-nav" data-tab="equipment">Equipment</a>
         {{/if}}
         <a class="item-nav" data-tab="characteristics">Characteristics</a>
         <a class="item-nav" data-tab="other">Other</a>
@@ -234,14 +234,14 @@
                 </table>
             </div> {{!-- Attacks Tab --}}
 
-            {{!-- MartialArts Tab --}}
+            {{!-- Martial Arts Tab --}}
             <div class="tab tab-body" data-group="primary" data-tab="martialArts">
                 <table>
                     <tr class="sticky">
                         <th></th>
+                        <th>{{localize "ActorSheet.Cost"}}</th>
                         <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
-                        <th>{{localize "ActorSheet.Cost"}}</th>
                         <th>{{localize "ActorSheet.Phase"}}</th>
                         <th>{{localize "ActorSheet.OCV"}}</th>
                         <th>{{localize "ActorSheet.DCV"}}</th>
@@ -258,9 +258,9 @@
                             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                     height="24" /></div>
                         </td>
+                        <td>{{item.system.realCost}}</td>
                         <td class="left">{{{itemName item}}}</td>
                         <td class="left">{{item.system.description}}</td>
-                        <td>{{item.system.realCost}}</td>
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocvEstimated}}</td>
                         <td>{{item.system.dcvEstimated}}</td>
