@@ -1220,56 +1220,6 @@ export function registerUploadTests(quench) {
                 });
             });
 
-            describe("Offensive Strike", async function () {
-                const contents = `
-                    <MANEUVER XMLID="MANEUVER" ID="1688340787607" BASECOST="5.0" LEVELS="0" ALIAS="Offensive Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Offensive Strike" OCV="-2" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
-                        <NOTES />
-                    </MANEUVER>
-                `;
-                let item;
-
-                before(async () => {
-                    const actor = new HeroSystem6eActor(
-                        {
-                            name: "Quench Actor",
-                            type: "pc",
-                        },
-                        { temporary: true },
-                    );
-                    actor.system.characteristics.dex.value = 15;
-                    item = await new HeroSystem6eItem(
-                        HeroSystem6eItem.itemDataFromXml(contents, actor),
-                        { temporary: true, parent: actor },
-                    );
-                    await item._postUpload();
-                    actor.items.set(item.system.XMLID, item);
-                    item.skillRollUpdateValue();
-                });
-
-                it("description", function () {
-                    assert.equal(
-                        item.system.description,
-                        "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike",
-                    );
-                });
-
-                it("realCost", function () {
-                    assert.equal(item.system.realCost, 5);
-                });
-
-                it("activePoints", function () {
-                    assert.equal(item.system.activePoints, 5);
-                });
-
-                it("dice", function () {
-                    assert.equal(item.system.dice, 4); // There are 4 raw dice, STR is added later
-                });
-
-                it("end", function () {
-                    assert.equal(item.system.end, 0);
-                });
-            });
-
             // WillForce362.hdc
             describe("TELEKINESIS", async function () {
                 const contents = `
@@ -1339,16 +1289,16 @@ export function registerUploadTests(quench) {
             describe("Sniper Rifle", async function () {
                 const contents = `
                     <POWER XMLID="RKA" ID="1688357238677" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Ranged" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Sniper Rifle" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                    <NOTES />
-                    <ADDER XMLID="PLUSONEHALFDIE" ID="1688357355014" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
-                    <NOTES />
-                    </ADDER>
-                    <MODIFIER XMLID="FOCUS" ID="1688357355044" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
-                    <MODIFIER XMLID="CHARGES" ID="1688357368689" BASECOST="-0.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EIGHT" OPTIONID="EIGHT" OPTION_ALIAS="8" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                    <NOTES />
-                    </MODIFIER>
+                        <NOTES />
+                        <ADDER XMLID="PLUSONEHALFDIE" ID="1688357355014" BASECOST="10.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <MODIFIER XMLID="FOCUS" ID="1688357355044" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
+                        <MODIFIER XMLID="CHARGES" ID="1688357368689" BASECOST="-0.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EIGHT" OPTIONID="EIGHT" OPTION_ALIAS="8" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                            <NOTES />
+                        </MODIFIER>
                     </POWER>
                 `;
                 let item;
@@ -6384,6 +6334,186 @@ export function registerUploadTests(quench) {
 
                 it("end", function () {
                     assert.equal(item.system.end, 12);
+                });
+            });
+
+            describe("MANEUVERs", async function () {
+                describe("Offensive Strike", async function () {
+                    const contents = `
+                        <MANEUVER XMLID="MANEUVER" ID="1688340787607" BASECOST="5.0" LEVELS="0" ALIAS="Offensive Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Offensive Strike" OCV="-2" DCV="+1" DC="4" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="15" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                            <NOTES />
+                        </MANEUVER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.characteristics.dex.value = 15;
+                        item = await new HeroSystem6eItem(
+                            {
+                                ...HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
+                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                            },
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 5);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 5);
+                    });
+
+                    it("dice", function () {
+                        assert.equal(item.system.dice, 4); // There are 4 raw dice, STR is added later
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("Martial Flash", async function () {
+                    const contents = `
+                    <MANEUVER XMLID="MANEUVER" ID="1706069203108" BASECOST="4.0" LEVELS="0" ALIAS="Martial Flash" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Hearing" CATEGORY="Hand To Hand" DISPLAY="Martial Flash" OCV="-1" DCV="-1" DC="4" PHASE="1/2" EFFECT="[FLASHDC]" ADDSTR="No" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[FLASHDC]">
+                        <NOTES />
+                    </MANEUVER>
+                `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            {
+                                ...HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
+                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                            },
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "1/2 Phase, -1 OCV, -1 DCV, 4d6 (Hearing)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 4);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 4);
+                    });
+
+                    it("dice", function () {
+                        assert.equal(item.system.dice, 4);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 0);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("Martial Disarm", async function () {
+                    const contents = `
+                        <MANEUVER XMLID="MANEUVER" ID="1711775140729" BASECOST="4.0" LEVELS="0" ALIAS="Martial Disarm" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Disarm" OCV="-1" DCV="+1" DC="2" PHASE="1/2" EFFECT="Disarm; [STRDC] to Disarm" ADDSTR="Yes" ACTIVECOST="5" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Disarm; [STRDC] to Disarm roll">
+                            <NOTES />
+                        </MANEUVER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            {
+                                ...HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
+                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                            },
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "1/2 Phase, -1 OCV, +1 DCV, Disarm; 20 STR to Disarm",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 4);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 4);
+                    });
+
+                    it("dice", function () {
+                        assert.equal(item.system.dice, 2);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 0);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
                 });
             });
         },

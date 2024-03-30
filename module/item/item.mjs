@@ -1,4 +1,3 @@
-import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import * as Attack from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
@@ -116,10 +115,6 @@ export class HeroSystem6eItem extends Item {
     // occur for the client which requested the operation. Modifications to the pending document before it is
     // persisted should be performed with this.updateSource().
     async _preCreate(data, options, userId) {
-        if (this.type == "martialart") {
-            HEROSYS.log(false, this.name);
-        }
-
         await super._preCreate(data, options, userId);
 
         // assign a default image
@@ -2439,7 +2434,13 @@ export class HeroSystem6eItem extends Item {
                     system.description += `, ${dcv.signedString()} DCV`;
                     if (system.EFFECT) {
                         let dc = convertToDcFromItem(this).dc;
-                        if (dc) {
+                        if (system.EFFECT.search(/\[STRDC\]/) > -1) {
+                            const effectiveStrength = 5 * dc;
+                            system.description += `, ${system.EFFECT.replace(
+                                "[STRDC]",
+                                `${effectiveStrength} STR`,
+                            )}`;
+                        } else if (dc) {
                             const damageDiceFormula = getDiceFormulaFromItemDC(
                                 this,
                                 dc,
@@ -2453,10 +2454,15 @@ export class HeroSystem6eItem extends Item {
                                 ) {
                                     system.description += " HKA";
                                 }
-                                system.description += ` ${system.EFFECT.replace(
+
+                                const dice = system.EFFECT.replace(
                                     "[NORMALDC]",
                                     damageDiceFormula,
-                                ).replace("[KILLINGDC]", damageDiceFormula)}`;
+                                )
+                                    .replace("[KILLINGDC]", damageDiceFormula)
+                                    .replace("[FLASHDC]", damageDiceFormula);
+
+                                system.description += ` ${dice}`;
                             }
                         } else {
                             system.description += ", " + system.EFFECT;
@@ -3307,11 +3313,13 @@ export class HeroSystem6eItem extends Item {
         this.system.dcv = dcv;
         this.system.stunBodyDamage = "stunbody";
 
-        // BLOCK and DODGE typically do not use STR
+        // FLASHDC, BLOCK and DODGE do not use STR
         if (["maneuver", "martialart"].includes(this.type)) {
             if (
-                this.system.EFFECT?.toLowerCase().indexOf("block") > -1 ||
-                this.system.EFFECT?.toLowerCase().indexOf("dodge") > -1
+                this.system.EFFECT &&
+                (this.system.EFFECT.toLowerCase().indexOf("block") > -1 ||
+                    this.system.EFFECT.toLowerCase().indexOf("dodge") > -1 ||
+                    this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
             ) {
                 this.system.usesStrength = false;
             }
