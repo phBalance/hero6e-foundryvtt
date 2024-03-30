@@ -1,7 +1,7 @@
 import { HeroRoller } from "./dice.mjs";
 
 const heroRollRegExp = new RegExp(
-    "^(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<flavour>.*))\\])?)$",
+    "^(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*))\\])?)$",
     "i",
 );
 
@@ -29,6 +29,10 @@ Hooks.on("chatMessage", function (_this, message /*, _chatData*/) {
 });
 
 async function doRollAndGenerateChatMessage(chatMessageCmd) {
+    const useHitLocations = !!chatMessageCmd.groups.hitLoc;
+    const useHitLocationsSide =
+        game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all";
+
     let numericTerm = parseFloat(chatMessageCmd.groups.numTerm || 0);
     const negativeTermWithDice =
         chatMessageCmd.groups.numDice && numericTerm < 0; // e.g. 1d6-1
@@ -44,9 +48,9 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
             : 0,
     );
 
-    const roller = new HeroRoller();
-
-    roller.modifyTo5e(chatMessageCmd.groups.heroSystemVersion === "5");
+    const roller = new HeroRoller()
+        .modifyTo5e(chatMessageCmd.groups.heroSystemVersion === "5")
+        .addToHitLocation(useHitLocations, "none", useHitLocationsSide, "none");
 
     let flavour;
     switch (chatMessageCmd.groups.flavour?.toLowerCase()) {
@@ -86,6 +90,9 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
             break;
     }
 
+    // Capitalize the first letter
+    flavour = `${flavour.charAt(0).toUpperCase() + flavour.slice(1)} attack`;
+
     roller
         .addDice(numDice)
         .addDiceMinus1(negativeTermWithDice ? 1 : 0)
@@ -95,7 +102,11 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
 
     await roller.roll();
 
+    if (useHitLocations) {
+        flavour += ` against ${roller.getHitLocation().fullName}`;
+    }
     const cardHtml = await roller.render(flavour);
+
     const speaker = ChatMessage.getSpeaker();
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
