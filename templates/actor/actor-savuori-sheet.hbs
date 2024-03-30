@@ -232,8 +232,7 @@
                         <th>{{localize "ActorSheet.Phase"}}</th>
                         <th>{{localize "ActorSheet.OCV"}}</th>
                         <th>{{localize "ActorSheet.DCV"}}</th>
-                        <th />
-
+                        <th>{{localize "ActorSheet.Roll"}}</th>
                         {{!-- <th>
                             <a class="item-control item-create" title="Create Martial Art" data-type="martialArt">
                                 <i class="fas fa-plus"></i> Add MartialArt</a>
@@ -252,7 +251,11 @@
                         <td>{{item.system.phase}}</td>
                         <td>{{item.system.ocvEstimated}}</td>
                         <td>{{item.system.dcvEstimated}}</td>
-
+                        <td>
+                            {{#if item.system.dice}}
+                                <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
+                            {{/if}}
+                        </td>
                         <td>
                             <a class="item-control item-chat" title="Send to chat"><i
                                     class="fas fa-comment-alt"></i></a>
