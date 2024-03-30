@@ -103,7 +103,7 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
     await roller.roll();
 
     if (useHitLocations) {
-        flavour += ` against ${roller.getHitLocation().fullName}`;
+        flavour += ` to ${roller.getHitLocation().fullName}`;
     }
     const cardHtml = await roller.render(flavour);
 

@@ -6,6 +6,7 @@
 - Improve martial maneuvers using `[FLASHDC]` and `[STRDC]` effects. [#850](https://github.com/dmdorman/hero6e-foundryvtt/issues/850)
 - Add phase information to martial maneuvers.
 - Can now make attack rolls directly from the `MartialArts` tab. [#834](https://github.com/dmdorman/hero6e-foundryvtt/issues/834)
+- For odd time you don't want to count the result of a manual dice roll, `/heroroll` in chat is now a command. See [README.md](https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md) for details.
 
 ## Version 3.0.64
 
