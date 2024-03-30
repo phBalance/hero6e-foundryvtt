@@ -1,4 +1,3 @@
-import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import * as Attack from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
@@ -2435,7 +2434,13 @@ export class HeroSystem6eItem extends Item {
                     system.description += `, ${dcv.signedString()} DCV`;
                     if (system.EFFECT) {
                         let dc = convertToDcFromItem(this).dc;
-                        if (dc) {
+                        if (system.EFFECT.search(/\[STRDC\]/) > -1) {
+                            const effectiveStrength = 5 * dc;
+                            system.description += `, ${system.EFFECT.replace(
+                                "[STRDC]",
+                                `${effectiveStrength} STR`,
+                            )}`;
+                        } else if (dc) {
                             const damageDiceFormula = getDiceFormulaFromItemDC(
                                 this,
                                 dc,

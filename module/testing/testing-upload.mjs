@@ -6454,6 +6454,67 @@ export function registerUploadTests(quench) {
                         assert.equal(item.system.end, 0);
                     });
                 });
+
+                describe("Martial Disarm", async function () {
+                    const contents = `
+                        <MANEUVER XMLID="MANEUVER" ID="1711775140729" BASECOST="4.0" LEVELS="0" ALIAS="Martial Disarm" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Disarm" OCV="-1" DCV="+1" DC="2" PHASE="1/2" EFFECT="Disarm; [STRDC] to Disarm" ADDSTR="Yes" ACTIVECOST="5" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Disarm; [STRDC] to Disarm roll">
+                            <NOTES />
+                        </MANEUVER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+
+                        item = await new HeroSystem6eItem(
+                            {
+                                ...HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
+                                type: "martialart", // TODO: Kludge to make itemDataFromXml match the uploading code.
+                            },
+                            { temporary: true, parent: actor },
+                        );
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                        item.skillRollUpdateValue();
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "1/2 Phase, -1 OCV, +1 DCV, Disarm; 20 STR to Disarm",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 4);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 4);
+                    });
+
+                    it("dice", function () {
+                        assert.equal(item.system.dice, 2);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 0);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
             });
         },
         { displayName: "HERO: Upload" },
