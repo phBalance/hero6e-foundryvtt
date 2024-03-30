@@ -33,6 +33,8 @@ import {
 } from "./utility/adjustment.mjs";
 import { migrateWorld } from "./migration.mjs";
 
+import "./utility/chat-dice.mjs";
+
 import "./testing/testing-main.mjs";
 
 Hooks.once("init", async function () {
