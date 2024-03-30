@@ -144,6 +144,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             // Damage
             if (
                 item.type == "attack" ||
+                item.type == "maneuver" ||
                 item.system.subType === "attack" ||
                 item.system.XMLID === "martialart"
             ) {
@@ -256,12 +257,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                                     );
                                 }
 
-                                item.system.ocvEstimated =
-                                    //parseInt(item.actor.system.characteristics.ocv.value) +
-                                    (
-                                        parseInt(csl.ocv) +
-                                        parseInt(velocity / 10)
-                                    ).signedString();
+                                item.system.ocvEstimated = (
+                                    parseInt(csl.ocv) + parseInt(velocity / 10)
+                                ).signedString();
                             }
                             break;
 
@@ -269,22 +267,18 @@ export class HeroSystemActorSheet extends ActorSheet {
                             item.system.ocv = parseInt(
                                 item.system.ocv,
                             ).signedString();
-                            item.system.ocvEstimated =
-                                //parseInt(item.system.targets === 'omcv' ? item.actor.system.characteristics.omcv.value : item.actor.system.characteristics.ocv.value) +
-                                (
-                                    parseInt(item.system.ocv) +
-                                    parseInt(csl.ocv || csl.omcv)
-                                ).signedString();
+                            item.system.ocvEstimated = (
+                                parseInt(item.system.ocv) +
+                                parseInt(csl.ocv || csl.omcv)
+                            ).signedString();
                     }
                 }
                 if (item.system.dcv != undefined) {
                     item.system.dcv = parseInt(item.system.dcv).signedString();
-                    item.system.dcvEstimated =
-                        //parseInt(item.system.targets === 'dmcv' ? item.actor.system.characteristics.dmcv.value : item.actor.system.characteristics.dcv.value) +
-                        (
-                            parseInt(item.system.dcv) +
-                            parseInt(csl.dcv || csl.dmcv)
-                        ).signedString();
+                    item.system.dcvEstimated = (
+                        parseInt(item.system.dcv) +
+                        parseInt(csl.dcv || csl.dmcv)
+                    ).signedString();
                 }
 
                 // Set +1 OCV
@@ -312,6 +306,8 @@ export class HeroSystemActorSheet extends ActorSheet {
                         parseInt(item.system.dcvEstimated) - 4
                     ).signedString();
                 }
+
+                item.system.phase = item.system.PHASE;
             }
 
             // Defense
@@ -818,7 +814,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         for (const item of this.actor.items.filter(
-            (o) => o.type != "maneuver",
+            (o) => o.type !== "maneuver",
         )) {
             let powerInfo = getPowerInfo({
                 xmlid: item.system.XMLID,
