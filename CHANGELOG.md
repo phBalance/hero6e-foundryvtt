@@ -3,6 +3,9 @@
 ## Version 3.0.64 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix crash during HDC upload with change environment and the damage adder.
+- Improve martial maneuvers using `[FLASHDC]` and `[STRDC]` effects. [#850](https://github.com/dmdorman/hero6e-foundryvtt/issues/850)
+- Add phase information to martial maneuvers.
+- Can now make attack rolls directly from the `MartialArts` tab. [#834](https://github.com/dmdorman/hero6e-foundryvtt/issues/834)
 
 ## Version 3.0.64
 
