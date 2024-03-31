@@ -3763,7 +3763,7 @@ export class HeroSystem6eItem extends Item {
                 (power) => power.system.XMLID === "PERCEPTION",
             );
             const perceptionRoll = parseInt(
-                perceptionItem.system.roll?.replace("-", "") || 11,
+                perceptionItem?.system.roll?.replace("-", "") || 11,
             );
 
             tags.push({
