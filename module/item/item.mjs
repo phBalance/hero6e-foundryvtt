@@ -2730,6 +2730,7 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     case "APPEARANCE":
+                    case "AREA":
                     case "CAPABILITIES":
                     case "CHANCETOGO":
                     case "CHANCETORECOVER":
@@ -2753,6 +2754,7 @@ export class HeroSystem6eItem extends Item {
                     case "POWER":
                     case "REACTION":
                     case "SENSING":
+                    case "SENSITIVITY":
                     case "SITUATION":
                     case "SUBSTANCE":
                     case "TIME":
