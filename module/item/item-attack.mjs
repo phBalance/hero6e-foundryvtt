@@ -2195,7 +2195,7 @@ async function _calcDamage(heroRoller, item, options) {
             `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
             `Characters take at least 1 STUN for every 1 point of BODY
                  damage that gets through their defenses.` +
-            `"></i> `;
+            `"></i>`;
     }
 
     // Special effects that change damage?
@@ -2213,7 +2213,7 @@ async function _calcDamage(heroRoller, item, options) {
 
     damageDetail.body = body;
     damageDetail.stun = stun;
-    damageDetail.effects = effects;
+    damageDetail.effects = effects.trim().replace(/;$/, "");
     damageDetail.stunDamage = stunDamage;
     damageDetail.bodyDamage = bodyDamage;
     damageDetail.stunMultiplier = stunMultiplier;
