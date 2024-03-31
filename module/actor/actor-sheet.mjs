@@ -1069,21 +1069,150 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Get the type of item to create.
         const type = header.dataset.type;
         // Grab any data associated with this control.
-        const data = foundry.utils.duplicate(header.dataset);
+        //const data = foundry.utils.duplicate(header.dataset);
+
+        const actor = this.actor;
+
+        if (
+            !["skill", "power", "perk", "talent", "complication"].includes(type)
+        ) {
+            ui.notifications.warn(
+                `Creating a new ${type.toUpperCase()} is currently unsupported`,
+            );
+            return;
+        }
+
         // Initialize a default name.
         const name = `New ${type.capitalize()}`;
 
-        // Prepare the item object.
-        const itemData = {
-            name,
-            type,
-            system: data,
-        };
-        // Remove the type from the dataset since it's in the itemData.type prop.
-        delete itemData.system.type;
+        // Options associated with TYPE (excluding enhancers for now)
+        const powers = actor.system.is5e
+            ? CONFIG.HERO.powers5e
+            : CONFIG.HERO.powers6e;
+        const powersOfType = powers.filter(
+            (o) =>
+                o.type.includes(type) && !o.type.includes("enhancer") && o.xml,
+        );
 
-        // Finally, create the item!
-        return await HeroSystem6eItem.create(itemData, { parent: this.actor });
+        // Make sure we have options
+        if (powersOfType.length === 0) {
+            ui.notifications.warn(
+                `Creating a new ${type.toUpperCase()} is currently unsupported`,
+            );
+            return;
+        }
+
+        const optionHTML = powersOfType
+            .sort((a, b) => {
+                const parserA = new DOMParser();
+                const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
+                const parserB = new DOMParser();
+                const xmlB = parserB.parseFromString(b.xml.trim(), "text/xml");
+                const nameA = xmlA.children[0]
+                    .getAttribute("ALIAS")
+                    .toUpperCase(); // ignore upper and lowercase
+                const nameB = xmlB.children[0]
+                    .getAttribute("ALIAS")
+                    .toUpperCase(); // ignore upper and lowercase
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+
+                // names must be equal
+                return 0;
+            })
+            .map(function (a) {
+                const parserA = new DOMParser();
+                const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
+                return `<option value='${
+                    a.key
+                }'>${xmlA.children[0].getAttribute("ALIAS")}</option>`;
+            });
+
+        // Need to select a specific XMLID
+        const form = `
+            <form>
+            <label>Select a ${type}:</label>
+                <select name="xmlid">
+                    ${optionHTML}
+                </select>
+            </form>`;
+
+        const d = new Dialog({
+            title: name,
+            content: form,
+            buttons: {
+                create: {
+                    icon: '<i class="fas fa-check"></i>',
+                    label: "Create",
+                    callback: async function (html) {
+                        const formElement = html[0].querySelector("form");
+                        const formData = new FormDataExtended(formElement);
+                        const formDataObject = formData.object;
+                        if (formDataObject.xmlid === "none") return;
+
+                        const power = powers.find(
+                            (o) => o.key == formDataObject.xmlid,
+                        );
+                        if (!power) {
+                            ui.notifications.error(
+                                `Creating new ${type.toUpperCase()} failed`,
+                            );
+                            return;
+                        }
+
+                        // Warn if xml is missing as the item is likely missing properties that we are expecting
+                        if (!power.xml) {
+                            ui.notifications.warn(
+                                `${power.key.toUpperCase()} is missing default properties.  This may cause issues with automation and cost calculations.`,
+                            );
+                        }
+
+                        // Prepare the item object.  Use xml if configured.
+                        let itemData = power.xml
+                            ? HeroSystem6eItem.itemDataFromXml(power.xml, actor)
+                            : {
+                                  name: power.name || power.key,
+                                  type,
+                                  system: {
+                                      XMLID: power.key.toUpperCase(),
+                                      ALIAS:
+                                          power.ALIAS ||
+                                          power.name ||
+                                          power.key,
+                                  },
+                              };
+
+                        // Track when added manually for diagnostic purposes
+                        itemData.system.versionHeroSystem6eManuallyCreated =
+                            game.system.version;
+
+                        // Create a unique ID
+                        itemData.system.ID = new Date().getTime().toString();
+
+                        // Finally, create the item!
+                        const newItem = await HeroSystem6eItem.create(
+                            itemData,
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await newItem._postUpload();
+                        return;
+                    },
+                },
+                cancel: {
+                    icon: '<i class="fas fa-times"></i>',
+                    label: "Cancel",
+                    callback: () =>
+                        console.log(`Cancel ${type.capitalize()} itemCreate`),
+                },
+            },
+        });
+        d.render(true);
     }
 
     async _onEffectCreate(event) {

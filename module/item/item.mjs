@@ -356,7 +356,16 @@ export class HeroSystem6eItem extends Item {
                 content += ` No Range.`;
                 break;
 
+            case "self": {
+                if (!configPowerInfo.type.includes("skill")) {
+                    content += ` Self.`;
+                }
+
+                break;
+            }
+
             default:
+                console.error("Unhandled range", configPowerInfo);
                 if (configPowerInfo?.range?.toLowerCase()) {
                     content += ` ${configPowerInfo?.range?.toLowerCase()}`;
                 }
