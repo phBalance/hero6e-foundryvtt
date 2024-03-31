@@ -6566,6 +6566,10 @@ export function registerUploadTests(quench) {
                 it("end", function () {
                     assert.equal(item.system.end, 0);
                 });
+
+                it("roll", function () {
+                    assert.equal(item.system.roll, "12-");
+                });
             });
         },
         { displayName: "HERO: Upload" },
