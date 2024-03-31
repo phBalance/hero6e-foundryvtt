@@ -90,7 +90,7 @@ Sometimes you just need to manually roll the dice and you don't want to count th
 
 ### Roll to Perform
 
-The command supports the typical combinations of rolls you might be asked to do in the Hero System such as `7d6`, `7d6-1`, `2d6+1`, or `7.5d6`.
+The command supports the typical combinations of rolls you might be asked to do in the Hero System such as `7d6`, `7d6-1`, `2d6+1`, or `7.5d6` (aka seven and a half dice).
 
 ### Optional Flavour of Dice Roll
 
@@ -113,7 +113,7 @@ Prefacing the the flavour with an `h` will give you a roll with hit locations. S
 - `/heroRoll 7d6-1[n]` performs a 6d6 + 1d6-1 normal roll
 - `/heroroll 3d6[s]` performs a 3d6 success roll
 - `/heroroll 5d6+1[hk]` performs a 5d6 + 1 pip killing attack with hit location roll
-- `/heroRoll 167d6[n]` to drops an atomic bomb on the PCs
+- `/heroRoll 167d6[n]` to drop an atomic bomb on the PCs
 
 ![A nasty roll you don't want to be hit with](./media/big-bomb-roll.png)
 
