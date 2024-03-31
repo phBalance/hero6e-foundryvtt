@@ -3063,6 +3063,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["success"],
             name: "Danger Sense",
             costEnd: false,
+            costPerLevel: 1,
         },
         {},
     );
@@ -3086,7 +3087,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-
             costPerLevel: 0,
         },
         {},

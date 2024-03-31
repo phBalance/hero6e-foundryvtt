@@ -6,8 +6,11 @@
 - Improve martial maneuvers using `[FLASHDC]` and `[STRDC]` effects. [#850](https://github.com/dmdorman/hero6e-foundryvtt/issues/850)
 - Add phase information to martial maneuvers.
 - Can now make attack rolls directly from the `MartialArts` tab. [#834](https://github.com/dmdorman/hero6e-foundryvtt/issues/834)
-- For odd time you don't want to count the result of a manual dice roll, `/heroroll` in chat is now a command. See [README.md](https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md) for details.
-- Correct Find Weakness' description and costing. Add success rolls to the actor's sheet powers tab.
+- For odd time you don't want to count the result of a manual dice roll, `/heroroll` in chat is now a command. See [README.md](https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md#manual-rolling) for details.
+- Correct Find Weakness' and Danger Sense description and costing.
+- Add success roll icon to the appropriate entries in the actor's sheet powers tab.
+- Minimum damage calculation should be last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
+- Fix adjustment powers not getting power defense and add effects, such as penetrating, to adjustment chat card.
 
 ## Version 3.0.64
 

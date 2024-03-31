@@ -6571,6 +6571,93 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.roll, "12-");
                 });
             });
+
+            describe("DANGER_SENSE (5e)", async function () {
+                const itemDataPerception = {
+                    name: "Perception",
+                    type: "skill",
+                    system: {
+                        XMLID: "PERCEPTION",
+                        ALIAS: "Perception",
+                        CHARACTERISTIC: "INT",
+                        state: "trained",
+                        levels: "0",
+                    },
+                };
+                const contents = `
+                    <TALENT XMLID="DANGER_SENSE" ID="1698995887314" BASECOST="15.0" LEVELS="8" ALIAS="Danger Sense" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                        <ADDER XMLID="SENSE" ID="1705805754733" BASECOST="2.0" LEVELS="0" ALIAS="Function as a Sense" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="SENSITIVITY" ID="1705805754738" BASECOST="5.0" LEVELS="0" ALIAS="Sensitivity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OUT_OF_COMBAT" OPTIONID="OUT_OF_COMBAT" OPTION_ALIAS="out of combat" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="AREA" ID="1705805754744" BASECOST="5.0" LEVELS="0" ALIAS="Area" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="IMMEDIATE_VICINITY" OPTIONID="IMMEDIATE_VICINITY" OPTION_ALIAS="immediate vicinity" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                    </TALENT>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    actor.system.is5e = true;
+                    actor.system.characteristics.int.value = 15;
+
+                    const perceptionItem = await new HeroSystem6eItem(
+                        itemDataPerception,
+                        { temporary: true, parent: actor },
+                    );
+                    await perceptionItem._postUpload();
+                    actor.items.set(
+                        perceptionItem.system.XMLID,
+                        perceptionItem,
+                    );
+                    perceptionItem.skillRollUpdateValue();
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Danger Sense (Function as a Sense; out of combat; immediate vicinity)",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 35);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 35);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 8);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+                it("roll", function () {
+                    assert.equal(item.system.roll, "20-"); // Perception (12-) + 8 levels = 20-
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
