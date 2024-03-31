@@ -1579,7 +1579,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplyAdjustmentToSpecificToken(
             item,
             token,
-            damageData,
             damageDetail,
             defense,
         );
@@ -1839,19 +1838,19 @@ async function _performAbsorptionForToken(
 
             console.warn("TODO: Not tracking per segment absorption max");
 
+            const activePointsAbsorbing = Math.min(
+                maxAbsorption,
+                damageDetail.bodyDamage,
+            );
+
             // Apply the absorption
             await _onApplyAdjustmentToSpecificToken(
                 absorptionItem,
                 token,
                 {
-                    stunDamage: Math.min(
-                        maxAbsorption,
-                        damageDetail.bodyDamage,
-                    ),
-                    defenseValue: 0,
-                    resistantValue: 0,
+                    stunDamage: activePointsAbsorbing,
+                    stun: activePointsAbsorbing,
                 },
-                undefined,
                 "Absorption - No Defense",
             );
         }
@@ -1861,8 +1860,7 @@ async function _performAbsorptionForToken(
 async function _onApplyAdjustmentToSpecificToken(
     adjustmentItem,
     token,
-    damageData,
-    damageDetail, // TODO: Need to use this at some point.
+    damageDetail,
     defense,
 ) {
     if (
@@ -1876,14 +1874,10 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
 
-    const rawActivePointsDamage = parseInt(damageData.stunDamage);
-    const actualActivePointDamage = Math.max(
-        0,
-        rawActivePointsDamage -
-            damageData.defenseValue -
-            damageData.resistantValue,
-    );
+    const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
+    const activePointsDamageAfterDefense = damageDetail.stun;
 
+    // Where is the adjustment taking from/giving to?
     const { valid, reducesArray, enhancesArray } =
         adjustmentItem.splitAdjustmentSourceAndTarget();
     if (!valid) {
@@ -1899,9 +1893,9 @@ async function _onApplyAdjustmentToSpecificToken(
             await performAdjustment(
                 adjustmentItem,
                 reduce,
-                rawActivePointsDamage,
-                rawActivePointsDamage, // TODO: Remove this extra parameter as it's no longer needed?
+                activePointsDamageAfterDefense,
                 defense,
+                damageDetail.effects,
                 false,
                 reductionTargetActor,
             ),
@@ -1921,11 +1915,11 @@ async function _onApplyAdjustmentToSpecificToken(
             await performAdjustment(
                 adjustmentItem,
                 enhance,
-                -rawActivePointsDamage,
                 adjustmentItem.system.XMLID === "TRANSFER"
-                    ? -actualActivePointDamage
-                    : -rawActivePointsDamage,
+                    ? -activePointsDamageAfterDefense
+                    : -rawActivePointsDamageBeforeDefense,
                 "None - Beneficial",
+                "",
                 false,
                 enhancementTargetActor,
             ),
@@ -2195,7 +2189,7 @@ async function _calcDamage(heroRoller, item, options) {
             `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
             `Characters take at least 1 STUN for every 1 point of BODY
                  damage that gets through their defenses.` +
-            `"></i> `;
+            `"></i>`;
     }
 
     // Special effects that change damage?
@@ -2213,7 +2207,7 @@ async function _calcDamage(heroRoller, item, options) {
 
     damageDetail.body = body;
     damageDetail.stun = stun;
-    damageDetail.effects = effects;
+    damageDetail.effects = effects.trim().replace(/;$/, "");
     damageDetail.stunDamage = stunDamage;
     damageDetail.bodyDamage = bodyDamage;
     damageDetail.stunMultiplier = stunMultiplier;

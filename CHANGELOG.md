@@ -10,6 +10,7 @@
 - Correct Find Weakness' and Danger Sense description and costing.
 - Add success rolls icon to the actor's sheet powers tab.
 - Minimum damage calculation should be last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
+- Fix adjustment powers not getting power defense and add effects, such as penetrating, to adjustment chat card.
 
 ## Version 3.0.64
 
