@@ -3753,19 +3753,25 @@ export class HeroSystem6eItem extends Item {
             roll = `${rollValue}-`;
         } else if (skillData.XMLID === "DANGER_SENSE") {
             const level = parseInt(skillData.LEVELS || 0);
-
             if (!skillData.LEVELS) {
                 console.error(
                     `unknown levels ${skillData.LEVELS} for DANGER_SENSE`,
                 );
             }
 
+            const perceptionItem = this.actor.items.find(
+                (power) => power.system.XMLID === "PERCEPTION",
+            );
+            const perceptionRoll = parseInt(
+                perceptionItem.system.roll?.replace("-", "") || 11,
+            );
+
             tags.push({
-                value: 11 + level,
+                value: perceptionRoll + level,
                 name: "Sense Danger",
             });
 
-            roll = `${11 + level}-`;
+            roll = `${perceptionRoll + level}-`;
         } else if (configPowerInfo?.type.includes("characteristic")) {
             // Characteristics can be bought as powers. We don't give them a roll in this case as they will be
             // rolled from the characteristics tab.
