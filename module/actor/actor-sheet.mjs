@@ -1089,39 +1089,31 @@ export class HeroSystemActorSheet extends ActorSheet {
         const powers = actor.system.is5e
             ? CONFIG.HERO.powers5e
             : CONFIG.HERO.powers6e;
-        const options =
-            type === "power"
-                ? powers.filter(
-                      (o) =>
-                          o.type.includes("attack") ||
-                          o.type.includes("defense") ||
-                          o.type.includes("movement") ||
-                          o.type.includes("adjustment") ||
-                          o.type.includes("automaton") ||
-                          o.type.includes("sense") ||
-                          o.type.includes("standard") ||
-                          o.type.includes("size") ||
-                          o.type.includes("custom") ||
-                          o.type.includes("mental") ||
-                          o.type.includes("body-affecting"),
-                  )
-                : powers.filter(
-                      (o) =>
-                          o.type.includes(type) && !o.type.includes("enhancer"),
-                  );
+        const powersOfType = powers.filter(
+            (o) =>
+                o.type.includes(type) && !o.type.includes("enhancer") && o.xml,
+        );
 
         // Make sure we have options
-        if (options.length === 0) {
+        if (powersOfType.length === 0) {
             ui.notifications.warn(
                 `Creating a new ${type.toUpperCase()} is currently unsupported`,
             );
             return;
         }
 
-        const optionHTML = options
+        const optionHTML = powersOfType
             .sort((a, b) => {
-                const nameA = (a.name || a.key).toUpperCase(); // ignore upper and lowercase
-                const nameB = (b.name || b.key).toUpperCase(); // ignore upper and lowercase
+                const parserA = new DOMParser();
+                const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
+                const parserB = new DOMParser();
+                const xmlB = parserB.parseFromString(b.xml.trim(), "text/xml");
+                const nameA = xmlA.children[0]
+                    .getAttribute("ALIAS")
+                    .toUpperCase(); // ignore upper and lowercase
+                const nameB = xmlB.children[0]
+                    .getAttribute("ALIAS")
+                    .toUpperCase(); // ignore upper and lowercase
                 if (nameA < nameB) {
                     return -1;
                 }
@@ -1132,19 +1124,19 @@ export class HeroSystemActorSheet extends ActorSheet {
                 // names must be equal
                 return 0;
             })
-            .map(
-                (a) =>
-                    `<option value='${a.key}'>${a.name || a.key}${
-                        a.xml ? "*" : ""
-                    }</option>`,
-            );
+            .map(function (a) {
+                const parserA = new DOMParser();
+                const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
+                return `<option value='${
+                    a.key
+                }'>${xmlA.children[0].getAttribute("ALIAS")}</option>`;
+            });
 
         // Need to select a specific XMLID
         const form = `
             <form>
             <label>Select a ${type}:</label>
                 <select name="xmlid">
-                    <option>none</option>
                     ${optionHTML}
                 </select>
             </form>`;
@@ -1195,7 +1187,11 @@ export class HeroSystemActorSheet extends ActorSheet {
                               };
 
                         // Track when added manually for diagnostic purposes
-                        itemData.system.manuallyAdded = game.system.version;
+                        itemData.system.versionHeroSystem6eManuallyCreated =
+                            game.system.version;
+
+                        // Create a unique ID
+                        itemData.system.ID = new Date().getTime().toString();
 
                         // Finally, create the item!
                         const newItem = await HeroSystem6eItem.create(
