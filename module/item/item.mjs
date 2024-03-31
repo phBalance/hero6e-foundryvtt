@@ -2618,6 +2618,15 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS} (${system.OPTION_ALIAS})`;
                 break;
 
+            case "FINDWEAKNESS":
+                {
+                    const { roll } =
+                        this._getNonCharacteristicsBasedRollComponents(system);
+
+                    system.description = `${system.ALIAS} ${roll} with ${system.OPTION_ALIAS}`;
+                }
+                break;
+
             default:
                 {
                     if (
@@ -3526,11 +3535,6 @@ export class HeroSystem6eItem extends Item {
 
         skillData.tags = [];
 
-        const configPowerInfo = getPowerInfo({
-            xmlid: skillData.XMLID,
-            actor: this.actor,
-        });
-
         if (!this.hasSuccessRoll()) {
             skillData.roll = null;
             return;
@@ -3541,226 +3545,237 @@ export class HeroSystem6eItem extends Item {
 
         // No Characteristic = no roll (Skill Enhancers for example) except for FINDWEAKNESS
         const characteristicBased = skillData.CHARACTERISTIC;
-        if (!characteristicBased) {
-            if (skillData.XMLID === "FINDWEAKNESS") {
-                // Provide up to 2 tags to explain how the roll was calculated:
-                // 1. Base skill value without modifier due to characteristics
-                const baseRollValue = 11;
-                skillData.tags.push({
-                    value: baseRollValue,
-                    name: "Base Skill",
-                });
+        const { roll, tags } = !characteristicBased
+            ? this._getNonCharacteristicsBasedRollComponents(skillData)
+            : this._getSkillRollComponents(skillData);
 
-                // 2. Adjustments due to level
-                const levelsAdjustment =
-                    parseInt(
-                        skillData.LEVELS?.value ||
-                            skillData.LEVELS ||
-                            skillData.levels,
-                    ) || 0;
-                if (levelsAdjustment) {
-                    skillData.tags.push({
-                        value: levelsAdjustment,
-                        name: "Levels",
-                    });
-                }
-
-                const rollVal = baseRollValue + levelsAdjustment;
-                skillData.roll = `${rollVal}-`;
-            } else if (skillData.XMLID === "REPUTATION") {
-                // 2 types of reputation. Positive is a perk ("HOWWELL" adder) and Negative is a disadvantage ("RECOGNIZED" adder).
-                let perkRollValue = parseInt(
-                    skillData.ADDER.find((adder) => adder.XMLID === "HOWWELL")
-                        ?.OPTIONID || 0,
-                );
-
-                if (!perkRollValue) {
-                    const disadRollName = skillData.ADDER.find(
-                        (adder) => adder.XMLID === "RECOGNIZED",
-                    ).OPTIONID;
-
-                    if (disadRollName === "SOMETIMES") {
-                        perkRollValue = 8;
-                    } else if (disadRollName === "FREQUENTLY") {
-                        perkRollValue = 11;
-                    } else if (disadRollName === "ALWAYS") {
-                        perkRollValue = 14;
-                    } else {
-                        console.error(
-                            `unknown disadRollName ${disadRollName} for REPUTATION`,
-                        );
-                        perkRollValue = 14;
-                    }
-                }
-
-                skillData.tags.push({
-                    value: perkRollValue,
-                    name: "How Recognized",
-                });
-
-                skillData.roll = `${perkRollValue}-`;
-            } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
-                const changeChance = skillData.ADDER.find(
-                    (adder) => adder.XMLID === "CHANCETOCHANGE",
-                )?.OPTIONID;
-                let rollValue;
-
-                if (changeChance === "INFREQUENT") {
-                    rollValue = 8;
-                } else if (changeChance === "FREQUENT") {
-                    rollValue = 11;
-                } else if (changeChance === "VERYFREQUENT") {
-                    rollValue = 14;
-                } else if (!changeChance) {
-                    // Shouldn't happen. Give it a default.
-                    console.error(
-                        `ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`,
-                    );
-                    rollValue = 8;
-                }
-
-                skillData.tags.push({
-                    value: rollValue,
-                    name: "Change Chance",
-                });
-
-                skillData.roll = `${rollValue}-`;
-            } else if (
-                skillData.XMLID === "DEPENDENTNPC" ||
-                skillData.XMLID === "HUNTED"
-            ) {
-                const appearanceChance = skillData.ADDER.find(
-                    (adder) => adder.XMLID === "APPEARANCE",
-                )?.OPTIONID;
-                let chance;
-
-                if (
-                    appearanceChance === "EIGHT" ||
-                    appearanceChance === "8ORLESS"
-                ) {
-                    chance = 8;
-                } else if (
-                    appearanceChance === "ELEVEN" ||
-                    appearanceChance === "11ORLESS"
-                ) {
-                    chance = 11;
-                } else if (
-                    appearanceChance === "FOURTEEN" ||
-                    appearanceChance === "14ORLESS"
-                ) {
-                    chance = 14;
-                } else {
-                    // Shouldn't happen. Give it a default.
-                    console.error(
-                        `${skillData.XMLID} unknown APPEARANCE adder ${appearanceChance}. Defaulting to 8-`,
-                    );
-                }
-
-                skillData.tags.push({
-                    value: chance,
-                    name: "Appearance Chance",
-                });
-
-                skillData.roll = `${chance ? chance : 8}-`;
-            } else if (skillData.XMLID === "ENRAGED") {
-                const enrageChance = skillData.ADDER.find(
-                    (adder) => adder.XMLID === "CHANCETOGO",
-                )?.OPTIONID;
-                let rollValue;
-
-                if (enrageChance === "8-") {
-                    rollValue = 8;
-                } else if (enrageChance === "11-") {
-                    rollValue = 11;
-                } else if (enrageChance === "14-") {
-                    rollValue = 14;
-                } else if (!enrageChance) {
-                    // Shouldn't happen. Give it a default.
-                    console.error(
-                        `ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`,
-                    );
-                    rollValue = 8;
-                }
-
-                skillData.tags.push({
-                    value: rollValue,
-                    name: "Become Enraged",
-                });
-
-                skillData.roll = `${rollValue}-`;
-            } else if (skillData.XMLID === "SOCIALLIMITATION") {
-                const occurChance = skillData.ADDER.find(
-                    (adder) => adder.XMLID === "OCCUR",
-                )?.OPTIONID;
-                let rollValue;
-
-                if (occurChance === "OCCASIONALLY") {
-                    rollValue = 8;
-                } else if (occurChance === "FREQUENTLY") {
-                    rollValue = 11;
-                } else if (occurChance === "VERYFREQUENTLY") {
-                    rollValue = 14;
-                } else {
-                    console.error(
-                        `unknown occurChance ${occurChance} for REPUTATION`,
-                    );
-                    rollValue = 14;
-                }
-
-                skillData.tags.push({
-                    value: rollValue,
-                    name: "Occurrence Chance",
-                });
-
-                skillData.roll = `${rollValue}-`;
-            } else if (skillData.XMLID === "CONTACT") {
-                const levels = parseInt(skillData.LEVELS || 1);
-                let rollValue;
-
-                if (levels === 1) {
-                    rollValue = 8;
-                } else {
-                    rollValue = 9 + levels;
-                }
-
-                skillData.tags.push({
-                    value: rollValue,
-                    name: "Contact Chance",
-                });
-
-                skillData.roll = `${rollValue}-`;
-            } else if (skillData.XMLID === "DANGER_SENSE") {
-                const level = parseInt(skillData.LEVELS || 0);
-
-                if (!skillData.LEVELS) {
-                    console.error(
-                        `unknown levels ${skillData.LEVELS} for DANGER_SENSE`,
-                    );
-                }
-
-                skillData.tags.push({
-                    value: 11 + level,
-                    name: "Sense Danger",
-                });
-
-                skillData.roll = `${11 + level}-`;
-            } else if (configPowerInfo?.type.includes("characteristic")) {
-                // Characteristics can be bought as powers. We don't give them a roll in this case as they will be
-                // rolled from the characteristics tab.
-                skillData.roll = null;
-            } else {
-                console.error(
-                    `Don't know how to build non characteristic based roll information for ${skillData.XMLID}`,
-                );
-                skillData.roll = null;
-            }
-
-            return;
-        }
-
-        const { roll, tags } = this._getSkillRollComponents(skillData);
         skillData.roll = roll;
         skillData.tags = tags;
+    }
+
+    _getNonCharacteristicsBasedRollComponents(skillData) {
+        let roll = null;
+        const tags = [];
+
+        const configPowerInfo = getPowerInfo({
+            xmlid: skillData.XMLID,
+            actor: this.actor,
+        });
+
+        if (skillData.XMLID === "FINDWEAKNESS") {
+            // Provide up to 2 tags to explain how the roll was calculated:
+            // 1. Base skill value without modifier due to characteristics
+            const baseRollValue = 11;
+            tags.push({
+                value: baseRollValue,
+                name: "Base Skill",
+            });
+
+            // 2. Adjustments due to level
+            const levelsAdjustment =
+                parseInt(
+                    skillData.LEVELS?.value ||
+                        skillData.LEVELS ||
+                        skillData.levels,
+                ) || 0;
+            if (levelsAdjustment) {
+                tags.push({
+                    value: levelsAdjustment,
+                    name: "Levels",
+                });
+            }
+
+            const rollVal = baseRollValue + levelsAdjustment;
+            roll = `${rollVal}-`;
+        } else if (skillData.XMLID === "REPUTATION") {
+            // 2 types of reputation. Positive is a perk ("HOWWELL" adder) and Negative is a disadvantage ("RECOGNIZED" adder).
+            let perkRollValue = parseInt(
+                skillData.ADDER.find((adder) => adder.XMLID === "HOWWELL")
+                    ?.OPTIONID || 0,
+            );
+
+            if (!perkRollValue) {
+                const disadRollName = skillData.ADDER.find(
+                    (adder) => adder.XMLID === "RECOGNIZED",
+                ).OPTIONID;
+
+                if (disadRollName === "SOMETIMES") {
+                    perkRollValue = 8;
+                } else if (disadRollName === "FREQUENTLY") {
+                    perkRollValue = 11;
+                } else if (disadRollName === "ALWAYS") {
+                    perkRollValue = 14;
+                } else {
+                    console.error(
+                        `unknown disadRollName ${disadRollName} for REPUTATION`,
+                    );
+                    perkRollValue = 14;
+                }
+            }
+
+            tags.push({
+                value: perkRollValue,
+                name: "How Recognized",
+            });
+
+            roll = `${perkRollValue}-`;
+        } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
+            const changeChance = skillData.ADDER.find(
+                (adder) => adder.XMLID === "CHANCETOCHANGE",
+            )?.OPTIONID;
+            let rollValue;
+
+            if (changeChance === "INFREQUENT") {
+                rollValue = 8;
+            } else if (changeChance === "FREQUENT") {
+                rollValue = 11;
+            } else if (changeChance === "VERYFREQUENT") {
+                rollValue = 14;
+            } else if (!changeChance) {
+                // Shouldn't happen. Give it a default.
+                console.error(
+                    `ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`,
+                );
+                rollValue = 8;
+            }
+
+            tags.push({
+                value: rollValue,
+                name: "Change Chance",
+            });
+
+            roll = `${rollValue}-`;
+        } else if (
+            skillData.XMLID === "DEPENDENTNPC" ||
+            skillData.XMLID === "HUNTED"
+        ) {
+            const appearanceChance = skillData.ADDER.find(
+                (adder) => adder.XMLID === "APPEARANCE",
+            )?.OPTIONID;
+            let chance;
+
+            if (
+                appearanceChance === "EIGHT" ||
+                appearanceChance === "8ORLESS"
+            ) {
+                chance = 8;
+            } else if (
+                appearanceChance === "ELEVEN" ||
+                appearanceChance === "11ORLESS"
+            ) {
+                chance = 11;
+            } else if (
+                appearanceChance === "FOURTEEN" ||
+                appearanceChance === "14ORLESS"
+            ) {
+                chance = 14;
+            } else {
+                // Shouldn't happen. Give it a default.
+                console.error(
+                    `${skillData.XMLID} unknown APPEARANCE adder ${appearanceChance}. Defaulting to 8-`,
+                );
+            }
+
+            tags.push({
+                value: chance,
+                name: "Appearance Chance",
+            });
+
+            roll = `${chance ? chance : 8}-`;
+        } else if (skillData.XMLID === "ENRAGED") {
+            const enrageChance = skillData.ADDER.find(
+                (adder) => adder.XMLID === "CHANCETOGO",
+            )?.OPTIONID;
+            let rollValue;
+
+            if (enrageChance === "8-") {
+                rollValue = 8;
+            } else if (enrageChance === "11-") {
+                rollValue = 11;
+            } else if (enrageChance === "14-") {
+                rollValue = 14;
+            } else if (!enrageChance) {
+                // Shouldn't happen. Give it a default.
+                console.error(
+                    `ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`,
+                );
+                rollValue = 8;
+            }
+
+            tags.push({
+                value: rollValue,
+                name: "Become Enraged",
+            });
+
+            roll = `${rollValue}-`;
+        } else if (skillData.XMLID === "SOCIALLIMITATION") {
+            const occurChance = skillData.ADDER.find(
+                (adder) => adder.XMLID === "OCCUR",
+            )?.OPTIONID;
+            let rollValue;
+
+            if (occurChance === "OCCASIONALLY") {
+                rollValue = 8;
+            } else if (occurChance === "FREQUENTLY") {
+                rollValue = 11;
+            } else if (occurChance === "VERYFREQUENTLY") {
+                rollValue = 14;
+            } else {
+                console.error(
+                    `unknown occurChance ${occurChance} for REPUTATION`,
+                );
+                rollValue = 14;
+            }
+
+            tags.push({
+                value: rollValue,
+                name: "Occurrence Chance",
+            });
+
+            roll = `${rollValue}-`;
+        } else if (skillData.XMLID === "CONTACT") {
+            const levels = parseInt(skillData.LEVELS || 1);
+            let rollValue;
+
+            if (levels === 1) {
+                rollValue = 8;
+            } else {
+                rollValue = 9 + levels;
+            }
+
+            tags.push({
+                value: rollValue,
+                name: "Contact Chance",
+            });
+
+            roll = `${rollValue}-`;
+        } else if (skillData.XMLID === "DANGER_SENSE") {
+            const level = parseInt(skillData.LEVELS || 0);
+
+            if (!skillData.LEVELS) {
+                console.error(
+                    `unknown levels ${skillData.LEVELS} for DANGER_SENSE`,
+                );
+            }
+
+            tags.push({
+                value: 11 + level,
+                name: "Sense Danger",
+            });
+
+            roll = `${11 + level}-`;
+        } else if (configPowerInfo?.type.includes("characteristic")) {
+            // Characteristics can be bought as powers. We don't give them a roll in this case as they will be
+            // rolled from the characteristics tab.
+            roll = null;
+        } else {
+            console.error(
+                `Don't know how to build non characteristic based roll information for ${skillData.XMLID}`,
+            );
+            roll = null;
+        }
+
+        return { roll: roll, tags: tags };
     }
 
     _getSkillRollComponents(skillData) {

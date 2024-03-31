@@ -3804,6 +3804,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "FINDWEAKNESS",
         type: ["sense", "special", "skill"],
         behaviors: ["success"],
+        costPerLevel: 5,
     });
     addPower(
         {
