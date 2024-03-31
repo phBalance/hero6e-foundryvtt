@@ -6516,6 +6516,61 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("FINDWEAKNESS (5e)", async function () {
+                const contents = `
+                    <POWER XMLID="FINDWEAKNESS" ID="1698998161256" BASECOST="20.0" LEVELS="1" ALIAS="Find Weakness" POSITION="5" MULTIPLIER="1.0" GRAPHIC="block" COLOR="0 255 0" SFX="Luck" SHOW_ACTIVE_COST="Yes" OPTION="RELATEDGROUP" OPTIONID="RELATEDGROUP" OPTION_ALIAS="Related Group of Attacks" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Weakness Location with Martial Arts" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+                    actor.system.is5e = true;
+
+                    item = await new HeroSystem6eItem(
+                        HeroSystem6eItem.itemDataFromXml(contents, actor),
+                        { temporary: true, parent: actor },
+                    );
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                    item.skillRollUpdateValue();
+                });
+
+                it("description", function () {
+                    assert.equal(
+                        item.system.description,
+                        "Find Weakness 12- with Related Group of Attacks",
+                    );
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 25);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 25);
+                });
+
+                it("levels", function () {
+                    assert.equal(item.system.value, 1);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 0);
+                });
+
+                it("roll", function () {
+                    assert.equal(item.system.roll, "12-");
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );
