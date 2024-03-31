@@ -75,10 +75,6 @@ export class HeroSystem6eAttackCard extends HeroSystem6eCard {
             damageMod: form.damageMod.value,
         };
 
-        if (game.settings.get("hero6efoundryvttv2", "knockback")) {
-            data["knockbackMod"] = form.knockbackMod.value;
-        }
-
         await HeroSystem6eToHitCard.createFromAttackCard(
             item,
             data,
@@ -110,10 +106,6 @@ export class HeroSystem6eAttackCard extends HeroSystem6eCard {
             effectiveStr: effectiveStr,
             damageMod: form.damageMod.value,
         };
-
-        if (game.settings.get("hero6efoundryvttv2", "knockback")) {
-            data["knockbackMod"] = form.knockbackMod.value;
-        }
 
         await HeroSystem6eToHitCard.createFromAttackCard(
             item,

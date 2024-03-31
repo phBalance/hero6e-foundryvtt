@@ -1579,7 +1579,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplyAdjustmentToSpecificToken(
             item,
             token,
-            damageData,
             damageDetail,
             defense,
         );
@@ -1839,19 +1838,19 @@ async function _performAbsorptionForToken(
 
             console.warn("TODO: Not tracking per segment absorption max");
 
+            const activePointsAbsorbing = Math.min(
+                maxAbsorption,
+                damageDetail.bodyDamage,
+            );
+
             // Apply the absorption
             await _onApplyAdjustmentToSpecificToken(
                 absorptionItem,
                 token,
                 {
-                    stunDamage: Math.min(
-                        maxAbsorption,
-                        damageDetail.bodyDamage,
-                    ),
-                    defenseValue: 0,
-                    resistantValue: 0,
+                    stunDamage: activePointsAbsorbing,
+                    stun: activePointsAbsorbing,
                 },
-                undefined,
                 "Absorption - No Defense",
             );
         }
@@ -1861,8 +1860,7 @@ async function _performAbsorptionForToken(
 async function _onApplyAdjustmentToSpecificToken(
     adjustmentItem,
     token,
-    damageData,
-    damageDetail, // TODO: Need to use this at some point.
+    damageDetail,
     defense,
 ) {
     if (
@@ -1876,14 +1874,10 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
 
-    const rawActivePointsDamage = parseInt(damageData.stunDamage);
-    const actualActivePointDamage = Math.max(
-        0,
-        rawActivePointsDamage -
-            damageData.defenseValue -
-            damageData.resistantValue,
-    );
+    const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
+    const activePointsDamageAfterDefense = damageDetail.stun;
 
+    // Where is the adjustment taking from/giving to?
     const { valid, reducesArray, enhancesArray } =
         adjustmentItem.splitAdjustmentSourceAndTarget();
     if (!valid) {
@@ -1899,9 +1893,9 @@ async function _onApplyAdjustmentToSpecificToken(
             await performAdjustment(
                 adjustmentItem,
                 reduce,
-                rawActivePointsDamage,
-                rawActivePointsDamage, // TODO: Remove this extra parameter as it's no longer needed?
+                activePointsDamageAfterDefense,
                 defense,
+                damageDetail.effects,
                 false,
                 reductionTargetActor,
             ),
@@ -1921,11 +1915,11 @@ async function _onApplyAdjustmentToSpecificToken(
             await performAdjustment(
                 adjustmentItem,
                 enhance,
-                -rawActivePointsDamage,
                 adjustmentItem.system.XMLID === "TRANSFER"
-                    ? -actualActivePointDamage
-                    : -rawActivePointsDamage,
+                    ? -activePointsDamageAfterDefense
+                    : -rawActivePointsDamageBeforeDefense,
                 "None - Beneficial",
+                "",
                 false,
                 enhancementTargetActor,
             ),
@@ -2157,36 +2151,17 @@ async function _calcDamage(heroRoller, item, options) {
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
 
-        hitLocText =
-            "Hit " +
-            hitLocation +
-            " (x" +
-            hitLocationStunMultiplier +
-            " STUN x" +
-            hitLocationBodyMultiplier +
-            " BODY)";
+        hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
     }
 
     // apply damage reduction
     if (options.damageReductionValue > 0) {
-        //defense += "; damage reduction " + options.damageReductionValue + "%";
         stun = RoundFavorPlayerDown(
             stun * (1 - options.damageReductionValue / 100),
         );
         body = RoundFavorPlayerDown(
             body * (1 - options.damageReductionValue / 100),
         );
-    }
-
-    // minimum damage rule
-    if (stun < body) {
-        stun = body;
-        effects +=
-            `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
-            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
-            `Characters take at least 1 STUN for every 1 point of BODY
-             damage that gets through their defenses.` +
-            `"></i> `;
     }
 
     // Penetrating attack minimum damage
@@ -2196,6 +2171,17 @@ async function _calcDamage(heroRoller, item, options) {
     } else if (!itemData.killing && penetratingBody > stun) {
         stun = penetratingBody;
         effects += "penetrating damage; ";
+    }
+
+    // minimum damage rule (needs to be last)
+    if (stun < body) {
+        stun = body;
+        effects +=
+            `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
+            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
+            `Characters take at least 1 STUN for every 1 point of BODY
+                 damage that gets through their defenses.` +
+            `"></i>`;
     }
 
     // Special effects that change damage?
@@ -2213,7 +2199,7 @@ async function _calcDamage(heroRoller, item, options) {
 
     damageDetail.body = body;
     damageDetail.stun = stun;
-    damageDetail.effects = effects;
+    damageDetail.effects = effects.trim().replace(/;$/, "");
     damageDetail.stunDamage = stunDamage;
     damageDetail.bodyDamage = bodyDamage;
     damageDetail.stunMultiplier = stunMultiplier;
@@ -2302,10 +2288,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             .subNumber(
                 parseInt(options.knockbackResistance || 0),
                 "Knockback resistance",
-            )
-            .addDice(
-                parseInt(options.knockbackMod || options.knockbadmod || 0),
-                "Knockback modifier", // knockback modifier added on an attack by attack basis
             )
             .subDice(Math.max(0, knockbackDice));
         await knockbackRoller.roll();

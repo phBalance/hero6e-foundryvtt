@@ -176,7 +176,6 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
 
         let stateData = {
             // dice rolls
-            //rolls: [attackRoll],
             renderedHitRoll: renderedResult,
             hitRollText: hitRollText,
             hitRollValue: result.total,
@@ -184,7 +183,6 @@ export class HeroSystem6eToHitCard extends HeroSystem6eCard {
             // data for damage card
             itemId: itemId,
             aim: data.aim,
-            knockbackMod: data.knockbackMod,
             damageMod: data.damageMod,
             hitRollData: hitRollData,
             effectiveStr: data.effectiveStr,

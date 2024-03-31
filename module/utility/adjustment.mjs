@@ -404,9 +404,9 @@ function _createNewAdjustmentEffect(
 export async function performAdjustment(
     item,
     nameOfCharOrPower,
-    thisAttackRawActivePointsDamage, // TODO: Remove this extra parameter as it's no longer needed?
-    thisAttackStartingActivePointDamage,
+    thisAttackRawActivePointsDamage,
     defenseDescription,
+    effectsDescription,
     isFade,
     targetActor,
 ) {
@@ -492,6 +492,7 @@ export async function performAdjustment(
             0,
             0,
             defenseDescription,
+            effectsDescription,
             potentialCharacteristic,
             true,
             true,
@@ -505,9 +506,9 @@ export async function performAdjustment(
 
     // Healing is not cumulative. All else is.
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
-        ? thisAttackStartingActivePointDamage -
+        ? thisAttackRawActivePointsDamage -
           activeEffect.flags.adjustmentActivePoints
-        : thisAttackStartingActivePointDamage;
+        : thisAttackRawActivePointsDamage;
     const thisAttackActivePointEffectLostDueToNotExceeding = isHealing
         ? activeEffect.flags.adjustmentActivePoints
         : 0;
@@ -548,7 +549,7 @@ export async function performAdjustment(
         );
 
         thisAttackActivePointAdjustmentLostDueToMax = isOnlyToStartingValues
-            ? thisAttackStartingActivePointDamage -
+            ? thisAttackRawActivePointsDamage -
               max -
               thisAttackActivePointEffectLostDueToNotExceeding
             : totalActivePointsStartingEffect - max;
@@ -594,12 +595,13 @@ export async function performAdjustment(
     ) {
         return _generateAdjustmentChatCard(
             item,
-            thisAttackStartingActivePointDamage,
+            thisAttackRawActivePointsDamage,
             totalActivePointAffectedDifference,
             totalAdjustmentNewActivePoints,
             thisAttackActivePointAdjustmentLostDueToMax,
             thisAttackActivePointEffectLostDueToNotExceeding,
             defenseDescription,
+            effectsDescription,
             potentialCharacteristic,
             isFade,
             false,
@@ -706,12 +708,13 @@ export async function performAdjustment(
 
     return _generateAdjustmentChatCard(
         item,
-        thisAttackStartingActivePointDamage,
+        thisAttackRawActivePointsDamage,
         totalActivePointAffectedDifference,
         totalAdjustmentNewActivePoints,
         thisAttackActivePointAdjustmentLostDueToMax,
         thisAttackActivePointEffectLostDueToNotExceeding,
         defenseDescription,
+        effectsDescription,
         potentialCharacteristic,
         isFade,
         isEffectFinished,
@@ -727,6 +730,7 @@ function _generateAdjustmentChatCard(
     activePointEffectLostDueToMax,
     activePointEffectLostDueToNotExceeding,
     defenseDescription,
+    effectsDescription,
     targetCharOrPower,
     isFade,
     isEffectFinished,
@@ -736,6 +740,7 @@ function _generateAdjustmentChatCard(
         item: item,
 
         defenseDescription: defenseDescription,
+        effectsDescription: effectsDescription,
 
         adjustment: {
             adjustmentDamageRaw: activePointDamage,
@@ -775,6 +780,8 @@ export async function renderAdjustmentChatCards(cardOrCards) {
     const cardData = {
         item: cardOrCards[0].item,
         defenseDescription: cardOrCards[0].defenseDescription,
+        activePoints: cardOrCards[0].adjustment.adjustmentDamageRaw,
+        effectsDescription: cardOrCards[0].effectsDescription,
         isEffectFinished: cardOrCards[cardOrCards.length - 1].isEffectFinished,
         targetActor: cardOrCards[0].targetActor,
 
