@@ -1,6 +1,6 @@
 # Releases
 
-## Version 3.0.64 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.65 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix crash during HDC upload with change environment and the damage adder.
 - Improve martial maneuvers using `[FLASHDC]` and `[STRDC]` effects. [#850](https://github.com/dmdorman/hero6e-foundryvtt/issues/850)
@@ -11,6 +11,7 @@
 - Add success roll icon to the appropriate entries in the actor's sheet powers tab.
 - Minimum damage calculation should be last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
 - Fix adjustment powers not getting power defense and add effects, such as penetrating, to adjustment chat card.
+- You can now add some skills, powers, and perks in game.
 
 ## Version 3.0.64
 
