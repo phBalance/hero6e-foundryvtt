@@ -404,8 +404,7 @@ function _createNewAdjustmentEffect(
 export async function performAdjustment(
     item,
     nameOfCharOrPower,
-    thisAttackRawActivePointsDamage, // TODO: Remove this extra parameter as it's no longer needed?
-    thisAttackStartingActivePointDamage,
+    thisAttackRawActivePointsDamage,
     defenseDescription,
     isFade,
     targetActor,
@@ -505,9 +504,9 @@ export async function performAdjustment(
 
     // Healing is not cumulative. All else is.
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
-        ? thisAttackStartingActivePointDamage -
+        ? thisAttackRawActivePointsDamage -
           activeEffect.flags.adjustmentActivePoints
-        : thisAttackStartingActivePointDamage;
+        : thisAttackRawActivePointsDamage;
     const thisAttackActivePointEffectLostDueToNotExceeding = isHealing
         ? activeEffect.flags.adjustmentActivePoints
         : 0;
@@ -548,7 +547,7 @@ export async function performAdjustment(
         );
 
         thisAttackActivePointAdjustmentLostDueToMax = isOnlyToStartingValues
-            ? thisAttackStartingActivePointDamage -
+            ? thisAttackRawActivePointsDamage -
               max -
               thisAttackActivePointEffectLostDueToNotExceeding
             : totalActivePointsStartingEffect - max;
@@ -594,7 +593,7 @@ export async function performAdjustment(
     ) {
         return _generateAdjustmentChatCard(
             item,
-            thisAttackStartingActivePointDamage,
+            thisAttackRawActivePointsDamage,
             totalActivePointAffectedDifference,
             totalAdjustmentNewActivePoints,
             thisAttackActivePointAdjustmentLostDueToMax,
@@ -706,7 +705,7 @@ export async function performAdjustment(
 
     return _generateAdjustmentChatCard(
         item,
-        thisAttackStartingActivePointDamage,
+        thisAttackRawActivePointsDamage,
         totalActivePointAffectedDifference,
         totalAdjustmentNewActivePoints,
         thisAttackActivePointAdjustmentLostDueToMax,
