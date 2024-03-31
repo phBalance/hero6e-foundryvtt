@@ -170,10 +170,6 @@
                         <th>{{localize "ActorSheet.Aoe"}}</th>
                         <th>{{localize "ActorSheet.Roll"}}</th>
                         <th>
-                            <span class="item-controls">
-                                <a class="item-control item-create" title="Create attack" data-type="attack"><i
-                                        class="fas fa-plus"></i> Add attack</a>
-                            </span>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -295,8 +291,6 @@
                         <th>{{localize "ActorSheet.End"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
-                            <a class="item-control item-create" title="Create defense" data-type="defense">
-                                <i class="fas fa-plus"></i> Add defense</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -414,8 +408,6 @@
                         <th>{{localize "ActorSheet.DCV"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
                         <th>
-                            <a class="item-control item-create" title="Create maneuver" data-type="maneuver">
-                                <i class="fas fa-plus"></i> Add Maneuver</a>
                         </th>
                     </tr>
                     {{#each items as |item id|}}
@@ -518,7 +510,10 @@
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
                         <th>{{localize "ActorSheet.End"}}</th>
                         <th>{{localize "ActorSheet.Active"}}</th>
-                        <th></th>
+                        <th>
+                            <a class="item-control item-create" title="Create power" data-type="power">
+                                <i class="fas fa-plus"></i> Add Power</a>
+                        </th>
                     </tr>
                     {{#each items as |item id|}}
                         {{!-- Show powers and things in a framework or compound power --}}
