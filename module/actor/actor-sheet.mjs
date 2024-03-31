@@ -1158,7 +1158,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     label: "Create",
                     callback: async function (html) {
                         const formElement = html[0].querySelector("form");
-                        const formData = new FormDataExtended(formElement); // eslint-disable-line
+                        const formData = new FormDataExtended(formElement);
                         const formDataObject = formData.object;
                         if (formDataObject.xmlid === "none") return;
 
