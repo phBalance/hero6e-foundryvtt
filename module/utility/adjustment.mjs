@@ -406,6 +406,7 @@ export async function performAdjustment(
     nameOfCharOrPower,
     thisAttackRawActivePointsDamage,
     defenseDescription,
+    effectsDescription,
     isFade,
     targetActor,
 ) {
@@ -491,6 +492,7 @@ export async function performAdjustment(
             0,
             0,
             defenseDescription,
+            effectsDescription,
             potentialCharacteristic,
             true,
             true,
@@ -599,6 +601,7 @@ export async function performAdjustment(
             thisAttackActivePointAdjustmentLostDueToMax,
             thisAttackActivePointEffectLostDueToNotExceeding,
             defenseDescription,
+            effectsDescription,
             potentialCharacteristic,
             isFade,
             false,
@@ -711,6 +714,7 @@ export async function performAdjustment(
         thisAttackActivePointAdjustmentLostDueToMax,
         thisAttackActivePointEffectLostDueToNotExceeding,
         defenseDescription,
+        effectsDescription,
         potentialCharacteristic,
         isFade,
         isEffectFinished,
@@ -726,6 +730,7 @@ function _generateAdjustmentChatCard(
     activePointEffectLostDueToMax,
     activePointEffectLostDueToNotExceeding,
     defenseDescription,
+    effectsDescription,
     targetCharOrPower,
     isFade,
     isEffectFinished,
@@ -735,6 +740,7 @@ function _generateAdjustmentChatCard(
         item: item,
 
         defenseDescription: defenseDescription,
+        effectsDescription: effectsDescription,
 
         adjustment: {
             adjustmentDamageRaw: activePointDamage,
@@ -774,6 +780,8 @@ export async function renderAdjustmentChatCards(cardOrCards) {
     const cardData = {
         item: cardOrCards[0].item,
         defenseDescription: cardOrCards[0].defenseDescription,
+        activePoints: cardOrCards[0].adjustment.adjustmentDamageRaw,
+        effectsDescription: cardOrCards[0].effectsDescription,
         isEffectFinished: cardOrCards[cardOrCards.length - 1].isEffectFinished,
         targetActor: cardOrCards[0].targetActor,
 

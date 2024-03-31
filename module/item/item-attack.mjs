@@ -1895,6 +1895,7 @@ async function _onApplyAdjustmentToSpecificToken(
                 reduce,
                 activePointsDamageAfterDefense,
                 defense,
+                damageDetail.effects,
                 false,
                 reductionTargetActor,
             ),
@@ -1918,6 +1919,7 @@ async function _onApplyAdjustmentToSpecificToken(
                     ? -activePointsDamageAfterDefense
                     : -rawActivePointsDamageBeforeDefense,
                 "None - Beneficial",
+                "",
                 false,
                 enhancementTargetActor,
             ),
