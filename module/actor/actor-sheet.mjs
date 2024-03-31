@@ -1089,9 +1089,35 @@ export class HeroSystemActorSheet extends ActorSheet {
         const powers = actor.system.is5e
             ? CONFIG.HERO.powers5e
             : CONFIG.HERO.powers6e;
-        const options = powers.filter(
-            (o) => o.type.includes(type) && !o.type.includes("enhancer"),
-        );
+        const options =
+            type === "power"
+                ? powers.filter(
+                      (o) =>
+                          o.type.includes("attack") ||
+                          o.type.includes("defense") ||
+                          o.type.includes("movement") ||
+                          o.type.includes("adjustment") ||
+                          o.type.includes("automaton") ||
+                          o.type.includes("sense") ||
+                          o.type.includes("standard") ||
+                          o.type.includes("size") ||
+                          o.type.includes("custom") ||
+                          o.type.includes("mental") ||
+                          o.type.includes("body-affecting"),
+                  )
+                : powers.filter(
+                      (o) =>
+                          o.type.includes(type) && !o.type.includes("enhancer"),
+                  );
+
+        // Make sure we have options
+        if (options.length === 0) {
+            ui.notifications.warn(
+                `Creating a new ${type.toUpperCase()} is currently unsupported`,
+            );
+            return;
+        }
+
         const optionHTML = options
             .sort((a, b) => {
                 const nameA = (a.name || a.key).toUpperCase(); // ignore upper and lowercase
