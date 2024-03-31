@@ -9,6 +9,7 @@
 - For odd time you don't want to count the result of a manual dice roll, `/heroroll` in chat is now a command. See [README.md](https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md) for details.
 - Correct Find Weakness' and Danger Sense description and costing.
 - Add success rolls icon to the actor's sheet powers tab.
+- Minimum damage calculation should be last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
 
 ## Version 3.0.64
 

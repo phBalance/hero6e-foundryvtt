@@ -2178,17 +2178,6 @@ async function _calcDamage(heroRoller, item, options) {
         );
     }
 
-    // minimum damage rule
-    if (stun < body) {
-        stun = body;
-        effects +=
-            `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
-            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
-            `Characters take at least 1 STUN for every 1 point of BODY
-             damage that gets through their defenses.` +
-            `"></i> `;
-    }
-
     // Penetrating attack minimum damage
     if (itemData.killing && penetratingBody > body) {
         body = penetratingBody;
@@ -2196,6 +2185,17 @@ async function _calcDamage(heroRoller, item, options) {
     } else if (!itemData.killing && penetratingBody > stun) {
         stun = penetratingBody;
         effects += "penetrating damage; ";
+    }
+
+    // minimum damage rule (needs to be last)
+    if (stun < body) {
+        stun = body;
+        effects +=
+            `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
+            `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
+            `Characters take at least 1 STUN for every 1 point of BODY
+                 damage that gets through their defenses.` +
+            `"></i> `;
     }
 
     // Special effects that change damage?
