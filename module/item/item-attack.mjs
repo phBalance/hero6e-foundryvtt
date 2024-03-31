@@ -2151,14 +2151,7 @@ async function _calcDamage(heroRoller, item, options) {
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
 
-        hitLocText =
-            "Hit " +
-            hitLocation +
-            " (x" +
-            hitLocationStunMultiplier +
-            " STUN x" +
-            hitLocationBodyMultiplier +
-            " BODY)";
+        hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
     }
 
     // apply damage reduction
