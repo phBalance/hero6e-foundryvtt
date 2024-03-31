@@ -2151,19 +2151,11 @@ async function _calcDamage(heroRoller, item, options) {
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
 
-        hitLocText =
-            "Hit " +
-            hitLocation +
-            " (x" +
-            hitLocationStunMultiplier +
-            " STUN x" +
-            hitLocationBodyMultiplier +
-            " BODY)";
+        hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
     }
 
     // apply damage reduction
     if (options.damageReductionValue > 0) {
-        //defense += "; damage reduction " + options.damageReductionValue + "%";
         stun = RoundFavorPlayerDown(
             stun * (1 - options.damageReductionValue / 100),
         );
@@ -2296,10 +2288,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             .subNumber(
                 parseInt(options.knockbackResistance || 0),
                 "Knockback resistance",
-            )
-            .addDice(
-                parseInt(options.knockbackMod || options.knockbadmod || 0),
-                "Knockback modifier", // knockback modifier added on an attack by attack basis
             )
             .subDice(Math.max(0, knockbackDice));
         await knockbackRoller.roll();
