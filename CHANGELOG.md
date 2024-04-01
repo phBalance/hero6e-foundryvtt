@@ -9,7 +9,7 @@
 - For odd time you don't want to count the result of a manual dice roll, `/heroroll` in chat is now a command. See [README.md](https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md#manual-rolling) for details.
 - Correct Find Weakness' and Danger Sense description and cost.
 - Add success roll icon to the appropriate entries in the actor's sheet powers tab.
-- Minimum damage calculation should be last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
+- Minimum damage calculation changed such that it is last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
 - Fix adjustment powers not getting power defense and add effects, such as penetrating, to adjustment chat card.
 - You can now add some skills, powers, and perks in game.
 - Drag Ruler will now show proper 5e colours at appropriate distances.
