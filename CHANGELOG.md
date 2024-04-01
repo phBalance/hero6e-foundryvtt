@@ -11,7 +11,6 @@
 - Add success roll icon to the appropriate entries in the actor's sheet powers tab.
 - Minimum damage calculation changed such that it is last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
 - Fix adjustment powers not getting power defense and add effects, such as penetrating, to adjustment chat card.
-- You can now add some skills, powers, and perks in game.
 - Drag Ruler will now show proper 5e colours at appropriate distances.
 - Defense are now properly applied to ADJUSTMENT POWERS. Added effect descriptions (such as penetrating) to adjustment chat card.
 - You can now add most skills and some powers in game.  We're still adding the rest of the powers, perks, etc.  Only a few items (blast for example) are functionally editable at the moment.  One small step toward Hero Designer lite.
