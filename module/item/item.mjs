@@ -365,7 +365,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             default:
-                console.error("Unhandled range", configPowerInfo);
+                console.warn("Unhandled range", configPowerInfo);
                 if (configPowerInfo?.range?.toLowerCase()) {
                     content += ` ${configPowerInfo?.range?.toLowerCase()}`;
                 }
