@@ -1073,15 +1073,6 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         const actor = this.actor;
 
-        if (
-            !["skill", "power", "perk", "talent", "complication"].includes(type)
-        ) {
-            ui.notifications.warn(
-                `Creating a new ${type.toUpperCase()} is currently unsupported`,
-            );
-            return;
-        }
-
         // Initialize a default name.
         const name = `New ${type.capitalize()}`;
 
@@ -1092,10 +1083,21 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // TODO: TYPE is really an ACTOR SHEET TAB (or section) name, which is loosely associated with item.type
         // If type = power or equipment then we should show ALL powers we know except for disadvantages, maneuvers, and martialArts.
-        const powersOfType = powers.filter(
-            (o) =>
-                o.type.includes(type) && !o.type.includes("enhancer") && o.xml,
-        );
+        const powersOfType = ["power", "equipment"].includes(type)
+            ? powers.filter(
+                  (o) =>
+                      o.type != undefined &&
+                      !o.type.includes("martial") &&
+                      !o.type.includes("framework") &&
+                      !o.type.includes("enhancer") &&
+                      o.xml,
+              )
+            : powers.filter(
+                  (o) =>
+                      o.type.includes(type) &&
+                      !o.type.includes("enhancer") &&
+                      o.xml,
+              );
 
         // Make sure we have options
         if (powersOfType.length === 0) {
@@ -1140,10 +1142,13 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Need to select a specific XMLID
         const form = `
             <form>
-            <label>Select a ${type}:</label>
+            <p>
+            <label>Select ${type}:</label>
+            <br>
                 <select name="xmlid">
                     ${optionHTML}
                 </select>
+            </p>
             </form>`;
 
         const d = new Dialog({
@@ -1181,7 +1186,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                             ? HeroSystem6eItem.itemDataFromXml(power.xml, actor)
                             : {
                                   name: power.name || power.key,
-                                  type,
                                   system: {
                                       XMLID: power.key.toUpperCase(),
                                       ALIAS:
@@ -1190,6 +1194,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                                           power.key,
                                   },
                               };
+
+                        // Make sure type matches TAB (consider power vs equipment)
+                        itemData.type = type;
 
                         // Track when added manually for diagnostic purposes
                         itemData.system.versionHeroSystem6eManuallyCreated =
