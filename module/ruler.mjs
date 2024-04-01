@@ -47,30 +47,47 @@ export class HeroRuler {
                 }
 
                 getRanges(token) {
-                    const baseSpeed = this.getMovementSpeed(token);
+                    const baseSpeedInMetres =
+                        HeroSysSpeedProvider.getMovementSpeedInMetres(token);
 
+                    // Convert metres into hexes using the standard 1" = 2m conversion with the
+                    // assumption that the grid is set to 1 hex = 2m.
                     const ranges = [
-                        { range: Math.ceil(baseSpeed / 2), color: "half" },
+                        {
+                            range: Math.ceil(baseSpeedInMetres / 2),
+                            color: "half",
+                        },
                         {
                             range:
-                                Math.floor(baseSpeed / 2) +
-                                Math.ceil(baseSpeed / 2),
+                                Math.floor(baseSpeedInMetres / 2) +
+                                Math.ceil(baseSpeedInMetres / 2),
                             color: "full",
                         },
-                        { range: baseSpeed * 2, color: "noncombat" },
+
+                        // TODO: This is assuming that the movement type has no non combat multiples.
+                        { range: baseSpeedInMetres * 2, color: "noncombat" },
                     ];
 
                     return ranges;
                 }
 
-                getMovementSpeed(token) {
+                /**
+                 *
+                 * Return the movement speed of a token in metres per phase.
+                 * 5e stores the value as ". 6e stores the value as m.
+                 *
+                 * @param {Object} token
+                 * @returns number
+                 */
+                static getMovementSpeedInMetres(token) {
                     const key = token.actor.flags.activeMovement || "running";
+                    const is5e = !!token.actor.system.is5e;
                     const movementValue =
                         parseInt(
                             token.actor.system.characteristics[key].value,
                         ) || 0;
 
-                    return movementValue;
+                    return is5e ? movementValue * 2 : movementValue;
                 }
 
                 async onMovementHistoryUpdate(tokens) {
@@ -263,13 +280,7 @@ export class HeroRuler {
                 actor.flags.activeMovement = args?.flags?.activeMovement;
             }
 
-            // const movementPowers = actor?.system.is5e
-            //     ? CONFIG.HERO.movementPowers5e
-            //     : CONFIG.HERO.movementPowers;
-
-            //if (movementPowers[Object.keys(args.system.characteristics)[0]]) {
             movementRadioSelectRender();
-            //}
         });
 
         Hooks.on("hdcUpload", function () {
