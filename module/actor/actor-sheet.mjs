@@ -1108,12 +1108,8 @@ export class HeroSystemActorSheet extends ActorSheet {
                 const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
                 const parserB = new DOMParser();
                 const xmlB = parserB.parseFromString(b.xml.trim(), "text/xml");
-                const nameA = xmlA.children[0]
-                    .getAttribute("ALIAS")
-                    .toUpperCase(); // ignore upper and lowercase
-                const nameB = xmlB.children[0]
-                    .getAttribute("ALIAS")
-                    .toUpperCase(); // ignore upper and lowercase
+                const nameA = xmlA.children[0].getAttribute("ALIAS");
+                const nameB = xmlB.children[0].getAttribute("ALIAS");
                 if (nameA < nameB) {
                     return -1;
                 }
@@ -1127,9 +1123,15 @@ export class HeroSystemActorSheet extends ActorSheet {
             .map(function (a) {
                 const parserA = new DOMParser();
                 const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
-                return `<option value='${
-                    a.key
-                }'>${xmlA.children[0].getAttribute("ALIAS")}</option>`;
+                const alias = xmlA.children[0].getAttribute("ALIAS");
+
+                // Make sure XMLID's match, if not then skip
+                if (a.key != xmlA.children[0].getAttribute("XMLID")) {
+                    console.warn(`XMLID mismatch`, a, xmlA.children[0]);
+                    return "";
+                }
+
+                return `<option value='${a.key}'>${alias}</option>`;
             });
 
         // Need to select a specific XMLID
