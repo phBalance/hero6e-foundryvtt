@@ -12,6 +12,7 @@
 - Minimum damage calculation should be last in the damage application chain to allow penetrating killing attacks to do STUN >= BODY.
 - Fix adjustment powers not getting power defense and add effects, such as penetrating, to adjustment chat card.
 - You can now add some skills, powers, and perks in game.
+- Drag Ruler will now report rules based colours at appropriate distance.
 
 ## Version 3.0.64
 
