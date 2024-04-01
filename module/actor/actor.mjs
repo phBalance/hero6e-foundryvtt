@@ -1301,6 +1301,7 @@ export class HeroSystem6eActor extends Actor {
         );
 
         // ITEMS
+
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
@@ -1345,7 +1346,17 @@ export class HeroSystem6eActor extends Actor {
                         const item = await HeroSystem6eItem.create(itemData, {
                             parent: this,
                         });
-                        await item._postUpload();
+                        try {
+                            await item._postUpload();
+                        } catch (e) {
+                            console.error(e);
+                            await ui.notifications.error(
+                                `${this.name}/${item.name}/${item.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                { console: true, permanent: true },
+                            );
+                            await item.delete();
+                            continue;
+                        }
 
                         // COMPOUNDPOWER is similar to a MULTIPOWER.
                         // MULTIPOWER uses PARENTID references.
@@ -1380,7 +1391,20 @@ export class HeroSystem6eActor extends Actor {
                                                 itemData2,
                                                 { parent: this },
                                             );
-                                        await item2._postUpload();
+                                        try {
+                                            await item2._postUpload();
+                                        } catch (e) {
+                                            console.error(e);
+                                            await ui.notifications.error(
+                                                `${this.name}/${item.name}/${item2.name}/${item2.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                {
+                                                    console: true,
+                                                    permanent: true,
+                                                },
+                                            );
+                                            await item2.delete();
+                                            continue;
+                                        }
                                     } else {
                                         console.log(key);
                                     }

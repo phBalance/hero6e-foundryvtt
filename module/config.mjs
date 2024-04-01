@@ -3843,7 +3843,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ENDURANCERESERVE",
             name: "Endurance Reserve",
-            type: ["special"],
+            type: ["special", "power"],
             behaviors: [],
             perceivability: "imperceptible",
             duration: "persistent",
@@ -3851,6 +3851,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             costPerLevel: 1 / 4,
+            xml: `<POWER XMLID="ENDURANCERESERVE" ID="1709342596431" BASECOST="0.0" LEVELS="0" ALIAS="Endurance Reserve" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <NOTES />
+            <POWER XMLID="ENDURANCERESERVEREC" ID="1709343272177" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+              <NOTES />
+            </POWER>`,
         },
         {},
     );
@@ -3875,12 +3880,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "ENTANGLE",
             name: "Entangle",
-            type: ["attack", "standard"],
+            type: ["attack", "standard", "power"],
             behaviors: ["attack", "dice"],
             duration: "instant",
             range: "standard",
             costPerLevel: 10,
             costEnd: true,
+            xml: `<POWER XMLID="ENTANGLE" ID="1709342612255" BASECOST="0.0" LEVELS="1" ALIAS="Entangle" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -3888,34 +3894,37 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EXTRALIMBS",
             name: "Extra Limbs",
-            type: ["standard"],
+            type: ["standard", "power"],
             behaviors: [],
             duration: "persistent",
             target: "self only",
             range: "self",
             costEnd: false,
             costPerLevel: 0,
+            xml: `<POWER XMLID="EXTRALIMBS" ID="1709342614933" BASECOST="5.0" LEVELS="1" ALIAS="Extra Limbs" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
 
     addPower(undefined, {
         key: "FINDWEAKNESS",
-        type: ["sense", "special", "skill"],
+        type: ["sense", "special", "skill", "power"],
         behaviors: ["success"],
         costPerLevel: 5,
+        xml: `<POWER XMLID="FINDWEAKNESS" ID="1709342622694" BASECOST="10.0" LEVELS="0" ALIAS="Find Weakness" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
     });
     addPower(
         {
             key: "FIXEDLOCATION",
             name: "Teleportation: Fixed Location",
-            type: ["attack", "sense-affecting", "standard"],
+            type: ["attack", "sense-affecting", "standard", "power"],
             behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
             range: "standard",
             costEnd: true,
+            xml: `<POWER XMLID="FIXEDLOCATION" ID="1709334034085" BASECOST="0.0" LEVELS="1" ALIAS="Teleportation: Fixed Location" POSITION="82" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -3923,33 +3932,35 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FLOATINGLOCATION",
             name: "Teleportation: Floating Fixed Location",
-            type: ["attack", "sense-affecting", "standard"],
+            type: ["attack", "sense-affecting", "standard", "power"],
             behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
             range: "standard",
             costEnd: true,
+            xml: `<POWER XMLID="FLOATINGLOCATION" ID="1709334037026" BASECOST="0.0" LEVELS="1" ALIAS="Teleportation: Floating Fixed Location" POSITION="83" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
     addPower(
         {
             key: "FLASH",
-            type: ["attack", "sense-affecting", "standard"],
+            type: ["attack", "sense-affecting", "standard", "power"],
             behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "Target’s DCV",
             range: "standard",
             costEnd: true,
+            xml: `<POWER XMLID="FLASH" ID="1711933970815" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="44" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
     addPower(
         {
             key: "FLASHDEFENSE",
-            type: ["defense", "special"],
+            type: ["defense", "special", "power"],
             behaviors: ["activatable"],
             name: "Flash Defense",
             perceivability: "inobvious",
@@ -3958,13 +3969,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             costPerLevel: 1,
+            xml: `<POWER XMLID="FLASHDEFENSE" ID="1711933981614" BASECOST="0.0" LEVELS="1" ALIAS="Flash Defense" POSITION="45" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
     addPower(
         {
             key: "FORCEFIELD",
-            type: ["defense", "standard"],
+            type: ["defense", "standard", "power"],
             behaviors: ["activatable"],
             name: "Resistant Protection",
             duration: "persistent",
@@ -3973,12 +3985,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             costPerLevel: 1.5,
+            xml: `<POWER XMLID="FORCEFIELD" ID="1709334003070" BASECOST="0.0" LEVELS="0" ALIAS="Resistant Protection" POSITION="71" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0">`,
         },
         {
-            name: "Force Field",
+            //name: "Force Field",
             duration: "constant",
             costEnd: true,
             costPerLevel: 1,
+            xml: `<POWER XMLID="FORCEFIELD" ID="1709342634480" BASECOST="0.0" LEVELS="0" ALIAS="Force Field" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0">`,
         },
     );
     addPower(
@@ -3986,7 +4000,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FORCEWALL",
             type: ["defense", "standard", "power"],
             behaviors: ["activatable"],
-            name: "Barrier",
+            //name: "Barrier",
             duration: "instant",
             range: "standard",
             costEnd: true,
@@ -3994,7 +4008,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<POWER XMLID="FORCEWALL" ID="1711932416775" BASECOST="3.0" LEVELS="0" ALIAS="Barrier" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0">`,
         },
         {
-            name: "Force Wall",
+            //name: "Force Wall",
             duration: "constant",
             costPerLevel: 2.5,
             xml: `<POWER XMLID="FORCEWALL" ID="1709342637180" BASECOST="0.0" LEVELS="0" ALIAS="Force Wall" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0">`,
@@ -4005,7 +4019,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "GROWTH",
             name: "Growth",
-            type: ["body-affecting", "size"],
+            type: ["body-affecting", "size", "power"],
             behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
@@ -4013,6 +4027,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 5,
+            xml: `<POWER XMLID="GROWTH" ID="1711934263926" BASECOST="25.0" LEVELS="0" ALIAS="Growth" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LARGE" OPTIONID="LARGE" OPTION_ALIAS="Large" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4021,19 +4036,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HANDTOHANDATTACK",
             name: "Hand-To-Hand Attack",
-            type: ["attack"],
+            type: ["attack", "power"],
             behaviors: ["attack", "dice"],
             duration: "instant",
             range: "no range",
             costEnd: true,
             costPerLevel: 5,
+            xml: `<POWER XMLID="HANDTOHANDATTACK" ID="1711934318209" BASECOST="0.0" LEVELS="1" ALIAS="Hand-To-Hand Attack" POSITION="48" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <NOTES />
+            <MODIFIER XMLID="HANDTOHANDATTACK" ID="1711934557552" BASECOST="-0.25" LEVELS="0" ALIAS="Hand-To-Hand Attack" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+              <NOTES />
+            </MODIFIER>
+          </POWER>`,
         },
         {},
     );
     addPower(
         {
             key: "HEALING",
-            type: ["adjustment"],
+            type: ["adjustment", "power"],
             behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
@@ -4041,6 +4062,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "no range",
             costEnd: true,
             costPerLevel: 10,
+            xml: `<POWER XMLID="HEALING" ID="1711934391072" BASECOST="0.0" LEVELS="1" ALIAS="Healing" POSITION="49" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4048,12 +4070,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "HKA",
             name: "Hand-To-Hand Killing Attack",
-            type: ["attack"],
+            type: ["attack", "power"],
             behaviors: ["attack", "dice"],
             duration: "instant",
             range: "no range",
             costPerLevel: 15,
             costEnd: true,
+            xml: `<POWER XMLID="HKA" ID="1711934431692" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="52" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4062,13 +4085,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "IMAGES",
             name: "Images",
-            type: ["attack", "sense-affecting", "standard"],
+            type: ["attack", "sense-affecting", "standard", "power"],
             behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "constant",
             target: "area (see text)",
             range: "standard",
             costEnd: true,
+            xml: `<POWER XMLID="IMAGES" ID="1711934509070" BASECOST="10.0" LEVELS="0" ALIAS="Images" POSITION="50" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4076,13 +4100,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "INVISIBILITY",
             name: "Invisibility",
-            type: ["sense-affecting", "standard"],
+            type: ["sense-affecting", "standard", "power"],
             behaviors: ["activatable"],
             perceivability: "Special",
             duration: "constant",
             target: "self only",
             range: "self",
             costEnd: true,
+            xml: `<POWER XMLID="INVISIBILITY" ID="1711934550291" BASECOST="20.0" LEVELS="0" ALIAS="Invisibility" POSITION="51" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4090,7 +4115,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "KBRESISTANCE",
-            type: ["defense", "standard"],
+            type: ["defense", "standard", "power"],
             behaviors: ["activatable"],
             name: "Knockback Resistance",
             perceivability: "imperceptible",
@@ -4099,6 +4124,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             costPerLevel: 1,
+            xml: `<POWER XMLID="KBRESISTANCE" ID="1709333943639" BASECOST="0.0" LEVELS="1" ALIAS="Knockback Resistance" POSITION="54" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {
             costPerLevel: 2,
@@ -4107,7 +4133,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(undefined, {
         key: "LACKOFWEAKNESS",
-        type: ["defense", "special"],
+        type: ["defense", "special", "power"],
         behaviors: ["activatable"],
         name: "Knockback Resistance",
         perceivability: "imperceptible",
@@ -4116,18 +4142,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: "self",
         costEnd: false,
         costPerLevel: 1,
+        xml: `<POWER XMLID="LACKOFWEAKNESS" ID="1709342664430" BASECOST="0.0" LEVELS="1" ALIAS="Lack Of Weakness" POSITION="40" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Mental Defense" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
     });
     addPower(
         {
             key: "LIFESUPPORT",
             name: "Life Support",
-            type: ["standard"],
+            type: ["standard", "power"],
             behaviors: ["activatable"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
             range: "self",
             costEnd: false,
+            xml: `<POWER XMLID="LIFESUPPORT" ID="1711934628815" BASECOST="0.0" LEVELS="0" ALIAS="Life Support" POSITION="56" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4135,7 +4163,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "LUCK",
             name: "Luck",
-            type: ["special"],
+            type: ["special", "power"],
             behaviors: ["dice"],
             perceivability: "imperceptible",
             duration: "persistent",
@@ -4143,6 +4171,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             costPerLevel: 5,
+            xml: `<POWER XMLID="LUCK" ID="1709333951260" BASECOST="0.0" LEVELS="1" ALIAS="Luck" POSITION="57" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4150,7 +4179,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MENTALDEFENSE",
-            type: ["defense", "special"],
+            type: ["defense", "special", "power"],
             behaviors: ["activatable"],
             name: "Mental Defense",
             perceivability: "imperceptible",
@@ -4159,6 +4188,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             duration: "persistent",
             costPerLevel: 1,
+            xml: `<POWER XMLID="MENTALDEFENSE" ID="1709333957464" BASECOST="0.0" LEVELS="1" ALIAS="Mental Defense" POSITION="59" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4166,7 +4196,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALILLUSIONS",
             name: "Mental Illusions",
-            type: ["attack", "mental"],
+            type: ["attack", "mental", "power"],
             behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
@@ -4174,6 +4204,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "los",
             costEnd: true,
             costPerLevel: 5,
+            xml: `<POWER XMLID="MENTALILLUSIONS" ID="1709333959742" BASECOST="0.0" LEVELS="1" ALIAS="Mental Illusions" POSITION="60" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4181,7 +4212,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDCONTROL",
             name: "Mind Control",
-            type: ["attack", "mental"],
+            type: ["attack", "mental", "power"],
             behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "instant",
@@ -4189,6 +4220,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "los",
             costEnd: true,
             costPerLevel: 5,
+            xml: `<POWER XMLID="MINDCONTROL" ID="1709333962182" BASECOST="0.0" LEVELS="1" ALIAS="Mind Control" POSITION="61" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4196,7 +4228,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MINDLINK",
             name: "Mind Link",
-            type: ["mental"],
+            type: ["mental", "power"],
             behaviors: ["attack", "activatable", "dice"],
             perceivability: "imperceptible",
             duration: "persistent",
@@ -4204,13 +4236,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "los",
             costEnd: false,
             costPerLevel: 5,
+            xml: `<POWER XMLID="MINDLINK" ID="1709333964463" BASECOST="5.0" LEVELS="0" ALIAS="Mind Link" POSITION="62" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="One Specific Mind" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
     addPower(
         {
             key: "MINDSCAN",
-            type: ["mental", "sense"],
+            type: ["mental", "sense", "power"],
             behaviors: ["attack", "dice"],
             perceivability: "imperceptible",
             duration: "constant",
@@ -4218,30 +4251,33 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "special",
             costEnd: true,
             costPerLevel: 5,
+            xml: `<POWER XMLID="MINDSCAN" ID="1709333966801" BASECOST="0.0" LEVELS="1" ALIAS="Mind Scan" POSITION="63" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
     addPower(
         {
             key: "MISSILEDEFLECTION",
-            name: "Deflection",
-            type: ["defense", "standard"],
+            //name: "Deflection",
+            type: ["defense", "standard", "power"],
             behaviors: ["attack", "activatable"],
             perceivability: "inobvious",
             duration: "instant",
             target: "target’s OCV",
             range: "standard",
             costEnd: true,
+            xml: `<POWER XMLID="MISSILEDEFLECTION" ID="1709333871556" BASECOST="20.0" LEVELS="0" ALIAS="Deflection" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {
-            name: "Missile Deflection and Reflection",
+            //name: "Missile Deflection and Reflection",
             duration: "constant",
+            xml: `<POWER XMLID="MISSILEDEFLECTION" ID="1709342687977" BASECOST="5.0" LEVELS="0" ALIAS="Missile Deflection" POSITION="49" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THROWN" OPTIONID="THROWN" OPTION_ALIAS="Thrown Objects" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
     );
     addPower(
         {
             key: "MULTIFORM",
-            type: ["body-affecting", "standard"],
+            type: ["body-affecting", "standard", "power"],
             behaviors: ["activatable"],
             name: "Multiform",
             perceivability: "obvious",
@@ -4250,6 +4286,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             costPerLevel: 0.2,
+            xml: `<POWER XMLID="MULTIFORM" ID="1709333969596" BASECOST="0.0" LEVELS="50" ALIAS="Multiform" POSITION="64" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4257,10 +4294,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "NAKEDMODIFIER",
-            type: ["special"],
+            type: ["special", "power"],
             behaviors: [],
             costEnd: true,
             costPerLevel: 1,
+            xml: `<POWER XMLID="NAKEDMODIFIER" ID="1709333972540" BASECOST="0.0" LEVELS="1" ALIAS="Naked Advantage" POSITION="65" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4268,10 +4306,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "NOHITLOCATIONS",
             name: "No Hit Locations",
-            type: ["automaton"],
+            type: ["automaton", "power"],
             behaviors: [],
             costEnd: true,
             costPerLevel: 0,
+            xml: `<POWER XMLID="NOHITLOCATIONS" ID="1709333986337" BASECOST="10.0" LEVELS="0" ALIAS="No Hit Locations" POSITION="66" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         undefined,
     );
@@ -4279,7 +4318,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "POSSESSION",
-            type: ["attack", "mental"],
+            type: ["attack", "mental", "power"],
             behaviors: ["attack", "dice"],
             name: "Possession",
             perceivability: "obvious",
@@ -4288,13 +4327,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "los",
             costEnd: true,
             costPerLevel: 0.5,
+            xml: `<POWER XMLID="POSSESSION" ID="1711934925655" BASECOST="60.0" LEVELS="0" ALIAS="Possession" POSITION="67" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Human" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <NOTES />
+            <ADDER XMLID="MINDCONTROLEFFECT" ID="1711935222251" BASECOST="0.0" LEVELS="0" ALIAS="+0 Points of Mind Control effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
+              <NOTES />
+            </ADDER>
+            <ADDER XMLID="TELEPATHYEFFECT" ID="1711935222252" BASECOST="0.0" LEVELS="0" ALIAS="+0 Points of Telepathy effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES">
+              <NOTES />
+            </ADDER>
+          </POWER>`,
         },
         undefined,
     );
     addPower(
         {
             key: "POWERDEFENSE",
-            type: ["defense", "special"],
+            type: ["defense", "special", "power"],
             behaviors: ["activatable"],
             name: "Power Defense",
             perceivability: "inobvious",
@@ -4303,6 +4351,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             costPerLevel: 1,
+            xml: `<POWER XMLID="POWERDEFENSE" ID="1709333995936" BASECOST="0.0" LEVELS="1" ALIAS="Power Defense" POSITION="68" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4310,7 +4359,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REFLECTION",
-            type: ["attack", "standard"],
+            type: ["attack", "standard", "power"],
             behaviors: ["attack", "activatable"],
             perceivability: "imperceptible",
             duration: "instant",
@@ -4318,19 +4367,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 3 / 2,
+            xml: `<POWER XMLID="REFLECTION" ID="1709333998486" BASECOST="0.0" LEVELS="1" ALIAS="Reflection" POSITION="69" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         undefined,
     );
     addPower(
         {
             key: "REGENERATION",
-            type: ["special"],
+            type: ["special", "power"],
             behaviors: ["activatable"],
             perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
             range: "self",
             costEnd: false,
+            xml: `<POWER XMLID="REGENERATION" ID="1709334000761" BASECOST="0.0" LEVELS="1" ALIAS="Regeneration" POSITION="70" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="WEEK" OPTIONID="WEEK" OPTION_ALIAS="Week" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         undefined,
     );
@@ -4338,7 +4389,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RKA",
             name: "Ranged Killing Attack",
-            type: ["attack"],
+            type: ["attack", "power"],
             behaviors: ["attack", "dice"],
             duration: "instant",
             range: "standard",
@@ -4353,6 +4404,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     },
                 },
             },
+            xml: `POWER XMLID="RKA" ID="1711934450257" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4361,13 +4413,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SHAPESHIFT",
             name: "Shape Shift",
-            type: ["body-affecting"],
+            type: ["body-affecting", "power"],
             behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",
             range: "self",
             costEnd: true,
+            xml: `<POWER XMLID="SHAPESHIFT" ID="1711935061472" BASECOST="8.0" LEVELS="0" ALIAS="Shape Shift" POSITION="73" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4375,7 +4428,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SHRINKING",
             name: "Shrinking",
-            type: ["body-affecting", "size"],
+            type: ["body-affecting", "size", "power"],
             behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
@@ -4383,13 +4436,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 6,
+            xml: `<POWER XMLID="SHRINKING" ID="1709334010424" BASECOST="0.0" LEVELS="1" ALIAS="Shrinking" POSITION="74" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         { costPerLevel: 10 },
     );
     addPower(
         {
             key: "STRETCHING",
-            type: ["body-affecting", "standard"],
+            type: ["body-affecting", "standard", "power"],
             behaviors: ["activatable"],
             perceivability: "obvious",
             duration: "constant",
@@ -4397,23 +4451,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 1,
+            xml: `<POWER XMLID="STRETCHING" ID="1709334014434" BASECOST="0.0" LEVELS="1" ALIAS="Stretching" POSITION="75" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         { costPerLevel: 5 },
     );
     addPower(
+        undefined, //BOOST is not a valid 6e XMLID (it is now AID)
         {
             key: "SUCCOR",
-            name: "Boost",
-            type: ["adjustment"],
+            type: ["adjustment", "power"],
             behaviors: ["attack", "dice"],
             duration: "constant",
             target: "target's DCV",
             range: "no range",
             costEnd: true,
             costPerLevel: 5,
-        },
-        {
-            name: "Succor",
+            xml: `<POWER XMLID="SUCCOR" ID="1709342717305" BASECOST="0.0" LEVELS="5" ALIAS="Succor" POSITION="60" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="END" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
     );
     addPower(
