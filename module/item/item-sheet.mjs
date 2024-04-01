@@ -248,8 +248,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     (o.type === "attack" || o.system.subType === "attack") &&
                     o.system.uses === _ocv,
             )) {
-                if (!item.system.attacks[attack.id])
+                if (!item.system.attacks[attack.id]) {
                     item.system.attacks[attack.id] = false;
+                }
                 data.attacks.push({
                     name: attack.name,
                     id: attack.id,
