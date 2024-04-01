@@ -1198,6 +1198,14 @@ export class HeroSystemActorSheet extends ActorSheet {
                         // Make sure type matches TAB (consider power vs equipment)
                         itemData.type = type;
 
+                        // Make sure we have a system object
+                        if (!itemData.system) {
+                            ui.notifications.error(
+                                `Creating new ${type.toUpperCase()} failed`,
+                            );
+                            return;
+                        }
+
                         // Track when added manually for diagnostic purposes
                         itemData.system.versionHeroSystem6eManuallyCreated =
                             game.system.version;
