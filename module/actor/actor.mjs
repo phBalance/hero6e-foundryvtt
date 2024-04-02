@@ -1487,6 +1487,11 @@ export class HeroSystem6eActor extends Actor {
                         },
                     };
 
+                    if (!itemData.name) {
+                        console.error("Missing name", itemData);
+                        return;
+                    }
+
                     // Skip if temporary actor (Quench)
                     if (this.id) {
                         const item = await HeroSystem6eItem.create(itemData, {

@@ -250,6 +250,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "STR",
+            name: "Strength",
             base: 10,
             cost: 1,
             type: ["characteristic"],
@@ -264,6 +265,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DEX",
+            name: "Dexterity",
             base: 10,
             cost: 2,
             type: ["characteristic"],
@@ -280,6 +282,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CON",
+            name: "Constitution",
             base: 10,
             cost: 1,
             type: ["characteristic"],
@@ -296,6 +299,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "INT",
+            name: "Intelligence",
             base: 10,
             cost: 1,
             type: ["characteristic"],
@@ -310,6 +314,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "EGO",
+            name: "Ego",
             base: 10,
             cost: 1,
             type: ["characteristic"],
@@ -326,6 +331,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PRE",
+            name: "Presence",
             base: 10,
             cost: 1,
             type: ["characteristic"],
@@ -339,6 +345,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(undefined, {
         key: "COM",
+        name: "Comeliness",
         type: ["characteristic"],
         behaviors: ["success"],
         duration: "persistent",
@@ -351,6 +358,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "OCV",
+            name: "Offensive Combat Value",
             base: 3,
             cost: 5,
             type: ["characteristic"],
@@ -367,6 +375,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DCV",
+            name: "Defensive Combat Value",
             base: 3,
             cost: 5,
             type: ["characteristic"],
@@ -383,6 +392,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "OMCV",
+            name: "Offensive Mental Combat Value",
             base: 3,
             cost: 3,
             type: ["characteristic"],
@@ -399,6 +409,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DMCV",
+            name: "Defensive Mental Combat Value",
             base: 3,
             cost: 3,
             type: ["characteristic"],
@@ -415,6 +426,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "SPD",
+            name: "Speed",
             base: 2,
             cost: 10,
             type: ["characteristic"],
@@ -431,6 +443,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PD",
+            name: "Physical Defense",
             base: 2,
             cost: 1,
             type: ["characteristic", "defense"],
@@ -448,6 +461,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ED",
+            name: "Energy Defense",
             base: 2,
             cost: 1,
             type: ["characteristic", "defense"],
@@ -465,6 +479,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REC",
+            name: "Recovery",
             base: 4,
             cost: 1,
             type: ["characteristic"],
@@ -482,6 +497,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "END",
+            name: "Endurance",
             base: 20,
             cost: 1 / 5,
             type: ["characteristic"],
@@ -499,6 +515,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "BODY",
+            name: "Body",
             base: 10,
             cost: 1,
             type: ["characteristic"],
@@ -515,6 +532,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "STUN",
+            name: "Stun",
             base: 20,
             cost: 1 / 2,
             type: ["characteristic"],
@@ -533,6 +551,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "BASESIZE",
+            name: "Base Size",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -545,6 +564,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(undefined, {
         key: "DEF",
+        name: "Defense",
         type: ["characteristic"],
         behaviors: [],
         duration: "persistent",
@@ -556,6 +576,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "SIZE",
+            name: "Vehicle Size",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -570,6 +591,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM1",
+            name: "Custom Characteristic 1",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -581,6 +603,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM2",
+            name: "Custom Characteristic 2",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -592,6 +615,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM3",
+            name: "Custom Characteristic 3",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -603,6 +627,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM4",
+            name: "Custom Characteristic 4",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -614,6 +639,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM5",
+            name: "Custom Characteristic 5",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -625,6 +651,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM6",
+            name: "Custom Characteristic 6",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -636,6 +663,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM7",
+            name: "Custom Characteristic 7",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -647,6 +675,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM8",
+            name: "Custom Characteristic 8",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -658,6 +687,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM9",
+            name: "Custom Characteristic 9",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -669,6 +699,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CUSTOM10",
+            name: "Custom Characteristic 10",
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -684,6 +715,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "BLAZINGAWAY",
         type: ["maneuver"],
         behaviors: ["non-hd", "optional-maneuver"],
+        name: "Blazing Away",
         perceivability: "obvious",
         duration: "instant",
         range: "standard",
@@ -703,6 +735,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BLOCK",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Block",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -724,6 +757,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BRACE",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Brace",
             perceivability: "obvious",
             duration: "instant",
             range: "self",
@@ -746,6 +780,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CHOKE",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Choke",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -767,6 +802,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CLUBWEAPON",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Club Weapon",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -788,6 +824,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COVER",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Cover",
             perceivability: "obvious",
             duration: "instant",
             range: "self",
@@ -810,6 +847,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DISARM",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Disarm",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -831,6 +869,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DIVEFORCOVER",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Dive For Cover",
             perceivability: "obvious",
             duration: "instant",
             range: "self",
@@ -852,6 +891,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DODGE",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Dodge",
             perceivability: "obvious",
             duration: "instant",
             range: "self",
@@ -874,6 +914,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "GRAB",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Grab",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -903,6 +944,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "GRABBY",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Grab By",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -933,6 +975,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HAYMAKER",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Haymaker",
             duration: "instant",
             range: "no range",
             costEnd: false,
@@ -952,6 +995,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "HIPSHOT",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Hipshot",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -972,6 +1016,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "HURRY",
         type: ["maneuver"],
         behaviors: ["non-hd", "optional-maneuver"],
+        name: "Hurry",
         perceivability: "obvious",
         duration: "instant",
         range: "self",
@@ -992,6 +1037,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MOVEBY",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Move By",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -1021,6 +1067,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MOVETHROUGH",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Move Through",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -1050,6 +1097,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MULTIPLEATTACK",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Multiple Attack",
             perceivability: "obvious",
             duration: "instant",
             range: "no range", // TODO: Not correct for all possible
@@ -1072,6 +1120,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "OTHERATTACKS",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Other Attacks",
             perceivability: "obvious",
             duration: "instant",
             range: "no range", // TODO: Not correct for all possible.
@@ -1094,6 +1143,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PULLINGAPUNCH",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Pulling A Punch",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -1115,6 +1165,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "RAPIDFIRE",
         type: ["maneuver"],
         behaviors: ["non-hd", "optional-maneuver"],
+        name: "Rapid Fire",
         perceivability: "obvious",
         duration: "instant",
         range: "no range", // TODO: Not correct for all
@@ -1134,6 +1185,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ROLLWITHAPUNCH",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Roll With A Punch",
             perceivability: "obvious",
             duration: "instant",
             range: "self",
@@ -1156,6 +1208,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SET",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Set",
             perceivability: "obvious",
             duration: "instant",
             range: "self",
@@ -1177,6 +1230,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SETANDBRACE",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Set And Brace",
             perceivability: "obvious",
             duration: "instant",
             range: "self",
@@ -1199,6 +1253,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SHOVE",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Shove",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -1220,6 +1275,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SNAPSHOT",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Snap Shot",
             perceivability: "obvious",
             duration: "instant",
             range: "standard",
@@ -1241,6 +1297,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STRAFE",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Strafe",
             perceivability: "obvious",
             duration: "instant",
             range: "standard",
@@ -1262,6 +1319,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STRIKE",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Strike",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -1283,6 +1341,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SUPPRESSIONFIRE",
             type: ["maneuver"],
             behaviors: ["non-hd", "optional-maneuver"],
+            name: "Suppression Fire",
             perceivability: "obvious",
             duration: "instant",
             range: "standard",
@@ -1311,6 +1370,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "SWEEP",
         type: ["maneuver"],
         behaviors: ["non-hd", "optional-maneuver"],
+        name: "Sweep",
         perceivability: "obvious",
         duration: "instant",
         range: "no range",
@@ -1331,6 +1391,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "THROW",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Throw",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -1352,6 +1413,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "TRIP",
             type: ["maneuver"],
             behaviors: ["non-hd"],
+            name: "Trip",
             perceivability: "obvious",
             duration: "instant",
             range: "no range",
@@ -1383,6 +1445,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: 20,
             ignoreFor: ["base2", "computer", "ai"],
+            xml: `<POWER XMLID="EXTRADIMENSIONALMOVEMENT" ID="1709333909749" BASECOST="20.0" LEVELS="0" ALIAS="Extra-Dimensional Movement" POSITION="42" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -1415,6 +1478,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             costPerLevel: 2,
             ignoreFor: ["base2", "computer", "ai"],
+            xml: `<POWER XMLID="FTL" ID="1712026014674" BASECOST="10.0" LEVELS="0" ALIAS="Faster-Than-Light Travel" POSITION="43" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -1435,6 +1499,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "LEAPING",
+            name: "Leaping",
             base: 4,
             cost: 1 / 2,
             type: ["movement"],
@@ -1445,7 +1510,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
-            xml: `<POWER XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
+            xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 2,
@@ -1466,7 +1531,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
-            xml: `<POWER XMLID="RUNNING" ID="1709334005554" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="72" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
+            xml: `<RUNNING XMLID="RUNNING" ID="1709334005554" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="72" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 6,
@@ -1487,7 +1552,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: 1 / 2,
             ignoreFor: ["base2", "computer", "ai"],
-            xml: `<POWER XMLID="SWIMMING" ID="1709334019357" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="77" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
+            xml: `<SWIMMING XMLID="SWIMMING" ID="1709334019357" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="77" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 2,
@@ -2142,6 +2207,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "MIF",
             type: ["skill"],
             behaviors: [],
+            name: "Musical Instrument Familiarity",
             duration: "constant",
             target: "self only",
             range: "self",
@@ -2694,6 +2760,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DIFFERINGMODIFIER",
+            name: "Differing Modifier",
             type: ["framework"],
             behaviors: [],
             costEnd: false,
@@ -2821,6 +2888,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "FALSEIDENTITY",
         type: ["perk"],
         behaviors: [],
+        name: "False Identity",
         costEnd: false,
         costPerLevel: 1,
         xml: `<PERK XMLID="FALSEIDENTITY" ID="1709164911446" BASECOST="1.0" LEVELS="0" ALIAS="False Identity" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
@@ -2841,6 +2909,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "FOLLOWER",
             type: ["perk"],
             behaviors: [],
+            name: "Follower",
             costEnd: false,
             xml: `<PERK XMLID="FOLLOWER" ID="1709161431234" BASECOST="0.0" LEVELS="0" ALIAS="Follower" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" NUMBER="1" BASEPOINTS="0" DISADPOINTS="0">`,
         },
@@ -2873,6 +2942,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "REPUTATION",
             type: ["perk", "disadvantage"],
             behaviors: ["success"],
+            name: "Positive Reputation",
             costEnd: false,
             costPerLevel: 0,
             xml: `<PERK XMLID="REPUTATION" ID="1709161449527" BASECOST="0.0" LEVELS="1" ALIAS="Positive Reputation" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
@@ -2892,6 +2962,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RESOURCE_POOL",
             type: ["perk"],
             behaviors: [],
+            name: "Resource Points",
             costEnd: false,
             xml: `<PERK XMLID="RESOURCE_POOL" ID="1709161452229" BASECOST="0.0" LEVELS="0" ALIAS="Resource Points" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EQUIPMENT" OPTIONID="EQUIPMENT" OPTION_ALIAS="Equipment Points" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" FREE_POINTS="0">`,
         },
@@ -2956,6 +3027,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "BEASTSPEECH",
         type: ["talent"],
         behaviors: [],
+        name: "Beast Speech",
         duration: "instant",
         target: "dmcv",
         range: "no range",
@@ -2967,6 +3039,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "BERSERKFURY",
         type: ["talent"],
         behaviors: [],
+        name: "Berserk Fury",
         duration: "instant",
         target: "self only",
         range: "self",
@@ -2994,6 +3067,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: "self",
         costEnd: false,
+        name: "Combat Archery",
         xml: `<TALENT XMLID="COMBATARCHERY" ID="1709164949036" BASECOST="8.0" LEVELS="0" ALIAS="Combat Archery" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
     });
     addPower(
@@ -3001,6 +3075,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMBAT_LUCK",
             type: ["talent"],
             behaviors: ["activatable"],
+            name: "Combat Luck",
             duration: "constant",
             costEnd: false,
             costPerLevel: 6,
@@ -3051,7 +3126,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "target's dcv",
         range: "no range",
         costEnd: false,
-        xml: `<TALENT XMLID="CRIPPLINGBLOW" ID="1709164962720" BASECOST="16.0" LEVELS="0" ALIAS="Crippling Blow" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
+        xml: `<TALENT XMLID="CRIPPLINGBLOW" ID="1709164962720" BASECOST="16.0" LEVELS="0" ALIAS="Crippling Blow" POSITION="13" MULTIPLIER`,
     });
     addPower(
         {
@@ -3080,6 +3155,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEADLYBLOW",
             type: ["talent"],
             behaviors: [],
+            name: "Deadly Blow",
             costEnd: false,
             xml: `<TALENT XMLID="DEADLYBLOW" ID="1709159979031" BASECOST="0.0" LEVELS="2" ALIAS="Deadly Blow:  +2d6" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited circumstances]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
         },
@@ -3188,6 +3264,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "HOTSHOTPILOT",
         type: ["talent"],
         behaviors: [],
+        name: "Hotshot Pilot",
         costEnd: false,
         costPerLevel: 0,
         xml: `<TALENT XMLID="HOTSHOTPILOT" ID="1709164985624" BASECOST="24.0" LEVELS="0" ALIAS="Hotshot Pilot" POSITION="28" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STARHERO" OPTIONID="STARHERO" OPTION_ALIAS="Star Hero" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
@@ -3238,6 +3315,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "LIGHTNING_REFLEXES_SINGLE",
         type: ["talent"],
         behaviors: [],
+        name: "Lightning Reflexes",
         costEnd: false,
         costPerLevel: 1,
         xml: `<TALENT XMLID="LIGHTNING_REFLEXES_SINGLE" ID="1709164999711" BASECOST="0.0" LEVELS="1" ALIAS="Lightning Reflexes: +1 DEX to act first with Single Action" POSITION="33" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Single Action">`,
@@ -3567,7 +3645,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CUSTOMPOWER",
             type: ["custom", "activatable"],
             behaviors: [],
-            xml: `<POWER XMLID="CUSTOMPOWER" ID="1711932960992" BASECOST="1.0" LEVELS="1" ALIAS="Custom Power" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" DOESBODY="No" DOESDAMAGE="No" DOESKNOCKBACK="No" KILLING="No" DEFENSE="NONE" END="Yes" VISIBLE="Yes" RANGE="SELF" DURATION="INSTANT" TARGET="SELFONLY" ENDCOLUMNOUTPUT="" USECUSTOMENDCOLUMN="No">`,
+            xml: `<POWER XMLID="CUSTOMPOWER" ID="1711932960992" BASECOST="1.0" LEVELS="1" ALIAS="Custom Power" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" DOESBODY="No" DOESDAMAGE="No" DOESKNOCKBACK="No" KILLING="No" DEFENSE="NONE" END="Yes" VISIBLE="Yes" RANGE="SELF" DURATION="INSTANT" TARGET="SELFONLY" ENDCOLUMNOUTPUT="" USECUSTOMENDCOLUMN="No"`,
         },
         {},
     );
@@ -4277,7 +4355,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     },
                 },
             },
-            xml: `<POWER XMLID="RKA" ID="1711934450257" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
+            xml: `POWER XMLID="RKA" ID="1711934450257" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -4945,6 +5023,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RIVALRY",
             type: ["disadvantage"],
             behaviors: [],
+            name: "Rivalry",
             xml: `<DISAD XMLID="RIVALRY" ID="1709445753501" BASECOST="0.0" LEVELS="0" ALIAS="Rivalry" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
             <NOTES />
             <ADDER XMLID="SITUATION" ID="1709447170155" BASECOST="5.0" LEVELS="0" ALIAS="Rivalry Situation" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PROFESSIONAL" OPTIONID="PROFESSIONAL" OPTION_ALIAS="Professional" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -4972,6 +5051,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SOCIALLIMITATION",
             type: ["disadvantage"],
             behaviors: ["success"],
+            name: "Social Limitation",
             xml: `<DISAD XMLID="SOCIALLIMITATION" ID="1709445756212" BASECOST="0.0" LEVELS="0" ALIAS="Social Complication" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
             <NOTES />
             <ADDER XMLID="OCCUR" ID="1709447173427" BASECOST="5.0" LEVELS="0" ALIAS="Circumstances Occur" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OCCASIONALLY" OPTIONID="OCCASIONALLY" OPTION_ALIAS="Infrequently" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
@@ -5010,6 +5090,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "UNLUCK",
             type: ["disadvantage"],
             behaviors: ["dice"],
+            name: "Unluck",
             costPerLevel: 5,
             xml: `<DISAD XMLID="UNLUCK" ID="1709445762298" BASECOST="0.0" LEVELS="1" ALIAS="Unluck: 1d6" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
         },

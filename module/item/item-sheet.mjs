@@ -384,6 +384,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 "system.description": this.item.system.description,
             });
         }
+
+        //await this.item._postUpload();
     }
 
     async _onSubItemCreate(event) {
