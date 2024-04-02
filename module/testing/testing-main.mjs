@@ -28,6 +28,7 @@ Hooks.on("quenchReady", (quench) => {
     registerUploadTests(quench);
     registerFullTests(quench);
     registerDiceTests(quench);
+    registerMainTests(quench);
 });
 
 // Helper function to run all tests from browser console.
@@ -81,4 +82,28 @@ async function runTestSuiteOnce() {
             resolve(true);
         });
     });
+}
+
+function registerMainTests(quench) {
+    quench.registerBatch(
+        "hero6efoundryvttv2.main",
+        (context) => {
+            const { describe, expect, it } = context;
+
+            describe("HERO", async function () {
+                describe("5e powers", async function () {
+                    it("should have no validation errors", function () {
+                        expect(CONFIG.HERO.powers5e.validate()).to.equal(0);
+                    });
+                });
+
+                describe("6e powers", async function () {
+                    it("should have no validation errors", function () {
+                        expect(CONFIG.HERO.powers6e.validate()).to.equal(0);
+                    });
+                });
+            });
+        },
+        { displayName: "HERO: Main" },
+    );
 }
