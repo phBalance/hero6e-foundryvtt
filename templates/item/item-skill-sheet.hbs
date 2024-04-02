@@ -100,7 +100,7 @@
         </div>
         {{/if}}
 
-        {{#if system.charges.max}}
+        {{#if system.charges}}
         <div class="form-group">
         <label>Charges</label>
         <div>
@@ -125,14 +125,17 @@
         <table>
 
             {{!-- ADDERS --}}
-            <tr class="activeEffects adders">
+            <tr class="activeEffects adders" >
                 <th class="left">Adders</th>
                 <th>Cost</th>
-                {{!-- <th>Add</th> --}}
-                </td>
+                <th class="right">
+                    <a class="item-control modifier-create" title="Create"
+                        data-action="create">
+                        <i class="fas fa-plus"></i></a>
+                </th>
             </tr>
             {{#each item.system.ADDER as |adder XMLID|}}
-            <tr>
+            <tr data-xmlid="{{adder.XMLID}}">
                 <td class="left">{{adder.ALIAS}}</td>
                 <td>{{adder.BASECOST}}</td>
             </tr>
@@ -142,16 +145,28 @@
             <tr class="activeEffects adders">
                 <th class="left">Modifiers</th>
                 <th>Cost</th>
+                <th class="right">
+                    <a class="item-control modifier-create" title="Create"
+                                data-action="create">
+                                <i class="fas fa-plus"></i></a>
+                </th>
                 {{!-- <th>Add</th> --}}
             </tr>
             {{#each item.system.MODIFIER as |mod id|}}
-            <tr>
+            <tr data-xmlid="{{mod.XMLID}}">
                 <td class="left">{{mod.ALIAS}}</td>
                 <td>{{mod.BASECOST}}</td>
+                <td class="right">
+                    <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
+                            class="fas fa-edit"></i></a>
+                    <a class="item-control modifier-delete" data-action="delete" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
             </tr>
             
             {{#each mod.ADDER as |adder id|}}
-            <tr class="modifierAdder">
+            <tr class="modifierAdder" data-xmlid="{{adder.XMLID}}">
                 <td class="left">{{adder.ALIAS}}</td>
                 <td>{{adder.BASECOST}}</td>
             </tr>
