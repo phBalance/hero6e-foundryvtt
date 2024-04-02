@@ -3,6 +3,10 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("abs", abs);
     Handlebars.registerHelper("increment", increment);
     Handlebars.registerHelper("gameConfigValue", gameConfigValue);
+
+    Handlebars.registerHelper("isdefined", function (value) {
+        return value !== undefined;
+    });
 }
 
 function indexOf(str, searchTerm) {

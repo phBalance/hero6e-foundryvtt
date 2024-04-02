@@ -3,7 +3,7 @@
     <header class="sheet-header">
         <img class="profile-img" name="img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
         <div class="header-fields">
-            <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name" /></h1>
+            <h1 class="charname"><input name="system.ALIAS" type="text" value="{{item.system.ALIAS}}" placeholder="Name" /></h1>
         </div>
     </header>
 
@@ -20,26 +20,29 @@
         NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>
     --}}
 
-        <div class="form-group">
+        {{!-- <div class="form-group">
             <label>ALIAS</label>
             <input type="text" name="system.ALIAS" value="{{system.ALIAS}}" data-dtype="text" />
-        </div>
+        </div> --}}
 
         <div class="form-group">
             <label>NAME</label>
             <input type="text" name="system.NAME" value="{{system.NAME}}" data-dtype="text" />
         </div>
 
+        {{#if (isdefined system.INPUT)}}
         <div class="form-group">
             <label>INPUT</label>
             <input type="text" name="system.INPUT" value="{{system.INPUT}}" data-dtype="text" />
         </div>
+        {{/if}}
 
         <div class="form-group">
             <label>LEVELS</label>
             <input type="text" name="system.LEVELS" value="{{system.LEVELS}}" data-dtype="Number" />
         </div>
 
+        {{#if (isdefined system.CHARACTERISTIC)}}
         <div class="form-group">
             <label>CHARACTERISTIC</label>
             <select name="system.CHARACTERISTIC" data-dtype="text">
@@ -50,21 +53,39 @@
                 {{/if}}
             </select>
         </div>
+        {{/if}}
 
-        <div class="form-group">
-            <label>FAMILIARITY</label>
-            <input type="checkbox" name="system.FAMILIARITY" {{checked system.FAMILIARITY}} data-dtype="Boolean" />
-        </div>
 
-        <div class="form-group">
-            <label>PROFICIENCY</label>
-            <input type="checkbox" name="system.PROFICIENCY" {{checked system.PROFICIENCY}} data-dtype="Boolean" />
-        </div>
-
+        {{#if (isdefined system.LEVELSONLY)}}
         <div class="form-group">
             <label>LEVELSONLY</label>
             <input type="checkbox" name="system.LEVELSONLY" {{checked system.LEVELSONLY}} data-dtype="Boolean" />
         </div>
+        {{/if}}
+
+        {{#if (isdefined system.FAMILIARITY)}}
+        <div class="form-group">
+            <label>FAMILIARITY</label>
+            <input type="checkbox" name="system.FAMILIARITY" {{checked system.FAMILIARITY}} data-dtype="Boolean" />
+        </div>
+        {{/if}}
+
+        {{!-- if FAMILIARITY is present then EVERYMAN can be an option --}}
+        {{#if (isdefined system.FAMILIARITY)}}
+        <div class="form-group">
+            <label>EVERYMAN</label>
+            <input type="checkbox" name="system.EVERYMAN" {{checked system.EVERYMAN}} data-dtype="Boolean" />
+        </div>
+        {{/if}}
+
+        {{#if (isdefined system.PROFICIENCY)}}
+        <div class="form-group">
+            <label>PROFICIENCY</label>
+            <input type="checkbox" name="system.PROFICIENCY" {{checked system.PROFICIENCY}} data-dtype="Boolean" />
+        </div>
+        {{/if}}
+
+
         
         <hr \>
 
