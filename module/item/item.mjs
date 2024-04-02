@@ -611,6 +611,24 @@ export class HeroSystem6eItem extends Item {
         return null;
     }
 
+    async deleteModByXmlid(xmlid) {
+        for (const key of HeroSystem6eItem.ItemXmlChildTags) {
+            if (this.system?.[key]) {
+                const value = this.system[key].find((o) => o.XMLID === xmlid);
+                if (value) {
+                    this.system[key] = this.system[key].filter(
+                        (o) => o.XMLID != xmlid,
+                    );
+                    await this.update({ system: this.system });
+                    return true;
+                }
+            }
+        }
+
+        ui.notifications.error(`Unable to delete ${xmlid} from ${this.name}.`);
+        return false;
+    }
+
     setInitialItemValueAndMax() {
         let changed;
 

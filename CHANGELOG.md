@@ -2,7 +2,8 @@
 
 ## Version 3.0.66 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Improved SKILL in game editing.
+- HD Lite: Broad term referring to the limited ability to edit actors within FoundryVTT, without the need for Hero Designer.
+  - Improved SKILL editing.
 
 ## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

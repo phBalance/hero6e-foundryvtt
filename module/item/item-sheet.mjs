@@ -294,6 +294,64 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         html.find(".effect-delete").click(this._onEffectDelete.bind(this));
         html.find(".effect-edit").click(this._onEffectEdit.bind(this));
         html.find(".effect-toggle").click(this._onEffectToggle.bind(this));
+
+        // Modifiers
+        html.find(".modifier-create").click(this._onModifierCreate.bind(this));
+        html.find(".modifier-edit").click(this._onModifierEdit.bind(this));
+        html.find(".modifier-delete").click(this._onModifierDelete.bind(this));
+    }
+
+    async _onModifierCreate(event) {
+        console.log(event);
+        return ui.notifications.warn(
+            `Creating modifiers is currently unsupported.`,
+        );
+    }
+
+    async _onModifierEdit(event) {
+        event.preventDefault();
+        const xmlid = $(event.currentTarget)
+            .closest("[data-xmlid]")
+            .data().xmlid;
+        if (!xmlid) {
+            return ui.notifications.error(`Unable to edit modifier.`);
+        }
+        console.log(this.item.findModsByXmlid(xmlid));
+
+        return ui.notifications.warn(
+            `Editing modifiers is currently unsupported.`,
+        );
+    }
+
+    async _onModifierDelete(event) {
+        event.preventDefault();
+        const xmlid = $(event.currentTarget)
+            .closest("[data-xmlid]")
+            .data().xmlid;
+        if (!xmlid) {
+            return ui.notifications.error(`Unable to delete modifier.`);
+        }
+
+        const confirmed = await Dialog.confirm({
+            title: game.i18n.localize(
+                "HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title",
+            ),
+            content: game.i18n.localize(
+                "HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content",
+            ),
+        });
+
+        if (confirmed) {
+            await this.item.deleteModByXmlid(xmlid);
+
+            if (this.item.system.charges && xmlid === "CHARGES") {
+                delete this.item.system.charges;
+                await this.item.update({ system: this.item.system });
+            }
+
+            this.item.updateItemDescription();
+            this.render();
+        }
     }
 
     /**
@@ -323,9 +381,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     async _updateObject(event, formData) {
         event.preventDefault();
 
-        // Do all the standard things like updating item properies that match the name of input boxes
-        await super._updateObject(event, formData);
-
         const expandedData = foundry.utils.expandObject(formData);
 
         const clickedElement = $(event.currentTarget);
@@ -335,6 +390,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (!id) {
             return;
         }
+
+        // Do all the standard things like updating item properies that match the name of input boxes
+        await super._updateObject(event, formData);
 
         // Endurance Reserve
         if (expandedData.rec) {
@@ -376,15 +434,14 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             await this.item.update({ "system.INPUT": newInputStr });
         }
 
-        //let description = this.item.system.description;
-
-        // If Description changed, update it
-        // this.item.updateItemDescription();
-        // if (description !== this.item.system.description) {
-        //     this.item.update({
-        //         "system.description": this.item.system.description,
-        //     });
-        // }
+        //If Description changed, update it
+        const description = this.item.system.description;
+        this.item.updateItemDescription();
+        if (description !== this.item.system.description) {
+            this.item.update({
+                "system.description": this.item.system.description,
+            });
+        }
 
         // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
         // Generally rely on HBS to enforce valid combinations.
@@ -394,7 +451,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         // HD lite (currently only SKILL) uses generic _postUpload
         // TODO: Much of the above is likely not necessary as _postUpload does alot
-        await this.item._postUpload();
+        //await this.item._postUpload();
+        //this.render();
     }
 
     async _onSubItemCreate(event) {
