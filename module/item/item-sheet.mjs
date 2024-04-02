@@ -385,7 +385,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             });
         }
 
-        //await this.item._postUpload();
+        // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
+        // Generally rely on HBS to enforce valid combinations.
+        if (this.item.system.EVERYMAN && !this.item.system.FAMILIARITY) {
+            await this.item.update({ "system.FAMILIARITY": true });
+        }
+
+        // HD lite (currently only SKILL) uses generic _postUpload
+        // TODO: Much of the above is likely not necessary as _postUpload does alot
+        await this.item._postUpload();
     }
 
     async _onSubItemCreate(event) {

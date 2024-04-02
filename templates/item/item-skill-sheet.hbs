@@ -25,6 +25,10 @@
             <input type="text" name="system.ALIAS" value="{{system.ALIAS}}" data-dtype="text" />
         </div> --}}
 
+        <div class="description">
+            {{item.system.description}}
+        </div>
+
         <div class="form-group">
             <label>NAME</label>
             <input type="text" name="system.NAME" value="{{system.NAME}}" data-dtype="text" />
@@ -59,14 +63,16 @@
         {{#if (isdefined system.LEVELSONLY)}}
         <div class="form-group">
             <label>LEVELSONLY</label>
-            <input type="checkbox" name="system.LEVELSONLY" {{checked system.LEVELSONLY}} data-dtype="Boolean" />
+            <input type="checkbox" name="system.LEVELSONLY" {{checked system.LEVELSONLY}} data-dtype="Boolean"  
+            {{#if (or (or system.FAMILIARITY system.EVERYMAN) system.PROFICIENCY)}}disabled{{/if}}/>
         </div>
         {{/if}}
 
         {{#if (isdefined system.FAMILIARITY)}}
         <div class="form-group">
             <label>FAMILIARITY</label>
-            <input type="checkbox" name="system.FAMILIARITY" {{checked system.FAMILIARITY}} data-dtype="Boolean" />
+            <input type="checkbox" name="system.FAMILIARITY" {{checked system.FAMILIARITY}} data-dtype="Boolean" 
+            {{#if (or system.LEVELSONLY system.PROFICIENCY)}}disabled{{/if}}/>
         </div>
         {{/if}}
 
@@ -74,22 +80,72 @@
         {{#if (isdefined system.FAMILIARITY)}}
         <div class="form-group">
             <label>EVERYMAN</label>
-            <input type="checkbox" name="system.EVERYMAN" {{checked system.EVERYMAN}} data-dtype="Boolean" />
+            <input type="checkbox" name="system.EVERYMAN" {{checked system.EVERYMAN}} data-dtype="Boolean"  
+            {{#if (or system.LEVELSONLY system.PROFICIENCY)}}disabled{{/if}}/>
         </div>
         {{/if}}
 
         {{#if (isdefined system.PROFICIENCY)}}
         <div class="form-group">
             <label>PROFICIENCY</label>
-            <input type="checkbox" name="system.PROFICIENCY" {{checked system.PROFICIENCY}} data-dtype="Boolean" />
+            <input type="checkbox" name="system.PROFICIENCY" {{checked system.PROFICIENCY}} data-dtype="Boolean"  
+            {{#if (or system.LEVELSONLY system.FAMILIARITY)}}disabled{{/if}}/>
         </div>
         {{/if}}
 
+        {{#if (isdefined system.SFX)}}
+        <div class="form-group">
+            <label>SFX</label>
+            <input type="text" name="system.SFX" value="{{system.SFX}}" data-dtype="text" />
+        </div>
+        {{/if}}
 
         
-        <hr \>
+        {{!-- Active Points --}}
+        <li class="flexrow summaryBreak">
+            <h4>Active Points: {{item.system.activePoints}}</h4>
+            <h4 class="center">END: {{item.system.end}}</h4>
+            <h4 class="right">Real Cost: {{item.system.realCost}}</h4>
+        </li>
 
-        {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
 
+
+        <table>
+
+            {{!-- ADDERS --}}
+            <tr class="activeEffects adders">
+                <th class="left">Adders</th>
+                <th>Cost</th>
+                {{!-- <th>Add</th> --}}
+                </td>
+            </tr>
+            {{#each item.system.ADDER as |adder XMLID|}}
+            <tr>
+                <td class="left">{{adder.ALIAS}}</td>
+                <td>{{adder.BASECOST}}</td>
+            </tr>
+            {{/each}}
+
+            {{!-- {{Modifiers}} --}}
+            <tr class="activeEffects adders">
+                <th class="left">Modifiers</th>
+                <th>Cost</th>
+                {{!-- <th>Add</th> --}}
+            </tr>
+            {{#each item.system.MODIFIER as |mod id|}}
+            <tr>
+                <td class="left">{{mod.ALIAS}}</td>
+                <td>{{mod.BASECOST}}</td>
+            </tr>
+            
+            {{#each mod.ADDER as |adder id|}}
+            <tr class="modifierAdder">
+                <td class="left">{{adder.ALIAS}}</td>
+                <td>{{adder.BASECOST}}</td>
+            </tr>
+            {{/each}}
+
+            {{/each}}
+        </table>
     </section>
 </form>
