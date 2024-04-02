@@ -100,6 +100,18 @@
         </div>
         {{/if}}
 
+        {{#if system.charges.max}}
+        <div class="form-group">
+        <label>Charges</label>
+        <div>
+            <input type="text" name="system.charges.value" value="{{system.charges.value}}" data-dtype="Number" />
+            <span>/</span>
+            <input disabled type="text" name="system.charges.max" value="{{system.charges.max}}" data-dtype="Number" />
+        </div>
+        {{/if}}
+
+</div>
+
         
         {{!-- Active Points --}}
         <li class="flexrow summaryBreak">

@@ -1262,7 +1262,7 @@ export class HeroSystem6eItem extends Item {
         const CHARGES = this.findModsByXmlid("CHARGES");
         if (CHARGES) {
             this.system.charges = {
-                value: parseInt(CHARGES.OPTION_ALIAS),
+                ...this.system.charges,
                 max: parseInt(CHARGES.OPTION_ALIAS),
                 recoverable: (CHARGES.ADDER || []).find(
                     (o) => o.XMLID == "RECOVERABLE",
@@ -1273,9 +1273,10 @@ export class HeroSystem6eItem extends Item {
                     (o) => o.XMLID == "CONTINUING",
                 )?.OPTIONID,
             };
-            this.system.charges.value ??= this.system.charges.max;
-
-            changed = true;
+            if (this.system.charges?.value === undefined) {
+                this.system.charges.value ??= this.system.charges.max;
+                changed = true;
+            }
         }
 
         // DEFENSES
