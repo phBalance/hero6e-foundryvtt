@@ -323,6 +323,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     async _updateObject(event, formData) {
         event.preventDefault();
 
+        // Do all the standard things like updating item properies that match the name of input boxes
+        await super._updateObject(event, formData);
+
         const expandedData = foundry.utils.expandObject(formData);
 
         const clickedElement = $(event.currentTarget);
@@ -373,19 +376,25 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             await this.item.update({ "system.INPUT": newInputStr });
         }
 
-        let description = this.item.system.description;
-
-        await super._updateObject(event, formData);
+        //let description = this.item.system.description;
 
         // If Description changed, update it
-        this.item.updateItemDescription();
-        if (description !== this.item.system.description) {
-            this.item.update({
-                "system.description": this.item.system.description,
-            });
+        // this.item.updateItemDescription();
+        // if (description !== this.item.system.description) {
+        //     this.item.update({
+        //         "system.description": this.item.system.description,
+        //     });
+        // }
+
+        // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
+        // Generally rely on HBS to enforce valid combinations.
+        if (this.item.system.EVERYMAN && !this.item.system.FAMILIARITY) {
+            await this.item.update({ "system.FAMILIARITY": true });
         }
 
-        //await this.item._postUpload();
+        // HD lite (currently only SKILL) uses generic _postUpload
+        // TODO: Much of the above is likely not necessary as _postUpload does alot
+        await this.item._postUpload();
     }
 
     async _onSubItemCreate(event) {
