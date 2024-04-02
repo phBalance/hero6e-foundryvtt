@@ -2,7 +2,7 @@
 
 ## Version 3.0.66 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- 
+- Improved SKILL in game editing.
 
 ## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
