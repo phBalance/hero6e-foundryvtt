@@ -309,7 +309,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     }
 
     async _onModifierEdit(event) {
-        console.log(event);
+        event.preventDefault();
+        const xmlid = $(event.currentTarget)
+            .closest("[data-xmlid]")
+            .data().xmlid;
+        if (!xmlid) {
+            return ui.notifications.error(`Unable to edit modifier.`);
+        }
+        console.log(this.item.findModsByXmlid(xmlid));
+
         return ui.notifications.warn(
             `Editing modifiers is currently unsupported.`,
         );
