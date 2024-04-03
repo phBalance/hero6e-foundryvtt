@@ -611,16 +611,32 @@ export class HeroSystem6eItem extends Item {
         return null;
     }
 
-    async deleteModByXmlid(xmlid) {
+    async deleteModById(id, xmlid) {
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
             if (this.system?.[key]) {
-                const value = this.system[key].find((o) => o.XMLID === xmlid);
+                // Intentionally using == here to take advantage of string/int equality
+                const value = this.system[key].find((o) => o.ID == id);
                 if (value) {
                     this.system[key] = this.system[key].filter(
-                        (o) => o.XMLID != xmlid,
+                        (o) => o.ID != id,
                     );
                     await this.update({ system: this.system });
                     return true;
+                }
+
+                for (const subMod of this.system[key]) {
+                    for (const key2 of HeroSystem6eItem.ItemXmlChildTags) {
+                        if (subMod[key2]) {
+                            const value = subMod[key2].find((o) => o.ID == id);
+                            if (value) {
+                                subMod[key2] = subMod[key2].filter(
+                                    (o) => o.ID != id,
+                                );
+                                await this.update({ system: this.system });
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
         }

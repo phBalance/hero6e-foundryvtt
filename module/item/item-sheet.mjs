@@ -304,7 +304,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     async _onModifierCreate(event) {
         console.log(event);
         return ui.notifications.warn(
-            `Creating modifiers is currently unsupported.`,
+            `Creating modifiers & adders is currently unsupported.`,
         );
     }
 
@@ -314,12 +314,12 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             .closest("[data-xmlid]")
             .data().xmlid;
         if (!xmlid) {
-            return ui.notifications.error(`Unable to edit modifier.`);
+            return ui.notifications.error(`Unable to edit modifier/adder.`);
         }
         console.log(this.item.findModsByXmlid(xmlid));
 
         return ui.notifications.warn(
-            `Editing modifiers is currently unsupported.`,
+            `Editing modifiers & adders is currently unsupported.`,
         );
     }
 
@@ -328,8 +328,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         const xmlid = $(event.currentTarget)
             .closest("[data-xmlid]")
             .data().xmlid;
-        if (!xmlid) {
-            return ui.notifications.error(`Unable to delete modifier.`);
+        const adderId = $(event.currentTarget)
+            .closest("[data-adder]")
+            ?.data()?.adder;
+        const modifierId = $(event.currentTarget)
+            .closest("[data-modifier]")
+            ?.data()?.modifier;
+        const id = adderId || modifierId;
+        if (!xmlid || !id) {
+            return ui.notifications.error(`Unable to delete modifier/adder.`);
         }
 
         const confirmed = await Dialog.confirm({
@@ -342,7 +349,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         });
 
         if (confirmed) {
-            await this.item.deleteModByXmlid(xmlid);
+            await this.item.deleteModById(id, xmlid);
 
             if (this.item.system.charges && xmlid === "CHARGES") {
                 delete this.item.system.charges;
