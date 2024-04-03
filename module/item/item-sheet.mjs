@@ -5,6 +5,7 @@ import {
     adjustmentSourcesStrict,
 } from "../utility/adjustment.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
+import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -313,14 +314,50 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         const xmlid = $(event.currentTarget)
             .closest("[data-xmlid]")
             .data().xmlid;
-        if (!xmlid) {
-            return ui.notifications.error(`Unable to edit modifier/adder.`);
+        const adderId = $(event.currentTarget)
+            .closest("[data-adder]")
+            ?.data()?.adder;
+        const modifierId = $(event.currentTarget)
+            .closest("[data-modifier]")
+            ?.data()?.modifier;
+        const id = adderId || modifierId;
+        if (!xmlid || !id) {
+            return ui.notifications.error(`Unable to edit adder/modifier.`);
         }
-        console.log(this.item.findModsByXmlid(xmlid));
 
-        return ui.notifications.warn(
-            `Editing modifiers & adders is currently unsupported.`,
-        );
+        const templateData = {
+            item: this.item,
+            mod: this.item.findModById(id, xmlid),
+        };
+        await new ItemModifierFormApplication(templateData).render(true);
+
+        // const template =
+        //     "systems/hero6efoundryvttv2/templates/item/item-" +
+        //     (adderId ? "adder" : "modifier") +
+        //     ".hbs";
+        // console.log(template);
+        // const templateData = {
+        //     item: this.item,
+        //     mod: this.item.findModById(id, xmlid),
+        // };
+        // const rendered_html = await renderTemplate(template, templateData);
+
+        // let d = new Dialog({
+        //     title: `Edit ${xmlid}`,
+        //     content: rendered_html,
+        //     buttons: {
+        //         // toggle: {
+        //         //     icon: '<i class="fas fa-check"></i>',
+        //         //     label: "Okay",
+        //         //     callback: () => console.log("Okay")
+        //         // },
+        //     },
+        //     //default: "toggle",
+        //     close: (html) => {
+        //         console.log(html);
+        //     },
+        // });
+        // d.render(true);
     }
 
     async _onModifierDelete(event) {
