@@ -1,0 +1,59 @@
+{{ log 'HEROSYS ITEM MODIFIER' this }}
+
+<form class="hero flexcol auto-overflow" autocomplete="off" data-item="{{item._id}}" data-modifier="{{mod.ID}}">
+    
+    <section class="sheet-body">
+
+        <div class="form-group">
+            <label>ALIAS</label>
+            <input type="text" name="mod.ALIAS" value="{{mod.ALIAS}}" data-dtype="text" />
+        </div>
+
+        {{#if (isdefined mod.OPTIONID)}}
+        <div class="form-group">
+            <label>OPTIONID</label>
+            <input type="text" name="mod.OPTIONID" value="{{mod.OPTIONID}}" data-dtype="text" />
+        </div>
+        {{/if}}
+
+        {{#if (isdefined mod.OPTION_ALIAS)}}
+        <div class="form-group">
+            <label>OPTION_ALIAS</label>
+            <input type="text" name="mod.OPTION_ALIAS" value="{{mod.OPTION_ALIAS}}" data-dtype="text" />
+        </div>
+        {{/if}}
+
+        {{#if (isdefined mod.COMMENTS)}}
+        <div class="form-group">
+            <label>COMMENTS</label>
+            <input type="text" name="mod.COMMENTS" value="{{mod.COMMENTS}}" data-dtype="text" />
+        </div>
+        {{/if}}
+
+        <div class="form-group">
+            <label>BASECOST</label>
+            <input disabled type="text" name="mod.BASECOST" value="{{mod.BASECOST}}" data-dtype="Number" />
+        </div>
+
+        {{!-- ADDERS --}}
+        {{#if mod.ADDER}}
+        <hr\>
+        <table>
+        <tr class="activeEffects adders">
+            <th class="left">Adders</th>
+            <th>Cost</th>
+            {{!-- <th>Add</th> --}}
+            </td>
+        </tr>
+        {{#each mod.ADDER as |adder XMLID|}}
+        <tr>
+            <td class="left">{{adder.ALIAS}}</td>
+            <td>{{adder.BASECOST}}</td>
+        </tr>
+        {{/each}}
+        {{/if}}
+        </table>
+
+    </section>
+
+</form>

@@ -135,7 +135,7 @@
                 </th>
             </tr>
             {{#each item.system.ADDER as |adder XMLID|}}
-            <tr data-xmlid="{{adder.XMLID}}">
+            <tr data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
                 <td class="left">{{adder.ALIAS}}</td>
                 <td>{{#if adder.SELECTED}}{{adder.BASECOST}}{{/if}}</td>
                 <td class="right">
@@ -148,7 +148,7 @@
             </tr>
 
                 {{#each adder.ADDER as |adder XMLID|}}
-                <tr  class="modifierAdder indent" data-xmlid="{{adder.XMLID}}">
+                <tr  class="modifierAdder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
                     <td class="left">{{adder.ALIAS}}</td>
                     <td>{{adder.BASECOST}}</td>
                     <td class="right">
@@ -174,7 +174,7 @@
                 {{!-- <th>Add</th> --}}
             </tr>
             {{#each item.system.MODIFIER as |mod id|}}
-            <tr data-xmlid="{{mod.XMLID}}">
+            <tr data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
                 <td class="left">{{mod.ALIAS}}</td>
                 <td>{{mod.BASECOST}}</td>
                 <td class="right">
@@ -187,7 +187,7 @@
             </tr>
             
             {{#each mod.ADDER as |adder id|}}
-            <tr class="modifierAdder indent" data-xmlid="{{adder.XMLID}}">
+            <tr class="modifierAdder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
                 <td class="left">{{adder.ALIAS}}</td>
                 <td>{{adder.BASECOST}}</td>
                 <td class="right">
