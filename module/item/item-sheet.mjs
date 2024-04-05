@@ -546,12 +546,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (confirmed) {
             await this.item.deleteModById(id, xmlid);
 
-            if (this.item.system.charges && xmlid === "CHARGES") {
-                delete this.item.system.charges;
-                await this.item.update({ system: this.item.system });
-            }
+            // if (this.item.system.charges && xmlid === "CHARGES") {
+            //     delete this.item.system.charges;
+            //     await this.item.update({ system: this.item.system });
+            // }
 
-            this.item._postUpload();
+            await this.item._postUpload();
+
             this.render();
         }
     }

@@ -5,12 +5,21 @@
 
         <div class="header-details flexrow">
             <h1 class="charname">
-                <input name="name" type="text" value="{{item.name}}" placeholder="Complication Name" />
+                <input name="system.ALIAS" type="text" value="{{system.ALIAS}}" placeholder="Complication ALIAS" />
             </h1>
         </div>
     </header>
 
     <section class="sheet-body">
-        {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
+
+        {{!-- Common --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs }}
+
+        {{!-- Active Points --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-active-points.hbs }}
+
+        {{!-- Adders & Modifiers --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-adders-modifiers.hbs }}
+        
     </section>
 </form>

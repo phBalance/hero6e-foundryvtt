@@ -22,6 +22,13 @@
     <input type="text" name="system.NAME" value="{{system.NAME}}" data-dtype="text" />
 </div>
 
+
+
+<div class="form-group">
+    <label>LEVELS</label>
+    <input {{#if (isdefined system.PDLEVELS)}}disabled{{/if}} type="text" name="system.LEVELS" value="{{system.LEVELS}}" data-dtype="Number" />
+</div>
+
 {{#if (isdefined system.INPUT)}}
 <div class="form-group">
     <label>INPUT</label>
@@ -29,10 +36,77 @@
 </div>
 {{/if}}
 
+{{#if (isdefined system.OPTION)}}
 <div class="form-group">
-    <label>LEVELS</label>
-    <input {{#if (isdefined system.PDLEVELS)}}disabled{{/if}} type="text" name="system.LEVELS" value="{{system.LEVELS}}" data-dtype="Number" />
+    <label>OPTION</label>
+    <input type="text" name="system.OPTION" value="{{system.OPTION}}" data-dtype="text" />
 </div>
+{{/if}}
+
+{{#if (isdefined system.OPTIONID)}}
+<div class="form-group">
+    <label>OPTIONID</label>
+    <input type="text" name="system.OPTIONID" value="{{system.OPTIONID}}" data-dtype="text" />
+</div>
+{{/if}}
+
+{{#if (isdefined system.OPTION_ALIAS)}}
+<div class="form-group">
+    <label>OPTION_ALIAS</label>
+    <input type="text" name="system.OPTION_ALIAS" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
+</div>
+{{/if}}
+
+{{!Martial Maneuver--}}
+{{#if (isdefined system.USEWEAPON)}}
+<div class="form-group">
+    <label>USEWEAPON</label>
+    <input type="checkbox" name="system.USEWEAPON" {{checked system.USEWEAPON}} data-dtype="Boolean"/>
+</div>
+{{/if}}
+{{!-- {{#if (isdefined system.CATEGORY)}}
+<div class="form-group">
+    <label>CATEGORY</label>
+    <input type="text" name="system.CATEGORY" value="{{system.CATEGORY}}" data-dtype="text" />
+</div>
+{{/if}}
+{{#if (isdefined system.OCV)}}
+<div class="form-group">
+    <label>OCV</label>
+    <input type="text" name="system.OCV" value="{{system.OCV}}" data-dtype="text" />
+</div>
+{{/if}}
+{{#if (isdefined system.DCV)}}
+<div class="form-group">
+    <label>DCV</label>
+    <input type="text" name="system.DCV" value="{{system.DCV}}" data-dtype="text" />
+</div>
+{{/if}}
+{{#if (isdefined system.DC)}}
+<div class="form-group">
+    <label>DC</label>
+    <input type="text" name="system.DC" value="{{system.DC}}" data-dtype="text" />
+</div>
+{{/if}}
+{{#if (isdefined system.PHASE)}}
+<div class="form-group">
+    <label>PHASE</label>
+    <input type="text" name="system.PHASE" value="{{system.PHASE}}" data-dtype="text" />
+</div>
+{{/if}}
+{{#if (isdefined system.EFFECT)}}
+<div class="form-group">
+    <label>EFFECT</label>
+    <input type="text" name="system.EFFECT" value="{{system.EFFECT}}" data-dtype="text" />
+</div>
+{{/if}}
+{{#if (isdefined system.WEAPONEFFECT)}}
+<div class="form-group">
+    <label>WEAPONEFFECT</label>
+    <input type="text" name="system.WEAPONEFFECT" value="{{system.WEAPONEFFECT}}" data-dtype="text" />
+</div>
+{{/if}} --}}
+
 
 {{!-- FORCEFIELD --}}
 {{#if (isdefined system.PDLEVELS)}}
@@ -85,6 +159,30 @@
     <input type="text" name="system.BODYLEVELS" value="{{system.BODYLEVELS}}" data-dtype="Number" />
 </div>
 {{/if}}
+
+{{#if (isdefined system.USESTANDARDEFFECT)}}
+<div class="form-group">
+    <label>USESTANDARDEFFECT</label>
+    <input type="checkbox" name="system.USESTANDARDEFFECT" {{checked system.USESTANDARDEFFECT}} data-dtype="Boolean"/>
+</div>
+{{/if}}
+
+{{#if (isdefined system.AFFECTS_PRIMARY)}}
+<div class="form-group">
+    <label>AFFECTS_PRIMARY</label>
+    <input type="checkbox" name="system.AFFECTS_PRIMARY" {{checked system.AFFECTS_PRIMARY}} data-dtype="Boolean"/>
+</div>
+{{/if}}
+
+{{#if (isdefined system.AFFECTS_TOTAL)}}
+<div class="form-group">
+    <label>AFFECTS_TOTAL</label>
+    <input type="checkbox" name="system.AFFECTS_TOTAL" {{checked system.AFFECTS_TOTAL}} data-dtype="Boolean"/>
+</div>
+{{/if}}
+
+
+
 
 {{#if (isdefined system.CHARACTERISTIC)}}
 <div class="form-group">

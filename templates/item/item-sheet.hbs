@@ -4,127 +4,22 @@
         <img class="profile-img" name="img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
         <div class="header-fields">
             <div class="xmlid">{{item.system.XMLID}}</div>
-            <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name" /></h1>
+            <h1 class="charname"><input name="system.ALIAS" type="text" value="{{system.ALIAS}}" placeholder="ALIAS" /></h1>
         </div>
     </header>
 
-    <div class="description">
-        {{item.system.description}}
-    </div>
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
 
-    {{!-- OPTION OPTIONID OPTION_ALIAS --}}
-    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
-    _value=item.system.OPTIONID
-    _name="system.OPTIONID"
-    _label=sheet.OPTIONID.label
-    _selectOptions = sheet.OPTIONID.selectOptions
-    }}
+        {{!-- Common --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs }}
 
+        {{!-- Active Points --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-active-points.hbs }}
 
-    {{!-- INPUT --}}
-    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
-    _value=item.system.INPUT
-    _name="system.INPUT"
-    _label=sheet.INPUT.label
-    _selectOptions = sheet.INPUT.selectOptions
-    }}
-
-
-    {{!-- SFX --}}
-    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
-    _value=item.system.SFX
-    _name="system.SFX"
-    _label=sheet.SFX.label
-    _selectOptions = sheet.SFX.selectOptions
-    }}
-
-    {{!-- LEVELS --}}
-    {{> systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs
-    _value=item.system.LEVELS
-    _name="system.LEVELS"
-    _label=sheet.LEVELS.label
-    _selectOptions = sheet.LEVELS.selectOptions
-    }}
-
-    {{!-- STANDARD EFFECT --}}
-    {{#if (or item.system.USESTANDARDEFFECT (eq item.system.USESTANDARDEFFECT false)) }}
-    <div class="form-group">
-        <label>USESTANDARDEFFECT</label>
-        <input type="checkbox" name="system.USESTANDARDEFFECT" {{checked item.system.USESTANDARDEFFECT}}
-            data-dtype="Boolean" />
-    </div>
-    {{/if}}
-
-    {{!-- AFFECTS_PRIMARY --}}
-    {{#if totalingOptions }}
-    <div class="form-group">
-        <label>AFFECTS_PRIMARY</label>
-        <input type="checkbox" name="system.AFFECTS_PRIMARY" {{checked item.system.AFFECTS_PRIMARY}}
-            data-dtype="Boolean" />
-    </div>
-    {{/if}}
-
-    {{!-- AFFECTS_TOTAL --}}
-    {{#if totalingOptions }}
-    <div class="form-group">
-        <label>AFFECTS_TOTAL</label>
-        <input type="checkbox" name="system.AFFECTS_TOTAL" {{checked item.system.AFFECTS_TOTAL}} data-dtype="Boolean" />
-    </div>
-    {{/if}}
-
-    {{!-- ADD_MODIFIERS_TO_BASE --}}
-    {{#if totalingOptions }}
-    <div class="form-group">
-        <label>ADD_MODIFIERS_TO_BASE</label>
-        <input type="checkbox" name="system.ADD_MODIFIERS_TO_BASE" {{checked item.system.ADD_MODIFIERS_TO_BASE}}
-            data-dtype="Boolean" />
-    </div>
-    {{/if}}
-
-    {{!-- Active Points --}}
-    <li class="flexrow summaryBreak">
-        <h4>Active Points: {{item.system.activePoints}}</h4>
-        <h4 class="center">END: {{item.system.end}}</h4>
-        <h4 class="right">Real Cost: {{item.system.realCost}}</h4>
-    </li>
-
-
-
-
-    <table>
-
-        {{!-- ADDERS --}}
-        <tr class="activeEffects adders">
-            <th class="left">Adders</th>
-            <th>Cost</th>
-            {{!-- <th>Add</th> --}}
-            </td>
-        </tr>
-        {{#each item.system.ADDER as |adder XMLID|}}
-        <tr>
-            <td class="left">{{adder.ALIAS}}</td>
-            <td>{{adder.BASECOST}}</td>
-        </tr>
-        {{/each}}
-
-        {{!-- {{Modifiers}} --}}
-        <tr class="activeEffects adders">
-            <th class="left">Modifiers</th>
-            <th>Cost</th>
-            {{!-- <th>Add</th> --}}
-        </tr>
-        {{#each item.system.MODIFIER as |mod id|}}
-        <tr>
-            <td class="left">{{mod.ALIAS}}</td>
-            <td>{{mod.BASECOST}}</td>
-        </tr>
-        {{#each mod.ADDER as |adder id|}}
-        <tr class="modifierAdder">
-            <td class="left">{{adder.ALIAS}}</td>
-            <td>{{adder.BASECOST}}</td>
-        </tr>
-        {{/each}}
-        {{/each}}
-    </table>
+        {{!-- Adders & Modifiers --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-adders-modifiers.hbs }}
+        
+    </section>
 
 </form>
