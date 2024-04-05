@@ -1081,7 +1081,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             ? CONFIG.HERO.powers5e
             : CONFIG.HERO.powers6e;
 
-        // TODO: TYPE is really an ACTOR SHEET TAB (or section) name, which is loosely associated with item.type
+        // TYPE is really an ACTOR SHEET TAB (or section) name, which is loosely associated with item.type
         // If type = power or equipment then we should show ALL powers we know except for disadvantages, maneuvers, and martialArts.
         const powersOfType = ["power", "equipment"].includes(type)
             ? powers.filter(
@@ -1090,6 +1090,8 @@ export class HeroSystemActorSheet extends ActorSheet {
                       !o.type.includes("martial") &&
                       !o.type.includes("framework") &&
                       !o.type.includes("enhancer") &&
+                      !o.type.includes("modifier") &&
+                      !o.type.includes("adder") &&
                       o.xml,
               )
             : powers.filter(

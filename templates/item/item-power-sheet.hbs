@@ -6,21 +6,28 @@
 
         <div class="header-details flexrow">
             <h1 class="charname">
-                <input name="name" type="text" value="{{item.name}}" placeholder="Power Name" />
+                <input name="system.ALIAS" type="text" value="{{system.ALIAS}}" placeholder="Power ALIAS" />
             </h1>
         </div>
     </header>
 
     {{!-- Sheet Body --}}
     <section class="sheet-body">
-        {{#if (eq item.system.subType 'attack') }}
+
+
+        {{!-- Common --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs }}
+
+        {{!-- Attack --}}
+        {{!-- {{#if (eq item.system.subType 'attack') }}
             {{> systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs item=item }}
-        {{/if}}
+        {{/if}} --}}
 
-        <hr>
+        {{!-- Active Points --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-active-points.hbs }}
 
-        {{> systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs item=item }}
-        {{> systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs item=item alphaTesting=alphaTesting}}
+        {{!-- Adders & Modifiers --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-adders-modifiers.hbs }}
 
     </section>
 </form>

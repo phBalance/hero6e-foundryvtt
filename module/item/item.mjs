@@ -617,7 +617,7 @@ export class HeroSystem6eItem extends Item {
                 // Intentionally using == here to take advantage of string/int equality
                 const value = this.system[key].find((o) => o.ID == id);
                 if (value) {
-                    return value;
+                    return { ...value, _parentKey: key };
                 }
 
                 for (const subMod of this.system[key]) {
@@ -625,7 +625,7 @@ export class HeroSystem6eItem extends Item {
                         if (subMod[key2]) {
                             const value = subMod[key2].find((o) => o.ID == id);
                             if (value) {
-                                return value;
+                                value;
                             }
                         }
                     }
@@ -1398,6 +1398,11 @@ export class HeroSystem6eItem extends Item {
                 this.system.subType = attack;
                 changed = true;
                 this.makeAttack();
+            } else {
+                // Newer item edit may change system.LEVELS or adder/modifier
+                if (changed) {
+                    this.makeAttack();
+                }
             }
         }
 
@@ -3320,6 +3325,12 @@ export class HeroSystem6eItem extends Item {
     }
 
     makeAttack() {
+        // this.id will be null for temporary items (quench, defense left sidebar summary on actor sheet)
+        // Keep this as it is handy for breakpoints
+        if (this.id) {
+            console.log("makeAttack", this);
+        }
+
         const xmlid = this.system.XMLID;
 
         // Name
