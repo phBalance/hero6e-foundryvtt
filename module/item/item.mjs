@@ -2566,6 +2566,13 @@ export class HeroSystem6eItem extends Item {
                 system.description = `Combat Luck (${3 * system.value} rPD/${
                     3 * system.value
                 } rED)`;
+                // Check to make sure ALIAS is largely folling default format before overriding
+                if (
+                    system.ALIAS.trim() === "" ||
+                    system.ALIAS.match(/Combat Luck \(\d+ rPD\/\d+ rED\)/)
+                ) {
+                    system.ALIAS = system.description;
+                }
                 break;
 
             case "DARKNESS":
