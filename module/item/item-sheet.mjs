@@ -368,6 +368,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         const form = `
             <form>
             <p>
+                Adding ADDERs and MODIFIERs is limited and has not been fully vetted.  
+                Invalid adders/modifiers are likely to be ignored and may cause automation issues.
+                Cost and Active Points may not be updated.
+            </p>
+            <p>
             <label>Select ${type}:</label>
             <br>
                 <select name="xmlid">
@@ -377,7 +382,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             </form>`;
 
         const d = new Dialog({
-            title: `Create ${type} for ${this.item.system.XMLID}`,
+            title: `Create ${type.toUpperCase()} for ${this.item.system.XMLID}`,
             content: form,
             buttons: {
                 create: {
@@ -441,7 +446,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         // Create a unique ID
                         modifierData.ID = new Date().getTime().toString();
 
-                        // Add the modifer
+                        // Add the modifer (create array if necessary)
+                        item.system[type.toUpperCase()] ??= [];
                         item.system[type.toUpperCase()].push(modifierData);
 
                         await item._postUpload();
@@ -545,7 +551,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 await this.item.update({ system: this.item.system });
             }
 
-            this.item.updateItemDescription();
+            this.item._postUpload();
             this.render();
         }
     }
@@ -631,13 +637,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         }
 
         //If Description changed, update it
-        const description = this.item.system.description;
-        this.item.updateItemDescription();
-        if (description !== this.item.system.description) {
-            this.item.update({
-                "system.description": this.item.system.description,
-            });
-        }
+        // const description = this.item.system.description;
+        // this.item.updateItemDescription();
+        // if (description !== this.item.system.description) {
+        //     this.item.update({
+        //         "system.description": this.item.system.description,
+        //     });
+        // }
 
         // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
         // Generally rely on HBS to enforce valid combinations.
@@ -647,8 +653,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         // HD lite (currently only SKILL) uses generic _postUpload
         // TODO: Much of the above is likely not necessary as _postUpload does alot
-        //await this.item._postUpload();
-        //this.render();
+        await this.item._postUpload();
+        this.render();
     }
 
     async _onSubItemCreate(event) {

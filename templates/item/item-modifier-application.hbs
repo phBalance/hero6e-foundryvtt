@@ -9,6 +9,13 @@
             <input type="text" name="mod.ALIAS" value="{{mod.ALIAS}}" data-dtype="text" />
         </div>
 
+        {{#if (isdefined mod.LEVELS)}}
+        <div class="form-group">
+            <label>LEVELS</label>
+            <input type="text" name="mod.LEVELS" value="{{mod.LEVELS}}" data-dtype="text" />
+        </div>
+        {{/if}}
+
         {{#if (isdefined mod.OPTION)}}
         <div class="form-group">
             <label>OPTION</label>

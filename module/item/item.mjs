@@ -1398,6 +1398,11 @@ export class HeroSystem6eItem extends Item {
                 this.system.subType = attack;
                 changed = true;
                 this.makeAttack();
+            } else {
+                // Newer item edit may change system.LEVELS or adder/modifier
+                if (changed) {
+                    this.makeAttack();
+                }
             }
         }
 
@@ -3320,6 +3325,12 @@ export class HeroSystem6eItem extends Item {
     }
 
     makeAttack() {
+        // this.id will be null for temporary items (quench, defense left sidebar summary on actor sheet)
+        // Keep this as it is handy for breakpoints
+        if (this.id) {
+            console.log("makeAttack", this);
+        }
+
         const xmlid = this.system.XMLID;
 
         // Name

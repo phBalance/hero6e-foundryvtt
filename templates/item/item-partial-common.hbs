@@ -1,0 +1,152 @@
+{{!-- HDC xml partial --}}
+    {{!-- UPPERCASE props are core to the item --}}
+    {{!-- "Yes" and "No" are converted to true/false --}}
+    {{!-- <SKILL XMLID="ACROBATICS" BASECOST="3.0" LEVELS="0" 
+        ALIAS="Acrobatics" POSITION="0" MULTIPLIER="1.0" 
+        GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" 
+        SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" 
+        NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>
+    --}}
+
+        {{!-- <div class="form-group">
+            <label>ALIAS</label>
+            <input type="text" name="system.ALIAS" value="{{system.ALIAS}}" data-dtype="text" />
+        </div> --}}
+
+<div class="description">
+    {{item.system.description}}
+</div>
+
+<div class="form-group">
+    <label>NAME</label>
+    <input type="text" name="system.NAME" value="{{system.NAME}}" data-dtype="text" />
+</div>
+
+{{#if (isdefined system.INPUT)}}
+<div class="form-group">
+    <label>INPUT</label>
+    <input type="text" name="system.INPUT" value="{{system.INPUT}}" data-dtype="text" />
+</div>
+{{/if}}
+
+<div class="form-group">
+    <label>LEVELS</label>
+    <input {{#if (isdefined system.PDLEVELS)}}disabled{{/if}} type="text" name="system.LEVELS" value="{{system.LEVELS}}" data-dtype="Number" />
+</div>
+
+{{!-- FORCEFIELD --}}
+{{#if (isdefined system.PDLEVELS)}}
+<div class="form-group">
+    <label>PDLEVELS</label>
+    <input type="text" name="system.PDLEVELS" value="{{system.PDLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+{{#if (isdefined system.EDLEVELS)}}
+<div class="form-group">
+    <label>EDLEVELS</label>
+    <input type="text" name="system.EDLEVELS" value="{{system.EDLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+{{#if (isdefined system.MDLEVELS)}}
+<div class="form-group">
+    <label>MDLEVELS</label>
+    <input type="text" name="system.MDLEVELS" value="{{system.MDLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+{{#if (isdefined system.POWDLEVELS)}}
+<div class="form-group">
+    <label>POWDLEVELS</label>
+    <input type="text" name="system.POWDLEVELS" value="{{system.POWDLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+
+{{!-- FORCEWALL/Barrier --}}
+{{#if (isdefined system.LENGTHLEVELS)}}
+<div class="form-group">
+    <label>LENGTHLEVELS</label>
+    <input type="text" name="system.LENGTHLEVELS" value="{{system.LENGTHLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+{{#if (isdefined system.HEIGHTLEVELS)}}
+<div class="form-group">
+    <label>HEIGHTLEVELS</label>
+    <input type="text" name="system.HEIGHTLEVELS" value="{{system.HEIGHTLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+{{#if (isdefined system.WIDTHLEVELS)}}
+<div class="form-group">
+    <label>WIDTHLEVELS</label>
+    <input type="text" name="system.WIDTHLEVELS" value="{{system.WIDTHLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+{{#if (isdefined system.BODYLEVELS)}}
+<div class="form-group">
+    <label>BODYLEVELS</label>
+    <input type="text" name="system.BODYLEVELS" value="{{system.BODYLEVELS}}" data-dtype="Number" />
+</div>
+{{/if}}
+
+{{#if (isdefined system.CHARACTERISTIC)}}
+<div class="form-group">
+    <label>CHARACTERISTIC</label>
+    <select name="system.CHARACTERISTIC" data-dtype="text">
+        {{#if item.actor.system.is5e}}
+            {{selectOptions config.skillCharacteristics5e selected=system.CHARACTERISTIC}}
+        {{else}}
+            {{selectOptions config.skillCharacteristics selected=system.CHARACTERISTIC}}
+        {{/if}}
+    </select>
+</div>
+{{/if}}
+
+
+{{#if (isdefined system.LEVELSONLY)}}
+<div class="form-group">
+    <label>LEVELSONLY</label>
+    <input type="checkbox" name="system.LEVELSONLY" {{checked system.LEVELSONLY}} data-dtype="Boolean"  
+    {{#if (or (or system.FAMILIARITY system.EVERYMAN) system.PROFICIENCY)}}disabled{{/if}}/>
+</div>
+{{/if}}
+
+{{#if (isdefined system.FAMILIARITY)}}
+<div class="form-group">
+    <label>FAMILIARITY</label>
+    <input type="checkbox" name="system.FAMILIARITY" {{checked system.FAMILIARITY}} data-dtype="Boolean" 
+    {{#if (or system.LEVELSONLY system.PROFICIENCY)}}disabled{{/if}}/>
+</div>
+{{/if}}
+
+{{!-- if FAMILIARITY is present then EVERYMAN can be an option --}}
+{{#if (isdefined system.FAMILIARITY)}}
+<div class="form-group">
+    <label>EVERYMAN</label>
+    <input type="checkbox" name="system.EVERYMAN" {{checked system.EVERYMAN}} data-dtype="Boolean"  
+    {{#if (or system.LEVELSONLY system.PROFICIENCY)}}disabled{{/if}}/>
+</div>
+{{/if}}
+
+{{#if (isdefined system.PROFICIENCY)}}
+<div class="form-group">
+    <label>PROFICIENCY</label>
+    <input type="checkbox" name="system.PROFICIENCY" {{checked system.PROFICIENCY}} data-dtype="Boolean"  
+    {{#if (or system.LEVELSONLY system.FAMILIARITY)}}disabled{{/if}}/>
+</div>
+{{/if}}
+
+{{#if (isdefined system.SFX)}}
+<div class="form-group">
+    <label>SFX</label>
+    <input type="text" name="system.SFX" value="{{system.SFX}}" data-dtype="text" />
+</div>
+{{/if}}
+
+{{#if system.charges}}
+<div class="form-group">
+    <label>Charges</label>
+    <div>
+        <input type="text" name="system.charges.value" value="{{system.charges.value}}" data-dtype="Number" />
+        <span>/</span>
+        <input disabled type="text" name="system.charges.max" value="{{system.charges.max}}" data-dtype="Number" />
+    </div>
+</div>
+{{/if}}

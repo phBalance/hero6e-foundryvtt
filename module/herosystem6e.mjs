@@ -138,6 +138,9 @@ Hooks.once("init", async function () {
         `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
         `systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs`,
         `systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs`,
+        `systems/hero6efoundryvttv2/templates/item/item-partial-active-points.hbs`,
+        `systems/hero6efoundryvttv2/templates/item/item-partial-adders-modifiers.hbs`,
+        `systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs`,
     ]);
 });
 
