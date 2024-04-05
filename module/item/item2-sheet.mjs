@@ -40,6 +40,7 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
         // }
 
         const item = data.item;
+        data.system = item.system;
         const configPowerInfo = getPowerInfo({
             xmlid: item.system.XMLID,
             actor: item?.actor,

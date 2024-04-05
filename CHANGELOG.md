@@ -4,7 +4,7 @@
 
 - HD Lite: Broad term referring to the limited ability to edit actors within FoundryVTT, without the need for Hero Designer.
   - You can now add skills and powers in game.
-  - Improved Skill, Defense, Talent and Complication editing.
+  - Improved Skill, Defense, Martial Arts, Perks, Talent and Complication editing.  Some editing options are confusing and will be improved in future releases.
   - Simplified Attack editing.  Using adders for +1/2 d6 and +1 pip.
 
 ## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)

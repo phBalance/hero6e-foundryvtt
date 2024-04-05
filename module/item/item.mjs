@@ -575,7 +575,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // TODO: Delete support for old format
+        // TODO: "Delete" support for old format
         for (const key of ["ADDER", "MODIFIER", "POWER"]) {
             if (this.system?.[key]) {
                 const value = this.system[key].find((o) => o.XMLID === xmlid);
@@ -1340,6 +1340,12 @@ export class HeroSystem6eItem extends Item {
             if (this.system.charges?.value === undefined) {
                 this.system.charges.value ??= this.system.charges.max;
                 changed = true;
+            }
+        } else {
+            // When CHARGES is manually deleted
+            if (this.system.charges) {
+                delete this.system.charges;
+                this.update({ "system.-=charges": null });
             }
         }
 
