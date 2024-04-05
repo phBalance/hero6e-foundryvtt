@@ -129,9 +129,11 @@
                 <th class="left">Adders</th>
                 <th>Cost</th>
                 <th class="right">
+                    {{#if alphaTesting}}
                     <a class="item-control modifier-create" title="Create"
-                        data-action="create">
+                        data-action="createAdder">
                         <i class="fas fa-plus"></i></a>
+                    {{/if}}
                 </th>
             </tr>
             {{#each item.system.ADDER as |adder XMLID|}}
@@ -139,10 +141,12 @@
                 <td class="left">{{adder.ALIAS}}</td>
                 <td>{{#if adder.SELECTED}}{{adder.BASECOST}}{{/if}}</td>
                 <td class="right">
+                    {{#if @root.alphaTesting}}
                     <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
                             class="fas fa-edit"></i></a>
                     <a class="item-control modifier-delete" data-action="delete" title="Delete">
                         <i class="fas fa-trash"></i>
+                    {{/if}}
                     </a>
                 </td>
             </tr>
@@ -152,11 +156,11 @@
                     <td class="left">{{adder.ALIAS}}</td>
                     <td>{{adder.BASECOST}}</td>
                     <td class="right">
-                        <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
+                        {{!-- <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
                                 class="fas fa-edit"></i></a>
                         <a class="item-control modifier-delete" data-action="delete" title="Delete">
                             <i class="fas fa-trash"></i>
-                        </a>
+                        </a> --}}
                     </td>
                 </tr>
                 {{/each}}
@@ -167,9 +171,11 @@
                 <th class="left">Modifiers</th>
                 <th>Cost</th>
                 <th class="right">
+                    {{#if @root.alphaTesting}}
                     <a class="item-control modifier-create" title="Create"
-                                data-action="create">
+                                data-action="createModifier">
                                 <i class="fas fa-plus"></i></a>
+                    {{/if}}
                 </th>
                 {{!-- <th>Add</th> --}}
             </tr>
@@ -178,11 +184,13 @@
                 <td class="left">{{mod.ALIAS}}</td>
                 <td>{{mod.BASECOST}}</td>
                 <td class="right">
+                    {{#if @root.alphaTesting}}
                     <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
                             class="fas fa-edit"></i></a>
                     <a class="item-control modifier-delete" data-action="delete" title="Delete">
                         <i class="fas fa-trash"></i>
                     </a>
+                    {{/if}}
                 </td>
             </tr>
             
@@ -191,11 +199,11 @@
                 <td class="left">{{adder.ALIAS}}</td>
                 <td>{{adder.BASECOST}}</td>
                 <td class="right">
-                    <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
+                    {{!-- <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
                             class="fas fa-edit"></i></a>
                     <a class="item-control modifier-delete" data-action="delete" title="Delete">
                         <i class="fas fa-trash"></i>
-                    </a>
+                    </a> --}}
                 </td>
             </tr>
             {{/each}}

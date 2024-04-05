@@ -243,16 +243,45 @@ HERO.powers5e.validate = validatePowers;
  */
 function addPower(powerDescription6e, powerOverrideFor5e) {
     if (powerDescription6e) {
+        if (!powerDescription6e.key && powerDescription6e.xml) {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(
+                powerDescription6e.xml.trim(),
+                "text/xml",
+            );
+            powerDescription6e.key = xml.children[0].getAttribute("XMLID");
+            powerDescription6e.name = xml.children[0].getAttribute("ALIAS");
+            powerDescription6e.behaviors ??= [];
+            powerDescription6e.type ??= [xml.children[0].tagName.toLowerCase()];
+        }
+        if (!powerDescription6e.key) {
+            console.error("Missing powerDescription6e key", powerDescription6e);
+        }
         HERO.powers6e.push(foundry.utils.deepClone(powerDescription6e));
     }
 
     if (powerOverrideFor5e) {
-        HERO.powers5e.push(
-            Object.assign(
-                powerDescription6e ? powerDescription6e : {},
-                powerOverrideFor5e,
-            ),
+        const powerDescription5e = Object.assign(
+            powerDescription6e ? powerDescription6e : {},
+            powerOverrideFor5e,
         );
+
+        if (!powerDescription5e.key && powerDescription5e.xml) {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(
+                powerDescription5e.xml.trim(),
+                "text/xml",
+            );
+            powerDescription5e.key ??= xml.children[0].getAttribute("XMLID");
+            powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
+            powerDescription5e.behaviors ??= [];
+            powerDescription5e.type ??= [xml.children[0].tagName.toLowerCase()];
+        }
+        if (!powerDescription5e.key) {
+            console.error("Missing powerDescription5e key", powerDescription5e);
+        }
+
+        HERO.powers5e.push(powerDescription5e);
     }
 }
 
@@ -3215,7 +3244,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "target's dcv",
         range: "no range",
         costEnd: false,
-        xml: `<TALENT XMLID="CRIPPLINGBLOW" ID="1709164962720" BASECOST="16.0" LEVELS="0" ALIAS="Crippling Blow" POSITION="13" MULTIPLIER`,
+        xml: `<TALENT XMLID="CRIPPLINGBLOW" ID="1709164962720" BASECOST="16.0" LEVELS="0" ALIAS="Crippling Blow" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
     });
     addPower(
         {
@@ -3786,7 +3815,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             target: "self only",
             range: "self",
-            xml: `<POWER XMLID="CUSTOMPOWER" ID="1711932960992" BASECOST="1.0" LEVELS="1" ALIAS="Custom Power" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" DOESBODY="No" DOESDAMAGE="No" DOESKNOCKBACK="No" KILLING="No" DEFENSE="NONE" END="Yes" VISIBLE="Yes" RANGE="SELF" DURATION="INSTANT" TARGET="SELFONLY" ENDCOLUMNOUTPUT="" USECUSTOMENDCOLUMN="No"`,
+            xml: `<POWER XMLID="CUSTOMPOWER" ID="1711932960992" BASECOST="1.0" LEVELS="1" ALIAS="Custom Power" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" DOESBODY="No" DOESDAMAGE="No" DOESKNOCKBACK="No" KILLING="No" DEFENSE="NONE" END="Yes" VISIBLE="Yes" RANGE="SELF" DURATION="INSTANT" TARGET="SELFONLY" ENDCOLUMNOUTPUT="" USECUSTOMENDCOLUMN="No">`,
         },
         {},
     );
@@ -4504,7 +4533,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     },
                 },
             },
-            xml: `POWER XMLID="RKA" ID="1711934450257" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
+            xml: `<POWER XMLID="RKA" ID="1711934450257" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Ranged" POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
     );
@@ -5367,6 +5396,30 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
               <NOTES />
             </ADDER>
           </DISAD>`,
+        },
+        {},
+    );
+})();
+
+(function addModifiersToPowerList() {
+    addPower(
+        {
+            xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
+            get baseCost() {
+                return null;
+            },
+            // BASECOST: function(OPTIONID) {
+            //     switch(OPTIONID) {
+
+            //     }
+            // }
+        },
+        {},
+    );
+
+    addPower(
+        {
+            xml: `<MODIFIER XMLID="OIHID" ID="1712092697365" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Heroic Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
         {},
     );

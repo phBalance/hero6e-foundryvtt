@@ -617,7 +617,7 @@ export class HeroSystem6eItem extends Item {
                 // Intentionally using == here to take advantage of string/int equality
                 const value = this.system[key].find((o) => o.ID == id);
                 if (value) {
-                    return value;
+                    return { ...value, _parentKey: key };
                 }
 
                 for (const subMod of this.system[key]) {
@@ -625,7 +625,7 @@ export class HeroSystem6eItem extends Item {
                         if (subMod[key2]) {
                             const value = subMod[key2].find((o) => o.ID == id);
                             if (value) {
-                                return value;
+                                value;
                             }
                         }
                     }

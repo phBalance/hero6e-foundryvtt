@@ -303,10 +303,162 @@ export class HeroSystem6eItemSheet extends ItemSheet {
     }
 
     async _onModifierCreate(event) {
-        console.log(event);
-        return ui.notifications.warn(
-            `Creating modifiers & adders is currently unsupported.`,
+        event.preventDefault();
+        const action = $(event.currentTarget)
+            .closest(".modifier-create")
+            .data().action;
+
+        if (!action) {
+            return ui.notifications.error(`Unable to add adder/modifier.`);
+        }
+
+        // Options associated with TYPE (excluding enhancers for now)
+        const powers = this.item.actor.system.is5e
+            ? CONFIG.HERO.powers5e
+            : CONFIG.HERO.powers6e;
+
+        const type = action.replace("create", "").toLowerCase();
+        const item = this.item;
+
+        const powersOfType = powers.filter(
+            (o) => o.type.includes(type) && o.xml,
         );
+
+        // Make sure we have options
+        if (powersOfType.length === 0) {
+            ui.notifications.warn(
+                `Creating a new ${type.toUpperCase()} is currently unsupported`,
+            );
+            return;
+        }
+
+        const optionHTML = powersOfType
+            .sort((a, b) => {
+                const parserA = new DOMParser();
+                const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
+                const parserB = new DOMParser();
+                const xmlB = parserB.parseFromString(b.xml.trim(), "text/xml");
+                const nameA = xmlA.children[0].getAttribute("ALIAS");
+                const nameB = xmlB.children[0].getAttribute("ALIAS");
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+
+                // names must be equal
+                return 0;
+            })
+            .map(function (a) {
+                const parserA = new DOMParser();
+                const xmlA = parserA.parseFromString(a.xml.trim(), "text/xml");
+                const alias = xmlA.children[0].getAttribute("ALIAS");
+
+                // Make sure XMLID's match, if not then skip
+                if (a.key != xmlA.children[0].getAttribute("XMLID")) {
+                    console.warn(`XMLID mismatch`, a, xmlA.children[0]);
+                    return "";
+                }
+
+                return `<option value='${a.key}'>${alias}</option>`;
+            });
+
+        // Need to select a specific XMLID
+        const form = `
+            <form>
+            <p>
+            <label>Select ${type}:</label>
+            <br>
+                <select name="xmlid">
+                    ${optionHTML}
+                </select>
+            </p>
+            </form>`;
+
+        const d = new Dialog({
+            title: `Create ${type} for ${this.item.system.XMLID}`,
+            content: form,
+            buttons: {
+                create: {
+                    icon: '<i class="fas fa-check"></i>',
+                    label: "Create",
+                    callback: async function (html) {
+                        const formElement = html[0].querySelector("form");
+                        const formData = new FormDataExtended(formElement);
+                        const formDataObject = formData.object;
+                        if (formDataObject.xmlid === "none") return;
+
+                        const power = powers.find(
+                            (o) => o.key == formDataObject.xmlid,
+                        );
+                        if (!power) {
+                            ui.notifications.error(
+                                `Creating new ${type.toUpperCase()} failed`,
+                            );
+                            return;
+                        }
+
+                        // Warn if xml is missing as the item is likely missing properties that we are expecting
+                        if (!power.xml) {
+                            ui.notifications.warn(
+                                `${power.key.toUpperCase()} is missing default properties.  This may cause issues with automation and cost calculations.`,
+                            );
+                        }
+
+                        // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
+                        // Using a simplied version of HeroSystemItem6e.itemDataFromXml for now.
+                        let modifierData = {};
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(
+                            power.xml,
+                            "text/xml",
+                        );
+                        for (const attribute of xmlDoc.children[0].attributes) {
+                            switch (attribute.value) {
+                                case "Yes":
+                                case "YES":
+                                    modifierData[attribute.name] = true;
+                                    break;
+                                case "No":
+                                case "NO":
+                                    modifierData[attribute.name] = false;
+                                    break;
+                                // case "GENERIC_OBJECT":
+                                //     modifierData[attribute.name] =
+                                //     modifierData.tagName.toUpperCase(); // e.g. MULTIPOWER
+                                //     break;
+                                default:
+                                    modifierData[attribute.name] =
+                                        attribute.value.trim();
+                            }
+                        }
+
+                        // Track when added manually for diagnostic purposes
+                        modifierData.versionHeroSystem6eManuallyCreated =
+                            game.system.version;
+
+                        // Create a unique ID
+                        modifierData.ID = new Date().getTime().toString();
+
+                        // Add the modifer
+                        item.system[type.toUpperCase()].push(modifierData);
+
+                        await item._postUpload();
+                        return;
+                    },
+                },
+                cancel: {
+                    icon: '<i class="fas fa-times"></i>',
+                    label: "Cancel",
+                    callback: () =>
+                        console.log(
+                            `Cancel ${type.capitalize()} ${type} create`,
+                        ),
+                },
+            },
+        });
+        d.render(true);
     }
 
     async _onModifierEdit(event) {
@@ -372,7 +524,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             .closest("[data-modifier]")
             ?.data()?.modifier;
         const id = adderId || modifierId;
-        if (!xmlid || !id) {
+        if (!id) {
             return ui.notifications.error(`Unable to delete modifier/adder.`);
         }
 

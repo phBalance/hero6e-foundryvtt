@@ -43,6 +43,17 @@ export class ItemModifierFormApplication extends FormApplication {
 
     async _updateObject(event, formData) {
         console.log(event, formData);
+        const expandedData = foundry.utils.expandObject(formData);
+        this.data.mod = { ...this.data.mod, ...expandedData.mod };
+        const oldMod = this.data.item.findModById(this.data.mod.ID);
+        const idx = this.data.item.system[oldMod._parentKey].findIndex(
+            (o) => o.ID == oldMod.ID,
+        );
+        this.data.item.system[oldMod._parentKey][idx] = this.data.mod;
+        await this.data.item.update({ system: this.data.item.system });
+
+        await this.data.item._postUpload();
+
         // Show any changes
         this.render();
     }
