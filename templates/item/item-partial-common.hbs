@@ -86,6 +86,14 @@
 </div>
 {{/if}}
 
+{{#if (isdefined system.USESTANDARDEFFECT)}}
+<div class="form-group">
+    <label>USESTANDARDEFFECT</label>
+    <input type="checkbox" name="system.USESTANDARDEFFECT" {{checked system.USESTANDARDEFFECT}} data-dtype="Boolean"/>
+</div>
+{{/if}}
+
+
 {{#if (isdefined system.CHARACTERISTIC)}}
 <div class="form-group">
     <label>CHARACTERISTIC</label>
