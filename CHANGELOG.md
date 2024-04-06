@@ -2,10 +2,13 @@
 
 ## Version 3.0.66 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- HD Lite: Broad term referring to the limited ability to edit actors within FoundryVTT, without the need for Hero Designer.
-  - You can now add skills and powers in game.
-  - Improved Skill, Defense, Martial Arts, Perks, Talent and Complication editing.  Some editing options are confusing and will be improved in future releases.
-  - Simplified Attack editing.  Using adders for +1/2 d6 and +1 pip.
+- Improved in game editing:
+  - You can add most skills, powers, etc to an actor in game. Frameworks, compound powers, and enhancers can not be added in game yet.
+  - Improved overall editing of skills/powers.  Some editing options are confusing and will be improved in future releases.
+  - A limited number of adders and modifiers can be added to items.  Will add more in future releases.
+  - Simplified editing of attacks.  Using adders for +1/2 d6 and +1 pip.
+  - There is minimal vetting of in game editing.  Any invalid adders/modifiers for a specific power will likely to be ignored and/or may cause automation issues.
+  - Items modified in-game may have incorrect costs and active points.
 
 ## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
