@@ -247,19 +247,54 @@ HERO.powers5e.validate = validatePowers;
  */
 function addPower(powerDescription6e, powerOverrideFor5e) {
     if (powerDescription6e) {
-        if (!powerDescription6e.key && powerDescription6e.xml) {
+        if (powerDescription6e.xml) {
+            powerDescription6e.xml = powerDescription6e.xml
+                .replace(/\n/g, "")
+                .trim();
             const parser = new DOMParser();
-            const xml = parser.parseFromString(
+            let xml = parser.parseFromString(
                 powerDescription6e.xml.trim(),
                 "text/xml",
             );
-            powerDescription6e.key = xml.children[0].getAttribute("XMLID");
-            powerDescription6e.name = xml.children[0].getAttribute("ALIAS");
-            powerDescription6e.behaviors ??= [];
-            powerDescription6e.type ??= [xml.children[0].tagName.toLowerCase()];
+
+            // Try to fix self-closing tags
+            if (xml.getElementsByTagName("parsererror").length > 0) {
+                const tag = powerDescription6e.xml.match(/<(\w+)/)[1];
+                const tagStart = powerDescription6e.xml.match(
+                    new RegExp("<" + tag, "g"),
+                ).length;
+                const tagEnd =
+                    powerDescription6e.xml.match(new RegExp("</" + tag, "g"))
+                        ?.length || 0;
+
+                if (tagStart != tagEnd) {
+                    powerDescription6e.xml += `</${tag}>`;
+                }
+                xml = parser.parseFromString(
+                    powerDescription6e.xml,
+                    "text/xml",
+                );
+            }
+
+            // Add power properties based on valid XML.
+            // NOTE: Chrome will parse partially valid XML, FireFox will not
+            // which is why we are checkig for parsererror.
+            if (xml.getElementsByTagName("parsererror").length === 0) {
+                powerDescription6e.key ??=
+                    xml.children[0].getAttribute("XMLID");
+                powerDescription6e.name ??=
+                    xml.children[0].getAttribute("ALIAS");
+                powerDescription6e.behaviors ??= [];
+                powerDescription6e.type ??= [
+                    xml.children[0].tagName.toLowerCase(),
+                ];
+            } else {
+                debugger;
+            }
         }
         if (!powerDescription6e.key) {
-            console.error("Missing powerDescription6e key", powerDescription6e);
+            debugger;
+            return;
         }
         HERO.powers6e.push(foundry.utils.deepClone(powerDescription6e));
     }
@@ -270,19 +305,51 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             powerOverrideFor5e,
         );
 
-        if (!powerDescription5e.key && powerDescription5e.xml) {
+        if (powerDescription5e.xml) {
+            powerDescription5e.xml = powerDescription5e.xml
+                .replace(/\n/g, "")
+                .trim();
             const parser = new DOMParser();
-            const xml = parser.parseFromString(
+            let xml = parser.parseFromString(
                 powerDescription5e.xml.trim(),
                 "text/xml",
             );
-            powerDescription5e.key ??= xml.children[0].getAttribute("XMLID");
-            powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
-            powerDescription5e.behaviors ??= [];
-            powerDescription5e.type ??= [xml.children[0].tagName.toLowerCase()];
+
+            // Try to fix self-closing tags
+            if (xml.getElementsByTagName("parsererror").length > 0) {
+                const tag = powerDescription5e.xml.match(/<(\w+)/)[1];
+                const tagStart = powerDescription5e.xml.match(
+                    new RegExp("<" + tag, "g"),
+                ).length;
+                const tagEnd =
+                    powerDescription5e.xml.match(new RegExp("</" + tag, "g"))
+                        ?.length || 0;
+
+                if (tagStart != tagEnd) {
+                    powerDescription5e.xml += `</${tag}>`;
+                }
+                xml = parser.parseFromString(
+                    powerDescription5e.xml,
+                    "text/xml",
+                );
+            }
+
+            if (xml.getElementsByTagName("parsererror").length === 0) {
+                powerDescription5e.key ??=
+                    xml.children[0].getAttribute("XMLID");
+                powerDescription5e.name ??=
+                    xml.children[0].getAttribute("ALIAS");
+                powerDescription5e.behaviors ??= [];
+                powerDescription5e.type ??= [
+                    xml.children[0].tagName.toLowerCase(),
+                ];
+            } else {
+                debugger;
+            }
         }
         if (!powerDescription5e.key) {
-            console.error("Missing powerDescription5e key", powerDescription5e);
+            debugger;
+            return;
         }
 
         HERO.powers5e.push(powerDescription5e);
@@ -5624,11 +5691,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addAddersToPowerList() {
     addPower(
         {
-            key: "PLUSONEHALFDIE",
-            type: [],
-            behaviors: ["adder"],
-            target: "self only",
-            range: "self",
+            // key: "PLUSONEHALFDIE",
+            // type: [],
+            // behaviors: ["adder"],
+            // target: "self only",
+            // range: "self",
 
             xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">`,
         },
@@ -5637,11 +5704,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "PLUSONEPIP",
-            type: [],
-            behaviors: ["adder"],
-            target: "self only",
-            range: "self",
+            // key: "PLUSONEPIP",
+            // type: [],
+            // behaviors: ["adder"],
+            // target: "self only",
+            // range: "self",
 
             xml: `<ADDER XMLID="PLUSONEPIP" ID="1712342367072" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">`,
         },
@@ -5650,11 +5717,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "MINUSONEPIP",
-            type: [],
-            behaviors: ["adder"],
-            target: "self only",
-            range: "self",
+            // key: "MINUSONEPIP",
+            // type: [],
+            // behaviors: ["adder"],
+            // target: "self only",
+            // range: "self",
 
             xml: `<ADDER XMLID="MINUSONEPIP" ID="1712344286624" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">`,
         },
@@ -5665,11 +5732,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addModifiersToPowerList() {
     addPower(
         {
-            key: "CHARGES",
-            type: [],
-            behaviors: ["modifier"],
-            target: "self only",
-            range: "self",
+            // key: "CHARGES",
+            // type: [],
+            // behaviors: ["modifier"],
+            // target: "self only",
+            // range: "self",
 
             xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
             get baseCost() {
@@ -5686,11 +5753,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "HARDENED",
-            type: [],
-            behaviors: ["modifier"],
-            target: "self only",
-            range: "self",
+            // key: "HARDENED",
+            // type: [],
+            // behaviors: ["modifier"],
+            // target: "self only",
+            // range: "self",
 
             xml: `<MODIFIER XMLID="HARDENED" ID="1712344562459" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
@@ -5699,11 +5766,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "IMPENETRABLE",
-            type: [],
-            behaviors: ["modifier"],
-            target: "self only",
-            range: "self",
+            // key: "IMPENETRABLE",
+            // type: [],
+            // behaviors: ["modifier"],
+            // target: "self only",
+            // range: "self",
 
             xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
@@ -5712,11 +5779,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "OIHID",
-            type: [],
-            behaviors: ["modifier"],
-            target: "self only",
-            range: "self",
+            // key: "OIHID",
+            // type: [],
+            // behaviors: ["modifier"],
+            // target: "self only",
+            // range: "self",
 
             xml: `<MODIFIER XMLID="OIHID" ID="1712092697365" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Heroic Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
@@ -5725,11 +5792,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            key: "PENETRATING",
-            type: [],
-            behaviors: ["modifier"],
-            target: "self only",
-            range: "self",
+            // key: "PENETRATING",
+            // type: [],
+            // behaviors: ["modifier"],
+            // target: "self only",
+            // range: "self",
 
             costPerLevel: 0.5,
             dc: true,
