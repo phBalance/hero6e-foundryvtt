@@ -738,239 +738,6 @@ export class HeroSystem6eItem extends Item {
     determinePointCosts() {
         let changed = false;
 
-        if (this.system.XMLID === "PENALTY_SKILL_LEVELS") {
-            if (this.actor?.system.is5e) {
-                switch (this.system.OPTION) {
-                    case "SINGLE":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "TIGHT":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "ALL":
-                        this.system.costPerLevel = 3;
-                        break;
-                    default:
-                        console.error(
-                            `Unknown 5e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                        );
-                        break;
-                }
-            } else {
-                switch (this.system.OPTION) {
-                    case "SINGLE":
-                        this.system.costPerLevel = 1;
-                        break;
-                    case "THREE":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "SINGLEDCV":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "GROUPDCV":
-                        this.system.costPerLevel = 3;
-                        break;
-                    case "ALL":
-                        this.system.costPerLevel = 3;
-                        break;
-                    default:
-                        console.error(
-                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                        );
-                        break;
-                }
-            }
-        } else if (this.system.XMLID === "MENTAL_COMBAT_LEVELS") {
-            if (this.actor?.system.is5e) {
-                // MCL doesn't exist in 5e
-                console.error(`Unknown 5e ${this.system.XMLID}`);
-            } else {
-                switch (this.system.OPTION) {
-                    case "SINGLE":
-                        this.system.costPerLevel = 1;
-                        break;
-                    case "TIGHT":
-                        this.system.costPerLevel = 3;
-                        break;
-                    case "BROAD":
-                        this.system.costPerLevel = 6;
-                        break;
-                    default:
-                        console.error(
-                            `Unknown 6e ${this.system.XMLID} levels ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                        );
-                        break;
-                }
-            }
-        } else if (this.system.XMLID === "COMBAT_LEVELS") {
-            if (this.actor?.system?.is5e) {
-                switch (this.system.OPTION) {
-                    case "SINGLESINGLE":
-                        this.system.costPerLevel = 1;
-                        break;
-                    case "SINGLESTRIKE":
-                    case "SINGLE":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "MAGIC":
-                    case "MARTIAL":
-                    case "STRIKE":
-                    case "TIGHT":
-                        this.system.costPerLevel = 3;
-                        break;
-                    case "BROAD":
-                    case "DECV":
-                    case "HTHDCV":
-                    case "TWODCV":
-                    case "TWOOCV":
-                        this.system.costPerLevel = 4;
-                        break;
-                    case "DCV":
-                    case "HTH":
-                    case "MENTAL":
-                    case "RANGED":
-                        this.system.costPerLevel = 5;
-                        break;
-                    case "HTHMENTAL":
-                    case "HTHRANGED":
-                    case "MENTALRANGED":
-                        this.system.costPerLevel = 6;
-                        break;
-                    case "ALL":
-                        this.system.costPerLevel = 8;
-                        break;
-                    default:
-                        console.error(
-                            `Unknown 5e combat level type ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                        );
-                        break;
-                }
-            } else {
-                switch (this.system.OPTION) {
-                    case "SINGLE":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "TIGHT":
-                        this.system.costPerLevel = 3;
-                        break;
-                    case "BROAD":
-                        this.system.costPerLevel = 5;
-                        break;
-                    case "HTH":
-                        this.system.costPerLevel = 8;
-                        break;
-                    case "RANGED":
-                        this.system.costPerLevel = 8;
-                        break;
-                    case "ALL":
-                        this.system.costPerLevel = 10;
-                        break;
-                    default:
-                        console.error(
-                            `Unknown 6e combat levels ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                        );
-                        break;
-                }
-            }
-        } else if (this.system.XMLID === "SKILL_LEVELS") {
-            if (this.actor?.system?.is5e) {
-                switch (this.system.OPTION) {
-                    case "CHARACTERISTIC":
-                    case "SINGLEMOVEMENT":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "ALLMOVEMENT":
-                    case "RELATED":
-                        this.system.costPerLevel = 3;
-                        break;
-                    case "SIMILAR":
-                        this.system.costPerLevel = 5;
-                        break;
-                    case "NONCOMBAT":
-                        this.system.costPerLevel = 8;
-                        break;
-                    case "OVERALL":
-                        this.system.costPerLevel = 10;
-                        break;
-                    default:
-                        console.error(
-                            `Unknown 5e SKILL_LEVELS ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                        );
-                        break;
-                }
-            } else {
-                switch (this.system.OPTION) {
-                    case "CHARACTERISTIC":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "RELATED":
-                        this.system.costPerLevel = 3;
-                        break;
-                    case "GROUP":
-                        this.system.costPerLevel = 4;
-                        break;
-                    case "AGILITY":
-                        this.system.costPerLevel = 6;
-                        break;
-                    case "NONCOMBAT":
-                        this.system.costPerLevel = 10;
-                        break;
-                    case "SINGLEMOVEMENT":
-                        this.system.costPerLevel = 2;
-                        break;
-                    case "ALLMOVEMENT":
-                        this.system.costPerLevel = 3;
-                        break;
-                    case "SIMILAR":
-                        this.system.costPerLevel = 5;
-                        break;
-                    case "OVERALL":
-                        this.system.costPerLevel = 12;
-                        break;
-                    default:
-                        console.error(
-                            `Unknown 6e SKILL_LEVELS ${this.system.OPTION} for ${this.actor.name}/${this.name}`,
-                        );
-                        break;
-                }
-            }
-        } else if (this.system.XMLID === "STRIKING_APPEARANCE") {
-            switch (this.system.OPTION) {
-                case "ALL":
-                    this.system.costPerLevel = 3;
-                    break;
-                default:
-                    this.system.costPerLevel = 2;
-                    break;
-            }
-        } else if (this.system.XMLID === "Advanced Tech") {
-            if (this.system.OPTIONID === "NORMAL") {
-                this.system.costPerLevel = 15;
-            } else {
-                this.system.costPerLevel = 10;
-            }
-        } else if (this.system.XMLID === "DEADLYBLOW") {
-            switch (this.system.OPTIONID) {
-                case "VERYLIMITED":
-                    this.system.costPerLevel = 4;
-                    break;
-
-                case "LIMITED":
-                    this.system.costPerLevel = 7;
-                    break;
-
-                case "ANY":
-                    this.system.costPerLevel = 10;
-                    break;
-
-                default:
-                    console.error(
-                        `Unknown skill levels ${this.system.OPTIONID} for ${this.actor.name}/${this.name}`,
-                    );
-                    break;
-            }
-        }
-
         // BASECOST
         const newBaseValue = parseFloat(this.system.BASECOST || 0);
         if (this.system.baseCost != newBaseValue) {
@@ -1758,29 +1525,33 @@ export class HeroSystem6eItem extends Item {
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
-        let costPerLevel = parseFloat(
-            system.costPerLevel ||
-                configPowerInfo?.costPerLevel ||
-                configPowerInfo?.cost ||
-                (configPowerInfo?.type == "skill" ? 2 : 0) ||
-                baseCost ||
-                1,
-        );
+        // let costPerLevel = parseFloat(
+        //     system.costPerLevel ||
+        //         configPowerInfo?.costPerLevel ||
+        //         configPowerInfo?.cost ||
+        //         (configPowerInfo?.type == "skill" ? 2 : 0) ||
+        //         baseCost ||
+        //         1,
+        // );
 
-        // FLASH (target group cost 5 per level, non-targeting costs 3 per level)
-        if (system.XMLID === "FLASH") {
-            if (system.OPTIONID === "SIGHTGROUP") {
-                // The only targeting group
-                costPerLevel = 5;
+        // Default costPerLevel 1
+        let costPerLevel = 1;
+
+        // Skills typically cost 2CP for every +1
+        if (configPowerInfo?.type == "skill") {
+            costPerLevel = 2;
+        }
+
+        // Check if configPowerInfo has a more specific costPerLevel
+        if (configPowerInfo?.costPerLevel) {
+            if (typeof configPowerInfo.costPerLevel === "function") {
+                costPerLevel =
+                    parseFloat(configPowerInfo.costPerLevel(this)) || 0;
             } else {
-                costPerLevel = 3;
+                costPerLevel = parseFloat(configPowerInfo.costPerLevel) || 0;
             }
         }
-
-        // But configPowerInfo?.costPerLevel could actually be 0 (EXTRALIMBS)
-        if (configPowerInfo?.costPerLevel != undefined) {
-            costPerLevel = parseFloat(configPowerInfo?.costPerLevel);
-        }
+        this.system.costPerLevel = costPerLevel;
 
         // The number of levels for cost is based on the original power, not
         // not any additional modifications or adjustments.
