@@ -346,20 +346,24 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "limited range":
-                let range = this.system.basePointsPlusAdders * 10;
-                if (this.actor?.system?.is5e) {
-                    range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
+                {
+                    let range = this.system.basePointsPlusAdders * 10;
+                    if (this.actor?.system?.is5e) {
+                        range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
+                    }
+                    content += ` GM Determined Maximum Range (much less than ${range}${getSystemDisplayUnits(
+                        this.actor,
+                    )}).`;
                 }
-                content += ` GM Determined Maximum Range (much less than ${range}${getSystemDisplayUnits(
-                    this.actor,
-                )}).`;
                 break;
 
             case "range based on str":
-                const runningThrow = this.actor?.strDetails().strThrow;
-                content += ` Maximum Range (running throw based on STR) ${runningThrow}${getSystemDisplayUnits(
-                    this.actor,
-                )}.`;
+                {
+                    const runningThrow = this.actor?.strDetails().strThrow;
+                    content += ` Maximum Range (running throw based on STR) ${runningThrow}${getSystemDisplayUnits(
+                        this.actor,
+                    )}.`;
+                }
                 break;
 
             case "standard":
