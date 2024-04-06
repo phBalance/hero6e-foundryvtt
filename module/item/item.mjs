@@ -2492,15 +2492,13 @@ export class HeroSystem6eItem extends Item {
 
             default:
                 {
-                    if (
-                        configPowerInfo &&
-                        configPowerInfo.type?.includes("characteristic")
-                    ) {
+                    if (configPowerInfo?.type?.includes("characteristic")) {
                         system.description =
                             "+" + system.value + " " + system.ALIAS;
                         break;
                     }
 
+                    // Provide a basic description
                     const _desc =
                         system.OPTION_ALIAS ||
                         system.ALIAS ||
@@ -2509,6 +2507,8 @@ export class HeroSystem6eItem extends Item {
                     system.description =
                         (system.INPUT ? system.INPUT + " " : "") + _desc;
 
+                    // Provide dice if this is an attack
+                    // TODO: Look at behaviors
                     const value2 = getDiceFormulaFromItemDC(
                         this,
                         convertToDcFromItem(this).dc,
@@ -2519,6 +2519,16 @@ export class HeroSystem6eItem extends Item {
                                 system.class || ""
                             }`;
                         }
+                    }
+
+                    // Add a success roll, if there is one, for skills, talents, or perks
+                    if (
+                        configPowerInfo?.behaviors?.includes("success") &&
+                        configPowerInfo?.type?.filter((type) =>
+                            ["skill", "talent", "perk"].includes(type),
+                        ).length > 0
+                    ) {
+                        system.description += ` ${system.roll}`;
                     }
                 }
                 break;
