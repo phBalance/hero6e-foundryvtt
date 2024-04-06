@@ -15,7 +15,7 @@
     {{#each item.system.ADDER as |adder XMLID|}}
     <tr data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
         <td class="left">{{adder.ALIAS}}</td>
-        <td>{{#if adder.SELECTED}}{{adder.BASECOST}}{{/if}}</td>
+        <td>{{#if adder.SELECTED}}{{adder.baseCost}}{{/if}}</td>
         <td class="right">
             <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
                     class="fas fa-edit"></i></a>
@@ -28,7 +28,7 @@
         {{#each adder.ADDER as |adder XMLID|}}
         <tr  class="modifierAdder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
             <td class="left">{{adder.ALIAS}}</td>
-            <td>{{adder.BASECOST}}</td>
+            <td>{{adder.baseCost}}</td>
             <td class="right">
                 {{!-- <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
                         class="fas fa-edit"></i></a>
@@ -54,7 +54,7 @@
     {{#each item.system.MODIFIER as |mod id|}}
     <tr data-xmlid="{{mod.XMLID}}" data-modifier="{{mod.ID}}">
         <td class="left">{{mod.ALIAS}}</td>
-        <td>{{mod.BASECOST}}</td>
+        <td>{{mod.baseCost}}</td>
         <td class="right">
             {{#if @root.alphaTesting}}
             <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
@@ -69,7 +69,7 @@
     {{#each mod.ADDER as |adder id|}}
     <tr class="modifierAdder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
         <td class="left">{{adder.ALIAS}}</td>
-        <td>{{adder.BASECOST}}</td>
+        <td>{{adder.baseCost}}</td>
         <td class="right">
             {{!-- <a class="item-control modifier-edit" data-action="edit" title="Edit"><i
                     class="fas fa-edit"></i></a>

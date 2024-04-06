@@ -24,7 +24,7 @@ export class ItemModifierFormApplication extends FormApplication {
     }
 
     getData() {
-        console.log(this);
+        console.log(this.data.mod);
         const data = this.data;
         return data;
     }
