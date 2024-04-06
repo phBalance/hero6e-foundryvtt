@@ -178,7 +178,9 @@ function validatePowers() {
         (power) =>
             !(
                 power.type.includes("framework") ||
-                power.type.includes("compound")
+                power.type.includes("compound") ||
+                power.type.includes("adder") ||
+                power.type.includes("modifier")
             ) && !power.range,
     );
     if (powersWithoutRange.length > 0) {
@@ -291,7 +293,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STR",
             name: "Strength",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -299,6 +301,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             ignoreFor: ["base2", "computer", "ai"],
+            xml: `<STR XMLID="STR" ID="1712377060992" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {},
     );
@@ -307,7 +310,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEX",
             name: "Dexterity",
             base: 10,
-            cost: 2,
+            costPerLevel: 2,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -315,9 +318,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["base2"],
+            xml: `<DEX XMLID="DEX" ID="1712377264025" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 3,
+            costPerLevel: 3,
         },
     );
     addPower(
@@ -325,7 +329,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CON",
             name: "Constitution",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -333,9 +337,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            xml: `<CON XMLID="CON" ID="1712377266422" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -343,7 +348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INT",
             name: "Intelligence",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -351,6 +356,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["vehicle", "base2"],
+            xml: `<INT XMLID="INT" ID="1712377270415" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {},
     );
@@ -359,7 +365,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EGO",
             name: "Ego",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -367,9 +373,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["automaton", "vehicle", "base2", "computer"],
+            xml: `<EGO XMLID="EGO" ID="1712377272129" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -377,7 +384,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PRE",
             name: "Presence",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -385,6 +392,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            xml: `<PRE XMLID="PRE" ID="1712377273912" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+            <NOTES />`,
         },
         {},
     );
@@ -399,14 +408,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costEnd: false,
         ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"], // TODO: Remove the 6e here.
         base: 10,
-        cost: 1 / 2,
+        costPerLevel: 1 / 2,
+        xml: `<COM XMLID="COM" ID="1712377275507" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
     });
     addPower(
         {
             key: "OCV",
             name: "Offensive Combat Value",
             base: 3,
-            cost: 5,
+            costPerLevel: 5,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -414,9 +424,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["base2"],
+            xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 0,
+            costPerLevel: 0,
+            xml: undefined,
         },
     );
     addPower(
@@ -424,7 +436,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DCV",
             name: "Defensive Combat Value",
             base: 3,
-            cost: 5,
+            costPerLevel: 5,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -432,9 +444,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["base2"],
+            xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 0,
+            costPerLevel: 0,
+            xml: undefined,
         },
     );
     addPower(
@@ -442,7 +456,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "OMCV",
             name: "Offensive Mental Combat Value",
             base: 3,
-            cost: 3,
+            costPerLevel: 3,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -450,9 +464,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["automaton", "vehicle", "base2"],
+            xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 0,
+            costPerLevel: 0,
+            xml: undefined,
         },
     );
     addPower(
@@ -460,7 +476,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DMCV",
             name: "Defensive Mental Combat Value",
             base: 3,
-            cost: 3,
+            costPerLevel: 3,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -468,9 +484,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["automaton", "vehicle", "base2"],
+            xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 0,
+            costPerLevel: 0,
+            xml: undefined,
         },
     );
     addPower(
@@ -478,7 +496,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SPD",
             name: "Speed",
             base: 2,
-            cost: 10,
+            costPerLevel: 10,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -486,6 +504,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["base2"],
+            xml: '<SPD XMLID="SPD" ID="1712377280539" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">',
         },
         {
             base: 0,
@@ -496,7 +515,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PD",
             name: "Physical Defense",
             base: 2,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic", "defense"],
             behaviors: [],
             duration: "persistent",
@@ -504,10 +523,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["computer", "ai"],
+            xml: `<PD XMLID="PD" ID="1712377277205" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 0,
-            cost: 1,
+            costPerLevel: 1,
         },
     );
     addPower(
@@ -515,7 +535,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ED",
             name: "Energy Defense",
             base: 2,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic", "defense"],
             behaviors: [],
             duration: "persistent",
@@ -523,10 +543,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["computer", "ai"],
+            xml: `<ED XMLID="ED" ID="1712377278856" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 0,
-            cost: 1,
+            costPerLevel: 1,
         },
     );
     addPower(
@@ -534,7 +555,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "REC",
             name: "Recovery",
             base: 4,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -542,10 +563,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            xml: `<REC XMLID="REC" ID="1712377282168" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 0,
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -553,7 +575,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "END",
             name: "Endurance",
             base: 20,
-            cost: 1 / 5,
+            costPerLevel: 1 / 5,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -561,10 +583,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            xml: `<END XMLID="END" ID="1712377283848" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 0,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
         },
     );
     addPower(
@@ -572,7 +595,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BODY",
             name: "Body",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -580,9 +603,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["base2", "computer", "ai"],
+            xml: `<BODY XMLID="BODY" ID="1712377268646" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -590,7 +614,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STUN",
             name: "Stun",
             base: 20,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -598,10 +622,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: false,
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
+            xml: `<STUN XMLID="STUN" ID="1712377285547" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 0,
-            cost: 1,
+            costPerLevel: 1,
         },
     );
 
@@ -1571,20 +1596,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LEAPING",
             name: "Leaping",
             base: 4,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             range: "self",
             costEnd: true,
-            costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 2,
-            cost: 1,
             costPerLevel: 1,
         },
     );
@@ -1593,7 +1616,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RUNNING",
             base: 12,
-            cost: 1,
+            costPerLevel: 1,
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
@@ -1605,7 +1628,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 6,
-            cost: 2,
+            costPerLevel: 2,
         },
     );
 
@@ -1613,20 +1636,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SWIMMING",
             base: 4,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             range: "self",
             costEnd: true,
-            costPerLevel: 1 / 2,
             ignoreFor: ["base2", "computer", "ai"],
             xml: `<SWIMMING XMLID="SWIMMING" ID="1709334019357" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="77" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 2,
-            cost: 1,
             costPerLevel: 1,
         },
     );
@@ -1864,9 +1885,67 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             costEnd: false,
             range: "self",
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "SINGLE":
+                        return 2;
+                    case "TIGHT":
+                        return 3;
+                    case "BROAD":
+                        return 5;
+                    case "HTH":
+                        return 8;
+                    case "RANGED":
+                        return 8;
+                    case "ALL":
+                        return 10;
+                    default:
+                        console.error(
+                            `Unknown 6e combat levels ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
             xml: `<SKILL XMLID="COMBAT_LEVELS" ID="1709161485197" BASECOST="0.0" LEVELS="1" ALIAS="Combat Skill Levels" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">`,
         },
-        {},
+        {
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "SINGLESINGLE":
+                        return 1;
+                    case "SINGLESTRIKE":
+                    case "SINGLE":
+                        return 2;
+                    case "MAGIC":
+                    case "MARTIAL":
+                    case "STRIKE":
+                    case "TIGHT":
+                        return 3;
+                    case "BROAD":
+                    case "DECV":
+                    case "HTHDCV":
+                    case "TWODCV":
+                    case "TWOOCV":
+                        return 4;
+                    case "DCV":
+                    case "HTH":
+                    case "MENTAL":
+                    case "RANGED":
+                        return 5;
+                    case "HTHMENTAL":
+                    case "HTHRANGED":
+                    case "MENTALRANGED":
+                        return 6;
+                    case "ALL":
+                        return 8;
+                    default:
+                        console.error(
+                            `Unknown 5e combat level type ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
+        },
     );
     addPower(
         {
@@ -2255,6 +2334,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "SINGLE":
+                        return 1;
+                    case "TIGHT":
+                        return 3;
+                    case "BROAD":
+                        return 6;
+                    default:
+                        console.error(
+                            `Unknown costPerLevel ${item.system.XMLID} levels ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
             xml: `<SKILL XMLID="MENTAL_COMBAT_LEVELS" ID="1709161526214" BASECOST="0.0" LEVELS="1" ALIAS="Mental Combat Skill Levels" POSITION="39" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with a single Mental Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">`,
         },
         undefined,
@@ -2373,9 +2467,44 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "SINGLE":
+                        return 1;
+                    case "THREE":
+                        return 2;
+                    case "SINGLEDCV":
+                        return 2;
+                    case "GROUPDCV":
+                        return 3;
+                    case "ALL":
+                        return 3;
+                    default:
+                        console.error(
+                            `Unknown 6e ${item.system.XMLID} levels ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
             xml: `<SKILL XMLID="PENALTY_SKILL_LEVELS" ID="1709161534055" BASECOST="0.0" LEVELS="1" ALIAS="Penalty Skill Levels" POSITION="44" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="to offset a specific negative OCV modifier with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">`,
         },
-        {},
+        {
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "SINGLE":
+                        return 2;
+                    case "TIGHT":
+                        return 2;
+                    case "ALL":
+                        return 3;
+                    default:
+                        console.error(
+                            `Unknown 5e ${item.system.XMLID} levels ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
+        },
     );
     addPower(
         {
@@ -2544,9 +2673,58 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "CHARACTERISTIC":
+                        return 2;
+                    case "RELATED":
+                        return 3;
+                    case "GROUP":
+                        return 4;
+                    case "AGILITY":
+                        return 6;
+                    case "NONCOMBAT":
+                        return 10;
+                    case "SINGLEMOVEMENT":
+                        return 2;
+                    case "ALLMOVEMENT":
+                        return 3;
+                    case "SIMILAR":
+                        return 5;
+                    case "OVERALL":
+                        return 12;
+                    default:
+                        console.error(
+                            `Unknown 6e SKILL_LEVELS ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
             xml: `<SKILL XMLID="SKILL_LEVELS" ID="1709161548219" BASECOST="0.0" LEVELS="1" ALIAS="Skill Levels" POSITION="52" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CHARACTERISTIC" OPTIONID="CHARACTERISTIC" OPTION_ALIAS="with single Skill or Characteristic Roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">`,
         },
-        {},
+        {
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "CHARACTERISTIC":
+                    case "SINGLEMOVEMENT":
+                        return 2;
+                    case "ALLMOVEMENT":
+                    case "RELATED":
+                        return 3;
+                    case "SIMILAR":
+                        return 5;
+                    case "NONCOMBAT":
+                        return 8;
+                    case "OVERALL":
+                        return 10;
+                    default:
+                        console.error(
+                            `Unknown 5e SKILL_LEVELS ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
+        },
     );
     addPower(
         {
@@ -2897,6 +3075,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: "self",
         costEnd: false,
+        costPerLevel: function (item) {
+            if (item.system.OPTIONID === "NORMAL") {
+                return 15;
+            } else {
+                return 10;
+            }
+        },
         xml: `<PERK XMLID="Advanced Tech" ID="1709164896663" BASECOST="0.0" LEVELS="1" ALIAS="Advanced Tech" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="15 pts / Level" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
     });
     addPower(
@@ -3281,6 +3466,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "VERYLIMITED":
+                        return 4;
+                    case "LIMITED":
+                        return 7;
+                    case "ANY":
+                        return 10;
+                    default:
+                        console.error(
+                            `Unknown skill levels ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
+            },
             xml: `<TALENT XMLID="DEADLYBLOW" ID="1709159979031" BASECOST="0.0" LEVELS="2" ALIAS="Deadly Blow:  +2d6" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited circumstances]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
         },
         {},
@@ -3631,7 +3831,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            costPerLevel: 3,
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "ALL":
+                        return 3;
+                    default:
+                        return 2;
+                }
+            },
             xml: `<TALENT XMLID="STRIKING_APPEARANCE" ID="1709160006516" BASECOST="0.0" LEVELS="1" ALIAS="Striking Appearance" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="vs. all characters" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">`,
         },
         undefined,
@@ -4102,6 +4309,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "Target’s DCV",
             range: "standard",
             costEnd: true,
+            costPerLevel: function (item) {
+                console.log(this);
+                // FLASH (target group cost 5 per level, non-targeting costs 3 per level)
+                if (item?.system?.OPTIONID === "SIGHTGROUP") {
+                    // The only targeting group
+                    return 5;
+                } else {
+                    return 3;
+                }
+            },
+            test: "test",
             xml: `<POWER XMLID="FLASH" ID="1711933970815" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="44" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">`,
         },
         {},
@@ -5463,6 +5681,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            costPerLevel: 0.5,
+            dc: true,
+            cost: function () {
+                return parseInt(this.LEVEL) * this.costPerLevel;
+            },
             xml: `<MODIFIER XMLID="PENETRATING" ID="1712344588687" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
         {},

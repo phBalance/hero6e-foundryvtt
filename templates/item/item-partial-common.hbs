@@ -50,6 +50,13 @@
 </div>
 {{/if}}
 
+{{#if (isdefined system.TYPE)}}
+<div class="form-group">
+    <label>TYPE</label>
+    <input type="text" name="system.TYPE" value="{{system.TYPE}}" data-dtype="text" />
+</div>
+{{/if}}
+
 {{#if (isdefined system.OPTION_ALIAS)}}
 <div class="form-group">
     <label>OPTION_ALIAS</label>
@@ -64,49 +71,6 @@
     <input type="checkbox" name="system.USEWEAPON" {{checked system.USEWEAPON}} data-dtype="Boolean"/>
 </div>
 {{/if}}
-{{!-- {{#if (isdefined system.CATEGORY)}}
-<div class="form-group">
-    <label>CATEGORY</label>
-    <input type="text" name="system.CATEGORY" value="{{system.CATEGORY}}" data-dtype="text" />
-</div>
-{{/if}}
-{{#if (isdefined system.OCV)}}
-<div class="form-group">
-    <label>OCV</label>
-    <input type="text" name="system.OCV" value="{{system.OCV}}" data-dtype="text" />
-</div>
-{{/if}}
-{{#if (isdefined system.DCV)}}
-<div class="form-group">
-    <label>DCV</label>
-    <input type="text" name="system.DCV" value="{{system.DCV}}" data-dtype="text" />
-</div>
-{{/if}}
-{{#if (isdefined system.DC)}}
-<div class="form-group">
-    <label>DC</label>
-    <input type="text" name="system.DC" value="{{system.DC}}" data-dtype="text" />
-</div>
-{{/if}}
-{{#if (isdefined system.PHASE)}}
-<div class="form-group">
-    <label>PHASE</label>
-    <input type="text" name="system.PHASE" value="{{system.PHASE}}" data-dtype="text" />
-</div>
-{{/if}}
-{{#if (isdefined system.EFFECT)}}
-<div class="form-group">
-    <label>EFFECT</label>
-    <input type="text" name="system.EFFECT" value="{{system.EFFECT}}" data-dtype="text" />
-</div>
-{{/if}}
-{{#if (isdefined system.WEAPONEFFECT)}}
-<div class="form-group">
-    <label>WEAPONEFFECT</label>
-    <input type="text" name="system.WEAPONEFFECT" value="{{system.WEAPONEFFECT}}" data-dtype="text" />
-</div>
-{{/if}} --}}
-
 
 {{!-- FORCEFIELD --}}
 {{#if (isdefined system.PDLEVELS)}}

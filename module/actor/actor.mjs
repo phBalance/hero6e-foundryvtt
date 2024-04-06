@@ -1074,7 +1074,7 @@ export class HeroSystem6eActor extends Actor {
 
             const base = this.getCharacteristicBase(key);
             const levels = core - base;
-            let cost = Math.round(levels * (powerInfo.cost || 0));
+            let cost = Math.round(levels * (powerInfo.costPerLevel || 0));
 
             // 5e hack for fractional speed
             if (key === "spd" && cost < 0) {

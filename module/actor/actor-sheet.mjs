@@ -869,7 +869,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             }
         }
         data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints);
-        let topActivePoints = data.activePointSummary[0].activePoints;
+        let topActivePoints = data.activePointSummary?.[0]?.activePoints;
         data.activePointSummary = data.activePointSummary.filter(
             (o) => o.activePoints >= topActivePoints * 0.5,
         );
