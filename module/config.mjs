@@ -289,11 +289,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     xml.children[0].tagName.toLowerCase(),
                 ];
             } else {
-                debugger;
+                //debugger;
             }
         }
         if (!powerDescription6e.key) {
-            debugger;
+            //debugger;
             return;
         }
         HERO.powers6e.push(foundry.utils.deepClone(powerDescription6e));
@@ -344,11 +344,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     xml.children[0].tagName.toLowerCase(),
                 ];
             } else {
-                debugger;
+                //debugger;
             }
         }
         if (!powerDescription5e.key) {
-            debugger;
+            //debugger;
             return;
         }
 
