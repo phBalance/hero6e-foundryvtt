@@ -225,13 +225,15 @@ HERO.powers5e.validate = validatePowers;
  * @param {string} base - Base cost in character points
  * @param {string} cost - Cost in character points per additional level
  * @param {Array<string>} type - A list of types associated with this power
- * @param {Array<"success">} behaviors - A list of the behavior types this power exhibits in the code
+ * @param {Array<"non-hd" | "optional-maneuver" | "success"| "dice" | "attack" | "activatable" | "adder" | "modifier">} behaviors - A list of the behavior types this power exhibits in the code
  *                                       "non-hd" - this is not an XMLID that comes from Hero Designer
  *                                       "optional-maneuver" - this is an optional combat maneuver
  *                                       "success" - can roll some kind of success roll for this power
  *                                       "dice" - a damage/effect dice roll is associated with this power
  *                                       "attack" - a to-hit dice roll is associated with this power
  *                                       "activatable" - this power can be turned on/off/activated/deactivated
+ *                                       "adder" - this power is actually a power adder
+ *                                       "modifier" - this power is actually a power modifier (aka advantage)
  *
  * @param {"constant"|"instant"|"persistent"} duration - The lower case duration of the power
  * @param {"standard"|"self"|"no range"|"los"|"special"|"limited range"|"range based on str"} range - The range of the power
@@ -5622,6 +5624,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addAddersToPowerList() {
     addPower(
         {
+            key: "PLUSONEHALFDIE",
+            type: [],
+            behaviors: ["adder"],
+            target: "self only",
+            range: "self",
+
             xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">`,
         },
         {},
@@ -5629,6 +5637,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "PLUSONEPIP",
+            type: [],
+            behaviors: ["adder"],
+            target: "self only",
+            range: "self",
+
             xml: `<ADDER XMLID="PLUSONEPIP" ID="1712342367072" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">`,
         },
         {},
@@ -5636,15 +5650,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "MINUSONEPIP",
+            type: [],
+            behaviors: ["adder"],
+            target: "self only",
+            range: "self",
+
             xml: `<ADDER XMLID="MINUSONEPIP" ID="1712344286624" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">`,
         },
         {},
     );
 })();
 
-(function addModifieresToPowerList() {
+(function addModifiersToPowerList() {
     addPower(
         {
+            key: "CHARGES",
+            type: [],
+            behaviors: ["modifier"],
+            target: "self only",
+            range: "self",
+
             xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
             get baseCost() {
                 return null;
@@ -5660,6 +5686,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "HARDENED",
+            type: [],
+            behaviors: ["modifier"],
+            target: "self only",
+            range: "self",
+
             xml: `<MODIFIER XMLID="HARDENED" ID="1712344562459" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
         {},
@@ -5667,6 +5699,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "IMPENETRABLE",
+            type: [],
+            behaviors: ["modifier"],
+            target: "self only",
+            range: "self",
+
             xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
         undefined,
@@ -5674,6 +5712,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "OIHID",
+            type: [],
+            behaviors: ["modifier"],
+            target: "self only",
+            range: "self",
+
             xml: `<MODIFIER XMLID="OIHID" ID="1712092697365" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Heroic Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
         {},
@@ -5681,6 +5725,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "PENETRATING",
+            type: [],
+            behaviors: ["modifier"],
+            target: "self only",
+            range: "self",
+
             costPerLevel: 0.5,
             dc: true,
             cost: function () {
