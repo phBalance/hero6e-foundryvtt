@@ -327,20 +327,46 @@ export class HeroSystem6eItem extends Item {
         content += `<b>${this.name}</b>`;
         let _desc = this.system.description;
 
-        content += ` ${_desc}`;
-        //}
-
-        content += ".";
+        content += ` ${_desc}.`;
 
         // Powers have one of four Ranges: Self; No Range; Standard
         // Range; and Line of Sight (LOS).
         const configPowerInfo = getPowerInfo({ item: this });
-        switch (configPowerInfo?.range?.toLowerCase()) {
+        switch (this.system.range) {
+            case "self": {
+                if (!configPowerInfo.type.includes("skill")) {
+                    content += " Self.";
+                }
+
+                break;
+            }
+
+            case "no range":
+                content += " No Range.";
+                break;
+
+            case "limited range":
+                let range = this.system.basePointsPlusAdders * 10;
+                if (this.actor?.system?.is5e) {
+                    range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
+                }
+                content += ` GM Determined Maximum Range (much less than ${range}${getSystemDisplayUnits(
+                    this.actor,
+                )}).`;
+                break;
+
+            case "range based on str":
+                const runningThrow = this.actor?.strDetails().strThrow;
+                content += ` Maximum Range (running throw based on STR) ${runningThrow}${getSystemDisplayUnits(
+                    this.actor,
+                )}.`;
+                break;
+
             case "standard":
                 {
                     let range = this.system.basePointsPlusAdders * 10;
                     if (this.actor?.system?.is5e) {
-                        range = Math.floor(range / 2);
+                        range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
                     }
                     content += ` Maximum Range ${range}${getSystemDisplayUnits(
                         this.actor,
@@ -349,23 +375,11 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "los":
-                content += ` Line of Sight.`;
+                content += " Line of Sight.";
                 break;
-
-            case "no range":
-                content += ` No Range.`;
-                break;
-
-            case "self": {
-                if (!configPowerInfo.type.includes("skill")) {
-                    content += ` Self.`;
-                }
-
-                break;
-            }
 
             default:
-                console.warn("Unhandled range", configPowerInfo);
+                console.error("Unhandled range", configPowerInfo);
                 if (configPowerInfo?.range?.toLowerCase()) {
                     content += ` ${configPowerInfo?.range?.toLowerCase()}`;
                 }
@@ -375,6 +389,7 @@ export class HeroSystem6eItem extends Item {
         if (this.system.end) {
             content += ` Estimated End: ${this.system.end}.`;
         }
+
         if (this.system.realCost && !isNaN(this.system.realCost)) {
             content += ` Total Cost: ${this.system.realCost} CP.`;
         }
@@ -1020,16 +1035,21 @@ export class HeroSystem6eItem extends Item {
     buildRangeParameters() {
         const originalRange = this.system.range;
 
-        // Range Modifiers "self", "no range", "standard", or "los" based on power
-        const ranged = this.findModsByXmlid("RANGED");
-        const noRange = this.findModsByXmlid("NORANGE");
-        const limitedRange = this.findModsByXmlid("LIMITEDRANGE");
-        const rangeBasedOnStrength = this.findModsByXmlid("RANGEBASEDONSTR");
-        const los = this.findModsByXmlid("LOS");
-        const normalLimitedRange = this.findModsByXmlid("NORMALRANGE");
-        const noRangeModifiers = this.findModsByXmlid("NORANGEMODIFIER");
-        const usableOnOthers = this.findModsByXmlid("UOO");
-        const boecv = this.findModsByXmlid("BOECV");
+        // Range Modifiers "self", "no range", "standard", or "los" based on base power.
+        // It is the modified up or down but the only other types that should be added are:
+        // "range based on str" or "limited range"
+        const ranged = !!this.findModsByXmlid("RANGED");
+        const noRange = !!this.findModsByXmlid("NORANGE");
+        const limitedRange =
+            this.findModsByXmlid("RANGED")?.OPTIONID === "LIMITEDRANGE" || // Advantage form
+            !!this.findModsByXmlid("LIMITEDRANGE"); // Limitation form
+        const rangeBasedOnStrength =
+            this.findModsByXmlid("RANGED")?.OPTIONID === "RANGEBASEDONSTR" || // Advantage form
+            !!this.findModsByXmlid("RANGEBASEDONSTR"); // Limitation form
+        const los = !!this.findModsByXmlid("LOS");
+        const normalRange = !!this.findModsByXmlid("NORMALRANGE");
+        const usableOnOthers = !!this.findModsByXmlid("UOO");
+        const boecv = !!this.findModsByXmlid("BOECV");
 
         // Based on EGO combat value comes with line of sight
         if (boecv) {
@@ -1061,17 +1081,17 @@ export class HeroSystem6eItem extends Item {
                 this.system.range = "limited range";
             } else if (rangeBasedOnStrength) {
                 this.system.range = "range based on str";
-            } else if (noRangeModifiers) {
-                this.system.range = "no range modifiers";
             }
         }
 
         // Line of sight can be bought down
         if (this.system.range === "los") {
-            if (normalLimitedRange) {
-                this.system.range = "limited normal range";
+            if (normalRange) {
+                this.system.range = "standard";
             } else if (rangeBasedOnStrength) {
                 this.system.range = "range based on str";
+            } else if (limitedRange) {
+                this.system.range = "limited range";
             } else if (noRange) {
                 this.system.range = "no range";
             }

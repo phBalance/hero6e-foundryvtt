@@ -251,6 +251,17 @@ export async function migrateWorld() {
         async (actor) => await migrate_actor_items_to_3_0_63(actor),
     );
 
+    // if lastMigration < 3.0.66
+    // move to corrected new item.system.range values
+    await migrateToVersion(
+        "3.0.66",
+        lastMigration,
+        getAllActorsInGame(),
+        "actors' items' range",
+        async (actor) => await migrate_actor_items_to_3_0_66(actor),
+    );
+
+    // FOR ALL VERSION MIGRATIONS
     // Reparse all items (description, cost, etc) on every migration
     await migrateToVersion(
         game.system.version,
@@ -297,6 +308,85 @@ async function migrateActorCostDescription(actor) {
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
         }
+    }
+}
+
+async function migrate_actor_items_to_3_0_66(actor) {
+    for (const item of actor.items) {
+        const configPowerInfo = migrationOnly_Pre_XXX_getPowerInfo({
+            item: item,
+        });
+        if (configPowerInfo) {
+            item.system.range = configPowerInfo.range;
+        } else {
+            continue;
+        }
+
+        // Range Modifiers "self", "no range", "standard", or "los" based on base power.
+        // It is the modified up or down but the only other types that should be added are:
+        // "range based on str" or "limited range"
+        const ranged = !!item.findModsByXmlid("RANGED");
+        const noRange = !!item.findModsByXmlid("NORANGE");
+        const limitedRange =
+            item.findModsByXmlid("RANGED")?.OPTIONID === "LIMITEDRANGE" || // Advantage form
+            !!item.findModsByXmlid("LIMITEDRANGE"); // Limitation form
+        const rangeBasedOnStrength =
+            item.findModsByXmlid("RANGED")?.OPTIONID === "RANGEBASEDONSTR" || // Advantage form
+            !!item.findModsByXmlid("RANGEBASEDONSTR"); // Limitation form
+        const los = !!item.findModsByXmlid("LOS");
+        const normalRange = !!item.findModsByXmlid("NORMALRANGE");
+        const usableOnOthers = !!item.findModsByXmlid("UOO");
+        const boecv = !!item.findModsByXmlid("BOECV");
+
+        // Based on EGO combat value comes with line of sight
+        if (boecv) {
+            item.system.range = "los";
+        }
+
+        // Self only powers cannot be bought to have range unless they become usable on others at which point
+        // they gain no range.
+        if (item.system.range === "self") {
+            if (usableOnOthers) {
+                item.system.range = "no range";
+            }
+        }
+
+        // No range can be bought to have range.
+        if (item.system.range === "no range") {
+            if (ranged) {
+                item.system.range = "standard";
+            }
+        }
+
+        // Standard range can be bought up or bought down.
+        if (item.system.range === "standard") {
+            if (noRange) {
+                item.system.range = "no range";
+            } else if (los) {
+                item.system.range = "los";
+            } else if (limitedRange) {
+                item.system.range = "limited range";
+            } else if (rangeBasedOnStrength) {
+                item.system.range = "range based on str";
+            }
+        }
+
+        // Line of sight can be bought down
+        if (item.system.range === "los") {
+            if (normalRange) {
+                item.system.range = "standard";
+            } else if (rangeBasedOnStrength) {
+                item.system.range = "range based on str";
+            } else if (limitedRange) {
+                item.system.range = "limited range";
+            } else if (noRange) {
+                item.system.range = "no range";
+            }
+        }
+
+        await item.update({
+            "system.range": item.system.range,
+        });
     }
 }
 
