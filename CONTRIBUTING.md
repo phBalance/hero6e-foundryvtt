@@ -27,19 +27,41 @@ In essence, you create changes in your fork and then generate a pull request to 
 
 ## How to Contribute Source Changes
 
-### Downloading
+All later steps assume you have installed the software listed above.
 
-You can download the GitHub repository from `https://github.com/dmdorman/hero6e-foundryvtt` as mentioned in the [README](./README.md). The source code is made up of JavaScript, Sass, and Handlebars.
+### Setting up FoundryVTT
+
+There are lots of resources to help online. [Here's a starter resource focusing on the configuration and command line](https://foundryvtt.com/article/configuration/).
+
+### Running FoundryVTT
+
+If you plan to use both the release version and the development version of the system, then you'll want to clone into a directory that is separate from (i.e. not within) your FoundryVTT install. This is suggested approach because FoundryVTT requires that all system names are unique. You should clone into the `Data/systems` directory after you have configured your FoundryVTT and run it with the `dataPath` option as suggested below.
+
+If you don't plan on running the release version you can clone into the `Data/systems` directory of your install. You can always move it later on if you change your mind and decide that you'd like to be able to run the released versions of the system.
+
+You can run FoundryVTT with:
+
+```bash
+node resources/app/main.js --dataPath=<the path to the data directory or the development data directory you want to use>
+```
+
+### Downloading/Cloning for Development
+
+You can clone the GitHub repository from `https://github.com/dmdorman/hero6e-foundryvtt` as mentioned in the [README](./README.md). The source code is made up of JavaScript, Sass, and Handlebars/HTML. You'll want to put it into a directory that is appropriate for how you're going to develop that you probably decided in an above step.
+
+```bash
+git clone https://github.com/dmdorman/hero6e-foundryvtt <your FoundryVTT data directory as above>/Data/systems/hero6efoundryvttv2
+```
 
 ### Setup for Development
 
-Install the npm packages used for building the project:
+Open a command shell, navigate to your cloned hero6efoundryvttv2 repository, and install the npm packages used for building the project:
 
 ```bash
 npm ci
 ```
 
-Setup your local git repository to use the `.git-blame-ignore-revs` file so that you can ignore specific changes which made large non functional modifications to the source when using `git blame`. As documented in the `.git-blame-ignore-revs` file you want to run:
+Setup your local git repository to use the `.git-blame-ignore-revs` file so that you can ignore specific changes which made large non functional modifications to the source when using `git blame`. As documented in the `.git-blame-ignore-revs` file, you want to run:
 
 ```bash
 git config blame.ignoreRevsFile .git-blame-ignore-revs
@@ -55,9 +77,11 @@ npm run build
 
 This will automatically leave `gulp` in watch mode which means that any of your changes will automatically rebuilt.
 
+One this step successful executes, you should be able to run worlds using this system.
+
 ### Testing
 
-This package can be tested using the [Quench](https://foundryvtt.com/packages/quench) Foundry module. Once added, make sure it's enabled and you should get a "Quench" button at the bottom of your expanded side bar. Push the button and you can choose what tests to run but ultimately all should pass.
+This package can be tested using the [Quench](https://foundryvtt.com/packages/quench) FoundryVTT module. Once added, make sure it's enabled and you should get a "Quench" button at the bottom of your expanded side bar. Push the button and you can choose what tests to run but ultimately all should pass.
 
 You should be able to find the appropriate labeled tests in the `module/testing` directory. As you add new functionality or make bug fixes, you should add corresponding tests.
 
