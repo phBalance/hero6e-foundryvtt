@@ -2118,7 +2118,7 @@ export class HeroSystem6eItem extends Item {
                 ].core;
             const _cost =
                 getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor })
-                    .cost || 1;
+                    .costPerLevel || 1;
             const _baseCost = _base * _cost;
             const _discount =
                 _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations));

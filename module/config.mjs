@@ -178,7 +178,9 @@ function validatePowers() {
         (power) =>
             !(
                 power.type.includes("framework") ||
-                power.type.includes("compound")
+                power.type.includes("compound") ||
+                power.type.includes("adder") ||
+                power.type.includes("modifier")
             ) && !power.range,
     );
     if (powersWithoutRange.length > 0) {
@@ -291,7 +293,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STR",
             name: "Strength",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -307,7 +309,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DEX",
             name: "Dexterity",
             base: 10,
-            cost: 2,
+            costPerLevel: 2,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -317,7 +319,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["base2"],
         },
         {
-            cost: 3,
+            costPerLevel: 3,
         },
     );
     addPower(
@@ -325,7 +327,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "CON",
             name: "Constitution",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -335,7 +337,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["vehicle", "base2", "computer", "ai"],
         },
         {
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -343,7 +345,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "INT",
             name: "Intelligence",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -359,7 +361,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "EGO",
             name: "Ego",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -369,7 +371,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["automaton", "vehicle", "base2", "computer"],
         },
         {
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -377,7 +379,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PRE",
             name: "Presence",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: ["success"],
             duration: "persistent",
@@ -399,14 +401,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costEnd: false,
         ignoreFor: ["vehicle", "base2", "computer", "ai", "6e"], // TODO: Remove the 6e here.
         base: 10,
-        cost: 1 / 2,
+        costPerLevel: 1 / 2,
     });
     addPower(
         {
             key: "OCV",
             name: "Offensive Combat Value",
             base: 3,
-            cost: 5,
+            costPerLevel: 5,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -416,7 +418,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["base2"],
         },
         {
-            cost: 0,
+            costPerLevel: 0,
         },
     );
     addPower(
@@ -424,7 +426,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DCV",
             name: "Defensive Combat Value",
             base: 3,
-            cost: 5,
+            costPerLevel: 5,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -434,7 +436,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["base2"],
         },
         {
-            cost: 0,
+            costPerLevel: 0,
         },
     );
     addPower(
@@ -442,7 +444,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "OMCV",
             name: "Offensive Mental Combat Value",
             base: 3,
-            cost: 3,
+            costPerLevel: 3,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -452,7 +454,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["automaton", "vehicle", "base2"],
         },
         {
-            cost: 0,
+            costPerLevel: 0,
         },
     );
     addPower(
@@ -460,7 +462,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DMCV",
             name: "Defensive Mental Combat Value",
             base: 3,
-            cost: 3,
+            costPerLevel: 3,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -470,7 +472,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["automaton", "vehicle", "base2"],
         },
         {
-            cost: 0,
+            costPerLevel: 0,
         },
     );
     addPower(
@@ -478,7 +480,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "SPD",
             name: "Speed",
             base: 2,
-            cost: 10,
+            costPerLevel: 10,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -496,7 +498,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PD",
             name: "Physical Defense",
             base: 2,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic", "defense"],
             behaviors: [],
             duration: "persistent",
@@ -507,7 +509,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 0,
-            cost: 1,
+            costPerLevel: 1,
         },
     );
     addPower(
@@ -515,7 +517,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ED",
             name: "Energy Defense",
             base: 2,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic", "defense"],
             behaviors: [],
             duration: "persistent",
@@ -526,7 +528,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 0,
-            cost: 1,
+            costPerLevel: 1,
         },
     );
     addPower(
@@ -534,7 +536,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "REC",
             name: "Recovery",
             base: 4,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -545,7 +547,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 0,
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -553,7 +555,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "END",
             name: "Endurance",
             base: 20,
-            cost: 1 / 5,
+            costPerLevel: 1 / 5,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -564,7 +566,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 0,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
         },
     );
     addPower(
@@ -572,7 +574,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "BODY",
             name: "Body",
             base: 10,
-            cost: 1,
+            costPerLevel: 1,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -582,7 +584,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreFor: ["base2", "computer", "ai"],
         },
         {
-            cost: 2,
+            costPerLevel: 2,
         },
     );
     addPower(
@@ -590,7 +592,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "STUN",
             name: "Stun",
             base: 20,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
             type: ["characteristic"],
             behaviors: [],
             duration: "persistent",
@@ -601,7 +603,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 0,
-            cost: 1,
+            costPerLevel: 1,
         },
     );
 
@@ -1571,20 +1573,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "LEAPING",
             name: "Leaping",
             base: 4,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             range: "self",
             costEnd: true,
-            costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 2,
-            cost: 1,
             costPerLevel: 1,
         },
     );
@@ -1593,7 +1593,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "RUNNING",
             base: 12,
-            cost: 1,
+            costPerLevel: 1,
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
@@ -1605,7 +1605,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 6,
-            cost: 2,
+            costPerLevel: 2,
         },
     );
 
@@ -1613,20 +1613,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "SWIMMING",
             base: 4,
-            cost: 1 / 2,
+            costPerLevel: 1 / 2,
             type: ["movement"],
             behaviors: ["activatable"],
             duration: "constant",
             target: "self only",
             range: "self",
             costEnd: true,
-            costPerLevel: 1 / 2,
             ignoreFor: ["base2", "computer", "ai"],
             xml: `<SWIMMING XMLID="SWIMMING" ID="1709334019357" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="77" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">`,
         },
         {
             base: 2,
-            cost: 1,
             costPerLevel: 1,
         },
     );
@@ -5463,6 +5461,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            costPerLevel: 0.5,
+            dc: true,
+            cost: function () {
+                return parseInt(this.LEVEL) * this.costPerLevel;
+            },
             xml: `<MODIFIER XMLID="PENETRATING" ID="1712344588687" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">`,
         },
         {},

@@ -488,34 +488,6 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             mod: this.item.findModById(id, xmlid),
         };
         await new ItemModifierFormApplication(templateData).render(true);
-
-        // const template =
-        //     "systems/hero6efoundryvttv2/templates/item/item-" +
-        //     (adderId ? "adder" : "modifier") +
-        //     ".hbs";
-        // console.log(template);
-        // const templateData = {
-        //     item: this.item,
-        //     mod: this.item.findModById(id, xmlid),
-        // };
-        // const rendered_html = await renderTemplate(template, templateData);
-
-        // let d = new Dialog({
-        //     title: `Edit ${xmlid}`,
-        //     content: rendered_html,
-        //     buttons: {
-        //         // toggle: {
-        //         //     icon: '<i class="fas fa-check"></i>',
-        //         //     label: "Okay",
-        //         //     callback: () => console.log("Okay")
-        //         // },
-        //     },
-        //     //default: "toggle",
-        //     close: (html) => {
-        //         console.log(html);
-        //     },
-        // });
-        // d.render(true);
     }
 
     async _onModifierDelete(event) {
