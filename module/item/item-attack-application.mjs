@@ -169,7 +169,9 @@ export class ItemAttackFormApplication extends FormApplication {
 
         this.data.ocvMod = formData.ocvMod;
         this.data.dcvMod = formData.dcvMod;
+
         this.data.effectiveStr = formData.effectiveStr;
+
         this.data.boostableCharges = Math.max(
             0,
             Math.min(
@@ -177,6 +179,8 @@ export class ItemAttackFormApplication extends FormApplication {
                 this.data.item.charges?.value - 1,
             ),
         );
+
+        this.data.velocity = parseInt(formData.velocity || 0);
 
         // Show any changes
         this.render();
