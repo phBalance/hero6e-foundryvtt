@@ -137,8 +137,8 @@ export class HeroRuler {
                                 );
 
                                 // TODO: We are using getMovedDistanceFromToken to get total distance,
-                                // however, we really should seperate distances by activeMovement so
-                                // we can apply END modificaitons to specific movements.
+                                // however, we really should separate distances by activeMovement so
+                                // we can apply END modifications to specific movements.
                                 // This is only an issue with split movement types.
                                 let currentDistance =
                                     dragRuler.getMovedDistanceFromToken(
@@ -185,7 +185,7 @@ export class HeroRuler {
                                         ) || 1;
                                 }
 
-                                // Assuming every 10 costs 1 endurance
+                                // TODO: This is assuming every 10 costs 1 endurance
                                 let totalEnd = Math.ceil(
                                     currentDistance / DistancePerEnd,
                                 );
@@ -434,4 +434,42 @@ function setHeroRulerLabel() {
 
         return label;
     };
+}
+
+export function calculateVelocity(actor, token) {
+    let velocity = 0;
+
+    const combatants = game?.combat?.combatants;
+
+    if (combatants && typeof dragRuler != "undefined" && token) {
+        const distance = dragRuler.getMovedDistanceFromToken(token);
+        const ranges = dragRuler.getRangesFromSpeedProvider(token);
+        const speed = ranges.length > 1 ? ranges[1].range : 0;
+        let delta = distance;
+        if (delta > speed / 2) {
+            delta = speed - delta;
+        }
+        velocity = delta * 5;
+    }
+
+    // Simplistic velocity calc using dragRuler
+    if (velocity === 0 && typeof dragRuler != "undefined" && token) {
+        if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
+            velocity = parseInt(
+                dragRuler.getRangesFromSpeedProvider(token)[1].range || 0,
+            );
+        }
+    }
+
+    // Simplistic velocity calc using running & flight
+    // TODO: Should we not at least get the presently enabled movement type(s) to make a guess?
+    if (velocity === 0) {
+        velocity = parseInt(actor.system.characteristics.running.value || 0);
+        velocity = Math.max(
+            velocity,
+            parseInt(actor.system.characteristics.flight.value || 0),
+        );
+    }
+
+    return velocity;
 }
