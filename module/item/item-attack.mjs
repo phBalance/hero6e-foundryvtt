@@ -83,6 +83,7 @@ export async function AttackOptions(item) {
 
         data.showVelocity = true;
         data.velocity = calculateVelocityInSystemUnits(item.actor, token);
+        data.velocitySystemUnits = getSystemDisplayUnits(item.actor);
     }
 
     const aoe = item.getAoeModifier();
@@ -109,7 +110,6 @@ export async function AttackOptions(item) {
         }
     }
 
-    // ItemAttackFormApplication allows for more interactivity (CSL).
     await new ItemAttackFormApplication(data).render(true);
 }
 
@@ -1554,7 +1554,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplySenseAffectingToSpecificToken(
             item,
             token,
-            damageData,
             damageDetail,
             defense,
         );
