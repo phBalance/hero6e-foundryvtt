@@ -53,7 +53,7 @@
 
     {{#if showVelocity}}
       <div class="form-group">
-        <label>{{localize "Items.Attack.Velocity"}}</label>
+        <label>{{localize "Items.Attack.Velocity"}} ({{velocitySystemUnits}}/phase)</label>
         <input type="text" name="velocity" value="{{velocity}}"
           title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
       </div>
