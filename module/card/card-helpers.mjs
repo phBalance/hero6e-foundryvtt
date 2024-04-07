@@ -1,4 +1,3 @@
-import { HeroSystem6eCard } from "./card.mjs";
 import * as Attack from "../item/item-attack.mjs";
 
 export class HeroSystem6eCardHelpers {
@@ -7,7 +6,6 @@ export class HeroSystem6eCardHelpers {
     }
 
     static chatListeners(html) {
-        HeroSystem6eCard.chatListeners(html);
         Attack.chatListeners(html);
     }
 }
