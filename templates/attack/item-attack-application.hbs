@@ -52,52 +52,52 @@
     </div>
 
     {{#if showVelocity}}
-    <div class="form-group">
-      <label>{{localize "Items.Attack.Velocity"}}</label>
-      <input type="text" name="velocity" value="{{velocity}}"
-        title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
-    </div>
+      <div class="form-group">
+        <label>{{localize "Items.Attack.Velocity"}}</label>
+        <input type="text" name="velocity" value="{{velocity}}"
+          title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
+      </div>
     {{/if}}
 
 
     {{#if (or item.system.usesStrength item.system.usesTk)}}
-    <div class="form-group">
-      <label>Effective Strength</label>
-      <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
-      <label>/ {{str}}</label>
-    </div>
+      <div class="form-group">
+        <label>Effective Strength</label>
+        <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
+        <label>/ {{str}}</label>
+      </div>
     {{/if}}
 
     {{#if boostableCharges}}
-    <div class="form-group">
-      <label>Boostable ({{boostableCharges}})</label>
-      <input type="text" name="boostableCharges" value="0" />
-      
-    </div>
+      <div class="form-group">
+        <label>Boostable ({{boostableCharges}})</label>
+        <input type="text" name="boostableCharges" value="0" />
+        
+      </div>
     {{/if}}
 
     {{#if cslChoices}}
-    <div class="form-group">
-      <label>Combat Skill Levels</label>
-      <div class="form-fields combat-skill-levels">
-        <ol>
-          {{#each csl}}
-          <li>
-            {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
-          </li>
-          {{/each}}
-        </ol>
+      <div class="form-group">
+        <label>Combat Skill Levels</label>
+        <div class="form-fields combat-skill-levels">
+          <ol>
+            {{#each csl}}
+            <li>
+              {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+            </li>
+            {{/each}}
+          </ol>
 
+        </div>
       </div>
-    </div>
     {{/if}}
 
     {{#if aoeText}}
-    <div class="aoe-button flexrow">
-      <button type="submit" name="aoe">
-        Place {{aoeText}} template
-      </button>
-    </div>
+      <div class="aoe-button flexrow">
+        <button type="submit" name="aoe">
+          Place {{aoeText}} template
+        </button>
+      </div>
     {{/if}}
   </div>
 

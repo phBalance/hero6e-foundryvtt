@@ -137,8 +137,8 @@ export class HeroRuler {
                                 );
 
                                 // TODO: We are using getMovedDistanceFromToken to get total distance,
-                                // however, we really should seperate distances by activeMovement so
-                                // we can apply END modificaitons to specific movements.
+                                // however, we really should separate distances by activeMovement so
+                                // we can apply END modifications to specific movements.
                                 // This is only an issue with split movement types.
                                 let currentDistance =
                                     dragRuler.getMovedDistanceFromToken(
@@ -185,7 +185,7 @@ export class HeroRuler {
                                         ) || 1;
                                 }
 
-                                // Assuming every 10 costs 1 endurance
+                                // TODO: This is assuming every 10 costs 1 endurance
                                 let totalEnd = Math.ceil(
                                     currentDistance / DistancePerEnd,
                                 );
@@ -434,4 +434,60 @@ function setHeroRulerLabel() {
 
         return label;
     };
+}
+
+/**
+ * Calculate the velocity in system units (5e is " and 6e in m).
+ * NOTE: dragRuler.getRangesFromSpeedProvider ranges are stored in m.
+ *
+ * @param {Object} actor
+ * @param {Object} token
+ * @returns
+ */
+export function calculateVelocityInSystemUnits(actor, token) {
+    let velocity = 0;
+
+    const combatants = game?.combat?.combatants;
+
+    // In combat we can calculate the velocity using the distance moved and acceleration rules (5 units/phase per unit moved).
+    // TODO: This does not consider the movement power being purchased with improved acceleration.
+    if (combatants && typeof dragRuler != "undefined" && token) {
+        const distance = dragRuler.getMovedDistanceFromToken(token);
+        const ranges = dragRuler.getRangesFromSpeedProvider(token);
+        const speed = ranges.length > 1 ? ranges[1].range : 0;
+        let delta = distance;
+        if (delta > speed / 2) {
+            delta = speed - delta;
+        }
+        velocity = delta * 5;
+
+        if (actor.system.is5e) {
+            velocity = velocity / 2;
+        }
+    }
+
+    // Simplistic velocity calc using dragRuler based on a full phase move.
+    else if (velocity === 0 && typeof dragRuler != "undefined" && token) {
+        if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
+            velocity = parseInt(
+                dragRuler.getRangesFromSpeedProvider(token)[1].range || 0,
+            );
+
+            if (actor.system.is5e) {
+                velocity = velocity / 2;
+            }
+        }
+    }
+
+    // Simplistic velocity calc using running & flight
+    // TODO: Should we not at least get the presently enabled movement type(s) to make a guess?
+    else {
+        velocity = parseInt(actor.system.characteristics.running.value || 0);
+        velocity = Math.max(
+            velocity,
+            parseInt(actor.system.characteristics.flight.value || 0),
+        );
+    }
+
+    return velocity;
 }

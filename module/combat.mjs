@@ -558,8 +558,6 @@ export class HeroSystem6eCombat extends Combat {
             );
             await effect.delete();
         }
-
-        //console.log("_onStartTurn.end", combatant.name, this.current);
     }
 
     /**
@@ -572,61 +570,6 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndTurn(combatant) {
-        //console.log("_onEndTurn", combatant.name, this.current);
-
-        // const automation = game.settings.get(
-        //     "hero6efoundryvttv2",
-        //     "automation",
-        // );
-
-        // https://github.com/dmdorman/hero6e-foundryvtt/issues/722
-        // if (this.round > 0) {
-        //     // Edge case where Flight was using 1 END when combat begins.  Make sure that doesn't happen.
-        //     // Hover (flight) uses 1 END
-        //     if (
-        //         automation === "all" ||
-        //         (automation === "npcOnly" && combatant.actor.type == "npc") ||
-        //         (automation === "pcEndOnly" && combatant.actor.type === "pc")
-        //     ) {
-        //         if (
-        //             // gliding costs no endurance
-        //             ["flight"].includes(combatant.actor?.flags?.activeMovement)
-        //         ) {
-        //             //console.log(combatant.actor);
-        //             if (dragRuler?.getRangesFromSpeedProvider) {
-        //                 if (
-        //                     dragRuler.getMovedDistanceFromToken(
-        //                         combatant.token.object,
-        //                     ) === 0
-        //                 ) {
-        //                     let endValue =
-        //                         parseInt(
-        //                             combatant.actor.system.characteristics.end
-        //                                 .value,
-        //                         ) - 1;
-        //                     await combatant.actor.update({
-        //                         "system.characteristics.end.value": endValue,
-        //                     });
-
-        //                     // ChatCard notification about spending 1 END to hover.
-        //                     // Players may mistakenly leave FLIGHT on.
-        //                     const content = `${combatant.token.name} spent 1 END to hover.`;
-        //                     const chatData = {
-        //                         user: game.user.id,
-        //                         //whisper: ChatMessage.getWhisperRecipients("GM"),
-        //                         speaker: ChatMessage.getSpeaker({
-        //                             actor: combatant.actor,
-        //                         }),
-        //                         //blind: true,
-        //                         content: content,
-        //                     };
-        //                     await ChatMessage.create(chatData);
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
         super._onEndTurn(combatant);
 
         // At the end of the Segment, any non-Persistent Powers, and any Skill Levels of any type, turn off for STUNNED actors.
@@ -634,11 +577,6 @@ export class HeroSystem6eCombat extends Combat {
             this.turns?.[this.turn]?.flags.segment !=
             this.turns?.[this.turn - 1]?.flags.segment
         ) {
-            //console.log(
-            //     "next segment",
-            //     this.combatant.flags?.segment,
-            //     this.current,
-            // );
             for (let _combatant of this.combatants) {
                 if (
                     _combatant?.actor?.statuses.has("stunned") ||
@@ -685,8 +623,6 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndRound() {
-        //console.log("_onEndRound", this.current);
-
         super._onEndRound();
 
         // Make really sure we only call at the end of the round
@@ -810,10 +746,9 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async startCombat() {
-        //console.log("startCombat", this.current);
-
         // Don't call super because we start on segment 12 which is never turn 0.
         //await super.startCombat();
+
         this._playCombatSound("startEncounter");
         const turn = this.turns.findIndex((o) => o.flags.segment === 12) || 1;
         const updateData = {
@@ -823,22 +758,6 @@ export class HeroSystem6eCombat extends Combat {
         };
         Hooks.callAll("combatStart", this, updateData);
         await this.update(updateData);
-
-        // Reset all movement history when we start combat
-        // if (dragRuler) {
-        //     for (const _combatant of this.combatants) {
-        //         await dragRuler.resetMovementHistory(this, _combatant.id);
-        //     }
-        // }
-
-        //this.setupTurns();
-
-        // Find first TURN with segment 12
-        // let turn = this.turns.findIndex((o) => o.flags.segment === 12) || 1;
-
-        // const updateData = { round: 1, turn: turn };
-        // await this.update(updateData);
-        //console.log("startCombat.end", this.current);
     }
 
     /**

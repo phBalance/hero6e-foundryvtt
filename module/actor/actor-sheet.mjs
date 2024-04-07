@@ -16,6 +16,7 @@ import {
 } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
+import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
@@ -194,68 +195,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                                     "+" + parseInt(item.system.ocv)
                                 ).replace("+-", "-");
 
-                                let velocity = 0;
-
-                                // Velocity from drag ruler
                                 const tokens = item.actor.getActiveTokens();
                                 const token = tokens[0];
-                                const combatants = game?.combat?.combatants;
-                                if (
-                                    combatants &&
-                                    typeof dragRuler != "undefined"
-                                ) {
-                                    if (token) {
-                                        let distance =
-                                            dragRuler.getMovedDistanceFromToken(
-                                                token,
-                                            );
-                                        let ranges =
-                                            dragRuler.getRangesFromSpeedProvider(
-                                                token,
-                                            );
-                                        let speed =
-                                            ranges.length > 1
-                                                ? ranges[1].range
-                                                : 0;
-                                        let delta = distance;
-                                        if (delta > speed / 2) {
-                                            delta = speed - delta;
-                                        }
-                                        velocity = delta * 5;
-                                    }
-                                }
-
-                                // Simplistic velocity calc using dragRuler
-                                if (velocity === 0 && token) {
-                                    if (typeof dragRuler != "undefined") {
-                                        if (
-                                            dragRuler.getRangesFromSpeedProvider(
-                                                token,
-                                            ).length > 1
-                                        ) {
-                                            velocity = parseInt(
-                                                dragRuler.getRangesFromSpeedProvider(
-                                                    token,
-                                                )[1].range || 0,
-                                            );
-                                        }
-                                    }
-                                }
-
-                                // Simplistic velocity calc using running & flight
-                                if (velocity === 0) {
-                                    velocity = parseInt(
-                                        item.actor.system.characteristics
-                                            .running.value || 0,
-                                    );
-                                    velocity = Math.max(
-                                        velocity,
-                                        parseInt(
-                                            item.actor.system.characteristics
-                                                .flight.value || 0,
-                                        ),
-                                    );
-                                }
+                                const velocity = calculateVelocityInSystemUnits(
+                                    item.actor,
+                                    token,
+                                );
 
                                 item.system.ocvEstimated = (
                                     parseInt(csl.ocv) + parseInt(velocity / 10)

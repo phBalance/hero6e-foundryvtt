@@ -15,6 +15,7 @@ import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
+import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -76,49 +77,12 @@ export async function AttackOptions(item) {
 
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
-    if ((item.system.EFFECT || "").match(/v\/\d/)) {
-        //["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
-        data.showVelocity = true;
-        data.velocity = 0;
-
+    if ((item.system.EFFECT || "").match(/v\/\d+/)) {
         const tokens = item.actor.getActiveTokens();
         const token = tokens[0];
-        const combatants = game?.combat?.combatants;
-        if (combatants && typeof dragRuler != "undefined") {
-            if (token) {
-                let distance = dragRuler.getMovedDistanceFromToken(token);
-                let speed =
-                    dragRuler.getRangesFromSpeedProvider(token)[1].range;
-                let delta = distance;
-                if (delta > speed / 2) {
-                    delta = speed - delta;
-                }
-                data.velocity = delta * 5;
-            }
-        }
 
-        // Simplistic velocity calc using dragRuler
-        if (data.velocity === 0 && token) {
-            if (typeof dragRuler != "undefined") {
-                if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
-                    data.velocity = parseInt(
-                        dragRuler.getRangesFromSpeedProvider(token)[1].range ||
-                            0,
-                    );
-                }
-            }
-        }
-
-        // Simplistic velocity calc using running & flight
-        if (data.velocity === 0) {
-            data.velocity = parseInt(
-                item.actor.system.characteristics.running.value || 0,
-            );
-            data.velocity = Math.max(
-                data.velocity,
-                parseInt(item.actor.system.characteristics.flight.value || 0),
-            );
-        }
+        data.showVelocity = true;
+        data.velocity = calculateVelocityInSystemUnits(item.actor, token);
     }
 
     const aoe = item.getAoeModifier();
