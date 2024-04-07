@@ -76,8 +76,7 @@ export async function AttackOptions(item) {
 
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
-    if ((item.system.EFFECT || "").match(/v\/\d/)) {
-        //["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+    if ((item.system.EFFECT || "").match(/v\/\d+/)) {
         data.showVelocity = true;
         data.velocity = 0;
 
