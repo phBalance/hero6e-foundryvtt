@@ -436,11 +436,21 @@ function setHeroRulerLabel() {
     };
 }
 
-export function calculateVelocity(actor, token) {
+/**
+ * Calculate the velocity in system units (5e is " and 6e in m).
+ * NOTE: dragRuler.getRangesFromSpeedProvider ranges are stored in m.
+ *
+ * @param {Object} actor
+ * @param {Object} token
+ * @returns
+ */
+export function calculateVelocityInSystemUnits(actor, token) {
     let velocity = 0;
 
     const combatants = game?.combat?.combatants;
 
+    // In combat we can calculate the velocity using the distance moved and acceleration rules (5 units/phase per unit moved).
+    // TODO: This does not consider the movement power being purchased with improved acceleration.
     if (combatants && typeof dragRuler != "undefined" && token) {
         const distance = dragRuler.getMovedDistanceFromToken(token);
         const ranges = dragRuler.getRangesFromSpeedProvider(token);
@@ -450,20 +460,28 @@ export function calculateVelocity(actor, token) {
             delta = speed - delta;
         }
         velocity = delta * 5;
+
+        if (actor.system.is5e) {
+            velocity = velocity / 2;
+        }
     }
 
-    // Simplistic velocity calc using dragRuler
-    if (velocity === 0 && typeof dragRuler != "undefined" && token) {
+    // Simplistic velocity calc using dragRuler based on a full phase move.
+    else if (velocity === 0 && typeof dragRuler != "undefined" && token) {
         if (dragRuler.getRangesFromSpeedProvider(token).length > 1) {
             velocity = parseInt(
                 dragRuler.getRangesFromSpeedProvider(token)[1].range || 0,
             );
+
+            if (actor.system.is5e) {
+                velocity = velocity / 2;
+            }
         }
     }
 
     // Simplistic velocity calc using running & flight
     // TODO: Should we not at least get the presently enabled movement type(s) to make a guess?
-    if (velocity === 0) {
+    else {
         velocity = parseInt(actor.system.characteristics.running.value || 0);
         velocity = Math.max(
             velocity,

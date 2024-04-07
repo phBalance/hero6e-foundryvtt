@@ -16,7 +16,7 @@ import {
 } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
-import { calculateVelocity } from "../ruler.mjs";
+import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
@@ -197,7 +197,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                                 const tokens = item.actor.getActiveTokens();
                                 const token = tokens[0];
-                                const velocity = calculateVelocity(
+                                const velocity = calculateVelocityInSystemUnits(
                                     item.actor,
                                     token,
                                 );

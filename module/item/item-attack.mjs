@@ -15,7 +15,7 @@ import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
-import { calculateVelocity } from "../ruler.mjs";
+import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -82,7 +82,7 @@ export async function AttackOptions(item) {
         const token = tokens[0];
 
         data.showVelocity = true;
-        data.velocity = calculateVelocity(item.actor, token);
+        data.velocity = calculateVelocityInSystemUnits(item.actor, token);
     }
 
     const aoe = item.getAoeModifier();
