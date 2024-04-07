@@ -1277,7 +1277,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     async _onActorDescription() {
         let content = `${this.actor.system.APPEARANCE || ""}`;
-        let perceivable = [];
+        const perceivable = [];
         for (let item of this.actor.items) {
             if (item.isPerceivable(true)) {
                 perceivable.push(
@@ -1294,8 +1294,8 @@ export class HeroSystemActorSheet extends ActorSheet {
             content += "</ul>";
         }
 
-        let token = this.actor.token;
-        let speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
+        const token = this.actor.token;
+        const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
