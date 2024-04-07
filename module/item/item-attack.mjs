@@ -1554,7 +1554,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplySenseAffectingToSpecificToken(
             item,
             token,
-            damageData,
             damageDetail,
             defense,
         );
