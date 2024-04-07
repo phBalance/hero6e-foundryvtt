@@ -265,8 +265,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     xml.children[0].getAttribute("XMLID");
                 powerDescription6e.name ??=
                     xml.children[0].getAttribute("ALIAS");
-                powerDescription6e.behaviors ??= [];
-                powerDescription6e.type ??= [
+                powerDescription6e.type ??= [];
+                powerDescription6e.behaviors ??= [
                     xml.children[0].tagName.toLowerCase(),
                 ];
             } else {
@@ -301,8 +301,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     xml.children[0].getAttribute("XMLID");
                 powerDescription5e.name ??=
                     xml.children[0].getAttribute("ALIAS");
-                powerDescription5e.behaviors ??= [];
-                powerDescription5e.type ??= [
+                powerDescription5e.type ??= [];
+                powerDescription5e.behaviors ??= [
                     xml.children[0].tagName.toLowerCase(),
                 ];
             } else {

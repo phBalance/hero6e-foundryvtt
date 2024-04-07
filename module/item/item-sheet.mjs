@@ -317,17 +317,17 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             ? CONFIG.HERO.powers5e
             : CONFIG.HERO.powers6e;
 
-        const type = action.replace("create", "").toLowerCase();
+        const adderOrModifier = action.replace("create", "").toLowerCase();
         const item = this.item;
 
         const powersOfType = powers.filter(
-            (o) => o.type.includes(type) && o.xml,
+            (o) => o.behaviors.includes(adderOrModifier) && o.xml,
         );
 
         // Make sure we have options
         if (powersOfType.length === 0) {
             ui.notifications.warn(
-                `Creating a new ${type.toUpperCase()} is currently unsupported`,
+                `Creating a new ${adderOrModifier.toUpperCase()} is currently unsupported`,
             );
             return;
         }
@@ -373,7 +373,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 Cost and Active Points may not be updated.
             </p>
             <p>
-            <label>Select ${type}:</label>
+            <label>Select ${adderOrModifier}:</label>
             <br>
                 <select name="xmlid">
                     ${optionHTML}
@@ -382,7 +382,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             </form>`;
 
         const d = new Dialog({
-            title: `Create ${type.toUpperCase()} for ${this.item.system.XMLID}`,
+            title: `Create ${adderOrModifier.toUpperCase()} for ${
+                this.item.system.XMLID
+            }`,
             content: form,
             buttons: {
                 create: {
@@ -399,7 +401,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         );
                         if (!power) {
                             ui.notifications.error(
-                                `Creating new ${type.toUpperCase()} failed`,
+                                `Creating new ${adderOrModifier.toUpperCase()} failed`,
                             );
                             return;
                         }
@@ -447,8 +449,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         modifierData.ID = new Date().getTime().toString();
 
                         // Add the modifer (create array if necessary)
-                        item.system[type.toUpperCase()] ??= [];
-                        item.system[type.toUpperCase()].push(modifierData);
+                        item.system[adderOrModifier.toUpperCase()] ??= [];
+                        item.system[adderOrModifier.toUpperCase()].push(
+                            modifierData,
+                        );
 
                         await item._postUpload();
                         return;
@@ -459,7 +463,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     label: "Cancel",
                     callback: () =>
                         console.log(
-                            `Cancel ${type.capitalize()} ${type} create`,
+                            `Cancel ${adderOrModifier.capitalize()} ${adderOrModifier} create`,
                         ),
                 },
             },
