@@ -518,48 +518,65 @@ export class HeroSystem6eItem extends Item {
         // Power must be turned on
         if (this.system.active === false) return false;
 
+        // TODO: Costs endurance (even if bought to 0 END) is perceivable when active unless it has invisible power effect bought for it.
+
         // FOCUS
-        let FOCUS = this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
+        const FOCUS = this.system.MODIFIER?.find((o) => o.XMLID === "FOCUS");
         if (FOCUS) {
             if (FOCUS?.OPTION?.startsWith("O")) return true;
             if (FOCUS?.OPTION?.startsWith("I")) return perceptionSuccess;
         }
 
-        let VISIBLE = this.system.MODIFIER?.find((o) => o.XMLID === "VISIBLE");
+        const VISIBLE = this.system.MODIFIER?.find(
+            (o) => o.XMLID === "VISIBLE",
+        );
         if (VISIBLE) {
-            if (VISIBLE?.OPTION?.endsWith("OBVIOUS")) return true;
-            if (VISIBLE?.OPTION?.endsWith("INOBVIOUS"))
+            if (VISIBLE?.OPTION?.endsWith("OBVIOUS")) {
+                return true;
+            } else if (VISIBLE?.OPTION?.endsWith("INOBVIOUS")) {
                 return perceptionSuccess;
+            }
+
             return true; // 5e?
         }
 
-        // PARENT?
-        let PARENT = this.actor.items.find(
+        // Parent that's visible?
+        const PARENT = this.actor.items.find(
             (o) => o.system.ID === (this.system.PARENTID || "null"),
         );
         if (PARENT) {
-            let VISIBLE = PARENT.system.MODIFIER?.find(
+            const VISIBLE = PARENT.system.MODIFIER?.find(
                 (o) => o.XMLID === "VISIBLE",
             );
             if (VISIBLE) {
-                if (VISIBLE?.OPTION.endsWith("OBVIOUS")) return true;
-                if (VISIBLE?.OPTION.endsWith("INOBVIOUS"))
+                if (VISIBLE?.OPTION.endsWith("OBVIOUS")) {
+                    return true;
+                } else if (VISIBLE?.OPTION.endsWith("INOBVIOUS")) {
                     return perceptionSuccess;
+                }
             }
         }
 
         const configPowerInfo = getPowerInfo({ item: this });
-        if (!configPowerInfo?.perceivability) {
+
+        if (configPowerInfo?.duration?.toLowerCase() === "instant") {
             return false;
         }
 
-        if (configPowerInfo?.duration.toLowerCase() === "instant") return false;
-        if (configPowerInfo.perceivability.toLowerCase() == "imperceptible")
+        if (!configPowerInfo?.perceivability) {
+            // TODO: Should it say that it's not perceivable if we haven't set it.
             return false;
-        if (configPowerInfo.perceivability.toLowerCase() == "obvious")
+        } else if (
+            configPowerInfo.perceivability.toLowerCase() === "imperceptible"
+        ) {
+            return false;
+        } else if (configPowerInfo.perceivability.toLowerCase() === "obvious") {
             return true;
-        if (configPowerInfo.perceivability.toLowerCase() == "inobvious")
+        } else if (
+            configPowerInfo.perceivability.toLowerCase() === "inobvious"
+        ) {
             return perceptionSuccess;
+        }
 
         if (["INVISIBILITY"].includes(this.system.XMLID)) {
             return false;
@@ -570,6 +587,7 @@ export class HeroSystem6eItem extends Item {
                 `${this.name} has undetermined perceivability`,
             );
         }
+
         return false;
     }
 

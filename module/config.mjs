@@ -4759,7 +4759,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "POWERDEFENSE",
             type: ["defense", "special"],
             behaviors: ["activatable"],
-            perceivability: "inobvious",
+            perceivability: "imperceptible",
             duration: "persistent",
             target: "self only",
             range: "self",
