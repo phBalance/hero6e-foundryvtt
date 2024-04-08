@@ -1403,7 +1403,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
         const html = await renderTemplate(template2, data);
 
-        // eslint-disable-next-line no-inner-declarations
         async function getDialogOutput() {
             return new Promise((resolve) => {
                 const dataConditionalDefenses = {

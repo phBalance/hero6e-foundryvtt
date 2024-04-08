@@ -1738,13 +1738,6 @@ export class HeroRoller {
         this.#fixUpTermMetadata(removed);
     }
 
-    #removeLastNTerms(ranksToRemove) {
-        // Remove the last N ranks
-        const removed = this._termsCluster.splice(-1, ranksToRemove);
-
-        this.#fixUpTermMetadata(removed);
-    }
-
     // TODO: Added has to be a proper type.
     #fixUpTermMetadata(removed) {
         // Fixup the base and calculated metadata so that it reflects what remains. The base and calculated
