@@ -1,7 +1,9 @@
 # Releases
 
-## Version 3.0.66 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.66 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Fix velocity calculations for 5e. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
+- Calculated velocity for maneuvers can now be adjusted in the to hit dialog when necessary. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
 - Improved in-game editing:
   - You can add most skills, powers, etc to an actor in-game. Frameworks, compound powers, and enhancers can not be added in-game yet.
   - Some editing options are confusing and will be improved in future releases.
@@ -10,8 +12,7 @@
   - There is minimal vetting of in-game editing.  Any invalid adders/modifiers for a specific power will likely to be ignored and/or may cause automation issues.
   - Items modified in-game may have incorrect costs and active points.
   - Be careful when re-uploading HDC files as in-game edits for that actor will be overwritten without warning.
-- Fix velocity calculations for 5e. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
-- Calculated velocity for maneuvers can now be adjusted in the to hit dialog when necessary. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
+
 
 ## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
