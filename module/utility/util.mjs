@@ -14,18 +14,6 @@ export function modifyRollEquation(equation, value) {
     return equation;
 }
 
-export function getTokenChar(token, char, data) {
-    let baseActor = game.actors.get(token.data.actorId);
-
-    try {
-        return token.data.actorData.system.characteristics[`${char}`][
-            `${data}`
-        ];
-    } catch (TypeError) {
-        return baseActor.system.characteristics[`${char}`][`${data}`];
-    }
-}
-
 export function getPowerInfo(options) {
     const xmlid =
         options.xmlid ||

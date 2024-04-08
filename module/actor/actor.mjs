@@ -1568,8 +1568,8 @@ export class HeroSystem6eActor extends Actor {
             // Create a directory if it doesn't already exist
             try {
                 await FilePicker.createDirectory("user", path);
-            } catch (e) {
-                //console.error(e)
+            } catch (error) {
+                console.log("create directory error", error);
             }
 
             // Set the image, uploading if not already in the file system

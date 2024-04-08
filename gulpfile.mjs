@@ -14,7 +14,7 @@ const JAVASCRIPT_FILES = ["**/*.js", "**/*.mjs", "!node_modules/**"];
 /*  Source Code Standard Validation
 /* ----------------------------------------- */
 
-const eslintDefaultConfig = { overrideConfigFile: "./.eslintrc.json" };
+const eslintDefaultConfig = { overrideConfigFile: "eslint.config.mjs" };
 const eslintFixConfig = { fix: true };
 
 function validateFilesByLint() {
