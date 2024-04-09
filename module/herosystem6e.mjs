@@ -209,8 +209,7 @@ Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
 export class HEROSYS {
     static ID = "HEROSYS";
 
-    static module = "hero6efoundryvttv2";
-
+    static module = "hero6e-foundryvtt";
     static log(force, ...args) {
         const shouldLog =
             force || game.settings.get(game.system.id, "alphaTesting");
