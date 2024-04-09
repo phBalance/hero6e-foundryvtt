@@ -22,7 +22,7 @@
         {
             "name": "heroMacros",
             "label": "Hero Macros",
-            "system": "hero6e-foundryvtt",
+            "system": "hero6efoundryvttv2",
             "type": "Macro",
             "path": "packs/heroMacros"
         }

@@ -1,3 +1,5 @@
+import { HEROSYS } from "./herosystem6e.mjs";
+
 export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("indexOf", indexOf);
     Handlebars.registerHelper("abs", abs);
@@ -22,5 +24,5 @@ function increment(str, value) {
 }
 
 function gameConfigValue(configSetting) {
-    return game.settings.get("hero6efoundryvttv2", configSetting);
+    return game.settings.get(HEROSYS.module, configSetting);
 }

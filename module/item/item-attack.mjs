@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 import { determineDefense } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
@@ -90,14 +91,14 @@ export async function AttackOptions(item) {
 
     // TODO: This needs to be considered. AOE does not preclude hit locations.
     if (
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        game.settings.get(HEROSYS.module, "hit locations") &&
         !item.system.noHitLocations &&
         !aoe
     ) {
         data.useHitLoc = true;
         data.hitLoc = CONFIG.HERO.hitLocations;
         data.hitLocSide =
-            game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all"
+            game.settings.get(HEROSYS.module, "hitLocTracking") === "all"
                 ? CONFIG.HERO.hitLocationSide
                 : null;
 
@@ -281,7 +282,7 @@ export async function AttackToHit(item, options) {
 
     const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
-    const automation = game.settings.get("hero6efoundryvttv2", "automation");
+    const automation = game.settings.get(HEROSYS.module, "automation");
 
     const adjustment = getPowerInfo({
         item: item,
@@ -417,13 +418,13 @@ export async function AttackToHit(item, options) {
     // [x Stun, x N Stun, x Body, OCV modifier]
     const noHitLocationsPower = !!item.system.noHitLocations;
     if (
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        game.settings.get(HEROSYS.module, "hit locations") &&
         options.aim &&
         options.aim !== "none" &&
         !noHitLocationsPower
     ) {
         const aimTargetLocation =
-            game.settings.get("hero6efoundryvttv2", "hitLocTracking") ===
+            game.settings.get(HEROSYS.module, "hitLocTracking") ===
                 "all" && options.aimSide !== "none"
                 ? `${options.aimSide} ${options.aim}`
                 : options.aim;
@@ -456,7 +457,7 @@ export async function AttackToHit(item, options) {
 
     let useEnd = false;
     let enduranceText = "";
-    if (game.settings.get("hero6efoundryvttv2", "use endurance")) {
+    if (game.settings.get(HEROSYS.module, "use endurance")) {
         useEnd = true;
         let valueEnd = actor.system.characteristics.end.value;
         let itemEnd = (parseInt(item.system.end) || 0) * (autoFireShots || 1);
@@ -1008,7 +1009,7 @@ export async function _onRollDamage(event) {
     const formulaParts = calculateDiceFormulaParts(item, dc);
 
     const includeHitLocation =
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        game.settings.get(HEROSYS.module, "hit locations") &&
         !item.system.noHitLocations;
 
     const damageRoller = new HeroRoller()
@@ -1038,7 +1039,7 @@ export async function _onRollDamage(event) {
             includeHitLocation,
             toHitData.aim,
             includeHitLocation &&
-                game.settings.get("hero6efoundryvttv2", "hitLocTracking") ===
+                game.settings.get(HEROSYS.module, "hitLocTracking") ===
                     "all",
             toHitData.aim === "none" ? "none" : toHitData.aimSide, // Can't just select a side to hit as that doesn't have a penalty
         );
@@ -1244,7 +1245,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const heroRoller = HeroRoller.fromJSON(damageData.roller);
     const originalRoll = heroRoller.clone();
 
-    const automation = game.settings.get("hero6efoundryvttv2", "automation");
+    const automation = game.settings.get(HEROSYS.module, "automation");
 
     const avad = item.findModsByXmlid("AVAD");
 
@@ -1606,7 +1607,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // check if target is stunned
-    if (game.settings.get("hero6efoundryvttv2", "stunned")) {
+    if (game.settings.get(HEROSYS.module, "stunned")) {
         // determine if target was Stunned
         if (
             damageDetail.stun > token.actor.system.characteristics.con.value &&
@@ -2011,7 +2012,7 @@ async function _calcDamage(heroRoller, item, options) {
 
     const noHitLocationsPower = !!item.system.noHitLocations;
     const useHitLocations =
-        game.settings.get("hero6efoundryvttv2", "hit locations") &&
+        game.settings.get(HEROSYS.module, "hit locations") &&
         !noHitLocationsPower;
     const hasStunMultiplierRoll = itemData.killing && !useHitLocations;
 
@@ -2035,7 +2036,7 @@ async function _calcDamage(heroRoller, item, options) {
         useHitLoc = true;
 
         if (
-            game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all"
+            game.settings.get(HEROSYS.module, "hitLocTracking") === "all"
         ) {
             hitLocation = heroRoller.getHitLocation().fullName;
         } else {
@@ -2187,7 +2188,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackRoller = null;
 
     if (
-        game.settings.get("hero6efoundryvttv2", "knockback") &&
+        game.settings.get(HEROSYS.module, "knockback") &&
         knockbackMultiplier
     ) {
         useKnockback = true;
