@@ -131,17 +131,17 @@ Hooks.once("init", async function () {
     Handlebars.registerHelper("is_active_segment", function (actives, index) {
         return actives?.[index];
     });
-
+    let templatePaths = [
+        `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-attack-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-sheet-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-active-points.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-adders-modifiers.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
+    ]
     // Handlebars Templates and Partials
-    loadTemplates([
-        `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-partial-active-points.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-partial-adders-modifiers.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs`,
-    ]);
+    loadTemplates(templatePaths);
 });
 
 Hooks.once("ready", async function () {
