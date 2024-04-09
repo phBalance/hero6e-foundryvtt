@@ -3,7 +3,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 export default class SettingsHelpers {
     // Initialize System Settings after the Init Hook
     static initLevelSettings() {
-        const module = "hero6efoundryvttv2";
+        const module = "hero6e-foundryvtt";
 
         game.settings.register(module, "stunned", {
             name: game.i18n.localize("Settings.UseStunned"),

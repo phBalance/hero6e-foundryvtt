@@ -1,7 +1,7 @@
 {
-    "id": "hero6efoundryvttv2",
-    "name": "hero6e-foundryvtt-v2",
-    "title": "Hero System 6e (Unofficial) v2",
+    "id": "hero6e-foundryvtt",
+    "name": "hero6e-foundryvtt",
+    "title": "Hero System 6e (Repo)",
     "description": "The Hero System 6e for FoundryVTT!",
     "version": "3.0.66",
     "compatibility": {
@@ -22,7 +22,7 @@
         {
             "name": "heroMacros",
             "label": "Hero Macros",
-            "system": "hero6efoundryvttv2",
+            "system": "hero6e-foundryvtt",
             "type": "Macro",
             "path": "packs/heroMacros"
         }
