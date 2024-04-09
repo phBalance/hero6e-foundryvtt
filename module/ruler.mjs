@@ -208,7 +208,7 @@ export class HeroRuler {
                 }
             }
 
-            dragRuler.registerSystem(HEROSYS.module, HeroSysSpeedProvider);
+            dragRuler.registerSystem(HEROSYS.getModule(), HeroSysSpeedProvider);
 
             setHeroRulerLabel();
         });

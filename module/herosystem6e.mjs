@@ -132,13 +132,13 @@ Hooks.once("init", async function () {
         return actives?.[index];
     });
     let templatePaths = [
-        `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
-        `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
-        `systems/${HEROSYS.module}/templates/item/item-attack-partial.hbs`,
-        `systems/${HEROSYS.module}/templates/item/item-sheet-partial.hbs`,
-        `systems/${HEROSYS.module}/templates/item/item-partial-active-points.hbs`,
-        `systems/${HEROSYS.module}/templates/item/item-partial-adders-modifiers.hbs`,
-        `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-common-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-effects-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-attack-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-sheet-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-partial-active-points.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-partial-adders-modifiers.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-partial-common.hbs`,
     ]
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
@@ -210,6 +210,11 @@ export class HEROSYS {
     static ID = "HEROSYS";
 
     static module = "hero6e-foundryvtt";
+    
+    static getModule(){
+        return HEROSYS.module;
+    }
+    
     static log(force, ...args) {
         const shouldLog =
             force || game.settings.get(game.system.id, "alphaTesting");

@@ -287,7 +287,7 @@ function determineDefense(targetActor, attackItem, options) {
 
         // Knockback Resistance
         if (
-            game.settings.get(HEROSYS.module, "knockback") &&
+            game.settings.get(HEROSYS.getModule(), "knockback") &&
             attackItem.system.knockbackMultiplier
         ) {
             if (["KBRESISTANCE", "DENSITYINCREASE", "GROWTH"].includes(xmlid)) {
@@ -515,7 +515,7 @@ function determineDefense(targetActor, attackItem, options) {
                 knockbackResistance += value;
                 if (
                     attackType != "mental" &&
-                    game.settings.get(HEROSYS.module, "knockback")
+                    game.settings.get(HEROSYS.getModule(), "knockback")
                 ) {
                     defenseTags.push({
                         name: "KB Resistance" + tagXmlids,
