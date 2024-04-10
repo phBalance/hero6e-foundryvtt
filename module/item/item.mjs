@@ -1444,6 +1444,40 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        //  SHRINKING (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+        if (changed && this.id && this.system.XMLID === "SHRINKING") {
+            const dcvAdd = Math.floor(this.system.value) * 2;
+
+            let activeEffect = Array.from(this.effects)?.[0] || {};
+            activeEffect.name =
+                (this.name ? `${this.name}: ` : "") +
+                `${this.system.XMLID} ${this.system.value}`;
+            activeEffect.icon = "icons/svg/upgrade.svg";
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.dcv.max",
+                    value: dcvAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+            ];
+            activeEffect.transfer = true;
+
+            if (activeEffect.update) {
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    changes: activeEffect.changes,
+                });
+                await this.actor.update({
+                    [`system.characteristics.dcv.value`]:
+                        this.actor.system.characteristics.dcv.max,
+                });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [
+                    activeEffect,
+                ]);
+            }
+        }
+
         return changed;
     }
 
@@ -1995,6 +2029,18 @@ export class HeroSystem6eItem extends Item {
                 } KB, ${system.ALIAS} (${
                     Math.pow(system.value, 2) * 100
                 } kg mass)`;
+                break;
+
+            case "SHRINKING":
+                // SHRINKING (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+                system.description = `${system.ALIAS} (+${
+                    system.value * 2
+                } DCV, -${
+                    this.actor?.system.is5e
+                        ? system.value + '"'
+                        : system.value * 6 + "m"
+                } KB, ${100 / (system.value * 8)}
+                kg mass)`;
                 break;
 
             case "MENTALDEFENSE":

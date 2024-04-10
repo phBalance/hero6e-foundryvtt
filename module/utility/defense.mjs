@@ -289,8 +289,28 @@ function determineDefense(targetActor, attackItem, options) {
             game.settings.get("hero6efoundryvttv2", "knockback") &&
             attackItem.system.knockbackMultiplier
         ) {
-            if (["KBRESISTANCE", "DENSITYINCREASE", "GROWTH"].includes(xmlid)) {
+            if (["KBRESISTANCE", "DENSITYINCREASE"].includes(xmlid)) {
                 let _value = value * (targetActor.system.is5e ? 1 : 2);
+                knockbackResistance += _value;
+                defenseTags.push({
+                    value: _value,
+                    name: "KB" + tagXmlids,
+                    title: activeDefense.name,
+                });
+            }
+
+            if (["GROWTH"].includes(xmlid)) {
+                let _value = value * (targetActor.system.is5e ? 1 : 6);
+                knockbackResistance += _value;
+                defenseTags.push({
+                    value: _value,
+                    name: "KB" + tagXmlids,
+                    title: activeDefense.name,
+                });
+            }
+
+            if (["SHRINKING"].includes(xmlid)) {
+                let _value = -value * (targetActor.system.is5e ? 1 : 6);
                 knockbackResistance += _value;
                 defenseTags.push({
                     value: _value,
