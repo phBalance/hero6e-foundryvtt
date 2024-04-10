@@ -1,4 +1,5 @@
 import { HeroRoller } from "./dice.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroRollRegExp = new RegExp(
     "^(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*))\\])?)$",
@@ -31,7 +32,7 @@ Hooks.on("chatMessage", function (_this, message /*, _chatData*/) {
 async function doRollAndGenerateChatMessage(chatMessageCmd) {
     const useHitLocations = !!chatMessageCmd.groups.hitLoc;
     const useHitLocationsSide =
-        game.settings.get("hero6efoundryvttv2", "hitLocTracking") === "all";
+        game.settings.get(HEROSYS.getModule(), "hitLocTracking") === "all";
 
     let numericTerm = parseFloat(chatMessageCmd.groups.numTerm || 0);
     const negativeTermWithDice =

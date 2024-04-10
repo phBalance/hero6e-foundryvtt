@@ -1,3 +1,5 @@
+import { HEROSYS } from "./herosystem6e.mjs";
+
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
         super(data, context);
@@ -641,7 +643,7 @@ export class HeroSystem6eCombat extends Combat {
         // Segment 12 Recovery does not eliminate the Stunned condition.
 
         const automation = game.settings.get(
-            "hero6efoundryvttv2",
+            HEROSYS.getModule(),
             "automation",
         );
 

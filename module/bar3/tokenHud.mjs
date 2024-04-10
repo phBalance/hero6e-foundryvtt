@@ -1,5 +1,5 @@
 /** Large portions have been inspired by https://gitlab.com/woodentavern/foundryvtt-bar-brawl */
-
+import { HEROSYS } from "../herosystem6e.mjs";
 import { getBarExtendedAttribute } from "./extendTokenConfig.mjs";
 
 // TokenHUD does not appear to be extendable, so hook on renderTokenHUD
@@ -126,7 +126,7 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
 function renderBarInput(bars) {
     const css = bars.length > 1 ? "compact" : "";
     return renderTemplate(
-        "systems/hero6efoundryvttv2/module/bar3/resource-hud.hbs",
+        `systems/${HEROSYS.getModule()}/module/bar3/resource-hud.hbs`,
         { bars, css },
     );
 }

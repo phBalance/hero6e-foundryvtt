@@ -6,7 +6,7 @@ export class HeroSystemActorSavuoriSheet extends HeroSystemActorSheet {
         return mergeObject(super.defaultOptions, {
             classes: ["actor-sheet", "savuori"],
             template:
-                "systems/hero6efoundryvttv2/templates/actor/actor-savuori-sheet.hbs",
+                `systems/${HEROSYS.getModule()}/templates/actor/actor-savuori-sheet.hbs`,
             tabs: [
                 {
                     navSelector: ".sheet-navigation",

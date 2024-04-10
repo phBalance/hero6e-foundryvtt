@@ -94,7 +94,7 @@ export class HeroRuler {
                     await super.onMovementHistoryUpdate(tokens);
 
                     const automation = game.settings.get(
-                        "hero6efoundryvttv2",
+                        HEROSYS.getModule(),
                         "automation",
                     );
 
