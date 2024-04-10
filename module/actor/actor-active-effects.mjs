@@ -14,11 +14,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
     static getEffects() {
         return Object.keys(HeroSystem6eActorActiveEffects)
-            .filter((o) => o.includes("Effect"))
+            .filter((effectKey) => effectKey.includes("Effect"))
             .sort()
-            .map((o) => {
-                o.icon = `systems/${HEROSYS.getModule()}/${o.icon}`;
-                return HeroSystem6eActorActiveEffects[o];
+            .map((effectKey) => {
+                HeroSystem6eActorActiveEffects[effectKey].icon = `systems/${HEROSYS.getModule()}/${effectKey.icon}`;
+                return HeroSystem6eActorActiveEffects[effectKey];
             });
     }
 
