@@ -819,8 +819,8 @@ export async function AttackToHit(item, options) {
     // render card
     const template =
         block > -1
-            ? "systems/hero6efoundryvttv2/templates/chat/item-toHit-block-card.hbs"
-            : "systems/hero6efoundryvttv2/templates/chat/item-toHit-card.hbs";
+            ? `systems/${HEROSYS.getModule()}/templates/chat/item-toHit-block-card.hbs`
+            : `systems/${HEROSYS.getModule()}/templates/chat/item-toHit-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
 
     const token = actor.token;
@@ -1146,7 +1146,7 @@ export async function _onRollDamage(event) {
 
     // render card
     const template =
-        "systems/hero6efoundryvttv2/templates/chat/item-damage-card.hbs";
+        `systems/${HEROSYS.getModule()}/templates/chat/item-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
@@ -1693,7 +1693,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // render card
     const template =
-        "systems/hero6efoundryvttv2/templates/chat/apply-damage-card.hbs";
+        `systems/${HEROSYS.getModule()}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 

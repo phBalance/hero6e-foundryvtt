@@ -265,7 +265,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static abortEffect = {
         id: "aborted",
         name: "Aborted",
-        icon: "systems/hero6efoundryvttv2/icons/aborted.svg",
+        icon: `poodles/aborted.svg`,
     };
 
     static underwaterEffect = {
