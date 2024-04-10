@@ -789,46 +789,46 @@ export class HeroSystem6eItem extends Item {
                     let newChildBaseCost;
 
                     switch (child.XMLID) {
-                        case "AOE":
-                            if (!this.actor?.system?.is5e) {
-                                let minLevel;
-                                let minDoubles;
+                        // case "AOE":
+                        //     if (!this.actor?.system?.is5e) {
+                        //         let minLevel;
+                        //         let minDoubles;
 
-                                if (
-                                    child.OPTION === "SURFACE" ||
-                                    child.OPTION === "ANY"
-                                ) {
-                                    minLevel = 2;
-                                    minDoubles = 0;
-                                } else if (child.OPTION === "RADIUS") {
-                                    minLevel = 4;
-                                    minDoubles = 1;
-                                } else if (child.OPTION === "CONE") {
-                                    minLevel = 8;
-                                    minDoubles = 2;
-                                } else if (child.OPTION === "LINE") {
-                                    minLevel = 16;
-                                    minDoubles = 3;
-                                } else {
-                                    console.error(
-                                        `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
-                                    );
-                                }
+                        //         if (
+                        //             child.OPTION === "SURFACE" ||
+                        //             child.OPTION === "ANY"
+                        //         ) {
+                        //             minLevel = 2;
+                        //             minDoubles = 0;
+                        //         } else if (child.OPTION === "RADIUS") {
+                        //             minLevel = 4;
+                        //             minDoubles = 1;
+                        //         } else if (child.OPTION === "CONE") {
+                        //             minLevel = 8;
+                        //             minDoubles = 2;
+                        //         } else if (child.OPTION === "LINE") {
+                        //             minLevel = 16;
+                        //             minDoubles = 3;
+                        //         } else {
+                        //             console.error(
+                        //                 `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
+                        //             );
+                        //         }
 
-                                const levels =
-                                    parseInt(child.LEVELS) < minLevel
-                                        ? minLevel
-                                        : parseInt(child.LEVELS);
+                        //         const levels =
+                        //             parseInt(child.LEVELS) < minLevel
+                        //                 ? minLevel
+                        //                 : parseInt(child.LEVELS);
 
-                                newChildBaseCost =
-                                    0.25 *
-                                    Math.ceil(Math.log2(levels) - minDoubles);
-                            } else {
-                                // Modifier plus any dimension doubling adders
-                                newChildBaseCost = parseFloat(child.BASECOST);
-                            }
+                        //         newChildBaseCost =
+                        //             0.25 *
+                        //             Math.ceil(Math.log2(levels) - minDoubles);
+                        //     } else {
+                        //         // Modifier plus any dimension doubling adders
+                        //         newChildBaseCost = parseFloat(child.BASECOST);
+                        //     }
 
-                            break;
+                        //     break;
 
                         case "REQUIRESASKILLROLL":
                             // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
@@ -1812,38 +1812,61 @@ export class HeroSystem6eItem extends Item {
         )) {
             let _myAdvantage = 0;
             const modifierBaseCost = parseFloat(modifier.baseCost || 0);
-            switch (modifier.XMLID) {
-                case "EXPLOSION":
-                case "AOE":
-                    _myAdvantage += modifierBaseCost;
-                    break;
 
-                case "CUMULATIVE":
-                    // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
-                    _myAdvantage +=
-                        modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
-                    break;
+            const configPowerInfo = getPowerInfo({
+                item: modifier,
+                actor: this.actor,
+            });
 
-                case "REDUCEDEND":
-                    {
-                        // Reduced endurance is double the cost if it's applying against a power with autofire
-                        const autofire = (system.MODIFIER || []).find(
-                            (mod) => mod.XMLID === "AUTOFIRE",
-                        );
-                        if (autofire) {
-                            endModifierCost = 2 * modifierBaseCost;
-                        } else {
-                            endModifierCost = modifierBaseCost;
-                        }
-                        _myAdvantage = _myAdvantage + endModifierCost;
-                    }
-                    break;
+            // Is there a cost function
+            let cost = configPowerInfo?.cost
+                ? configPowerInfo.cost(modifier)
+                : 0;
 
-                default:
-                    _myAdvantage +=
-                        modifierBaseCost *
-                        Math.max(1, parseInt(modifier.LEVELS));
+            // If not use a the default cost formula
+            if (!cost) {
+                const modifierCostPerLevel =
+                    typeof configPowerInfo?.costPerLevel === "function"
+                        ? (configPowerInfo.costPerLevel =
+                              configPowerInfo.costPerLevel(modifier))
+                        : configPowerInfo?.costPerLevel || 0;
+                cost = parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
             }
+
+            _myAdvantage += cost;
+
+            // switch (modifier.XMLID) {
+            //     case "EXPLOSION":
+            //     case "AOE":
+            //         _myAdvantage += modifierBaseCost;
+            //         break;
+
+            //     case "CUMULATIVE":
+            //         // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
+            //         _myAdvantage +=
+            //             modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
+            //         break;
+
+            //     case "REDUCEDEND":
+            //         {
+            //             // Reduced endurance is double the cost if it's applying against a power with autofire
+            //             const autofire = (system.MODIFIER || []).find(
+            //                 (mod) => mod.XMLID === "AUTOFIRE",
+            //             );
+            //             if (autofire) {
+            //                 endModifierCost = 2 * modifierBaseCost;
+            //             } else {
+            //                 endModifierCost = modifierBaseCost;
+            //             }
+            //             _myAdvantage = _myAdvantage + endModifierCost;
+            //         }
+            //         break;
+
+            //     default:
+            //         _myAdvantage +=
+            //             modifierBaseCost *
+            //             Math.max(1, parseInt(modifier.LEVELS));
+            // }
 
             // Some modifiers may have ADDERS
             const adders = modifier.ADDER || [];

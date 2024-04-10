@@ -5858,33 +5858,84 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addModifiersToPowerList() {
     addPower(
         {
-            // key: "CHARGES",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
-
-            xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
-            get baseCost() {
-                return null;
+            cost: function (modifier) {
+                const four =
+                    Math.ceil(Math.sqrt(parseInt(modifier.LEVELS) || 0)) / 4;
+                const sq = Math.ceil(Math.sqrt(four));
+                return sq * 0.25;
             },
-            // BASECOST: function(OPTIONID) {
-            //     switch(OPTIONID) {
+            dc: true,
+            xml: `<MODIFIER XMLID="AOE" ID="1712699305027" BASECOST="0.0" LEVELS="1" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {
+            cost: function (modifier, item) {
+                // const activePointsWithoutAoeAdvantage = Math.max(
+                //     item.system.basePointsPlusAdders,
+                //     item.system.activePoints / (1 + modifier.BASECOST_total),
+                // );
+                // switch (modifier.OPTIONID) {
+                //     case "CONE":
+                //         levels = Math.floor(
+                //             1 + activePointsWithoutAoeAdvantage / 5,
+                //         );
+                //         break;
 
-            //     }
-            // }
+                //     case "HEX":
+                //         levels = 1;
+                //         break;
+
+                //     case "LINE":
+                //         levels = Math.floor(
+                //             (2 * activePointsWithoutAoeAdvantage) / 5,
+                //         );
+                //         break;
+
+                //     case "ANY":
+                //     case "RADIUS":
+                //         levels = Math.floor(
+                //             1 + activePointsWithoutAoeAdvantage / 10,
+                //         );
+                //         break;
+
+                //     default:
+                //         console.error(
+                //             `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                //         );
+                //         break;
+                // }
+                return 0;
+            },
+            xml: `<MODIFIER XMLID="AOE" ID="1712699238358" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+    );
+
+    addPower(
+        {
+            costPerLevel: 0.5,
+            dc: true,
+            xml: `<MODIFIER XMLID="ARMORPIERCING" ID="1712696642037" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
         },
         {},
     );
 
     addPower(
         {
-            // key: "HARDENED",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
+            xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
+            get baseCost() {
+                return null;
+            },
+        },
+        {},
+    );
 
+    addPower(
+        {
             xml: `<MODIFIER XMLID="HARDENED" ID="1712344562459" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
         },
         {},
@@ -5892,12 +5943,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // key: "IMPENETRABLE",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
-
             xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
         },
         undefined,
@@ -5905,12 +5950,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // key: "OIHID",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
-
             xml: `<MODIFIER XMLID="OIHID" ID="1712092697365" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Heroic Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
         },
         {},
@@ -5918,18 +5957,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // key: "PENETRATING",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
-
             costPerLevel: 0.5,
             dc: true,
-            cost: function () {
-                return parseInt(this.LEVEL) * this.costPerLevel;
-            },
-            xml: `<MODIFIER XMLID="PENETRATING" ID="1712344588687" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
+            // cost: function (modifier) {
+            //     return parseInt(modifier.LEVELS) * this.costPerLevel;
+            // },
+            xml: `<MODIFIER XMLID="PENETRATING" ID="1712697142089" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
         },
         {},
     );
@@ -5941,7 +5976,7 @@ HERO.ModifierOverride = {
     ADDITIONALPD: { BASECOST: 5 / 2 },
     ALWAYSOCCURS: { BASECOST: 0, MULTIPLIER: 2 },
     AOE: { dc: true },
-    ARMORPIERCING: { BASECOST: 0.25, dc: true },
+    //ARMORPIERCING: { BASECOST: 0.25, dc: true },
     AUTOFIRE: { dc: true },
     AVAD: { dc: true },
     BOOSTABLE: { dc: true },
@@ -5959,7 +5994,7 @@ HERO.ModifierOverride = {
     IMPENETRABLE: { BASECOST: 0.25 },
     IMPROVEDNONCOMBAT: { BASECOST: 5 },
     MENTAL: { BASECOST: 5 }, // DAMAGENEGATION
-    PENETRATING: { BASECOST: 0.5, dc: true },
+    //PENETRATING: { BASECOST: 0.5, dc: true },
     PHYSICAL: { BASECOST: 5 }, // DAMAGENEGATION
     STICKY: { dc: true },
     TIMELIMIT: { dc: true },

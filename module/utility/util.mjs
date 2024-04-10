@@ -17,6 +17,7 @@ export function modifyRollEquation(equation, value) {
 export function getPowerInfo(options) {
     const xmlid =
         options.xmlid ||
+        options.item?.XMLID ||
         options.item?.system?.XMLID ||
         options.item?.system?.xmlid ||
         options.item?.system?.id;
