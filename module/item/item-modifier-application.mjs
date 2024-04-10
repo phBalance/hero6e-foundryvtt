@@ -1,3 +1,5 @@
+import { HEROSYS } from "../herosystem6e.mjs";
+
 export class ItemModifierFormApplication extends FormApplication {
     constructor(data) {
         super();
@@ -14,7 +16,7 @@ export class ItemModifierFormApplication extends FormApplication {
         options = mergeObject(options, {
             classes: ["form"],
             popOut: true,
-            template: `systems/hero6efoundryvttv2/templates/item/item-modifier-application.hbs`,
+            template: `systems/${HEROSYS.getModule()}/templates/item/item-modifier-application.hbs`,
             id: "item-modifier-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes

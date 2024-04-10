@@ -251,7 +251,7 @@ export async function AttackAoeToHit(item, options) {
     };
 
     const template =
-        "systems/hero6efoundryvttv2/templates/chat/item-toHitAoe-card.hbs";
+        `systems/${HEROSYS.getModule()}/templates/chat/item-toHitAoe-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
@@ -1274,7 +1274,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     if (conditionalDefenses.length > 0) {
         const template2 =
-            "systems/hero6efoundryvttv2/templates/attack/item-conditional-defense-card.hbs";
+            `systems/${HEROSYS.getModule()}/templates/attack/item-conditional-defense-card.hbs`;
 
         let options = [];
         for (const defense of conditionalDefenses) {
@@ -1942,7 +1942,7 @@ async function _onApplySenseAffectingToSpecificToken(
 
     // render card
     const template =
-        "systems/hero6efoundryvttv2/templates/chat/apply-sense-affecting-card.hbs";
+        `systems/${HEROSYS.getModule()}/templates/chat/apply-sense-affecting-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: senseAffectingItem.actor });
 

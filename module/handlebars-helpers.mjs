@@ -5,7 +5,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("abs", abs);
     Handlebars.registerHelper("increment", increment);
     Handlebars.registerHelper("gameConfigValue", gameConfigValue);
-
+    Handlebars.registerHelper("getModulePath", getModulePath);
     Handlebars.registerHelper("isdefined", function (value) {
         return value !== undefined;
     });
@@ -25,4 +25,8 @@ function increment(str, value) {
 
 function gameConfigValue(configSetting) {
     return game.settings.get(HEROSYS.getModule(), configSetting);
+}
+
+function getModulePath(templateDirectory) {
+    return  `systems/${HEROSYS.getModule()}/templates/${templateDirectory}`;
 }

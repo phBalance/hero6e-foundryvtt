@@ -92,7 +92,9 @@ Hooks.once("init", async function () {
         CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
         CONFIG.Token.objectClass = HeroSystem6eToken;
         CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
-        CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects();
+        // We can't use the information from system.json in a static context; so we change the load path here.
+        CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(HEROSYS.getModule());
+        
         CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
         CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
@@ -570,7 +572,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 const activeEffect = {
                     name: `Natural Body Healing (${bodyPerMonth}/month)`,
                     id: "naturalBodyHealing",
-                    icon: "systems/hero6efoundryvttv2/icons/heartbeat.svg",
+                    icon: `systems/${HEROSYS.getModule()}/icons/heartbeat.svg`,
                     duration: {
                         seconds: secondsPerBody,
                     },
@@ -701,7 +703,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
             const automation = game.settings.get(
-                "hero6efoundryvttv2",
+                HEROSYS.getModule(),
                 "automation",
             );
             if (

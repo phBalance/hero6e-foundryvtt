@@ -1,6 +1,6 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { HEROSYS } from "../herosystem6e.mjs";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
@@ -97,7 +97,7 @@ export class HeroSystem6eActor extends Actor {
 
     async ChangeType() {
         const template =
-            "systems/hero6efoundryvttv2/templates/chat/actor-change-type-dialog.hbs";
+            `systems/${HEROSYS.getModule()}/templates/chat/actor-change-type-dialog.hbs`;
         const actor = this;
         let cardData = {
             actor,
@@ -738,8 +738,7 @@ export class HeroSystem6eActor extends Actor {
                 let activeEffect = {
                     name: name,
                     id: "encumbered",
-                    //icon: 'icons/svg/daze.svg', //'systems/hero6efoundryvttv2/icons/encumbered.svg',
-                    icon: "systems/hero6efoundryvttv2/icons/encumbered.svg",
+                    icon: `systems/${HEROSYS.getModule()}/icons/encumbered.svg`,
                     changes: [
                         {
                             key: "system.characteristics.dcv.value",

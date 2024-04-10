@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 
 async function _renderSkillForm(item, actor, stateData) {
@@ -20,7 +21,7 @@ async function _renderSkillForm(item, actor, stateData) {
     };
 
     var path =
-        "systems/hero6efoundryvttv2/templates/pop-out/item-skill-card.hbs";
+        `systems/${HEROSYS.getModule()}/templates/pop-out/item-skill-card.hbs`;
 
     return await renderTemplate(path, templateData);
 }
@@ -113,7 +114,7 @@ async function skillRoll(item, actor, html) {
         speaker: speaker,
     };
     const template =
-        "systems/hero6efoundryvttv2/templates/chat/skill-success-roll-card.hbs";
+        `systems/${HEROSYS.getModule()}/templates/chat/skill-success-roll-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
 
     const chatData = {

@@ -185,7 +185,7 @@ class AutomationMenu extends FormApplication {
         options = mergeObject(options, {
             classes: ["form"],
             popOut: true,
-            template: `systems/hero6efoundryvttv2/templates/automationMenu.hbs`,
+            template: `systems/${HEROSYS.getModule()}/templates/automationMenu.hbs`,
             id: "automation-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes

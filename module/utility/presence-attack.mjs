@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoller } from "./dice.mjs";
 
 async function _renderForm(actor, stateData) {
@@ -10,7 +11,7 @@ async function _renderForm(actor, stateData) {
     };
 
     var path =
-        "systems/hero6efoundryvttv2/templates/pop-out/presence-attack-card.hbs";
+        `systems/${HEROSYS.getModule()}/templates/pop-out/presence-attack-card.hbs`;
 
     return await renderTemplate(path, templateData);
 }

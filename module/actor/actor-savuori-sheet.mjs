@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystemActorSheet } from "./actor-sheet.mjs";
 
 export class HeroSystemActorSavuoriSheet extends HeroSystemActorSheet {
