@@ -28,5 +28,5 @@ function gameConfigValue(configSetting) {
 }
 
 function getModulePath(templateDirectory) {
-    return  `systems/${HEROSYS.getModule()}/templates/${templateDirectory}`;
+    return `systems/${HEROSYS.getModule()}/templates/${templateDirectory}`;
 }

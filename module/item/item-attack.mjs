@@ -250,8 +250,7 @@ export async function AttackAoeToHit(item, options) {
             "Confirm AOE placement<br>and selected targets (SHIFT-T to unselect)",
     };
 
-    const template =
-        `systems/${HEROSYS.getModule()}/templates/chat/item-toHitAoe-card.hbs`;
+    const template = `systems/${HEROSYS.getModule()}/templates/chat/item-toHitAoe-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
@@ -1145,8 +1144,7 @@ export async function _onRollDamage(event) {
     };
 
     // render card
-    const template =
-        `systems/${HEROSYS.getModule()}/templates/chat/item-damage-card.hbs`;
+    const template = `systems/${HEROSYS.getModule()}/templates/chat/item-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
@@ -1273,8 +1271,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     if (conditionalDefenses.length > 0) {
-        const template2 =
-            `systems/${HEROSYS.getModule()}/templates/attack/item-conditional-defense-card.hbs`;
+        const template2 = `systems/${HEROSYS.getModule()}/templates/attack/item-conditional-defense-card.hbs`;
 
         let options = [];
         for (const defense of conditionalDefenses) {
@@ -1692,8 +1689,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     };
 
     // render card
-    const template =
-        `systems/${HEROSYS.getModule()}/templates/chat/apply-damage-card.hbs`;
+    const template = `systems/${HEROSYS.getModule()}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
@@ -1941,8 +1937,7 @@ async function _onApplySenseAffectingToSpecificToken(
     };
 
     // render card
-    const template =
-        `systems/${HEROSYS.getModule()}/templates/chat/apply-sense-affecting-card.hbs`;
+    const template = `systems/${HEROSYS.getModule()}/templates/chat/apply-sense-affecting-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: senseAffectingItem.actor });
 

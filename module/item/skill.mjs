@@ -20,8 +20,7 @@ async function _renderSkillForm(item, actor, stateData) {
         skillLevels,
     };
 
-    var path =
-        `systems/${HEROSYS.getModule()}/templates/pop-out/item-skill-card.hbs`;
+    var path = `systems/${HEROSYS.getModule()}/templates/pop-out/item-skill-card.hbs`;
 
     return await renderTemplate(path, templateData);
 }
@@ -113,8 +112,7 @@ async function skillRoll(item, actor, html) {
         user: game.user._id,
         speaker: speaker,
     };
-    const template =
-        `systems/${HEROSYS.getModule()}/templates/chat/skill-success-roll-card.hbs`;
+    const template = `systems/${HEROSYS.getModule()}/templates/chat/skill-success-roll-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
 
     const chatData = {

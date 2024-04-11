@@ -1,5 +1,4 @@
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
-import { HEROSYS } from "../herosystem6e.mjs";
 
 export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     // Rhair3 suggestion:
@@ -12,12 +11,17 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     // seventh Line: Invisible/ Targeted/ Marked/ Blessed
     // Last Line: Fire Shield/ Ice Shield/ Magic Shield/ Holy Shield
 
-    static getEffects() {
+    static getEffects(module) {
         return Object.keys(HeroSystem6eActorActiveEffects)
             .filter((effectKey) => effectKey.includes("Effect"))
             .sort()
             .map((effectKey) => {
-                HeroSystem6eActorActiveEffects[effectKey].icon = `systems/${HEROSYS.getModule()}/${effectKey.icon}`;
+                let heroIcon =
+                    HeroSystem6eActorActiveEffects[effectKey].heroIcon;
+                if (heroIcon) {
+                    HeroSystem6eActorActiveEffects[effectKey].icon =
+                        `systems/${module}/${heroIcon}`;
+                }
                 return HeroSystem6eActorActiveEffects[effectKey];
             });
     }
@@ -262,13 +266,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static abortEffect = {
         id: "aborted",
         name: "Aborted",
-        icon: `icons/aborted.svg`,
+        heroIcon: `icons/aborted.svg`,
     };
 
     static underwaterEffect = {
         id: "underwater",
         name: "Underwater",
-        icon: "icons/underwater.svg",
+        heroIcon: "icons/underwater.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -281,7 +285,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static standingInWaterEffect = {
         id: "standingInWater",
         name: "Standing In Water",
-        icon: "icons/standingInWater.svg",
+        heroIcon: "icons/standingInWater.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -294,13 +298,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static holdingBreathEffect = {
         id: "holdingBreath",
         name: "Holding Breath",
-        icon: "icons/holdingBreath.svg",
+        heroIcon: "icons/holdingBreath.svg",
     };
 
     static grabEffect = {
         id: "grab",
         name: "Grabbed",
-        icon: "icons/noun-wrestling-1061808.svg",
+        heroIcon: "icons/noun-wrestling-1061808.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
