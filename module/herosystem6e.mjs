@@ -222,6 +222,7 @@ Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
 
 export class HEROSYS {
     static ID = "HEROSYS";
+    console.log("RWC HEROSYS running - no system load issues");
 
     static module = undefined;
     
