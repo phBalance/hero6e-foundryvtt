@@ -38,15 +38,12 @@ import "./utility/chat-dice.mjs";
 import "./testing/testing-main.mjs";
 
 Hooks.once("init", async function () {
-    console.log("RWC Hooks.once(init:");
     await foundry.utils.fetchWithTimeout(new URL('../system.json', import.meta.url))
         .then(response => {
-            console.log("RWC .then(response:", response);
             return response.json();
         })
         .then(data => 
         {
-            console.log("RWC .then(data:", data);
         HEROSYS.module = data.id;
         game.herosystem6e = {
             applications: {
@@ -155,7 +152,6 @@ Hooks.once("init", async function () {
         // Handlebars Templates and Partials
         loadTemplates(templatePaths);
     });
-    console.log("RWC after await foundry.utils.fetchWithTimeout:");
 });
 
 Hooks.once("ready", async function () {
@@ -222,12 +218,16 @@ Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
 
 export class HEROSYS {
     static ID = "HEROSYS";
-    console.log("RWC HEROSYS running - no system load issues");
 
-    static module = undefined;
+    static onInitialise(){
+        console.log("HEROSYS running - no system load issues");
+        return null;
+    }
+    
+    static module = HEROSYS.onInitialise();
     
     static getModule(){
-        if(HEROSYS.module === undefined){
+        if(HEROSYS.module === null){
             console.error(`HEROSYS.module accessed before it is loaded`);
             ui.notifications.error(`HEROSYS.module accessed before it is loaded`);
         }
