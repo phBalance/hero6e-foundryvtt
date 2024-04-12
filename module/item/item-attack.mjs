@@ -231,7 +231,7 @@ export async function AttackAoeToHit(item, options) {
     }
 
     const cardData = {
-        HerosysModule:HEROSYS.getModule(),
+        HerosysModule: HEROSYS.getModule(),
         // dice rolls
         renderedHitRoll: renderedRollResult,
         hitRollText: hitRollText,
