@@ -2532,6 +2532,73 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "ACTIVESONAR":
+            case "HRRP":
+            case "INFRAREDPERCEPTION":
+            case "NRAYPERCEPTION":
+            case "RADAR":
+            case "RADIOPERCEIVETRANSMIT":
+            case "RADIOPERCEPTION":
+            case "SPATIALAWARENESS":
+            case "ULTRASONICPERCEPTION":
+            case "ULTRAVIOLETPERCEPTION":
+                system.description = `${system.ALIAS} (${system.GROUP})`;
+                break;
+
+            case "DETECT":
+                system.description = `${system.ALIAS} ${system.OPTION_ALIAS} (${system.GROUP})`;
+                break;
+
+            case "ENHANCEDPERCEPTION":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} +${levels} PER with ${system.OPTION_ALIAS}`;
+                }
+                break;
+
+            case "TELESCOPIC":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} +${levels} range modifier for ${system.OPTION_ALIAS}`;
+                }
+                break;
+
+            case "CONCEALED":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} (-${levels} PER to ${system.OPTION_ALIAS})`;
+                }
+                break;
+
+            case "RAPID":
+                {
+                    const factor = Math.pow(10, parseInt(system.LEVELS || 1));
+                    system.description = `${system.ALIAS} (x${factor}) with ${system.OPTION_ALIAS})`;
+                }
+                break;
+
+            case "CLAIRSENTIENCE":
+            case "ANALYZESENSE":
+            case "DIMENSIONALSINGLE":
+            case "DIMENSIONALGROUP":
+            case "DIMENSIONALALL":
+            case "DISCRIMINATORY":
+            case "INCREASEDARC240":
+            case "INCREASEDARC360":
+            case "MAKEASENSE":
+            case "MICROSCOPIC":
+            case "RANGE":
+            case "TARGETINGSENSE":
+            case "TRACKINGSENSE":
+            case "TRANSMIT":
+                system.description = `${system.ALIAS} with ${system.OPTION_ALIAS}`;
+                break;
+
+            case "MENTALAWARENESS":
+            case "NIGHTVISION":
+                system.description = `${system.ALIAS}`;
+                break;
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
