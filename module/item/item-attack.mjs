@@ -171,15 +171,12 @@ export async function AttackAoeToHit(item, options) {
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
     //       in case the system has calculated it incorrectly.
 
+    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!this.findModsByXmlid("NORMALRANGE");
+
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
-    if (
-        !(
-            item.system.range === "los" ||
-            item.system.range === "no range modifiers" ||
-            item.system.range === "limited normal range"
-        )
-    ) {
+    if (!(item.system.range === "los" || noRangeModifiers || normalRange)) {
         const factor = actor.system.is5e ? 4 : 8;
 
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
@@ -312,15 +309,14 @@ export async function AttackToHit(item, options) {
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
     //       in case the system has calculated it incorrectly.
 
+    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!this.findModsByXmlid("NORMALRANGE");
+
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
         game.user.targets.size > 0 &&
-        !(
-            item.system.range === "los" ||
-            item.system.range === "no range modifiers" ||
-            item.system.range === "limited normal range"
-        )
+        !(item.system.range === "los" || noRangeModifiers || normalRange)
     ) {
         // Educated guess for token
         let token = actor.getActiveTokens()[0];
