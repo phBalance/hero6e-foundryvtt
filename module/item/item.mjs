@@ -2532,6 +2532,15 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "DANGER_SENSE":
+                {
+                    const { roll } =
+                        this._getNonCharacteristicsBasedRollComponents(system);
+
+                    system.description = `${system.ALIAS} ${roll}`;
+                }
+                break;
+
             case "ACTIVESONAR":
             case "HRRP":
             case "INFRAREDPERCEPTION":
@@ -2630,12 +2639,12 @@ export class HeroSystem6eItem extends Item {
                         }
                     }
 
-                    // Add a success roll, if there is one, for skills, talents, or perks
+                    // Add a success roll, if it has one, but only for skills, talents, or perks
                     if (
                         configPowerInfo?.behaviors?.includes("success") &&
-                        configPowerInfo?.type?.filter((type) =>
+                        configPowerInfo?.type?.find((type) =>
                             ["skill", "talent", "perk"].includes(type),
-                        ).length > 0
+                        )
                     ) {
                         system.description += ` ${system.roll}`;
                     }

@@ -205,10 +205,11 @@ export function registerUploadTests(quench) {
                     await item._postUpload();
                     actor.items.set(item.system.XMLID, item);
                     item.skillRollUpdateValue();
+                    item.updateItemDescription();
                 });
 
                 it("description", function () {
-                    assert.equal(item.system.description, "Climbing");
+                    assert.equal(item.system.description, "Climbing 12-");
                 });
 
                 it("realCost", function () {
@@ -6632,7 +6633,7 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Danger Sense (Function as a Sense; out of combat; immediate vicinity)",
+                        "Danger Sense 20- (Function as a Sense; out of combat; immediate vicinity)",
                     );
                 });
 
