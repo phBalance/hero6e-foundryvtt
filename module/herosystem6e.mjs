@@ -38,125 +38,115 @@ import "./utility/chat-dice.mjs";
 import "./testing/testing-main.mjs";
 
 Hooks.once("init", async function () {
-    await foundry.utils
-        .fetchWithTimeout(new URL("../system.json", import.meta.url))
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
-            HEROSYS.module = data.id;
-            game.herosystem6e = {
-                applications: {
-                    HeroSystem6eItemSheet,
-                },
-                entities: {
-                    HeroSystem6eActor,
-                    HeroSystem6eItem,
-                    HeroSystem6eTokenDocument,
-                    HeroSystem6eToken,
-                },
-                macros: macros,
-                rollItemMacro: rollItemMacro,
-                CreateCustomAttack: CreateCustomAttack,
-                config: HERO,
-            };
+    HEROSYS.module = game.system.id;
+    game.herosystem6e = {
+        applications: {
+            HeroSystem6eItemSheet,
+        },
+        entities: {
+            HeroSystem6eActor,
+            HeroSystem6eItem,
+            HeroSystem6eTokenDocument,
+            HeroSystem6eToken,
+        },
+        macros: macros,
+        rollItemMacro: rollItemMacro,
+        CreateCustomAttack: CreateCustomAttack,
+        config: HERO,
+    };
 
-            CONFIG.HERO = HERO;
+    CONFIG.HERO = HERO;
 
-            CONFIG.Combat.documentClass = HeroSystem6eCombat;
-            CONFIG.Combat.defeatedStatusId = "dead";
+    CONFIG.Combat.documentClass = HeroSystem6eCombat;
+    CONFIG.Combat.defeatedStatusId = "dead";
 
-            // V11 now support ActiveEffects on items without
-            // the need to transfer the effect to the actor.
-            CONFIG.ActiveEffect.legacyTransferral = false;
+    // V11 now support ActiveEffects on items without
+    // the need to transfer the effect to the actor.
+    CONFIG.ActiveEffect.legacyTransferral = false;
 
-            /**
-             * Set an initiative formula for the system
-             * @type {String}
-             */
-            CONFIG.Combat.initiative = {
-                formula:
-                    "@characteristics.dex.value + (@characteristics.spd.value / 100)",
-                decimals: 2,
-            };
+    /**
+     * Set an initiative formula for the system
+     * @type {String}
+     */
+    CONFIG.Combat.initiative = {
+        formula:
+            "@characteristics.dex.value + (@characteristics.spd.value / 100)",
+        decimals: 2,
+    };
 
-            // debug
-            // CONFIG.debug.hooks = true;
+    // debug
+    // CONFIG.debug.hooks = true;
 
-            // Define custom Entity classes
-            CONFIG.Actor.documentClass = HeroSystem6eActor;
-            CONFIG.Item.documentClass = HeroSystem6eItem;
-            CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
-            CONFIG.Token.objectClass = HeroSystem6eToken;
-            CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
-            // We can't use the information from system.json in a static context; so we change the load path here.
-            CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(
-                HEROSYS.getModule(),
-            );
+    // Define custom Entity classes
+    CONFIG.Actor.documentClass = HeroSystem6eActor;
+    CONFIG.Item.documentClass = HeroSystem6eItem;
+    CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
+    CONFIG.Token.objectClass = HeroSystem6eToken;
+    CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
+    // We can't use the information from system.json in a static context; so we change the load path here.
+    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(
+        HEROSYS.getModule(),
+    );
 
-            CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-            CONFIG.ui.combat = HeroSystem6eCombatTracker;
+    CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
+    CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
-            HeroRuler.initialize();
+    HeroRuler.initialize();
 
-            SettingsHelpers.initLevelSettings();
+    SettingsHelpers.initLevelSettings();
 
-            initializeHandlebarsHelpers();
-            initializeItemHandlebarsHelpers();
+    initializeHandlebarsHelpers();
+    initializeItemHandlebarsHelpers();
 
-            // Register sheet application classes
-            Actors.unregisterSheet("core", ActorSheet);
-            Actors.registerSheet("herosystem6e", HeroSystemActorSheet, {
-                makeDefault: true,
-            });
-            Actors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
-                makeDefault: false,
-            });
-            Items.unregisterSheet("core", ItemSheet);
-            Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
-                makeDefault: true,
-            });
-            Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, {
-                makeDefault: false,
-            });
+    // Register sheet application classes
+    Actors.unregisterSheet("core", ActorSheet);
+    Actors.registerSheet("herosystem6e", HeroSystemActorSheet, {
+        makeDefault: true,
+    });
+    Actors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
+        makeDefault: false,
+    });
+    Items.unregisterSheet("core", ItemSheet);
+    Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
+        makeDefault: true,
+    });
+    Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, {
+        makeDefault: false,
+    });
 
-            // If you need to add Handlebars helpers, here are a few useful examples:
-            Handlebars.registerHelper("concat", function () {
-                var outStr = "";
-                for (var arg in arguments) {
-                    if (typeof arguments[arg] != "object") {
-                        outStr += arguments[arg];
-                    }
-                }
-                return outStr;
-            });
+    // If you need to add Handlebars helpers, here are a few useful examples:
+    Handlebars.registerHelper("concat", function () {
+        var outStr = "";
+        for (var arg in arguments) {
+            if (typeof arguments[arg] != "object") {
+                outStr += arguments[arg];
+            }
+        }
+        return outStr;
+    });
 
-            Handlebars.registerHelper("toLowerCase", function (str) {
-                return str?.toLowerCase();
-            });
+    Handlebars.registerHelper("toLowerCase", function (str) {
+        return str?.toLowerCase();
+    });
 
-            Handlebars.registerHelper("toUpperCase", function (str) {
-                return str?.toUpperCase();
-            });
+    Handlebars.registerHelper("toUpperCase", function (str) {
+        return str?.toUpperCase();
+    });
 
-            Handlebars.registerHelper(
-                "is_active_segment",
-                function (actives, index) {
-                    return actives?.[index];
-                },
-            );
-            let templatePaths = [
-                `systems/${HEROSYS.getModule()}/templates/item/item-common-partial.hbs`,
-                `systems/${HEROSYS.getModule()}/templates/item/item-effects-partial.hbs`,
-                `systems/${HEROSYS.getModule()}/templates/item/item-attack-partial.hbs`,
-                `systems/${HEROSYS.getModule()}/templates/item/item-sheet-partial.hbs`,
-                `systems/${HEROSYS.getModule()}/templates/item/item-partial-active-points.hbs`,
-                `systems/${HEROSYS.getModule()}/templates/item/item-partial-adders-modifiers.hbs`,
-                `systems/${HEROSYS.getModule()}/templates/item/item-partial-common.hbs`,
-            ];
-            // Handlebars Templates and Partials
-            loadTemplates(templatePaths);
-        });
+    Handlebars.registerHelper("is_active_segment", function (actives, index) {
+        return actives?.[index];
+    });
+    let templatePaths = [
+        `systems/${HEROSYS.getModule()}/templates/item/item-common-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-effects-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-attack-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-sheet-partial.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-partial-active-points.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-partial-adders-modifiers.hbs`,
+        `systems/${HEROSYS.getModule()}/templates/item/item-partial-common.hbs`,
+    ];
+    // Handlebars Templates and Partials
+    loadTemplates(templatePaths);
 });
 
 Hooks.once("ready", async function () {
@@ -224,18 +214,11 @@ Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
 export class HEROSYS {
     static ID = "HEROSYS";
 
-    static onInitialise() {
-        console.log("HEROSYS running - no system load issues");
-        return null;
-    }
-
-    static module = HEROSYS.onInitialise();
-
     static getModule() {
-        if (HEROSYS.module === null) {
-            console.error(`HEROSYS.module accessed before it is loaded`);
+        if (HEROSYS.module === undefined) {
+            console.error(`HEROSYS.module accessed before it is assigned`);
             ui.notifications.error(
-                `HEROSYS.module accessed before it is loaded`,
+                `HEROSYS.module accessed before it is assigned`,
             );
         }
         return HEROSYS.module;
