@@ -1,5 +1,10 @@
 # Releases
 
+## Version 3.0.67 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Improve descriptions for senses.
+- Correct default 6e AOE line width and height determination. [#937](https://github.com/dmdorman/hero6e-foundryvtt/issues/937)
+
 ## Version 3.0.66 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix velocity calculations for 5e. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
@@ -12,7 +17,6 @@
   - There is minimal vetting of in-game editing.  Any invalid adders/modifiers for a specific power will likely to be ignored and/or may cause automation issues.
   - Items modified in-game may have incorrect costs and active points.
   - Be careful when re-uploading HDC files as in-game edits for that actor will be overwritten without warning.
-
 
 ## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

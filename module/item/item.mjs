@@ -937,8 +937,8 @@ export class HeroSystem6eItem extends Item {
             )?.LEVELS || 0,
         );
         // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
-        const width = is5e ? Math.pow(2, widthDouble) : widthDouble;
-        const height = is5e ? Math.pow(2, heightDouble) : heightDouble;
+        const width = is5e ? Math.pow(2, widthDouble) : widthDouble || 2;
+        const height = is5e ? Math.pow(2, heightDouble) : heightDouble || 2;
         let levels = 1;
         let dcFalloff = 0;
 

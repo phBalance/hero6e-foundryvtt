@@ -519,6 +519,61 @@ export function registerUploadTests(quench) {
                         });
                     });
 
+                    describe("line (default width & height)", async function () {
+                        const contents = `
+                            <POWER XMLID="ENERGYBLAST" ID="1707357227575" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="AOE" ID="1707357437029" BASECOST="0.0" LEVELS="13" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="3.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LINE" OPTIONID="LINE" OPTION_ALIAS="Line" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        let item;
+
+                        before(async () => {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                { temporary: true },
+                            );
+                            item = await new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(
+                                    contents,
+                                    actor,
+                                ),
+                                { temporary: true, parent: actor },
+                            );
+                            await item._postUpload();
+                            actor.items.set(item.system.XMLID, item);
+                            item.skillRollUpdateValue();
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Blast 1d6 (ED), Area Of Effect (13m Long, 2m Tall, 2m Wide Line; +1/4)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.system.realCost, 6);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.system.activePoints, 6);
+                        });
+
+                        it("levels", function () {
+                            assert.equal(item.system.value, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.system.end, 1);
+                        });
+                    });
+
                     describe("any area", async function () {
                         const contents = `
                             <POWER XMLID="ENERGYBLAST" ID="1707357291607" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
