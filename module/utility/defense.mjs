@@ -1,3 +1,5 @@
+import { getPowerInfo } from "../utility/util.mjs";
+
 function determineDefense(targetActor, attackItem, options) {
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem);
@@ -300,7 +302,9 @@ function determineDefense(targetActor, attackItem, options) {
             }
 
             if (["GROWTH"].includes(xmlid)) {
-                let _value = value * (targetActor.system.is5e ? 1 : 6);
+                const configPowerInfo = getPowerInfo({ item: activeDefense });
+                const details = configPowerInfo?.details(activeDefense) || {};
+                let _value = details.kb; //value * (targetActor.system.is5e ? 1 : 6);
                 knockbackResistance += _value;
                 defenseTags.push({
                     value: _value,
