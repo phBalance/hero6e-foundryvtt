@@ -25,9 +25,15 @@ async function presenceAttackRoll(actor, html) {
     const heroRoller = new HeroRoller()
         .makeBasicRoll()
         .addDice(Math.trunc(presenceDice), "Presence Attack")
-        .addHalfDice(presenceDice % 1 >= 0.5, "Presence Attack")
+        .addHalfDice(
+            Math.abs(presenceDice) % 1 >= 0.5 ? 1 : 0,
+            "Presence Attack",
+        )
         .addDice(Math.trunc(rollModifier), "Roll Modifier")
-        .addHalfDice(rollModifier % 1 >= 0.5, "Roll Modifier");
+        .addHalfDice(
+            Math.abs(rollModifier) % 1 >= 0.5 ? 1 : 0,
+            "Roll Modifier",
+        );
     await heroRoller.roll();
 
     const cardHtml = await heroRoller.render("Presence Attack");
