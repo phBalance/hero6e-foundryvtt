@@ -4467,7 +4467,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     running: 12,
                     kb: 6,
                     mass: "101-800",
-                    ocv: 2,
+                    dcv: 2,
                     perception: 2,
                     tall: "2-4",
                     wide: "1-2",
@@ -4487,7 +4487,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.running = 24;
                         result.kb = 12;
                         result.mass = "1600";
-                        result.ocv = 4;
+                        result.dcv = 4;
                         result.perception = 4;
                         result.tall = "8";
                         result.wide = "4";
@@ -4504,7 +4504,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.running = 36;
                         result.kb = 18;
                         result.mass = "32000";
-                        result.ocv = 6;
+                        result.dcv = 6;
                         result.perception = 6;
                         result.tall = "16";
                         result.wide = "8";
@@ -4521,7 +4521,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.running = 48;
                         result.kb = 24;
                         result.mass = 100 * 16;
-                        result.ocv = 8;
+                        result.dcv = 8;
                         result.perception = 8;
                         result.tall = "32";
                         result.wide = "16";
@@ -4538,7 +4538,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.running = 60;
                         result.kb = 30;
                         result.mass = 100 * 32;
-                        result.ocv = 10;
+                        result.dcv = 10;
                         result.perception = 10;
                         result.tall = "64";
                         result.wide = "32";
@@ -4555,7 +4555,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.running = 72;
                         result.kb = 36;
                         result.mass = 100 * 64;
-                        result.ocv = 12;
+                        result.dcv = 12;
                         result.perception = 12;
                         result.tall = "128";
                         result.wide = "64";
@@ -4568,7 +4568,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             xml: `<POWER XMLID="GROWTH" ID="1711934263926" BASECOST="25.0" LEVELS="0" ALIAS="Growth" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LARGE" OPTIONID="LARGE" OPTION_ALIAS="Large" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
-        {},
+        {
+            details: function (item) {
+                const result = {
+                    str: parseInt(item.system.value) * 5,
+                    body: parseInt(item.system.value),
+                    stun: parseInt(item.system.value),
+                    reach: Math.pow(2, Math.floor(item.system.value / 3)),
+                    kb: parseInt(item.system.value),
+                    mass: Math.pow(2, item.system.value) * 100,
+                    dcv: 2 * Math.floor(item.system.value / 3),
+                    perception: 2 * Math.floor(item.system.value / 3),
+                    tall: Math.pow(2, Math.floor(item.system.value / 3)) * 2,
+                    wide: Math.pow(2, Math.floor(item.system.value / 3)),
+                };
+                return result;
+            },
+        },
     );
 
     addPower(

@@ -1394,73 +1394,76 @@ export class HeroSystem6eItem extends Item {
         // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
         // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
         if (changed && this.id && this.system.XMLID === "GROWTH") {
-            const details6e = configPowerInfo?.details(this) || {};
-            const strAdd = this.system.is5e
-                ? Math.floor(this.system.value) * 5
-                : details6e.str;
-            const bodyAdd = this.system.is5e
-                ? Math.floor(this.system.value)
-                : details6e.body;
-            const stunAdd = this.system.is5e
-                ? Math.floor(this.system.value)
-                : details6e.stun;
+            const details = configPowerInfo?.details(this) || {};
+            // const strAdd = this.system.is5e
+            //     ? Math.floor(this.system.value) * 5
+            //     : details6e.str;
+            // const bodyAdd = this.system.is5e
+            //     ? Math.floor(this.system.value)
+            //     : details6e.body;
+            // const stunAdd = this.system.is5e
+            //     ? Math.floor(this.system.value)
+            //     : details6e.stun;
 
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
                 (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
             activeEffect.name += `${this.system.XMLID} ${
-                this.system.is5e ? this.system.value : this.system.OPTIONID
+                this.actor.system.is5e
+                    ? this.system.value
+                    : this.system.OPTIONID
             }`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
                     key: "system.characteristics.str.max",
-                    value: strAdd,
+                    value: details.str,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
                 {
                     key: "system.characteristics.body.max",
-                    value: bodyAdd,
+                    value: details.body,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
                 {
                     key: "system.characteristics.stun.max",
-                    value: stunAdd,
+                    value: details.stun,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+                {
+                    // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, should technicallky add to OCV of attacker.
+                    // However 5e use the -DCV concept and we will implemente 6e in kind for now.
+                    key: "system.characteristics.dcv.max",
+                    value: -details.dcv,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
             ];
-            if (!this.system.is5e) {
+            if (!this.actor.system.is5e) {
                 activeEffect.changes.push({
                     key: "system.characteristics.con.max",
-                    value: details6e.con,
+                    value: details.con,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 });
                 activeEffect.changes.push({
                     key: "system.characteristics.pre.max",
-                    value: details6e.pre,
+                    value: details.pre,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 });
                 activeEffect.changes.push({
                     key: "system.characteristics.pd.max",
-                    value: details6e.pd,
+                    value: details.pd,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 });
                 activeEffect.changes.push({
                     key: "system.characteristics.ed.max",
-                    value: details6e.ed,
+                    value: details.ed,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 });
                 activeEffect.changes.push({
                     key: "system.characteristics.running.max",
-                    value: details6e.running,
+                    value: details.running,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 });
-                // + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, should add to OCV of attacker
-                // activeEffect.changes.push({
-                //     key: "system.characteristics.dcv.max",
-                //     value: -details6e.ocv,
-                //     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                // });
             }
             activeEffect.transfer = true;
 
@@ -2066,55 +2069,38 @@ export class HeroSystem6eItem extends Item {
                 // Growth5e (+5 STR, +1 BODY, +1 STUN, -1" KB, 200 kg, +0 DCV, +0 PER Rolls to perceive character, 2 m tall, 1 m wide)
                 // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
                 // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
-                const details6e = configPowerInfo?.details(this) || {};
+                const details = configPowerInfo?.details(this) || {};
                 system.description = `${system.ALIAS} (`;
-                system.description += `+${
-                    system.is5e ? system.value * 5 : 15
-                } STR`;
-                if (!system.is5e) {
-                    system.description += `, +${details6e.con} CON`;
+                system.description += `+${details.str} STR`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.con} CON`;
                 }
-                if (!system.is5e) {
-                    system.description += `, +${details6e.pre} PRE`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.pre} PRE`;
                 }
-                if (!system.is5e) {
-                    system.description += `, +${details6e.pd} PD`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.pd} PD`;
                 }
-                if (!system.is5e) {
-                    system.description += `, +${details6e.ed} ED`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.ed} ED`;
                 }
-                system.description += `, +${
-                    system.is5e ? system.value * 1 : details6e.body
-                } BODY`;
-                system.description += `, +${
-                    system.is5e ? system.value * 1 : details6e.stun
-                } STUN`;
-                if (!system.is5e) {
-                    system.description += `, +${details6e.reach}m Reach`;
+                system.description += `, +${details.body} BODY`;
+                system.description += `, +${details.stun} STUN`;
+                system.description += `, +${details.reach}${
+                    this.actor.system.is5e ? '"' : "m"
+                } Reach`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.running}m Running`;
                 }
-                if (!system.is5e) {
-                    system.description += `, +${details6e.running}m Running`;
+                system.description += `, -${details.kb}${
+                    this.actor?.system.is5e ? '"' : "m"
                 }
-                system.description += `, -${
-                    system.is5e ? system.value + '"' : details6e.kb + "m"
-                } KB`;
-                system.description += `, ${
-                    system.is5e
-                        ? Math.pow(system.value, 2) * 100
-                        : details6e.mass
-                } kg`;
-                if (!system.is5e) {
-                    system.description += `, +${details6e.ocv} to OCV to hit`;
-                }
-                if (!system.is5e) {
-                    system.description += `, +${details6e.perception} to PER Rolls to perceive character`;
-                }
-                if (!system.is5e) {
-                    system.description += `, +${details6e.tall}m tall`;
-                }
-                if (!system.is5e) {
-                    system.description += `, +${details6e.wide}m wide`;
-                }
+                KB`;
+                system.description += `, ${details.mass} kg`;
+                system.description += `, -${details.dcv} DCV`;
+                system.description += `, +${details.perception} to PER Rolls to perceive character`;
+                system.description += `, ${details.tall}m tall`;
+                system.description += `, ${details.wide}m wide`;
                 system.description += `)`;
                 break;
 
