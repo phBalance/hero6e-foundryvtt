@@ -83,7 +83,7 @@
           <ol>
             {{#each csl}}
             <li>
-              {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+              {{radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
             </li>
             {{/each}}
           </ol>
@@ -95,7 +95,7 @@
   </div>
 
   <footer class="sheet-footer flexcol">
-    {{#if noTargets}}
+    {{#if (and noTargets (not aoeText))}}
       <div>
         <p class="hero-warning">
           <i class="fas fa-exclamation-triangle"></i>
