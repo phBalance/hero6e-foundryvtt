@@ -203,12 +203,19 @@ export async function AttackAoeToHit(item, options) {
     attackHeroRoller.addDice(-3);
 
     await attackHeroRoller.roll();
-    const renderedRollResult = await attackHeroRoller.render();
+    const autoSuccess = attackHeroRoller.getAutoSuccess();
     const hitRollTotal = attackHeroRoller.getSuccessTotal();
+    const renderedRollResult = await attackHeroRoller.render();
 
-    let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollTotal;
+    let hitRollText = "AOE origin successfully HITS a DCV of " + hitRollTotal;
 
-    if (hitRollTotal < dcvTargetNumber) {
+    if (autoSuccess !== undefined) {
+        if (autoSuccess) {
+            hitRollText = "AOE origin automatically HITS any DCV";
+        } else {
+            hitRollText = "AOE origin automatically MISSES any DCV";
+        }
+    } else if (hitRollTotal < dcvTargetNumber) {
         const missBy = dcvTargetNumber - hitRollTotal;
 
         const facingHeroRoller = new HeroRoller().makeBasicRoll().addDice(1);
@@ -221,7 +228,7 @@ export async function AttackAoeToHit(item, options) {
                 item.actor.system.is5e ? missBy : missBy * 2,
             ),
         );
-        hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${
+        hitRollText = `AOE origin MISSED by ${missBy}. Move AOE origin ${
             moveDistance + getSystemDisplayUnits(item.actor)
         } in the <b>${facingRollResult}</b> direction.`;
     }
