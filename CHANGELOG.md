@@ -4,6 +4,8 @@
 
 - Improve descriptions for senses.
 - Correct default 6e AOE line width and height determination. [#937](https://github.com/dmdorman/hero6e-foundryvtt/issues/937)
+- 5e missile deflection and reflection should not use END. [#945](https://github.com/dmdorman/hero6e-foundryvtt/issues/945)
+- Presence attack can now do 1/2 dice and 1/2 dice modification increments. [#943](https://github.com/dmdorman/hero6e-foundryvtt/issues/943)
 
 ## Version 3.0.66 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
