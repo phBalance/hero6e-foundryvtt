@@ -92,16 +92,15 @@
       </div>
     {{/if}}
 
-    {{#if aoeText}}
-      <div class="aoe-button flexrow">
-        <button type="submit" name="aoe">
-          Place {{aoeText}} template
-        </button>
-      </div>
-    {{/if}}
   </div>
 
-  <footer class="sheet-footer flexrow">
+  <footer class="sheet-footer flexcol">
+    {{#if aoeText}}
+      <button class="aoe-button" type="submit" name="aoe">
+        Place {{aoeText}} template
+      </button>
+    {{/if}}
+
     <button type="submit" name="roll" {{#if rollHide}}disabled
       title="You must select at least 1 target token, preferably by using the AOE template." {{/if}}>
       {{#if aoeText}}
