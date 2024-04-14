@@ -2096,7 +2096,7 @@ export class HeroSystem6eItem extends Item {
                     this.actor?.system.is5e ? '"' : "m"
                 }
                 KB`;
-                system.description += `, ${details.mass} kg`;
+                system.description += `, ${details.mass}`;
                 system.description += `, -${details.dcv} DCV`;
                 system.description += `, +${details.perception} to PER Rolls to perceive character`;
                 system.description += `, ${details.tall}m tall`;

@@ -4466,7 +4466,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     reach: 1,
                     running: 12,
                     kb: 6,
-                    mass: "101-800",
+                    mass: "101-800 kg",
                     dcv: 2,
                     perception: 2,
                     tall: "2-4",
@@ -4486,7 +4486,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.reach = 3;
                         result.running = 24;
                         result.kb = 12;
-                        result.mass = "1600";
+                        result.mass = "801-6,400 kg";
                         result.dcv = 4;
                         result.perception = 4;
                         result.tall = "8";
@@ -4503,7 +4503,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.reach = 7;
                         result.running = 36;
                         result.kb = 18;
-                        result.mass = "32000";
+                        result.mass = "6,401-50,000 kg";
                         result.dcv = 6;
                         result.perception = 6;
                         result.tall = "16";
@@ -4520,7 +4520,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.reach = 15;
                         result.running = 48;
                         result.kb = 24;
-                        result.mass = 100 * 16;
+                        result.mass = "50,001-400,000 kg";
                         result.dcv = 8;
                         result.perception = 8;
                         result.tall = "32";
@@ -4537,7 +4537,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.reach = 31;
                         result.running = 60;
                         result.kb = 30;
-                        result.mass = 100 * 32;
+                        result.mass = "400,001-3.2 mil kg";
                         result.dcv = 10;
                         result.perception = 10;
                         result.tall = "64";
@@ -4554,7 +4554,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.reach = 63;
                         result.running = 72;
                         result.kb = 36;
-                        result.mass = 100 * 64;
+                        result.mass = "3.3-25.6 mil kg";
                         result.dcv = 12;
                         result.perception = 12;
                         result.tall = "128";
@@ -4576,7 +4576,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     stun: parseInt(item.system.value),
                     reach: Math.pow(2, Math.floor(item.system.value / 3)),
                     kb: parseInt(item.system.value),
-                    mass: Math.pow(2, item.system.value) * 100,
+                    mass:
+                        (
+                            Math.pow(2, item.system.value) * 100
+                        ).toLocaleString() + " kg",
                     dcv: 2 * Math.floor(item.system.value / 3),
                     perception: 2 * Math.floor(item.system.value / 3),
                     tall: Math.pow(2, Math.floor(item.system.value / 3)) * 2,
