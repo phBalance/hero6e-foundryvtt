@@ -715,6 +715,7 @@ export async function AttackToHit(item, options) {
             const singleTarget = Array.from(game.user.targets)[0];
             const toHitRollTotal = targetData[0].toHitRollTotal;
             const firstShotResult = targetData[0].result.hit;
+            const autoSuccess = targetData[0].autoSuccess;
 
             const firstShotRenderedRoll = targetData[0].renderedRoll;
             const firstShotRoller = targetData[0].roller;
@@ -734,7 +735,13 @@ export async function AttackToHit(item, options) {
                         toHitChar.toLowerCase()
                     ].value;
 
-                if (value <= autofireShotRollTotal) {
+                if (autoSuccess !== undefined) {
+                    if (autoSuccess) {
+                        hit = "Auto Hit";
+                    } else {
+                        hit = "Auto Miss";
+                    }
+                } else if (value <= autofireShotRollTotal) {
                     hit = "Hit";
                 }
 
@@ -749,6 +756,7 @@ export async function AttackToHit(item, options) {
                     aoeAlwaysHit: aoeAlwaysHit,
                     toHitChar: toHitChar,
                     toHitRollTotal: autofireShotRollTotal,
+                    autoSuccess: autoSuccess,
                     hitRollText: hitRollText,
                     value: value,
                     result: { hit: hit, by: by.toString() },
