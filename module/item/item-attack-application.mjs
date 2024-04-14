@@ -87,6 +87,7 @@ export class ItemAttackFormApplication extends FormApplication {
             }
         } else {
             data.noTargets = game.user.targets.size === 0;
+            data.aoeText = null;
         }
 
         // Initialize aim to the default option values
