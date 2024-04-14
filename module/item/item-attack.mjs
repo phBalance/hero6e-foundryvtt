@@ -602,8 +602,15 @@ export async function AttackToHit(item, options) {
         aoeModifier && !(SELECTIVETARGET || NONSELECTIVETARGET);
 
     let targetData = [];
-    let targetIds = [];
-    let targetsArray = Array.from(game.user.targets);
+    const targetIds = [];
+    const targetsArray = Array.from(game.user.targets);
+
+    // Has the attacker mistakenly not selected a target?
+    if (targetsArray.length === 0) {
+        return await ui.notifications.warn(
+            `${actor.name} has no target(s) selected for attack with ${item.name}`,
+        );
+    }
 
     // If AOE then sort by distance from center
     if (explosion) {
@@ -621,7 +628,7 @@ export async function AttackToHit(item, options) {
     // Make attacks against all targets
     for (const target of targetsArray) {
         let hit = "Miss";
-        let value = RoundFavorPlayerUp(
+        let targetDefenseValue = RoundFavorPlayerUp(
             target.actor.system.characteristics[toHitChar.toLowerCase()].value,
         );
 
@@ -634,17 +641,17 @@ export async function AttackToHit(item, options) {
 
         // TODO: Auto success and failure
 
-        if (value <= toHitRollTotal || aoeAlwaysHit) {
+        if (targetDefenseValue <= toHitRollTotal || aoeAlwaysHit) {
             hit = "Hit";
         }
 
-        let by = toHitRollTotal - value;
+        let by = toHitRollTotal - targetDefenseValue;
         if (by >= 0) {
             by = "+" + by;
         }
 
         if (explosion) {
-            value = 0;
+            targetDefenseValue = 0;
             hit = "Hit";
             by = aoeModifier.OPTION_ALIAS + aoeModifier.LEVELS;
 
@@ -669,7 +676,7 @@ export async function AttackToHit(item, options) {
             toHitChar: toHitChar,
             toHitRollTotal: toHitRollTotal,
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
-            value: value,
+            value: targetDefenseValue,
             result: { hit: hit, by: by.toString() },
             roller: targetHeroRoller,
             renderedRoll: await targetHeroRoller.render(),
