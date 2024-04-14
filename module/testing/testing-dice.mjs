@@ -344,7 +344,7 @@ export function registerDiceTests(quench) {
                             .addNumber(11)
                             .subNumber(3)
                             .subNumber(-2)
-                            .subDice(3)
+                            .addDice(-3)
                             .addHalfDice(1)
                             .addDice(9)
                             .addNumber(1);
@@ -710,7 +710,7 @@ export function registerDiceTests(quench) {
                             .subNumber(2)
                             .addNumber(-2)
                             .addNumber(3)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -783,7 +783,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 11)
                             .addNumber(11)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -796,7 +796,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 11)
                             .addNumber(11)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -809,7 +809,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 9)
                             .addNumber(18)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -822,7 +822,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 9)
                             .addNumber(19)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 

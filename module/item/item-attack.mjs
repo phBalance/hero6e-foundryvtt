@@ -200,7 +200,7 @@ export async function AttackAoeToHit(item, options) {
         }
     }
 
-    attackHeroRoller.subDice(3);
+    attackHeroRoller.addDice(-3);
 
     await attackHeroRoller.roll();
     const renderedRollResult = await attackHeroRoller.render();
@@ -443,7 +443,7 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    heroRoller.subDice(3);
+    heroRoller.addDice(-3);
 
     const autofire = item.findModsByXmlid("AUTOFIRE");
     const autoFireShots = autofire
@@ -2247,7 +2247,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
                 parseInt(options.knockbackResistance || 0),
                 "Knockback resistance",
             )
-            .subDice(Math.max(0, knockbackDice));
+            .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
 
         const knockbackResultTotal = Math.round(
