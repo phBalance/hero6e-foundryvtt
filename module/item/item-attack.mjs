@@ -636,12 +636,18 @@ export async function AttackToHit(item, options) {
 
         // TODO: Autofire against multiple targets should have increasing difficulty
 
-        await targetHeroRoller.roll();
+        await targetHeroRoller.makeSuccessRoll(true, targetDefenseValue).roll();
+        const autoSuccess = targetHeroRoller.getAutoSuccess();
         const toHitRollTotal = targetHeroRoller.getSuccessTotal();
+        const margin = targetDefenseValue - toHitRollTotal;
 
-        // TODO: Auto success and failure
-
-        if (targetDefenseValue <= toHitRollTotal || aoeAlwaysHit) {
+        if (autoSuccess !== undefined) {
+            if (autoSuccess) {
+                hit = "Auto Hit";
+            } else {
+                hit = "Auto Miss";
+            }
+        } else if (margin <= 0 || aoeAlwaysHit) {
             hit = "Hit";
         }
 
@@ -686,6 +692,7 @@ export async function AttackToHit(item, options) {
         // Assume beneficial adjustment powers always hits
         if (
             hit === "Hit" ||
+            hit === "Auto Hit" ||
             item.system.XMLID == "AID" ||
             item.system.XMLID === "HEALING" ||
             item.system.XMLID === "SUCCOR"
