@@ -81,10 +81,12 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             if (this.getAoeTemplate() || game.user.targets.size > 0) {
-                data.rollHide = false;
+                data.noTargets = false;
             } else {
-                data.rollHide = true;
+                data.noTargets = true;
             }
+        } else {
+            data.noTargets = game.user.targets.size === 0;
         }
 
         // Initialize aim to the default option values
