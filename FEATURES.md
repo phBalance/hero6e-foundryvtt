@@ -160,7 +160,7 @@ Our support ratings:
 | FLASH | C | |
 | FLASH DEFENSE | C | |
 | FLIGHT | B | No turn modes, or gliding. non-combat penalties not automated |
-| GROWTH | D |  |
+| GROWTH | C |  |
 | HAND-TO-HAND ATTACK | A |  |
 | HEALING | A | Works for characteristics, cannot heal powers |
 | IMAGES | D |  |
@@ -184,7 +184,7 @@ Our support ratings:
 | RESISTANT PROTECTION | A |  |
 | RUNNING| B | Non-combat penalties not automated |
 | SHAPE SHIFT| F | You will have to have a different token for each form. No sense support. |
-| SHRINKING | D |  |
+| SHRINKING | C |  |
 | STRETCHING | C | Currently the reach of a power is ignored |
 | SUMMON | F |  You will have to create a separate HDC file and import that for each duplicate. |
 | SWIMMING | B | Non-combat penalties not automated |

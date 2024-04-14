@@ -4454,6 +4454,118 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 5,
+            details: function (item) {
+                const result = {
+                    str: 15,
+                    con: 5,
+                    pre: 5,
+                    pd: 3,
+                    ed: 3,
+                    body: 3,
+                    stun: 6,
+                    reach: 1,
+                    running: 12,
+                    kb: 6,
+                    mass: "101-800",
+                    ocv: 2,
+                    perception: 2,
+                    tall: "2-4",
+                    wide: "1-2",
+                };
+                switch (item.system.OPTIONID) {
+                    case "LARGE":
+                        break;
+                    case "ENORMOUS":
+                        result.str = 30;
+                        result.con = 10;
+                        result.pre = 10;
+                        result.pd = 6;
+                        result.ed = 6;
+                        result.body = 6;
+                        result.stun = 12;
+                        result.reach = 3;
+                        result.running = 24;
+                        result.kb = 12;
+                        result.mass = "1600";
+                        result.ocv = 4;
+                        result.perception = 4;
+                        result.tall = "8";
+                        result.wide = "4";
+                        break;
+                    case "HUGE":
+                        result.str = 45;
+                        result.con = 15;
+                        result.pre = 15;
+                        result.pd = 9;
+                        result.ed = 9;
+                        result.body = 9;
+                        result.stun = 18;
+                        result.reach = 7;
+                        result.running = 36;
+                        result.kb = 18;
+                        result.mass = "32000";
+                        result.ocv = 6;
+                        result.perception = 6;
+                        result.tall = "16";
+                        result.wide = "8";
+                        break;
+                    case "GIGANTIC":
+                        result.str = 60;
+                        result.con = 20;
+                        result.pre = 20;
+                        result.pd = 12;
+                        result.ed = 12;
+                        result.body = 12;
+                        result.stun = 24;
+                        result.reach = 15;
+                        result.running = 48;
+                        result.kb = 24;
+                        result.mass = 100 * 16;
+                        result.ocv = 8;
+                        result.perception = 8;
+                        result.tall = "32";
+                        result.wide = "16";
+                        break;
+                    case "GARGANTUAN":
+                        result.str = 75;
+                        result.con = 25;
+                        result.pre = 25;
+                        result.pd = 15;
+                        result.ed = 15;
+                        result.body = 15;
+                        result.stun = 30;
+                        result.reach = 31;
+                        result.running = 60;
+                        result.kb = 30;
+                        result.mass = 100 * 32;
+                        result.ocv = 10;
+                        result.perception = 10;
+                        result.tall = "64";
+                        result.wide = "32";
+                        break;
+                    case "COLASSAL":
+                        result.str = 90;
+                        result.con = 30;
+                        result.pre = 30;
+                        result.pd = 18;
+                        result.ed = 18;
+                        result.body = 18;
+                        result.stun = 36;
+                        result.reach = 63;
+                        result.running = 72;
+                        result.kb = 36;
+                        result.mass = 100 * 64;
+                        result.ocv = 12;
+                        result.perception = 12;
+                        result.tall = "128";
+                        result.wide = "64";
+                        break;
+                    default:
+                        console.warn("Unknown GROWTH OPTIONID", item);
+                        break;
+                }
+                return result;
+            },
             xml: `<POWER XMLID="GROWTH" ID="1711934263926" BASECOST="25.0" LEVELS="0" ALIAS="Growth" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LARGE" OPTIONID="LARGE" OPTION_ALIAS="Large" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
