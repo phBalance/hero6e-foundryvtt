@@ -172,7 +172,7 @@ export async function AttackAoeToHit(item, options) {
     //       in case the system has calculated it incorrectly.
 
     const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
-    const normalRange = !!this.findModsByXmlid("NORMALRANGE");
+    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
 
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
@@ -310,7 +310,7 @@ export async function AttackToHit(item, options) {
     //       in case the system has calculated it incorrectly.
 
     const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
-    const normalRange = !!this.findModsByXmlid("NORMALRANGE");
+    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
 
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
