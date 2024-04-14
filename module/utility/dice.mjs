@@ -305,7 +305,7 @@ export class HeroRoller {
         return this;
     }
 
-    #addOperatorTerm(operator = "+") {
+    #addOperatorTerm(operator) {
         this._formulaTerms.push(new OperatorTerm({ operator: operator }));
     }
 
@@ -427,11 +427,12 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm();
+        this.#addOperatorTerm(value > 0 ? "+" : "-");
 
+        const absValue = Math.abs(value);
         this._formulaTerms.push(
             new NumericTerm({
-                number: value,
+                number: absValue,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
                     flavor: description,
@@ -439,34 +440,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: value,
-                          },
-                },
-            }),
-        );
-
-        return this;
-    }
-
-    // TODO: Remove
-    subNumber(value, description) {
-        if (!value) {
-            return this;
-        }
-
-        this.#addOperatorTerm("-");
-
-        this._formulaTerms.push(
-            new NumericTerm({
-                number: value,
-                options: {
-                    _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
-                    flavor: description,
-                    _hrTag: !description
-                        ? undefined
-                        : {
-                              name: description,
-                              value: value,
+                              value: absValue,
                           },
                 },
             }),
