@@ -162,7 +162,7 @@ export async function AttackAoeToHit(item, options) {
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, item.system.uses)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
-        .subNumber(parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
+        .addNumber(-parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
 
     if (item.system.range === "self") {
         // TODO: Should not be able to use this on anyone else. Should add a check.
@@ -171,15 +171,12 @@ export async function AttackAoeToHit(item, options) {
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
     //       in case the system has calculated it incorrectly.
 
+    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!this.findModsByXmlid("NORMALRANGE");
+
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
-    if (
-        !(
-            item.system.range === "los" ||
-            item.system.range === "no range modifiers" ||
-            item.system.range === "limited normal range"
-        )
-    ) {
+    if (!(item.system.range === "los" || noRangeModifiers || normalRange)) {
         const factor = actor.system.is5e ? 4 : 8;
 
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
@@ -203,7 +200,7 @@ export async function AttackAoeToHit(item, options) {
         }
     }
 
-    attackHeroRoller.subDice(3);
+    attackHeroRoller.addDice(-3);
 
     await attackHeroRoller.roll();
     const renderedRollResult = await attackHeroRoller.render();
@@ -312,15 +309,14 @@ export async function AttackToHit(item, options) {
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
     //       in case the system has calculated it incorrectly.
 
+    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!this.findModsByXmlid("NORMALRANGE");
+
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
         game.user.targets.size > 0 &&
-        !(
-            item.system.range === "los" ||
-            item.system.range === "no range modifiers" ||
-            item.system.range === "limited normal range"
-        )
+        !(item.system.range === "los" || noRangeModifiers || normalRange)
     ) {
         // Educated guess for token
         let token = actor.getActiveTokens()[0];
@@ -447,7 +443,7 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    heroRoller.subDice(3);
+    heroRoller.addDice(-3);
 
     const autofire = item.findModsByXmlid("AUTOFIRE");
     const autoFireShots = autofire
@@ -2247,11 +2243,11 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
                 body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
                 "Max potential knockback",
             )
-            .subNumber(
-                parseInt(options.knockbackResistance || 0),
+            .addNumber(
+                -parseInt(options.knockbackResistance || 0),
                 "Knockback resistance",
             )
-            .subDice(Math.max(0, knockbackDice));
+            .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
 
         const knockbackResultTotal = Math.round(

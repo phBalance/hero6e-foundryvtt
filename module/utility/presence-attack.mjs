@@ -16,14 +16,23 @@ async function _renderForm(actor, stateData) {
 }
 
 async function presenceAttackRoll(actor, html) {
-    let form = html[0].querySelector("form");
+    const form = html[0].querySelector("form");
+    const rollModifier = parseFloat(form.mod.value);
+
+    const presence = parseInt(actor.system.characteristics.pre.value);
+    const presenceDice = presence / 5;
 
     const heroRoller = new HeroRoller()
         .makeBasicRoll()
-        .addDice(
-            parseInt(Math.floor(actor.system.characteristics.pre.value / 5)) +
-                parseInt(form.mod.value),
+        .addDice(Math.trunc(presenceDice), "Presence Attack")
+        .addHalfDice(
+            Math.abs(presenceDice) % 1 >= 0.5 ? 1 : 0,
             "Presence Attack",
+        )
+        .addDice(Math.trunc(rollModifier), "Roll Modifier")
+        .addHalfDice(
+            Math.abs(rollModifier) % 1 >= 0.5 ? 1 : 0,
+            "Roll Modifier",
         );
     await heroRoller.roll();
 

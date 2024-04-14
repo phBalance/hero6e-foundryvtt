@@ -937,8 +937,8 @@ export class HeroSystem6eItem extends Item {
             )?.LEVELS || 0,
         );
         // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
-        const width = is5e ? Math.pow(2, widthDouble) : widthDouble;
-        const height = is5e ? Math.pow(2, heightDouble) : heightDouble;
+        const width = is5e ? Math.pow(2, widthDouble) : widthDouble || 2;
+        const height = is5e ? Math.pow(2, heightDouble) : heightDouble || 2;
         let levels = 1;
         let dcFalloff = 0;
 
@@ -2578,6 +2578,82 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "DANGER_SENSE":
+                {
+                    const { roll } =
+                        this._getNonCharacteristicsBasedRollComponents(system);
+
+                    system.description = `${system.ALIAS} ${roll}`;
+                }
+                break;
+
+            case "ACTIVESONAR":
+            case "HRRP":
+            case "INFRAREDPERCEPTION":
+            case "NRAYPERCEPTION":
+            case "RADAR":
+            case "RADIOPERCEIVETRANSMIT":
+            case "RADIOPERCEPTION":
+            case "SPATIALAWARENESS":
+            case "ULTRASONICPERCEPTION":
+            case "ULTRAVIOLETPERCEPTION":
+                system.description = `${system.ALIAS} (${system.GROUP})`;
+                break;
+
+            case "DETECT":
+                system.description = `${system.ALIAS} ${system.OPTION_ALIAS} (${system.GROUP})`;
+                break;
+
+            case "ENHANCEDPERCEPTION":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} +${levels} PER with ${system.OPTION_ALIAS}`;
+                }
+                break;
+
+            case "TELESCOPIC":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} +${levels} range modifier for ${system.OPTION_ALIAS}`;
+                }
+                break;
+
+            case "CONCEALED":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} (-${levels} PER to ${system.OPTION_ALIAS})`;
+                }
+                break;
+
+            case "RAPID":
+                {
+                    const factor = Math.pow(10, parseInt(system.LEVELS || 1));
+                    system.description = `${system.ALIAS} (x${factor}) with ${system.OPTION_ALIAS})`;
+                }
+                break;
+
+            case "CLAIRSENTIENCE":
+            case "ANALYZESENSE":
+            case "DIMENSIONALSINGLE":
+            case "DIMENSIONALGROUP":
+            case "DIMENSIONALALL":
+            case "DISCRIMINATORY":
+            case "INCREASEDARC240":
+            case "INCREASEDARC360":
+            case "MAKEASENSE":
+            case "MICROSCOPIC":
+            case "RANGE":
+            case "TARGETINGSENSE":
+            case "TRACKINGSENSE":
+            case "TRANSMIT":
+                system.description = `${system.ALIAS} with ${system.OPTION_ALIAS}`;
+                break;
+
+            case "MENTALAWARENESS":
+            case "NIGHTVISION":
+                system.description = `${system.ALIAS}`;
+                break;
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
@@ -2609,12 +2685,12 @@ export class HeroSystem6eItem extends Item {
                         }
                     }
 
-                    // Add a success roll, if there is one, for skills, talents, or perks
+                    // Add a success roll, if it has one, but only for skills, talents, or perks
                     if (
                         configPowerInfo?.behaviors?.includes("success") &&
-                        configPowerInfo?.type?.filter((type) =>
+                        configPowerInfo?.type?.find((type) =>
                             ["skill", "talent", "perk"].includes(type),
-                        ).length > 0
+                        )
                     ) {
                         system.description += ` ${system.roll}`;
                     }
