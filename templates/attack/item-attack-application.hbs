@@ -97,7 +97,10 @@
   <footer class="sheet-footer flexcol">
     {{#if noTargets}}
       <div>
-        <p class="">{{localize "Items.Attack.NoTargetsSelected"}}</p>
+        <p class="hero-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          {{localize "Items.Attack.NoTargetsSelected"}}
+        </p>
         <i>{{localize "Items.Attack.TargetingExplanation"}}</i>
       </div>
     {{/if}}
