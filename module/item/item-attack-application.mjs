@@ -207,13 +207,11 @@ export class ItemAttackFormApplication extends FormApplication {
     async _spawnAreaOfEffect() {
         const item = this.data.item;
         const aoeModifier = item.getAoeModifier();
-        if (!aoeModifier) return;
+        const areaOfEffect = item.system.areaOfEffect;
+        if (!aoeModifier || !areaOfEffect) return;
 
         const aoeType = aoeModifier.OPTION.toLowerCase();
-        const aoeValue = Math.max(
-            item.actor.system.is5e ? 0.5 : 1,
-            parseInt(aoeModifier.LEVELS || 0),
-        ); // Even 1 hex it technically 1m
+        const aoeValue = areaOfEffect.value;
 
         const actor = item.actor;
         const actorIs6e = !item.actor?.system?.is5e;
@@ -263,28 +261,10 @@ export class ItemAttackFormApplication extends FormApplication {
 
             case "ray":
                 {
-                    const widthDouble = parseInt(
-                        (aoeModifier.ADDER || []).find(
-                            (adder) => adder.XMLID === "DOUBLEWIDTH",
-                        )?.LEVELS || 0,
-                    );
-                    const heightDouble = parseInt(
-                        (aoeModifier.ADDER || []).find(
-                            (adder) => adder.XMLID === "DOUBLEHEIGHT",
-                        )?.LEVELS || 0,
-                    );
-
-                    // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
-                    const width = actorIs6e
-                        ? widthDouble
-                        : sizeConversionToMeters * Math.pow(2, widthDouble);
-                    const height = actorIs6e
-                        ? heightDouble
-                        : sizeConversionToMeters * Math.pow(2, heightDouble);
-
-                    templateData.width = width;
-                    templateData.flags.width = width;
-                    templateData.flags.height = height;
+                    templateData.width =
+                        sizeConversionToMeters * areaOfEffect.width;
+                    templateData.flags.width = areaOfEffect.width;
+                    templateData.flags.height = areaOfEffect.height;
                 }
                 break;
 
