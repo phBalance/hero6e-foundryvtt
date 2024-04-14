@@ -97,8 +97,7 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
         .addDice(Math.trunc(numDice))
         .addDiceMinus1(negativeTermWithDice ? 1 : 0)
         .addHalfDice(numDice % 1 ? 1 : 0)
-        .addNumber(numericTerm > 0 ? Math.trunc(numericTerm) : 0)
-        .subNumber(numericTerm < 0 ? -Math.trunc(numericTerm) : 0);
+        .addNumber(Math.trunc(numericTerm));
 
     await roller.roll();
 
