@@ -612,13 +612,6 @@ export async function AttackToHit(item, options) {
     const targetIds = [];
     const targetsArray = Array.from(game.user.targets);
 
-    // Has the attacker mistakenly not selected a target?
-    if (targetsArray.length === 0) {
-        return await ui.notifications.warn(
-            `${actor.name} has no target(s) selected for attack with ${item.name}`,
-        );
-    }
-
     // If AOE then sort by distance from center
     if (explosion) {
         targetsArray.sort(function (a, b) {
@@ -634,7 +627,6 @@ export async function AttackToHit(item, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        let hit = "Miss";
         let targetDefenseValue = RoundFavorPlayerUp(
             target.actor.system.characteristics[toHitChar.toLowerCase()].value,
         );
@@ -648,6 +640,7 @@ export async function AttackToHit(item, options) {
         const toHitRollTotal = targetHeroRoller.getSuccessTotal();
         const margin = targetDefenseValue - toHitRollTotal;
 
+        let hit = "Miss";
         if (autoSuccess !== undefined) {
             if (autoSuccess) {
                 hit = "Auto Hit";
@@ -688,6 +681,7 @@ export async function AttackToHit(item, options) {
             aoeAlwaysHit: aoeAlwaysHit,
             toHitChar: toHitChar,
             toHitRollTotal: toHitRollTotal,
+            autoSuccess: autoSuccess,
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
             value: targetDefenseValue,
             result: { hit: hit, by: by.toString() },

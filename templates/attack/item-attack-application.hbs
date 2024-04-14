@@ -95,14 +95,20 @@
   </div>
 
   <footer class="sheet-footer flexcol">
+    {{#if noTargets}}
+      <div>
+        <p class="">{{localize "Items.Attack.NoTargetsSelected"}}</p>
+        <i>{{localize "Items.Attack.TargetingExplanation"}}</i>
+      </div>
+    {{/if}}
+
     {{#if aoeText}}
       <button class="aoe-button" type="submit" name="aoe">
         Place {{aoeText}} template
       </button>
     {{/if}}
 
-    <button type="submit" name="roll" {{#if rollHide}}disabled
-      title="You must select at least 1 target token, preferably by using the AOE template." {{/if}}>
+    <button type="submit" name="roll">
       {{#if aoeText}}
         Roll Placement
       {{else}}
