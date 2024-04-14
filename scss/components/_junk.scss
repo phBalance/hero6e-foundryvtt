@@ -60,11 +60,11 @@ div.fifthEd {
 }
 
 .toHit-card .target-dc-result .Miss {
-  color: red;
+  color: $c-miss;
 }
 
 .toHit-card .target-dc-result .Hit {
-  color: blue;
+  color: $c-hit;
 }
 
 .toHit-card .target-dc {
