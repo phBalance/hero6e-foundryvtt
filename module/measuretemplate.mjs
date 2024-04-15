@@ -39,7 +39,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     }
 
     // Tokens within template
-    getTokensInTempalte(options) {
+    getTokensInTemplate(options) {
         let tokens = [];
         for (let token of this.scene.tokens) {
             if (this.isTokenInside(token, options)) {
@@ -51,7 +51,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
     isTokenInside(token, options) {
         options = { checkShape: true, checkPositions: true, ...options };
-        // Use Shape (but there are rorunding issues; specifically if token and MeasuredTemplate have same hex origin)
+        // Use Shape (but there are rounding issues; specifically if token and MeasuredTemplate have same hex origin)
         if (options.checkShape) {
             const obj = token?.object;
             const _x = obj.center.x - (options?.templateData?.x || this.x);
@@ -76,7 +76,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     async selectObjects(options) {
         let targets = [];
 
-        for (let token of this.getTokensInTempalte(options)) {
+        for (let token of this.getTokensInTemplate(options)) {
             if (!token?.hidden) {
                 targets.push(token.id);
             }
