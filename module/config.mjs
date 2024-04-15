@@ -179,8 +179,8 @@ function validatePowers() {
             !(
                 power.type.includes("framework") ||
                 power.type.includes("compound") ||
-                power.type.includes("adder") ||
-                power.type.includes("modifier")
+                power.behaviors.includes("adder") ||
+                power.behaviors.includes("modifier")
             ) && !power.range,
     );
     if (powersWithoutRange.length > 0) {
