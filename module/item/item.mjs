@@ -2066,11 +2066,11 @@ export class HeroSystem6eItem extends Item {
                 } KB)`;
                 break;
 
-            case "GROWTH":
-                // Growth5e (+5 STR, +1 BODY, +1 STUN, -1" KB, 200 kg, +0 DCV, +0 PER Rolls to perceive character, 2 m tall, 1 m wide)
-                // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
-                // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
-                const details = configPowerInfo.details(this);
+            case "GROWTH": // Growth5e (+5 STR, +1 BODY, +1 STUN, -1" KB, 200 kg, +0 DCV, +0 PER Rolls to perceive character, 2 m tall, 1 m wide)
+            // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
+            // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
+            {
+                const details = configPowerInfo?.details(this) || {};
                 system.description = `${system.ALIAS} (`;
                 system.description += `+${details.str} STR`;
                 if (!this.actor?.system.is5e) {
@@ -2104,6 +2104,7 @@ export class HeroSystem6eItem extends Item {
                 system.description += `, ${details.wide}m wide`;
                 system.description += `)`;
                 break;
+            }
 
             case "SHRINKING":
                 // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
