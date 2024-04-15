@@ -2612,7 +2612,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "POWERSKILL",
             type: ["skill"],
-            behaviors: [],
+            behaviors: ["success"],
             duration: "constant",
             target: "self only",
             range: "self",
