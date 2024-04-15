@@ -203,12 +203,19 @@ export async function AttackAoeToHit(item, options) {
     attackHeroRoller.addDice(-3);
 
     await attackHeroRoller.roll();
-    const renderedRollResult = await attackHeroRoller.render();
+    const autoSuccess = attackHeroRoller.getAutoSuccess();
     const hitRollTotal = attackHeroRoller.getSuccessTotal();
+    const renderedRollResult = await attackHeroRoller.render();
 
-    let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollTotal;
+    let hitRollText = "AOE origin successfully HITS a DCV of " + hitRollTotal;
 
-    if (hitRollTotal < dcvTargetNumber) {
+    if (autoSuccess !== undefined) {
+        if (autoSuccess) {
+            hitRollText = "AOE origin automatically HITS any DCV";
+        } else {
+            hitRollText = "AOE origin automatically MISSES any DCV";
+        }
+    } else if (hitRollTotal < dcvTargetNumber) {
         const missBy = dcvTargetNumber - hitRollTotal;
 
         const facingHeroRoller = new HeroRoller().makeBasicRoll().addDice(1);
@@ -221,7 +228,7 @@ export async function AttackAoeToHit(item, options) {
                 item.actor.system.is5e ? missBy : missBy * 2,
             ),
         );
-        hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${
+        hitRollText = `AOE origin MISSED by ${missBy}. Move AOE origin ${
             moveDistance + getSystemDisplayUnits(item.actor)
         } in the <b>${facingRollResult}</b> direction.`;
     }
@@ -602,8 +609,8 @@ export async function AttackToHit(item, options) {
         aoeModifier && !(SELECTIVETARGET || NONSELECTIVETARGET);
 
     let targetData = [];
-    let targetIds = [];
-    let targetsArray = Array.from(game.user.targets);
+    const targetIds = [];
+    const targetsArray = Array.from(game.user.targets);
 
     // If AOE then sort by distance from center
     if (explosion) {
@@ -620,8 +627,7 @@ export async function AttackToHit(item, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        let hit = "Miss";
-        let value = RoundFavorPlayerUp(
+        let targetDefenseValue = RoundFavorPlayerUp(
             target.actor.system.characteristics[toHitChar.toLowerCase()].value,
         );
 
@@ -629,22 +635,29 @@ export async function AttackToHit(item, options) {
 
         // TODO: Autofire against multiple targets should have increasing difficulty
 
-        await targetHeroRoller.roll();
+        await targetHeroRoller.makeSuccessRoll(true, targetDefenseValue).roll();
+        const autoSuccess = targetHeroRoller.getAutoSuccess();
         const toHitRollTotal = targetHeroRoller.getSuccessTotal();
+        const margin = targetDefenseValue - toHitRollTotal;
 
-        // TODO: Auto success and failure
-
-        if (value <= toHitRollTotal || aoeAlwaysHit) {
+        let hit = "Miss";
+        if (autoSuccess !== undefined) {
+            if (autoSuccess) {
+                hit = "Auto Hit";
+            } else {
+                hit = "Auto Miss";
+            }
+        } else if (margin <= 0 || aoeAlwaysHit) {
             hit = "Hit";
         }
 
-        let by = toHitRollTotal - value;
+        let by = toHitRollTotal - targetDefenseValue;
         if (by >= 0) {
             by = "+" + by;
         }
 
         if (explosion) {
-            value = 0;
+            targetDefenseValue = 0;
             hit = "Hit";
             by = aoeModifier.OPTION_ALIAS + aoeModifier.LEVELS;
 
@@ -668,8 +681,9 @@ export async function AttackToHit(item, options) {
             aoeAlwaysHit: aoeAlwaysHit,
             toHitChar: toHitChar,
             toHitRollTotal: toHitRollTotal,
+            autoSuccess: autoSuccess,
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
-            value: value,
+            value: targetDefenseValue,
             result: { hit: hit, by: by.toString() },
             roller: targetHeroRoller,
             renderedRoll: await targetHeroRoller.render(),
@@ -679,6 +693,7 @@ export async function AttackToHit(item, options) {
         // Assume beneficial adjustment powers always hits
         if (
             hit === "Hit" ||
+            hit === "Auto Hit" ||
             item.system.XMLID == "AID" ||
             item.system.XMLID === "HEALING" ||
             item.system.XMLID === "SUCCOR"
@@ -694,6 +709,7 @@ export async function AttackToHit(item, options) {
             const singleTarget = Array.from(game.user.targets)[0];
             const toHitRollTotal = targetData[0].toHitRollTotal;
             const firstShotResult = targetData[0].result.hit;
+            const autoSuccess = targetData[0].autoSuccess;
 
             const firstShotRenderedRoll = targetData[0].renderedRoll;
             const firstShotRoller = targetData[0].roller;
@@ -713,7 +729,13 @@ export async function AttackToHit(item, options) {
                         toHitChar.toLowerCase()
                     ].value;
 
-                if (value <= autofireShotRollTotal) {
+                if (autoSuccess !== undefined) {
+                    if (autoSuccess) {
+                        hit = "Auto Hit";
+                    } else {
+                        hit = "Auto Miss";
+                    }
+                } else if (value <= autofireShotRollTotal) {
                     hit = "Hit";
                 }
 
@@ -728,6 +750,7 @@ export async function AttackToHit(item, options) {
                     aoeAlwaysHit: aoeAlwaysHit,
                     toHitChar: toHitChar,
                     toHitRollTotal: autofireShotRollTotal,
+                    autoSuccess: autoSuccess,
                     hitRollText: hitRollText,
                     value: value,
                     result: { hit: hit, by: by.toString() },
