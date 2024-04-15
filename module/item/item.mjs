@@ -1491,7 +1491,8 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        //  SHRINKING (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+        // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+        // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
         if (changed && this.id && this.system.XMLID === "SHRINKING") {
             const dcvAdd = Math.floor(this.system.value) * 2;
 
@@ -2105,15 +2106,30 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "SHRINKING":
-                // SHRINKING (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
-                system.description = `${system.ALIAS} (+${
+                // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+                // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
+                system.description = `${system.ALIAS} (`;
+                system.description += `${(
+                    2 / Math.pow(2, parseInt(system.value))
+                )
+                    .toPrecision(3)
+                    .replace(/\.?0+$/, "")} m tall`;
+                system.description += `, ${(
+                    100 / Math.pow(8, parseInt(system.value))
+                )
+                    .toPrecision(4)
+                    .replace(/\.?0+$/, "")}
+                kg mass`;
+                system.description += `, -${
                     system.value * 2
-                } DCV, -${
-                    this.actor?.system.is5e
-                        ? system.value + '"'
-                        : system.value * 6 + "m"
-                } KB, ${100 / (system.value * 8)}
-                kg mass)`;
+                } PER Rolls to perceive character`;
+                system.description += `, +${system.value * 2} DCV`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, takes +${
+                        system.value * 6 + "m"
+                    } KB`;
+                }
+
                 break;
 
             case "MENTALDEFENSE":
