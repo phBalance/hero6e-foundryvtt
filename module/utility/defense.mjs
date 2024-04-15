@@ -304,7 +304,7 @@ function determineDefense(targetActor, attackItem, options) {
             if (["GROWTH"].includes(xmlid)) {
                 const configPowerInfo = getPowerInfo({ item: activeDefense });
                 const details = configPowerInfo?.details(activeDefense) || {};
-                let _value = details.kb; //value * (targetActor.system.is5e ? 1 : 6);
+                let _value = details.kb;
                 knockbackResistance += _value;
                 defenseTags.push({
                     value: _value,
@@ -314,7 +314,7 @@ function determineDefense(targetActor, attackItem, options) {
             }
 
             if (["SHRINKING"].includes(xmlid)) {
-                let _value = -value * (targetActor.system.is5e ? 1 : 6);
+                let _value = -value * (targetActor.system.is5e ? 3 : 6);
                 knockbackResistance += _value;
                 defenseTags.push({
                     value: _value,

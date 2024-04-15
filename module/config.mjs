@@ -4543,7 +4543,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         result.tall = "64";
                         result.wide = "32";
                         break;
-                    case "COLASSAL":
+                    case "COLOSSAL":
                         result.str = 90;
                         result.con = 30;
                         result.pre = 30;
