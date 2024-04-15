@@ -2,14 +2,13 @@
 
 ## Version 3.0.67 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Improve descriptions for senses.
+- Improve descriptions for senses. [#934](https://github.com/dmdorman/hero6e-foundryvtt/issues/934)
 - Correct default 6e AOE line width and height determination. [#937](https://github.com/dmdorman/hero6e-foundryvtt/issues/937)
 - 5e missile deflection and reflection should not use END. [#945](https://github.com/dmdorman/hero6e-foundryvtt/issues/945)
 - Presence attack can now do 1/2 dice and 1/2 dice modification increments. [#943](https://github.com/dmdorman/hero6e-foundryvtt/issues/943)
-- Attacks now have auto success (3) and auto failure (18). [#562](https://github.com/dmdorman/hero6e-foundryvtt/issues/562)
+- Attacks now have auto success (3) and auto failure (18). [#562](https://github.com/dmdorman/hero6e-foundryvtt/issues/562) [#522](https://github.com/dmdorman/hero6e-foundryvtt/issues/522)
 - Warning is now given when attacking with no target selected. [#927](https://github.com/dmdorman/hero6e-foundryvtt/issues/927)
-- Fixed issue where SHRINKING failed to toggle on/off. [#936](https://github.com/dmdorman/hero6e-foundryvtt/issues/936)
-- Improved SHRINKING and GROWTH support.
+- Improved SHRINKING and GROWTH support. [#936](https://github.com/dmdorman/hero6e-foundryvtt/issues/936)
 
 ## Version 3.0.66 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

@@ -1390,21 +1390,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         // 5e GROWTH
-        // Growth53 (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
+        // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
         // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
         // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
         if (changed && this.id && this.system.XMLID === "GROWTH") {
             const details = configPowerInfo?.details(this) || {};
-            // const strAdd = this.system.is5e
-            //     ? Math.floor(this.system.value) * 5
-            //     : details6e.str;
-            // const bodyAdd = this.system.is5e
-            //     ? Math.floor(this.system.value)
-            //     : details6e.body;
-            // const stunAdd = this.system.is5e
-            //     ? Math.floor(this.system.value)
-            //     : details6e.stun;
-
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
                 (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
@@ -1431,8 +1421,9 @@ export class HeroSystem6eItem extends Item {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
                 {
-                    // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, should technicallky add to OCV of attacker.
-                    // However 5e use the -DCV concept and we will implemente 6e in kind for now.
+                    // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
+                    // should technicaly add to OCV of attacker.
+                    // However 5e use the -DCV concept and we will implement 6e in kind for now.
                     key: "system.characteristics.dcv.max",
                     value: -details.dcv,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -2107,7 +2098,7 @@ export class HeroSystem6eItem extends Item {
 
             case "SHRINKING":
                 // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
-                // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
+                // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV) -- Also +3" KB which is not in HD
                 system.description = `${system.ALIAS} (`;
                 system.description += `${(
                     2 / Math.pow(2, parseInt(system.value))
@@ -2124,11 +2115,10 @@ export class HeroSystem6eItem extends Item {
                     system.value * 2
                 } PER Rolls to perceive character`;
                 system.description += `, +${system.value * 2} DCV`;
-                if (!this.actor?.system.is5e) {
-                    system.description += `, takes +${
-                        system.value * 6 + "m"
-                    } KB`;
-                }
+                system.description += `, takes +${
+                    system.value * (this.actor.system.is5e ? 3 : 6) +
+                    getSystemDisplayUnits(this.actor)
+                } KB`;
 
                 break;
 
