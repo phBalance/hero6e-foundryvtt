@@ -1370,6 +1370,16 @@ export class HeroSystem6eActor extends Actor {
                                             xmlid: system2.XMLID,
                                             actor: this,
                                         });
+                                        if (!power) {
+                                            await ui.notifications.error(
+                                                `${this.name}/${item.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                {
+                                                    console: true,
+                                                    permanent: true,
+                                                },
+                                            );
+                                            continue;
+                                        }
                                         let itemData2 = {
                                             name:
                                                 system2.NAME ||
