@@ -75,8 +75,9 @@ export class ItemAttackFormApplication extends FormApplication {
         const aoe = item.getAoeModifier();
         if (aoe) {
             data.aoeText = aoe.OPTION_ALIAS;
-            if (aoe.LEVELS) {
-                data.aoeText += ` (${aoe.LEVELS}${getSystemDisplayUnits(
+            const levels = parseInt(aoe.LEVELS) || parseInt(aoe.levels);
+            if (levels) {
+                data.aoeText += ` (${levels}${getSystemDisplayUnits(
                     item.actor,
                 )})`;
             }

@@ -456,6 +456,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         );
 
                         await item._postUpload();
+                        await item.actor.CalcActorRealAndActivePoints();
                         return;
                     },
                 },
@@ -529,6 +530,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             // }
 
             await this.item._postUpload();
+            await this.item.actor.CalcActorRealAndActivePoints();
 
             this.render();
         }
@@ -632,7 +634,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // HD lite (currently only SKILL) uses generic _postUpload
         // TODO: Much of the above is likely not necessary as _postUpload does alot
         await this.item._postUpload();
-        this.render();
+        await this.item.actor.CalcActorRealAndActivePoints();
+        //await this.render();
     }
 
     async _onSubItemCreate(event) {

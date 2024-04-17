@@ -1,5 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 
+import { getPowerInfo } from "../utility/util.mjs";
+
 export class ItemModifierFormApplication extends FormApplication {
     constructor(data) {
         super();
@@ -28,6 +30,14 @@ export class ItemModifierFormApplication extends FormApplication {
     getData() {
         console.log(this.data.mod);
         const data = this.data;
+
+        const configPowerInfo = getPowerInfo({
+            xmlid: this.data?.mod?.XMLID,
+            actor: this.data.item.actor,
+        });
+        if (configPowerInfo) {
+            data.editOptions = configPowerInfo.editOptions;
+        }
         return data;
     }
 
@@ -48,6 +58,19 @@ export class ItemModifierFormApplication extends FormApplication {
         console.log(event, formData);
         const expandedData = foundry.utils.expandObject(formData);
         this.data.mod = { ...this.data.mod, ...expandedData.mod };
+
+        if (this.data.editOptions?.choices) {
+            const choiceSelected = this.data.editOptions.choices.find(
+                (o) => o.OPTIONID === this.data.mod.OPTIONID,
+            );
+            this.data.mod.OPTION = choiceSelected.OPTION;
+            this.data.mod.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
+            this.data.mod.BASECOST =
+                choiceSelected.BASECOST || this.data.mod.BASECOST;
+            // this.data.mod.baseCost = this.data.mod.BASECOST;
+            // this.data.mod.BASECOST_total = this.data.mod.baseCost;
+        }
+
         const oldMod = this.data.item.findModById(this.data.mod.ID);
         const idx = this.data.item.system[oldMod._parentKey].findIndex(
             (o) => o.ID == oldMod.ID,
@@ -56,6 +79,7 @@ export class ItemModifierFormApplication extends FormApplication {
         await this.data.item.update({ system: this.data.item.system });
 
         await this.data.item._postUpload();
+        await this.data.item.actor.CalcActorRealAndActivePoints();
 
         // Show any changes
         this.render();

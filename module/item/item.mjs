@@ -776,11 +776,11 @@ export class HeroSystem6eItem extends Item {
         let changed = false;
 
         // BASECOST
-        const newBaseValue = parseFloat(this.system.BASECOST || 0);
-        if (this.system.baseCost != newBaseValue) {
-            this.system.baseCost = newBaseValue;
-            changed = true;
-        }
+        // const newBaseValue = parseFloat(this.system.BASECOST || 0);
+        // if (this.system.baseCost != newBaseValue) {
+        //     this.system.baseCost = newBaseValue;
+        //     changed = true;
+        // }
 
         // BASECOST (children)
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
@@ -1046,8 +1046,13 @@ export class HeroSystem6eItem extends Item {
 
         // Set LEVELS equal to the length of the basic dimensions of the shape (length for line, side length for cone, etc.)
         // TODO: Would be best if we didn't modify the XML unless the power actually changed.
-        if (parseInt(modifier.LEVELS) !== levels) {
-            modifier.LEVELS = levels;
+        // if (parseInt(modifier.LEVELS) !== levels) {
+        //     modifier.LEVELS = levels;
+        //     changed = true;
+        // }
+        // Aaron is reworking 5e AOE to use lower case levels instead of changing XML uppercase LEVELS
+        if (parseInt(modifier.levels) !== levels) {
+            modifier.levels = levels;
             changed = true;
         }
 
@@ -1635,7 +1640,7 @@ export class HeroSystem6eItem extends Item {
         });
 
         // Base Cost is typically extracted directly from HDC
-        let baseCost = system.baseCost;
+        let baseCost = parseFloat(system.BASECOST) || 0;
 
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
@@ -1770,7 +1775,7 @@ export class HeroSystem6eItem extends Item {
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
             for (let adder of system.POWER) {
-                let adderBaseCost = adder.baseCost; //parseFloat(adder.BASECOST)
+                let adderBaseCost = parseFloat(adder.BASECOST);
                 let adderLevels = Math.max(1, parseInt(adder.LEVELS));
                 adderCost += Math.ceil(adderBaseCost * adderLevels);
             }
@@ -1811,7 +1816,6 @@ export class HeroSystem6eItem extends Item {
                 parseFloat(mod.baseCost) >= 0,
         )) {
             let _myAdvantage = 0;
-            const modifierBaseCost = parseFloat(modifier.baseCost || 0);
 
             const configPowerInfo = getPowerInfo({
                 item: modifier,
@@ -1825,12 +1829,14 @@ export class HeroSystem6eItem extends Item {
 
             // If not use a the default cost formula
             if (!cost) {
+                const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
+                cost += modifierBaseCost;
                 const modifierCostPerLevel =
                     typeof configPowerInfo?.costPerLevel === "function"
                         ? (configPowerInfo.costPerLevel =
                               configPowerInfo.costPerLevel(modifier))
                         : configPowerInfo?.costPerLevel || 0;
-                cost = parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+                cost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
             }
 
             _myAdvantage += cost;

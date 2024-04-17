@@ -5859,53 +5859,92 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             cost: function (modifier) {
-                const four =
-                    Math.ceil(Math.sqrt(parseInt(modifier.LEVELS) || 0)) / 4;
-                const sq = Math.ceil(Math.sqrt(four));
-                return sq * 0.25;
+                const levels = parseInt(modifier.LEVELS) || 0;
+                switch (modifier.OPTIONID) {
+                    case "RADIUS":
+                        return (
+                            Math.max(1, Math.ceil(Math.log2(levels / 2))) * 0.25
+                        );
+                    case "CONE":
+                        return (
+                            Math.max(1, Math.ceil(Math.log2(levels / 4))) * 0.25
+                        );
+                    case "LINE":
+                        return (
+                            Math.max(1, Math.ceil(Math.log2(levels / 8))) * 0.25
+                        );
+                    case "SURFACE":
+                        return Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
+                    case "ANY":
+                        return Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
+                    default:
+                        console.warn("Unknown OPTIONID", modifier);
+                        return 0;
+                }
             },
             dc: true,
+            editOptions: {
+                choices: [
+                    {
+                        OPTIONID: "RADIUS",
+                        OPTION: "RADIUS",
+                        OPTION_ALIAS: "Radius",
+                    },
+                    { OPTIONID: "CONE", OPTION: "CONE", OPTION_ALIAS: "Cone" },
+                    { OPTIONID: "LINE", OPTION: "LINE", OPTION_ALIAS: "Line" },
+                    {
+                        OPTIONID: "SURFACE",
+                        OPTION: "SURFACE",
+                        OPTION_ALIAS: "Surface",
+                    },
+                    {
+                        OPTIONID: "ANY",
+                        OPTION: "ANY",
+                        OPTION_ALIAS: "Any Area",
+                    },
+                ],
+            },
             xml: `<MODIFIER XMLID="AOE" ID="1712699305027" BASECOST="0.0" LEVELS="1" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
             <NOTES />
           </MODIFIER>`,
         },
         {
-            cost: function (modifier, item) {
-                // const activePointsWithoutAoeAdvantage = Math.max(
-                //     item.system.basePointsPlusAdders,
-                //     item.system.activePoints / (1 + modifier.BASECOST_total),
-                // );
-                // switch (modifier.OPTIONID) {
-                //     case "CONE":
-                //         levels = Math.floor(
-                //             1 + activePointsWithoutAoeAdvantage / 5,
-                //         );
-                //         break;
-
-                //     case "HEX":
-                //         levels = 1;
-                //         break;
-
-                //     case "LINE":
-                //         levels = Math.floor(
-                //             (2 * activePointsWithoutAoeAdvantage) / 5,
-                //         );
-                //         break;
-
-                //     case "ANY":
-                //     case "RADIUS":
-                //         levels = Math.floor(
-                //             1 + activePointsWithoutAoeAdvantage / 10,
-                //         );
-                //         break;
-
-                //     default:
-                //         console.error(
-                //             `Unhandled 5e AOE OPTIONID ${modifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
-                //         );
-                //         break;
-                // }
-                return 0;
+            // 5e AOE cost is in BASECOST
+            cost: undefined,
+            editOptions: {
+                hideLEVELS: true,
+                choices: [
+                    {
+                        OPTIONID: "HEX",
+                        OPTION: "HEX",
+                        OPTION_ALIAS: "One Hex",
+                        BASECOST: 0.5,
+                    },
+                    {
+                        OPTIONID: "RADIUS",
+                        OPTION: "RADIUS",
+                        OPTION_ALIAS: "Radius",
+                        BASECOST: 1,
+                    },
+                    {
+                        OPTIONID: "CONE",
+                        OPTION: "CONE",
+                        OPTION_ALIAS: "Cone",
+                        BASECOST: 1,
+                    },
+                    {
+                        OPTIONID: "LINE",
+                        OPTION: "LINE",
+                        OPTION_ALIAS: "Line",
+                        BASECOST: 1,
+                    },
+                    {
+                        OPTIONID: "ANY",
+                        OPTION: "ANY",
+                        OPTION_ALIAS: "Any Area",
+                        BASECOST: 1,
+                    },
+                ],
             },
             xml: `<MODIFIER XMLID="AOE" ID="1712699238358" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
             <NOTES />
@@ -5971,11 +6010,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 })();
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
+// Turns out this is actually correct BASECOST can be 0, and COSTPERLEVEL is calculated.
+// Plan it to remove ModifierOverride and add them to the powers list as modifiers.
 HERO.ModifierOverride = {
     ADDITIONALED: { BASECOST: 5 / 2 },
     ADDITIONALPD: { BASECOST: 5 / 2 },
     ALWAYSOCCURS: { BASECOST: 0, MULTIPLIER: 2 },
-    AOE: { dc: true },
+    //AOE: { dc: true },
     //ARMORPIERCING: { BASECOST: 0.25, dc: true },
     AUTOFIRE: { dc: true },
     AVAD: { dc: true },
