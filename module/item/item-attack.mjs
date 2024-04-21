@@ -16,7 +16,10 @@ import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
-import { calculateVelocityInSystemUnits } from "../ruler.mjs";
+import {
+    calculateVelocityInSystemUnits,
+    calculateRangePenaltyFromDistanceInMetres,
+} from "../ruler.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -178,10 +181,8 @@ export async function AttackAoeToHit(item, options) {
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (!(item.system.range === "los" || noRangeModifiers || normalRange)) {
-        const factor = actor.system.is5e ? 4 : 8;
-
-        let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
-        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
+        const rangePenalty =
+            -calculateRangePenaltyFromDistanceInMetres(distanceToken);
         if (rangePenalty) {
             attackHeroRoller.addNumber(rangePenalty, "Range penalty");
         }
