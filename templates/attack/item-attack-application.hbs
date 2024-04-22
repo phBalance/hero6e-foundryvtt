@@ -83,7 +83,7 @@
           <ol>
             {{#each csl}}
             <li>
-              {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+              {{radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
             </li>
             {{/each}}
           </ol>
@@ -92,18 +92,26 @@
       </div>
     {{/if}}
 
-    {{#if aoeText}}
-      <div class="aoe-button flexrow">
-        <button type="submit" name="aoe">
-          Place {{aoeText}} template
-        </button>
-      </div>
-    {{/if}}
   </div>
 
-  <footer class="sheet-footer flexrow">
-    <button type="submit" name="roll" {{#if rollHide}}disabled
-      title="You must select at least 1 target token, preferably by using the AOE template." {{/if}}>
+  <footer class="sheet-footer flexcol">
+    {{#if (and noTargets (not aoeText))}}
+      <div>
+        <p class="hero-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          {{localize "Items.Attack.NoTargetsSelected"}}
+        </p>
+        <i>{{localize "Items.Attack.TargetingExplanation"}}</i>
+      </div>
+    {{/if}}
+
+    {{#if aoeText}}
+      <button class="aoe-button" type="submit" name="aoe">
+        Place {{aoeText}} template
+      </button>
+    {{/if}}
+
+    <button type="submit" name="roll">
       {{#if aoeText}}
         Roll Placement
       {{else}}

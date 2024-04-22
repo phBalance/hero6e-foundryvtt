@@ -305,22 +305,22 @@ export class HeroRoller {
         return this;
     }
 
-    #addOperatorTerm(operator = "+") {
+    #addOperatorTerm(operator) {
         this._formulaTerms.push(new OperatorTerm({ operator: operator }));
     }
 
-    // TODO: May wish to add tagging information to each of these. Are tags always 1:1?
     addDice(numDice, description) {
         if (!numDice) {
             return this;
         }
 
-        this.#addOperatorTerm();
+        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
 
+        const absNumDice = Math.abs(numDice);
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: numDice,
+                number: absNumDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE,
                     flavor: description,
@@ -328,34 +328,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: numDice,
-                          },
-                },
-            }),
-        );
-
-        return this;
-    }
-
-    subDice(numDice, description) {
-        if (!numDice) {
-            return this;
-        }
-
-        this.#addOperatorTerm("-");
-
-        this._formulaTerms.push(
-            new Die({
-                faces: 6,
-                number: numDice,
-                options: {
-                    _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE,
-                    flavor: description,
-                    _hrTag: !description
-                        ? undefined
-                        : {
-                              name: description,
-                              value: numDice,
+                              value: absNumDice,
                           },
                 },
             }),
@@ -369,12 +342,13 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm();
+        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
 
+        const absNumDice = Math.abs(numDice);
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: numDice,
+                number: absNumDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.HALF_DIE,
                     flavor: description,
@@ -382,7 +356,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: numDice,
+                              value: absNumDice,
                           },
                 },
             }),
@@ -396,12 +370,13 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm();
+        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
 
+        const absNumDice = Math.abs(numDice);
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: numDice,
+                number: absNumDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE,
                     flavor: description,
@@ -409,7 +384,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: numDice,
+                              value: absNumDice,
                           },
                 },
             }),
@@ -423,12 +398,13 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm();
+        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
 
+        const absNumDice = Math.abs(numDice);
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: numDice,
+                number: absNumDice,
                 options: {
                     _hrQualifier:
                         HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE,
@@ -437,7 +413,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: numDice,
+                              value: absNumDice,
                           },
                 },
             }),
@@ -451,11 +427,12 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm();
+        this.#addOperatorTerm(value > 0 ? "+" : "-");
 
+        const absValue = Math.abs(value);
         this._formulaTerms.push(
             new NumericTerm({
-                number: value,
+                number: absValue,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
                     flavor: description,
@@ -463,33 +440,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: value,
-                          },
-                },
-            }),
-        );
-
-        return this;
-    }
-
-    subNumber(value, description) {
-        if (!value) {
-            return this;
-        }
-
-        this.#addOperatorTerm("-");
-
-        this._formulaTerms.push(
-            new NumericTerm({
-                number: value,
-                options: {
-                    _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
-                    flavor: description,
-                    _hrTag: !description
-                        ? undefined
-                        : {
-                              name: description,
-                              value: value,
+                              value: absValue,
                           },
                 },
             }),

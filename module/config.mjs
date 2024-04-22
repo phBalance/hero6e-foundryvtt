@@ -179,8 +179,8 @@ function validatePowers() {
             !(
                 power.type.includes("framework") ||
                 power.type.includes("compound") ||
-                power.type.includes("adder") ||
-                power.type.includes("modifier")
+                power.behaviors.includes("adder") ||
+                power.behaviors.includes("modifier")
             ) && !power.range,
     );
     if (powersWithoutRange.length > 0) {
@@ -2612,7 +2612,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "POWERSKILL",
             type: ["skill"],
-            behaviors: [],
+            behaviors: ["success"],
             duration: "constant",
             target: "self only",
             range: "self",
@@ -4454,9 +4454,140 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 5,
+            details: function (item) {
+                const result = {
+                    str: 15,
+                    con: 5,
+                    pre: 5,
+                    pd: 3,
+                    ed: 3,
+                    body: 3,
+                    stun: 6,
+                    reach: 1,
+                    running: 12,
+                    kb: 6,
+                    mass: "101-800 kg",
+                    dcv: 2,
+                    perception: 2,
+                    tall: "2-4",
+                    wide: "1-2",
+                };
+                switch (item.system.OPTIONID) {
+                    case "LARGE":
+                        break;
+                    case "ENORMOUS":
+                        result.str = 30;
+                        result.con = 10;
+                        result.pre = 10;
+                        result.pd = 6;
+                        result.ed = 6;
+                        result.body = 6;
+                        result.stun = 12;
+                        result.reach = 3;
+                        result.running = 24;
+                        result.kb = 12;
+                        result.mass = "801-6,400 kg";
+                        result.dcv = 4;
+                        result.perception = 4;
+                        result.tall = "8";
+                        result.wide = "4";
+                        break;
+                    case "HUGE":
+                        result.str = 45;
+                        result.con = 15;
+                        result.pre = 15;
+                        result.pd = 9;
+                        result.ed = 9;
+                        result.body = 9;
+                        result.stun = 18;
+                        result.reach = 7;
+                        result.running = 36;
+                        result.kb = 18;
+                        result.mass = "6,401-50,000 kg";
+                        result.dcv = 6;
+                        result.perception = 6;
+                        result.tall = "16";
+                        result.wide = "8";
+                        break;
+                    case "GIGANTIC":
+                        result.str = 60;
+                        result.con = 20;
+                        result.pre = 20;
+                        result.pd = 12;
+                        result.ed = 12;
+                        result.body = 12;
+                        result.stun = 24;
+                        result.reach = 15;
+                        result.running = 48;
+                        result.kb = 24;
+                        result.mass = "50,001-400,000 kg";
+                        result.dcv = 8;
+                        result.perception = 8;
+                        result.tall = "32";
+                        result.wide = "16";
+                        break;
+                    case "GARGANTUAN":
+                        result.str = 75;
+                        result.con = 25;
+                        result.pre = 25;
+                        result.pd = 15;
+                        result.ed = 15;
+                        result.body = 15;
+                        result.stun = 30;
+                        result.reach = 31;
+                        result.running = 60;
+                        result.kb = 30;
+                        result.mass = "400,001-3.2 mil kg";
+                        result.dcv = 10;
+                        result.perception = 10;
+                        result.tall = "64";
+                        result.wide = "32";
+                        break;
+                    case "COLOSSAL":
+                        result.str = 90;
+                        result.con = 30;
+                        result.pre = 30;
+                        result.pd = 18;
+                        result.ed = 18;
+                        result.body = 18;
+                        result.stun = 36;
+                        result.reach = 63;
+                        result.running = 72;
+                        result.kb = 36;
+                        result.mass = "3.3-25.6 mil kg";
+                        result.dcv = 12;
+                        result.perception = 12;
+                        result.tall = "128";
+                        result.wide = "64";
+                        break;
+                    default:
+                        console.warn("Unknown GROWTH OPTIONID", item);
+                        break;
+                }
+                return result;
+            },
             xml: `<POWER XMLID="GROWTH" ID="1711934263926" BASECOST="25.0" LEVELS="0" ALIAS="Growth" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LARGE" OPTIONID="LARGE" OPTION_ALIAS="Large" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
-        {},
+        {
+            details: function (item) {
+                const result = {
+                    str: parseInt(item.system.value) * 5,
+                    body: parseInt(item.system.value),
+                    stun: parseInt(item.system.value),
+                    reach: Math.pow(2, Math.floor(item.system.value / 3)),
+                    kb: parseInt(item.system.value),
+                    mass:
+                        (
+                            Math.pow(2, item.system.value) * 100
+                        ).toLocaleString() + " kg",
+                    dcv: 2 * Math.floor(item.system.value / 3),
+                    perception: 2 * Math.floor(item.system.value / 3),
+                    tall: Math.pow(2, Math.floor(item.system.value / 3)) * 2,
+                    wide: Math.pow(2, Math.floor(item.system.value / 3)),
+                };
+                return result;
+            },
+        },
     );
 
     addPower(
@@ -4685,6 +4816,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             duration: "constant",
+            costEnd: false,
             xml: `<POWER XMLID="MISSILEDEFLECTION" ID="1709342687977" BASECOST="5.0" LEVELS="0" ALIAS="Missile Deflection" POSITION="49" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THROWN" OPTIONID="THROWN" OPTION_ALIAS="Thrown Objects" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
     );
@@ -5688,12 +5820,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addAddersToPowerList() {
     addPower(
         {
-            // key: "PLUSONEHALFDIE",
-            // type: [],
-            // behaviors: ["adder"],
-            // target: "self only",
-            // range: "self",
+            xml: `<MODIFIER XMLID="FOCUS" ID="1442342142790" BASECOST="-0.5" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OIF" OPTIONID="OIF" OPTION_ALIAS="OIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No">
+        <NOTES />
+      </MODIFIER>`,
+        },
+        {},
+    );
 
+    addPower(
+        {
             xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"><NOTES/></ADDER>`,
         },
         {},
@@ -5701,12 +5836,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // key: "PLUSONEPIP",
-            // type: [],
-            // behaviors: ["adder"],
-            // target: "self only",
-            // range: "self",
-
             xml: `<ADDER XMLID="PLUSONEPIP" ID="1712342367072" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"><NOTES/></ADDER>`,
         },
         {},

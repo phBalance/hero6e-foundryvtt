@@ -1035,8 +1035,8 @@ export class HeroSystemActorSheet extends ActorSheet {
                       !o.type.includes("martial") &&
                       !o.type.includes("framework") &&
                       !o.type.includes("enhancer") &&
-                      !o.type.includes("modifier") &&
-                      !o.type.includes("adder") &&
+                      !o.behaviors.includes("modifier") &&
+                      !o.behaviors.includes("adder") &&
                       o.xml,
               )
             : powers.filter(

@@ -937,8 +937,8 @@ export class HeroSystem6eItem extends Item {
             )?.LEVELS || 0,
         );
         // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
-        const width = is5e ? Math.pow(2, widthDouble) : widthDouble;
-        const height = is5e ? Math.pow(2, heightDouble) : heightDouble;
+        const width = is5e ? Math.pow(2, widthDouble) : widthDouble || 2;
+        const height = is5e ? Math.pow(2, heightDouble) : heightDouble || 2;
         let levels = 1;
         let dcFalloff = 0;
 
@@ -1390,34 +1390,72 @@ export class HeroSystem6eItem extends Item {
         }
 
         // 5e GROWTH
-        // Growth (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
+        // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
+        // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
+        // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
         if (changed && this.id && this.system.XMLID === "GROWTH") {
-            const strAdd = Math.floor(this.system.value) * 5;
-            const bodyAdd = Math.floor(this.system.value);
-            const stunAdd = Math.floor(this.system.value);
-
+            const details = configPowerInfo?.details(this) || {};
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
-                (this.name ? `${this.name}: ` : "") +
-                `${this.system.XMLID} ${this.system.value}`;
+                (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
+            activeEffect.name += `${this.system.XMLID} ${
+                this.actor.system.is5e
+                    ? this.system.value
+                    : this.system.OPTIONID
+            }`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
                     key: "system.characteristics.str.max",
-                    value: strAdd,
+                    value: details.str,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
                 {
                     key: "system.characteristics.body.max",
-                    value: bodyAdd,
+                    value: details.body,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
                 {
                     key: "system.characteristics.stun.max",
-                    value: stunAdd,
+                    value: details.stun,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+                {
+                    // Growth6e + OCV is sorta like -DCV, but not quite as 1/2 DCV penalties are an issue, also min 0 DCV rules,
+                    // should technicaly add to OCV of attacker.
+                    // However 5e use the -DCV concept and we will implement 6e in kind for now.
+                    key: "system.characteristics.dcv.max",
+                    value: -details.dcv,
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
             ];
+            if (!this.actor.system.is5e) {
+                activeEffect.changes.push({
+                    key: "system.characteristics.con.max",
+                    value: details.con,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.pre.max",
+                    value: details.pre,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.pd.max",
+                    value: details.pd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.ed.max",
+                    value: details.ed,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+                activeEffect.changes.push({
+                    key: "system.characteristics.running.max",
+                    value: details.running,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                });
+            }
             activeEffect.transfer = true;
 
             if (activeEffect.update) {
@@ -1436,6 +1474,41 @@ export class HeroSystem6eItem extends Item {
                 await this.actor.update({
                     [`system.characteristics.ed.value`]:
                         this.actor.system.characteristics.ed.max,
+                });
+            } else {
+                await this.createEmbeddedDocuments("ActiveEffect", [
+                    activeEffect,
+                ]);
+            }
+        }
+
+        // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+        // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
+        if (changed && this.id && this.system.XMLID === "SHRINKING") {
+            const dcvAdd = Math.floor(this.system.value) * 2;
+
+            let activeEffect = Array.from(this.effects)?.[0] || {};
+            activeEffect.name =
+                (this.name ? `${this.name}: ` : "") +
+                `${this.system.XMLID} ${this.system.value}`;
+            activeEffect.icon = "icons/svg/upgrade.svg";
+            activeEffect.changes = [
+                {
+                    key: "system.characteristics.dcv.max",
+                    value: dcvAdd,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                },
+            ];
+            activeEffect.transfer = true;
+
+            if (activeEffect.update) {
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    changes: activeEffect.changes,
+                });
+                await this.actor.update({
+                    [`system.characteristics.dcv.value`]:
+                        this.actor.system.characteristics.dcv.max,
                 });
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [
@@ -1984,17 +2057,69 @@ export class HeroSystem6eItem extends Item {
                 } KB)`;
                 break;
 
-            case "GROWTH":
-                //Growth (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide), Reduced Endurance (0 END; +1/2), Persistent (+1/2); Always On (-1/2), IIF (-1/4)
-                system.description = `${system.ALIAS} (+${
-                    system.value * 5
-                } STR, +${system.value} BODY, +${system.value} STUN, -${
-                    this.actor?.system.is5e
-                        ? system.value + '"'
-                        : system.value * 2 + "m"
-                } KB, ${system.ALIAS} (${
-                    Math.pow(system.value, 2) * 100
-                } kg mass)`;
+            case "GROWTH": {
+                // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide) // Growth5e (+5 STR, +1 BODY, +1 STUN, -1" KB, 200 kg, +0 DCV, +0 PER Rolls to perceive character, 2 m tall, 1 m wide)
+                // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
+                const details = configPowerInfo?.details(this) || {};
+                system.description = `${system.ALIAS} (`;
+                system.description += `+${details.str} STR`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.con} CON`;
+                }
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.pre} PRE`;
+                }
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.pd} PD`;
+                }
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.ed} ED`;
+                }
+                system.description += `, +${details.body} BODY`;
+                system.description += `, +${details.stun} STUN`;
+                system.description += `, +${details.reach}${
+                    this.actor.system.is5e ? '"' : "m"
+                } Reach`;
+                if (!this.actor?.system.is5e) {
+                    system.description += `, +${details.running}m Running`;
+                }
+                system.description += `, -${details.kb}${
+                    this.actor?.system.is5e ? '"' : "m"
+                }
+                KB`;
+                system.description += `, ${details.mass}`;
+                system.description += `, -${details.dcv} DCV`;
+                system.description += `, +${details.perception} to PER Rolls to perceive character`;
+                system.description += `, ${details.tall}m tall`;
+                system.description += `, ${details.wide}m wide`;
+                system.description += `)`;
+                break;
+            }
+
+            case "SHRINKING":
+                // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+                // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV) -- Also +3" KB which is not in HD
+                system.description = `${system.ALIAS} (`;
+                system.description += `${(
+                    2 / Math.pow(2, parseInt(system.value))
+                )
+                    .toPrecision(3)
+                    .replace(/\.?0+$/, "")} m tall`;
+                system.description += `, ${(
+                    100 / Math.pow(8, parseInt(system.value))
+                )
+                    .toPrecision(4)
+                    .replace(/\.?0+$/, "")}
+                kg mass`;
+                system.description += `, -${
+                    system.value * 2
+                } PER Rolls to perceive character`;
+                system.description += `, +${system.value * 2} DCV`;
+                system.description += `, takes +${
+                    system.value * (this.actor.system.is5e ? 3 : 6) +
+                    getSystemDisplayUnits(this.actor)
+                } KB`;
+
                 break;
 
             case "MENTALDEFENSE":
@@ -2532,6 +2657,82 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "DANGER_SENSE":
+                {
+                    const { roll } =
+                        this._getNonCharacteristicsBasedRollComponents(system);
+
+                    system.description = `${system.ALIAS} ${roll}`;
+                }
+                break;
+
+            case "ACTIVESONAR":
+            case "HRRP":
+            case "INFRAREDPERCEPTION":
+            case "NRAYPERCEPTION":
+            case "RADAR":
+            case "RADIOPERCEIVETRANSMIT":
+            case "RADIOPERCEPTION":
+            case "SPATIALAWARENESS":
+            case "ULTRASONICPERCEPTION":
+            case "ULTRAVIOLETPERCEPTION":
+                system.description = `${system.ALIAS} (${system.GROUP})`;
+                break;
+
+            case "DETECT":
+                system.description = `${system.ALIAS} ${system.OPTION_ALIAS} (${system.GROUP})`;
+                break;
+
+            case "ENHANCEDPERCEPTION":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} +${levels} PER with ${system.OPTION_ALIAS}`;
+                }
+                break;
+
+            case "TELESCOPIC":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} +${levels} range modifier for ${system.OPTION_ALIAS}`;
+                }
+                break;
+
+            case "CONCEALED":
+                {
+                    const levels = parseInt(system.LEVELS || 0);
+                    system.description = `${system.ALIAS} (-${levels} PER to ${system.OPTION_ALIAS})`;
+                }
+                break;
+
+            case "RAPID":
+                {
+                    const factor = Math.pow(10, parseInt(system.LEVELS || 1));
+                    system.description = `${system.ALIAS} (x${factor}) with ${system.OPTION_ALIAS})`;
+                }
+                break;
+
+            case "CLAIRSENTIENCE":
+            case "ANALYZESENSE":
+            case "DIMENSIONALSINGLE":
+            case "DIMENSIONALGROUP":
+            case "DIMENSIONALALL":
+            case "DISCRIMINATORY":
+            case "INCREASEDARC240":
+            case "INCREASEDARC360":
+            case "MAKEASENSE":
+            case "MICROSCOPIC":
+            case "RANGE":
+            case "TARGETINGSENSE":
+            case "TRACKINGSENSE":
+            case "TRANSMIT":
+                system.description = `${system.ALIAS} with ${system.OPTION_ALIAS}`;
+                break;
+
+            case "MENTALAWARENESS":
+            case "NIGHTVISION":
+                system.description = `${system.ALIAS}`;
+                break;
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
@@ -2563,12 +2764,12 @@ export class HeroSystem6eItem extends Item {
                         }
                     }
 
-                    // Add a success roll, if there is one, for skills, talents, or perks
+                    // Add a success roll, if it has one, but only for skills, talents, or perks
                     if (
                         configPowerInfo?.behaviors?.includes("success") &&
-                        configPowerInfo?.type?.filter((type) =>
+                        configPowerInfo?.type?.find((type) =>
                             ["skill", "talent", "perk"].includes(type),
-                        ).length > 0
+                        )
                     ) {
                         system.description += ` ${system.roll}`;
                     }

@@ -163,7 +163,7 @@ export async function AttackAoeToHit(item, options) {
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, item.system.uses)
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
-        .subNumber(parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
+        .addNumber(-parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
 
     if (item.system.range === "self") {
         // TODO: Should not be able to use this on anyone else. Should add a check.
@@ -172,15 +172,12 @@ export async function AttackAoeToHit(item, options) {
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
     //       in case the system has calculated it incorrectly.
 
+    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
+
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
-    if (
-        !(
-            item.system.range === "los" ||
-            item.system.range === "no range modifiers" ||
-            item.system.range === "limited normal range"
-        )
-    ) {
+    if (!(item.system.range === "los" || noRangeModifiers || normalRange)) {
         const factor = actor.system.is5e ? 4 : 8;
 
         let rangePenalty = -Math.ceil(Math.log2(distanceToken / factor)) * 2;
@@ -204,15 +201,22 @@ export async function AttackAoeToHit(item, options) {
         }
     }
 
-    attackHeroRoller.subDice(3);
+    attackHeroRoller.addDice(-3);
 
     await attackHeroRoller.roll();
-    const renderedRollResult = await attackHeroRoller.render();
+    const autoSuccess = attackHeroRoller.getAutoSuccess();
     const hitRollTotal = attackHeroRoller.getSuccessTotal();
+    const renderedRollResult = await attackHeroRoller.render();
 
-    let hitRollText = "AOE origin SUCCESSFULLY hits a DCV of " + hitRollTotal;
+    let hitRollText = "AOE origin successfully HITS a DCV of " + hitRollTotal;
 
-    if (hitRollTotal < dcvTargetNumber) {
+    if (autoSuccess !== undefined) {
+        if (autoSuccess) {
+            hitRollText = "AOE origin automatically HITS any DCV";
+        } else {
+            hitRollText = "AOE origin automatically MISSES any DCV";
+        }
+    } else if (hitRollTotal < dcvTargetNumber) {
         const missBy = dcvTargetNumber - hitRollTotal;
 
         const facingHeroRoller = new HeroRoller().makeBasicRoll().addDice(1);
@@ -225,7 +229,7 @@ export async function AttackAoeToHit(item, options) {
                 item.actor.system.is5e ? missBy : missBy * 2,
             ),
         );
-        hitRollText = `AOE origin MISSED by ${missBy}.  Move AOE origin ${
+        hitRollText = `AOE origin MISSED by ${missBy}. Move AOE origin ${
             moveDistance + getSystemDisplayUnits(item.actor)
         } in the <b>${facingRollResult}</b> direction.`;
     }
@@ -313,15 +317,14 @@ export async function AttackToHit(item, options) {
     // TODO: Should consider if the target's range exceeds the power's range or not and display some kind of warning
     //       in case the system has calculated it incorrectly.
 
+    const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
+    const normalRange = !!item.findModsByXmlid("NORMALRANGE");
+
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
         game.user.targets.size > 0 &&
-        !(
-            item.system.range === "los" ||
-            item.system.range === "no range modifiers" ||
-            item.system.range === "limited normal range"
-        )
+        !(item.system.range === "los" || noRangeModifiers || normalRange)
     ) {
         // Educated guess for token
         let token = actor.getActiveTokens()[0];
@@ -448,7 +451,7 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    heroRoller.subDice(3);
+    heroRoller.addDice(-3);
 
     const autofire = item.findModsByXmlid("AUTOFIRE");
     const autoFireShots = autofire
@@ -607,8 +610,8 @@ export async function AttackToHit(item, options) {
         aoeModifier && !(SELECTIVETARGET || NONSELECTIVETARGET);
 
     let targetData = [];
-    let targetIds = [];
-    let targetsArray = Array.from(game.user.targets);
+    const targetIds = [];
+    const targetsArray = Array.from(game.user.targets);
 
     // If AOE then sort by distance from center
     if (explosion) {
@@ -625,8 +628,7 @@ export async function AttackToHit(item, options) {
 
     // Make attacks against all targets
     for (const target of targetsArray) {
-        let hit = "Miss";
-        let value = RoundFavorPlayerUp(
+        let targetDefenseValue = RoundFavorPlayerUp(
             target.actor.system.characteristics[toHitChar.toLowerCase()].value,
         );
 
@@ -634,22 +636,29 @@ export async function AttackToHit(item, options) {
 
         // TODO: Autofire against multiple targets should have increasing difficulty
 
-        await targetHeroRoller.roll();
+        await targetHeroRoller.makeSuccessRoll(true, targetDefenseValue).roll();
+        const autoSuccess = targetHeroRoller.getAutoSuccess();
         const toHitRollTotal = targetHeroRoller.getSuccessTotal();
+        const margin = targetDefenseValue - toHitRollTotal;
 
-        // TODO: Auto success and failure
-
-        if (value <= toHitRollTotal || aoeAlwaysHit) {
+        let hit = "Miss";
+        if (autoSuccess !== undefined) {
+            if (autoSuccess) {
+                hit = "Auto Hit";
+            } else {
+                hit = "Auto Miss";
+            }
+        } else if (margin <= 0 || aoeAlwaysHit) {
             hit = "Hit";
         }
 
-        let by = toHitRollTotal - value;
+        let by = toHitRollTotal - targetDefenseValue;
         if (by >= 0) {
             by = "+" + by;
         }
 
         if (explosion) {
-            value = 0;
+            targetDefenseValue = 0;
             hit = "Hit";
             by = aoeModifier.OPTION_ALIAS + aoeModifier.LEVELS;
 
@@ -673,8 +682,9 @@ export async function AttackToHit(item, options) {
             aoeAlwaysHit: aoeAlwaysHit,
             toHitChar: toHitChar,
             toHitRollTotal: toHitRollTotal,
+            autoSuccess: autoSuccess,
             hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
-            value: value,
+            value: targetDefenseValue,
             result: { hit: hit, by: by.toString() },
             roller: targetHeroRoller,
             renderedRoll: await targetHeroRoller.render(),
@@ -684,6 +694,7 @@ export async function AttackToHit(item, options) {
         // Assume beneficial adjustment powers always hits
         if (
             hit === "Hit" ||
+            hit === "Auto Hit" ||
             item.system.XMLID == "AID" ||
             item.system.XMLID === "HEALING" ||
             item.system.XMLID === "SUCCOR"
@@ -699,6 +710,7 @@ export async function AttackToHit(item, options) {
             const singleTarget = Array.from(game.user.targets)[0];
             const toHitRollTotal = targetData[0].toHitRollTotal;
             const firstShotResult = targetData[0].result.hit;
+            const autoSuccess = targetData[0].autoSuccess;
 
             const firstShotRenderedRoll = targetData[0].renderedRoll;
             const firstShotRoller = targetData[0].roller;
@@ -718,7 +730,13 @@ export async function AttackToHit(item, options) {
                         toHitChar.toLowerCase()
                     ].value;
 
-                if (value <= autofireShotRollTotal) {
+                if (autoSuccess !== undefined) {
+                    if (autoSuccess) {
+                        hit = "Auto Hit";
+                    } else {
+                        hit = "Auto Miss";
+                    }
+                } else if (value <= autofireShotRollTotal) {
                     hit = "Hit";
                 }
 
@@ -733,6 +751,7 @@ export async function AttackToHit(item, options) {
                     aoeAlwaysHit: aoeAlwaysHit,
                     toHitChar: toHitChar,
                     toHitRollTotal: autofireShotRollTotal,
+                    autoSuccess: autoSuccess,
                     hitRollText: hitRollText,
                     value: value,
                     result: { hit: hit, by: by.toString() },
@@ -2244,11 +2263,11 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
                 body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
                 "Max potential knockback",
             )
-            .subNumber(
-                parseInt(options.knockbackResistance || 0),
+            .addNumber(
+                -parseInt(options.knockbackResistance || 0),
                 "Knockback resistance",
             )
-            .subDice(Math.max(0, knockbackDice));
+            .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
 
         const knockbackResultTotal = Math.round(

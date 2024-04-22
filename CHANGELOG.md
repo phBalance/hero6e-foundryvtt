@@ -1,5 +1,16 @@
 # Releases
 
+## Version 3.0.67.1 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Improve descriptions for senses. [#934](https://github.com/dmdorman/hero6e-foundryvtt/issues/934)
+- Correct default 6e AOE line width and height determination. [#937](https://github.com/dmdorman/hero6e-foundryvtt/issues/937)
+- 5e missile deflection and reflection should not use END. [#945](https://github.com/dmdorman/hero6e-foundryvtt/issues/945)
+- Presence attack can now do 1/2 dice and 1/2 dice modification increments. [#943](https://github.com/dmdorman/hero6e-foundryvtt/issues/943)
+- Attacks now have auto success (3) and auto failure (18). [#562](https://github.com/dmdorman/hero6e-foundryvtt/issues/562) [#522](https://github.com/dmdorman/hero6e-foundryvtt/issues/522)
+- Warning is now given when attacking with no target selected. [#927](https://github.com/dmdorman/hero6e-foundryvtt/issues/927)
+- Improved SHRINKING and GROWTH support. [#936](https://github.com/dmdorman/hero6e-foundryvtt/issues/936)
+- Fix for POWERSKILL where it was not rollable.
+
 ## Version 3.0.66 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix velocity calculations for 5e. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
@@ -12,7 +23,6 @@
   - There is minimal vetting of in-game editing.  Any invalid adders/modifiers for a specific power will likely to be ignored and/or may cause automation issues.
   - Items modified in-game may have incorrect costs and active points.
   - Be careful when re-uploading HDC files as in-game edits for that actor will be overwritten without warning.
-
 
 ## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

@@ -2,7 +2,7 @@ import { HeroRoller } from "./dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroRollRegExp = new RegExp(
-    "^(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*))\\])?)$",
+    "^(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d\\.]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*))\\])?)$",
     "i",
 );
 
@@ -41,7 +41,7 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
         numericTerm = 0;
     }
 
-    const numDice = parseInt(
+    const numDice = parseFloat(
         chatMessageCmd.groups.numDice
             ? negativeTermWithDice
                 ? chatMessageCmd.groups.numDice - 1
@@ -95,11 +95,10 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
     flavour = `${flavour.charAt(0).toUpperCase() + flavour.slice(1)} attack`;
 
     roller
-        .addDice(numDice)
+        .addDice(Math.trunc(numDice))
         .addDiceMinus1(negativeTermWithDice ? 1 : 0)
-        .addHalfDice(numericTerm % 1 ? 1 : 0)
-        .addNumber(numericTerm > 0 ? Math.trunc(numericTerm) : 0)
-        .subNumber(numericTerm < 0 ? -Math.trunc(numericTerm) : 0);
+        .addHalfDice(numDice % 1 ? 1 : 0)
+        .addNumber(Math.trunc(numericTerm));
 
     await roller.roll();
 

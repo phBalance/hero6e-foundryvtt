@@ -278,7 +278,7 @@ export function registerDiceTests(quench) {
                     });
 
                     it("should handle formulas with negative numeric term", async function () {
-                        const roller = new HeroRoller().subNumber(7);
+                        const roller = new HeroRoller().addNumber(-7);
                         await roller.roll();
 
                         expect(roller.getFormula()).to.equal("-7");
@@ -296,9 +296,9 @@ export function registerDiceTests(quench) {
 
                     it("should handle formulas with multiple numeric terms of varied sign", async function () {
                         const roller = new HeroRoller()
-                            .subNumber(7)
+                            .addNumber(-7)
                             .addNumber(3)
-                            .subNumber(2);
+                            .addNumber(-2);
                         await roller.roll();
 
                         expect(roller.getFormula()).to.equal("-7 + 3 - 2");
@@ -342,16 +342,17 @@ export function registerDiceTests(quench) {
                     it("should handle formulas with a mix", async function () {
                         const roller = new HeroRoller()
                             .addNumber(11)
-                            .subNumber(3)
-                            .subNumber(-2)
-                            .subDice(3)
+                            .addNumber(-3)
+                            .addNumber(2)
+                            .addDice(-3)
                             .addHalfDice(1)
+                            .addHalfDice(-1)
                             .addDice(9)
                             .addNumber(1);
                         await roller.roll();
 
                         expect(roller.getFormula()).to.equal(
-                            "11 - 3 + 2 - 3d6 + ½d6 + 9d6 + 1",
+                            "11 - 3 + 2 - 3d6 + ½d6 - ½d6 + 9d6 + 1",
                         );
                     });
 
@@ -707,10 +708,10 @@ export function registerDiceTests(quench) {
                             .makeSuccessRoll()
                             .addNumber(11)
                             .addNumber(9)
-                            .subNumber(2)
+                            .addNumber(-2)
                             .addNumber(-2)
                             .addNumber(3)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -783,7 +784,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 11)
                             .addNumber(11)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -796,7 +797,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 11)
                             .addNumber(11)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -809,7 +810,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 9)
                             .addNumber(18)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
@@ -822,7 +823,7 @@ export function registerDiceTests(quench) {
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeSuccessRoll(true, 9)
                             .addNumber(19)
-                            .subDice(3);
+                            .addDice(-3);
 
                         await roller.roll();
 
