@@ -213,27 +213,27 @@ Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
 
 export class HEROSYS {
     static ID = "HEROSYS";
-    
-    static _module = undefined;
-    
+
+    static #module = undefined;
+
     static get module() {
-        if (HEROSYS._module === undefined) {
+        if (HEROSYS.#module === undefined) {
             console.error(`HEROSYS.module accessed before it is assigned`);
             ui.notifications.error(
                 `HEROSYS.module accessed before it is assigned`,
             );
         }
-        return HEROSYS._module;
+        return HEROSYS.#module;
     }
-    
+
     static set module(value) {
-        if (HEROSYS._module !== undefined) {
+        if (HEROSYS.#module !== undefined) {
             console.error(`HEROSYS.module assigned after it is assigned`);
             ui.notifications.error(
                 `HEROSYS.module accessed before it is assigned`,
             );
         }
-        HEROSYS._module = value;
+        HEROSYS.#module = value;
     }
 
     static log(force, ...args) {
@@ -705,10 +705,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
-            const automation = game.settings.get(
-                HEROSYS.module,
-                "automation",
-            );
+            const automation = game.settings.get(HEROSYS.module, "automation");
             if (
                 !game.combat?.active &&
                 (automation === "all" ||

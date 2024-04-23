@@ -427,8 +427,8 @@ export async function AttackToHit(item, options) {
         !noHitLocationsPower
     ) {
         const aimTargetLocation =
-            game.settings.get(HEROSYS.module, "hitLocTracking") ===
-                "all" && options.aimSide !== "none"
+            game.settings.get(HEROSYS.module, "hitLocTracking") === "all" &&
+            options.aimSide !== "none"
                 ? `${options.aimSide} ${options.aim}`
                 : options.aim;
         heroRoller.addNumber(
@@ -1058,8 +1058,7 @@ export async function _onRollDamage(event) {
             includeHitLocation,
             toHitData.aim,
             includeHitLocation &&
-                game.settings.get(HEROSYS.module, "hitLocTracking") ===
-                    "all",
+                game.settings.get(HEROSYS.module, "hitLocTracking") === "all",
             toHitData.aim === "none" ? "none" : toHitData.aimSide, // Can't just select a side to hit as that doesn't have a penalty
         );
 
@@ -2050,9 +2049,7 @@ async function _calcDamage(heroRoller, item, options) {
     if (useHitLocations) {
         useHitLoc = true;
 
-        if (
-            game.settings.get(HEROSYS.module, "hitLocTracking") === "all"
-        ) {
+        if (game.settings.get(HEROSYS.module, "hitLocTracking") === "all") {
             hitLocation = heroRoller.getHitLocation().fullName;
         } else {
             hitLocation = heroRoller.getHitLocation().name;
@@ -2202,10 +2199,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackTags = [];
     let knockbackRoller = null;
 
-    if (
-        game.settings.get(HEROSYS.module, "knockback") &&
-        knockbackMultiplier
-    ) {
+    if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier) {
         useKnockback = true;
 
         let knockbackDice = 2;
