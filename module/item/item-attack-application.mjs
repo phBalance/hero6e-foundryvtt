@@ -4,6 +4,7 @@ import {
     _processAttackAoeOptions,
 } from "../item/item-attack.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroAoeTypeToFoundryAoeTypeConversions = {
     any: "rect",
@@ -58,7 +59,7 @@ export class ItemAttackFormApplication extends FormApplication {
         options = mergeObject(options, {
             classes: ["form"],
             popOut: true,
-            template: `systems/hero6efoundryvttv2/templates/attack/item-attack-application.hbs`,
+            template: `systems/${HEROSYS.module}/templates/attack/item-attack-application.hbs`,
             id: "item-attack-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes

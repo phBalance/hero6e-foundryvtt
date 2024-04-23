@@ -1,3 +1,5 @@
+import { HEROSYS } from "./herosystem6e.mjs";
+
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
         super(data, context);
@@ -640,10 +642,7 @@ export class HeroSystem6eCombat extends Combat {
         // Recovery. This includes Stunned characters, although the Post-
         // Segment 12 Recovery does not eliminate the Stunned condition.
 
-        const automation = game.settings.get(
-            "hero6efoundryvttv2",
-            "automation",
-        );
+        const automation = game.settings.get(HEROSYS.module, "automation");
 
         let content = `Post-Segment 12 (Turn ${this.round - 1})`;
         let contentHidden = `Post-Segment 12 (Turn ${this.round - 1})`;

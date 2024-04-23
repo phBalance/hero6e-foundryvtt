@@ -38,6 +38,7 @@ import "./utility/chat-dice.mjs";
 import "./testing/testing-main.mjs";
 
 Hooks.once("init", async function () {
+    HEROSYS.module = game.system.id;
     game.herosystem6e = {
         applications: {
             HeroSystem6eItemSheet,
@@ -82,7 +83,11 @@ Hooks.once("init", async function () {
     CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
-    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects();
+    // We can't use the information from system.json in a static context; so we change the load path here.
+    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(
+        HEROSYS.module,
+    );
+
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
@@ -131,17 +136,17 @@ Hooks.once("init", async function () {
     Handlebars.registerHelper("is_active_segment", function (actives, index) {
         return actives?.[index];
     });
-
+    const templatePaths = [
+        `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-attack-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-sheet-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-active-points.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-adders-modifiers.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
+    ];
     // Handlebars Templates and Partials
-    loadTemplates([
-        `systems/hero6efoundryvttv2/templates/item/item-common-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-effects-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-attack-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-sheet-partial.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-partial-active-points.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-partial-adders-modifiers.hbs`,
-        `systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs`,
-    ]);
+    loadTemplates(templatePaths);
 });
 
 Hooks.once("ready", async function () {
@@ -209,7 +214,27 @@ Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
 export class HEROSYS {
     static ID = "HEROSYS";
 
-    static module = "hero6efoundryvttv2";
+    static #module = undefined;
+
+    static get module() {
+        if (HEROSYS.#module === undefined) {
+            console.error(`HEROSYS.module accessed before it is assigned`);
+            ui.notifications.error(
+                `HEROSYS.module accessed before it is assigned`,
+            );
+        }
+        return HEROSYS.#module;
+    }
+
+    static set module(value) {
+        if (HEROSYS.#module !== undefined) {
+            console.error(`HEROSYS.module assigned after it is assigned`);
+            ui.notifications.error(
+                `HEROSYS.module accessed before it is assigned`,
+            );
+        }
+        HEROSYS.#module = value;
+    }
 
     static log(force, ...args) {
         const shouldLog =
@@ -550,7 +575,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 const activeEffect = {
                     name: `Natural Body Healing (${bodyPerMonth}/month)`,
                     id: "naturalBodyHealing",
-                    icon: "systems/hero6efoundryvttv2/icons/heartbeat.svg",
+                    icon: `systems/${HEROSYS.module}/icons/heartbeat.svg`,
                     duration: {
                         seconds: secondsPerBody,
                     },
@@ -680,10 +705,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
-            const automation = game.settings.get(
-                "hero6efoundryvttv2",
-                "automation",
-            );
+            const automation = game.settings.get(HEROSYS.module, "automation");
             if (
                 !game.combat?.active &&
                 (automation === "all" ||

@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "./util.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
@@ -791,8 +792,7 @@ export async function renderAdjustmentChatCards(cardOrCards) {
     };
 
     // render card
-    const template =
-        "systems/hero6efoundryvttv2/templates/chat/apply-adjustment-card.hbs";
+    const template = `systems/${HEROSYS.module}/templates/chat/apply-adjustment-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({
         actor: cardOrCards[0].targetActor,

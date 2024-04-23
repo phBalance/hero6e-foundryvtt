@@ -13,13 +13,13 @@
     <section class="sheet-body">
 
         {{!-- Common --}}
-        {{> systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs }}
+        {{> (getModulePath 'item/item-partial-common.hbs') }}
 
         {{!-- Active Points --}}
-        {{> systems/hero6efoundryvttv2/templates/item/item-partial-active-points.hbs }}
+        {{> (getModulePath 'item/item-partial-active-points.hbs') }}
 
         {{!-- Adders & Modifiers --}}
-        {{> systems/hero6efoundryvttv2/templates/item/item-partial-adders-modifiers.hbs }}
+        {{> (getModulePath 'item/item-partial-adders-modifiers.hbs') }}
         
     </section>
 </form>

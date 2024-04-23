@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystemActorSheet } from "./actor-sheet.mjs";
 
 export class HeroSystemActorSavuoriSheet extends HeroSystemActorSheet {
@@ -5,8 +6,7 @@ export class HeroSystemActorSavuoriSheet extends HeroSystemActorSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             classes: ["actor-sheet", "savuori"],
-            template:
-                "systems/hero6efoundryvttv2/templates/actor/actor-savuori-sheet.hbs",
+            template: `systems/${HEROSYS.module}/templates/actor/actor-savuori-sheet.hbs`,
             tabs: [
                 {
                     navSelector: ".sheet-navigation",

@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 
 /**
@@ -18,7 +19,7 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
 
     /** @override */
     get template() {
-        const path = "systems/hero6efoundryvttv2/templates/item";
+        const path = `systems/${HEROSYS.module}/templates/item`;
         // Return a single sheet for all item types.
         return `${path}/item-sheet.hbs`;
     }

@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
 import { editSubItem, deleteSubItem } from "../powers/powers.mjs";
 import {
@@ -24,7 +25,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
     /** @override */
     get template() {
-        const path = "systems/hero6efoundryvttv2/templates/item";
+        const path = `systems/${HEROSYS.module}/templates/item`;
 
         if (
             [

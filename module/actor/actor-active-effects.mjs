@@ -11,18 +11,19 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     // seventh Line: Invisible/ Targeted/ Marked/ Blessed
     // Last Line: Fire Shield/ Ice Shield/ Magic Shield/ Holy Shield
 
-    static getEffects() {
+    static getEffects(module) {
         return Object.keys(HeroSystem6eActorActiveEffects)
-            .filter((o) => o.includes("Effect"))
+            .filter((effectKey) => effectKey.includes("Effect"))
             .sort()
-            .map((o) => HeroSystem6eActorActiveEffects[o]);
-        // return [
-        //     HeroSystem6eActorActiveEffects.blindEffect,
-        //     HeroSystem6eActorActiveEffects.bleedingEffect,
-        //     HeroSystem6eActorActiveEffects.deadEffect,
-        //     HeroSystem6eActorActiveEffects.stunEffect,
-        //     HeroSystem6eActorActiveEffects.unconsciousEffect,
-        // ];
+            .map((effectKey) => {
+                let heroIcon =
+                    HeroSystem6eActorActiveEffects[effectKey].heroIcon;
+                if (heroIcon) {
+                    HeroSystem6eActorActiveEffects[effectKey].icon =
+                        `systems/${module}/${heroIcon}`;
+                }
+                return HeroSystem6eActorActiveEffects[effectKey];
+            });
     }
 
     // A Stunned character’s DCV and DMCV are instantly halved.
@@ -265,13 +266,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static abortEffect = {
         id: "aborted",
         name: "Aborted",
-        icon: "systems/hero6efoundryvttv2/icons/aborted.svg",
+        heroIcon: `icons/aborted.svg`,
     };
 
     static underwaterEffect = {
         id: "underwater",
         name: "Underwater",
-        icon: "systems/hero6efoundryvttv2/icons/underwater.svg",
+        heroIcon: "icons/underwater.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -284,7 +285,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static standingInWaterEffect = {
         id: "standingInWater",
         name: "Standing In Water",
-        icon: "systems/hero6efoundryvttv2/icons/standingInWater.svg",
+        heroIcon: "icons/standingInWater.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -297,13 +298,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static holdingBreathEffect = {
         id: "holdingBreath",
         name: "Holding Breath",
-        icon: "systems/hero6efoundryvttv2/icons/holdingBreath.svg",
+        heroIcon: "icons/holdingBreath.svg",
     };
 
     static grabEffect = {
         id: "grab",
         name: "Grabbed",
-        icon: "systems/hero6efoundryvttv2/icons/noun-wrestling-1061808.svg",
+        heroIcon: "icons/noun-wrestling-1061808.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",

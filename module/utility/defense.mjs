@@ -1,5 +1,5 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
-
 function determineDefense(targetActor, attackItem, options) {
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem);
@@ -288,7 +288,7 @@ function determineDefense(targetActor, attackItem, options) {
 
         // Knockback Resistance
         if (
-            game.settings.get("hero6efoundryvttv2", "knockback") &&
+            game.settings.get(HEROSYS.module, "knockback") &&
             attackItem.system.knockbackMultiplier
         ) {
             if (["KBRESISTANCE", "DENSITYINCREASE"].includes(xmlid)) {
@@ -538,7 +538,7 @@ function determineDefense(targetActor, attackItem, options) {
                 knockbackResistance += value;
                 if (
                     attackType != "mental" &&
-                    game.settings.get("hero6efoundryvttv2", "knockback")
+                    game.settings.get(HEROSYS.module, "knockback")
                 ) {
                     defenseTags.push({
                         name: "KB Resistance" + tagXmlids,

@@ -1,9 +1,11 @@
+import { HEROSYS } from "./herosystem6e.mjs";
+
 export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("indexOf", indexOf);
     Handlebars.registerHelper("abs", abs);
     Handlebars.registerHelper("increment", increment);
     Handlebars.registerHelper("gameConfigValue", gameConfigValue);
-
+    Handlebars.registerHelper("getModulePath", getModulePath);
     Handlebars.registerHelper("isdefined", function (value) {
         return value !== undefined;
     });
@@ -22,5 +24,9 @@ function increment(str, value) {
 }
 
 function gameConfigValue(configSetting) {
-    return game.settings.get("hero6efoundryvttv2", configSetting);
+    return game.settings.get(HEROSYS.module, configSetting);
+}
+
+function getModulePath(templateDirectory) {
+    return `systems/${HEROSYS.module}/templates/${templateDirectory}`;
 }

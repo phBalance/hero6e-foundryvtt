@@ -14,7 +14,7 @@ export const extendTokenConfig = async function (tokenConfig, html, data) {
     let barAttributes = data.barAttributes["Attribute Bars"];
     let singleValues = data.barAttributes["Single Values"];
     let bar3FormGroup = await renderTemplate(
-        "systems/hero6efoundryvttv2/module/bar3/resource-form-group.hbs",
+        `systems/${HEROSYS.module}/module/bar3/resource-form-group.hbs`,
         { bar3, barAttributes, singleValues },
     );
     resourceTab.append(bar3FormGroup);
