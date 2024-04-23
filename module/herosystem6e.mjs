@@ -136,7 +136,7 @@ Hooks.once("init", async function () {
     Handlebars.registerHelper("is_active_segment", function (actives, index) {
         return actives?.[index];
     });
-    let templatePaths = [
+    const templatePaths = [
         `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-attack-partial.hbs`,
