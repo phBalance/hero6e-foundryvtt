@@ -10,7 +10,7 @@ async function _renderForm(actor, stateData) {
         state: stateData,
     };
 
-    var path = `systems/${HEROSYS.getModule()}/templates/pop-out/presence-attack-card.hbs`;
+    var path = `systems/${HEROSYS.module}/templates/pop-out/presence-attack-card.hbs`;
 
     return await renderTemplate(path, templateData);
 }

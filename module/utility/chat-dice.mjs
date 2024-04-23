@@ -32,7 +32,7 @@ Hooks.on("chatMessage", function (_this, message /*, _chatData*/) {
 async function doRollAndGenerateChatMessage(chatMessageCmd) {
     const useHitLocations = !!chatMessageCmd.groups.hitLoc;
     const useHitLocationsSide =
-        game.settings.get(HEROSYS.getModule(), "hitLocTracking") === "all";
+        game.settings.get(HEROSYS.module, "hitLocTracking") === "all";
 
     let numericTerm = parseFloat(chatMessageCmd.groups.numTerm || 0);
     const negativeTermWithDice =

@@ -3,7 +3,7 @@ const scrollIntoViewOptions = { block: "center" };
 
 export class HeroSystem6eCombatTracker extends CombatTracker {
     static get defaultOptions() {
-        var path = `systems/${HEROSYS.getModule()}/templates/combat/combat-tracker.hbs`;
+        var path = `systems/${HEROSYS.module}/templates/combat/combat-tracker.hbs`;
         return foundry.utils.mergeObject(super.defaultOptions, {
             template: path,
             //scrollY: [], // Do not save ['.directory-list'] scrollY positions, were just going to override them.

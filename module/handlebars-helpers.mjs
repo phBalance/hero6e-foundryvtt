@@ -24,9 +24,9 @@ function increment(str, value) {
 }
 
 function gameConfigValue(configSetting) {
-    return game.settings.get(HEROSYS.getModule(), configSetting);
+    return game.settings.get(HEROSYS.module, configSetting);
 }
 
 function getModulePath(templateDirectory) {
-    return `systems/${HEROSYS.getModule()}/templates/${templateDirectory}`;
+    return `systems/${HEROSYS.module}/templates/${templateDirectory}`;
 }

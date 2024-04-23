@@ -25,7 +25,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
     /** @override */
     get template() {
-        const path = `systems/${HEROSYS.getModule()}/templates/item`;
+        const path = `systems/${HEROSYS.module}/templates/item`;
 
         if (
             [

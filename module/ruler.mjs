@@ -94,7 +94,7 @@ export class HeroRuler {
                     await super.onMovementHistoryUpdate(tokens);
 
                     const automation = game.settings.get(
-                        HEROSYS.getModule(),
+                        HEROSYS.module,
                         "automation",
                     );
 
@@ -208,7 +208,7 @@ export class HeroRuler {
                 }
             }
 
-            dragRuler.registerSystem(HEROSYS.getModule(), HeroSysSpeedProvider);
+            dragRuler.registerSystem(HEROSYS.module, HeroSysSpeedProvider);
 
             setHeroRulerLabel();
         });

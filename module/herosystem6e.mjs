@@ -85,7 +85,7 @@ Hooks.once("init", async function () {
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     // We can't use the information from system.json in a static context; so we change the load path here.
     CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(
-        HEROSYS.getModule(),
+        HEROSYS.module,
     );
 
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
@@ -137,13 +137,13 @@ Hooks.once("init", async function () {
         return actives?.[index];
     });
     let templatePaths = [
-        `systems/${HEROSYS.getModule()}/templates/item/item-common-partial.hbs`,
-        `systems/${HEROSYS.getModule()}/templates/item/item-effects-partial.hbs`,
-        `systems/${HEROSYS.getModule()}/templates/item/item-attack-partial.hbs`,
-        `systems/${HEROSYS.getModule()}/templates/item/item-sheet-partial.hbs`,
-        `systems/${HEROSYS.getModule()}/templates/item/item-partial-active-points.hbs`,
-        `systems/${HEROSYS.getModule()}/templates/item/item-partial-adders-modifiers.hbs`,
-        `systems/${HEROSYS.getModule()}/templates/item/item-partial-common.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-attack-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-sheet-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-active-points.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-adders-modifiers.hbs`,
+        `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
@@ -213,15 +213,27 @@ Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
 
 export class HEROSYS {
     static ID = "HEROSYS";
-
-    static getModule() {
-        if (HEROSYS.module === undefined) {
+    
+    static _module = undefined;
+    
+    static get module() {
+        if (HEROSYS._module === undefined) {
             console.error(`HEROSYS.module accessed before it is assigned`);
             ui.notifications.error(
                 `HEROSYS.module accessed before it is assigned`,
             );
         }
-        return HEROSYS.module;
+        return HEROSYS._module;
+    }
+    
+    static set module(value) {
+        if (HEROSYS._module !== undefined) {
+            console.error(`HEROSYS.module assigned after it is assigned`);
+            ui.notifications.error(
+                `HEROSYS.module accessed before it is assigned`,
+            );
+        }
+        HEROSYS._module = value;
     }
 
     static log(force, ...args) {
@@ -563,7 +575,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 const activeEffect = {
                     name: `Natural Body Healing (${bodyPerMonth}/month)`,
                     id: "naturalBodyHealing",
-                    icon: `systems/${HEROSYS.getModule()}/icons/heartbeat.svg`,
+                    icon: `systems/${HEROSYS.module}/icons/heartbeat.svg`,
                     duration: {
                         seconds: secondsPerBody,
                     },
@@ -694,7 +706,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
             // This simple routine only handles increments of 12 seconds or more.
             const automation = game.settings.get(
-                HEROSYS.getModule(),
+                HEROSYS.module,
                 "automation",
             );
             if (

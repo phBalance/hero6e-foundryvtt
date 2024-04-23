@@ -19,7 +19,7 @@ export class HeroSystem6eItem2Sheet extends ItemSheet {
 
     /** @override */
     get template() {
-        const path = `systems/${HEROSYS.getModule()}/templates/item`;
+        const path = `systems/${HEROSYS.module}/templates/item`;
         // Return a single sheet for all item types.
         return `${path}/item-sheet.hbs`;
     }

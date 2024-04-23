@@ -16,7 +16,7 @@ export class ItemModifierFormApplication extends FormApplication {
         options = mergeObject(options, {
             classes: ["form"],
             popOut: true,
-            template: `systems/${HEROSYS.getModule()}/templates/item/item-modifier-application.hbs`,
+            template: `systems/${HEROSYS.module}/templates/item/item-modifier-application.hbs`,
             id: "item-modifier-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes

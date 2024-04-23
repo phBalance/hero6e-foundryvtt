@@ -3,7 +3,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 export default class SettingsHelpers {
     // Initialize System Settings after the Init Hook
     static initLevelSettings() {
-        const module = HEROSYS.getModule();
+        const module = HEROSYS.module;
 
         game.settings.register(module, "stunned", {
             name: game.i18n.localize("Settings.UseStunned"),
@@ -185,7 +185,7 @@ class AutomationMenu extends FormApplication {
         options = mergeObject(options, {
             classes: ["form"],
             popOut: true,
-            template: `systems/${HEROSYS.getModule()}/templates/automationMenu.hbs`,
+            template: `systems/${HEROSYS.module}/templates/automationMenu.hbs`,
             id: "automation-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes

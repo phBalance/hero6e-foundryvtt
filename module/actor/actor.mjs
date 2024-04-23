@@ -96,7 +96,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async ChangeType() {
-        const template = `systems/${HEROSYS.getModule()}/templates/chat/actor-change-type-dialog.hbs`;
+        const template = `systems/${HEROSYS.module}/templates/chat/actor-change-type-dialog.hbs`;
         const actor = this;
         let cardData = {
             actor,
@@ -737,7 +737,7 @@ export class HeroSystem6eActor extends Actor {
                 let activeEffect = {
                     name: name,
                     id: "encumbered",
-                    icon: `systems/${HEROSYS.getModule()}/icons/encumbered.svg`,
+                    icon: `systems/${HEROSYS.module}/icons/encumbered.svg`,
                     changes: [
                         {
                             key: "system.characteristics.dcv.value",

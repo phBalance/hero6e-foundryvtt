@@ -126,7 +126,7 @@ export const HeroSystem6eTokenHud = async function (tokenHud, html, data) {
 function renderBarInput(bars) {
     const css = bars.length > 1 ? "compact" : "";
     return renderTemplate(
-        `systems/${HEROSYS.getModule()}/module/bar3/resource-hud.hbs`,
+        `systems/${HEROSYS.module}/module/bar3/resource-hud.hbs`,
         { bars, css },
     );
 }
