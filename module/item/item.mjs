@@ -1780,10 +1780,15 @@ export class HeroSystem6eItem extends Item {
 
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
-            for (let adder of system.POWER) {
-                let adderBaseCost = parseFloat(adder.BASECOST);
-                let adderLevels = Math.max(1, parseInt(adder.LEVELS));
-                adderCost += Math.ceil(adderBaseCost * adderLevels);
+            for (const adderPower of system.POWER) {
+                const adderBaseCost = parseFloat(adderPower.BASECOST);
+                const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
+                const adderPowerInfo = getPowerInfo({
+                    item: adderPower,
+                    actor: this.actor,
+                });
+                const adderCostPerLevel = adderPowerInfo?.costPerLevel || 0;
+                adderCost += Math.ceil(adderCostPerLevel * adderLevels);
             }
         }
 

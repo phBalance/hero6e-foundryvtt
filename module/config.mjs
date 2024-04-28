@@ -4298,7 +4298,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            costPerLevel: 1 / 3,
+            costPerLevel: 2 / 3,
             xml: `<POWER XMLID="ENDURANCERESERVEREC" ID="1713377825229" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
           </POWER>`,
