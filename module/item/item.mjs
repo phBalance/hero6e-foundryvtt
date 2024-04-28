@@ -1886,38 +1886,38 @@ export class HeroSystem6eItem extends Item {
 
             _myAdvantage += modCost;
 
-            // switch (modifier.XMLID) {
-            //     case "EXPLOSION":
-            //     case "AOE":
-            //         _myAdvantage += modifierBaseCost;
-            //         break;
+            switch (modifier.XMLID) {
+                // case "EXPLOSION":
+                // case "AOE":
+                //     _myAdvantage += modifierBaseCost;
+                //     break;
 
-            //     case "CUMULATIVE":
-            //         // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
-            //         _myAdvantage +=
-            //             modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
-            //         break;
+                // case "CUMULATIVE":
+                //     // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
+                //     _myAdvantage +=
+                //         modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
+                //     break;
 
-            //     case "REDUCEDEND":
-            //         {
-            //             // Reduced endurance is double the cost if it's applying against a power with autofire
-            //             const autofire = (system.MODIFIER || []).find(
-            //                 (mod) => mod.XMLID === "AUTOFIRE",
-            //             );
-            //             if (autofire) {
-            //                 endModifierCost = 2 * modifierBaseCost;
-            //             } else {
-            //                 endModifierCost = modifierBaseCost;
-            //             }
-            //             _myAdvantage = _myAdvantage + endModifierCost;
-            //         }
-            //         break;
+                case "REDUCEDEND":
+                    {
+                        // Reduced endurance is double the cost if it's applying against a power with autofire
+                        const autofire = (system.MODIFIER || []).find(
+                            (mod) => mod.XMLID === "AUTOFIRE",
+                        );
+                        if (autofire) {
+                            endModifierCost = 2 * modifierBaseCost;
+                        } else {
+                            endModifierCost = modifierBaseCost;
+                        }
+                        //_myAdvantage = _myAdvantage + endModifierCost;
+                    }
+                    break;
 
-            //     default:
-            //         _myAdvantage +=
-            //             modifierBaseCost *
-            //             Math.max(1, parseInt(modifier.LEVELS));
-            // }
+                // default:
+                //     _myAdvantage +=
+                //         modifierBaseCost *
+                //         Math.max(1, parseInt(modifier.LEVELS));
+            }
 
             // Some modifiers may have ADDERS
             for (const adder of modifier.ADDER || []) {
