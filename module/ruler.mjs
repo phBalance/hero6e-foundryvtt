@@ -1,5 +1,8 @@
 import { HEROSYS } from "./herosystem6e.mjs";
-import { getSystemDisplayUnits } from "./utility/units.mjs";
+import {
+    getRoundedDistanceInSystemUnits,
+    getSystemDisplayUnits,
+} from "./utility/units.mjs";
 
 export class HeroRuler {
     static initialize() {
@@ -377,18 +380,16 @@ export class HeroRuler {
 function setHeroRulerLabel() {
     Ruler.prototype._getSegmentLabel = function _getSegmentLabel(
         segmentDistance,
-        totalDistance,
+        totalDistanceInMetres, // NOTE: Assuming totalDistance is in metres. We could try to pull out the grid distance etc to be smarter.
     ) {
         const relevantToken = canvas.tokens.controlled[0];
-        let factor = relevantToken?.actor?.system?.is5e ? 4 : 8;
-        let rangeMod = Math.ceil(Math.log2(totalDistance / factor)) * 2;
+        const actor = relevantToken?.actor;
+        const rangeMod = calculateRangePenaltyFromDistanceInMetres(
+            totalDistanceInMetres,
+            actor,
+        );
 
-        rangeMod = rangeMod < 0 ? 0 : rangeMod;
-
-        let label = `[${Math.round(segmentDistance.distance)}${
-            game.scenes.current.grid.units || ""
-        }]`;
-
+        let activeMovementLabel;
         if (
             game.modules.get("drag-ruler")?.active &&
             canvas.tokens.controlled.length > 0
@@ -401,7 +402,7 @@ function setHeroRulerLabel() {
                 ? CONFIG.HERO.movementPowers5e
                 : CONFIG.HERO.movementPowers;
 
-            let movementItems = [];
+            const movementItems = [];
             for (const key of Object.keys(
                 relevantToken.actor.system.characteristics,
             ).filter((o) => movementPowers[o])) {
@@ -421,16 +422,17 @@ function setHeroRulerLabel() {
                               o._id == relevantToken.actor.flags.activeMovement,
                       )?._id || movementItems[0]._id;
 
-            const activeMovementLabel =
+            activeMovementLabel =
                 activeMovement === "none"
                     ? "Running"
                     : movementItems.find((e) => e._id === activeMovement)?.name;
-            if (activeMovementLabel) {
-                label += "\n" + activeMovementLabel;
-            }
         }
 
-        label += "\n-" + rangeMod + " Range Modifier";
+        const label = `[${Math.round(
+            getRoundedDistanceInSystemUnits(segmentDistance.distance, actor),
+        )}${getSystemDisplayUnits(actor)}]${
+            activeMovementLabel ? `\n${activeMovementLabel}` : ""
+        }\n${rangeMod > 0 ? "-" : ""}${rangeMod} Range Modifier`;
 
         return label;
     };
@@ -490,4 +492,26 @@ export function calculateVelocityInSystemUnits(actor, token) {
     }
 
     return velocity;
+}
+
+/**
+ * Calculate range based on a provided distance in metres. Range penalties are essentially
+ * the same in 5e and 6e, but there is a difference in the rounding of the distance.
+ *
+ * @param {number} distanceInMetres
+ * @param {object} actor
+ */
+export function calculateRangePenaltyFromDistanceInMetres(
+    distanceInMetres,
+    actor,
+) {
+    const is5e = actor?.system?.is5e;
+    const roundedDistanceInMetres =
+        getRoundedDistanceInSystemUnits(distanceInMetres, actor) *
+        (is5e ? 2 : 1);
+    const basicRangePenalty =
+        Math.ceil(Math.log2(roundedDistanceInMetres / 8)) * 2;
+    const rangePenalty = Math.max(0, basicRangePenalty);
+
+    return rangePenalty;
 }
