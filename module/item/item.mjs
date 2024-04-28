@@ -1867,23 +1867,24 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Is there a cost function
-            let cost = modPowerInfo?.cost
+            let modCost = modPowerInfo?.cost
                 ? modPowerInfo.cost(modifier, this)
                 : 0;
 
             const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
 
             // If not use a the default cost formula
-            if (!cost) {
-                cost += modifierBaseCost;
+            if (!modCost) {
+                modCost += modifierBaseCost;
                 const modifierCostPerLevel =
                     typeof modPowerInfo?.costPerLevel === "function"
                         ? modPowerInfo.costPerLevel(modifier)
                         : modPowerInfo?.costPerLevel || 0;
-                cost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+                modCost +=
+                    parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
             }
 
-            _myAdvantage += cost;
+            _myAdvantage += modCost;
 
             // switch (modifier.XMLID) {
             //     case "EXPLOSION":

@@ -6094,6 +6094,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            dc: true,
+            costPerLevel: 0.25,
+            xml: `<MODIFIER XMLID="CUMULATIVE" ID="1714280316745" BASECOST="0.5" LEVELS="0" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             cost: function (modifier) {
                 const baseCost = parseFloat(modifier.BASECOST);
                 const levels = parseInt(modifier.LEVELS);
