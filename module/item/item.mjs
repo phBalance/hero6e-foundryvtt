@@ -1856,6 +1856,11 @@ export class HeroSystem6eItem extends Item {
                 actor: this.actor,
             });
 
+            // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)
+            if (modPowerInfo?.minumumLimitation) {
+                continue;
+            }
+
             // Some non-PRIVATE modifiers are considered adders and included in basePointsPlusAdders
             if (configPowerInfo?.privateAsAdder && !modifier.PRIVATE) {
                 continue;
@@ -1996,7 +2001,12 @@ export class HeroSystem6eItem extends Item {
         const parent = this.getHdcParent();
 
         let modifiers = (system.MODIFIER || []).filter(
-            (o) => parseFloat(o.BASECOST) < 0,
+            (o) =>
+                parseFloat(o.BASECOST) < 0 ||
+                getPowerInfo({
+                    item: o,
+                    actor: this.actor,
+                })?.minumumLimitation,
         );
 
         // Add limitations from parent
@@ -2011,6 +2021,18 @@ export class HeroSystem6eItem extends Item {
         let limitations = 0;
         for (let modifier of modifiers) {
             let _myLimitation = 0;
+
+            const modPowerInfo = getPowerInfo({
+                item: modifier,
+                actor: this.actor,
+            });
+            if (!modPowerInfo) {
+                console.warn(
+                    `Missing powerInfo for ${modifier.XMLID}`,
+                    modifier,
+                );
+            }
+
             const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
             _myLimitation += -modifierBaseCost;
 
@@ -2019,12 +2041,12 @@ export class HeroSystem6eItem extends Item {
                 let adderBaseCost = parseFloat(adder.BASECOST || 0);
 
                 // Unique situation where JAMMED floors the limitation
-                if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
-                    system.title =
-                        (system.title || "") +
-                        "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
-                    adderBaseCost = 0;
-                }
+                // if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
+                //     system.title =
+                //         (system.title || "") +
+                //         "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
+                //     adderBaseCost = 0;
+                // }
 
                 // can be positive or negative (like charges).
                 // Requires a roll gets interesting with Jammed / Can choose which of two rolls to make from use to use
@@ -2039,13 +2061,17 @@ export class HeroSystem6eItem extends Item {
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
             if (_myLimitation < 0.25) {
+                console.warn(
+                    `${modifier.XMLID} Limitation clamped to -1/4`,
+                    modifier,
+                    this,
+                );
                 _myLimitation = 0.25;
                 system.title =
                     (system.title || "") +
                     "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
             }
 
-            //console.log("limitation", modifier.ALIAS, _myLimitation)
             modifier.BASECOST_total = -_myLimitation;
 
             limitations += _myLimitation;
@@ -3134,6 +3160,15 @@ export class HeroSystem6eItem extends Item {
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             })) {
+            // This might be a limitation with an unusually positive value
+            const modPowerInfo = getPowerInfo({
+                item: modifier,
+                actor: this.actor,
+            });
+            if (modPowerInfo?.minumumLimitation) {
+                continue;
+            }
+
             system.description += this.createPowerDescriptionModifier(modifier);
         }
 
@@ -3150,7 +3185,7 @@ export class HeroSystem6eItem extends Item {
 
         // MULTIPOWER slots typically include limitations
         let modifiers = (system.MODIFIER || [])
-            .filter((o) => o.BASECOST < 0)
+            .filter((o) => o.BASECOST_total < 0)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             });
