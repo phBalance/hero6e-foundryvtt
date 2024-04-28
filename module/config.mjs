@@ -5838,6 +5838,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 })();
 
 (function addAddersToPowerList() {
+    addPower(undefined, {
+        xml: `<ADDER XMLID="DOUBLEAREA" ID="1707272359920" BASECOST="0.0" LEVELS="1" ALIAS="x2 Radius" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+            <NOTES />
+        </ADDER>`,
+    });
+
     addPower(
         {
             cost: function (adder) {

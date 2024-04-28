@@ -1924,9 +1924,21 @@ export class HeroSystem6eItem extends Item {
                     console.warn(`Missing powerInfo for ${adder.XMLID}`, adder);
                 }
 
-                const adderCost = adderPowerInfo?.cost
+                let adderCost = adderPowerInfo?.cost
                     ? adderPowerInfo.cost(adder, this)
-                    : parseFloat(adder.BASECOST || 0);
+                    : 0;
+
+                if (!adderCost) {
+                    adderCost += parseFloat(adder.BASECOST);
+                    const adderCostPerLevel =
+                        typeof adderPowerInfo?.costPerLevel === "function"
+                            ? adderPowerInfo.costPerLevel(adder)
+                            : adderPowerInfo?.costPerLevel ||
+                              parseFloat(adder.LVLCOST) ||
+                              0;
+                    adderCost +=
+                        parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
+                }
 
                 adder.BASECOST_total = adderCost;
                 _myAdvantage += adderCost;
