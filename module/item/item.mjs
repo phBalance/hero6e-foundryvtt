@@ -1715,19 +1715,25 @@ export class HeroSystem6eItem extends Item {
         for (const adder of system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost =
-                adder.BASECOST || parseInt(adder.LVLCOST) || 0;
+                parseInt(adder.BASECOST || adder.LVLCOST) || 0;
+            adder.BASECOST_total = adderBaseCost;
 
             if (adder.SELECTED != false) {
                 //TRANSPORT_FAMILIARITY
-                const adderValPerLevel = Math.max(
+                const adderCostPerLevel = Math.max(
                     1,
-                    parseInt(adder.LVLVAL) || 0,
+                    parseInt(adder.LVLCOST) || 0,
                 );
-                const adderLevels = Math.ceil(
-                    Math.max(1, parseInt(adder.LEVELS)) / adderValPerLevel,
+                const adderLevels = parseInt(adder.LEVELS);
+                //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
+                adder.BASECOST_total += Math.ceil(
+                    adderCostPerLevel * adderLevels,
                 );
-                adderCost += Math.ceil(adderBaseCost * adderLevels);
             }
+
+            adderCost += adder.BASECOST_total;
+
+            adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
 
             let subAdderCost = 0;
 
