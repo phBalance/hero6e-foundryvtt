@@ -488,203 +488,207 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Defense (create fake attacks and get defense results)
         let defense = {};
 
-        // Make a fake actor to hold the fake attacks we're going to create. Give it the
-        // same HERO system version as the actor related to this sheet.
-        // TODO: Is there a better way to calculate defense without creating fake attacks?
-        const defenseCalculationActor = new HeroSystem6eActor(
-            {
-                name: "Defense Calculation Actor",
-                type: "pc",
-            },
-            { temporary: true },
-        );
-        defenseCalculationActor.system.is5e = this.actor.system.is5e;
+        if (false) {
+            // Make a fake actor to hold the fake attacks we're going to create. Give it the
+            // same HERO system version as the actor related to this sheet.
+            // TODO: Is there a better way to calculate defense without creating fake attacks?
+            const defenseCalculationActor = new HeroSystem6eActor(
+                {
+                    name: "Defense Calculation Actor",
+                    type: "pc",
+                },
+                { temporary: true },
+            );
+            defenseCalculationActor.system.is5e = this.actor.system.is5e;
 
-        // Defense PD
-        const pdContentsAttack = `
+            // Defense PD
+            const pdContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             </POWER>
         `;
-        const pdAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(
-                pdContentsAttack,
-                defenseCalculationActor,
-            ),
-            { temporary: true, parent: defenseCalculationActor },
-        );
-        await pdAttack._postUpload();
+            const pdAttack = await new HeroSystem6eItem(
+                HeroSystem6eItem.itemDataFromXml(
+                    pdContentsAttack,
+                    defenseCalculationActor,
+                ),
+                { temporary: true, parent: defenseCalculationActor },
+            );
+            await pdAttack._postUpload();
 
-        let [
-            defenseValue,
-            resistantValue /*impenetrableValue*/,
-            ,
-            damageReductionValue,
-            damageNegationValue /*knockbackResistance*/,
-            ,
-            defenseTagsP,
-        ] = determineDefense(this.actor, pdAttack);
-        defense.PD = defenseValue;
-        defense.rPD = resistantValue;
-        defense.PDtags = "PHYSICAL DEFENSE\n";
-        defense.rPDtags = "PHYSICAL DEFENSE (RESISTANT)\n";
-        for (let tag of defenseTagsP.filter((o) => o.name.match(/pd$/i))) {
-            if (tag.resistant) {
-                defense.rPDtags += `${tag.value} ${tag.title}\n`;
-            } else if (tag.resistant != undefined) {
-                defense.PDtags += `${tag.value} ${tag.title}\n`;
+            let [
+                defenseValue,
+                resistantValue /*impenetrableValue*/,
+                ,
+                damageReductionValue,
+                damageNegationValue /*knockbackResistance*/,
+                ,
+                defenseTagsP,
+            ] = determineDefense(this.actor, pdAttack);
+            defense.PD = defenseValue;
+            defense.rPD = resistantValue;
+            defense.PDtags = "PHYSICAL DEFENSE\n";
+            defense.rPDtags = "PHYSICAL DEFENSE (RESISTANT)\n";
+            for (let tag of defenseTagsP.filter((o) => o.name.match(/pd$/i))) {
+                if (tag.resistant) {
+                    defense.rPDtags += `${tag.value} ${tag.title}\n`;
+                } else if (tag.resistant != undefined) {
+                    defense.PDtags += `${tag.value} ${tag.title}\n`;
+                }
             }
-        }
-        defense.drp = damageReductionValue;
-        defense.drptags = "DAMAGE REDUCTION PHYSICAL\n";
-        for (let tag of defenseTagsP.filter((o) => o.name.match(/drp$/i))) {
-            if (tag.resistant) {
-                defense.drptags += `${tag.value} ${tag.title}\n`;
-            } else if (tag.resistant != undefined) {
-                defense.drptags += `${tag.value} ${tag.title}\n`;
+            defense.drp = damageReductionValue;
+            defense.drptags = "DAMAGE REDUCTION PHYSICAL\n";
+            for (let tag of defenseTagsP.filter((o) => o.name.match(/drp$/i))) {
+                if (tag.resistant) {
+                    defense.drptags += `${tag.value} ${tag.title}\n`;
+                } else if (tag.resistant != undefined) {
+                    defense.drptags += `${tag.value} ${tag.title}\n`;
+                }
             }
-        }
-        defense.dnp = damageNegationValue;
-        defense.dnptags = "DAMAGE NEGATION PHYSICAL\n";
-        for (let tag of defenseTagsP.filter((o) => o.name.match(/dnp$/i))) {
-            defense.dnptags += `${tag.value} ${tag.title}\n`;
-        }
+            defense.dnp = damageNegationValue;
+            defense.dnptags = "DAMAGE NEGATION PHYSICAL\n";
+            for (let tag of defenseTagsP.filter((o) => o.name.match(/dnp$/i))) {
+                defense.dnptags += `${tag.value} ${tag.title}\n`;
+            }
 
-        // Defense ED
-        const edContentsAttack = `
+            // Defense ED
+            const edContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             </POWER>
         `;
-        const edAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(
-                edContentsAttack,
-                defenseCalculationActor,
-            ),
-            { temporary: true, parent: defenseCalculationActor },
-        );
-        await edAttack._postUpload();
+            const edAttack = await new HeroSystem6eItem(
+                HeroSystem6eItem.itemDataFromXml(
+                    edContentsAttack,
+                    defenseCalculationActor,
+                ),
+                { temporary: true, parent: defenseCalculationActor },
+            );
+            await edAttack._postUpload();
 
-        let [
-            defenseValueE,
-            resistantValueE /* impenetrableValueE */,
-            ,
-            damageReductionValueE,
-            damageNegationValueE /* knockbackResistanceE */,
-            ,
-            defenseTagsE,
-        ] = determineDefense(this.actor, edAttack);
-        defense.ED = defenseValueE;
-        defense.rED = resistantValueE;
-        defense.EDtags = "ENERGY DEFENSE\n";
-        defense.rEDtags = "ENERGY DEFENSE (RESISTANT)\n";
-        for (let tag of defenseTagsE.filter((o) => o.name.match(/ed$/i))) {
-            if (tag.resistant) {
-                defense.rEDtags += `${tag.value} ${tag.title}\n`;
-            } else if (tag.resistant != undefined) {
-                defense.EDtags += `${tag.value} ${tag.title}\n`;
+            let [
+                defenseValueE,
+                resistantValueE /* impenetrableValueE */,
+                ,
+                damageReductionValueE,
+                damageNegationValueE /* knockbackResistanceE */,
+                ,
+                defenseTagsE,
+            ] = determineDefense(this.actor, edAttack);
+            defense.ED = defenseValueE;
+            defense.rED = resistantValueE;
+            defense.EDtags = "ENERGY DEFENSE\n";
+            defense.rEDtags = "ENERGY DEFENSE (RESISTANT)\n";
+            for (let tag of defenseTagsE.filter((o) => o.name.match(/ed$/i))) {
+                if (tag.resistant) {
+                    defense.rEDtags += `${tag.value} ${tag.title}\n`;
+                } else if (tag.resistant != undefined) {
+                    defense.EDtags += `${tag.value} ${tag.title}\n`;
+                }
             }
-        }
-        defense.dre = damageReductionValueE;
-        defense.dretags = "DAMAGE REDUCTION ENERGY\n";
-        for (let tag of defenseTagsE.filter((o) => o.name.match(/dre$/i))) {
-            if (tag.resistant) {
-                defense.dretags += `${tag.value} ${tag.title}\n`;
-            } else if (tag.resistant != undefined) {
-                defense.dretags += `${tag.value} ${tag.title}\n`;
+            defense.dre = damageReductionValueE;
+            defense.dretags = "DAMAGE REDUCTION ENERGY\n";
+            for (let tag of defenseTagsE.filter((o) => o.name.match(/dre$/i))) {
+                if (tag.resistant) {
+                    defense.dretags += `${tag.value} ${tag.title}\n`;
+                } else if (tag.resistant != undefined) {
+                    defense.dretags += `${tag.value} ${tag.title}\n`;
+                }
             }
-        }
-        defense.dne = damageNegationValueE;
-        defense.dnetags = "DAMAGE NEGATION ENERGY\n";
-        for (let tag of defenseTagsE.filter((o) => o.name.match(/dne$/i))) {
-            defense.dnetags += `${tag.value} ${tag.title}\n`;
-        }
+            defense.dne = damageNegationValueE;
+            defense.dnetags = "DAMAGE NEGATION ENERGY\n";
+            for (let tag of defenseTagsE.filter((o) => o.name.match(/dne$/i))) {
+                defense.dnetags += `${tag.value} ${tag.title}\n`;
+            }
 
-        // Defense MD
-        const mdContentsAttack = `
+            // Defense MD
+            const mdContentsAttack = `
             <POWER XMLID="EGOATTACK" ID="1695575160315" BASECOST="0.0" LEVELS="1" ALIAS="Mental Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
             </POWER>
         `;
-        const mdAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(
-                mdContentsAttack,
-                defenseCalculationActor,
-            ),
-            { temporary: true, parent: defenseCalculationActor },
-        );
-        await mdAttack._postUpload();
+            const mdAttack = await new HeroSystem6eItem(
+                HeroSystem6eItem.itemDataFromXml(
+                    mdContentsAttack,
+                    defenseCalculationActor,
+                ),
+                { temporary: true, parent: defenseCalculationActor },
+            );
+            await mdAttack._postUpload();
 
-        let [
-            defenseValueM,
-            resistantValueM /*impenetrableValueM*/,
-            ,
-            damageReductionValueM,
-            damageNegationValueM /*knockbackResistanceM*/,
-            ,
-            defenseTagsM,
-        ] = determineDefense(this.actor, mdAttack);
-        defense.MD = defenseValueM;
-        defense.rMD = resistantValueM;
-        defense.MDtags = "MENTAL DEFENSE\n";
-        defense.rMDtags = "MENTAL DEFENSE (RESISTANT)\n";
-        for (let tag of defenseTagsM.filter((o) => o.name.match(/md$/i))) {
-            if (tag.resistant) {
-                defense.rMDtags += `${tag.value} ${tag.title}\n`;
-            } else if (tag.resistant != undefined) {
-                defense.MDtags += `${tag.value} ${tag.title}\n`;
+            let [
+                defenseValueM,
+                resistantValueM /*impenetrableValueM*/,
+                ,
+                damageReductionValueM,
+                damageNegationValueM /*knockbackResistanceM*/,
+                ,
+                defenseTagsM,
+            ] = determineDefense(this.actor, mdAttack);
+            defense.MD = defenseValueM;
+            defense.rMD = resistantValueM;
+            defense.MDtags = "MENTAL DEFENSE\n";
+            defense.rMDtags = "MENTAL DEFENSE (RESISTANT)\n";
+            for (let tag of defenseTagsM.filter((o) => o.name.match(/md$/i))) {
+                if (tag.resistant) {
+                    defense.rMDtags += `${tag.value} ${tag.title}\n`;
+                } else if (tag.resistant != undefined) {
+                    defense.MDtags += `${tag.value} ${tag.title}\n`;
+                }
             }
-        }
-        defense.drm = damageReductionValueM;
-        defense.drmtags = "DAMAGE REDUCTION MENTAL\n";
-        for (let tag of defenseTagsM.filter((o) => o.name.match(/drm$/i))) {
-            if (tag.resistant) {
-                defense.drmtags += `${tag.value} ${tag.title}\n`;
-            } else if (tag.resistant != undefined) {
-                defense.drmtags += `${tag.value} ${tag.title}\n`;
+            defense.drm = damageReductionValueM;
+            defense.drmtags = "DAMAGE REDUCTION MENTAL\n";
+            for (let tag of defenseTagsM.filter((o) => o.name.match(/drm$/i))) {
+                if (tag.resistant) {
+                    defense.drmtags += `${tag.value} ${tag.title}\n`;
+                } else if (tag.resistant != undefined) {
+                    defense.drmtags += `${tag.value} ${tag.title}\n`;
+                }
             }
-        }
-        defense.dnm = damageNegationValueM;
-        defense.dnmtags = "DAMAGE NEGATION MENTAL\n";
-        for (let tag of defenseTagsM.filter((o) => o.name.match(/dnm$/i))) {
-            defense.dnmtags += `${tag.value} ${tag.title}\n`;
-        }
+            defense.dnm = damageNegationValueM;
+            defense.dnmtags = "DAMAGE NEGATION MENTAL\n";
+            for (let tag of defenseTagsM.filter((o) => o.name.match(/dnm$/i))) {
+                defense.dnmtags += `${tag.value} ${tag.title}\n`;
+            }
 
-        // Defense POWD
-        const drainContentsAttack = `
+            // Defense POWD
+            const drainContentsAttack = `
             <POWER XMLID="DRAIN" ID="1703727634494" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                 <NOTES />
             </POWER>
         `;
-        const drainAttack = await new HeroSystem6eItem(
-            HeroSystem6eItem.itemDataFromXml(
-                drainContentsAttack,
-                defenseCalculationActor,
-            ),
-            { temporary: true, parent: defenseCalculationActor },
-        );
-        await drainAttack._postUpload();
+            const drainAttack = await new HeroSystem6eItem(
+                HeroSystem6eItem.itemDataFromXml(
+                    drainContentsAttack,
+                    defenseCalculationActor,
+                ),
+                { temporary: true, parent: defenseCalculationActor },
+            );
+            await drainAttack._postUpload();
 
-        let [
-            defenseValuePOWD,
-            resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
-            ,
-            ,
-            ,
-            ,
-            defenseTagsPOWD,
-        ] = determineDefense(this.actor, drainAttack);
-        defense.POWD = defenseValuePOWD;
-        defense.rPOWD = resistantValuePOWD;
-        defense.POWDtags = "POWER DEFENSE\n";
-        defense.rPOWDtags = "POWER DEFENSE (RESISTANT)\n";
-        for (let tag of defenseTagsPOWD.filter((o) => o.name.match(/powd$/i))) {
-            if (tag.resistant) {
-                defense.rPOWDtags += `${tag.value} ${tag.title}\n`;
-            } else if (tag.resistant != undefined) {
-                defense.POWDtags += `${tag.value} ${tag.title}\n`;
+            let [
+                defenseValuePOWD,
+                resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
+                ,
+                ,
+                ,
+                ,
+                defenseTagsPOWD,
+            ] = determineDefense(this.actor, drainAttack);
+            defense.POWD = defenseValuePOWD;
+            defense.rPOWD = resistantValuePOWD;
+            defense.POWDtags = "POWER DEFENSE\n";
+            defense.rPOWDtags = "POWER DEFENSE (RESISTANT)\n";
+            for (let tag of defenseTagsPOWD.filter((o) =>
+                o.name.match(/powd$/i),
+            )) {
+                if (tag.resistant) {
+                    defense.rPOWDtags += `${tag.value} ${tag.title}\n`;
+                } else if (tag.resistant != undefined) {
+                    defense.POWDtags += `${tag.value} ${tag.title}\n`;
+                }
             }
-        }
 
-        data.defense = defense;
+            data.defense = defense;
+        }
 
         // Get all applicable effects (from actor and all items)
         data.allTemporaryEffects = Array.from(this.actor.allApplicableEffects())
