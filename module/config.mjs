@@ -2931,6 +2931,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            editOptions: {
+                hideLEVELS: true,
+            },
         },
         {},
     );
@@ -6197,6 +6200,24 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             //     return parseInt(modifier.LEVELS) * this.costPerLevel;
             // },
             xml: `<MODIFIER XMLID="PENETRATING" ID="1712697142089" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            // costPerLevel: 0.5,
+            // dc: true,
+            cost: function (modifier, item) {
+                // Reduced endurance is double the cost if it's applying against a power with autofire
+                if (item.findModsByXmlid("AUTOFIRE")) {
+                    return parseFloat(modifier.BASECOST) * 2;
+                }
+                return parseFloat(modifier.BASECOST);
+            },
+            xml: `<MODIFIER XMLID="REDUCEDEND" ID="1710101174711" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
             <NOTES />
           </MODIFIER>`,
         },

@@ -56,6 +56,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`;
         }
 
+        // Trying to see if we can get most items to use the generic power sheet
+        if (this.item.type === "skill") {
+            return `${path}/item-power-sheet.hbs`;
+        }
+
         return `${path}/item-${this.item.type}-sheet.hbs`;
     }
 
@@ -110,6 +115,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             actor: item?.actor,
         });
         data.sheet = { ...(configPowerInfo?.sheet || {}) };
+        data.editOptions = configPowerInfo?.editOptions;
 
         // SFX
         const sfx = [

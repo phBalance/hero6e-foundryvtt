@@ -35,9 +35,7 @@ export class ItemModifierFormApplication extends FormApplication {
             xmlid: this.data?.mod?.XMLID,
             actor: this.data.item.actor,
         });
-        if (configPowerInfo) {
-            data.editOptions = configPowerInfo.editOptions;
-        }
+        data.editOptions = configPowerInfo?.editOptions;
         return data;
     }
 

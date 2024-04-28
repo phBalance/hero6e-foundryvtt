@@ -1716,7 +1716,7 @@ export class HeroSystem6eItem extends Item {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost =
                 parseInt(adder.BASECOST || adder.LVLCOST) || 0;
-            adder.BASECOST_total = adderBaseCost;
+            //adder.BASECOST_total = adderBaseCost;
 
             if (adder.SELECTED != false) {
                 //TRANSPORT_FAMILIARITY
@@ -1725,9 +1725,10 @@ export class HeroSystem6eItem extends Item {
                         parseFloat(adder.LVLVAL || 1) || 1;
                 const adderLevels = parseInt(adder.LEVELS);
                 //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
-                adder.BASECOST_total += Math.ceil(
-                    adderCostPerLevel * adderLevels,
-                );
+                adder.BASECOST_total =
+                    adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
+            } else {
+                adder.BASECOST_total = 0;
             }
 
             adderCost += adder.BASECOST_total;
@@ -1742,6 +1743,9 @@ export class HeroSystem6eItem extends Item {
                 if (adder2.SELECTED != false) {
                     let adderLevels = Math.max(1, parseInt(adder2.LEVELS));
                     subAdderCost += Math.ceil(adder2BaseCost * adderLevels);
+                    adder2.BASECOST_total = Math.ceil(
+                        adder2BaseCost * adderLevels,
+                    );
                 }
             }
 
@@ -1812,7 +1816,7 @@ export class HeroSystem6eItem extends Item {
 
                 // Is there a cost function
                 let modCost = modPowerInfo?.cost
-                    ? modPowerInfo.cost(modifier)
+                    ? modPowerInfo.cost(modifier, this)
                     : 0;
 
                 // If not use a the default cost formula
