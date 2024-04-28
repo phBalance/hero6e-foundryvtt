@@ -6,15 +6,19 @@
 
         <div class="header-details flexrow">
             <h1 class="charname">
-                <input name="name" type="text" value="{{item.name}}" placeholder="Power Name" />
+                <input name="system.ALIAS" type="text" value="{{system.ALIAS}}" placeholder="Power ALIAS" />
             </h1>
         </div>
     </header>
 
     {{!-- Sheet Body --}}
     <section class="sheet-body">
+
+        {{!-- Common --}}
+        {{> systems/hero6efoundryvttv2/templates/item/item-partial-common.hbs }}
+
         <!-- Adjustment Dice (Active Points) -->
-        <div class="form-group">
+        {{!-- <div class="form-group">
             <label>{{localize "Items.Attack.Value"}}</label>
             <input type="text" name="system.dice" value="{{system.dice}}" data-dtype="Number" />
             D6
@@ -22,7 +26,7 @@
                 {{selectOptions config.extraDice selected=system.extraDice}}
 
             </select>
-        </div>
+        </div> --}}
 
         <!-- Adjustment Targets/Sources (possibly infinite number depending on modifiers and 5e vs 6e) -->
         {{#each reduces as |input id|}}
@@ -43,10 +47,16 @@
             </div>
         {{/each}}
 
-        <hr>
+        {{!-- <hr> --}}
 
-        {{> (getModulePath 'item/item-common-partial.hbs') item=item }}
-        {{> (getModulePath 'item/item-effects-partial.hbs') item=item alphaTesting=alphaTesting}}
+        {{!-- {{> (getModulePath 'item/item-common-partial.hbs') item=item }}
+        {{> (getModulePath 'item/item-effects-partial.hbs') item=item alphaTesting=alphaTesting}} --}}
+
+        {{!-- Active Points --}}
+        {{> (getModulePath 'item/item-partial-active-points.hbs') }}
+
+        {{!-- Adders & Modifiers --}}
+        {{> (getModulePath 'item/item-partial-adders-modifiers.hbs') }}
 
     </section>
 

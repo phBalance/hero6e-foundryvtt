@@ -4336,8 +4336,8 @@ export function registerUploadTests(quench) {
                         assert.equal(ecItem.system.activePoints, 10);
                     });
 
-                    it("elemental control baseCost", function () {
-                        assert.equal(ecItem.system.baseCost, 10);
+                    it("elemental control realCost", function () {
+                        assert.equal(ecItem.system.realCost, 5);
                     });
                 });
             });
@@ -4444,7 +4444,8 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Aid CON 3d6+1 (Increased Maximum (+8 points) (27 total points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
+                        //"Aid CON 3d6+1 (Increased Maximum (+8 points) (27 total points)), Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
+                        "Aid CON 3d6+1, Can Add Maximum Of 27 Points, Continuous (+1) (74 Active Points); Crew-Served (2 people; -1/4)",
                     );
                 });
 

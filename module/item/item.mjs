@@ -1720,10 +1720,9 @@ export class HeroSystem6eItem extends Item {
 
             if (adder.SELECTED != false) {
                 //TRANSPORT_FAMILIARITY
-                const adderCostPerLevel = Math.max(
-                    1,
-                    parseInt(adder.LVLCOST) || 0,
-                );
+                const adderCostPerLevel =
+                    parseFloat(adder.LVLCOST || 0) /
+                        parseFloat(adder.LVLVAL || 1) || 1;
                 const adderLevels = parseInt(adder.LEVELS);
                 //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
                 adder.BASECOST_total += Math.ceil(
@@ -1951,7 +1950,8 @@ export class HeroSystem6eItem extends Item {
                         typeof adderPowerInfo?.costPerLevel === "function"
                             ? adderPowerInfo.costPerLevel(adder)
                             : adderPowerInfo?.costPerLevel ||
-                              parseFloat(adder.LVLCOST) ||
+                              parseFloat(adder.LVLCOST || 0) /
+                                  parseFloat(adder.LVLVAL || 1) ||
                               0;
                     adderCost +=
                         parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
@@ -3053,11 +3053,15 @@ export class HeroSystem6eItem extends Item {
 
                     case "INCREASEDMAX":
                         // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
-                        _adderArray.push(
-                            `${adder.ALIAS} (${determineMaxAdjustment(
-                                this,
-                            )} total points)`,
-                        );
+                        // Can Add Maximum Of 34 Points
+                        //_adderArray.push(
+                        // `${adder.ALIAS} (${determineMaxAdjustment(
+                        //     this,
+                        // )} total points)`,
+                        system.description += `, Can Add Maximum Of ${determineMaxAdjustment(
+                            this,
+                        )} Points`;
+                        //);
                         break;
 
                     default:
