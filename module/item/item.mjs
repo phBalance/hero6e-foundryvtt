@@ -1900,7 +1900,8 @@ export class HeroSystem6eItem extends Item {
 
             _myAdvantage += modCost;
 
-            switch (modifier.XMLID) {
+            switch (
+                modifier.XMLID
                 // case "EXPLOSION":
                 // case "AOE":
                 //     _myAdvantage += modifierBaseCost;
@@ -1912,25 +1913,26 @@ export class HeroSystem6eItem extends Item {
                 //         modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
                 //     break;
 
-                case "REDUCEDEND":
-                    {
-                        // Reduced endurance is double the cost if it's applying against a power with autofire
-                        const autofire = (system.MODIFIER || []).find(
-                            (mod) => mod.XMLID === "AUTOFIRE",
-                        );
-                        if (autofire) {
-                            endModifierCost = 2 * modifierBaseCost;
-                        } else {
-                            endModifierCost = modifierBaseCost;
-                        }
-                        //_myAdvantage = _myAdvantage + endModifierCost;
-                    }
-                    break;
+                // case "REDUCEDEND":
+                //     {
+                //         // Reduced endurance is double the cost if it's applying against a power with autofire
+                //         const autofire = (system.MODIFIER || []).find(
+                //             (mod) => mod.XMLID === "AUTOFIRE",
+                //         );
+                //         if (autofire) {
+                //             endModifierCost = 2 * modifierBaseCost;
+                //         } else {
+                //             endModifierCost = modifierBaseCost;
+                //         }
+                //         //_myAdvantage = _myAdvantage + endModifierCost;
+                //     }
+                //     break;
 
                 // default:
                 //     _myAdvantage +=
                 //         modifierBaseCost *
                 //         Math.max(1, parseInt(modifier.LEVELS));
+            ) {
             }
 
             // Some modifiers may have ADDERS
