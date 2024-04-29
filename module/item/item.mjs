@@ -1047,18 +1047,6 @@ export class HeroSystem6eItem extends Item {
             changed = true;
         }
 
-        // Set LEVELS equal to the length of the basic dimensions of the shape (length for line, side length for cone, etc.)
-        // TODO: Would be best if we didn't modify the XML unless the power actually changed.
-        // if (parseInt(modifier.LEVELS) !== levels) {
-        //     modifier.LEVELS = levels;
-        //     changed = true;
-        // }
-        // Aaron is reworking 5e AOE to use lower case levels instead of changing XML uppercase LEVELS
-        if (parseInt(modifier.levels) !== levels) {
-            modifier.levels = levels;
-            changed = true;
-        }
-
         return changed;
     }
 
