@@ -4,6 +4,7 @@
 
 - Correct range penalty calculations. [#944](https://github.com/dmdorman/hero6e-foundryvtt/issues/944)
 - 5e actors will now see ruler measurements in hexes ("). We still recommend both 5e and 6e scenes use a grid size of 2m.
+- Additional in-game editing support focused mainly on AOE.
 
 ## Version 3.0.67.1 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

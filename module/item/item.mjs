@@ -776,139 +776,139 @@ export class HeroSystem6eItem extends Item {
         let changed = false;
 
         // BASECOST
-        const newBaseValue = parseFloat(this.system.BASECOST || 0);
-        if (this.system.baseCost != newBaseValue) {
-            this.system.baseCost = newBaseValue;
-            changed = true;
-        }
+        // const newBaseValue = parseFloat(this.system.BASECOST || 0);
+        // if (this.system.baseCost != newBaseValue) {
+        //     this.system.baseCost = newBaseValue;
+        //     changed = true;
+        // }
 
         // BASECOST (children)
-        for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-            if (this.system[key]) {
-                for (const child of this.system[key]) {
-                    let newChildBaseCost;
+        // for (const key of HeroSystem6eItem.ItemXmlChildTags) {
+        //     if (this.system[key]) {
+        //         for (const child of this.system[key]) {
+        //             let newChildBaseCost;
 
-                    switch (child.XMLID) {
-                        case "AOE":
-                            if (!this.actor?.system?.is5e) {
-                                let minLevel;
-                                let minDoubles;
+        //             switch (child.XMLID) {
+        //                 // case "AOE":
+        //                 //     if (!this.actor?.system?.is5e) {
+        //                 //         let minLevel;
+        //                 //         let minDoubles;
 
-                                if (
-                                    child.OPTION === "SURFACE" ||
-                                    child.OPTION === "ANY"
-                                ) {
-                                    minLevel = 2;
-                                    minDoubles = 0;
-                                } else if (child.OPTION === "RADIUS") {
-                                    minLevel = 4;
-                                    minDoubles = 1;
-                                } else if (child.OPTION === "CONE") {
-                                    minLevel = 8;
-                                    minDoubles = 2;
-                                } else if (child.OPTION === "LINE") {
-                                    minLevel = 16;
-                                    minDoubles = 3;
-                                } else {
-                                    console.error(
-                                        `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
-                                    );
-                                }
+        //                 //         if (
+        //                 //             child.OPTION === "SURFACE" ||
+        //                 //             child.OPTION === "ANY"
+        //                 //         ) {
+        //                 //             minLevel = 2;
+        //                 //             minDoubles = 0;
+        //                 //         } else if (child.OPTION === "RADIUS") {
+        //                 //             minLevel = 4;
+        //                 //             minDoubles = 1;
+        //                 //         } else if (child.OPTION === "CONE") {
+        //                 //             minLevel = 8;
+        //                 //             minDoubles = 2;
+        //                 //         } else if (child.OPTION === "LINE") {
+        //                 //             minLevel = 16;
+        //                 //             minDoubles = 3;
+        //                 //         } else {
+        //                 //             console.error(
+        //                 //                 `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
+        //                 //             );
+        //                 //         }
 
-                                const levels =
-                                    parseInt(child.LEVELS) < minLevel
-                                        ? minLevel
-                                        : parseInt(child.LEVELS);
+        //                 //         const levels =
+        //                 //             parseInt(child.LEVELS) < minLevel
+        //                 //                 ? minLevel
+        //                 //                 : parseInt(child.LEVELS);
 
-                                newChildBaseCost =
-                                    0.25 *
-                                    Math.ceil(Math.log2(levels) - minDoubles);
-                            } else {
-                                // Modifier plus any dimension doubling adders
-                                newChildBaseCost = parseFloat(child.BASECOST);
-                            }
+        //                 //         newChildBaseCost =
+        //                 //             0.25 *
+        //                 //             Math.ceil(Math.log2(levels) - minDoubles);
+        //                 //     } else {
+        //                 //         // Modifier plus any dimension doubling adders
+        //                 //         newChildBaseCost = parseFloat(child.BASECOST);
+        //                 //     }
 
-                            break;
+        //                 //     break;
 
-                        case "REQUIRESASKILLROLL":
-                            // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-                            // This is a limitation not an advantage, not sure why it is positive.  Force it negative.
-                            newChildBaseCost = -Math.abs(
-                                parseFloat(child.BASECOST),
-                            );
-                            break;
+        //                 case "REQUIRESASKILLROLL":
+        //                     // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+        //                     // This is a limitation not an advantage, not sure why it is positive.  Force it negative.
+        //                     newChildBaseCost = -Math.abs(
+        //                         parseFloat(child.BASECOST),
+        //                     );
+        //                     break;
 
-                        case "EXPLOSION":
-                            {
-                                // Not specified correctly in HDC.
-                                let baseDCFalloffFromShape;
-                                switch (child.OPTION) {
-                                    case "CONE":
-                                        baseDCFalloffFromShape = 2;
-                                        break;
-                                    case "LINE":
-                                        baseDCFalloffFromShape = 3;
-                                        break;
-                                    case "NORMAL":
-                                        baseDCFalloffFromShape = 1;
-                                        break;
-                                    default:
-                                        console.error(
-                                            `unknown 5e explosion shape ${child.OPTION}`,
-                                        );
-                                        break;
-                                }
+        //                 case "EXPLOSION":
+        //                     {
+        //                         // Not specified correctly in HDC.
+        //                         let baseDCFalloffFromShape;
+        //                         switch (child.OPTION) {
+        //                             case "CONE":
+        //                                 baseDCFalloffFromShape = 2;
+        //                                 break;
+        //                             case "LINE":
+        //                                 baseDCFalloffFromShape = 3;
+        //                                 break;
+        //                             case "NORMAL":
+        //                                 baseDCFalloffFromShape = 1;
+        //                                 break;
+        //                             default:
+        //                                 console.error(
+        //                                     `unknown 5e explosion shape ${child.OPTION}`,
+        //                                 );
+        //                                 break;
+        //                         }
 
-                                newChildBaseCost =
-                                    parseFloat(child.BASECOST) +
-                                    0.25 *
-                                        (parseInt(child.LEVELS || 1) -
-                                            baseDCFalloffFromShape);
-                            }
-                            break;
+        //                         newChildBaseCost =
+        //                             parseFloat(child.BASECOST) +
+        //                             0.25 *
+        //                                 (parseInt(child.LEVELS || 1) -
+        //                                     baseDCFalloffFromShape);
+        //                     }
+        //                     break;
 
-                        default:
-                            newChildBaseCost = parseFloat(
-                                getModifierInfo({
-                                    xmlid: child.XMLID,
-                                    item: this,
-                                })?.BASECOST ||
-                                    child.BASECOST ||
-                                    0,
-                            );
-                            break;
-                    }
+        //                 default:
+        //                     newChildBaseCost = parseFloat(
+        //                         getModifierInfo({
+        //                             xmlid: child.XMLID,
+        //                             item: this,
+        //                         })?.BASECOST ||
+        //                             child.BASECOST ||
+        //                             0,
+        //                     );
+        //                     break;
+        //             }
 
-                    if (child.baseCost != newChildBaseCost) {
-                        child.baseCost = newChildBaseCost;
-                        changed = true;
-                    }
+        //             if (child.baseCost != newChildBaseCost) {
+        //                 child.baseCost = newChildBaseCost;
+        //                 changed = true;
+        //             }
 
-                    for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-                        if (child[key]) {
-                            for (const child2 of child[key]) {
-                                const newChild2BaseCost =
-                                    parseFloat(
-                                        getModifierInfo({
-                                            xmlid: child2.XMLID,
-                                            item: this,
-                                        })?.BASECOST ||
-                                            child2.BASECOST ||
-                                            0,
-                                    ) +
-                                    parseFloat(child2.LVLCOST || 0) *
-                                        parseFloat(child2.LEVELS || 0); // TODO: Might need to also consider cost per level
+        //             for (const key of HeroSystem6eItem.ItemXmlChildTags) {
+        //                 if (child[key]) {
+        //                     for (const child2 of child[key]) {
+        //                         const newChild2BaseCost =
+        //                             parseFloat(
+        //                                 getModifierInfo({
+        //                                     xmlid: child2.XMLID,
+        //                                     item: this,
+        //                                 })?.BASECOST ||
+        //                                     child2.BASECOST ||
+        //                                     0,
+        //                             ) +
+        //                             parseFloat(child2.LVLCOST || 0) *
+        //                                 parseFloat(child2.LEVELS || 0); // TODO: Might need to also consider cost per level
 
-                                if (child2.baseCost != newChild2BaseCost) {
-                                    child2.baseCost = newChild2BaseCost;
-                                    changed = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                         if (child2.baseCost != newChild2BaseCost) {
+        //                             child2.baseCost = newChild2BaseCost;
+        //                             changed = true;
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         changed = this.calcItemPoints() || changed;
 
@@ -955,7 +955,7 @@ export class HeroSystem6eItem extends Item {
                 );
                 switch (modifier.OPTIONID) {
                     case "CONE":
-                        levels = Math.floor(
+                        levels = RoundFavorPlayerUp(
                             1 + activePointsWithoutAoeAdvantage / 5,
                         );
                         break;
@@ -965,15 +965,18 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     case "LINE":
-                        levels = Math.floor(
+                        levels = RoundFavorPlayerUp(
                             (2 * activePointsWithoutAoeAdvantage) / 5,
                         );
                         break;
 
                     case "ANY":
                     case "RADIUS":
-                        levels = Math.floor(
-                            1 + activePointsWithoutAoeAdvantage / 10,
+                        levels = Math.max(
+                            1,
+                            RoundFavorPlayerUp(
+                                activePointsWithoutAoeAdvantage / 10,
+                            ),
                         );
                         break;
 
@@ -1041,13 +1044,6 @@ export class HeroSystem6eItem extends Item {
                 ...newAoe,
             };
 
-            changed = true;
-        }
-
-        // Set LEVELS equal to the length of the basic dimensions of the shape (length for line, side length for cone, etc.)
-        // TODO: Would be best if we didn't modify the XML unless the power actually changed.
-        if (parseInt(modifier.LEVELS) !== levels) {
-            modifier.LEVELS = levels;
             changed = true;
         }
 
@@ -1635,7 +1631,7 @@ export class HeroSystem6eItem extends Item {
         });
 
         // Base Cost is typically extracted directly from HDC
-        let baseCost = system.baseCost;
+        let baseCost = parseFloat(system.BASECOST) || 0;
 
         // Cost per level is NOT included in the HDC file.
         // We will try to get cost per level via config.js
@@ -1710,28 +1706,37 @@ export class HeroSystem6eItem extends Item {
         for (const adder of system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
             const adderBaseCost =
-                adder.baseCost || parseInt(adder.LVLCOST) || 0;
+                parseInt(adder.BASECOST || adder.LVLCOST) || 0;
+            //adder.BASECOST_total = adderBaseCost;
 
             if (adder.SELECTED != false) {
                 //TRANSPORT_FAMILIARITY
-                const adderValPerLevel = Math.max(
-                    1,
-                    parseInt(adder.LVLVAL) || 0,
-                );
-                const adderLevels = Math.ceil(
-                    Math.max(1, parseInt(adder.LEVELS)) / adderValPerLevel,
-                );
-                adderCost += Math.ceil(adderBaseCost * adderLevels);
+                const adderCostPerLevel =
+                    parseFloat(adder.LVLCOST || 0) /
+                        parseFloat(adder.LVLVAL || 1) || 1;
+                const adderLevels = parseInt(adder.LEVELS);
+                //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
+                adder.BASECOST_total =
+                    adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
+            } else {
+                adder.BASECOST_total = 0;
             }
+
+            adderCost += adder.BASECOST_total;
+
+            adder.BASECOST_total = RoundFavorPlayerDown(adder.BASECOST_total);
 
             let subAdderCost = 0;
 
             for (const adder2 of adder.ADDER || []) {
-                const adder2BaseCost = adder2.baseCost;
+                const adder2BaseCost = adder2.BASECOST;
 
                 if (adder2.SELECTED != false) {
                     let adderLevels = Math.max(1, parseInt(adder2.LEVELS));
                     subAdderCost += Math.ceil(adder2BaseCost * adderLevels);
+                    adder2.BASECOST_total = Math.ceil(
+                        adder2BaseCost * adderLevels,
+                    );
                 }
             }
 
@@ -1769,10 +1774,15 @@ export class HeroSystem6eItem extends Item {
 
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
-            for (let adder of system.POWER) {
-                let adderBaseCost = adder.baseCost; //parseFloat(adder.BASECOST)
-                let adderLevels = Math.max(1, parseInt(adder.LEVELS));
-                adderCost += Math.ceil(adderBaseCost * adderLevels);
+            for (const adderPower of system.POWER) {
+                //const adderBaseCost = parseFloat(adderPower.BASECOST);
+                const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
+                const adderPowerInfo = getPowerInfo({
+                    item: adderPower,
+                    actor: this.actor,
+                });
+                const adderCostPerLevel = adderPowerInfo?.costPerLevel || 0;
+                adderCost += Math.ceil(adderCostPerLevel * adderLevels);
             }
         }
 
@@ -1780,12 +1790,40 @@ export class HeroSystem6eItem extends Item {
 
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
-        if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
+        //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
+        if (configPowerInfo.privateAsAdder && system.MODIFIER) {
             let advantages = 0;
             for (let modifier of (system.MODIFIER || []).filter(
                 (o) => !o.PRIVATE,
             )) {
-                advantages += modifier.baseCost;
+                const modPowerInfo = getPowerInfo({
+                    item: modifier,
+                    actor: this.actor,
+                });
+
+                if (!modPowerInfo) {
+                    console.warn("Missing modPowerInfo", modifier);
+                }
+
+                // Is there a cost function
+                let modCost = modPowerInfo?.cost
+                    ? modPowerInfo.cost(modifier, this)
+                    : 0;
+
+                // If not use a the default cost formula
+                if (!modCost) {
+                    const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
+                    modCost += modifierBaseCost;
+                    const modifierCostPerLevel =
+                        typeof modPowerInfo?.costPerLevel === "function"
+                            ? modPowerInfo.costPerLevel(modifier)
+                            : modPowerInfo?.costPerLevel || 0;
+                    modCost +=
+                        parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+                }
+
+                modifier.BASECOST_total = modCost;
+                advantages += modCost;
             }
             cost = cost * advantages;
         }
@@ -1805,28 +1843,70 @@ export class HeroSystem6eItem extends Item {
         let minAdvantage = 0;
         let endModifierCost = 0;
 
+        const configPowerInfo = getPowerInfo({
+            item: this,
+            actor: this.actor,
+        });
+
         for (const modifier of (system.MODIFIER || []).filter(
             (mod) =>
-                (system.XMLID != "NAKEDMODIFIER" || mod.PRIVATE) &&
-                parseFloat(mod.baseCost) >= 0,
+                //system.XMLID != "NAKEDMODIFIER" ||
+                //!mod.PRIVATE &&
+                parseFloat(mod.BASECOST) >= 0,
         )) {
             let _myAdvantage = 0;
-            const modifierBaseCost = parseFloat(modifier.baseCost || 0);
-            switch (modifier.XMLID) {
-                case "EXPLOSION":
-                case "AOE":
-                    _myAdvantage += modifierBaseCost;
-                    break;
 
-                case "CUMULATIVE":
-                    // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
-                    _myAdvantage +=
-                        modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
-                    break;
+            const modPowerInfo = getPowerInfo({
+                item: modifier,
+                actor: this.actor,
+            });
+
+            // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)
+            if (modPowerInfo?.minumumLimitation) {
+                continue;
+            }
+
+            // Some non-PRIVATE modifiers are considered adders and included in basePointsPlusAdders
+            if (configPowerInfo?.privateAsAdder && !modifier.PRIVATE) {
+                continue;
+            }
+
+            // Is there a cost function
+            let modCost = modPowerInfo?.cost
+                ? modPowerInfo.cost(modifier, this)
+                : 0;
+
+            const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
+
+            // If not use a the default cost formula
+            if (!modCost) {
+                modCost += modifierBaseCost;
+                const modifierCostPerLevel =
+                    typeof modPowerInfo?.costPerLevel === "function"
+                        ? modPowerInfo.costPerLevel(modifier)
+                        : modPowerInfo?.costPerLevel || 0;
+                modCost +=
+                    parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+            }
+
+            _myAdvantage += modCost;
+
+            switch (modifier.XMLID) {
+                // case "EXPLOSION":
+                // case "AOE":
+                //     _myAdvantage += modifierBaseCost;
+                //     break;
+
+                // case "CUMULATIVE":
+                //     // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
+                //     _myAdvantage +=
+                //         modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
+                //     break;
 
                 case "REDUCEDEND":
                     {
                         // Reduced endurance is double the cost if it's applying against a power with autofire
+                        // We track this because we back out the endModifierCost to calculate _activePointsWithoutEndMods.
                         const autofire = (system.MODIFIER || []).find(
                             (mod) => mod.XMLID === "AUTOFIRE",
                         );
@@ -1835,24 +1915,47 @@ export class HeroSystem6eItem extends Item {
                         } else {
                             endModifierCost = modifierBaseCost;
                         }
-                        _myAdvantage = _myAdvantage + endModifierCost;
+                        //_myAdvantage = _myAdvantage + endModifierCost;
                     }
                     break;
 
-                default:
-                    _myAdvantage +=
-                        modifierBaseCost *
-                        Math.max(1, parseInt(modifier.LEVELS));
+                // default:
+                //     _myAdvantage +=
+                //         modifierBaseCost *
+                //         Math.max(1, parseInt(modifier.LEVELS));
             }
 
             // Some modifiers may have ADDERS
-            const adders = modifier.ADDER || [];
-            if (adders.length) {
-                for (const adder of adders) {
-                    const adderBaseCost = parseFloat(adder.baseCost || 0);
-                    _myAdvantage += adderBaseCost;
-                    minAdvantage = 0.25;
+            for (const adder of modifier.ADDER || []) {
+                const adderPowerInfo = getPowerInfo({
+                    item: adder,
+                    actor: this.actor,
+                });
+
+                if (!adderPowerInfo) {
+                    console.warn(`Missing powerInfo for ${adder.XMLID}`, adder);
                 }
+
+                let adderCost = adderPowerInfo?.cost
+                    ? adderPowerInfo.cost(adder, this)
+                    : 0;
+
+                if (!adderCost) {
+                    adderCost += parseFloat(adder.BASECOST);
+                    const adderCostPerLevel =
+                        typeof adderPowerInfo?.costPerLevel === "function"
+                            ? adderPowerInfo.costPerLevel(adder)
+                            : adderPowerInfo?.costPerLevel ||
+                              parseFloat(adder.LVLCOST || 0) /
+                                  parseFloat(adder.LVLVAL || 1) ||
+                              0;
+                    adderCost +=
+                        parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
+                }
+
+                adder.BASECOST_total = adderCost;
+                _myAdvantage += adderCost;
+                minAdvantage = 0.25;
             }
 
             // No negative advantages and minimum is 1/4
@@ -1875,6 +1978,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         const _activePoints = system.basePointsPlusAdders * (1 + advantages);
+        // if (system.XMLID === "NAKEDMODIFIER") {
+        //     _activePoints = parseInt(system.LEVELS) * advantages;
+        // }
         system.activePointsDc = RoundFavorPlayerDown(
             system.basePointsPlusAdders * (1 + advantagesDC),
         );
@@ -1903,14 +2009,19 @@ export class HeroSystem6eItem extends Item {
         const parent = this.getHdcParent();
 
         let modifiers = (system.MODIFIER || []).filter(
-            (o) => parseFloat(o.baseCost) < 0,
+            (o) =>
+                parseFloat(o.BASECOST) < 0 ||
+                getPowerInfo({
+                    item: o,
+                    actor: this.actor,
+                })?.minumumLimitation,
         );
 
         // Add limitations from parent
         if (parent) {
             modifiers.push(
                 ...(parent.system.MODIFIER || []).filter(
-                    (o) => parseFloat(o.baseCost) < 0,
+                    (o) => parseFloat(o.BASECOST) < 0,
                 ),
             );
         }
@@ -1918,20 +2029,32 @@ export class HeroSystem6eItem extends Item {
         let limitations = 0;
         for (let modifier of modifiers) {
             let _myLimitation = 0;
-            const modifierBaseCost = parseFloat(modifier.baseCost || 0);
+
+            const modPowerInfo = getPowerInfo({
+                item: modifier,
+                actor: this.actor,
+            });
+            if (!modPowerInfo) {
+                console.warn(
+                    `Missing powerInfo for ${modifier.XMLID}`,
+                    modifier,
+                );
+            }
+
+            const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
             _myLimitation += -modifierBaseCost;
 
             // Some modifiers may have ADDERS as well (like a focus)
             for (let adder of modifier.ADDER || []) {
-                let adderBaseCost = parseFloat(adder.baseCost || 0);
+                let adderBaseCost = parseFloat(adder.BASECOST || 0);
 
                 // Unique situation where JAMMED floors the limitation
-                if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
-                    system.title =
-                        (system.title || "") +
-                        "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
-                    adderBaseCost = 0;
-                }
+                // if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
+                //     system.title =
+                //         (system.title || "") +
+                //         "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
+                //     adderBaseCost = 0;
+                // }
 
                 // can be positive or negative (like charges).
                 // Requires a roll gets interesting with Jammed / Can choose which of two rolls to make from use to use
@@ -1946,13 +2069,17 @@ export class HeroSystem6eItem extends Item {
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
             if (_myLimitation < 0.25) {
+                console.warn(
+                    `${modifier.XMLID} Limitation clamped to -1/4`,
+                    modifier,
+                    this,
+                );
                 _myLimitation = 0.25;
                 system.title =
                     (system.title || "") +
                     "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
             }
 
-            //console.log("limitation", modifier.ALIAS, _myLimitation)
             modifier.BASECOST_total = -_myLimitation;
 
             limitations += _myLimitation;
@@ -1990,7 +2117,7 @@ export class HeroSystem6eItem extends Item {
                     _realCost /= 5.0;
                 }
             } else if (parent.system.XMLID === "ELEMENTAL_CONTROL") {
-                _realCost = _realCost - parent.system.baseCost;
+                _realCost = _realCost - parent.system.BASECOST;
             }
         }
 
@@ -2435,7 +2562,7 @@ export class HeroSystem6eItem extends Item {
             case "ELEMENTAL_CONTROL":
                 // Elemental Control, 12-point powers
                 system.description = `${system.NAME || system.ALIAS}, ${
-                    parseInt(system.baseCost) * 2
+                    parseInt(system.BASECOST) * 2
                 }-point powers`;
                 break;
 
@@ -2554,7 +2681,7 @@ export class HeroSystem6eItem extends Item {
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
                 system.description = `${
                     system.NAME || system.ALIAS
-                }, ${parseInt(system.baseCost)}-point reserve`;
+                }, ${parseInt(system.BASECOST)}-point reserve`;
                 break;
 
             case "FLASH":
@@ -2922,11 +3049,15 @@ export class HeroSystem6eItem extends Item {
 
                     case "INCREASEDMAX":
                         // Typical ALIAS would be "Increased Maximum (+34 points)". Provide total as well.
-                        _adderArray.push(
-                            `${adder.ALIAS} (${determineMaxAdjustment(
-                                this,
-                            )} total points)`,
-                        );
+                        // Can Add Maximum Of 34 Points
+                        //_adderArray.push(
+                        // `${adder.ALIAS} (${determineMaxAdjustment(
+                        //     this,
+                        // )} total points)`,
+                        system.description += `, Can Add Maximum Of ${determineMaxAdjustment(
+                            this,
+                        )} Points`;
+                        //);
                         break;
 
                     default:
@@ -3037,10 +3168,19 @@ export class HeroSystem6eItem extends Item {
 
         // Advantages sorted low to high
         for (let modifier of (system.MODIFIER || [])
-            .filter((o) => o.baseCost >= 0)
+            .filter((o) => o.BASECOST >= 0)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             })) {
+            // This might be a limitation with an unusually positive value
+            const modPowerInfo = getPowerInfo({
+                item: modifier,
+                actor: this.actor,
+            });
+            if (modPowerInfo?.minumumLimitation) {
+                continue;
+            }
+
             system.description += this.createPowerDescriptionModifier(modifier);
         }
 
@@ -3057,14 +3197,14 @@ export class HeroSystem6eItem extends Item {
 
         // MULTIPOWER slots typically include limitations
         let modifiers = (system.MODIFIER || [])
-            .filter((o) => o.baseCost < 0)
+            .filter((o) => o.BASECOST_total < 0)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             });
         if (this.getHdcParent()) {
             modifiers.push(
                 ...(this.getHdcParent().system.MODIFIER || [])
-                    .filter((o) => o.baseCost < 0)
+                    .filter((o) => o.BASECOST < 0)
                     .sort((a, b) => {
                         return a.BASECOST_total - b.BASECOST_total;
                     }),
@@ -3294,7 +3434,7 @@ export class HeroSystem6eItem extends Item {
 
         let fraction = "";
 
-        let BASECOST_total = modifier.BASECOST_total || modifier.baseCost;
+        let BASECOST_total = modifier.BASECOST_total || modifier.BASECOST;
 
         if (BASECOST_total == 0) {
             fraction += "+0";

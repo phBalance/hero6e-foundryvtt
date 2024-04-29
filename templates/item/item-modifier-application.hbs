@@ -10,31 +10,61 @@
         </div>
 
         {{#if (isdefined mod.LEVELS)}}
-        <div class="form-group">
-            <label>LEVELS</label>
-            <input type="text" name="mod.LEVELS" value="{{mod.LEVELS}}" data-dtype="text" />
-        </div>
+            {{#unless editOptions.hideLEVELS}}
+            <div class="form-group">
+                <label>LEVELS</label>
+                <input type="text" name="mod.LEVELS" value="{{mod.LEVELS}}" data-dtype="text" />
+            </div>
+            {{/unless}}
         {{/if}}
 
-        {{#if (isdefined mod.OPTION)}}
-        <div class="form-group">
-            <label>OPTION</label>
-            <input type="text" name="mod.OPTION" value="{{mod.OPTION}}" data-dtype="text" />
-        </div>
-        {{/if}}
 
-        {{#if (isdefined mod.OPTIONID)}}
-        <div class="form-group">
-            <label>OPTIONID</label>
-            <input type="text" name="mod.OPTIONID" value="{{mod.OPTIONID}}" data-dtype="text" />
-        </div>
-        {{/if}}
+        {{!-- Select for OPTIONID/OPTION/OPTION_ALIAS --}}
+        {{#if editOptions.choices}}
+            <div class="form-group">
+                <label>option</label>
+                <select name="mod.OPTIONID" data-dtype="text">
+                    {{selectOptions editOptions.choices selected=mod.OPTIONID nameAttr="OPTIONID" labelAttr="OPTION_ALIAS"}}
+                </select>
+            </div>
 
-        {{#if (isdefined mod.OPTION_ALIAS)}}
-        <div class="form-group">
-            <label>OPTION_ALIAS</label>
-            <input type="text" name="mod.OPTION_ALIAS" value="{{mod.OPTION_ALIAS}}" data-dtype="text" />
-        </div>
+            <div class="form-group">
+                <label>OPTIONID</label>
+                <input disabled type="text" value="{{mod.OPTIONID}}" data-dtype="text" />
+            </div>
+
+            <div class="form-group">
+                <label>OPTION</label>
+                <input disabled type="text" value="{{mod.OPTION}}" data-dtype="text" />
+            </div>
+
+            <div class="form-group">
+                <label>OPTION_ALIAS</label>
+                <input disabled type="text" value="{{mod.OPTION_ALIAS}}" data-dtype="text" />
+            </div>
+        {{else}}
+
+            {{#if (isdefined mod.OPTIONID)}}
+            <div class="form-group">
+                <label>OPTIONID</label>
+                <input type="text" name="mod.OPTIONID" value="{{mod.OPTIONID}}" data-dtype="text" />
+            </div>
+            {{/if}}
+
+            {{#if (isdefined mod.OPTION)}}
+            <div class="form-group">
+                <label>OPTION</label>
+                <input type="text" name="mod.OPTION" value="{{mod.OPTION}}" data-dtype="text" />
+            </div>
+            {{/if}}
+
+            {{#if (isdefined mod.OPTION_ALIAS)}}
+            <div class="form-group">
+                <label>OPTION_ALIAS</label>
+                <input type="text" name="mod.OPTION_ALIAS" value="{{mod.OPTION_ALIAS}}" data-dtype="text" />
+            </div>
+            {{/if}}
+
         {{/if}}
 
         {{#if (isdefined mod.COMMENTS)}}
@@ -45,8 +75,8 @@
         {{/if}}
 
         <div class="form-group">
-            <label>baseCost</label>
-            <input disabled type="text" name="mod.baseCost" value="{{mod.baseCost}}" data-dtype="Number" />
+            <label>BASECOST</label>
+            <input disabled type="text" name="mod.BASECOST" value="{{mod.BASECOST}}" data-dtype="Number" />
         </div>
 
         {{!-- ADDERS --}}

@@ -2929,6 +2929,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            editOptions: {
+                hideLEVELS: true,
+            },
         },
         {},
     );
@@ -4288,6 +4291,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            key: "ENDURANCERESERVEREC",
+            type: ["special"],
+            behaviors: [],
+            perceivability: "imperceptible",
+            duration: "persistent",
+            target: "self only",
+            range: "self",
+            costEnd: false,
+            costPerLevel: 2 / 3,
+            xml: `<POWER XMLID="ENDURANCERESERVEREC" ID="1713377825229" BASECOST="0.0" LEVELS="1" ALIAS="Recovery" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <NOTES />
+          </POWER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "ENERGYBLAST",
             type: ["attack"],
             behaviors: ["attack", "dice"],
@@ -4845,6 +4865,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 1,
+            privateAsAdder: true,
             xml: `<POWER XMLID="NAKEDMODIFIER" ID="1709333972540" BASECOST="0.0" LEVELS="1" ALIAS="Naked Advantage" POSITION="65" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -5818,11 +5839,68 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 })();
 
 (function addAddersToPowerList() {
+    addPower(undefined, {
+        xml: `<ADDER XMLID="DOUBLEAREA" ID="1707272359920" BASECOST="0.0" LEVELS="1" ALIAS="x2 Radius" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+            <NOTES />
+        </ADDER>`,
+    });
+
     addPower(
         {
-            xml: `<MODIFIER XMLID="FOCUS" ID="1442342142790" BASECOST="-0.5" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OIF" OPTIONID="OIF" OPTION_ALIAS="OIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No">
-        <NOTES />
-      </MODIFIER>`,
+            cost: function (adder) {
+                const levels = parseInt(adder.LEVELS);
+                const baseCost = parseFloat(adder.BASECOST);
+                adder.BASECOST_total = baseCost + levels * 0.25;
+                return adder.BASECOST_total;
+            },
+            xml: `<ADDER XMLID="DOUBLEHEIGHT" ID="1707357448496" BASECOST="-0.5" LEVELS="3" ALIAS="Height (m)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+            <NOTES />
+        </ADDER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            cost: function (adder) {
+                const levels = parseInt(adder.LEVELS);
+                const baseCost = parseFloat(adder.BASECOST);
+                adder.BASECOST_total = baseCost + levels * 0.25;
+                return adder.BASECOST_total;
+            },
+            xml: `<ADDER XMLID="DOUBLEWIDTH" ID="1707357449336" BASECOST="-0.5" LEVELS="3" ALIAS="Width (m)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+            <NOTES />
+        </ADDER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            // cost: function (adder) {
+            //     const levels = parseInt(adder.LEVELS);
+            //     const baseCost = parseFloat(adder.BASECOST);
+            //     adder.BASECOST_total = baseCost + levels * 0.25;
+            //     return adder.BASECOST_total;
+            // },
+            xml: `<ADDER XMLID="FIXEDSHAPE" ID="1707357527471" BASECOST="-0.25" LEVELS="0" ALIAS="Fixed Shape" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+            <NOTES />
+        </ADDER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            cost: function (adder) {
+                const levels = parseInt(adder.LEVELS);
+                const baseCost = parseFloat(adder.BASECOST);
+                adder.BASECOST_total = baseCost + Math.ceil(levels / 12) * 0.25;
+                return adder.BASECOST_total;
+            },
+            xml: `<ADDER XMLID="MOBILE" ID="1707357530522" BASECOST="0.25" LEVELS="1" ALIAS="Mobile" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES">
+            <NOTES />
+        </ADDER>`,
         },
         {},
     );
@@ -5858,33 +5936,240 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addModifiersToPowerList() {
     addPower(
         {
-            // key: "CHARGES",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
+            cost: function (modifier) {
+                const levels = parseInt(modifier.LEVELS) || 0;
+                let _cost = 0;
+                switch (modifier.OPTIONID) {
+                    case "RADIUS":
+                        _cost =
+                            Math.max(1, Math.ceil(Math.log2(levels / 2))) *
+                            0.25;
+                        break;
+                    case "CONE":
+                        _cost =
+                            Math.max(1, Math.ceil(Math.log2(levels / 4))) *
+                            0.25;
+                        break;
+                    case "LINE":
+                        _cost =
+                            Math.max(1, Math.ceil(Math.log2(levels / 8))) *
+                            0.25;
+                        break;
+                    case "SURFACE":
+                        _cost =
+                            Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
+                        break;
+                    case "ANY":
+                        _cost =
+                            Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
+                        break;
+                    default:
+                        console.warn("Unknown OPTIONID", modifier);
+                        _cost = 0;
+                }
 
-            xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
-            get baseCost() {
-                return null;
+                // // AOE ADDERS
+                // for (const adder of modifier.ADDER || []) {
+                //     const adderPowerInfo = getPowerInfo({
+                //         item: adder,
+                //         actor: item.actor,
+                //     });
+                //     if (adderPowerInfo.cost) {
+                //         if (typeof adderPowerInfo.cost === "function") {
+                //             _cost += adderPowerInfo.cost(adder);
+                //         }
+                //     }
+                // }
+                // modifier.BASECOST_total = _cost;
+                return _cost;
             },
-            // BASECOST: function(OPTIONID) {
-            //     switch(OPTIONID) {
+            dc: true,
+            editOptions: {
+                choices: [
+                    {
+                        OPTIONID: "RADIUS",
+                        OPTION: "RADIUS",
+                        OPTION_ALIAS: "Radius",
+                    },
+                    { OPTIONID: "CONE", OPTION: "CONE", OPTION_ALIAS: "Cone" },
+                    { OPTIONID: "LINE", OPTION: "LINE", OPTION_ALIAS: "Line" },
+                    {
+                        OPTIONID: "SURFACE",
+                        OPTION: "SURFACE",
+                        OPTION_ALIAS: "Surface",
+                    },
+                    {
+                        OPTIONID: "ANY",
+                        OPTION: "ANY",
+                        OPTION_ALIAS: "Any Area",
+                    },
+                ],
+            },
+            xml: `<MODIFIER XMLID="AOE" ID="1712699305027" BASECOST="0.0" LEVELS="1" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {
+            // 5e AOE cost is in BASECOST
+            cost: undefined,
+            editOptions: {
+                hideLEVELS: true,
+                choices: [
+                    {
+                        OPTIONID: "HEX",
+                        OPTION: "HEX",
+                        OPTION_ALIAS: "One Hex",
+                        BASECOST: 0.5,
+                    },
+                    {
+                        OPTIONID: "RADIUS",
+                        OPTION: "RADIUS",
+                        OPTION_ALIAS: "Radius",
+                        BASECOST: 1,
+                    },
+                    {
+                        OPTIONID: "CONE",
+                        OPTION: "CONE",
+                        OPTION_ALIAS: "Cone",
+                        BASECOST: 1,
+                    },
+                    {
+                        OPTIONID: "LINE",
+                        OPTION: "LINE",
+                        OPTION_ALIAS: "Line",
+                        BASECOST: 1,
+                    },
+                    {
+                        OPTIONID: "ANY",
+                        OPTION: "ANY",
+                        OPTION_ALIAS: "Any Area",
+                        BASECOST: 1,
+                    },
+                ],
+            },
+            xml: `<MODIFIER XMLID="AOE" ID="1712699238358" BASECOST="1.0" LEVELS="0" ALIAS="Area Of Effect" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="RADIUS" OPTIONID="RADIUS" OPTION_ALIAS="Radius" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+    );
 
-            //     }
-            // }
+    addPower(
+        {
+            costPerLevel: 0.25,
+            dc: true,
+            xml: `<MODIFIER XMLID="ARMORPIERCING" ID="1712696642037" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {
+            costPerLevel: 0.5,
+        },
+    );
+
+    addPower(
+        {
+            dc: true,
+            xml: `<MODIFIER XMLID="AUTOFIRE" ID="1713378198591" BASECOST="0.25" LEVELS="0" ALIAS="Autofire" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="2 Shots" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
         },
         {},
     );
 
     addPower(
         {
-            // key: "HARDENED",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
+            xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
+        },
+        {},
+    );
 
+    addPower(
+        {
+            dc: true,
+            xml: `<MODIFIER XMLID="CONTINUOUS" ID="1713378099716" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            dc: true,
+            costPerLevel: 0.25,
+            xml: `<MODIFIER XMLID="CUMULATIVE" ID="1714280316745" BASECOST="0.5" LEVELS="0" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            cost: function (modifier) {
+                const baseCost = parseFloat(modifier.BASECOST);
+                const levels = parseInt(modifier.LEVELS);
+                let baseDCFalloffFromShape = 1;
+                switch (modifier.OPTIONID) {
+                    case "CONE":
+                        baseDCFalloffFromShape = 2;
+                        break;
+                    case "LINE":
+                        baseDCFalloffFromShape = 3;
+                        break;
+                    case "NORMAL":
+                        baseDCFalloffFromShape = 1;
+                        break;
+                    default:
+                        console.error(
+                            `unknown 5e explosion shape ${modifier.OPTIONID}`,
+                        );
+                        break;
+                }
+                const adjustedLevels = Math.max(
+                    0,
+                    levels - baseDCFalloffFromShape,
+                );
+                return baseCost + adjustedLevels * 0.25;
+            },
+            editOptions: {
+                choices: [
+                    {
+                        OPTIONID: "NORMAL",
+                        OPTION: "NORMAL",
+                        OPTION_ALIAS: "Normal (Radius)",
+                    },
+                    {
+                        OPTIONID: "CONE",
+                        OPTION: "CONE",
+                        OPTION_ALIAS: "Cone",
+                    },
+                    {
+                        OPTIONID: "LINE",
+                        OPTION: "LINE",
+                        OPTION_ALIAS: "LINE",
+                    },
+                ],
+            },
+            xml: `<MODIFIER XMLID="EXPLOSION" ID="1713379744211" BASECOST="0.5" LEVELS="1" ALIAS="Explosion" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NORMAL" OPTIONID="NORMAL" OPTION_ALIAS="Normal (Radius)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            xml: `<MODIFIER XMLID="FOCUS" ID="1442342142790" BASECOST="-0.5" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OIF" OPTIONID="OIF" OPTION_ALIAS="OIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No">
+        <NOTES />
+      </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            costPerLevel: 0.25,
             xml: `<MODIFIER XMLID="HARDENED" ID="1712344562459" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
         },
         {},
@@ -5892,12 +6177,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // key: "IMPENETRABLE",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
-
+            costPerLevel: 0.25,
             xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
         },
         undefined,
@@ -5905,12 +6185,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // key: "OIHID",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
-
             xml: `<MODIFIER XMLID="OIHID" ID="1712092697365" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Heroic Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
         },
         {},
@@ -5918,34 +6192,62 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            // key: "PENETRATING",
-            // type: [],
-            // behaviors: ["modifier"],
-            // target: "self only",
-            // range: "self",
-
             costPerLevel: 0.5,
             dc: true,
-            cost: function () {
-                return parseInt(this.LEVEL) * this.costPerLevel;
+            // cost: function (modifier) {
+            //     return parseInt(modifier.LEVELS) * this.costPerLevel;
+            // },
+            xml: `<MODIFIER XMLID="PENETRATING" ID="1712697142089" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            // costPerLevel: 0.5,
+            // dc: true,
+            cost: function (modifier, item) {
+                // Reduced endurance is double the cost if it's applying against a power with autofire
+                if (item.findModsByXmlid("AUTOFIRE")) {
+                    return parseFloat(modifier.BASECOST) * 2;
+                }
+                return parseFloat(modifier.BASECOST);
             },
-            xml: `<MODIFIER XMLID="PENETRATING" ID="1712344588687" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"><NOTES/></MODIFIER>`,
+            xml: `<MODIFIER XMLID="REDUCEDEND" ID="1710101174711" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            // costPerLevel: 0.5,
+            // dc: true,
+            minumumLimitation: -0.25,
+            xml: `<MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+        </MODIFIER>`,
         },
         {},
     );
 })();
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
+// Turns out this is actually correct BASECOST can be 0, and COSTPERLEVEL is calculated.
+// Plan it to remove ModifierOverride and add them to the powers list as modifiers.
 HERO.ModifierOverride = {
     ADDITIONALED: { BASECOST: 5 / 2 },
     ADDITIONALPD: { BASECOST: 5 / 2 },
     ALWAYSOCCURS: { BASECOST: 0, MULTIPLIER: 2 },
-    AOE: { dc: true },
-    ARMORPIERCING: { BASECOST: 0.25, dc: true },
-    AUTOFIRE: { dc: true },
+    //AOE: { dc: true },
+    //ARMORPIERCING: { BASECOST: 0.25, dc: true },
+    //AUTOFIRE: { dc: true },
     AVAD: { dc: true },
     BOOSTABLE: { dc: true },
-    CONTINUOUS: { dc: true },
+    //CONTINUOUS: { dc: true },
     CONTINUOUSCONCENTRATION: { BASECOST: -0.25 },
     DAMAGEOVERTIME: { dc: true },
     DEFBONUS: { BASECOST: 2 },
@@ -5953,13 +6255,13 @@ HERO.ModifierOverride = {
     DIMENSIONS: { BASECOST: 5 },
     DOESBODY: { dc: true },
     DOUBLEKB: { dc: true },
-    ENDURANCERESERVEREC: { BASECOST: 2 / 3 },
+    //ENDURANCERESERVEREC: { BASECOST: 2 / 3 },
     ENERGY: { BASECOST: 5 }, // DAMAGENEGATION
-    HARDENED: { BASECOST: 0.25 },
-    IMPENETRABLE: { BASECOST: 0.25 },
+    //HARDENED: { BASECOST: 0.25 },
+    //IMPENETRABLE: { BASECOST: 0.25 },
     IMPROVEDNONCOMBAT: { BASECOST: 5 },
     MENTAL: { BASECOST: 5 }, // DAMAGENEGATION
-    PENETRATING: { BASECOST: 0.5, dc: true },
+    //PENETRATING: { BASECOST: 0.5, dc: true },
     PHYSICAL: { BASECOST: 5 }, // DAMAGENEGATION
     STICKY: { dc: true },
     TIMELIMIT: { dc: true },
@@ -5971,9 +6273,9 @@ HERO.ModifierOverride = {
 };
 
 HERO.ModifierOverride5e = {
-    ARMORPIERCING: {
-        BASECOST: 0.5,
-    },
+    // ARMORPIERCING: {
+    //     BASECOST: 0.5,
+    // },
 };
 
 // Valid Power Options (found these in Custom Power)

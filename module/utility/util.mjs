@@ -17,6 +17,7 @@ export function modifyRollEquation(equation, value) {
 export function getPowerInfo(options) {
     const xmlid =
         options.xmlid ||
+        options.item?.XMLID ||
         options.item?.system?.XMLID ||
         options.item?.system?.xmlid ||
         options.item?.system?.id;
@@ -69,6 +70,12 @@ export function getModifierInfo(options) {
             ...modifierOverrideInfo,
             ...CONFIG.HERO.ModifierOverride5e[xmlid],
         };
+    }
+
+    if (Object.entries(modifierOverrideInfo).length == 0) {
+        modifierOverrideInfo = getPowerInfo(options);
+    } else {
+        console.warn("modifierOverrideInfo using older format", xmlid);
     }
 
     return modifierOverrideInfo;

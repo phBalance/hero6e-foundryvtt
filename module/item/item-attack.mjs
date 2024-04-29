@@ -1861,7 +1861,12 @@ async function _onApplyAdjustmentToSpecificToken(
         adjustmentItem.splitAdjustmentSourceAndTarget();
     if (!valid) {
         return ui.notifications.error(
-            `Invalid adjustment sources/targets provided. Compute effects manually.`,
+            `${
+                adjustmentItem.actor.name
+            } has an invalid adjustment sources/targets provided for ${
+                adjustmentItem.system.ALIAS || adjustmentItem.name
+            }. Compute effects manually.`,
+            { permanent: true },
         );
     }
 

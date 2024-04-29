@@ -2040,7 +2040,7 @@ export class HeroSystem6eActor extends Actor {
                     "system.activePoints": activePoints,
                     "system.pointsDetail": this.system.pointsDetail,
                 },
-                { render: false },
+                //{ render: false },
                 { hideChatMessage: true },
             );
         }

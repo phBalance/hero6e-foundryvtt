@@ -56,6 +56,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`;
         }
 
+        // Trying to see if we can get most items to use the generic power sheet
+        if (this.item.type === "skill") {
+            return `${path}/item-power-sheet.hbs`;
+        }
+
         return `${path}/item-${this.item.type}-sheet.hbs`;
     }
 
@@ -110,6 +115,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             actor: item?.actor,
         });
         data.sheet = { ...(configPowerInfo?.sheet || {}) };
+        data.editOptions = configPowerInfo?.editOptions;
 
         // SFX
         const sfx = [
@@ -456,6 +462,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         );
 
                         await item._postUpload();
+                        await item.actor.CalcActorRealAndActivePoints();
                         return;
                     },
                 },
@@ -529,6 +536,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             // }
 
             await this.item._postUpload();
+            await this.item.actor.CalcActorRealAndActivePoints();
 
             this.render();
         }
@@ -632,7 +640,8 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // HD lite (currently only SKILL) uses generic _postUpload
         // TODO: Much of the above is likely not necessary as _postUpload does alot
         await this.item._postUpload();
-        this.render();
+        await this.item.actor.CalcActorRealAndActivePoints();
+        //await this.render();
     }
 
     async _onSubItemCreate(event) {

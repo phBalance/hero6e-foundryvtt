@@ -5,6 +5,7 @@ import { registerUploadTests } from "./testing-upload.mjs";
 import { registerDefenseTests } from "./testing-defense.mjs";
 import { registerFullTests } from "./testing-full.mjs";
 import { registerDiceTests } from "./testing-dice.mjs";
+import { registerEverythingLadLass } from "./testing-everything-lad-lass.mjs";
 
 Hooks.once("ready", async function () {
     if (!game.modules.get("_dev-mode")?.active) {
@@ -27,6 +28,7 @@ Hooks.on("quenchReady", (quench) => {
     registerDefenseTests(quench);
     registerUploadTests(quench);
     registerFullTests(quench);
+    registerEverythingLadLass(quench);
     registerDiceTests(quench);
     registerMainTests(quench);
 });
