@@ -955,7 +955,7 @@ export class HeroSystem6eItem extends Item {
                 );
                 switch (modifier.OPTIONID) {
                     case "CONE":
-                        levels = Math.floor(
+                        levels = RoundFavorPlayerUp(
                             1 + activePointsWithoutAoeAdvantage / 5,
                         );
                         break;
@@ -965,15 +965,18 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     case "LINE":
-                        levels = Math.floor(
+                        levels = RoundFavorPlayerUp(
                             (2 * activePointsWithoutAoeAdvantage) / 5,
                         );
                         break;
 
                     case "ANY":
                     case "RADIUS":
-                        levels = Math.floor(
-                            1 + activePointsWithoutAoeAdvantage / 10,
+                        levels = Math.max(
+                            1,
+                            RoundFavorPlayerUp(
+                                activePointsWithoutAoeAdvantage / 10,
+                            ),
                         );
                         break;
 

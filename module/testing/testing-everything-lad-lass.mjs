@@ -1958,6 +1958,6 @@ export function registerEverythingLadLass(quench) {
             });
         },
 
-        { displayName: "HERO: Everthing Character Tests" },
+        { displayName: "HERO: Everything Character Tests" },
     );
 }
