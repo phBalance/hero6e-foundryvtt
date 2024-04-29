@@ -1,5 +1,3 @@
-import { getPowerInfo } from "./utility/util.mjs";
-
 export const HERO = {};
 
 HERO.bool = {
@@ -5938,7 +5936,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addModifiersToPowerList() {
     addPower(
         {
-            cost: function (modifier, item) {
+            cost: function (modifier) {
                 const levels = parseInt(modifier.LEVELS) || 0;
                 let _cost = 0;
                 switch (modifier.OPTIONID) {

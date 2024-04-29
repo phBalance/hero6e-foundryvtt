@@ -75,7 +75,14 @@ export class ItemAttackFormApplication extends FormApplication {
         const aoe = item.getAoeModifier();
         if (aoe) {
             data.aoeText = aoe.OPTION_ALIAS;
-            const levels = parseInt(aoe.LEVELS) || parseInt(aoe.levels);
+            if (!item.system.areaOfEffect) {
+                ui.notifications.error(
+                    `${
+                        item.system.ALIAS || item.name
+                    } has invalid AOE definition.`,
+                );
+            }
+            const levels = item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
             if (levels) {
                 data.aoeText += ` (${levels}${getSystemDisplayUnits(
                     item.actor,

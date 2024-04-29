@@ -1775,7 +1775,7 @@ export class HeroSystem6eItem extends Item {
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
             for (const adderPower of system.POWER) {
-                const adderBaseCost = parseFloat(adderPower.BASECOST);
+                //const adderBaseCost = parseFloat(adderPower.BASECOST);
                 const adderLevels = Math.max(1, parseInt(adderPower.LEVELS));
                 const adderPowerInfo = getPowerInfo({
                     item: adderPower,
