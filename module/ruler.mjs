@@ -1,6 +1,6 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import {
-    getRoundedDistanceInSystemUnits,
+    getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
 } from "./utility/units.mjs";
 
@@ -429,7 +429,10 @@ function setHeroRulerLabel() {
         }
 
         const label = `[${Math.round(
-            getRoundedDistanceInSystemUnits(segmentDistance.distance, actor),
+            getRoundedDownDistanceInSystemUnits(
+                segmentDistance.distance,
+                actor,
+            ),
         )}${getSystemDisplayUnits(actor)}]${
             activeMovementLabel ? `\n${activeMovementLabel}` : ""
         }\n${rangeMod > 0 ? "-" : ""}${rangeMod} Range Modifier`;
@@ -507,7 +510,7 @@ export function calculateRangePenaltyFromDistanceInMetres(
 ) {
     const is5e = actor?.system?.is5e;
     const roundedDistanceInMetres =
-        getRoundedDistanceInSystemUnits(distanceInMetres, actor) *
+        getRoundedDownDistanceInSystemUnits(distanceInMetres, actor) *
         (is5e ? 2 : 1);
     const basicRangePenalty =
         Math.ceil(Math.log2(roundedDistanceInMetres / 8)) * 2;

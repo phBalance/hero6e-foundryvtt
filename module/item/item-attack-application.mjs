@@ -3,7 +3,10 @@ import {
     _processAttackOptions,
     _processAttackAoeOptions,
 } from "../item/item-attack.mjs";
-import { getSystemDisplayUnits } from "../utility/units.mjs";
+import {
+    convertSystemUnitsToMetres,
+    getSystemDisplayUnits,
+} from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroAoeTypeToFoundryAoeTypeConversions = {
@@ -224,7 +227,6 @@ export class ItemAttackFormApplication extends FormApplication {
         const aoeValue = areaOfEffect.value;
 
         const actor = item.actor;
-        const actorIs6e = !item.actor?.system?.is5e;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!token) return;
 
@@ -236,12 +238,12 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
-        const sizeConversionToMeters = actorIs6e ? 1 : 2;
+        const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
 
         const templateData = {
             t: templateType,
             user: game.user.id,
-            distance: aoeValue * sizeConversionToMeters,
+            distance: (aoeValue - 0.5) * sizeConversionToMeters, // The first system unit is the hex that the actor is in.
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {
@@ -257,14 +259,31 @@ export class ItemAttackFormApplication extends FormApplication {
                 break;
 
             case "cone":
-                if (
-                    (aoeModifier.adders || []).find(
-                        (adder) => adder.XMLID === "THINCONE",
-                    )
-                ) {
-                    templateData.angle = 31;
-                } else {
-                    templateData.angle = 61; // 60 has odd rounding error
+                {
+                    // cone end is not controlled via the template ... see what type the core is drawing
+                    const flatCone =
+                        game.settings.get("core", "coneTemplateType") ===
+                        "flat";
+                    if (flatCone) {
+                        // Need to shave off 1 (more) system unit to have it match up to what's expected.
+                        templateData.distance =
+                            templateData.distance - sizeConversionToMeters;
+                    } else {
+                        // The hero system uses a cone with a flat end. We can't seem to be able to set it programmatically.
+                        ui.notifications.warn(
+                            "Please set the world's 'Cone Template Type' to 'flat' for a more correct cone template.",
+                        );
+                    }
+
+                    if (
+                        (aoeModifier.adders || []).find(
+                            (adder) => adder.XMLID === "THINCONE",
+                        )
+                    ) {
+                        templateData.angle = 30;
+                    } else {
+                        templateData.angle = 60;
+                    }
                 }
 
                 break;
