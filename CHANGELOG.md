@@ -1,5 +1,10 @@
 # Releases
 
+## Version 3.0.69 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+* Make AOE templates a 1/2 system unit smaller. [#966](https://github.com/dmdorman/hero6e-foundryvtt/issues/966)
+* Cone AOE templates now sized correctly when world is set to flat cone template. [FoundryVTT Measured Template Controls](https://foundryvtt.com/article/measurement/)
+
 ## Version 3.0.68 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Correct range penalty calculations. [#944](https://github.com/dmdorman/hero6e-foundryvtt/issues/944)
