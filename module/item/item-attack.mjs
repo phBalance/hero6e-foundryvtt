@@ -952,6 +952,17 @@ function getAttackTags(item) {
                 });
                 break;
 
+            case "STRMINIMUM": {
+                const strMinimum = parseInt(
+                    mod.OPTION_ALIAS.match(/\d+/)?.[0] || 0,
+                );
+                attackTags.push({
+                    name: `${strMinimum} ${mod.ALIAS || mod.XMLID}`,
+                    title: `${mod.XMLID}`,
+                });
+                break;
+            }
+
             default:
                 attackTags.push({
                     name: `${mod.ALIAS || mod.XMLID}`,

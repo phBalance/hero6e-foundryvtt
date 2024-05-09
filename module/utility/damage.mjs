@@ -121,14 +121,27 @@ export function convertToDcFromItem(item, options) {
 
     // Add in STR
     if (item.system.usesStrength) {
-        let str =
+        let str = parseInt(
             options?.effectivestr != undefined
                 ? options?.effectivestr
-                : actor.system.characteristics.str.value;
+                : actor.system.characteristics.str.value,
+        );
 
         // MOVEBY halves STR
         if (item.system.XMLID === "MOVEBY") {
             str = str / 2;
+        }
+
+        // STRMINIMUM
+        // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
+        const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
+        if (STRMINIMUM) {
+            const strMinimum = parseInt(
+                STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0,
+            );
+            if (strMinimum && str > strMinimum) {
+                str = Math.max(0, str - strMinimum);
+            }
         }
 
         let str5 = Math.floor(str / 5);

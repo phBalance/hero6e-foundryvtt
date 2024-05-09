@@ -327,7 +327,7 @@ Our support ratings:
 | STANDARD RANGE | D |  |
 | STICKY | D |  |
 | STOPS WORKING IF KNOCKED OUT/STUNNED | D |  |
-| STR MINIMUM | D |  |
+| STR MINIMUM | C |  | STR adjusted for damage, but no OCV/DC penalties for low STR
 | STUN ONLY | C |  |
 | SUBJECT TO RANGE MODIFIER | D |  |
 | TIME LIMIT | D |  |
