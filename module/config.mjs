@@ -3956,11 +3956,35 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "WEAPON_MASTER",
             type: ["talent"],
-            behaviors: [],
+            behaviors: ["weaponSelect"],
             target: "self only",
             range: "self",
             costEnd: false,
             costPerLevel: 0,
+            editOptions: {
+                choices: [
+                    {
+                        OPTIONID: "VERYLIMITED",
+                        OPTION: "VERYLIMITED",
+                        OPTION_ALIAS: "very limited group",
+                    },
+                    {
+                        OPTIONID: "LIMITED",
+                        OPTION: "LIMITED",
+                        OPTION_ALIAS: "limited group",
+                    },
+                    {
+                        OPTIONID: "ANYHTH",
+                        OPTION: "ANYHTH",
+                        OPTION_ALIAS: "all HTH Killing Damage weapons",
+                    },
+                    {
+                        OPTIONID: "ANYRANGED",
+                        OPTION: "ANYRANGED",
+                        OPTION_ALIAS: "all Ranged Killing Damage weapons",
+                    },
+                ],
+            },
             xml: `<TALENT XMLID="WEAPON_MASTER" ID="1709160011422" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited group]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""><NOTES/></TALENT>`,
         },
         {},

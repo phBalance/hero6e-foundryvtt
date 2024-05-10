@@ -2633,6 +2633,12 @@ export class HeroSystem6eItem extends Item {
                 system.description = `+${system.value} ${system.OPTION_ALIAS}`;
                 break;
 
+            case "WEAPON_MASTER":
+                // Weapon Master:  +1d6 (all Ranged Killing Damage weapons)
+                system.ALIAS = "Weapon Master";
+                system.description = `${system.ALIAS}: +${system.LEVELS}d6 (${system.OPTION_ALIAS})`;
+                break;
+
             case "COMBAT_LUCK":
                 system.description = `Combat Luck (${3 * system.value} rPD/${
                     3 * system.value

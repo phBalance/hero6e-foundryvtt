@@ -39,18 +39,48 @@
 {{/if}}
 
 {{#if (isdefined system.OPTION)}}
-<div class="form-group">
-    <label>OPTION</label>
-    <input type="text" name="system.OPTION" value="{{system.OPTION}}" data-dtype="text" />
-</div>
+    {{#if editOptions.choices}}
+        <div class="form-group">
+            <label>option</label>
+            <select name="system.OPTIONID" data-dtype="text">
+                {{selectOptions editOptions.choices selected=system.OPTIONID nameAttr="OPTIONID" labelAttr="OPTION_ALIAS"}}
+            </select>
+        </div>
+
+        <div class="form-group">
+        <label>OPTIONID</label>
+        <input disabled type="text" value="{{system.OPTIONID}}" data-dtype="text" />
+        </div>
+
+        <div class="form-group">
+            <label>OPTION_ALIAS</label>
+            <input disabled type="text" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
+        </div>
+
+    {{else}}
+        <div class="form-group">
+            <label>OPTION</label>
+            <input type="text" name="system.OPTION" value="{{system.OPTION}}" data-dtype="text" />
+        </div>
+
+        {{#if (isdefined system.OPTIONID)}}
+        <div class="form-group">
+            <label>OPTIONID</label>
+            <input type="text" name="system.OPTIONID" value="{{system.OPTIONID}}" data-dtype="text" />
+        </div>
+        {{/if}}
+
+        {{#if (isdefined system.OPTION_ALIAS)}}
+        <div class="form-group">
+            <label>OPTION_ALIAS</label>
+            <input type="text" name="system.OPTION_ALIAS" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
+        </div>
+        {{/if}}
+
+    {{/if}}
 {{/if}}
 
-{{#if (isdefined system.OPTIONID)}}
-<div class="form-group">
-    <label>OPTIONID</label>
-    <input type="text" name="system.OPTIONID" value="{{system.OPTIONID}}" data-dtype="text" />
-</div>
-{{/if}}
+
 
 {{#if (isdefined system.TYPE)}}
 <div class="form-group">
@@ -59,12 +89,7 @@
 </div>
 {{/if}}
 
-{{#if (isdefined system.OPTION_ALIAS)}}
-<div class="form-group">
-    <label>OPTION_ALIAS</label>
-    <input type="text" name="system.OPTION_ALIAS" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
-</div>
-{{/if}}
+
 
 {{!Martial Maneuver--}}
 {{#if (isdefined system.USEWEAPON)}}
