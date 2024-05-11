@@ -1,5 +1,3 @@
-import { HEROSYS } from "../herosystem6e.mjs";
-
 // DAMAGE CLASS (DC)
 //
 // Different dice of damage are not the same – 2d6 of Killing
