@@ -40,10 +40,21 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
     // Tokens within template
     getTokensInTemplate(options) {
+        // PERSONALIMMUNITY
+        const PERSONALIMMUNITY = (
+            this.document.flags?.item?.system?.MODIFIER || []
+        ).find((o) => o.XMLID === "PERSONALIMMUNITY");
+
         let tokens = [];
         for (let token of this.scene.tokens) {
+            // For some reason the only the base ITEM and ACTOR props pass into this class, so we aren't using the typical functions like actor.id instead use actor._id.
             if (this.isTokenInside(token, options)) {
-                tokens.push(token);
+                if (
+                    PERSONALIMMUNITY &&
+                    token.actor?.id != this.document.flags?.actor?._id
+                ) {
+                    tokens.push(token);
+                }
             }
         }
         return tokens;

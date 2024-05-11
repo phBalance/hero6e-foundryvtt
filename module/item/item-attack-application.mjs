@@ -248,6 +248,8 @@ export class ItemAttackFormApplication extends FormApplication {
             fillColor: game.user.color,
             flags: {
                 itemId: item.id,
+                item: item,
+                actor: item.actor,
                 aoeType,
                 aoeValue,
                 sizeConversionToMeters,
