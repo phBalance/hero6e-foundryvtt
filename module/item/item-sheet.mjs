@@ -267,6 +267,25 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
         }
 
+        if (configPowerInfo?.editOptions?.showAttacks) {
+            // Enumerate attacks
+            data.attacks = [];
+            for (const attack of item.actor.items.filter(
+                (o) => o.type === "attack" || o.system.subType === "attack",
+            )) {
+                // Check if there is an adder (if so attack is checked)
+                const adder = (this.item.system.ADDER || []).find(
+                    (o) => o.ALIAS === attack.name,
+                );
+
+                data.attacks.push({
+                    id: attack.id,
+                    name: attack.system.ALIAS || attack.name,
+                    checked: adder ? true : false,
+                });
+            }
+        }
+
         // ENDURANCERESERVE has a REC rate
         if (item.system.XMLID == "ENDURANCERESERVE") {
             const power = item.system.POWER.find(
@@ -582,6 +601,23 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Do all the standard things like updating item properies that match the name of input boxes
         await super._updateObject(event, formData);
 
+        // OPTION_ALIAS may need updating
+        if (
+            this.item.getBaseInfo()?.editOptions?.choices &&
+            expandedData.system.OPTIONID &&
+            !expandedData.system.OPTION_ALIAS
+        ) {
+            const choiceSelected = this.item
+                .getBaseInfo()
+                .editOptions.choices.find(
+                    (o) => o.OPTIONID === expandedData.system.OPTIONID,
+                );
+            this.item.system.OPTION = choiceSelected.OPTION;
+            this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
+            this.item.system.BASECOST =
+                choiceSelected.BASECOST || this.item.system.BASECOST;
+        }
+
         // Endurance Reserve
         if (expandedData.rec) {
             const ENDURANCERESERVEREC = this.item.findModsByXmlid(
@@ -622,14 +658,48 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             await this.item.update({ "system.INPUT": newInputStr });
         }
 
-        //If Description changed, update it
-        // const description = this.item.system.description;
-        // this.item.updateItemDescription();
-        // if (description !== this.item.system.description) {
-        //     this.item.update({
-        //         "system.description": this.item.system.description,
-        //     });
-        // }
+        // Turn attack toggles into adders
+        if (expandedData.attacks) {
+            for (const [attackId, checked] of Object.entries(
+                expandedData.attacks,
+            )) {
+                const attackItem = this.actor.items.find(
+                    (o) => o.id === attackId,
+                );
+                const adder = (this.item.system.ADDER || []).find(
+                    (adder) =>
+                        adder.XMLID === "ADDER" &&
+                        adder.ALIAS ===
+                            (attackItem.system.ALIAS || attackItem.name),
+                );
+
+                // Create a custom adders that matches attack name
+                if (!adder && checked) {
+                    const newAdder = {
+                        XMLID: "ADDER",
+                        ID: new Date().getTime().toString(),
+                        ALIAS: attackItem.system.ALIAS || attackItem.name,
+                        BASECOST: "0.0",
+                        LEVELS: "0",
+                        NAME: "",
+                        PRIVATE: false,
+                        SELECTED: true,
+                        BASECOST_total: 0,
+                    };
+                    this.item.system.ADDER ??= [];
+                    this.item.system.ADDER.push(newAdder);
+                }
+
+                // Delete custom adders that matches attack name
+                if (adder && !checked) {
+                    this.item.system.ADDER = this.item.system.ADDER.filter(
+                        (o) =>
+                            o.ALIAS !=
+                            (attackItem.system.ALIAS || attackItem.name),
+                    );
+                }
+            }
+        }
 
         // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
         // Generally rely on HBS to enforce valid combinations.

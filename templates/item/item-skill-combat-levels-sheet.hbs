@@ -42,11 +42,10 @@
             <div class="form-fields csl-attack-list">
                 <ul>
                     {{#each attacks }}
-                    <li>
-                        <input type="checkbox" name="system.attacks.{{this.id}}" {{checked this.checked}}
+                        <li><input type="checkbox" name="{{this.id}}" {{checked this.checked}}
                             data-dtype="Boolean" />
                         {{this.name}}
-                    </li>
+                        </li>
                     {{/each}}
                 </ul>
             </div>

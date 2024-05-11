@@ -219,6 +219,25 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
+    // WEAPON MASTER (also check that item is present as a custom ADDER)
+    if (item.actor) {
+        const WEAPON_MASTER = item.actor.items.find(
+            (o) => o.system.XMLID === "WEAPON_MASTER",
+        );
+        if (WEAPON_MASTER) {
+            const weaponMatch = (WEAPON_MASTER.system.ADDER || []).find(
+                (o) =>
+                    o.XMLID === "ADDER" &&
+                    o.ALIAS === (item.system.ALIAS || item.name),
+            );
+            if (weaponMatch) {
+                dc +=
+                    3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
+                tags.push({ value: `+3DC`, name: "WeaponMaster" });
+            }
+        }
+    }
+
     if (item.actor?.statuses?.has("underwater")) {
         dc = Math.max(0, dc - 2);
         tags.push({ value: `-2DC`, name: "Underwater" });

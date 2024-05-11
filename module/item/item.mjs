@@ -774,145 +774,14 @@ export class HeroSystem6eItem extends Item {
 
     determinePointCosts() {
         let changed = false;
-
-        // BASECOST
-        // const newBaseValue = parseFloat(this.system.BASECOST || 0);
-        // if (this.system.baseCost != newBaseValue) {
-        //     this.system.baseCost = newBaseValue;
-        //     changed = true;
-        // }
-
-        // BASECOST (children)
-        // for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-        //     if (this.system[key]) {
-        //         for (const child of this.system[key]) {
-        //             let newChildBaseCost;
-
-        //             switch (child.XMLID) {
-        //                 // case "AOE":
-        //                 //     if (!this.actor?.system?.is5e) {
-        //                 //         let minLevel;
-        //                 //         let minDoubles;
-
-        //                 //         if (
-        //                 //             child.OPTION === "SURFACE" ||
-        //                 //             child.OPTION === "ANY"
-        //                 //         ) {
-        //                 //             minLevel = 2;
-        //                 //             minDoubles = 0;
-        //                 //         } else if (child.OPTION === "RADIUS") {
-        //                 //             minLevel = 4;
-        //                 //             minDoubles = 1;
-        //                 //         } else if (child.OPTION === "CONE") {
-        //                 //             minLevel = 8;
-        //                 //             minDoubles = 2;
-        //                 //         } else if (child.OPTION === "LINE") {
-        //                 //             minLevel = 16;
-        //                 //             minDoubles = 3;
-        //                 //         } else {
-        //                 //             console.error(
-        //                 //                 `unknown AOE child option ${child.OPTION} for ${this.name}/${this.system.XMLID}`,
-        //                 //             );
-        //                 //         }
-
-        //                 //         const levels =
-        //                 //             parseInt(child.LEVELS) < minLevel
-        //                 //                 ? minLevel
-        //                 //                 : parseInt(child.LEVELS);
-
-        //                 //         newChildBaseCost =
-        //                 //             0.25 *
-        //                 //             Math.ceil(Math.log2(levels) - minDoubles);
-        //                 //     } else {
-        //                 //         // Modifier plus any dimension doubling adders
-        //                 //         newChildBaseCost = parseFloat(child.BASECOST);
-        //                 //     }
-
-        //                 //     break;
-
-        //                 case "REQUIRESASKILLROLL":
-        //                     // <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1589145772288" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
-        //                     // This is a limitation not an advantage, not sure why it is positive.  Force it negative.
-        //                     newChildBaseCost = -Math.abs(
-        //                         parseFloat(child.BASECOST),
-        //                     );
-        //                     break;
-
-        //                 case "EXPLOSION":
-        //                     {
-        //                         // Not specified correctly in HDC.
-        //                         let baseDCFalloffFromShape;
-        //                         switch (child.OPTION) {
-        //                             case "CONE":
-        //                                 baseDCFalloffFromShape = 2;
-        //                                 break;
-        //                             case "LINE":
-        //                                 baseDCFalloffFromShape = 3;
-        //                                 break;
-        //                             case "NORMAL":
-        //                                 baseDCFalloffFromShape = 1;
-        //                                 break;
-        //                             default:
-        //                                 console.error(
-        //                                     `unknown 5e explosion shape ${child.OPTION}`,
-        //                                 );
-        //                                 break;
-        //                         }
-
-        //                         newChildBaseCost =
-        //                             parseFloat(child.BASECOST) +
-        //                             0.25 *
-        //                                 (parseInt(child.LEVELS || 1) -
-        //                                     baseDCFalloffFromShape);
-        //                     }
-        //                     break;
-
-        //                 default:
-        //                     newChildBaseCost = parseFloat(
-        //                         getModifierInfo({
-        //                             xmlid: child.XMLID,
-        //                             item: this,
-        //                         })?.BASECOST ||
-        //                             child.BASECOST ||
-        //                             0,
-        //                     );
-        //                     break;
-        //             }
-
-        //             if (child.baseCost != newChildBaseCost) {
-        //                 child.baseCost = newChildBaseCost;
-        //                 changed = true;
-        //             }
-
-        //             for (const key of HeroSystem6eItem.ItemXmlChildTags) {
-        //                 if (child[key]) {
-        //                     for (const child2 of child[key]) {
-        //                         const newChild2BaseCost =
-        //                             parseFloat(
-        //                                 getModifierInfo({
-        //                                     xmlid: child2.XMLID,
-        //                                     item: this,
-        //                                 })?.BASECOST ||
-        //                                     child2.BASECOST ||
-        //                                     0,
-        //                             ) +
-        //                             parseFloat(child2.LVLCOST || 0) *
-        //                                 parseFloat(child2.LEVELS || 0); // TODO: Might need to also consider cost per level
-
-        //                         if (child2.baseCost != newChild2BaseCost) {
-        //                             child2.baseCost = newChild2BaseCost;
-        //                             changed = true;
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
         changed = this.calcItemPoints() || changed;
-
         return changed;
+    }
+
+    // An attempt to cache getPowerInfo for performance reasons.
+    _baseInfo = getPowerInfo({ item: this });
+    getBaseInfo() {
+        return this._baseInfo;
     }
 
     /**
@@ -2631,6 +2500,12 @@ export class HeroSystem6eItem extends Item {
             case "COMBAT_LEVELS":
                 // +1 with any single attack
                 system.description = `+${system.value} ${system.OPTION_ALIAS}`;
+                break;
+
+            case "WEAPON_MASTER":
+                // Weapon Master:  +1d6 (all Ranged Killing Damage weapons)
+                system.ALIAS = "Weapon Master";
+                system.description = `${system.ALIAS}: +${system.LEVELS}d6 (${system.OPTION_ALIAS})`;
                 break;
 
             case "COMBAT_LUCK":
