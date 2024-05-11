@@ -236,7 +236,11 @@ export function convertToDcFromItem(item, options) {
                 const dcPlus =
                     3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
                 dc += dcPlus;
-                tags.push({ value: `+${dcPlus}DC`, name: "WeaponMaster" });
+                tags.push({
+                    value: `+${dcPlus}DC`,
+                    name: "WeaponMaster",
+                    title: WEAPON_MASTER.system.OPTION_ALIAS,
+                });
             }
         }
     }
@@ -247,13 +251,17 @@ export function convertToDcFromItem(item, options) {
         const DEADLYBLOW = item.actor.items.find(
             (o) =>
                 o.system.XMLID === "DEADLYBLOW" &&
-                !options?.ignoreAttackAbilities.includes(o.id),
+                !(options?.ignoreAttackAbilities || []).includes(o.id),
         );
         if (DEADLYBLOW) {
             const dcPlus =
                 3 * Math.max(1, parseInt(DEADLYBLOW.system.LEVELS) || 1);
             dc += dcPlus;
-            tags.push({ value: `+${dcPlus}DC`, name: "DeadlyBlow" });
+            tags.push({
+                value: `+${dcPlus}DC`,
+                name: "DeadlyBlow",
+                title: DEADLYBLOW.system.OPTION_ALIAS,
+            });
         }
     }
 

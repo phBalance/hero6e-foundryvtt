@@ -3983,6 +3983,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: 0,
             editOptions: {
                 showAttacks: true,
+                editableOption_ALIAS: true,
                 choices: [
                     {
                         OPTIONID: "VERYLIMITED",
