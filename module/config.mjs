@@ -3956,12 +3956,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "WEAPON_MASTER",
             type: ["talent"],
-            behaviors: ["weaponSelect"],
+            behaviors: [""],
             target: "self only",
             range: "self",
             costEnd: false,
             costPerLevel: 0,
             editOptions: {
+                showAttacks: true,
                 choices: [
                     {
                         OPTIONID: "VERYLIMITED",
