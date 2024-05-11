@@ -748,10 +748,7 @@ export async function AttackToHit(item, options) {
                     hit = "Hit";
                 }
 
-                let by = autofireShotRollTotal - value;
-                if (by >= 0) {
-                    by = "+" + by;
-                }
+                let by = Math.abs(autofireShotRollTotal - value);
 
                 targetData.push({
                     id: singleTarget.id,
