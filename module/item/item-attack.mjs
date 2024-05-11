@@ -12,7 +12,10 @@ import {
     performAdjustment,
     renderAdjustmentChatCards,
 } from "../utility/adjustment.mjs";
-import { getSystemDisplayUnits } from "../utility/units.mjs";
+import {
+    getRoundedDownDistanceInSystemUnits,
+    getSystemDisplayUnits,
+} from "../utility/units.mjs";
 import { RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
@@ -633,47 +636,50 @@ export async function AttackToHit(item, options) {
             target.actor.system.characteristics[toHitChar.toLowerCase()].value,
         );
 
-        const targetHeroRoller = heroRoller.clone();
-
-        // TODO: Autofire against multiple targets should have increasing difficulty
-
-        await targetHeroRoller.makeSuccessRoll(true, targetDefenseValue).roll();
-        const autoSuccess = targetHeroRoller.getAutoSuccess();
-        const toHitRollTotal = targetHeroRoller.getSuccessTotal();
-        const margin = targetDefenseValue - toHitRollTotal;
+        const targetHeroRoller = aoeAlwaysHit ? heroRoller : heroRoller.clone();
+        let toHitRollTotal = 0;
+        let by = 0;
+        let autoSuccess = false;
 
         let hit = "Miss";
-        if (autoSuccess !== undefined) {
-            if (autoSuccess) {
-                hit = "Auto Hit";
-            } else {
-                hit = "Auto Miss";
+        if (aoeAlwaysHit) {
+            hit = "Hit";
+            by = "AOE auto";
+        } else {
+            // TODO: Autofire against multiple targets should have increasing difficulty
+
+            await targetHeroRoller
+                .makeSuccessRoll(true, targetDefenseValue)
+                .roll();
+            autoSuccess = targetHeroRoller.getAutoSuccess();
+            toHitRollTotal = targetHeroRoller.getSuccessTotal();
+            const margin = targetDefenseValue - toHitRollTotal;
+
+            if (autoSuccess !== undefined) {
+                if (autoSuccess) {
+                    hit = "Auto Hit";
+                } else {
+                    hit = "Auto Miss";
+                }
+            } else if (margin <= 0) {
+                hit = "Hit";
             }
-        } else if (margin <= 0 || aoeAlwaysHit) {
-            hit = "Hit";
+
+            by = Math.abs(toHitRollTotal - targetDefenseValue);
         }
 
-        let by = toHitRollTotal - targetDefenseValue;
-        if (by >= 0) {
-            by = "+" + by;
-        }
-
-        if (explosion) {
-            targetDefenseValue = 0;
-            hit = "Hit";
-            by = aoeModifier.OPTION_ALIAS + aoeModifier.LEVELS;
-
+        if (aoeModifier) {
             // Distance from center
             if (aoeTemplate) {
-                let distance = canvas.grid.measureDistance(
+                const distanceInMetres = canvas.grid.measureDistance(
                     aoeTemplate,
                     target.center,
                     { gridSpaces: true },
                 );
-                // TODO: Does distance need to be scaled for units?
-                by += ` (${distance}${getSystemDisplayUnits(
+                by += ` (${getRoundedDownDistanceInSystemUnits(
+                    distanceInMetres,
                     item.actor,
-                )} from center)`;
+                )}${getSystemDisplayUnits(item.actor)} from center)`;
             }
         }
 
@@ -681,6 +687,7 @@ export async function AttackToHit(item, options) {
             id: target.id,
             name: target.name,
             aoeAlwaysHit: aoeAlwaysHit,
+            explosion: explosion,
             toHitChar: toHitChar,
             toHitRollTotal: toHitRollTotal,
             autoSuccess: autoSuccess,
@@ -741,10 +748,7 @@ export async function AttackToHit(item, options) {
                     hit = "Hit";
                 }
 
-                let by = autofireShotRollTotal - value;
-                if (by >= 0) {
-                    by = "+" + by;
-                }
+                let by = Math.abs(autofireShotRollTotal - value);
 
                 targetData.push({
                     id: singleTarget.id,
