@@ -54,7 +54,7 @@
 
         <div class="form-group">
             <label>OPTION_ALIAS</label>
-            <input disabled type="text" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
+            <input {{#unless editOptions.editableOption_ALIAS}}disabled{{/unless}} name="system.OPTION_ALIAS" type="text" value="{{system.OPTION_ALIAS}}" data-dtype="text" />
         </div>
 
     {{else}}
