@@ -3535,6 +3535,26 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            editOptions: {
+                editableOption_ALIAS: true,
+                choices: [
+                    {
+                        OPTIONID: "VERYLIMITED",
+                        OPTION: "VERYLIMITED",
+                        OPTION_ALIAS: "[very limited circumstances]",
+                    },
+                    {
+                        OPTIONID: "LIMITED",
+                        OPTION: "LIMITED",
+                        OPTION_ALIAS: "[limited circumstances]",
+                    },
+                    {
+                        OPTIONID: "ANY",
+                        OPTION: "ANY",
+                        OPTION_ALIAS: "[broad circumstances]",
+                    },
+                ],
+            },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "VERYLIMITED":
@@ -3963,21 +3983,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: 0,
             editOptions: {
                 showAttacks: true,
+                editableOption_ALIAS: true,
                 choices: [
                     {
                         OPTIONID: "VERYLIMITED",
                         OPTION: "VERYLIMITED",
-                        OPTION_ALIAS: "very limited group",
+                        OPTION_ALIAS: "[very limited group]",
                     },
                     {
                         OPTIONID: "LIMITED",
                         OPTION: "LIMITED",
-                        OPTION_ALIAS: "limited group",
+                        OPTION_ALIAS: "[limited group]",
                     },
                     {
                         OPTIONID: "ANYHTH",
                         OPTION: "ANYHTH",
-                        OPTION_ALIAS: "all HTH Killing Damage weapons",
+                        OPTION_ALIAS: "[all HTH Killing Damage weapons]",
                     },
                     {
                         OPTIONID: "ANYRANGED",

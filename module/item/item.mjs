@@ -2505,7 +2505,17 @@ export class HeroSystem6eItem extends Item {
             case "WEAPON_MASTER":
                 // Weapon Master:  +1d6 (all Ranged Killing Damage weapons)
                 system.ALIAS = "Weapon Master";
-                system.description = `${system.ALIAS}: +${system.LEVELS}d6 (${system.OPTION_ALIAS})`;
+                system.description = `${system.ALIAS}: +${
+                    parseInt(system.LEVELS) * 3
+                }DC (${system.OPTION_ALIAS})`;
+                break;
+
+            case "DEADLYBLOW":
+                // Deadly Blow:  +1d6 ([very limited circumstances])
+                system.ALIAS = "Deadly Blow";
+                system.description = `${system.ALIAS}: +${
+                    parseInt(system.LEVELS) * 3
+                }DC (${system.OPTION_ALIAS})`;
                 break;
 
             case "COMBAT_LUCK":
@@ -2628,7 +2638,6 @@ export class HeroSystem6eItem extends Item {
             case "Advanced Tech":
             case "AMBIDEXTERITY":
             case "COMBATSPELLCASTING":
-            case "DEADLYBLOW":
             case "MONEY":
             case "SHAPECHANGING":
             case "SKILLMASTER":

@@ -231,10 +231,35 @@ export function convertToDcFromItem(item, options) {
                     o.ALIAS === (item.system.ALIAS || item.name),
             );
             if (weaponMatch) {
-                dc +=
+                const dcPlus =
                     3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
-                tags.push({ value: `+3DC`, name: "WeaponMaster" });
+                dc += dcPlus;
+                tags.push({
+                    value: `+${dcPlus}DC`,
+                    name: "WeaponMaster",
+                    title: WEAPON_MASTER.system.OPTION_ALIAS,
+                });
             }
+        }
+    }
+
+    // DEADLYBLOW
+    //item-conditional-defense-card
+    if (item.actor) {
+        const DEADLYBLOW = item.actor.items.find(
+            (o) =>
+                o.system.XMLID === "DEADLYBLOW" &&
+                !(options?.ignoreAttackAbilities || []).includes(o.id),
+        );
+        if (DEADLYBLOW) {
+            const dcPlus =
+                3 * Math.max(1, parseInt(DEADLYBLOW.system.LEVELS) || 1);
+            dc += dcPlus;
+            tags.push({
+                value: `+${dcPlus}DC`,
+                name: "DeadlyBlow",
+                title: DEADLYBLOW.system.OPTION_ALIAS,
+            });
         }
     }
 

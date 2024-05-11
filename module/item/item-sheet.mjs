@@ -604,18 +604,21 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // OPTION_ALIAS may need updating
         if (
             this.item.getBaseInfo()?.editOptions?.choices &&
-            expandedData.system.OPTIONID &&
-            !expandedData.system.OPTION_ALIAS
+            expandedData.system.OPTIONID
         ) {
             const choiceSelected = this.item
                 .getBaseInfo()
                 .editOptions.choices.find(
                     (o) => o.OPTIONID === expandedData.system.OPTIONID,
                 );
-            this.item.system.OPTION = choiceSelected.OPTION;
-            this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
-            this.item.system.BASECOST =
-                choiceSelected.BASECOST || this.item.system.BASECOST;
+            // only update OPTION and OPTION_ALIAS when OPTION has changed.
+            // This allows for custom OPTION_ALIAS text for things like DEADLYBLOW.
+            if (this.item.system.OPTION != choiceSelected.OPTION) {
+                this.item.system.OPTION = choiceSelected.OPTION;
+                this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
+                this.item.system.BASECOST =
+                    choiceSelected.BASECOST || this.item.system.BASECOST;
+            }
         }
 
         // Endurance Reserve
