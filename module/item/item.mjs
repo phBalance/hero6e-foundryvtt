@@ -2638,7 +2638,6 @@ export class HeroSystem6eItem extends Item {
             case "Advanced Tech":
             case "AMBIDEXTERITY":
             case "COMBATSPELLCASTING":
-            case "DEADLYBLOW":
             case "MONEY":
             case "SHAPECHANGING":
             case "SKILLMASTER":
