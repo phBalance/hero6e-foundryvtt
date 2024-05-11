@@ -299,7 +299,7 @@ Our support ratings:
 | PENETRATING | B | Most attacks supported, not fully vetted against all attacks |
 | PERCEIVABLE | D |  |
 | PERSISTENT | D |  |
-| PERSONAL IMMUNITY | D |  |
+| PERSONAL IMMUNITY | B |  |
 | PHYSICAL MANIFESTATION | D |  |
 | POSITION SHIFT | D |  |
 | RANGE BASED ON STR | D |  |

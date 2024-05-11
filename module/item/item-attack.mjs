@@ -272,7 +272,7 @@ export async function AttackAoeToHit(item, options) {
         speaker: speaker,
     };
 
-    return ChatMessage.create(chatData);
+    await ChatMessage.create(chatData);
 }
 
 /// ChatMessage showing Attack To Hit
@@ -996,7 +996,7 @@ function getAttackTags(item) {
 }
 
 export async function _onRollAoeDamage(event) {
-    console.log("_onRollAoeDamage");
+    //console.log("_onRollAoeDamage");
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
@@ -1191,6 +1191,12 @@ export async function _onRollDamage(event) {
             }
             targetTokens.push(targetToken);
         }
+    }
+
+    // PERSONALIMMUNITY
+    const PERSONALIMMUNITY = item.findModsByXmlid("PERSONALIMMUNITY");
+    if (PERSONALIMMUNITY && targetTokens) {
+        targetTokens = targetTokens.filter((o) => o.token.actor.id != actor.id);
     }
 
     // If there is only 1 target then get rid of targetIds (which is used for Apply Damage ALL)
