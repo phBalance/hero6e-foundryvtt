@@ -2,9 +2,10 @@
 
 ## Version 3.0.69 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-* Make AOE templates a 1/2 system unit smaller. [#966](https://github.com/dmdorman/hero6e-foundryvtt/issues/966)
-* Cone AOE templates now sized correctly when world is set to flat cone template. [FoundryVTT Measured Template Controls](https://foundryvtt.com/article/measurement/)
-* Initial support for STR MINUMUM.  STR is reduced by STR MINUMUM, but no OCV/DC penalties for low STR. [#971](https://github.com/dmdorman/hero6e-foundryvtt/issues/971)
+- Make AOE templates a 1/2 system unit smaller. [#966](https://github.com/dmdorman/hero6e-foundryvtt/issues/966)
+- Cone AOE templates now sized correctly when world is set to flat cone template. [FoundryVTT Measured Template Controls](https://foundryvtt.com/article/measurement/)
+- Stop auto success/auto miss for standard AOE target resolution. [#965](https://github.com/dmdorman/hero6e-foundryvtt/issues/965)
+- Initial support for STR MINIMUM.  STR is reduced by STR MINIMUM, but no OCV/DC penalties for low STR. [#971](https://github.com/dmdorman/hero6e-foundryvtt/issues/971)
 
 ## Version 3.0.68 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
