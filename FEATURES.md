@@ -125,7 +125,7 @@ Our support ratings:
 | SPEED READING | D | |
 | STRIKING APPEARANCE | D | |
 | UNIVERSAL TRANSLATOR | D | |
-| WEAPONMASTER | D | |
+| WEAPONMASTER | B | |
 
 ## Powers
 
