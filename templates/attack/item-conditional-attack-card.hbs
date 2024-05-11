@@ -1,0 +1,29 @@
+{{ log 'HEROSYS item-conditional-attack-card' this }}
+<form class="hero chat-card item-card conditional-attack-card" data-actor-id="{{actor._id}}"
+    data-item-id="{{item._id}}" {{#if tokenId}}data-token-id="{{tokenId}}" {{/if}}>
+
+    <div class="hero chat-card item-card">
+        <h2>Verify the following abilities apply to this attack.</h2>
+        <div class="description">
+            <b>{{{itemName item}}}
+                {{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}
+            </b>: {{item.system.description}}
+        </div>
+    </div>
+
+    <div class="form-fields  csl-attack-list">
+        <table>
+            {{#each conditionalAttacks}}
+            <tr>
+                <td>
+                    <input type="checkbox" id="{{this.id}}" {{checked this.checked}} data-dtype="Boolean" />
+                </td>
+                <td class="left">
+                    <b>{{this.system.ALIAS}}{{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}</b>: {{this.system.description}}
+                </td>
+            </tr>
+            {{/each}}
+        </table>
+    </div>
+
+</form>

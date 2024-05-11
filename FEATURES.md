@@ -111,7 +111,7 @@ Our support ratings:
 | COMBAT LUCK | B | Implemented as resistant defense, PER roll unsupported |
 | COMBAT SENSE | D | |
 | DANGER SENSE | D | |
-| DEADLY BLOW | D | |
+| DEADLY BLOW | B | |
 | DOUBLE JOINTED | D | |
 | EIDETIC MEMORY | D | |
 | ENVIRONMENTAL MOVEMENT | D | |
