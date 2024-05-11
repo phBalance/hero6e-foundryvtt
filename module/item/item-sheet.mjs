@@ -601,6 +601,23 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // Do all the standard things like updating item properies that match the name of input boxes
         await super._updateObject(event, formData);
 
+        // OPTION_ALIAS may need updating
+        if (
+            this.item.getBaseInfo()?.editOptions?.choices &&
+            expandedData.system.OPTIONID &&
+            !expandedData.system.OPTION_ALIAS
+        ) {
+            const choiceSelected = this.item
+                .getBaseInfo()
+                .editOptions.choices.find(
+                    (o) => o.OPTIONID === expandedData.system.OPTIONID,
+                );
+            this.item.system.OPTION = choiceSelected.OPTION;
+            this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
+            this.item.system.BASECOST =
+                choiceSelected.BASECOST || this.item.system.BASECOST;
+        }
+
         // Endurance Reserve
         if (expandedData.rec) {
             const ENDURANCERESERVEREC = this.item.findModsByXmlid(
