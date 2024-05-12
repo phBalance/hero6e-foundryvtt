@@ -1083,6 +1083,10 @@ export class HeroSystem6eActor extends Actor {
                 changes[`system.characteristics.${key}.realCost`] = cost;
                 this.system.characteristics[key].realCost = cost;
             }
+            if (characteristic.core != core) {
+                changes[`system.characteristics.${key}.core`] = core;
+                this.system.characteristics[key].core = core;
+            }
             // changes[`system.characteristics.${key}.basePointsPlusAdders`] = cost
             // changes[`system.characteristics.${key}.realCost`] = cost
             // changes[`system.characteristics.${key}.activePoints`] = cost
