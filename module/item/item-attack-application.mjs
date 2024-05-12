@@ -254,7 +254,11 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
-        if (!token) return;
+        if (!token) {
+            return ui.notifications.error(
+                `${actor.name} has no token in this scene.  Unable to place AOE template.`,
+            );
+        }
 
         // Close all windows except us
         for (let id of Object.keys(ui.windows)) {
