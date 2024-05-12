@@ -6,6 +6,12 @@
       <h3 class="item-name">{{{itemName item}}}</h3>
     </header>
 
+      <div class="description">
+          <b>{{{itemName item}}}
+              {{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}
+          </b>: {{item.system.description}}
+      </div>
+
     {{!-- Aim (hit location) form group --}}
     <div class="form-group" {{#unless useHitLoc}}style="display: none;"{{/unless}}>
       <label>Aim</label>
@@ -63,8 +69,10 @@
     {{#if (or item.system.usesStrength item.system.usesTk)}}
       <div class="form-group">
         <label>Effective Strength</label>
+        <div class="noflexwrap">
         <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
         <label>/ {{str}}</label>
+        </div>
       </div>
     {{/if}}
 

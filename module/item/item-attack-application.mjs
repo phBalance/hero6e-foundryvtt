@@ -66,6 +66,7 @@ export class ItemAttackFormApplication extends FormApplication {
             id: "item-attack-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
+            width: "400",
         });
 
         return options;
