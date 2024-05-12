@@ -210,7 +210,7 @@ Our support ratings:
 | ALTERABLE SIZE | D |  |
 | ALTERNATE COMBAT VALUE | C | Works on some attacks |
 | ALWAYS ON | D |  |
-| AREA OF EFFECT | B | Any surface not supported |
+| AREA OF EFFECT | B | Any surface not supported, circle and cone templates not correct when bigger than ~7 hexes |
 | ARMOR PIERCING | A | |
 | ATTACK VERSUS ALTERNATE DEFENSE | D |  |
 | AUTOFIRE | B | Good single target support, poor multiple target support  |
