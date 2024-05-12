@@ -1641,9 +1641,12 @@ export class HeroSystem6eActor extends Actor {
         // Set base values to HDC LEVELs and calculate costs of things.
         await this._postUpload(true);
 
-        // Re-run _postUpload for CSL's so we can guess associated attacks (now that all attacks are loaded)
+        // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
         this.items
-            .filter((item) => item.system.csl)
+            .filter(
+                (item) =>
+                    item.system.csl || item.baseInfo?.editOptions?.showAttacks,
+            )
             .forEach(async (item) => {
                 await item._postUpload();
             });

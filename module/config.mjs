@@ -3616,11 +3616,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "VERYLIMITED":
-                        return 4;
+                        return 12;
                     case "LIMITED":
-                        return 7;
+                        return 16;
                     case "ANY":
-                        return 10;
+                        return 19;
                     default:
                         console.error(
                             `Unknown skill levels ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
@@ -4038,7 +4038,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            costPerLevel: 0,
             editOptions: {
                 showAttacks: true,
                 editableOption_ALIAS: true,
@@ -4064,6 +4063,23 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         OPTION_ALIAS: "all Ranged Killing Damage weapons",
                     },
                 ],
+            },
+            costPerLevel: function (item) {
+                switch (item.system.OPTIONID) {
+                    case "VERYLIMITED":
+                        return 12;
+                    case "LIMITED":
+                        return 20;
+                    case "ANYHTH":
+                        return 24;
+                    case "ANYRANGED":
+                        return 24;
+                    default:
+                        console.error(
+                            `Unknown skill levels ${item.system.OPTIONID} for ${item.actor.name}/${item.name}`,
+                        );
+                        return 0;
+                }
             },
             xml: `<TALENT XMLID="WEAPON_MASTER" ID="1709160011422" BASECOST="0.0" LEVELS="1" ALIAS="Weapon Master:  +1d6" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited group]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""><NOTES/></TALENT>`,
         },
