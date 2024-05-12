@@ -240,10 +240,21 @@ export class ItemAttackFormApplication extends FormApplication {
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
         const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
 
+        // TODO: We need to have custom templates as shapes should be hex counted (a circle looks like a hexagon plotted on hex grid).
+        //       Circle and cone are the most broken. The values we're providing using a gridless geometric circle or cone approximate the
+        //       right thing when we're dealing with fewer than 7 hexes and start to fall apart after that.
+        // NOTE: the hex that the actor is in should count as a distance of 1"/2m. This means that to convert to what FoundryVTT expects
+        //       for distance we need to subtract 2m, and add a very small amount for rounding in attacker's favour, to approximate
+        //       correctness. It is not, however, "correct" as that would require hex counting.
+        const distance = Math.max(
+            1.01,
+            aoeValue * sizeConversionToMeters - 1.99,
+        );
+
         const templateData = {
             t: templateType,
             user: game.user.id,
-            distance: (aoeValue - 0.5) * sizeConversionToMeters, // The first system unit is the hex that the actor is in.
+            distance: distance,
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
             flags: {
@@ -262,29 +273,23 @@ export class ItemAttackFormApplication extends FormApplication {
 
             case "cone":
                 {
-                    // cone end is not controlled via the template ... see what type the core is drawing
-                    const flatCone =
-                        game.settings.get("core", "coneTemplateType") ===
-                        "flat";
-                    if (flatCone) {
-                        // Need to shave off 1 (more) system unit to have it match up to what's expected.
-                        templateData.distance =
-                            templateData.distance - sizeConversionToMeters;
-                    } else {
-                        // The hero system uses a cone with a flat end. We can't seem to be able to set it programmatically.
-                        ui.notifications.warn(
-                            "Please set the world's 'Cone Template Type' to 'flat' for a more correct cone template.",
-                        );
-                    }
-
+                    // TODO: Technically, following rules as written, cones should have a flat end. However,
+                    //       it doesn't make sense to change cones until we have "flat"/hex counted circles as
+                    //       the shapes should be consistent.
                     if (
                         (aoeModifier.adders || []).find(
                             (adder) => adder.XMLID === "THINCONE",
                         )
                     ) {
-                        templateData.angle = 30;
+                        // TODO: The extra 1 degree helps with approximating the correct hex counts when not
+                        //       not oriented in one of the prime 6 directions. This is because we're not
+                        //       hex counting. The extra degree is more incorrect the larger the cone is.
+                        templateData.angle = 31;
                     } else {
-                        templateData.angle = 60;
+                        // TODO: The extra 1 degree helps with approximating the correct hex counts when not
+                        //       not oriented in one of the prime 6 directions. This is because we're not
+                        //       hex counting. The extra degree is more incorrect the larger the cone is.
+                        templateData.angle = 61;
                     }
                 }
 
