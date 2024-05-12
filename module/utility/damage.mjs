@@ -250,22 +250,42 @@ export function convertToDcFromItem(item, options) {
     }
 
     // DEADLYBLOW
-    //item-conditional-defense-card
+    // Only check if it has been turned off
     if (item.actor) {
-        const DEADLYBLOW = item.actor.items.find(
-            (o) =>
-                o.system.XMLID === "DEADLYBLOW" &&
-                !(options?.ignoreAttackAbilities || []).includes(o.id),
-        );
-        if (DEADLYBLOW) {
-            const dcPlus =
-                3 * Math.max(1, parseInt(DEADLYBLOW.system.LEVELS) || 1);
-            dc += dcPlus;
-            tags.push({
-                value: `+${dcPlus}DC`,
-                name: "DeadlyBlow",
-                title: DEADLYBLOW.system.OPTION_ALIAS,
-            });
+        for (const key in item.system.conditionalAttacks) {
+            const conditionalAttack = item.actor.items.find(
+                (o) => o.id === key,
+            );
+            if (!conditionalAttack) {
+                console.error("conditionalAttack is empty");
+                continue;
+            }
+
+            // If unchecked or missing then assume it is enabled
+            if (!item.system.conditionalAttacks[key].checked) continue;
+
+            switch (conditionalAttack.system.XMLID) {
+                case "DEADLYBLOW": {
+                    const dcPlus =
+                        3 *
+                        Math.max(
+                            1,
+                            parseInt(conditionalAttack.system.LEVELS) || 1,
+                        );
+                    dc += dcPlus;
+                    tags.push({
+                        value: `+${dcPlus}DC`,
+                        name: "DeadlyBlow",
+                        title: conditionalAttack.system.OPTION_ALIAS,
+                    });
+                    break;
+                }
+                default:
+                    console.warn(
+                        "Unhandled conditionalAttack",
+                        conditionalAttack,
+                    );
+            }
         }
     }
 

@@ -102,6 +102,22 @@
 
   </div>
 
+  {{!-- Conditional attack selection. DEADLY BLOW --}}
+  <div class="form-fields  csl-attack-list">
+        <table>
+            {{#each item.system.conditionalAttacks}}
+            <tr>
+                <td>
+                    <input name="system.conditionalAttacks.{{this.id}}.checked" type="checkbox" _id="{{this.id}}" {{checked this.checked}} data-dtype="Boolean" />
+                </td>
+                <td class="left">
+                    <b>{{this.system.ALIAS}}{{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}</b>: {{this.system.description}}
+                </td>
+            </tr>
+            {{/each}}
+        </table>
+    </div>
+
   <footer class="sheet-footer flexcol">
     {{#if (and noTargets (not aoeText))}}
       <div>
