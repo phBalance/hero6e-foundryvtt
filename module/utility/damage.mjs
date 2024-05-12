@@ -140,7 +140,13 @@ export function convertToDcFromItem(item, options) {
                 STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0,
             );
             if (strMinimum && str > strMinimum) {
-                str = Math.max(0, str - strMinimum);
+                const strMinDc = Math.floor(strMinimum / 5);
+                dc -= strMinDc;
+                tags.push({
+                    value: `-${strMinDc}DC`,
+                    name: "STR Minimum",
+                    title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
+                });
             }
         }
 
