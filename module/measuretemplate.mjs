@@ -50,7 +50,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
             // For some reason the only the base ITEM and ACTOR props pass into this class, so we aren't using the typical functions like actor.id instead use actor._id.
             if (this.isTokenInside(token, options)) {
                 if (
-                    PERSONALIMMUNITY &&
+                    !PERSONALIMMUNITY ||
                     token.actor?.id != this.document.flags?.actor?._id
                 ) {
                     tokens.push(token);

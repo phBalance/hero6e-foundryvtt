@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import * as Attack from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
@@ -779,9 +780,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     // An attempt to cache getPowerInfo for performance reasons.
-    _baseInfo = getPowerInfo({ item: this });
+    #baseInfo = getPowerInfo({ item: this });
     getBaseInfo() {
-        return this._baseInfo;
+        console.warn("Use baseInfo instead of getBaseInfo");
+        return this.#baseInfo;
+    }
+    get baseInfo() {
+        return this.#baseInfo;
     }
 
     /**
@@ -988,7 +993,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     async _postUpload() {
-        const configPowerInfo = getPowerInfo({ item: this });
+        const configPowerInfo = this.baseInfo; //getPowerInfo({ item: this });
 
         let changed = this.setInitialItemValueAndMax();
 
@@ -1094,16 +1099,137 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
-            // Make sure CSLs are defined
-            this.system.csl = {};
+            // Make sure CSLs are defined; but don't override them if they are already present
+            this.system.csl ??= {};
             for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] = "ocv";
+                this.system.csl[c] ??= "ocv";
+            }
+
+            // Attempt Default weapon selection if there are no custom adders
+            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
+                let count = 0;
+                for (const attackItem of this.actor.items.filter(
+                    (o) =>
+                        (o.type === "attack" ||
+                            o.system.subType === "attack") &&
+                        (!o
+                            .getBaseInfo()
+                            .behaviors.includes("optional-maneuver") ||
+                            game.settings.get(
+                                HEROSYS.module,
+                                "optionalManeuvers",
+                            )),
+                )) {
+                    if (attackItem.baseInfo.type.includes("mental")) {
+                        continue; // Skip mental powers
+                    }
+                    let addMe = false;
+                    switch (this.system.OPTIONID) {
+                        case "SINGLE":
+                            if (count === 0) {
+                                addMe = true;
+                            }
+                            break;
+                        case "TIGHT":
+                            if (count < 3) {
+                                addMe = true;
+                            }
+                            break;
+                        case "BROAD":
+                            if (count < 6) {
+                                addMe = true;
+                            }
+                            break;
+                        case "HTH":
+                            if (attackItem.baseInfo.range === "no range") {
+                                addMe = true;
+                            }
+                            break;
+                        case "RANGED":
+                            if (attackItem.baseInfo.range === "standard") {
+                                addMe = true;
+                            }
+                            break;
+                        case "ALL":
+                            addMe = true;
+                            break;
+                    }
+                    if (addMe) {
+                        const newAdder = {
+                            XMLID: "ADDER",
+                            ID: new Date().getTime().toString(),
+                            ALIAS: attackItem.system.ALIAS || attackItem.name,
+                            BASECOST: "0.0",
+                            LEVELS: "0",
+                            NAME: "",
+                            PRIVATE: false,
+                            SELECTED: true,
+                            BASECOST_total: 0,
+                        };
+                        this.system.ADDER ??= [];
+                        this.system.ADDER.push(newAdder);
+                        count++;
+                    }
+                }
             }
         } else if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
-            // Make sure CSLs are defined
-            this.system.csl = {};
+            // Make sure CSLs are defined; but don't override them if they are already present
+            this.system.csl ??= {};
             for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] = "omcv";
+                this.system.csl[c] ??= "omcv";
+            }
+
+            // Attempt Default weapon selection if there are no custom adders
+            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
+                let count = 0;
+                for (const attackItem of this.actor.items.filter(
+                    (o) =>
+                        (o.type === "attack" ||
+                            o.system.subType === "attack") &&
+                        (!o
+                            .getBaseInfo()
+                            .behaviors.includes("optional-maneuver") ||
+                            game.settings.get(
+                                HEROSYS.module,
+                                "optionalManeuvers",
+                            )),
+                )) {
+                    if (!attackItem.baseInfo.type.includes("mental")) {
+                        continue; // Skip non-mental powers
+                    }
+                    let addMe = false;
+                    switch (this.system.OPTIONID) {
+                        case "SINGLE":
+                            if (count === 0) {
+                                addMe = true;
+                            }
+                            break;
+                        case "TIGHT":
+                            if (count < 3) {
+                                addMe = true;
+                            }
+                            break;
+                        case "ALL":
+                            addMe = true;
+                            break;
+                    }
+                    if (addMe) {
+                        const newAdder = {
+                            XMLID: "ADDER",
+                            ID: new Date().getTime().toString(),
+                            ALIAS: attackItem.system.ALIAS || attackItem.name,
+                            BASECOST: "0.0",
+                            LEVELS: "0",
+                            NAME: "",
+                            PRIVATE: false,
+                            SELECTED: true,
+                            BASECOST_total: 0,
+                        };
+                        this.system.ADDER ??= [];
+                        this.system.ADDER.push(newAdder);
+                        count++;
+                    }
+                }
             }
         }
 
@@ -2379,7 +2505,6 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}: `;
                 break;
 
-            case "MENTAL_COMBAT_LEVELS":
             case "PENALTY_SKILL_LEVELS":
                 system.description =
                     system.NAME +
@@ -2497,6 +2622,7 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS} (${system.value} STR)`;
                 break;
 
+            case "MENTAL_COMBAT_LEVELS":
             case "COMBAT_LEVELS":
                 // +1 with any single attack
                 system.description = `+${system.value} ${system.OPTION_ALIAS}`;

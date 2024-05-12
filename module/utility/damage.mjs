@@ -140,7 +140,13 @@ export function convertToDcFromItem(item, options) {
                 STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0,
             );
             if (strMinimum && str > strMinimum) {
-                str = Math.max(0, str - strMinimum);
+                const strMinDc = Math.floor(strMinimum / 5);
+                dc -= strMinDc;
+                tags.push({
+                    value: `-${strMinDc}DC`,
+                    name: "STR Minimum",
+                    title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
+                });
             }
         }
 
@@ -361,8 +367,9 @@ export function CombatSkillLevelsForAttack(item) {
             ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(
                 o.system.XMLID,
             ) &&
-            o.system.attacks &&
-            o.system.attacks[item.id],
+            (o.system.ADDER || []).find(
+                (p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name,
+            ),
     );
     if (result.skill && result.skill.system.csl) {
         for (let i = 0; i < parseInt(result.skill.system.LEVELS || 0); i++) {

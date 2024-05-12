@@ -81,6 +81,7 @@
 {{/if}}
 
 {{! editOptions.showAttacks}}
+{{#if attacks}}
 <div class="form-group">
     <label>Attacks Included:</label>
     <div class="form-fields csl-attack-list">
@@ -93,7 +94,24 @@
         </ul>
     </div>
 </div>
+{{/if}}
 
+{{! COMBAT SKILL LEVELS}}
+{{#if csl}}
+ <div class="form-group">
+    <label>SKILL LEVELS</label>
+    <div class="form-fields">
+        <ol>
+            {{#each csl}}
+            <li>
+                {{ radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+            </li>
+            {{/each}}
+        </ol>
+
+    </div>
+</div>
+{{/if}}
 
 
 {{#if (isdefined system.TYPE)}}

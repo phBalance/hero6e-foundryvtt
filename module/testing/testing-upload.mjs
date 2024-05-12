@@ -160,8 +160,8 @@ export function registerUploadTests(quench) {
                 it("description", function () {
                     assert.equal(
                         item.system.description,
-                        "Mind Empowered: +2 with a group of Mental Powers",
-                    ); //"+2 with a group of Mental Powers");
+                        "+2 with a group of Mental Powers",
+                    );
                 });
 
                 it("realCost", function () {

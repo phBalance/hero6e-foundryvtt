@@ -1951,6 +1951,42 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             costEnd: false,
             range: "self",
+            editOptions: {
+                showAttacks: true,
+                editableOption_ALIAS: true,
+                choices: [
+                    {
+                        OPTIONID: "SINGLE",
+                        OPTION: "SINGLE",
+                        OPTION_ALIAS: "with any single attack",
+                    },
+                    {
+                        OPTIONID: "TIGHT",
+                        OPTION: "TIGHT",
+                        OPTION_ALIAS: "with a small group of attacks",
+                    },
+                    {
+                        OPTIONID: "BROAD",
+                        OPTION: "BROAD",
+                        OPTION_ALIAS: "with a large group of attacks",
+                    },
+                    {
+                        OPTIONID: "HTH",
+                        OPTION: "HTH",
+                        OPTION_ALIAS: "with HTH Combat",
+                    },
+                    {
+                        OPTIONID: "RANGED",
+                        OPTION: "RANGED",
+                        OPTION_ALIAS: "with Ranged Combat",
+                    },
+                    {
+                        OPTIONID: "ALL",
+                        OPTION: "ALL",
+                        OPTION_ALIAS: "with All Attacks",
+                    },
+                ],
+            },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "SINGLE":
@@ -2400,6 +2436,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            editOptions: {
+                showAttacks: true,
+                editableOption_ALIAS: true,
+                choices: [
+                    {
+                        OPTIONID: "SINGLE",
+                        OPTION: "SINGLE",
+                        OPTION_ALIAS: "with a single Mental Power",
+                    },
+                    {
+                        OPTIONID: "TIGHT",
+                        OPTION: "TIGHT",
+                        OPTION_ALIAS: "with a group of Mental Powers",
+                    },
+                    {
+                        OPTIONID: "ALL",
+                        OPTION: "ALL",
+                        OPTION_ALIAS: "with all Mental Powers",
+                    },
+                ],
+            },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "SINGLE":
@@ -2407,6 +2464,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     case "TIGHT":
                         return 3;
                     case "BROAD":
+                    case "ALL":
                         return 6;
                     default:
                         console.error(

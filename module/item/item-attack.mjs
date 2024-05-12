@@ -1194,10 +1194,12 @@ export async function _onRollDamage(event) {
     }
 
     // PERSONALIMMUNITY
-    const PERSONALIMMUNITY = item.findModsByXmlid("PERSONALIMMUNITY");
-    if (PERSONALIMMUNITY && targetTokens) {
-        targetTokens = targetTokens.filter((o) => o.token.actor.id != actor.id);
-    }
+    // NOTE: We may want to reintorduce this code (CHANGE ENVIRONMENT or large scale MENTAL) at some point.
+    // However at the moment AOE is the primary mechanism to target multiple tokens.
+    // const PERSONALIMMUNITY = item.findModsByXmlid("PERSONALIMMUNITY");
+    // if (PERSONALIMMUNITY && targetTokens) {
+    //     targetTokens = targetTokens.filter((o) => o.token.actor.id != actor.id);
+    // }
 
     // If there is only 1 target then get rid of targetIds (which is used for Apply Damage ALL)
     if (targetTokens.length <= 1) {

@@ -9,6 +9,7 @@
 - Initial support for WEAPON_MASTER talent. [#972](https://github.com/dmdorman/hero6e-foundryvtt/issues/972)
 - Initial support for DEADLYBLOW talent. [#972](https://github.com/dmdorman/hero6e-foundryvtt/issues/972)
 - Initial support for PERSONALIMMUNITY. [#973](https://github.com/dmdorman/hero6e-foundryvtt/issues/973)
+- Reworked Combat Skill Levels. They now use Custom Adders to store attack details.  You can use Custom Adder in your HD file to streamline future imports, so you don't have to update your CSL's every time you import. Educated guessing of which attacks apply if you don't provide them in the HD file as custom adders.  
 
 ## Version 3.0.68 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

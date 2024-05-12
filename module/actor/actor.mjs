@@ -1517,7 +1517,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Validate everything that's been imported
         this.items.forEach(async (item) => {
-            const power = getPowerInfo({ item: item });
+            const power = item.baseInfo;
 
             // Power needs to exist
             if (!power) {
@@ -1535,7 +1535,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Warn about invalid adjustment targets
         for (const item of this.items.filter((item) =>
-            getPowerInfo({ item: item })?.type?.includes("adjustment"),
+            item.baseInfo?.type?.includes("adjustment"),
         )) {
             const result = item.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
@@ -1640,6 +1640,13 @@ export class HeroSystem6eActor extends Actor {
 
         // Set base values to HDC LEVELs and calculate costs of things.
         await this._postUpload(true);
+
+        // Re-run _postUpload for CSL's so we can guess associated attacks (now that all attacks are loaded)
+        this.items
+            .filter((item) => item.system.csl)
+            .forEach(async (item) => {
+                await item._postUpload();
+            });
 
         uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
 
