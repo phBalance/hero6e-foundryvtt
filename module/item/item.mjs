@@ -1104,82 +1104,19 @@ export class HeroSystem6eItem extends Item {
             for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
                 this.system.csl[c] ??= "ocv";
             }
+        }
 
-            // Attempt Default weapon selection if there are no custom adders
-            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
-                let count = 0;
-                for (const attackItem of this.actor.items.filter(
-                    (o) =>
-                        (o.type === "attack" ||
-                            o.system.subType === "attack") &&
-                        (!o
-                            .getBaseInfo()
-                            .behaviors.includes("optional-maneuver") ||
-                            game.settings.get(
-                                HEROSYS.module,
-                                "optionalManeuvers",
-                            )),
-                )) {
-                    if (attackItem.baseInfo.type.includes("mental")) {
-                        continue; // Skip mental powers
-                    }
-                    let addMe = false;
-                    switch (this.system.OPTIONID) {
-                        case "SINGLE":
-                            if (count === 0) {
-                                addMe = true;
-                            }
-                            break;
-                        case "TIGHT":
-                            if (count < 3) {
-                                addMe = true;
-                            }
-                            break;
-                        case "BROAD":
-                            if (count < 6) {
-                                addMe = true;
-                            }
-                            break;
-                        case "HTH":
-                            if (attackItem.baseInfo.range === "no range") {
-                                addMe = true;
-                            }
-                            break;
-                        case "RANGED":
-                            if (attackItem.baseInfo.range === "standard") {
-                                addMe = true;
-                            }
-                            break;
-                        case "ALL":
-                            addMe = true;
-                            break;
-                    }
-                    if (addMe) {
-                        const newAdder = {
-                            XMLID: "ADDER",
-                            ID: new Date().getTime().toString(),
-                            ALIAS: attackItem.system.ALIAS || attackItem.name,
-                            BASECOST: "0.0",
-                            LEVELS: "0",
-                            NAME: "",
-                            PRIVATE: false,
-                            SELECTED: true,
-                            BASECOST_total: 0,
-                        };
-                        this.system.ADDER ??= [];
-                        this.system.ADDER.push(newAdder);
-                        count++;
-                    }
-                }
-            }
-        } else if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
+        if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
             // Make sure CSLs are defined; but don't override them if they are already present
             this.system.csl ??= {};
             for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
                 this.system.csl[c] ??= "omcv";
             }
+        }
 
-            // Attempt Default weapon selection if there are no custom adders
+        // Attempt default weapon selection if showAttacks is defined andthere are no custom adders
+        // TODO: move
+        if (this.baseInfo?.editOptions?.showAttacks) {
             if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
                 let count = 0;
                 for (const attackItem of this.actor.items.filter(
@@ -1194,25 +1131,114 @@ export class HeroSystem6eItem extends Item {
                                 "optionalManeuvers",
                             )),
                 )) {
-                    if (!attackItem.baseInfo.type.includes("mental")) {
-                        continue; // Skip non-mental powers
-                    }
                     let addMe = false;
-                    switch (this.system.OPTIONID) {
-                        case "SINGLE":
-                            if (count === 0) {
-                                addMe = true;
+
+                    switch (this.system.XMLID) {
+                        case "WEAPON_MASTER":
+                            // Skip mental powers
+                            if (attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+                            switch (this.system.OPTIONID) {
+                                case "VERYLIMITED":
+                                    if (count === 0) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "LIMITED":
+                                    if (count < 3) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "ANYHTH":
+                                    if (
+                                        attackItem.baseInfo.range === "no range"
+                                    ) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "ANYRANGED":
+                                    if (
+                                        attackItem.baseInfo.range === "standard"
+                                    ) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                default:
+                                    console.warn(
+                                        "Unhandled attack automatic selection",
+                                        this,
+                                    );
                             }
                             break;
-                        case "TIGHT":
-                            if (count < 3) {
-                                addMe = true;
+                        case "COMBAT_LEVELS":
+                            // Skip mental powers
+                            if (attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+                            switch (this.system.OPTIONID) {
+                                case "SINGLE":
+                                    if (count === 0) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "TIGHT":
+                                    if (count < 3) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "BROAD":
+                                    if (count < 6) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "HTH":
+                                    if (
+                                        attackItem.baseInfo.range === "no range"
+                                    ) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "RANGED":
+                                    if (
+                                        attackItem.baseInfo.range === "standard"
+                                    ) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "ALL":
+                                    addMe = true;
+                                    break;
                             }
                             break;
-                        case "ALL":
-                            addMe = true;
+                        case "MENTAL_COMBAT_LEVELS":
+                            // Skip non-mental powers
+                            if (!attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+                            switch (this.system.OPTIONID) {
+                                case "SINGLE":
+                                    if (count === 0) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "TIGHT":
+                                    if (count < 3) {
+                                        addMe = true;
+                                    }
+                                    break;
+                                case "ALL":
+                                    addMe = true;
+                                    break;
+                            }
                             break;
+                        default:
+                            console.warn(
+                                "Unhandled attack automatic selection",
+                                this,
+                            );
                     }
+
                     if (addMe) {
                         const newAdder = {
                             XMLID: "ADDER",
