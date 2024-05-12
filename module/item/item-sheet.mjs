@@ -607,6 +607,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         await super._updateObject(event, formData);
 
         // OPTION_ALIAS may need updating
+        let clearAdderAttacks = false; // Clear all attacks and infer new attacks when OPTIONID is changed
         if (
             this.item.getBaseInfo()?.editOptions?.choices &&
             expandedData.system.OPTIONID
@@ -623,6 +624,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 this.item.system.OPTION_ALIAS = choiceSelected.OPTION_ALIAS;
                 this.item.system.BASECOST =
                     choiceSelected.BASECOST || this.item.system.BASECOST;
+                clearAdderAttacks = true;
             }
         }
 
@@ -707,6 +709,14 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     );
                 }
             }
+        }
+
+        // Clear all attacks from ADDERs
+        // _postUpload will guess proper attacks
+        if (clearAdderAttacks) {
+            this.item.system.ADDER = (this.item.system.ADDER || []).filter(
+                (o) => o.XMLID != "ADDER" || !parseFloat(o.BASECOST) == 0,
+            );
         }
 
         // SKILLS (LEVELSONLY, FAMILIARITY, EVERYMAN, PROFICIENCY)
