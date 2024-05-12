@@ -367,8 +367,9 @@ export function CombatSkillLevelsForAttack(item) {
             ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(
                 o.system.XMLID,
             ) &&
-            o.system.attacks &&
-            o.system.attacks[item.id],
+            (o.system.ADDER || []).find(
+                (p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name,
+            ),
     );
     if (result.skill && result.skill.system.csl) {
         for (let i = 0; i < parseInt(result.skill.system.LEVELS || 0); i++) {

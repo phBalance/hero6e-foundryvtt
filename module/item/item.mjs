@@ -779,9 +779,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     // An attempt to cache getPowerInfo for performance reasons.
-    _baseInfo = getPowerInfo({ item: this });
+    #baseInfo = getPowerInfo({ item: this });
     getBaseInfo() {
-        return this._baseInfo;
+        console.warn("Use baseInfo instead of getBaseInfo");
+        return this.#baseInfo;
+    }
+    get baseInfo() {
+        return this.#baseInfo;
     }
 
     /**
@@ -988,7 +992,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     async _postUpload() {
-        const configPowerInfo = getPowerInfo({ item: this });
+        const configPowerInfo = this.baseInfo; //getPowerInfo({ item: this });
 
         let changed = this.setInitialItemValueAndMax();
 
@@ -1094,16 +1098,16 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.system.XMLID == "COMBAT_LEVELS") {
-            // Make sure CSLs are defined
-            this.system.csl = {};
+            // Make sure CSLs are defined; but don't override them if they are already present
+            this.system.csl ??= {};
             for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] = "ocv";
+                this.system.csl[c] ??= "ocv";
             }
         } else if (this.system.XMLID == "MENTAL_COMBAT_LEVELS") {
-            // Make sure CSLs are defined
-            this.system.csl = {};
+            // Make sure CSLs are defined; but don't override them if they are already present
+            this.system.csl ??= {};
             for (let c = 0; c < parseInt(this.system.LEVELS); c++) {
-                this.system.csl[c] = "omcv";
+                this.system.csl[c] ??= "omcv";
             }
         }
 

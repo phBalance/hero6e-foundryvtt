@@ -48,13 +48,13 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }-${this.item.system.XMLID.toLowerCase()}-sheet.hbs`;
         }
 
-        if (
-            ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(
-                this.item.system.XMLID,
-            )
-        ) {
-            return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`;
-        }
+        // if (
+        //     ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(
+        //         this.item.system.XMLID,
+        //     )
+        // ) {
+        //     return `${path}/item-${this.item.type}-combat-levels-sheet.hbs`;
+        // }
 
         // Trying to see if we can get most items to use the generic power sheet
         if (this.item.type === "skill") {
@@ -249,33 +249,38 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
 
             // Enumerate attacks
-            data.attacks = [];
-            if (!item.system.attacks) item.system.attacks = {};
-            for (let attack of item.actor.items.filter(
-                (o) =>
-                    (o.type === "attack" || o.system.subType === "attack") &&
-                    o.system.uses === _ocv,
-            )) {
-                if (!item.system.attacks[attack.id]) {
-                    item.system.attacks[attack.id] = false;
-                }
-                data.attacks.push({
-                    name: attack.name,
-                    id: attack.id,
-                    checked: item.system.attacks[attack.id],
-                });
-            }
+            // data.attacks = [];
+            // if (!item.system.attacks) item.system.attacks = {};
+            // for (let attack of item.actor.items.filter(
+            //     (o) =>
+            //         (o.type === "attack" || o.system.subType === "attack") &&
+            //         o.system.uses === _ocv,
+            // )) {
+            //     if (!item.system.attacks[attack.id]) {
+            //         item.system.attacks[attack.id] = false;
+            //     }
+            //     data.attacks.push({
+            //         name: attack.name,
+            //         id: attack.id,
+            //         checked: item.system.attacks[attack.id],
+            //     });
+            // }
         }
 
         if (configPowerInfo?.editOptions?.showAttacks) {
             // Enumerate attacks
             data.attacks = [];
             for (const attack of item.actor.items.filter(
-                (o) => o.type === "attack" || o.system.subType === "attack",
+                (o) =>
+                    (o.type === "attack" || o.system.subType === "attack") &&
+                    (!o.getBaseInfo().behaviors.includes("optional-maneuver") ||
+                        game.settings.get(HEROSYS.module, "optionalManeuvers")),
             )) {
                 // Check if there is an adder (if so attack is checked)
                 const adder = (this.item.system.ADDER || []).find(
-                    (o) => o.ALIAS === attack.name,
+                    (o) =>
+                        o.ALIAS === attack.system.ALIAS ||
+                        o.ALIAS == attack.name,
                 );
 
                 data.attacks.push({
