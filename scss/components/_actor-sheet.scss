@@ -413,3 +413,10 @@ form div.attack-card div.description {
 .modifierAdder.indent {
     padding-left: 5px;
   }
+
+  #item-attack-form-application .noflexwrap input[type="text"]
+{
+  width: auto; 
+  margin-right: 5px;
+  margin-left: -4px; //* needed to aligh to previous rows, not sure why **//
+}

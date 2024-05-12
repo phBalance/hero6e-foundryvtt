@@ -66,6 +66,7 @@ export class ItemAttackFormApplication extends FormApplication {
             id: "item-attack-form-application",
             closeOnSubmit: false, // do not close when submitted
             submitOnChange: true, // submit when any input changes
+            width: "400",
         });
 
         return options;
@@ -144,6 +145,19 @@ export class ItemAttackFormApplication extends FormApplication {
             data.cslSkill = null;
         }
 
+        // DEADLYBLOW
+        const DEADLYBLOW = item.actor.items.find(
+            (o) => o.system.XMLID === "DEADLYBLOW",
+        );
+        if (DEADLYBLOW) {
+            item.system.conditionalAttacks ??= {};
+            item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
+                ...DEADLYBLOW,
+                id: DEADLYBLOW.id,
+            };
+            item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
+        }
+
         return data;
     }
 
@@ -197,8 +211,20 @@ export class ItemAttackFormApplication extends FormApplication {
 
         this.data.velocity = parseInt(formData.velocity || 0);
 
+        // Save conditionalAttack check
+        const expandedData = foundry.utils.expandObject(formData);
+        for (const ca in expandedData?.system?.conditionalAttacks) {
+            console.log(ca);
+            this.data.item.system.conditionalAttacks[ca].checked =
+                expandedData.system.conditionalAttacks[ca].checked;
+            await this.data.item.update({
+                [`system.conditionalAttacks`]:
+                    this.data.item.system.conditionalAttacks,
+            });
+        }
+
         // Show any changes
-        this.render();
+        //this.render();
     }
 
     async _updateCsl(event, formData) {

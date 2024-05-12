@@ -1040,58 +1040,58 @@ export async function _onRollDamage(event) {
     // DEADLYBLOW
     // TODO: Consider moving this into the convertToDcFromItem function.
     // You would need to make it async and check for isAction.
-    const DEADLYBLOW = item.actor.items.find(
-        (o) => o.system.XMLID === "DEADLYBLOW",
-    );
-    if (DEADLYBLOW) {
-        const templateDeadlyBlow = `systems/${HEROSYS.module}/templates/attack/item-conditional-attack-card.hbs`;
-        let data = {
-            token: actor.getActiveTokens()[0],
-            item,
-            conditionalAttacks: [
-                { ...DEADLYBLOW, id: DEADLYBLOW.id, checked: true },
-            ],
-        };
+    // const DEADLYBLOW = item.actor.items.find(
+    //     (o) => o.system.XMLID === "DEADLYBLOW",
+    // );
+    // if (DEADLYBLOW) {
+    //     const templateDeadlyBlow = `systems/${HEROSYS.module}/templates/attack/item-conditional-attack-card.hbs`;
+    //     let data = {
+    //         token: actor.getActiveTokens()[0],
+    //         item,
+    //         conditionalAttacks: [
+    //             { ...DEADLYBLOW, id: DEADLYBLOW.id, checked: true },
+    //         ],
+    //     };
 
-        const html = await renderTemplate(templateDeadlyBlow, data);
-        async function getDialogOutput() {
-            return new Promise((resolve) => {
-                const dataConditionalDefenses = {
-                    title: item.actor.name + " conditional attacks",
-                    content: html,
-                    buttons: {
-                        normal: {
-                            label: "Roll Damage",
-                            callback: (html) => {
-                                resolve(html.find("form input"));
-                            },
-                        },
-                        cancel: {
-                            label: "cancel",
-                            callback: () => {
-                                resolve(null);
-                            },
-                        },
-                    },
-                    default: "normal",
-                    close: () => {
-                        resolve(null);
-                    },
-                };
-                new Dialog(dataConditionalDefenses).render(true);
-            });
-        }
+    //     const html = await renderTemplate(templateDeadlyBlow, data);
+    //     async function getDialogOutput() {
+    //         return new Promise((resolve) => {
+    //             const dataConditionalDefenses = {
+    //                 title: item.actor.name + " conditional attacks",
+    //                 content: html,
+    //                 buttons: {
+    //                     normal: {
+    //                         label: "Roll Damage",
+    //                         callback: (html) => {
+    //                             resolve(html.find("form input"));
+    //                         },
+    //                     },
+    //                     cancel: {
+    //                         label: "cancel",
+    //                         callback: () => {
+    //                             resolve(null);
+    //                         },
+    //                     },
+    //                 },
+    //                 default: "normal",
+    //                 close: () => {
+    //                     resolve(null);
+    //                 },
+    //             };
+    //             new Dialog(dataConditionalDefenses).render(true);
+    //         });
+    //     }
 
-        const inputs = await getDialogOutput();
-        if (inputs === null) return;
+    //     const inputs = await getDialogOutput();
+    //     if (inputs === null) return;
 
-        toHitData.ignoreAttackAbilities = [];
-        for (let input of inputs) {
-            if (!input.checked) {
-                toHitData.ignoreAttackAbilities.push(input.id);
-            }
-        }
-    }
+    //     toHitData.ignoreAttackAbilities = [];
+    //     for (let input of inputs) {
+    //         if (!input.checked) {
+    //             toHitData.ignoreAttackAbilities.push(input.id);
+    //         }
+    //     }
+    // }
 
     const { dc, tags } = convertToDcFromItem(item, {
         isAction: true,
