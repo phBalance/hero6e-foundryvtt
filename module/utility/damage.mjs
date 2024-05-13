@@ -252,7 +252,7 @@ export function convertToDcFromItem(item, options) {
     // DEADLYBLOW
     // Only check if it has been turned off
 
-    const DEADLYBLOW = item.actor.items.find(
+    const DEADLYBLOW = item.actor?.items.find(
         (o) => o.system.XMLID === "DEADLYBLOW",
     );
     if (DEADLYBLOW) {

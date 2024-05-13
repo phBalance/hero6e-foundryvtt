@@ -1,6 +1,6 @@
 # Releases
 
-## Version 3.0.69 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.69 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved AOE template accuracy. [#966](https://github.com/dmdorman/hero6e-foundryvtt/issues/966)
 - Removed auto success/miss for standard AOE targets. [#965](https://github.com/dmdorman/hero6e-foundryvtt/issues/965)
@@ -10,13 +10,13 @@
 - Initial support for PERSONALIMMUNITY. [#973](https://github.com/dmdorman/hero6e-foundryvtt/issues/973)
 - Reworked Combat Skill Levels. They now use Custom Adders to store attack details.  You can use Custom Adder in your HD file to streamline future imports, so you don't have to update your CSLs every time you import. Educated guessing of which attacks apply if you don't provide them in the HD file as custom adders. [#883](https://github.com/dmdorman/hero6e-foundryvtt/issues/883)
 
-## Version 3.0.68 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.68
 
 - Correct range penalty calculations. [#944](https://github.com/dmdorman/hero6e-foundryvtt/issues/944)
 - 5e actors will now see ruler measurements in hexes ("). We still recommend both 5e and 6e scenes use a grid size of 2m.
 - Additional in-game editing support focused mainly on AOE.
 
-## Version 3.0.67.1 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.67.1
 
 - Improve descriptions for senses. [#934](https://github.com/dmdorman/hero6e-foundryvtt/issues/934)
 - Correct default 6e AOE line width and height determination. [#937](https://github.com/dmdorman/hero6e-foundryvtt/issues/937)
@@ -27,7 +27,7 @@
 - Improved SHRINKING and GROWTH support. [#936](https://github.com/dmdorman/hero6e-foundryvtt/issues/936)
 - Fix for POWERSKILL where it was not rollable.
 
-## Version 3.0.66 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.66
 
 - Fix velocity calculations for 5e. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
 - Calculated velocity for maneuvers can now be adjusted in the to hit dialog when necessary. [#923](https://github.com/dmdorman/hero6e-foundryvtt/issues/923)
@@ -40,7 +40,7 @@
   - Items modified in-game may have incorrect costs and active points.
   - Be careful when re-uploading HDC files as in-game edits for that actor will be overwritten without warning.
 
-## Version 3.0.65 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.65
 
 - Fix crash during HDC upload with change environment and the damage adder.
 - Improve martial maneuvers using `[FLASHDC]` and `[STRDC]` effects. [#850](https://github.com/dmdorman/hero6e-foundryvtt/issues/850)

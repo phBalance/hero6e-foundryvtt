@@ -237,8 +237,6 @@ export function registerDamageFunctionTests(quench) {
                     parent: actor,
                 });
 
-                //return { dc: dc, tags: tags, end: end };
-
                 it("Killing dc", function () {
                     assert.equal(convertToDcFromItem(item).dc, 4);
                 });
