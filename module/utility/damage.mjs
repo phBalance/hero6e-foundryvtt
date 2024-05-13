@@ -139,15 +139,15 @@ export function convertToDcFromItem(item, options) {
             const strMinimum = parseInt(
                 STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0,
             );
-            if (strMinimum && str > strMinimum) {
-                const strMinDc = Math.floor(strMinimum / 5);
-                dc -= strMinDc;
-                tags.push({
-                    value: `-${strMinDc}DC`,
-                    name: "STR Minimum",
-                    title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
-                });
-            }
+            //if (strMinimum && str > strMinimum) {
+            const strMinDc = Math.ceil(strMinimum / 5);
+            dc -= strMinDc;
+            tags.push({
+                value: `-${strMinDc}DC`,
+                name: "STR Minimum",
+                title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
+            });
+            //}
         }
 
         let str5 = Math.floor(str / 5);
@@ -251,13 +251,33 @@ export function convertToDcFromItem(item, options) {
 
     // DEADLYBLOW
     // Only check if it has been turned off
+
+    const DEADLYBLOW = item.actor.items.find(
+        (o) => o.system.XMLID === "DEADLYBLOW",
+    );
+    if (DEADLYBLOW) {
+        item.system.conditionalAttacks ??= {};
+        item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
+            ...DEADLYBLOW,
+            id: DEADLYBLOW.id,
+        };
+        item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
+    }
+
     if (item.actor) {
         for (const key in item.system.conditionalAttacks) {
             const conditionalAttack = item.actor.items.find(
                 (o) => o.id === key,
             );
             if (!conditionalAttack) {
-                console.error("conditionalAttack is empty");
+                console.warn("conditionalAttack is empty");
+                delete item.system.conditionalAttacks[key];
+                // NOTE: typically we await here, but this isn't an async function.
+                // Shouldn't be a problem.
+                item.update({
+                    [`system.conditionalAttacks`]:
+                        item.system.conditionalAttacks,
+                });
                 continue;
             }
 
@@ -292,6 +312,11 @@ export function convertToDcFromItem(item, options) {
     if (item.actor?.statuses?.has("underwater")) {
         dc = Math.max(0, dc - 2);
         tags.push({ value: `-2DC`, name: "Underwater" });
+    }
+
+    // Programmer warning
+    if (dc <= 0) {
+        console.warn("DC <= 0", dc, item);
     }
 
     return { dc: dc, tags: tags, end: end };

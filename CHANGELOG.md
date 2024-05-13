@@ -2,13 +2,13 @@
 
 ## Version 3.0.69 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Correct AOE templates by making a hex smaller. [#966](https://github.com/dmdorman/hero6e-foundryvtt/issues/966)
-- Stop auto success/auto miss for standard AOE target resolution. [#965](https://github.com/dmdorman/hero6e-foundryvtt/issues/965)
+- Improved AOE template accuracy. [#966](https://github.com/dmdorman/hero6e-foundryvtt/issues/966)
+- Removed auto success/miss for standard AOE targets. [#965](https://github.com/dmdorman/hero6e-foundryvtt/issues/965)
 - Initial support for STR MINIMUM. STR damage is reduced by STR MINIMUM, but no OCV/DC penalties for low STR. [#971](https://github.com/dmdorman/hero6e-foundryvtt/issues/971) [#127](https://github.com/dmdorman/hero6e-foundryvtt/issues/127)
 - Initial support for WEAPON_MASTER talent. [#972](https://github.com/dmdorman/hero6e-foundryvtt/issues/972)
 - Initial support for DEADLYBLOW talent. [#972](https://github.com/dmdorman/hero6e-foundryvtt/issues/972)
 - Initial support for PERSONALIMMUNITY. [#973](https://github.com/dmdorman/hero6e-foundryvtt/issues/973)
-- Reworked Combat Skill Levels. They now use Custom Adders to store attack details.  You can use Custom Adder in your HD file to streamline future imports, so you don't have to update your CSL's every time you import. Educated guessing of which attacks apply if you don't provide them in the HD file as custom adders. [#883](https://github.com/dmdorman/hero6e-foundryvtt/issues/883)
+- Reworked Combat Skill Levels. They now use Custom Adders to store attack details.  You can use Custom Adder in your HD file to streamline future imports, so you don't have to update your CSLs every time you import. Educated guessing of which attacks apply if you don't provide them in the HD file as custom adders. [#883](https://github.com/dmdorman/hero6e-foundryvtt/issues/883)
 
 ## Version 3.0.68 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

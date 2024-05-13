@@ -1126,7 +1126,7 @@ export async function _onRollDamage(event) {
         .addStunMultiplier(
             increasedMultiplierLevels - decreasedMultiplierLevels,
         )
-        .addDice(formulaParts.d6Count)
+        .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
         .addHalfDice(formulaParts.halfDieCount)
         .addDiceMinus1(formulaParts.d6Less1DieCount)
         .addNumber(formulaParts.constant)
@@ -1142,6 +1142,18 @@ export async function _onRollDamage(event) {
                 game.settings.get(HEROSYS.module, "hitLocTracking") === "all",
             toHitData.aim === "none" ? "none" : toHitData.aimSide, // Can't just select a side to hit as that doesn't have a penalty
         );
+
+    // Hackey solution to look for 0DC (STRMINIMUM)
+    if (
+        formulaParts.d6Count <= 0 &&
+        formulaParts.halfDieCount <= 0 &&
+        formulaParts.d6Less1DieCount <= 0 &&
+        formulaParts.constant <= 0
+    ) {
+        return ui.notifications.error(
+            `Attack (${item.system.ALIAS || item.name}) has no dice to roll.`,
+        );
+    }
 
     await damageRoller.roll();
 
