@@ -243,6 +243,12 @@ export class ItemAttackFormApplication extends FormApplication {
         }
     }
 
+    /**
+     *
+     * 5e is a hex based system with defined AOE templates. The first hex is the target hex (even though it's less than a 2m radius).
+     * 6e is a gridless system with distances and AOE templates defined by the grid/gridless system being used for this scene.
+     *
+     */
     async _spawnAreaOfEffect() {
         const item = this.data.item;
         const aoeModifier = item.getAoeModifier();
@@ -268,18 +274,31 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
+
         const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
 
-        // TODO: We need to have custom templates as shapes should be hex counted (a circle looks like a hexagon plotted on hex grid).
-        //       Circle and cone are the most broken. The values we're providing using a gridless geometric circle or cone approximate the
-        //       right thing when we're dealing with fewer than 7 hexes and start to fall apart after that.
-        // NOTE: the hex that the actor is in should count as a distance of 1"/2m. This means that to convert to what FoundryVTT expects
-        //       for distance we need to subtract 2m, and add a very small amount for rounding in attacker's favour, to approximate
-        //       correctness. It is not, however, "correct" as that would require hex counting.
-        const distance = Math.max(
-            1.01,
-            aoeValue * sizeConversionToMeters - 1.99,
-        );
+        // NOTE: We add a very small amount (0.05m) to make it easier to place the template in the centre of a hex as we don't have hex snapping. This
+        //       should be removed if grid snapping is implemented. Games using gridless can have perfect positioning and the pain that comes from it.
+        const hexCenterFudge =
+            game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS
+                ? 0
+                : 0.05;
+
+        let distance;
+        if (actor.system.is5e) {
+            // TODO: We need to have custom templates as shapes should be hex counted (a circle looks like a hexagon plotted on a hex grid).
+            //       Circle and cone are the most broken. The values we're providing using a gridless geometric circle or cone approximate the
+            //       right thing when we're dealing with fewer than 7 hexes and start to fall apart after that.
+            // NOTE: the hex that the actor is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
+            //       for distance we need to subtract 2m to approximate correctness of a radial the template. It is not, however, "correct"
+            //       as that would require hex counting.
+            distance = Math.max(
+                1.01,
+                aoeValue * sizeConversionToMeters - 2 + hexCenterFudge,
+            );
+        } else {
+            distance = aoeValue * sizeConversionToMeters + hexCenterFudge;
+        }
 
         const templateData = {
             t: templateType,
