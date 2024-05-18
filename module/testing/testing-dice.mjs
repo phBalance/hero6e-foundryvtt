@@ -1,5 +1,9 @@
 import { HeroRoller } from "../utility/dice.mjs";
 
+// v11/v12 compatibility shim
+// TODO: Cleanup eslint file with these terms
+const Die = CONFIG.Dice.terms.d;
+
 function FixedDieRoll(fixedRollResult) {
     return class extends Die {
         constructor(termData = {}) {

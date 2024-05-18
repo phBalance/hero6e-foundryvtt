@@ -36,6 +36,17 @@ const DICE_SO_NICE_CUSTOM_SETS = {
 
 const DICE_SO_NICE_CATEGORY_NAME = "Hero System 6e (Unofficial) V2";
 
+// v11/v12 compatibility shim.
+// TODO: Cleanup eslint file with these terms
+const Die = CONFIG.Dice.terms.d;
+const NumericTerm = CONFIG.Dice.termTypes.NumericTerm;
+const OperatorTerm = CONFIG.Dice.termTypes.OperatorTerm;
+
+// foundry.dice.terms.RollTerm is the v12 way of finding the class
+const RollTermClass = foundry.dice?.terms.RollTerm
+    ? foundry.dice.terms.RollTerm
+    : RollTerm;
+
 /**
  * Add colour sets into Dice So Nice! This allows users to see what the colour set is for each function.
  * Players can then choose to use that theme for maximum confusion as to which are their rolls and which
@@ -314,13 +325,15 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        if (this._formulaTerms.length > 0) {
+            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        }
 
-        const absNumDice = Math.abs(numDice);
+        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: absNumDice,
+                number: numDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE,
                     flavor: description,
@@ -328,7 +341,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: absNumDice,
+                              value: numDice,
                           },
                 },
             }),
@@ -342,13 +355,15 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        if (this._formulaTerms.length > 0) {
+            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        }
 
-        const absNumDice = Math.abs(numDice);
+        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: absNumDice,
+                number: numDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.HALF_DIE,
                     flavor: description,
@@ -356,7 +371,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: absNumDice,
+                              value: numDice,
                           },
                 },
             }),
@@ -370,13 +385,15 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        if (this._formulaTerms.length > 0) {
+            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        }
 
-        const absNumDice = Math.abs(numDice);
+        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: absNumDice,
+                number: numDice,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE,
                     flavor: description,
@@ -384,7 +401,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: absNumDice,
+                              value: numDice,
                           },
                 },
             }),
@@ -398,13 +415,15 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        if (this._formulaTerms.length > 0) {
+            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
+        }
 
-        const absNumDice = Math.abs(numDice);
+        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
-                number: absNumDice,
+                number: numDice,
                 options: {
                     _hrQualifier:
                         HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE,
@@ -413,7 +432,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: absNumDice,
+                              value: numDice,
                           },
                 },
             }),
@@ -427,12 +446,14 @@ export class HeroRoller {
             return this;
         }
 
-        this.#addOperatorTerm(value > 0 ? "+" : "-");
+        if (this._formulaTerms.length > 0) {
+            this.#addOperatorTerm(value > 0 ? "+" : "-");
+        }
 
-        const absValue = Math.abs(value);
+        value = this._formulaTerms.length > 0 ? Math.abs(value) : value;
         this._formulaTerms.push(
             new NumericTerm({
-                number: absValue,
+                number: value,
                 options: {
                     _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
                     flavor: description,
@@ -440,7 +461,7 @@ export class HeroRoller {
                         ? undefined
                         : {
                               name: description,
-                              value: absValue,
+                              value: value,
                           },
                 },
             }),
@@ -473,9 +494,16 @@ export class HeroRoller {
             this._options,
         );
 
+        // V12 doesn't have async as an option anymore - it is the default.
+        const evaluateOptions = foundry.utils.isNewerVersion(
+            game.version,
+            "11.315",
+        )
+            ? {}
+            : { async: true };
         await this._rollObj.evaluate({
             ...options,
-            async: true,
+            ...evaluateOptions,
         });
 
         await this.#calculateResults();
@@ -908,7 +936,7 @@ export class HeroRoller {
             ? Roll.fromData(dataObj._rollObj)
             : undefined;
         heroRoller._formulaTerms = dataObj._formulaTerms.map((_term, index) =>
-            RollTerm.fromData(dataObj._formulaTerms[index]),
+            RollTermClass.fromData(dataObj._formulaTerms[index]),
         );
 
         heroRoller._type = dataObj._type;
@@ -987,7 +1015,14 @@ export class HeroRoller {
                 )
                 .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
 
-            await this._killingStunMultiplierHeroRoller.roll({ async: true });
+            // V12 doesn't have async as an option anymore - it is the default.
+            const evaluateOptions = foundry.utils.isNewerVersion(
+                game.version,
+                "11.315",
+            )
+                ? {}
+                : { async: true };
+            await this._killingStunMultiplierHeroRoller.roll(evaluateOptions);
 
             this._killingBaseStunMultiplier =
                 this._killingStunMultiplierHeroRoller.getBasicTotal();
@@ -1200,7 +1235,7 @@ export class HeroRoller {
         const _calculatedTermsMetadata = [];
         const _calculatedTerms = [];
 
-        let lastOperatorMultiplier = 1; // Start with +1
+        let lastOperatorMultiplier = 1; // Start with +
 
         const _baseTermsMetadata = [];
         const _baseTerms = this._rollObj.terms
