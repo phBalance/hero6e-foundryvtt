@@ -36,10 +36,16 @@ const DICE_SO_NICE_CUSTOM_SETS = {
 
 const DICE_SO_NICE_CATEGORY_NAME = "Hero System 6e (Unofficial) V2";
 
-// v11/v12 compatibility shim
+// v11/v12 compatibility shim.
+// TODO: Cleanup eslint file with these terms
 const Die = CONFIG.Dice.terms.d;
 const NumericTerm = CONFIG.Dice.termTypes.NumericTerm;
 const OperatorTerm = CONFIG.Dice.termTypes.OperatorTerm;
+
+// foundry.dice.terms.RollTerm is the v12 way of finding the class
+const RollTermClass = foundry.dice?.terms.RollTerm
+    ? foundry.dice.terms.RollTerm
+    : RollTerm;
 
 /**
  * Add colour sets into Dice So Nice! This allows users to see what the colour set is for each function.
@@ -478,9 +484,16 @@ export class HeroRoller {
             this._options,
         );
 
+        // V12 doesn't have async as an option anymore - it is the default.
+        const evaluateOptions = foundry.utils.isNewerVersion(
+            game.version,
+            "11.315",
+        )
+            ? {}
+            : { async: true };
         await this._rollObj.evaluate({
             ...options,
-            async: true,
+            ...evaluateOptions,
         });
 
         await this.#calculateResults();
@@ -913,7 +926,7 @@ export class HeroRoller {
             ? Roll.fromData(dataObj._rollObj)
             : undefined;
         heroRoller._formulaTerms = dataObj._formulaTerms.map((_term, index) =>
-            RollTerm.fromData(dataObj._formulaTerms[index]),
+            RollTermClass.fromData(dataObj._formulaTerms[index]),
         );
 
         heroRoller._type = dataObj._type;
@@ -992,7 +1005,14 @@ export class HeroRoller {
                 )
                 .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
 
-            await this._killingStunMultiplierHeroRoller.roll({ async: true });
+            // V12 doesn't have async as an option anymore - it is the default.
+            const evaluateOptions = foundry.utils.isNewerVersion(
+                game.version,
+                "11.315",
+            )
+                ? {}
+                : { async: true };
+            await this._killingStunMultiplierHeroRoller.roll(evaluateOptions);
 
             this._killingBaseStunMultiplier =
                 this._killingStunMultiplierHeroRoller.getBasicTotal();

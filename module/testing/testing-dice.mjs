@@ -1,9 +1,8 @@
 import { HeroRoller } from "../utility/dice.mjs";
 
 // v11/v12 compatibility shim
+// TODO: Cleanup eslint file with these terms
 const Die = CONFIG.Dice.terms.d;
-const NumericTerm = CONFIG.Dice.termTypes.NumericTerm;
-const OperatorTerm = CONFIG.Dice.termTypes.OperatorTerm;
 
 function FixedDieRoll(fixedRollResult) {
     return class extends Die {
@@ -122,7 +121,7 @@ export function registerDiceTests(quench) {
         "hero6efoundryvttv2.utils.dice",
         (context) => {
             const { describe, expect, it } = context;
-            describe("HeroRoller", function () {
+            describe.only("HeroRoller", function () {
                 describe("chaining", function () {
                     it("should be conditional for make functions with negative and default", function () {
                         const roller = new HeroRoller().makeSuccessRoll();
@@ -283,7 +282,7 @@ export function registerDiceTests(quench) {
                         expect(roller.getFormula()).to.equal("0");
                     });
 
-                    it("should handle formulas with numeric term", async function () {
+                    it.only("should handle formulas with numeric term", async function () {
                         const roller = new HeroRoller().addNumber(7);
                         await roller.roll();
 
