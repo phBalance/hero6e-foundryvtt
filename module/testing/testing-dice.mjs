@@ -1,5 +1,10 @@
 import { HeroRoller } from "../utility/dice.mjs";
 
+// v11/v12 compatibility shim
+const Die = CONFIG.Dice.terms.d;
+const NumericTerm = CONFIG.Dice.termTypes.NumericTerm;
+const OperatorTerm = CONFIG.Dice.termTypes.OperatorTerm;
+
 function FixedDieRoll(fixedRollResult) {
     return class extends Die {
         constructor(termData = {}) {

@@ -36,6 +36,11 @@ const DICE_SO_NICE_CUSTOM_SETS = {
 
 const DICE_SO_NICE_CATEGORY_NAME = "Hero System 6e (Unofficial) V2";
 
+// v11/v12 compatibility shim
+const Die = CONFIG.Dice.terms.d;
+const NumericTerm = CONFIG.Dice.termTypes.NumericTerm;
+const OperatorTerm = CONFIG.Dice.termTypes.OperatorTerm;
+
 /**
  * Add colour sets into Dice So Nice! This allows users to see what the colour set is for each function.
  * Players can then choose to use that theme for maximum confusion as to which are their rolls and which
