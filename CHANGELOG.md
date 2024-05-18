@@ -2,7 +2,7 @@
 
 ## Version 3.0.70 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Restore 6e AOE template calculation as it should be different from 6e.
+- Restore 6e AOE template calculation as it should be different from 5e.
 
 ## Version 3.0.69 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
@@ -597,7 +597,7 @@ transferred from the item to the actor.  This is following [FoundryVtt v11 Activ
 - Attack OcvMod [#137](https://github.com/dmdorman/hero6e-foundryvtt/issues/137)
 - Attack powers are used directly.  No longer need to have separate attack items.
 - All attack powers are shown in Attack tab, even those not fully implemented.  A small step toward implementing additional attack types and charges.
-aracter sheet can filter on some items. [#90](https://github.com/dmdorman/hero6e-foundryvtt/issues/90)
+- Character sheet can filter on some items. [#90](https://github.com/dmdorman/hero6e-foundryvtt/issues/90)
 
 ## Version 2.2.0-alpha
 
