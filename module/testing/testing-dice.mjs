@@ -121,7 +121,7 @@ export function registerDiceTests(quench) {
         "hero6efoundryvttv2.utils.dice",
         (context) => {
             const { describe, expect, it } = context;
-            describe.only("HeroRoller", function () {
+            describe("HeroRoller", function () {
                 describe("chaining", function () {
                     it("should be conditional for make functions with negative and default", function () {
                         const roller = new HeroRoller().makeSuccessRoll();
@@ -282,7 +282,7 @@ export function registerDiceTests(quench) {
                         expect(roller.getFormula()).to.equal("0");
                     });
 
-                    it.only("should handle formulas with numeric term", async function () {
+                    it("should handle formulas with numeric term", async function () {
                         const roller = new HeroRoller().addNumber(7);
                         await roller.roll();
 
