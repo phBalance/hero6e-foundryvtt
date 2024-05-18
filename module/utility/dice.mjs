@@ -457,9 +457,19 @@ export class HeroRoller {
     }
 
     async roll(options) {
-        // Build the Foundry pseudo random roller
+        // Build the Foundry pseudo random roller. If no terms are provided, then provide one that equals 0 to
+        // ensure that everything else works.
         this._rollObj = this._buildRollClass.fromTerms(
-            this._formulaTerms,
+            this._formulaTerms.length > 0
+                ? this._formulaTerms
+                : [
+                      new NumericTerm({
+                          number: 0,
+                          options: {
+                              flavor: "No roller terms provided",
+                          },
+                      }),
+                  ],
             this._options,
         );
 
