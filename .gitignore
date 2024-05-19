@@ -19,6 +19,7 @@ css/
 # FoundryVTT v11 creates several log files which we don't need in our system.
 # However, we may need some of these when updating packs/compendiums.  Unclear if back-compat only.
 # Don't commit LevelDB files for now for v10 back-compat
+# MOVING PACKS TO SEPERATE MODULE
 packs/**/*.log
 packs/**/*.old
 packs/**/*.ldb
