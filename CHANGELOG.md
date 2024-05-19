@@ -2,7 +2,8 @@
 
 ## Version 3.0.70 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Restore 6e AOE template calculation as it should be different from 5e.
+- Reworked AOE templates to support the differences between 5e and 6e as we understand them.
+- Under the hood preparation for FoundryVTT V12.
 
 ## Version 3.0.69 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
