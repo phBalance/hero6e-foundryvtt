@@ -283,7 +283,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const hexRoundingFudge =
             game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS
                 ? 0
-                : 0.05;
+                : 0.04;
 
         let distance;
         if (is5e) {
