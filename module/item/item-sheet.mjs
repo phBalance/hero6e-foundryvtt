@@ -628,6 +628,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
         }
 
+        // ALIAS should match name
+        this.item.system.ALIAS = this.item.name;
+
         // Endurance Reserve
         if (expandedData.rec) {
             const ENDURANCERESERVEREC = this.item.findModsByXmlid(
