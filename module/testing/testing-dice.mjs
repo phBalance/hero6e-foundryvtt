@@ -1,5 +1,9 @@
 import { HeroRoller } from "../utility/dice.mjs";
 
+// v11/v12 compatibility shim
+// TODO: Cleanup eslint file with these terms
+const Die = CONFIG.Dice.terms.d;
+
 function FixedDieRoll(fixedRollResult) {
     return class extends Die {
         constructor(termData = {}) {
@@ -270,6 +274,14 @@ export function registerDiceTests(quench) {
                 });
 
                 describe("formula", function () {
+                    it("should be able to handle no terms and get a 0 formula", async function () {
+                        const roller = new HeroRoller();
+
+                        await roller.roll();
+
+                        expect(roller.getFormula()).to.equal("0");
+                    });
+
                     it("should handle formulas with numeric term", async function () {
                         const roller = new HeroRoller().addNumber(7);
                         await roller.roll();
@@ -603,6 +615,16 @@ export function registerDiceTests(quench) {
                         expect(roller.getFormula()).to.not.equal(
                             postRoller.getFormula(),
                         );
+                    });
+                });
+
+                describe("degenerate rolling", function () {
+                    it("should work with no terms and get a 0 roll", async function () {
+                        const roller = new HeroRoller();
+
+                        await roller.roll();
+
+                        expect(roller.getBaseTotal()).to.equal(0);
                     });
                 });
 
