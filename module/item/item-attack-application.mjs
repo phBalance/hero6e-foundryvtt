@@ -278,7 +278,7 @@ export class ItemAttackFormApplication extends FormApplication {
         //       correctness. It is not, however, "correct" as that would require hex counting.
         const distance = Math.max(
             1.01,
-            aoeValue * sizeConversionToMeters - 1.99,
+            aoeValue * sizeConversionToMeters + 0.01, //- 1.99,
         );
 
         const templateData = {
