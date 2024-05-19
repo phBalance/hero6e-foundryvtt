@@ -18,15 +18,7 @@
     "esmodules": ["module/herosystem6e.mjs"],
     "styles": ["css/herosystem6e.css", "css/actor-sheet.css"],
     "scripts": [],
-    "packs": [
-        {
-            "name": "heroMacros",
-            "label": "Hero Macros",
-            "system": "hero6efoundryvttv2",
-            "type": "Macro",
-            "path": "packs/heroMacros"
-        }
-    ],
+    "packs": [],
     "languages": [
         {
             "lang": "en",
