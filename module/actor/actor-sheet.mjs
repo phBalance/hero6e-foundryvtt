@@ -366,7 +366,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 characteristic.notes = `lift ${
                     strDetails.strLiftText
                 }, running throw ${strDetails.strThrow}${getSystemDisplayUnits(
-                    data.actor,
+                    data.actor.is5e,
                 )}`;
             }
 

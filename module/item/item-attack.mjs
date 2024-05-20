@@ -90,7 +90,7 @@ export async function AttackOptions(item) {
 
         data.showVelocity = true;
         data.velocity = calculateVelocityInSystemUnits(item.actor, token);
-        data.velocitySystemUnits = getSystemDisplayUnits(item.actor);
+        data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
     const aoe = item.getAoeModifier();

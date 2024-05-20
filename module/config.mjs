@@ -6226,11 +6226,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
-            cost: function (modifier) {
+            cost: function (modifier, item) {
                 const baseCost = parseFloat(modifier.BASECOST);
                 const levels = parseInt(modifier.LEVELS);
                 let baseDCFalloffFromShape = 1;
-                switch (modifier.OPTIONID) {
+                // 6e and 5e define AOE & EXPLOSION differently
+                const AOE = item.findModsByXmlid("AOE");
+                switch ((AOE || modifier).OPTIONID) {
                     case "CONE":
                         baseDCFalloffFromShape = 2;
                         break;
@@ -6238,11 +6240,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         baseDCFalloffFromShape = 3;
                         break;
                     case "NORMAL":
+                    case "RADIUS":
                         baseDCFalloffFromShape = 1;
                         break;
                     default:
                         console.error(
-                            `unknown 5e explosion shape ${modifier.OPTIONID}`,
+                            `unknown 5e explosion shape ${AOE || modifier}`,
+                            item,
                         );
                         break;
                 }
@@ -6534,3 +6538,6 @@ HERO.SFX = [
     "Wood/Plant",
     "Miscellaneous",
 ];
+
+// For testing and pack-load-frorm-config macroo
+window.HERO = HERO;

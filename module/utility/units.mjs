@@ -1,5 +1,9 @@
-export function getSystemDisplayUnits(actor) {
-    return actor?.system?.is5e ? '"' : "m";
+export function getSystemDisplayUnits(object) {
+    const is5e = object.is5e || object?.system?.is5e || object;
+    if (is5e === undefined) {
+        console.warn("Assuming 6e units", object);
+    }
+    return is5e ? '"' : "m";
 }
 
 /**

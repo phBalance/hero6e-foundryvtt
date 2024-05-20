@@ -344,7 +344,7 @@ export class HeroRuler {
                         <label for="radio-${index}" class="radio-label">${
                             item.name
                         } (${item.value}${getSystemDisplayUnits(
-                            relevantToken.actor,
+                            relevantToken.actor.is5e,
                         )})</label>
                     </div>
                 `,

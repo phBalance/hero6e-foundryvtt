@@ -2059,4 +2059,8 @@ export class HeroSystem6eActor extends Actor {
             );
         }
     }
+
+    get is5e() {
+        return this?.system.is5e;
+    }
 }

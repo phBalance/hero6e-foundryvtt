@@ -89,7 +89,7 @@ export class ItemAttackFormApplication extends FormApplication {
             const levels = item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
             if (levels) {
                 data.aoeText += ` (${levels}${getSystemDisplayUnits(
-                    item.actor,
+                    item.actor.is5e,
                 )})`;
             }
 
