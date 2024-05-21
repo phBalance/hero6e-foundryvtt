@@ -1,11 +1,14 @@
 # Releases
 
-## Version 3.0.70 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.71 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Under the hood preperation for compendiums.  Includes minor fixes for HD lite code (adding powers ingame).
+
+## Version 3.0.70
 
 - Reworked AOE templates to support the differences between 5e and 6e as we understand them.
 - Under the hood preparation for FoundryVTT V12.
 
-## Version 3.0.69 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.69
 
 - Improved AOE template accuracy. [#966](https://github.com/dmdorman/hero6e-foundryvtt/issues/966)
 - Removed auto success/miss for standard AOE targets. [#965](https://github.com/dmdorman/hero6e-foundryvtt/issues/965)

@@ -126,6 +126,19 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
+    async _onCreate(data, options, userId) {
+        // If this is an ITEMS pack then override default name
+        if (this.pack && this.name.match(/New Item \(\d+\)/)) {
+            const myPack = game.packs.get(this.pack);
+            await myPack.getIndex();
+            const count = myPack.index.size;
+            await this.update({
+                name: `New ${String(data.type).titleCase()} (${count})`,
+            });
+        }
+        super._onCreate(data, options, userId);
+    }
+
     /**
      * Augment the basic Item data model with additional dynamic data.
      */
@@ -353,7 +366,7 @@ export class HeroSystem6eItem extends Item {
                         range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
                     }
                     content += ` GM Determined Maximum Range (much less than ${range}${getSystemDisplayUnits(
-                        this.actor,
+                        this.is5e,
                     )}).`;
                 }
                 break;
@@ -362,7 +375,7 @@ export class HeroSystem6eItem extends Item {
                 {
                     const runningThrow = this.actor?.strDetails().strThrow;
                     content += ` Maximum Range (running throw based on STR) ${runningThrow}${getSystemDisplayUnits(
-                        this.actor,
+                        this.is5e,
                     )}.`;
                 }
                 break;
@@ -374,7 +387,7 @@ export class HeroSystem6eItem extends Item {
                         range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
                     }
                     content += ` Maximum Range ${range}${getSystemDisplayUnits(
-                        this.actor,
+                        this.is5e,
                     )}.`;
                 }
                 break;
@@ -637,7 +650,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Power framework may include this modifier
-        if (this.system.PARENTID) {
+        if (this.system.PARENTID && this.actor?.items) {
             const parent = this.actor.items.find(
                 (o) => o.system.ID == this.system.PARENTID,
             );
@@ -787,6 +800,10 @@ export class HeroSystem6eItem extends Item {
     }
     get baseInfo() {
         return this.#baseInfo;
+    }
+
+    get is5e() {
+        return this.actor?.system?.is5e || this.system?.is5e;
     }
 
     /**
@@ -1115,8 +1132,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Attempt default weapon selection if showAttacks is defined andthere are no custom adders
-        // TODO: move
-        if (this.baseInfo?.editOptions?.showAttacks) {
+        if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
             if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
                 let count = 0;
                 for (const attackItem of this.actor.items.filter(
@@ -1416,9 +1432,7 @@ export class HeroSystem6eItem extends Item {
             activeEffect.name =
                 (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
             activeEffect.name += `${this.system.XMLID} ${
-                this.actor.system.is5e
-                    ? this.system.value
-                    : this.system.OPTIONID
+                this.is5e ? this.system.value : this.system.OPTIONID
             }`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
@@ -1446,7 +1460,7 @@ export class HeroSystem6eItem extends Item {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
             ];
-            if (!this.actor.system.is5e) {
+            if (!this.is5e) {
                 activeEffect.changes.push({
                     key: "system.characteristics.con.max",
                     value: details.con,
@@ -1569,6 +1583,10 @@ export class HeroSystem6eItem extends Item {
             type: "power",
         };
 
+        // Keep track of is5e as it may be important (compendiums, transfer between 5e/6e actors)
+        itemData.system ??= {};
+        itemData.system.is5e = actor.system?.is5e;
+
         const powerList = actor.system.is5e
             ? CONFIG.HERO.powers5e
             : CONFIG.HERO.powers6e;
@@ -1599,7 +1617,7 @@ export class HeroSystem6eItem extends Item {
                             .map((o) => o.key)
                             ? "power"
                             : itemTag.toLowerCase().replace(/s$/, ""),
-                        system: system,
+                        system: { ...system, is5e: itemData.system.is5e },
                     };
 
                     return itemData;
@@ -1607,11 +1625,21 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Perhaps a single entry
+        if (!itemData.system.XMLID) {
+            itemData.system = {
+                ...heroJson[Object.keys(heroJson)[0]],
+                is5e: itemData.system.is5e,
+            };
+            itemData.name = itemData.system?.ALIAS || itemData.system?.XMLID;
+        }
+
         return itemData;
     }
 
     getHdcParent() {
         if (!this.system.PARENTID) return null;
+        if (!this.actor?.items) return null;
         return this.actor.items.find(
             (o) => o.system.ID == this.system.PARENTID,
         );
@@ -1801,6 +1829,7 @@ export class HeroSystem6eItem extends Item {
                 const adderPowerInfo = getPowerInfo({
                     item: adderPower,
                     actor: this.actor,
+                    is5e: this.is5e,
                 });
                 const adderCostPerLevel = adderPowerInfo?.costPerLevel || 0;
                 adderCost += Math.ceil(adderCostPerLevel * adderLevels);
@@ -2054,6 +2083,7 @@ export class HeroSystem6eItem extends Item {
             const modPowerInfo = getPowerInfo({
                 item: modifier,
                 actor: this.actor,
+                is5e: this.is5e,
             });
             if (!modPowerInfo) {
                 console.warn(
@@ -2187,10 +2217,7 @@ export class HeroSystem6eItem extends Item {
         // Reset the description and build it up again.
         system.description = "";
 
-        const configPowerInfo = getPowerInfo({
-            xmlid: system.XMLID,
-            actor: this.actor,
-        });
+        const configPowerInfo = this.baseInfo;
         const powerXmlId = system.XMLID;
 
         switch (powerXmlId) {
@@ -2211,29 +2238,27 @@ export class HeroSystem6eItem extends Item {
                 const details = configPowerInfo?.details(this) || {};
                 system.description = `${system.ALIAS} (`;
                 system.description += `+${details.str} STR`;
-                if (!this.actor?.system.is5e) {
+                if (!this.is5e) {
                     system.description += `, +${details.con} CON`;
                 }
-                if (!this.actor?.system.is5e) {
+                if (!this.is5e) {
                     system.description += `, +${details.pre} PRE`;
                 }
-                if (!this.actor?.system.is5e) {
+                if (!this.is5e) {
                     system.description += `, +${details.pd} PD`;
                 }
-                if (!this.actor?.system.is5e) {
+                if (!this.is5e) {
                     system.description += `, +${details.ed} ED`;
                 }
                 system.description += `, +${details.body} BODY`;
                 system.description += `, +${details.stun} STUN`;
                 system.description += `, +${details.reach}${
-                    this.actor.system.is5e ? '"' : "m"
+                    this.is5e ? '"' : "m"
                 } Reach`;
-                if (!this.actor?.system.is5e) {
+                if (!this.is5e) {
                     system.description += `, +${details.running}m Running`;
                 }
-                system.description += `, -${details.kb}${
-                    this.actor?.system.is5e ? '"' : "m"
-                }
+                system.description += `, -${details.kb}${this.is5e ? '"' : "m"}
                 KB`;
                 system.description += `, ${details.mass}`;
                 system.description += `, -${details.dcv} DCV`;
@@ -2264,8 +2289,8 @@ export class HeroSystem6eItem extends Item {
                 } PER Rolls to perceive character`;
                 system.description += `, +${system.value * 2} DCV`;
                 system.description += `, takes +${
-                    system.value * (this.actor.system.is5e ? 3 : 6) +
-                    getSystemDisplayUnits(this.actor)
+                    system.value * (this.is5e ? 3 : 6) +
+                    getSystemDisplayUnits(this.is5e)
                 } KB`;
 
                 break;
@@ -2407,7 +2432,7 @@ export class HeroSystem6eItem extends Item {
             case "STRETCHING":
                 system.description = `${system.ALIAS} ${
                     system.value
-                }${getSystemDisplayUnits(this.actor)}`;
+                }${getSystemDisplayUnits(this.is5e)}`;
                 break;
 
             case "LEAPING":
@@ -2416,7 +2441,7 @@ export class HeroSystem6eItem extends Item {
                 // Running +25m (12m/37m total)
                 system.description = `${system.ALIAS} +${
                     system.value
-                }${getSystemDisplayUnits(this.actor)}`;
+                }${getSystemDisplayUnits(this.is5e)}`;
                 break;
 
             case "GLIDING":
@@ -2425,7 +2450,7 @@ export class HeroSystem6eItem extends Item {
             case "SWINGING":
                 system.description = `${system.ALIAS} ${
                     system.value
-                }${getSystemDisplayUnits(this.actor)}`;
+                }${getSystemDisplayUnits(this.is5e)}`;
                 break;
             case "TUNNELING":
                 {
@@ -2443,7 +2468,7 @@ export class HeroSystem6eItem extends Item {
                     system.description = `${system.ALIAS} ${
                         system.value
                     }${getSystemDisplayUnits(
-                        this.actor,
+                        this.is5e,
                     )} through ${pd} PD materials`;
                 }
                 break;
@@ -2670,16 +2695,27 @@ export class HeroSystem6eItem extends Item {
                 }DC (${system.OPTION_ALIAS})`;
                 break;
 
+            case "RESISTANCE":
+                system.description = `Resistance (+${parseInt(
+                    system.LEVELS,
+                )} to roll)`;
+                system.ALIAS = system.description;
+                if (this.name.match(/Resistance \(\+\d+ to roll\)/)) {
+                    this.name = system.NAME || system.ALIAS;
+                }
+                break;
+
             case "COMBAT_LUCK":
                 system.description = `Combat Luck (${3 * system.value} rPD/${
                     3 * system.value
                 } rED)`;
                 // Check to make sure ALIAS is largely folling default format before overriding
                 if (
-                    system.ALIAS.trim() === "" ||
-                    system.ALIAS.match(/Combat Luck \(\d+ rPD\/\d+ rED\)/)
+                    this.name.trim().length <= 1 ||
+                    this.name.match(/Combat Luck \(\d+ rPD\/\d+ rED\)/)
                 ) {
                     system.ALIAS = system.description;
+                    this.name = system.NAME || system.ALIAS;
                 }
                 break;
 
@@ -2780,10 +2816,15 @@ export class HeroSystem6eItem extends Item {
 
             case "CLINGING":
                 {
-                    const baseStr = this.actor.system.characteristics.str.value;
-                    const additionalClingingStr = system.value;
-                    const totalStr = baseStr + additionalClingingStr;
-                    system.description = `${system.ALIAS} (${baseStr} + ${additionalClingingStr} = ${totalStr} STR)`;
+                    if (!this.actor) {
+                        system.description = `${system.ALIAS}`;
+                    } else {
+                        const baseStr =
+                            this.actor.system.characteristics.str.value;
+                        const additionalClingingStr = system.value;
+                        const totalStr = baseStr + additionalClingingStr;
+                        system.description = `${system.ALIAS} (${baseStr} + ${additionalClingingStr} = ${totalStr} STR)`;
+                    }
                 }
                 break;
 
@@ -3385,7 +3426,7 @@ export class HeroSystem6eItem extends Item {
                     modifier.OPTION_ALIAS === "Any Area" &&
                     !item.actor?.system?.is5e
                         ? ""
-                        : getSystemDisplayUnits(item.actor)
+                        : getSystemDisplayUnits(item.is5e)
                 } `;
             }
         }
@@ -3417,9 +3458,9 @@ export class HeroSystem6eItem extends Item {
                         const height = item.system.areaOfEffect.height;
 
                         result += `Long, ${height}${getSystemDisplayUnits(
-                            item.actor,
+                            item.actor.is5e,
                         )} Tall, ${width}${getSystemDisplayUnits(
-                            item.actor,
+                            item.actor.is5e,
                         )} Wide Line; `;
                     } else {
                         result += `${modifier.OPTION_ALIAS}; `;
@@ -3519,6 +3560,7 @@ export class HeroSystem6eItem extends Item {
         const configPowerInfo = getPowerInfo({
             xmlid: system.XMLID,
             actor: item?.actor,
+            is5e: this.is5e,
         });
 
         // All Slots? This may be a slot in a framework if so get parent
@@ -3585,6 +3627,7 @@ export class HeroSystem6eItem extends Item {
         // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
         if (this.system.XMLID == "TELEKINESIS") {
             if (
+                this.actor?.items &&
                 this.actor.items.find(
                     (o) =>
                         o.system.XMLID == "WEAPON_ELEMENT" &&
@@ -3857,10 +3900,7 @@ export class HeroSystem6eItem extends Item {
         let roll = null;
         const tags = [];
 
-        const configPowerInfo = getPowerInfo({
-            xmlid: skillData.XMLID,
-            actor: this.actor,
-        });
+        const configPowerInfo = this.baseInfo;
 
         if (skillData.XMLID === "FINDWEAKNESS") {
             // Provide up to 2 tags to explain how the roll was calculated:
@@ -4057,7 +4097,7 @@ export class HeroSystem6eItem extends Item {
                 );
             }
 
-            const perceptionItem = this.actor.items.find(
+            const perceptionItem = (this.actor?.items || []).find(
                 (power) => power.system.XMLID === "PERCEPTION",
             );
             const perceptionRoll = parseInt(
@@ -4175,6 +4215,7 @@ export class HeroSystem6eItem extends Item {
 
     _areAllAdjustmentTargetsInListValid(targetsList, mustBeStrict) {
         if (!targetsList) return false;
+        if (!this.actor) return true;
 
         // ABSORPTION, AID + SUCCOR/BOOST, and TRANSFER target characteristics/powers are the only adjustment powers that must match
         // the character's characteristics/powers (i.e. they can't create new characteristics or powers). All others just
@@ -4546,3 +4587,6 @@ export async function RequiresASkillRollCheck(item) {
     }
     return true;
 }
+
+// for testing and pack-load-from-config macro
+window.HeroSystem6eItem = HeroSystem6eItem;

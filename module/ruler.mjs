@@ -344,7 +344,7 @@ export class HeroRuler {
                         <label for="radio-${index}" class="radio-label">${
                             item.name
                         } (${item.value}${getSystemDisplayUnits(
-                            relevantToken.actor,
+                            relevantToken.actor.is5e,
                         )})</label>
                     </div>
                 `,
@@ -433,7 +433,7 @@ function setHeroRulerLabel() {
                 segmentDistance.distance,
                 actor,
             ),
-        )}${getSystemDisplayUnits(actor)}]${
+        )}${getSystemDisplayUnits(actor.is5e)}]${
             activeMovementLabel ? `\n${activeMovementLabel}` : ""
         }\n${rangeMod > 0 ? "-" : ""}${rangeMod} Range Modifier`;
 

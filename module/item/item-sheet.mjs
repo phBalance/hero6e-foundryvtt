@@ -628,6 +628,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             }
         }
 
+        // ALIAS should match name
+        this.item.system.ALIAS = this.item.name;
+
         // Endurance Reserve
         if (expandedData.rec) {
             const ENDURANCERESERVEREC = this.item.findModsByXmlid(
@@ -728,8 +731,9 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // HD lite (currently only SKILL) uses generic _postUpload
         // TODO: Much of the above is likely not necessary as _postUpload does alot
         await this.item._postUpload();
-        await this.item.actor.CalcActorRealAndActivePoints();
-        //await this.render();
+        if (this.item.actor) {
+            await this.item.actor.CalcActorRealAndActivePoints();
+        }
     }
 
     async _onSubItemCreate(event) {

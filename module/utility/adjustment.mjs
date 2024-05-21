@@ -44,6 +44,8 @@ export function adjustmentSourcesPermissive(actor) {
 export function adjustmentSourcesStrict(actor) {
     let choices = {};
 
+    if (!actor) return choices;
+
     const powerList = actor.system.is5e
         ? CONFIG.HERO.powers5e
         : CONFIG.HERO.powers6e;

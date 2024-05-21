@@ -124,7 +124,7 @@ export function convertToDcFromItem(item, options) {
         let str = parseInt(
             options?.effectivestr != undefined
                 ? options?.effectivestr
-                : actor.system.characteristics.str.value,
+                : actor?.system.characteristics.str.value || 0,
         );
 
         // MOVEBY halves STR
@@ -270,14 +270,17 @@ export function convertToDcFromItem(item, options) {
                 (o) => o.id === key,
             );
             if (!conditionalAttack) {
-                console.warn("conditionalAttack is empty");
-                delete item.system.conditionalAttacks[key];
-                // NOTE: typically we await here, but this isn't an async function.
-                // Shouldn't be a problem.
-                item.update({
-                    [`system.conditionalAttacks`]:
-                        item.system.conditionalAttacks,
-                });
+                // Quench and other edge cases where item.id is null
+                if (item.id) {
+                    console.warn("conditionalAttack is empty");
+                    delete item.system.conditionalAttacks[key];
+                    // NOTE: typically we await here, but this isn't an async function.
+                    // Shouldn't be a problem.
+                    item.update({
+                        [`system.conditionalAttacks`]:
+                            item.system.conditionalAttacks,
+                    });
+                }
                 continue;
             }
 
