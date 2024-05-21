@@ -209,6 +209,7 @@ input.left {
     height: auto;
     line-height: 24px;
     padding: 3px 0;
+    vertical-align: top;
 }
 
 .actor-sheet table tr td {
@@ -304,7 +305,8 @@ input.left {
 }
 
 .actor-sheet table tr td.item-framework-child-name {
-    padding-left: 10px;
+    padding-left: 27px;
+    text-indent: -17px;
 }
 
 .actor-sheet header span {

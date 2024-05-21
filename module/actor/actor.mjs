@@ -48,7 +48,7 @@ export class HeroSystem6eActor extends Actor {
 
     async removeActiveEffect(activeEffect) {
         const existingEffect = Array.from(this.allApplicableEffects()).find(
-            (o) => o.id === activeEffect.id,
+            (o) => o.id === activeEffect.id || o.statuses.has(activeEffect.id),
         );
         if (existingEffect) {
             if (activeEffect.id == "knockedOut") {

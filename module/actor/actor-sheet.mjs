@@ -828,6 +828,42 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     /** @override */
+    async _onDropItem(event, data) {
+        //super._onDropItem(event, data);
+        if (!this.actor.isOwner) return false;
+        const item = await Item.implementation.fromDropData(data);
+        const itemData = item.toObject();
+
+        // Create new system.ID
+        // TODO: Perhaps we could drop system.ID and rely on builtin itemData.id
+        itemData.system.ID = new Date().getTime().toString();
+
+        // Remove system.PARENTID
+        delete itemData.system.PARENTID;
+
+        // Handle item sorting within the same Actor
+        if (this.actor.uuid === item.parent?.uuid)
+            return this._onSortItem(event, itemData);
+
+        // Create the owned item
+        return this._onDropItemCreate(itemData);
+    }
+
+    /** @override */
+    async _onDropItemCreate(itemData) {
+        itemData = itemData instanceof Array ? itemData : [itemData];
+        const newItems = await this.actor.createEmbeddedDocuments(
+            "Item",
+            itemData,
+        );
+        for (const newItem of newItems) {
+            await newItem._postUpload();
+        }
+
+        return newItems;
+    }
+
+    /** @override */
     activateListeners(html) {
         super.activateListeners(html);
 
