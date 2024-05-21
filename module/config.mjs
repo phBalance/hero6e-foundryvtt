@@ -6538,6 +6538,3 @@ HERO.SFX = [
     "Wood/Plant",
     "Miscellaneous",
 ];
-
-// For testing and pack-load-frorm-config macroo
-window.HERO = HERO;

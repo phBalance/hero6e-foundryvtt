@@ -374,10 +374,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                 characteristic.notes = `${Math.max(
                     0,
                     characteristic.value,
-                )}${getSystemDisplayUnits(data.actor)} forward, ${Math.max(
+                )}${getSystemDisplayUnits(
+                    data.actor.system.is5e,
+                )} forward, ${Math.max(
                     0,
                     Math.round(characteristic.value / 2),
-                )}${getSystemDisplayUnits(data.actor)} upward`;
+                )}${getSystemDisplayUnits(data.actor.system.is5e)} upward`;
 
             characteristic.delta = 0;
             if (data.actor.system.is5e) {

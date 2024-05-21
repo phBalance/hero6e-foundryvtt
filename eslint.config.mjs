@@ -45,7 +45,7 @@ export default [
                 Handlebars: "readonly",
                 HERO: "readonly",
                 HeroRuler: "readonly",
-                HEROSystem6eItem: "readonly",
+                HeroSystem6eItem: "readonly",
                 Hooks: "readonly",
                 ImageHelper: "readonly",
                 Item: "readonly",

@@ -23,12 +23,20 @@ export function getPowerInfo(options) {
         options.item?.system?.id;
 
     const actor = options?.actor || options?.item?.actor;
-    const is5e = actor?.system?.is5e || options.item?.system?.is5e; // perhaps is5e is in item (compendium)
+
+    // perhaps is5e is in item (compendium)
+    let is5e = actor?.system?.is5e;
+    if (is5e === undefined) {
+        is5e = options.item?.system?.is5e;
+    }
+    if (is5e === undefined) {
+        is5e = options.is5e;
+    }
 
     if (!actor && is5e === undefined) {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
         console.warn(
-            `${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`,
+            `${xmlid} for ${options.item?.name} has no actor provided. Unable to determine is5e. Assuming 6e.`,
         );
     }
 

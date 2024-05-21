@@ -37,7 +37,7 @@ console.log(folder6e);
 
 const bogus6eActor = { system: { is5e: false } };
 
-for (const power of HERO.powers6e.filter(
+for (const power of CONFIG.HERO.powers6e.filter(
     (o) =>
         o.type != undefined &&
         !o.type.includes("martial") &&

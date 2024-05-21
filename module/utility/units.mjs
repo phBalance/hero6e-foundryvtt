@@ -1,7 +1,6 @@
-export function getSystemDisplayUnits(object) {
-    const is5e = object.is5e || object?.system?.is5e || object;
-    if (is5e === undefined) {
-        console.warn("Assuming 6e units", object);
+export function getSystemDisplayUnits(is5e) {
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error("bad paramater", is5e);
     }
     return is5e ? '"' : "m";
 }

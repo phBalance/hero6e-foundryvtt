@@ -234,7 +234,7 @@ export async function AttackAoeToHit(item, options) {
             ),
         );
         hitRollText = `AOE origin MISSED by ${missBy}. Move AOE origin ${
-            moveDistance + getSystemDisplayUnits(item.actor)
+            moveDistance + getSystemDisplayUnits(item.actor.is5e)
         } in the <b>${facingRollResult}</b> direction.`;
     }
 
@@ -688,7 +688,7 @@ export async function AttackToHit(item, options) {
                 by += ` (${getRoundedDownDistanceInSystemUnits(
                     distanceInMetres,
                     item.actor,
-                )}${getSystemDisplayUnits(item.actor)} from center)`;
+                )}${getSystemDisplayUnits(item.actor.is5e)} from center)`;
             }
         }
 
@@ -2378,7 +2378,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             // If the result is positive, the target is Knocked Back 1" or 2m times the result
             knockbackMessage = `Knocked Back ${
                 knockbackResultTotal * (item.actor.system.is5e ? 1 : 2)
-            }${getSystemDisplayUnits(item.actor)}`;
+            }${getSystemDisplayUnits(item.actor.is5e)}`;
         }
     }
 
