@@ -41,6 +41,7 @@ export class HeroSystem6eActor extends Actor {
             prototypeToken: prototypeToken,
             system: {
                 versionHeroSystem6eCreated: game.system.version,
+                is5e: false,
             },
         });
     }
@@ -1769,7 +1770,7 @@ export class HeroSystem6eActor extends Actor {
             if (
                 this.system.CHARACTER.TEMPLATE.includes("builtIn.") &&
                 this.system.CHARACTER.TEMPLATE.includes("6E.") &&
-                this.system.is5e
+                this.system.is5e === undefined
             ) {
                 changes[`system.is5e`] = false;
                 this.system.is5e = false;
