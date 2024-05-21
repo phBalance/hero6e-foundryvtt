@@ -17,6 +17,7 @@ import {
 } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
+import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -432,21 +433,18 @@ export class HeroSystem6eItem extends Item {
                 return;
             }
 
-            const costEndOnlyToActivate = (item.system.MODIFIER || []).find(
-                (o) => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE",
-            );
-            if (costEndOnlyToActivate) {
-                let end = parseInt(this.system.end);
-                let value = parseInt(
-                    this.actor.system.characteristics.end.value,
+            // Spend END to toggle power on
+            let end = parseInt(this.system.end);
+            let value = parseInt(this.actor.system.characteristics.end.value);
+            if (end > value) {
+                ui.notifications.error(
+                    `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.`,
                 );
-                if (end > value) {
-                    ui.notifications.error(
-                        `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.`,
-                    );
-                    return;
-                }
+                return;
+            }
 
+            // Only spend the END if we are in combat.
+            if (this.actor.inCombat) {
                 await item.actor.update({
                     "system.characteristics.end.value": value - end,
                 });
@@ -467,6 +465,28 @@ export class HeroSystem6eItem extends Item {
             const success = await RequiresASkillRollCheck(this);
             if (!success) {
                 return;
+            }
+
+            // Invisibility status effect for SIGHTGROUP?
+            if (this.system.XMLID === "INVISIBILITY") {
+                if (
+                    this.system.OPTIONID === "SIGHTGROUP" &&
+                    !this.actor.statuses.has("invisible")
+                ) {
+                    this.actor.addActiveEffect(
+                        HeroSystem6eActorActiveEffects.invisibleEffect,
+                    );
+                }
+            }
+        } else {
+            // Remove Invisibility status effect
+            if (this.system.XMLID === "INVISIBILITY") {
+                if (this.actor.statuses.has("invisible")) {
+                    const x = this.actor.allApplicableEffects();
+                    await this.actor.removeActiveEffect(
+                        HeroSystem6eActorActiveEffects.invisibleEffect,
+                    );
+                }
             }
         }
 
