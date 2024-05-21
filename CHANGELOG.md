@@ -3,6 +3,7 @@
 ## Version 3.0.71 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Under the hood preperation for compendiums.  Includes minor fixes for HD lite code (adding powers ingame).
 - Improved item drag & drop behavior.  Dropped item descriptions are updated on drop and any parenting associated with frameworks is removed.
+- Minor actor sheet layout improvements for power frameworks and items with long descriptions.
 
 ## Version 3.0.70
 
