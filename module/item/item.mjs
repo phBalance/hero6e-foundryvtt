@@ -482,7 +482,6 @@ export class HeroSystem6eItem extends Item {
             // Remove Invisibility status effect
             if (this.system.XMLID === "INVISIBILITY") {
                 if (this.actor.statuses.has("invisible")) {
-                    const x = this.actor.allApplicableEffects();
                     await this.actor.removeActiveEffect(
                         HeroSystem6eActorActiveEffects.invisibleEffect,
                     );
