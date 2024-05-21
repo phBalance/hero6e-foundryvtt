@@ -5,12 +5,15 @@ import { RoundFavorPlayerUp } from "./round.mjs";
 /**
  * Return the full list of possible powers and characteristics. No skills, talents, or perks.
  */
-export function adjustmentSourcesPermissive(actor) {
+export function adjustmentSourcesPermissive(actor, is5e) {
     let choices = {};
 
-    const powerList = actor.system.is5e
-        ? CONFIG.HERO.powers5e
-        : CONFIG.HERO.powers6e;
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error("bad paramater", is5e);
+        return choices;
+    }
+
+    const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     const powers = powerList.filter(
         (power) =>
             !power.type?.includes("skill") &&
@@ -25,7 +28,7 @@ export function adjustmentSourcesPermissive(actor) {
 
     // Add * to defensive powers
     for (let key of Object.keys(choices)) {
-        if (defensivePowerAdjustmentMultiplier(key, actor) > 1) {
+        if (defensivePowerAdjustmentMultiplier(key, actor, is5e) > 1) {
             choices[key] += "*";
         }
     }
@@ -104,22 +107,32 @@ const defensiveCharacteristics6e = [
     "STUN",
 ];
 
-export function defensivePowerAdjustmentMultiplier(XMLID, actor) {
+export function defensivePowerAdjustmentMultiplier(XMLID, actor, is5e) {
     if (!XMLID) return 1;
 
-    let configPowerInfo = getPowerInfo({ xmlid: XMLID, actor: actor });
+    if (is5e !== false && is5e !== true && is5e !== undefined) {
+        console.error("bad paramater", is5e);
+        return 1;
+    }
+
+    let configPowerInfo = getPowerInfo({
+        xmlid: XMLID,
+        actor: actor,
+        is5e: is5e,
+    });
     if (!configPowerInfo) {
         if (actor) {
             configPowerInfo = getPowerInfo({
                 xmlid: actor.items.find((o) => o.name.toUpperCase() === XMLID)
                     ?.system?.XMLID,
                 actor: actor,
+                is5e: is5e,
             });
         }
         if (!configPowerInfo) return 1;
     }
 
-    const defenseCharacteristics = actor.system.is5e
+    const defenseCharacteristics = is5e
         ? defensiveCharacteristics5e
         : defensiveCharacteristics6e;
     if (defenseCharacteristics.includes(XMLID)) {
@@ -226,6 +239,7 @@ export function determineCostPerActivePoint(
         defensivePowerAdjustmentMultiplier(
             targetCharacteristic.toUpperCase(),
             targetActor,
+            targetActor?.is5e || this.is5e,
         )
     );
 }

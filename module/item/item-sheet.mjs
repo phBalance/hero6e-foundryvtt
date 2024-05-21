@@ -5,7 +5,6 @@ import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,
 } from "../utility/adjustment.mjs";
-import { getPowerInfo } from "../utility/util.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 
 /**
@@ -110,10 +109,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             );
         }
 
-        const configPowerInfo = getPowerInfo({
-            xmlid: item.system.XMLID,
-            actor: item?.actor,
-        });
+        const configPowerInfo = item.baseInfo;
         data.sheet = { ...(configPowerInfo?.sheet || {}) };
         data.editOptions = configPowerInfo?.editOptions;
 
@@ -197,8 +193,14 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     ? adjustmentSourcesStrict
                     : adjustmentSourcesPermissive;
 
-            data.possibleEnhances = enhancesValidator(this.actor);
-            data.possibleReduces = adjustmentSourcesPermissive(this.actor);
+            data.possibleEnhances = enhancesValidator(
+                this.actor,
+                this.item.is5e,
+            );
+            data.possibleReduces = adjustmentSourcesPermissive(
+                this.actor,
+                this.item.is5e,
+            );
 
             data.enhances = enhances
                 ? enhances
@@ -270,24 +272,32 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         if (configPowerInfo?.editOptions?.showAttacks) {
             // Enumerate attacks
             data.attacks = [];
-            for (const attack of item.actor.items.filter(
-                (o) =>
-                    (o.type === "attack" || o.system.subType === "attack") &&
-                    (!o.getBaseInfo().behaviors.includes("optional-maneuver") ||
-                        game.settings.get(HEROSYS.module, "optionalManeuvers")),
-            )) {
-                // Check if there is an adder (if so attack is checked)
-                const adder = (this.item.system.ADDER || []).find(
+            if (item.actor) {
+                for (const attack of item.actor.items.filter(
                     (o) =>
-                        o.ALIAS === attack.system.ALIAS ||
-                        o.ALIAS == attack.name,
-                );
+                        (o.type === "attack" ||
+                            o.system.subType === "attack") &&
+                        (!o
+                            .getBaseInfo()
+                            .behaviors.includes("optional-maneuver") ||
+                            game.settings.get(
+                                HEROSYS.module,
+                                "optionalManeuvers",
+                            )),
+                )) {
+                    // Check if there is an adder (if so attack is checked)
+                    const adder = (this.item.system.ADDER || []).find(
+                        (o) =>
+                            o.ALIAS === attack.system.ALIAS ||
+                            o.ALIAS == attack.name,
+                    );
 
-                data.attacks.push({
-                    id: attack.id,
-                    name: attack.system.ALIAS || attack.name,
-                    checked: adder ? true : false,
-                });
+                    data.attacks.push({
+                        id: attack.id,
+                        name: attack.system.ALIAS || attack.name,
+                        checked: adder ? true : false,
+                    });
+                }
             }
         }
 
