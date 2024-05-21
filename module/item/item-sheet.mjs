@@ -5,7 +5,6 @@ import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,
 } from "../utility/adjustment.mjs";
-import { getPowerInfo } from "../utility/util.mjs";
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 
 /**
