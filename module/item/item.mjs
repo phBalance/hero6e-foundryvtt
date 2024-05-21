@@ -483,7 +483,7 @@ export class HeroSystem6eItem extends Item {
             case "equipment":
                 {
                     // Is this a defense power?  If so toggle active state
-                    const configPowerInfo = getPowerInfo({ item: item });
+                    const configPowerInfo = item.baseInfo;
                     if (
                         (configPowerInfo &&
                             configPowerInfo.type.includes("defense")) ||
