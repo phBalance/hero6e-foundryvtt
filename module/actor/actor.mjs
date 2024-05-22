@@ -1504,7 +1504,7 @@ export class HeroSystem6eActor extends Actor {
                             //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
                             //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
                             //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
-                            DISPLAY: String(XMLID).titleCase(),
+                            DISPLAY: name, // Not sure we should allow editing of basic maneuvers
                         },
                     };
 
