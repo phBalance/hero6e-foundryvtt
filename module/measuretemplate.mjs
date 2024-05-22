@@ -19,14 +19,21 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     _computeShape() {
         const { t: shapeType, distance, flags } = this.document;
 
-        // TODO: Can we make this shape work for gridless?
-        if (shapeType === "circle" && flags.is5e && game.canvas.grid.isHex) {
+        if (shapeType === "circle" && flags.is5e) {
+            // 5e is based on hexes but 6e is based on gridless. Adapt 5e templates to gridless
+            // but it's only an approximation as the 2 systems are not comparable.
+            const columnarGridArrangement =
+                game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
+                game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
+                    ? true
+                    : game.canvas.grid.grid.columnar;
+
             // Hex based circle looks like a hexagon. The hexagon has the opposite orientation of the grid.
-            // See https://www.redblobgames.com/grids/hexagons/#basics for instance
-            const gridShape = game.canvas.grid.grid.columnar
+            // See https://www.redblobgames.com/grids/hexagons/#basics for instance.
+            const gridShape = columnarGridArrangement
                 ? HexagonalGrid.pointyHexPoints
                 : HexagonalGrid.flatHexPoints;
-            const shapeVector = game.canvas.grid.grid.columnar
+            const shapeVector = columnarGridArrangement
                 ? [
                       canvas.dimensions.distancePixels * Math.sqrt(3),
                       canvas.dimensions.distancePixels * 2,
