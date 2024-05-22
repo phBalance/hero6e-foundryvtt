@@ -294,10 +294,15 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                         id: attack.id,
                         name: attack.system.NAME || attack.name,
                         checked: adder ? true : false,
-                        title: attack.system.description.replace(
+                        title: `${
+                            attack.system.XMLID +
+                            (attack.system.DISPLAY
+                                ? " (" + attack.system.DISPLAY + ")"
+                                : "")
+                        }: ${attack.system.description.replace(
                             /"/g,
                             "&quot;",
-                        ),
+                        )}`,
                     });
                 }
 
