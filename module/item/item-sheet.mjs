@@ -277,9 +277,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     (o) =>
                         (o.type === "attack" ||
                             o.system.subType === "attack") &&
-                        (!o
-                            .getBaseInfo()
-                            .behaviors.includes("optional-maneuver") ||
+                        (!o.baseInfo.behaviors.includes("optional-maneuver") ||
                             game.settings.get(
                                 HEROSYS.module,
                                 "optionalManeuvers",

@@ -4794,8 +4794,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "INVISIBILITY",
-            type: ["sense-affecting", "standard", "defense"],
-            behaviors: ["activatable"],
+            type: ["sense-affecting", "standard"],
+            behaviors: ["activatable", "defense"],
             perceivability: "Special",
             duration: "constant",
             target: "self only",

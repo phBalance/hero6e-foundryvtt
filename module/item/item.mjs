@@ -506,6 +506,7 @@ export class HeroSystem6eItem extends Item {
                     if (
                         (configPowerInfo &&
                             configPowerInfo.type.includes("defense")) ||
+                        configPowerInfo.behaviors.includes("defense") ||
                         item.type === "equipment"
                     ) {
                         await item.update({ [attr]: newValue });
