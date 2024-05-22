@@ -506,6 +506,7 @@ export class HeroSystem6eItem extends Item {
                     if (
                         (configPowerInfo &&
                             configPowerInfo.type.includes("defense")) ||
+                        configPowerInfo.behaviors.includes("defense") ||
                         item.type === "equipment"
                     ) {
                         await item.update({ [attr]: newValue });
@@ -1158,9 +1159,7 @@ export class HeroSystem6eItem extends Item {
                     (o) =>
                         (o.type === "attack" ||
                             o.system.subType === "attack") &&
-                        (!o
-                            .getBaseInfo()
-                            .behaviors.includes("optional-maneuver") ||
+                        (!o.baseInfo.behaviors.includes("optional-maneuver") ||
                             game.settings.get(
                                 HEROSYS.module,
                                 "optionalManeuvers",

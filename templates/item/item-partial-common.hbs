@@ -88,7 +88,9 @@
         <ul>
             {{#each attacks }}
                 <li><input type="checkbox" name="attacks.{{this.id}}" {{checked this.checked}} data-dtype="Boolean"/>
-                {{this.name}}
+                <span title="{{this.title}}">
+                    {{this.name}}
+                </span>
                 </li>
             {{/each}}
         </ul>

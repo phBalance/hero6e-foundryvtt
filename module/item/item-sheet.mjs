@@ -277,9 +277,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     (o) =>
                         (o.type === "attack" ||
                             o.system.subType === "attack") &&
-                        (!o
-                            .getBaseInfo()
-                            .behaviors.includes("optional-maneuver") ||
+                        (!o.baseInfo.behaviors.includes("optional-maneuver") ||
                             game.settings.get(
                                 HEROSYS.module,
                                 "optionalManeuvers",
@@ -294,10 +292,25 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
                     data.attacks.push({
                         id: attack.id,
-                        name: attack.system.ALIAS || attack.name,
+                        name: attack.system.NAME || attack.name,
                         checked: adder ? true : false,
+                        title: attack.system.description.replace(
+                            /"/g,
+                            "&quot;",
+                        ),
                     });
                 }
+
+                // Not sure if we should SORT or not
+                // data.attacks.sort((a, b) => {
+                //     if (a.name.toUpperCase() < b.name.toUpperCase()) {
+                //         return -1;
+                //     }
+                //     if (a.name.toUpperCase() > b.name.toUpperCase()) {
+                //         return 1;
+                //     }
+                //     return 0;
+                // });
             }
         }
 
