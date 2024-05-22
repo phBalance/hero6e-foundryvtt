@@ -56,7 +56,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         // }
 
         // Trying to see if we can get most items to use the generic power sheet
-        if (this.item.type === "skill") {
+        if (["skill"].includes(this.item.type)) {
             return `${path}/item-power-sheet.hbs`;
         }
 
@@ -629,6 +629,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         if (!id) {
             return;
+        }
+
+        // If name is empty then create a default one
+        if (!expandedData.name) {
+            formData.name = this.item.system.DISPLAY || this.item.system.XMLID;
         }
 
         // Do all the standard things like updating item properies that match the name of input boxes
