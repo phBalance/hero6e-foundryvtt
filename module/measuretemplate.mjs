@@ -1,20 +1,61 @@
 export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     async _onClickLeft(event) {
         await super._onClickLeft(event);
-        //if (game.user.id != this.document.user.id) return;
+
         await this.selectObjects();
         await game.user.broadcastActivity({
             targets: Array.from(game.user.targets.map((o) => o.id)),
         });
     }
 
+    /**
+     * In 5e shapes are based on a hex grid so don't have typical Euclidean shapes.
+     * While lines (ray) can be represented easily, other shapes cannot. Fall back to
+     * approximating the shapes with typical Euclidean shapes but attempt to override where
+     * appropriate.
+     *
+     * @returns PIXI.Points
+     */
+    _computeShape() {
+        const { t: shapeType, distance, flags } = this.document;
+
+        // TODO: Can we make this shape work for gridless?
+        if (shapeType === "circle" && flags.is5e && game.canvas.grid.isHex) {
+            // Hex based circle looks like a hexagon. The hexagon has the opposite orientation of the grid.
+            // See https://www.redblobgames.com/grids/hexagons/#basics for instance
+            const gridShape = game.canvas.grid.grid.columnar
+                ? HexagonalGrid.pointyHexPoints
+                : HexagonalGrid.flatHexPoints;
+            const shapeVector = game.canvas.grid.grid.columnar
+                ? [
+                      canvas.dimensions.distancePixels * Math.sqrt(3),
+                      canvas.dimensions.distancePixels * 2,
+                  ]
+                : [
+                      canvas.dimensions.distancePixels * 2,
+                      canvas.dimensions.distancePixels * Math.sqrt(3),
+                  ];
+            const gamePoints = gridShape.map(
+                (vertex) =>
+                    new PIXI.Point(
+                        (vertex[0] - 0.5) * distance * shapeVector[0],
+                        (vertex[1] - 0.5) * distance * shapeVector[1],
+                    ),
+            );
+
+            return new PIXI.Polygon(...gamePoints);
+        }
+
+        return super._computeShape();
+    }
+
     async _onUpdate(data, options, userId) {
         await super._onUpdate(data, options, userId);
-        if (game.user.id != userId) return; //this.document.user.id) return;
+        if (game.user.id !== userId) return;
         this._computeShape();
         this.selectObjects({ checkPositions: true, templateData: data });
         game.user.broadcastActivity({
-            targets: Array.from(game.user.targets.map((o) => o.id)),
+            targets: Array.from(game.user.targets.map((target) => target.id)),
         });
     }
 
@@ -33,7 +74,9 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
         if (!this.isPreview) {
             await game.user.broadcastActivity({
-                targets: Array.from(game.user.targets.map((o) => o.id)),
+                targets: Array.from(
+                    game.user.targets.map((target) => target.id),
+                ),
             });
         }
     }
@@ -51,7 +94,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
             if (this.isTokenInside(token, options)) {
                 if (
                     !PERSONALIMMUNITY ||
-                    token.actor?.id != this.document.flags?.actor?._id
+                    token.actor?.id !== this.document.flags?.actor?._id
                 ) {
                     tokens.push(token);
                 }

@@ -278,13 +278,6 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
 
-        // NOTE: We add a very small amount (0.05m) to make it easier to include the hexes. Games using gridless can
-        //       have perfect positioning.
-        const hexRoundingFudge =
-            game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS
-                ? 0
-                : 0.04;
-
         let distance;
         if (is5e) {
             // TODO: We need to have custom templates as shapes should be hex counted (a circle looks like a hexagon plotted on a hex grid).
@@ -293,12 +286,9 @@ export class ItemAttackFormApplication extends FormApplication {
             // NOTE: The hex that the actor is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
             //       for distance we need to subtract 2m to approximate correctness of a radial the template. It is not, however, "correct"
             //       as that would require hex counting.
-            distance = Math.max(
-                1 + hexRoundingFudge,
-                aoeValue * sizeConversionToMeters - 2 + hexRoundingFudge,
-            );
+            distance = aoeValue * sizeConversionToMeters - 1;
         } else {
-            distance = aoeValue * sizeConversionToMeters + hexRoundingFudge;
+            distance = aoeValue * sizeConversionToMeters;
         }
 
         const templateData = {
