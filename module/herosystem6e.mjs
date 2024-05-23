@@ -13,7 +13,7 @@ import {
     initializeItemHandlebarsHelpers,
 } from "./item/item.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
-import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.mjs";
+//import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.mjs";
 import * as chat from "./chat.mjs";
 import * as macros from "./macros.mjs";
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
@@ -110,9 +110,9 @@ Hooks.once("init", async function () {
     Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
         makeDefault: true,
     });
-    Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, {
-        makeDefault: false,
-    });
+    // Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, {
+    //     makeDefault: false,
+    // });
 
     // If you need to add Handlebars helpers, here are a few useful examples:
     Handlebars.registerHelper("concat", function () {

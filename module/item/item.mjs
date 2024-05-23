@@ -25,8 +25,8 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemIsManeuver", itemIsManeuver);
     Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
     Handlebars.registerHelper("filterItem", filterItem);
-    Handlebars.registerHelper("parentItem", parentItem);
-    Handlebars.registerHelper("parentItemType", parentItemType);
+    // Handlebars.registerHelper("parentItem", parentItem);
+    // Handlebars.registerHelper("parentItemType", parentItemType);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -84,15 +84,15 @@ function filterItem(item, filterString) {
     }
 }
 
-function parentItem(item) {
-    return item.getHdcParent();
-}
+// function parentItem(item) {
+//     return item.getHdcParent();
+// }
 
-function parentItemType(item, type) {
-    const parent = parentItem(item);
+// function parentItemType(item, type) {
+//     const parent = parentItem(item);
 
-    return parent?.system.type === type;
-}
+//     return parent?.system.type === type;
+// }
 
 const itemTypeToIcon = {
     attack: "icons/svg/sword.svg",
@@ -444,7 +444,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Only spend the END if we are in combat.
-            if (this.actor.inCombat) {
+            if (this.actor.inCombat && end) {
                 await item.actor.update({
                     "system.characteristics.end.value": value - end,
                 });
@@ -1213,7 +1213,17 @@ export class HeroSystem6eItem extends Item {
                             switch (this.system.OPTIONID) {
                                 case "SINGLE":
                                     if (count === 0) {
-                                        addMe = true;
+                                        // Is this part of a compound power?
+                                        if (this.parentItem) {
+                                            if (
+                                                this.parentItem.id ===
+                                                attackItem.parentItem?.id
+                                            ) {
+                                                addMe = true;
+                                            }
+                                        } else {
+                                            addMe = true;
+                                        }
                                     }
                                     break;
                                 case "TIGHT":
@@ -1655,7 +1665,15 @@ export class HeroSystem6eItem extends Item {
         return itemData;
     }
 
-    getHdcParent() {
+    // getHdcParent() {
+    //     if (!this.system.PARENTID) return null;
+    //     if (!this.actor?.items) return null;
+    //     return this.actor.items.find(
+    //         (o) => o.system.ID == this.system.PARENTID,
+    //     );
+    // }
+
+    get parentItem() {
         if (!this.system.PARENTID) return null;
         if (!this.actor?.items) return null;
         return this.actor.items.find(
@@ -2074,7 +2092,6 @@ export class HeroSystem6eItem extends Item {
         // Real Cost = Active Cost / (1 + total value of all Limitations)
 
         // This may be a slot in a framework if so get parent
-        const parent = this.getHdcParent();
 
         let modifiers = (system.MODIFIER || []).filter(
             (o) =>
@@ -2086,9 +2103,9 @@ export class HeroSystem6eItem extends Item {
         );
 
         // Add limitations from parent
-        if (parent) {
+        if (this.parentItem) {
             modifiers.push(
-                ...(parent.system.MODIFIER || []).filter(
+                ...(this.parentItem.system.MODIFIER || []).filter(
                     (o) => parseFloat(o.BASECOST) < 0,
                 ),
             );
@@ -2157,23 +2174,14 @@ export class HeroSystem6eItem extends Item {
         let _realCost = system.activePoints;
 
         // Skill Enhancer discount
-        if (parent) {
-            const configPowerInfoParent = getPowerInfo({
-                item: parent,
-            });
-
-            if (
-                configPowerInfoParent &&
-                configPowerInfoParent.type?.includes("enhancer")
-            ) {
-                _realCost = Math.max(1, _realCost - 1);
-            }
+        if (this.parentItem?.baseInfo.type.includes("enhancer")) {
+            _realCost = Math.max(1, _realCost - 1);
         }
 
         // Power cost in Power Framework is applied before limitations
         let costSuffix = "";
-        if (parent) {
-            if (parent.system.XMLID === "MULTIPOWER") {
+        if (this.parentItem) {
+            if (this.parentItem.system.XMLID === "MULTIPOWER") {
                 // Fixed
                 if (this.system.ULTRA_SLOT) {
                     costSuffix = this.actor?.system.is5e ? "u" : "f";
@@ -2185,8 +2193,8 @@ export class HeroSystem6eItem extends Item {
                     costSuffix = this.actor?.system.is5e ? "m" : "v";
                     _realCost /= 5.0;
                 }
-            } else if (parent.system.XMLID === "ELEMENTAL_CONTROL") {
-                _realCost = _realCost - parent.system.BASECOST;
+            } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
+                _realCost = _realCost - this.parentItem.system.BASECOST;
             }
         }
 
@@ -3282,7 +3290,7 @@ export class HeroSystem6eItem extends Item {
         // Active Points
         if (
             parseInt(system.realCost) != parseInt(system.activePoints) ||
-            this.getHdcParent()
+            this.parentItem
         ) {
             if (system.activePoints) {
                 system.description +=
@@ -3296,9 +3304,9 @@ export class HeroSystem6eItem extends Item {
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             });
-        if (this.getHdcParent()) {
+        if (this.parentItem) {
             modifiers.push(
-                ...(this.getHdcParent().system.MODIFIER || [])
+                ...(this.parentItem.system.MODIFIER || [])
                     .filter((o) => o.BASECOST < 0)
                     .sort((a, b) => {
                         return a.BASECOST_total - b.BASECOST_total;
@@ -3330,8 +3338,7 @@ export class HeroSystem6eItem extends Item {
 
         const reducedEnd =
             this.findModsByXmlid("REDUCEDEND") ||
-            (this.getHdcParent() &&
-                this.getHdcParent().findModsByXmlid("REDUCEDEND"));
+            (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
         if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
             system.end = RoundFavorPlayerDown(
                 (system._activePointsWithoutEndMods || system.activePoints) /

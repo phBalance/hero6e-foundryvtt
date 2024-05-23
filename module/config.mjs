@@ -6056,6 +6056,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addModifiersToPowerList() {
     addPower(
         {
+            // AOE
             cost: function (modifier) {
                 const levels = parseInt(modifier.LEVELS) || 0;
                 let _cost = 0;
@@ -6340,6 +6341,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return parseFloat(modifier.BASECOST);
             },
             xml: `<MODIFIER XMLID="REDUCEDEND" ID="1710101174711" BASECOST="0.25" LEVELS="0" ALIAS="Reduced Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HALFEND" OPTIONID="HALFEND" OPTION_ALIAS="1/2 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            <NOTES />
+          </MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
+            xml: `<MODIFIER XMLID="SELFONLY" ID="1716495880091" BASECOST="-0.5" LEVELS="0" ALIAS="Self Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
             <NOTES />
           </MODIFIER>`,
         },

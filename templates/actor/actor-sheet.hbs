@@ -302,7 +302,8 @@
                                             height="24" /></div>
                                 </td>
                                 <td class="left">
-                                    {{#if item.system.childIdx}}{{item.system.childIdx}}){{/if}}
+                                    {{!-- {{#if item.system.childIdx}}{{item.system.childIdx}}){{/if}} --}}
+                                    {{#if item.parentItem}}{{item.parentItem.name}}: {{/if}}
                                     {{{itemFullDescription item}}}
                                 </td>
                                 <td>{{item.system.end}}</td>
@@ -361,9 +362,13 @@
                                     {{#if (and (ne item.system.realCost 0) (ne item.system.XMLID "LIST"))}}
                                         {{item.system.realCost}}</td>
                                     {{/if}}
-                                <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
+                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{/if}}">
                                     {{#if item.system.childIdx}}
-                                        {{item.system.childIdx}})
+                                        {{#if (eq item.parentItem.type "skill")}}
+                                            {{item.system.childIdx}})
+                                        {{else}}
+                                            {{item.parentItem.name}}:
+                                        {{/if}}
                                     {{/if}}
                                     {{#if (ne item.name "LIST")}}
                                         {{{itemFullDescription item}}}
@@ -517,7 +522,7 @@
                     </tr>
                     {{#each items as |item id|}}
                         {{!-- Show powers and things in a framework or compound power --}}
-                        {{#if (and (or (eq item.type "power") (parentItemType item "framework") (parentItemType item "compound")) (filterItem item ../options.itemFilters.power))}}
+                        {{#if (and (or (eq item.type "power") (eq item.parentItem.type "framework") (eq item.parentItem.type "power")) (filterItem item ../options.itemFilters.power))}}
                             {{#if (eq item.system.XMLID "LIST")}}
                                 <tr class="item">
                                     <td height="24"></td>
@@ -527,7 +532,7 @@
                                     <td></td>
                                     <td></td>
                                 </tr>
-                            {{else}}
+                            {{else if (or (not item.parentItem) (eq item.parentItem.type "power"))}}
                                 <tr class="item {{#if (gt item.system.value item.system.max)}}overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                                     data-item-id="{{item._id}}">
                                     <td>
@@ -535,7 +540,7 @@
                                                 height="24" /></div>
                                     </td>
                                     <td>{{item.system.realCost}}</td>
-                                    <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
+                                    <td class="left{{#if item.parentItem.type}} item-framework-child-name{{/if}}">
                                         {{#if item.system.childIdx}}
                                             {{item.system.childIdx}})
                                         {{/if}}
@@ -568,7 +573,13 @@
                                         </a>
                                     </td>
                                 </tr>
+                            {{else}}
+                                {{!-- These are subitems of equipment, which don't belong in the POWERS tab --}}
+                                {{!-- <tr><td>{{item.name}} {{item.parentItem.type}}</td></tr> --}}
                             {{/if}}
+                        {{else}}
+                            {{!-- testing --}}
+                            {{!-- <tr><td>{{item.name}} {{item.parentItem.type}}</td></tr> --}}
                         {{/if}}
                     {{/each}}
                 </table>
@@ -586,9 +597,7 @@
                     {{/if}}
                     <tr class="sticky">
                         <th></th>
-                        <th class="left">{{localize "ActorSheet.Name"}}</th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
-                        <th>{{localize "ActorSheet.Cost"}}</th>
                         <th>{{localize "ActorSheet.End"}}</th>
                         <th>{{localize "ActorSheet.Price"}}</th>
                         <th>{{localize "ActorSheet.Weight"}}</th>
@@ -599,22 +608,35 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                        {{#if (eq item.type "equipment") }}
+                        {{#if (or (eq item.type "equipment") (eq item.parentItem.type "equipment")) }}
                             <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                                 data-item-id="{{item._id}}">
-                                <td style="min-width: 24px">
-                                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                            height="24" /></div>
+                                <td class="item-image-td" style="width:26px">
+                                    <div class="item-image" width="26px"><img src="{{item.img}}" title="{{item.name}}" width="24px"
+                                            height="24px" /></div>
                                 </td>
-                                <td class="left">{{{itemName item}}}</td>
-                                <td class="left">{{item.system.description}}</td>
-                                <td>{{item.system.realCost}}</td>
+                                
+                                <td class="left{{#if item.parentItem.type}} item-framework-child-name{{/if}}">
+                                    {{#if item.system.childIdx}}
+                                        {{item.system.childIdx}})
+                                    {{/if}}
+                                    {{{itemFullDescription item}}}
+                                </td>
+
+                                {{#if item.system.childIdx}}
+                                <td>{{item.system.end}}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                {{else}}
                                 <td>{{item.system.end}}</td>
                                 <td>{{item.system.PRICEtext}}</td>
                                 <td>{{item.system.WEIGHTtext}}</td>
                                 <td>
                                     <input class="item-toggle" type="checkbox" name="item.system.active" {{checked
                                         item.system.active}} data-dtype="Boolean" />
+                                </td>
+                                {{/if}}
                                 <td>
                                     <a class="item-control item-chat" title="{{localize "ActorSheet.SendToChat"}}"><i
                                             class="fas fa-comment-alt"></i></a>
