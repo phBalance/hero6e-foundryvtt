@@ -302,7 +302,8 @@
                                             height="24" /></div>
                                 </td>
                                 <td class="left">
-                                    {{#if item.system.childIdx}}{{item.system.childIdx}}){{/if}}
+                                    {{!-- {{#if item.system.childIdx}}{{item.system.childIdx}}){{/if}} --}}
+                                    {{#if item.parentItem}}{{item.parentItem.name}}: {{/if}}
                                     {{{itemFullDescription item}}}
                                 </td>
                                 <td>{{item.system.end}}</td>
