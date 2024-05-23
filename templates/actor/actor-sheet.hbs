@@ -362,9 +362,13 @@
                                     {{#if (and (ne item.system.realCost 0) (ne item.system.XMLID "LIST"))}}
                                         {{item.system.realCost}}</td>
                                     {{/if}}
-                                <td class="left{{#if item.system.PARENTID}} item-framework-child-name{{/if}}">
+                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{/if}}">
                                     {{#if item.system.childIdx}}
-                                        {{item.system.childIdx}})
+                                        {{#if (eq item.parentItem.type "skill")}}
+                                            {{item.system.childIdx}})
+                                        {{else}}
+                                            {{item.parentItem.name}}:
+                                        {{/if}}
                                     {{/if}}
                                     {{#if (ne item.name "LIST")}}
                                         {{{itemFullDescription item}}}
@@ -518,7 +522,7 @@
                     </tr>
                     {{#each items as |item id|}}
                         {{!-- Show powers and things in a framework or compound power --}}
-                        {{#if (and (or (eq item.type "power") (eq item.parentItem.type "framework") (eq item.parentItem.type "compound")) (filterItem item ../options.itemFilters.power))}}
+                        {{#if (and (or (eq item.type "power") (eq item.parentItem.type "framework") (eq item.parentItem.type "power")) (filterItem item ../options.itemFilters.power))}}
                             {{#if (eq item.system.XMLID "LIST")}}
                                 <tr class="item">
                                     <td height="24"></td>
@@ -571,7 +575,11 @@
                                 </tr>
                             {{else}}
                                 {{!-- These are subitems of equipment, which don't belong in the POWERS tab --}}
+                                {{!-- <tr><td>{{item.name}} {{item.parentItem.type}}</td></tr> --}}
                             {{/if}}
+                        {{else}}
+                            {{!-- testing --}}
+                            {{!-- <tr><td>{{item.name}} {{item.parentItem.type}}</td></tr> --}}
                         {{/if}}
                     {{/each}}
                 </table>

@@ -1213,7 +1213,17 @@ export class HeroSystem6eItem extends Item {
                             switch (this.system.OPTIONID) {
                                 case "SINGLE":
                                     if (count === 0) {
-                                        addMe = true;
+                                        // Is this part of a compound power?
+                                        if (this.parentItem) {
+                                            if (
+                                                this.parentItem.id ===
+                                                attackItem.parentItem?.id
+                                            ) {
+                                                addMe = true;
+                                            }
+                                        } else {
+                                            addMe = true;
+                                        }
                                     }
                                     break;
                                 case "TIGHT":
