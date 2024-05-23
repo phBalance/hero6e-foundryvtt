@@ -1415,6 +1415,7 @@ export class HeroSystem6eActor extends Actor {
                                                     permanent: true,
                                                 },
                                             );
+                                            console.error(e);
                                             await item2.delete();
                                             continue;
                                         }
