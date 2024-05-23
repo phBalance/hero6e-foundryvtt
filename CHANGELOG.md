@@ -7,6 +7,7 @@
 - Fixed INVISIBILITY.  You can now toggle the power, it consumes END while in combat, and triggers the invisibility status condition if invisibility's primary option is SIGHT GROUP.  Ehhanced senses are not implemented so the GM will have to address invisibility vs enhanced senses.
 - Fix Combat Skill Levels attack enumerations.  Attacks are now listed by name when provided, and by generic power when no name is provided.  [#1004](https://github.com/dmdorman/hero6e-foundryvtt/issues/1004)
 - Fixed issue where some of the compound EQUIPMENT sub items were showing in the POWERS tab.
+- Skill Levels now default to unchecked, with some educated guessing by matching characteristic or Skill Levels options. [#1006](https://github.com/dmdorman/hero6e-foundryvtt/issues/1006)
 
 ## Version 3.0.70
 
