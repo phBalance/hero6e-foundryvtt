@@ -20,6 +20,13 @@ async function _renderSkillForm(item, actor, stateData) {
             s.system.checked = true;
         }
 
+        // OPTION_ALIAS has XMLID of skill
+        if (
+            s.system.OPTION_ALIAS.toUpperCase().indexOf(item.system.XMLID) > -1
+        ) {
+            s.system.checked = true;
+        }
+
         // CHARACTERISTIC match
         if (s.name.toUpperCase().indexOf(item.system.CHARACTERISTIC) > -1) {
             s.system.checked = true;
