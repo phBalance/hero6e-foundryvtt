@@ -9,7 +9,29 @@ async function _renderSkillForm(item, actor, stateData) {
         actor.items.filter((o) => o.system.XMLID === "SKILL_LEVELS"),
     );
     for (let s of skillLevels) {
-        s.system.checked = true;
+        s.system.checked = false;
+
+        // OPTION_ALIAS has name of skill
+        if (
+            s.system.OPTION_ALIAS.toUpperCase().indexOf(
+                item.name.toUpperCase(),
+            ) > -1
+        ) {
+            s.system.checked = true;
+        }
+
+        // CHARACTERISTIC match
+        if (s.name.toUpperCase().indexOf(item.system.CHARACTERISTIC) > -1) {
+            s.system.checked = true;
+        }
+
+        // INTERACTION match (really PRE match)
+        if (
+            s.name.toUpperCase().indexOf("INTERACTION") > -1 &&
+            item.system.CHARACTERISTIC === "PRE"
+        ) {
+            s.system.checked = true;
+        }
     }
 
     const templateData = {
@@ -30,7 +52,7 @@ export async function createSkillPopOutFromItem(item, actor) {
 
     // Attack Card as a Pop Out
     let options = {
-        width: 300,
+        width: 500,
     };
 
     return new Promise((resolve) => {
