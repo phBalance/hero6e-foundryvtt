@@ -1809,6 +1809,11 @@ export class HeroSystem6eItem extends Item {
                 //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
                 adder.BASECOST_total =
                     adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
+
+                // WEAPONSMITH (selections over 1 cost only 1)
+                if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
+                    adder.BASECOST_total = 1;
+                }
             } else {
                 adder.BASECOST_total = 0;
             }
