@@ -339,10 +339,16 @@ export class HeroSystem6eItem extends Item {
                 content += ".</p>";
             }
         }
-        content += `<b>${this.name}</b>`;
-        let _desc = this.system.description;
+        content += `<b>${this.name}`;
+        if (
+            this.name.toUpperCase().replace(/ /g, "") !=
+            this.system.XMLID.toUpperCase().replace(/_/g, "")
+        ) {
+            content += ` <i>[${this.system.XMLID}]</i> `;
+        }
+        content += `</b>`;
 
-        content += ` ${_desc}.`;
+        content += ` ${this.system.description}.`;
 
         // Powers have one of four Ranges: Self; No Range; Standard
         // Range; and Line of Sight (LOS).

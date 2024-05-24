@@ -1857,7 +1857,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "constant",
             target: "self only",
             range: "self",
-            costPerLevel: 1,
+            //costPerLevel: 1,
             costEnd: false,
             xml: `<SKILL XMLID="BREAKFALL" ID="1709161478362" BASECOST="3.0" LEVELS="0" ALIAS="Breakfall" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"><NOTES/></SKILL>`,
         },
