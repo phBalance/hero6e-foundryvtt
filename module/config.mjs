@@ -5407,6 +5407,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: [],
             target: "self only",
             range: "self",
+            costPerLevel: 3,
         },
         {},
     );
