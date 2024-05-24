@@ -86,7 +86,12 @@
 
     {{#if cslChoices}}
       <div class="form-group">
-        <label>Combat Skill Levels</label>
+          <label>
+            {{cslSkill.name}}
+            {{#if (ne cslSkill.name "Combat Skill Levels")}}
+                (CSL)
+            {{/if}}
+        </label>
         <div class="form-fields combat-skill-levels">
           <ol>
             {{#each csl}}
@@ -111,7 +116,7 @@
                     <input name="system.conditionalAttacks.{{this.id}}.checked" type="checkbox" _id="{{this.id}}" {{checked this.checked}} data-dtype="Boolean" />
                 </td>
                 <td class="left">
-                    <b>{{this.system.ALIAS}}{{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}</b>: {{this.system.description}}
+                    <b>{{this.name}}{{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}</b>: {{this.system.description}}
                 </td>
             </tr>
             {{/each}}
