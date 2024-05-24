@@ -256,6 +256,14 @@
 </div>
 {{/if}}
 
+{{#if (isdefined system.NATIVE_TONGUE)}}
+<div class="form-group">
+    <label>NATIVE TONGUE</label>
+    <input type="checkbox" name="system.NATIVE_TONGUE" {{checked system.NATIVE_TONGUE}} data-dtype="Boolean" />
+</div>
+{{/if}}
+
+
 {{#if (isdefined system.SFX)}}
 <div class="form-group">
     <label>SFX</label>
