@@ -9,6 +9,7 @@
 - Fixed issue where some compound powers subitems were showing in the wrong actor sheet tab or not showing at all.
 - Skill Levels now default to unchecked, with some educated guessing by matching characteristic or Skill Levels options. [#1006](https://github.com/dmdorman/hero6e-foundryvtt/issues/1006)
 - Improved CSL selection of attacks for compound powers. [#1007](https://github.com/dmdorman/hero6e-foundryvtt/issues/1007)
+- Improved CP and AP on actor sheet.  Equipment is now sumarised correctly.  AP hover title shows breakout.
 
 ## Version 3.0.70
 
