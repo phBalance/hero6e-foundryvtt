@@ -95,12 +95,25 @@ export class HeroSystemActorSheet extends ActorSheet {
         let priceTotal = 0;
 
         data.pointsTitle = "";
+        data.activePointsTitle = "";
         if (data.actor.system.pointsDetail) {
             for (let [key, value] of Object.entries(
                 data.actor.system.pointsDetail,
             )) {
-                data.pointsTitle += `${key}: ${value}\n`;
+                data.pointsTitle += `${key.replace(
+                    "equipment",
+                    "[equipment]",
+                )}: ${value}\n`;
             }
+        }
+        if (data.actor.system.activePointsDetail) {
+            for (let [key, value] of Object.entries(
+                data.actor.system.activePointsDetail,
+            )) {
+                data.activePointsTitle += `${key}: ${value}\n`;
+            }
+        } else {
+            data.activePointsTitle = "Total Active Points (estimate)";
         }
 
         // override actor.items (which is a map) to an array with some custom properties
@@ -763,12 +776,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         for (const item of this.actor.items.filter(
             (o) => o.type !== "maneuver",
         )) {
-            let powerInfo = getPowerInfo({
-                xmlid: item.system.XMLID,
-                actor: this.actor,
-            });
-
-            if (!powerInfo) {
+            if (!item.baseInfo) {
                 console.warn(
                     `${item?.system?.XMLID} (${item?.name}) has no powerInfo`,
                 );
@@ -789,7 +797,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     let costPerDice =
                         Math.max(
                             Math.floor((item.system.activePoints || 0) / dc) ||
-                                powerInfo.costPerLevel,
+                                item.baseInfo.costPerLevel,
                         ) || (item.system.targets === "dcv" ? 5 : 10);
                     dc += csl.dc + Math.floor((csl.ocv + csl.dcv) / 2); // Assume CSL are converted to DCs
                     let ap = dc * costPerDice;

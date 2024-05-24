@@ -339,10 +339,16 @@ export class HeroSystem6eItem extends Item {
                 content += ".</p>";
             }
         }
-        content += `<b>${this.name}</b>`;
-        let _desc = this.system.description;
+        content += `<b>${this.name}`;
+        if (
+            this.name.toUpperCase().replace(/ /g, "") !=
+            this.system.XMLID.toUpperCase().replace(/_/g, "")
+        ) {
+            content += ` <i>[${this.system.XMLID}]</i> `;
+        }
+        content += `</b>`;
 
-        content += ` ${_desc}.`;
+        content += ` ${this.system.description}.`;
 
         // Powers have one of four Ranges: Self; No Range; Standard
         // Range; and Line of Sight (LOS).
@@ -1739,7 +1745,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Check if configPowerInfo has a more specific costPerLevel
-        if (configPowerInfo?.costPerLevel) {
+        if (configPowerInfo?.costPerLevel !== undefined) {
             if (typeof configPowerInfo.costPerLevel === "function") {
                 costPerLevel =
                     parseFloat(configPowerInfo.costPerLevel(this)) || 0;
@@ -1803,6 +1809,11 @@ export class HeroSystem6eItem extends Item {
                 //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
                 adder.BASECOST_total =
                     adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
+
+                // WEAPONSMITH (selections over 1 cost only 1)
+                if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
+                    adder.BASECOST_total = 1;
+                }
             } else {
                 adder.BASECOST_total = 0;
             }
@@ -1912,6 +1923,11 @@ export class HeroSystem6eItem extends Item {
                 advantages += modCost;
             }
             cost = cost * advantages;
+        }
+
+        // COMPOUNDPOWER itself costs 0, other ITEMS will handle COMPOUNDPOWER sub-powers
+        if (this.system.XMLID === "COMPOUNDPOWER") {
+            cost = 0;
         }
 
         system.basePointsPlusAdders = cost;
@@ -2173,9 +2189,14 @@ export class HeroSystem6eItem extends Item {
 
         let _realCost = system.activePoints;
 
-        // Skill Enhancer discount
+        // Skill Enhancer discount (min cost of 1)
         if (this.parentItem?.baseInfo.type.includes("enhancer")) {
             _realCost = Math.max(1, _realCost - 1);
+
+            // NATIVE_TONGUE is always free
+            if (this.system.NATIVE_TONGUE) {
+                _realCost = 0;
+            }
         }
 
         // Power cost in Power Framework is applied before limitations
