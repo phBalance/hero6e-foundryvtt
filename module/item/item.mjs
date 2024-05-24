@@ -1739,7 +1739,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Check if configPowerInfo has a more specific costPerLevel
-        if (configPowerInfo?.costPerLevel) {
+        if (configPowerInfo?.costPerLevel !== undefined) {
             if (typeof configPowerInfo.costPerLevel === "function") {
                 costPerLevel =
                     parseFloat(configPowerInfo.costPerLevel(this)) || 0;
@@ -1912,6 +1912,11 @@ export class HeroSystem6eItem extends Item {
                 advantages += modCost;
             }
             cost = cost * advantages;
+        }
+
+        // COMPOUNDPOWER itself costs 0, other ITEMS will handle COMPOUNDPOWER sub-powers
+        if (this.system.XMLID === "COMPOUNDPOWER") {
+            cost = 0;
         }
 
         system.basePointsPlusAdders = cost;

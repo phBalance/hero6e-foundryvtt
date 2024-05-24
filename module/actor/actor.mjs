@@ -2009,6 +2009,7 @@ export class HeroSystem6eActor extends Actor {
         let activePoints = realCost;
 
         this.system.pointsDetail = {};
+        this.system.activePointsDetail = {};
 
         const powers = getCharacteristicInfoArrayForActor(this);
         for (const powerInfo of powers) {
@@ -2016,9 +2017,15 @@ export class HeroSystem6eActor extends Actor {
                 this.system.characteristics[powerInfo.key.toLowerCase()]
                     ?.realCost || 0,
             );
+            activePoints += parseInt(
+                this.system.characteristics[powerInfo.key.toLowerCase()]
+                    ?.activePoints || 0,
+            );
         }
         this.system.pointsDetail.characteristics = realCost;
+        this.system.activePointsDetail.characteristics = realCost;
 
+        // ActivePoints are the same a RealCosts for base CHARACTERISTICS
         activePoints = realCost;
 
         // Add in costs for items
@@ -2028,18 +2035,27 @@ export class HeroSystem6eActor extends Actor {
                 o.type != "defense" &&
                 o.type != "movement",
         )) {
-            // Equipment is typically purchased with money, not character points
-            if (item.type != "equipment") {
-                const _realCost = parseInt(item.system?.realCost) || 0;
+            const _realCost = parseInt(item.system?.realCost) || 0;
+            const _activePoints = parseInt(item.system?.activePoints) || 0;
 
-                if (_realCost != 0) {
+            if (_realCost != 0) {
+                // Equipment is typically purchased with money, not character points
+                if ((item.parentItem?.type || item.type) != "equipment") {
                     realCost += _realCost;
-                    this.system.pointsDetail[item.type] ??= 0;
-                    this.system.pointsDetail[item.type] += _realCost;
                 }
-            }
+                activePoints += _activePoints;
+                this.system.pointsDetail[item.parentItem?.type || item.type] ??=
+                    0;
+                this.system.activePointsDetail[
+                    item.parentItem?.type || item.type
+                ] ??= 0;
 
-            activePoints += parseInt(item.system?.activePoints || 0);
+                this.system.pointsDetail[item.parentItem?.type || item.type] +=
+                    _realCost;
+                this.system.activePointsDetail[
+                    item.parentItem?.type || item.type
+                ] += _activePoints;
+            }
         }
 
         // DISAD_POINTS: realCost
@@ -2063,6 +2079,7 @@ export class HeroSystem6eActor extends Actor {
                     "system.points": realCost,
                     "system.activePoints": activePoints,
                     "system.pointsDetail": this.system.pointsDetail,
+                    "system.activePointsDetail": this.system.activePointsDetail,
                 },
                 //{ render: false },
                 { hideChatMessage: true },
