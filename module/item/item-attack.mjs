@@ -19,6 +19,7 @@ import {
 import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
+import { clamp } from "../utility/compatibility.mjs";
 import {
     calculateVelocityInSystemUnits,
     calculateRangePenaltyFromDistanceInMetres,
@@ -589,7 +590,7 @@ export async function AttackToHit(item, options) {
         if (charges <= 0) {
             return ui.notifications.error(`${item.name} has no more charges.`);
         }
-        options.boostableCharges = Math.clamped(
+        options.boostableCharges = clamp(
             parseInt(options.boostableCharges) || 0,
             0,
             Math.min(charges - 1, 4),

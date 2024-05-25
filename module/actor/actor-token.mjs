@@ -3,6 +3,7 @@
 
 import { getBarExtendedAttribute } from "../bar3/extendTokenConfig.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
+import { clamp } from "../utility/compatibility.mjs";
 
 export class HeroSystem6eTokenDocument extends TokenDocument {
     constructor(data, context) {
@@ -87,12 +88,12 @@ export class HeroSystem6eToken extends Token {
         }
 
         const val = Number(data.value);
-        const pct = Math.clamped(val, 0, data.max) / data.max;
+        const pct = clamp(val, 0, data.max) / data.max;
 
         // Determine sizing
         let h = Math.max(canvas.dimensions.size / 12, 8);
         const w = this.w;
-        const bs = Math.clamped(h / 8, 1, 2);
+        const bs = clamp(h / 8, 1, 2);
         if (this.document.height >= 2) h *= 1.6; // Enlarge the bar for large tokens
 
         // Determine the color to use
@@ -171,7 +172,7 @@ export class HeroSystem6eToken extends Token {
                 {
                     // Label does not match bar percentage because of possible inversion.
                     const percentage = Math.round(
-                        (Math.clamped(value, 0, max) / max) * 100,
+                        (clamp(value, 0, max) / max) * 100,
                     );
                     this.createBarLabel(
                         bar,
