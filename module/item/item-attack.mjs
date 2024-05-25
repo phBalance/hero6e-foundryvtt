@@ -515,6 +515,8 @@ export async function AttackToHit(item, options) {
                 });
                 newEnd = valueEnd;
             }
+        } else {
+            newEnd -= spentEnd;
         }
 
         if (newEnd < 0) {
