@@ -23,7 +23,6 @@ import {
     calculateVelocityInSystemUnits,
     calculateRangePenaltyFromDistanceInMetres,
 } from "../ruler.mjs";
-import { HeroSystem6eToken } from "../actor/actor-token.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
