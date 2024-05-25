@@ -184,42 +184,43 @@ export class HeroSystem6eActor extends Actor {
         let content = "";
 
         if (changed?.system?.characteristics?.stun?.value) {
-            let valueT = parseInt(this.system.characteristics.stun.value);
-            let valueC = parseInt(changed.system.characteristics.stun.value);
-            let valueM = parseInt(this.system.characteristics.stun.max);
+            const valueT = parseInt(this.system.characteristics.stun.value);
+            const valueC = parseInt(changed.system.characteristics.stun.value);
+            const valueM = parseInt(this.system.characteristics.stun.max);
             if (valueT != valueC) {
-                content = `STUN from ${valueT} to ${valueC}`;
-            } else {
-                content = `STUN changed to ${valueC}`;
-            }
-            if (valueC === valueM) {
-                content += " (at max)";
-            }
+                content += `STUN from ${valueT} to ${valueC}`;
 
-            //this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
-            options.displayScrollingChanges.push({
-                value: valueC - valueT,
-                options: { max: valueM, fill: "0x00FF00" },
-            });
+                if (valueC === valueM) {
+                    content += " (at max)";
+                }
+
+                //this._displayScrollingChange(valueC - valueT, { max: valueM, fill: '0x00FF00' });
+                options.displayScrollingChanges.push({
+                    value: valueC - valueT,
+                    options: { max: valueM, fill: "0x00FF00" },
+                });
+            }
         }
 
         if (changed?.system?.characteristics?.body?.value) {
-            let valueT = parseInt(this.system.characteristics.body.value);
-            let valueC = parseInt(changed.system.characteristics.body.value);
-            let valueM = parseInt(this.system.characteristics.body.max);
+            const valueT = parseInt(this.system.characteristics.body.value);
+            const valueC = parseInt(changed.system.characteristics.body.value);
+            const valueM = parseInt(this.system.characteristics.body.max);
+            if (content.length > 0) {
+                content += "<br>";
+            }
             if (valueT != valueC) {
-                content = `BODY from ${valueT} to ${valueC}`;
-            } else {
-                content = `BODY changed to ${valueC}`;
-            }
-            if (valueC === valueM) {
-                content += " (at max)";
-            }
+                content += `BODY from ${valueT} to ${valueC}`;
 
-            options.displayScrollingChanges.push({
-                value: valueC - valueT,
-                options: { max: valueM, fill: "0xFF1111" },
-            });
+                if (valueC === valueM) {
+                    content += " (at max)";
+                }
+
+                options.displayScrollingChanges.push({
+                    value: valueC - valueT,
+                    options: { max: valueM, fill: "0xFF1111" },
+                });
+            }
         }
 
         if (options.hideChatMessage || !options.render) return;

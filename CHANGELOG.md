@@ -1,7 +1,7 @@
 # Releases
 
 ## Version 3.0.71 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- FoundryVTT v12 initial support.  We recommend sticking with v11 for now as some key modules do not support v12 yet.
+- FoundryVTT v12 initial support.  We recommend sticking with v11 for now as some key modules do not support v12 yet.  If you choose to proceed with v12 you should disable the Drag Ruler module as it currently breaks a few things.
 - Under the hood preperation for compendiums.  Includes minor fixes for HD lite code (adding powers ingame).
 - Improved item drag & drop behavior.  Dropped item descriptions are updated on drop, and any parenting associated with frameworks is removed.
 - Fixed INVISIBILITY.  You can now toggle the power, it consumes END while in combat, and triggers the invisibility status condition if invisibility's primary option is SIGHT GROUP.  Ehhanced senses are not implemented so the GM will have to address invisibility vs enhanced senses.
@@ -11,6 +11,7 @@
 - Improved CSL selection of attacks for compound powers. [#1007](https://github.com/dmdorman/hero6e-foundryvtt/issues/1007)
 - Improved CP and AP on actor sheet.  Equipment is now sumarised correctly.  AP hover title shows breakout.
 - Fix issue where STR shows END use in chat card but not actually consumed. [#1018](https://github.com/dmdorman/hero6e-foundryvtt/issues/1018)
+- Initial KNOCKBACK damage support.  The knockback text in the chatcard is now a button that automates the damage and associated defenses. [#810](https://github.com/dmdorman/hero6e-foundryvtt/issues/810)
 
 ## Version 3.0.70
 

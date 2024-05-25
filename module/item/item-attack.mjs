@@ -16,18 +16,20 @@ import {
     getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
 } from "../utility/units.mjs";
-import { RequiresASkillRollCheck } from "../item/item.mjs";
+import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import {
     calculateVelocityInSystemUnits,
     calculateRangePenaltyFromDistanceInMetres,
 } from "../ruler.mjs";
+import { HeroSystem6eToken } from "../actor/actor-token.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
     html.on("click", "button.apply-damage", this._onApplyDamage.bind(this));
     html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
+    html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -1015,6 +1017,230 @@ export async function _onRollAoeDamage(event) {
     return AttackToHit(item, JSON.parse(options.formdata));
 }
 
+export async function _onRollKnockback(event) {
+    const button = event.currentTarget;
+    button.blur(); // The button remains highlighted for some reason; kluge to fix.
+    const options = { ...button.dataset };
+    const token = game.scenes.current.tokens.get("7YYaWs2H4Kmu0epF");
+    const knockbackResultTotal = options.knockbackresulttotal;
+    if (!token || !knockbackResultTotal) {
+        return ui.notifications.error(`Knockback details are not available.`);
+    }
+    console.log(token, options.knockbackResultTotal);
+
+    // A character who’s Knocked Back into a surface or object
+    // perpendicular to the path of his Knockback (such as a wall)
+    // takes 1d6 Normal Damage for every 2m of Knockback rolled,
+    // to a maximum of the PD + BODY of the structure he hit.
+    // If a Knocked Back character doesn’t impact some
+    // upright surface, he simply hits the ground. He takes 1d6 Normal
+    // Damage for every 4m he was Knocked Back. The target winds
+    // up prone at the location where his Knockback travel stops.
+
+    const html = `
+    <form autocomplete="off">
+        <p>
+            A character takes 1d6 damage for every 2m they are knocked into a solid object, 
+            to a maximum of the PD + BODY of the object hit.  
+            A character takes 1d6 damage for every 4m knocked back if no object intervenes.
+            The character typically winds up prone.
+        </p>
+        
+        <p>
+            <div class="form-group">
+                <label>KB damage dice</label>
+                <input type="text" name="knockbackDice" value="${Math.floor(
+                    knockbackResultTotal / 2,
+                )}" data-dtype="Number" />
+            </div>
+        <p/>
+
+        <p>
+        NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
+        </p>
+    </form>
+    `;
+
+    await new Promise((resolve) => {
+        const data = {
+            title: `Confirm Knockback details`,
+            content: html,
+            buttons: {
+                normal: {
+                    label: "Roll & Apply",
+                    callback: async function (html) {
+                        const dice = html.find("input")[0].value;
+                        await _rollApplyKnockback(token, parseInt(dice));
+                    },
+                },
+                cancel: {
+                    label: "Cancel",
+                },
+            },
+            default: "normal",
+            close: () => resolve({ cancelled: true }),
+        };
+        new Dialog(data, null).render(true);
+    });
+}
+
+/**
+ * Roll and Apply Knockback
+ * @param {HeroSystem6eToken} token
+ * @param {number} knockbackDice
+ */
+async function _rollApplyKnockback(token, knockbackDice) {
+    const actor = token.actor;
+
+    const damageRoller = new HeroRoller()
+        .addDice(parseInt(knockbackDice), "KnockBack")
+        .makeNormalRoll();
+    await damageRoller.roll();
+
+    const damageRenderedResult = await damageRoller.render();
+
+    // Bogus attack item
+    const pdContentsAttack = `
+            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="KnockBack" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+            </POWER>
+        `;
+    const pdAttack = await new HeroSystem6eItem(
+        HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor),
+        { temporary: true },
+    );
+    await pdAttack._postUpload();
+    pdAttack.name ??= "KNOCKBACK";
+
+    // TODO: Conditional defenses?
+    let ignoreDefenseIds = [];
+
+    let defense = "";
+    let [
+        defenseValue,
+        resistantValue,
+        impenetrableValue,
+        damageReductionValue,
+        damageNegationValue,
+        knockbackResistance,
+        defenseTags,
+    ] = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
+    if (damageNegationValue > 0) {
+        defense += "Damage Negation " + damageNegationValue + "DC(s); ";
+    }
+
+    defense =
+        defense + defenseValue + " normal; " + resistantValue + " resistant";
+
+    if (damageReductionValue > 0) {
+        defense += "; damage reduction " + damageReductionValue + "%";
+    }
+
+    let damageData = {};
+    damageData.defenseValue = defenseValue;
+    damageData.resistantValue = resistantValue;
+    damageData.impenetrableValue = impenetrableValue;
+    damageData.damageReductionValue = damageReductionValue;
+    damageData.damageNegationValue = damageNegationValue;
+    damageData.knockbackResistance = knockbackResistance;
+    damageData.defenseAvad =
+        defenseValue +
+        resistantValue +
+        impenetrableValue +
+        damageReductionValue +
+        damageNegationValue +
+        knockbackResistance;
+    damageData.targetToken = token;
+
+    const damageDetail = await _calcDamage(damageRoller, pdAttack, damageData);
+
+    const cardData = {
+        item: pdAttack,
+
+        // Incoming Damage Information
+        incomingDamageSummary: damageRoller.getTotalSummary(),
+        incomingAnnotatedDamageTerms: damageRoller.getAnnotatedTermsSummary(),
+
+        // dice rolls
+        roller: damageRoller,
+        renderedDamageRoll: damageRenderedResult,
+        renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
+        knockbackRoll: damageDetail.knockbackRoller,
+
+        // body
+        bodyDamage: damageDetail.bodyDamage,
+        bodyDamageEffective: damageDetail.body,
+
+        // stun
+        stunDamage: damageDetail.stunDamage,
+        stunDamageEffective: damageDetail.stun,
+        hasRenderedDamageRoll: true,
+        stunMultiplier: damageDetail.stunMultiplier,
+        hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
+
+        // damage info
+        damageString: damageRoller.getTotalSummary(),
+        useHitLoc: damageDetail.useHitLoc,
+        hitLocText: damageDetail.hitLocText,
+
+        // effects
+        effects: damageDetail.effects,
+
+        // defense
+        defense: defense,
+        damageNegationValue: damageNegationValue,
+
+        // knockback
+        knockbackMessage: damageDetail.knockbackMessage,
+        useKnockBack: damageDetail.useKnockBack,
+        knockbackRenderedResult: damageDetail.knockbackRenderedResult,
+        knockbackTags: damageDetail.knockbackTags,
+        knockbackResultTotal: damageDetail.knockbackResultTotal,
+        isKnockBack: true,
+
+        // misc
+        tags: defenseTags,
+        targetToken: token,
+    };
+
+    // render card
+    const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: actor });
+
+    const chatData = {
+        user: game.user._id,
+
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
+
+    // none: "No Automation",
+    // npcOnly: "NPCs Only (end, stun, body)",
+    // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
+    // all: "PCs and NPCs (end, stun, body)"
+    const automation = game.settings.get(HEROSYS.module, "automation");
+    if (
+        automation === "all" ||
+        (automation === "npcOnly" && token.actor.type === "npc")
+    ) {
+        let changes = {};
+        if (damageDetail.stun != 0) {
+            changes["system.characteristics.stun.value"] =
+                token.actor.system.characteristics.stun.value -
+                damageDetail.stun;
+        }
+        if (damageDetail.body != 0) {
+            changes["system.characteristics.body.value"] =
+                token.actor.system.characteristics.body.value -
+                damageDetail.body;
+        }
+        await token.actor.update(changes);
+    }
+}
+
 // Event handler for when the Roll Damage button is
 // clicked on item-attack-card2.hbs
 // Notice the chatListeners function in this file.
@@ -1798,6 +2024,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         useKnockBack: damageDetail.useKnockBack,
         knockbackRenderedResult: damageDetail.knockbackRenderedResult,
         knockbackTags: damageDetail.knockbackTags,
+        knockbackResultTotal: damageDetail.knockbackResultTotal,
 
         // misc
         tags: defenseTags,
@@ -2187,6 +2414,7 @@ async function _calcDamage(heroRoller, item, options) {
         knockbackRenderedResult,
         knockbackTags,
         knockbackRoller,
+        knockbackResultTotal,
     } = await _calcKnockback(
         body,
         item,
@@ -2290,6 +2518,7 @@ async function _calcDamage(heroRoller, item, options) {
     damageDetail.knockbackRenderedResult = knockbackRenderedResult;
     damageDetail.knockbackTags = knockbackTags;
     damageDetail.knockbackRoller = knockbackRoller;
+    damageDetail.knockbackResultTotal = knockbackResultTotal;
 
     return damageDetail;
 }
@@ -2300,6 +2529,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackRenderedResult = null;
     let knockbackTags = [];
     let knockbackRoller = null;
+    let knockbackResultTotal = null;
 
     if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier) {
         useKnockback = true;
@@ -2366,9 +2596,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
 
-        const knockbackResultTotal = Math.round(
-            knockbackRoller.getBasicTotal(),
-        );
+        knockbackResultTotal = Math.round(knockbackRoller.getBasicTotal());
 
         knockbackRenderedResult = await knockbackRoller.render();
 
@@ -2390,5 +2618,6 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         knockbackRenderedResult,
         knockbackTags,
         knockbackRoller,
+        knockbackResultTotal,
     };
 }
