@@ -56,7 +56,6 @@ export default [
                 NumericTerm: "readonly",
                 Macro: "readonly",
                 MeasuredTemplate: "readonly",
-                mergeObject: "readonly",
                 OperatorTerm: "readonly",
                 PIXI: "readonly",
                 quench: "readonly",

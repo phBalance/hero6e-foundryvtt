@@ -8,7 +8,7 @@ import { getPowerInfo } from "../utility/util.mjs";
 export class HeroSystem6eItem2Sheet extends ItemSheet {
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["herosystem6e", "sheet", "item"],
             width: 520,
             height: 660,

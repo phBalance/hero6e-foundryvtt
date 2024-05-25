@@ -59,7 +59,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     static get defaultOptions() {
         let options = super.defaultOptions;
-        options = mergeObject(options, {
+        options = foundry.utils.mergeObject(options, {
             classes: ["form"],
             popOut: true,
             template: `systems/${HEROSYS.module}/templates/attack/item-attack-application.hbs`,
