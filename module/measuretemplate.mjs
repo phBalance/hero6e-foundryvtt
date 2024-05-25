@@ -30,10 +30,6 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         if (flags.is5e) {
             const isV12 = isGameV12OrLater();
 
-            // NOTE: The target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
-            //       for distance we need to subtract 0.5"/1m.
-            const distance5e = distance - 1;
-
             if (shapeType === "circle") {
                 if (!isV12) {
                     // v11
@@ -66,8 +62,8 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
                     const pixelHexagonVertices = gridHexagonVertices.map(
                         (vertex) =>
                             new PIXI.Point(
-                                (vertex[0] - 0.5) * distance5e * shapeVector[0],
-                                (vertex[1] - 0.5) * distance5e * shapeVector[1],
+                                (vertex[0] - 0.5) * distance * shapeVector[0],
+                                (vertex[1] - 0.5) * distance * shapeVector[1],
                             ),
                     );
 
@@ -76,32 +72,17 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
                     // v12
                     const vertices = game.canvas.grid.getCircle(
                         { x: 0, y: 0 },
-                        distance5e,
+                        distance,
                     );
 
                     return new PIXI.Polygon(...vertices);
                 }
             } else if (shapeType === "cone") {
-                // 5e cones are hex counted and have a flat end.
-                if (!isV12) {
-                    // v11
-                    // Using the normal Euclidean cone which is not the right size as the first 1" of size
-                    // is the target hex. Add a small fudge to help with larger templates. Modify the template size
-                    // here as a work around.
-                    // NOTE: This crude approach causes problems with changing the cone template size manually.
-                    const desired5eConeSize =
-                        flags.aoeValue * flags.sizeConversionToMeters -
-                        1 -
-                        0.04;
-                    if (distance !== desired5eConeSize) {
-                        // NOTE: Would be preferable to await but this is not an async function
-                        this.document.update({ distance: desired5eConeSize });
-                        this.document.distance = desired5eConeSize;
-                    }
-                } else {
+                // 5e cones are hex counted and have a flat end. We only support v12 for these.
+                if (isV12) {
                     const vertices = game.canvas.grid.getCone(
                         { x: 0, y: 0 },
-                        distance5e,
+                        distance,
                         direction,
                         angle,
                     );

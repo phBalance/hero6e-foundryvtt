@@ -277,7 +277,10 @@ export class ItemAttackFormApplication extends FormApplication {
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
 
         const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
-        const distance = aoeValue * sizeConversionToMeters;
+
+        // NOTE: The target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
+        //       for distance we need to subtract 0.5"/1m.
+        const distance = aoeValue * sizeConversionToMeters - (is5e ? 1 : 0);
 
         const templateData = {
             t: templateType,
