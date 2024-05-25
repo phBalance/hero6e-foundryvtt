@@ -4,7 +4,7 @@ import { HeroSystemActorSheet } from "./actor-sheet.mjs";
 export class HeroSystemActorSavuoriSheet extends HeroSystemActorSheet {
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["actor-sheet", "savuori"],
             template: `systems/${HEROSYS.module}/templates/actor/actor-savuori-sheet.hbs`,
             tabs: [
