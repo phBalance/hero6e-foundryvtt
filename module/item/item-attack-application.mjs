@@ -277,19 +277,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
 
         const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor);
-
-        let distance;
-        if (is5e) {
-            // TODO: We need to have custom templates as shapes should be hex counted (a circle looks like a hexagon plotted on a hex grid).
-            //       Circle and cone are the most broken. The values we're providing using a gridless geometric circle or cone approximate the
-            //       right thing when we're dealing with fewer than 7 hexes and start to fall apart after that.
-            // NOTE: The hex that the actor is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
-            //       for distance we need to subtract 2m to approximate correctness of a radial the template. It is not, however, "correct"
-            //       as that would require hex counting.
-            distance = aoeValue * sizeConversionToMeters - 1;
-        } else {
-            distance = aoeValue * sizeConversionToMeters;
-        }
+        const distance = aoeValue * sizeConversionToMeters;
 
         const templateData = {
             t: templateType,
@@ -314,23 +302,20 @@ export class ItemAttackFormApplication extends FormApplication {
 
             case "cone":
                 {
-                    // TODO: Technically, following rules as written, cones should have a flat end. However,
-                    //       it doesn't make sense to change cones until we have "flat"/hex counted circles as
-                    //       the shapes should be consistent.
                     if (
                         (aoeModifier.adders || []).find(
                             (adder) => adder.XMLID === "THINCONE",
                         )
                     ) {
-                        // TODO: The extra 1 degree helps with approximating the correct hex counts when not
+                        // TODO: The extra 0.1 degree helps with approximating the correct hex counts when not
                         //       not oriented in one of the prime 6 directions. This is because we're not
                         //       hex counting. The extra degree is more incorrect the larger the cone is.
-                        templateData.angle = 31;
+                        templateData.angle = 30.1;
                     } else {
-                        // TODO: The extra 1 degree helps with approximating the correct hex counts when not
+                        // TODO: The extra 0.1 degree helps with approximating the correct hex counts when not
                         //       not oriented in one of the prime 6 directions. This is because we're not
                         //       hex counting. The extra degree is more incorrect the larger the cone is.
-                        templateData.angle = 61;
+                        templateData.angle = 60.1;
                     }
                 }
 
