@@ -83,7 +83,22 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
                 }
             } else if (shapeType === "cone") {
                 // 5e cones are hex counted and have a flat end.
-                if (isV12) {
+                if (!isV12) {
+                    // v11
+                    // Using the normal Euclidean cone which is not the right size as the first 1" of size
+                    // is the target hex. Add a small fudge to help with larger templates. Modify the template
+                    // here as a work around.
+                    // NOTE: This crude approach causes problems with changing the cone template size manually.
+                    const desired5eConeSize =
+                        flags.aoeValue * flags.sizeConversionToMeters -
+                        1 -
+                        0.04;
+                    if (distance !== desired5eConeSize) {
+                        // NOTE: Would be preferable to await but this is not an async function
+                        this.document.update({ distance: desired5eConeSize });
+                        this.document.distance = desired5eConeSize;
+                    }
+                } else {
                     const vertices = game.canvas.grid.getCone(
                         { x: 0, y: 0 },
                         distance5e,
@@ -157,9 +172,11 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         options = { checkShape: true, checkPositions: true, ...options };
         // Use Shape (but there are rounding issues; specifically if token and MeasuredTemplate have same hex origin)
         if (options.checkShape) {
-            const obj = token?.object;
-            const _x = obj.center.x - (options?.templateData?.x || this.x);
-            const _y = obj.center.y - (options?.templateData?.y || this.y);
+            const actorToken = token?.object;
+            const _x =
+                actorToken.center.x - (options?.templateData?.x || this.x);
+            const _y =
+                actorToken.center.y - (options?.templateData?.y || this.y);
             if (this.shape.contains(_x, _y)) return true;
         }
 
