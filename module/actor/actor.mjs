@@ -6,6 +6,7 @@ import {
     getCharacteristicInfoArrayForActor,
 } from "../utility/util.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
+import { clamp } from "../utility/compatibility.mjs";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -154,11 +155,7 @@ export class HeroSystem6eActor extends Actor {
         let updates;
         if (isBar) {
             if (isDelta)
-                value = Math.clamped(
-                    -99,
-                    Number(current.value) + value,
-                    current.max,
-                ); // a negative bar is typically acceptable
+                value = clamp(-99, Number(current.value) + value, current.max); // a negative bar is typically acceptable
             updates = { [`system.${attribute}.value`]: value };
         } else {
             if (isDelta) value = Number(current) + value;
@@ -480,7 +477,7 @@ export class HeroSystem6eActor extends Actor {
                         ? CONST.TEXT_ANCHOR_POINTS.BOTTOM
                         : CONST.TEXT_ANCHOR_POINTS.TOP,
                 direction: change < 0 ? 1 : 2,
-                fontSize: Math.clamped(fontSize, 50, 100),
+                fontSize: clamp(fontSize, 50, 100),
                 fill: options?.fill || "0xFFFFFF",
                 stroke: options?.stroke || 0x00000000,
                 strokeThickness: 4,
