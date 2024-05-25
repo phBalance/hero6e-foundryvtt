@@ -46,6 +46,7 @@ export default [
                 HERO: "readonly",
                 HeroRuler: "readonly",
                 HeroSystem6eItem: "readonly",
+                HexagonalGrid: "readonly",
                 Hooks: "readonly",
                 ImageHelper: "readonly",
                 Item: "readonly",
