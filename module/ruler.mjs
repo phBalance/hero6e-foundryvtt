@@ -433,7 +433,7 @@ function setHeroRulerLabel() {
                 segmentDistance.distance,
                 actor,
             ),
-        )}${getSystemDisplayUnits(actor.is5e)}]${
+        )}${getSystemDisplayUnits(actor?.is5e)}]${
             activeMovementLabel ? `\n${activeMovementLabel}` : ""
         }\n${rangeMod > 0 ? "-" : ""}${rangeMod} Range Modifier`;
 
