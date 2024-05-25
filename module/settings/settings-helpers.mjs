@@ -182,7 +182,7 @@ export default class SettingsHelpers {
 class AutomationMenu extends FormApplication {
     static get defaultOptions() {
         let options = super.defaultOptions;
-        options = mergeObject(options, {
+        options = foundry.utils.mergeObject(options, {
             classes: ["form"],
             popOut: true,
             template: `systems/${HEROSYS.module}/templates/automationMenu.hbs`,

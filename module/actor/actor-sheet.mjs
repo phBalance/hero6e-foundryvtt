@@ -22,7 +22,7 @@ import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["actor-sheet"],
             template: `systems/${HEROSYS.module}/templates/actor/actor-sheet.hbs`,
             tabs: [

@@ -1,3 +1,5 @@
+import { isGameV12OrLater } from "./compatibility.mjs";
+
 const DICE_SO_NICE_CUSTOM_SETS = {
     STUNx: {
         colorset: "Stun Multiplier",
@@ -495,12 +497,7 @@ export class HeroRoller {
         );
 
         // V12 doesn't have async as an option anymore - it is the default.
-        const evaluateOptions = foundry.utils.isNewerVersion(
-            game.version,
-            "11.315",
-        )
-            ? {}
-            : { async: true };
+        const evaluateOptions = isGameV12OrLater() ? {} : { async: true };
         await this._rollObj.evaluate({
             ...options,
             ...evaluateOptions,
@@ -1016,12 +1013,7 @@ export class HeroRoller {
                 .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
 
             // V12 doesn't have async as an option anymore - it is the default.
-            const evaluateOptions = foundry.utils.isNewerVersion(
-                game.version,
-                "11.315",
-            )
-                ? {}
-                : { async: true };
+            const evaluateOptions = isGameV12OrLater() ? {} : { async: true };
             await this._killingStunMultiplierHeroRoller.roll(evaluateOptions);
 
             this._killingBaseStunMultiplier =

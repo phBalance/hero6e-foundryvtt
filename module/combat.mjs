@@ -1,4 +1,5 @@
 import { HEROSYS } from "./herosystem6e.mjs";
+import { clamp } from "./utility/compatibility.mjs";
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
@@ -152,7 +153,7 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         if (this.turn !== null)
-            this.turn = Math.clamped(this.turn, 0, turns.length - 1);
+            this.turn = clamp(this.turn, 0, turns.length - 1);
 
         // Update state tracking
         let c = turns[this.turn];

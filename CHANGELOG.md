@@ -1,16 +1,18 @@
 # Releases
 
-## Version 3.0.71 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- FoundryVTT v12 initial support.  We recommend sticking with v11 for now as some key modules do not support v12 yet.
-- Under the hood preperation for compendiums.  Includes minor fixes for HD lite code (adding powers ingame).
-- Improved item drag & drop behavior.  Dropped item descriptions are updated on drop, and any parenting associated with frameworks is removed.
-- Fixed INVISIBILITY.  You can now toggle the power, it consumes END while in combat, and triggers the invisibility status condition if invisibility's primary option is SIGHT GROUP.  Ehhanced senses are not implemented so the GM will have to address invisibility vs enhanced senses.
-- Fix Combat Skill Levels attack enumerations.  Attacks are now listed by name when provided, and by generic power when no name is provided.  [#1004](https://github.com/dmdorman/hero6e-foundryvtt/issues/1004)
+## Version 3.0.71 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- FoundryVTT v12 initial support. We recommend sticking with v11 for now as some key modules do not support v12 yet.
+- Under the hood preparation for compendiums. Includes minor fixes for HD lite code (adding powers in game).
+- Improved item drag & drop behavior. Dropped item descriptions are updated on drop, and any parenting associated with frameworks is removed.
+- Fixed INVISIBILITY. You can now toggle the power, it consumes END while in combat, and triggers the invisibility status condition if invisibility's primary option is SIGHT GROUP.  Enhanced senses are not implemented so the GM will have to address invisibility vs enhanced senses.
+- Fix Combat Skill Levels attack enumerations. Attacks are now listed by name when provided, and by generic power when no name is provided. [#1004](https://github.com/dmdorman/hero6e-foundryvtt/issues/1004)
 - Fixed issue where some compound powers subitems were showing in the wrong actor sheet tab or not showing at all.
 - Skill Levels now default to unchecked, with some educated guessing by matching characteristic or Skill Levels options. [#1006](https://github.com/dmdorman/hero6e-foundryvtt/issues/1006)
 - Improved CSL selection of attacks for compound powers. [#1007](https://github.com/dmdorman/hero6e-foundryvtt/issues/1007)
-- Improved CP and AP on actor sheet.  Equipment is now sumarised correctly.  AP hover title shows breakout.
+- Improved CP and AP on actor sheet. Equipment is now summarized correctly. AP hover title shows breakout.
 - Fix issue where STR shows END use in chat card but not actually consumed. [#1018](https://github.com/dmdorman/hero6e-foundryvtt/issues/1018)
+- Add custom AOE templates for 5e radius (v11 and v12) and cone (v12 only) AOE to match hex counted versions. [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997)
 
 ## Version 3.0.70
 
