@@ -10,9 +10,9 @@
 - Fixed issue where some compound powers subitems were showing in the wrong actor sheet tab or not showing at all.
 - Skill Levels now default to unchecked, with some educated guessing by matching characteristic or Skill Levels options. [#1006](https://github.com/dmdorman/hero6e-foundryvtt/issues/1006)
 - Improved CSL selection of attacks for compound powers. [#1007](https://github.com/dmdorman/hero6e-foundryvtt/issues/1007)
-- Improved CP and AP on actor sheet. Equipment is now sumarised correctly. AP hover title shows breakout.
+- Improved CP and AP on actor sheet. Equipment is now summarized correctly. AP hover title shows breakout.
 - Fix issue where STR shows END use in chat card but not actually consumed. [#1018](https://github.com/dmdorman/hero6e-foundryvtt/issues/1018)
-- Add custom AOE templates for 5e radius and cone (v12 only) AOE to match hex counted versions. [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997)
+- Add custom AOE templates for 5e radius (v11 and v12) and cone (v12 only) AOE to match hex counted versions. [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997)
 - Under the hood preparation for FoundryVTT V12.
 
 ## Version 3.0.70
