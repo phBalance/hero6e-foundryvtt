@@ -86,7 +86,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
                 if (!isV12) {
                     // v11
                     // Using the normal Euclidean cone which is not the right size as the first 1" of size
-                    // is the target hex. Add a small fudge to help with larger templates. Modify the template
+                    // is the target hex. Add a small fudge to help with larger templates. Modify the template size
                     // here as a work around.
                     // NOTE: This crude approach causes problems with changing the cone template size manually.
                     const desired5eConeSize =
@@ -132,8 +132,8 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     async _refreshTemplate(...args) {
         await super._refreshTemplate(...args);
 
-        // A tad hacky here.  When template is first rendered we don't want to selectObjects
-        if (game.user.id != this.document.user.id) return;
+        // A tad hacky here. When template is first rendered we don't want to selectObjects
+        if (game.user.id !== this.document.user.id) return;
 
         await this.selectObjects();
 
@@ -151,10 +151,10 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         // PERSONALIMMUNITY
         const PERSONALIMMUNITY = (
             this.document.flags?.item?.system?.MODIFIER || []
-        ).find((o) => o.XMLID === "PERSONALIMMUNITY");
+        ).find((modifier) => modifier.XMLID === "PERSONALIMMUNITY");
 
-        let tokens = [];
-        for (let token of this.scene.tokens) {
+        const tokens = [];
+        for (const token of this.scene.tokens) {
             // For some reason the only the base ITEM and ACTOR props pass into this class, so we aren't using the typical functions like actor.id instead use actor._id.
             if (this.isTokenInside(token, options)) {
                 if (
@@ -180,7 +180,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
             if (this.shape.contains(_x, _y)) return true;
         }
 
-        // Use positions (but some tokens may not be exctly centered on a 1 hex)
+        // Use positions (but some tokens may not be exactly centered on a 1 hex)
         if (options.checkPositions) {
             if (
                 this._getGridHighlightPositions().find(
@@ -195,17 +195,19 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
     // Update user.targets based on which tokens are in the template
     async selectObjects(options) {
-        let targets = [];
+        const targets = [];
 
-        for (let token of this.getTokensInTemplate(options)) {
+        for (const token of this.getTokensInTemplate(options)) {
             if (!token?.hidden) {
                 targets.push(token.id);
             }
         }
 
         if (
-            JSON.stringify(targets) !=
-            JSON.stringify(Array.from(game.user.targets).map((o) => o.id))
+            JSON.stringify(targets) !==
+            JSON.stringify(
+                Array.from(game.user.targets).map((target) => target.id),
+            )
         ) {
             await game.user.updateTokenTargets(targets);
         }
