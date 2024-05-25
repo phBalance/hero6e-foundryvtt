@@ -97,7 +97,9 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
 
     async _onUpdate(data, options, userId) {
         await super._onUpdate(data, options, userId);
+
         if (game.user.id !== userId) return;
+
         this._computeShape();
         this.selectObjects({ checkPositions: true, templateData: data });
         game.user.broadcastActivity({
