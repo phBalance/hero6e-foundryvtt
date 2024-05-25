@@ -10,6 +10,7 @@
 - Skill Levels now default to unchecked, with some educated guessing by matching characteristic or Skill Levels options. [#1006](https://github.com/dmdorman/hero6e-foundryvtt/issues/1006)
 - Improved CSL selection of attacks for compound powers. [#1007](https://github.com/dmdorman/hero6e-foundryvtt/issues/1007)
 - Improved CP and AP on actor sheet.  Equipment is now sumarised correctly.  AP hover title shows breakout.
+- Fix issue where STR shows END use in chat card but not actually consumed. [#1018](https://github.com/dmdorman/hero6e-foundryvtt/issues/1018)
 
 ## Version 3.0.70
 
