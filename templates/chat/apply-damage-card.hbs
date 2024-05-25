@@ -1,25 +1,31 @@
 {{ log 'HEROSYS apply-damage-card' this }}
-<div class="hero chat-card item-card toHit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+<div class="hero chat-card apply-damage-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
   tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
   <header class="card-header flexrow">
-    <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-    <h3>vs {{targetToken.name}}</h3>
+    {{!-- <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" /> --}}
+    <h3>{{item.name}} vs {{targetToken.name}}</h3>
   </header>
 
   <div>
-    Attacker: <span class="item-name">{{item.actor.name}}</span>
+    Attacker: <span class="item-name">{{#if isKnockBack}}KnockBack{{else}}{{item.actor.name}}{{/if}}</span>
   </div>
   <div>
     Attack: <span class="item-name">{{{itemName item}}}</span>
   </div>
 
-  <div class="apply-damage-amount">
-    <span title="{{incomingAnnotatedDamageTerms}}">{{incomingDamageSummary}}</span>
-    {{#if useHitLoc}}
-      <div class="description-tiny">{{ hitLocText }}</div>
-    {{/if}}
-  </div>
+  {{#if isKnockBack}} {{!-- Show dice details for KnockBack ApplyDamage --}}
+    <div>
+    {{{renderedDamageRoll}}}
+    </div>
+  {{else}} {{!-- Typical apply damage --}}
+    <div class="apply-damage-amount">
+      <span title="{{incomingAnnotatedDamageTerms}}">{{incomingDamageSummary}}</span>
+      {{#if useHitLoc}}
+        <div class="description-tiny">{{ hitLocText }}</div>
+      {{/if}}
+    </div>
+  {{/if}}
 
   <div class="tags">
     <span class="tag">{{item.system.class}}</span>
@@ -85,7 +91,19 @@
         </div>
       {{/if}}
       <div class="hit-roll">{{{ knockbackRenderedResult }}}</div>
-      <div class="description-tiny">{{ knockbackMessage }}</div>
+
+
+      {{#if (gt knockbackResultTotal 0)}}
+        <div data-visibility="{{actor.id}}">
+          <button class="roll-knockback" data-itemId="{{item.uuid}}" data-targetTokenId="{{targetToken.id}}"
+            data-knockbackResultTotal="{{knockbackResultTotal}}">
+            {{ knockbackMessage }}
+          </button>
+        </div>
+      {{else}}
+        <div class="description-tiny">{{ knockbackMessage }}</div>
+      {{/if}}
+
     </div>
   {{/if}}
 </div>
