@@ -1,5 +1,5 @@
 # Releases
-## Version 3.0.71 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.71 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - FoundryVTT v12 initial support. We recommend sticking with v11 for now as some key modules do not support v12 yet. If you choose to proceed with v12 there are some known issues:
   - You should disable the [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module as it currently breaks a few things. [DR#319](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/319) [DR#324](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/324)
