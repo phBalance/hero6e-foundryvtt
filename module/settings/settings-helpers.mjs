@@ -6,7 +6,8 @@ export default class SettingsHelpers {
         const module = HEROSYS.module;
 
         game.settings.register(module, "stunned", {
-            name: game.i18n.localize("Settings.UseStunned"),
+            name: game.i18n.localize("Settings.UseStunned.Name"),
+            hint: game.i18n.localize("Settings.UseStunned.Hint"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -15,7 +16,8 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "use endurance", {
-            name: game.i18n.localize("Settings.UseEndurance"),
+            name: game.i18n.localize("Settings.UseEndurance.Name"),
+            hint: game.i18n.localize("Settings.UseEndurance.Hint"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -24,7 +26,8 @@ export default class SettingsHelpers {
         });
 
         game.settings.register(module, "knockback", {
-            name: game.i18n.localize("Settings.UseKnockback"),
+            name: game.i18n.localize("Settings.UseKnockback.Name"),
+            hint: game.i18n.localize("Settings.UseKnockback.Hint"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -61,6 +64,7 @@ export default class SettingsHelpers {
 
         game.settings.register(module, "optionalManeuvers", {
             name: game.i18n.localize("Settings.OptionalManeuvers.Name"),
+            hint: game.i18n.localize("Settings.OptionalManeuvers.Hint"),
             scope: "world",
             config: true,
             type: Boolean,
@@ -153,6 +157,33 @@ export default class SettingsHelpers {
             default: false,
             onChange: (value) => HEROSYS.log(false, value),
             requiresReload: true,
+        });
+
+        game.settings.register(module, "HexTemplates", {
+            name: game.i18n.localize("Settings.HexTemplates.Name"),
+            hint: game.i18n.localize("Settings.HexTemplates.Hint"),
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: true,
+            requiresReload: false,
+        });
+
+        game.settings.register(module, "DefaultEdition", {
+            name: game.i18n.localize("Settings.DefaultEdition.Name"),
+            hint: game.i18n.localize("Settings.DefaultEdition.Hint"),
+            scope: "world",
+            config: true,
+            type: String,
+            choices: {
+                six: game.i18n.localize("Settings.DefaultEdition.Choices.six"),
+                five: game.i18n.localize(
+                    "Settings.DefaultEdition.Choices.five",
+                ),
+            },
+            default: "six",
+            onChange: (value) => HEROSYS.log(false, value),
+            requiresReload: false,
         });
 
         game.settings.register(module, "alphaTesting", {

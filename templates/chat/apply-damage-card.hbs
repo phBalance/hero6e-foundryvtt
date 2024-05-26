@@ -8,7 +8,7 @@
   </header>
 
   <div>
-    Attacker: <span class="item-name">{{#if isKnockBack}}KnockBack{{else}}{{item.actor.name}}{{/if}}</span>
+    Attacker: <span class="item-name">{{#if isKnockBack}}Knockback{{else}}{{item.actor.name}}{{/if}}</span>
   </div>
   <div>
     Attack: <span class="item-name">{{{itemName item}}}</span>
@@ -95,8 +95,8 @@
 
       {{#if (gt knockbackResultTotal 0)}}
         <div data-visibility="{{actor.id}}">
-          <button class="roll-knockback" data-itemId="{{item.uuid}}" data-targetTokenId="{{targetToken.id}}"
-            data-knockbackResultTotal="{{knockbackResultTotal}}">
+          <button class="roll-knockback" data-item-Id="{{item.uuid}}" data-target-Token-Id="{{targetToken.id}}"
+            data-knockback-Result-Total="{{knockbackResultTotal}}">
             {{ knockbackMessage }}
           </button>
         </div>
