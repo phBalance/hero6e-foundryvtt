@@ -1663,6 +1663,13 @@ export class HeroSystem6eActor extends Actor {
                 await item._postUpload();
             });
 
+        // Re-run _postUpload for SKILLS
+        this.items
+            .filter((item) => item.type === "skill")
+            .forEach(async (item) => {
+                await item._postUpload();
+            });
+
         uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
 
         // Apply retained damage

@@ -136,20 +136,14 @@ export class HeroSystemActorSheet extends ActorSheet {
                 }
             }
 
-            // Framework?
-            if (item.system.PARENTID) {
-                const parent = data.actor.items.find(
-                    (o) => o.system.ID === item.system.PARENTID,
-                );
-                if (parent) {
-                    const parentPosition =
-                        parent.system.XMLID === "COMPOUNDPOWER"
-                            ? -1 // Compound power starts at a random position. Sub powers start at 0.
-                            : parseInt(parent.system.POSITION);
-                    item.system.childIdx =
-                        parseInt(item.system.POSITION) -
-                        parseInt(parentPosition);
-                }
+            // Item in a Framework?
+            if (item.parentItem) {
+                const parentPosition =
+                    item.parentItem.system.XMLID === "COMPOUNDPOWER"
+                        ? -1 // Compound power starts at a random position. Sub powers start at 0.
+                        : parseInt(item.parentItem.system.POSITION);
+                item.system.childIdx =
+                    parseInt(item.system.POSITION) - parseInt(parentPosition);
             }
 
             // Endurance
@@ -848,6 +842,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // Remove system.PARENTID
         delete itemData.system.PARENTID;
+        delete itemData.system.childIdx;
 
         // Handle item sorting within the same Actor
         if (this.actor.uuid === item.parent?.uuid)

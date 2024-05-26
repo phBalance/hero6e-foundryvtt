@@ -1219,7 +1219,7 @@ export class HeroSystem6eItem extends Item {
                             switch (this.system.OPTIONID) {
                                 case "SINGLE":
                                     if (count === 0) {
-                                        // Is this part of a compound power?
+                                        // Is this part of a framework/compound power/list?
                                         if (this.parentItem) {
                                             if (
                                                 this.parentItem.id ===
@@ -1293,7 +1293,7 @@ export class HeroSystem6eItem extends Item {
                         const newAdder = {
                             XMLID: "ADDER",
                             ID: new Date().getTime().toString(),
-                            ALIAS: attackItem.system.ALIAS || attackItem.name,
+                            ALIAS: attackItem.name || attackItem.system.ALIAS,
                             BASECOST: "0.0",
                             LEVELS: "0",
                             NAME: "",

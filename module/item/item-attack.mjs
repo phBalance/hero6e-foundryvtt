@@ -1021,12 +1021,12 @@ export async function _onRollKnockback(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
-    const token = game.scenes.current.tokens.get("7YYaWs2H4Kmu0epF");
-    const knockbackResultTotal = options.knockbackresulttotal;
-    if (!token || !knockbackResultTotal) {
+    const item = fromUuidSync(options.itemId);
+    const token = game.scenes.current.tokens.get(options.targetTokenId);
+    const knockbackResultTotal = options.knockbackResultTotal;
+    if (!item || !token || !knockbackResultTotal) {
         return ui.notifications.error(`Knockback details are not available.`);
     }
-    console.log(token, options.knockbackResultTotal);
 
     // A character who’s Knocked Back into a surface or object
     // perpendicular to the path of his Knockback (such as a wall)
@@ -1040,9 +1040,19 @@ export async function _onRollKnockback(event) {
     const html = `
     <form autocomplete="off">
         <p>
-            A character takes 1d6 damage for every 2m they are knocked into a solid object, 
+            A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
+                2,
+                item.actor,
+            )}${getSystemDisplayUnits(
+                item.actor.system.is5e,
+            )} they are knocked into a solid object, 
             to a maximum of the PD + BODY of the object hit.  
-            A character takes 1d6 damage for every 4m knocked back if no object intervenes.
+            A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
+                4,
+                item.actor,
+            )}${getSystemDisplayUnits(
+                item.actor.system.is5e,
+            )} knocked back if no object intervenes.
             The character typically winds up prone.
         </p>
         
@@ -1093,7 +1103,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const actor = token.actor;
 
     const damageRoller = new HeroRoller()
-        .addDice(parseInt(knockbackDice), "KnockBack")
+        .addDice(parseInt(knockbackDice), "Knockback")
         .makeNormalRoll();
     await damageRoller.roll();
 
@@ -1101,7 +1111,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
 
     // Bogus attack item
     const pdContentsAttack = `
-            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="KnockBack" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
             </POWER>
         `;
@@ -1184,7 +1194,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         hitLocText: damageDetail.hitLocText,
 
         // effects
-        effects: damageDetail.effects,
+        effects: "prone", //damageDetail.effects;
 
         // defense
         defense: defense,
@@ -1239,6 +1249,9 @@ async function _rollApplyKnockback(token, knockbackDice) {
         }
         await token.actor.update(changes);
     }
+
+    // Token falls prone
+    token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.proneEffect);
 }
 
 // Event handler for when the Roll Damage button is
@@ -2577,7 +2590,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         if (["martialart", "martial"].includes(item.type)) {
             knockbackDice += 1;
             knockbackTags.push({
-                value: "+1d6",
+                value: "+1d6KB",
                 name: "attack used a Martial Maneuver",
                 title: "Knockback Modifier",
             });

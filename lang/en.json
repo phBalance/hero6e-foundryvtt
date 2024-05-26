@@ -161,11 +161,27 @@
             "Name": "Add 3rd Bar and labels",
             "Hint": "Add a 3rd resource bar to tokens. Each token will have a Body, Stun and Endurance resource bar with an appropriate label. It is recommended this be disabled and instead use the BarBrawl module for custom bars."
         },
+        "DefaultEdition" : {
+            "Name": "Default System Rules",
+            "Hint": "The system rules are typically determined by the edition defined within the HDC file you import for each actor. When there is no actor (or otherwise 5e/6e cannot be determined) we will use this choice for the rule system.",
+            "Choices": {
+                "six": "6th edition",
+                "five": "5th edition"
+            }
+        },
         "Equipment": {
             "WeightPercentage": {
                 "Name": "Equipment Weight Percentage",
                 "Hint": "This only applies to equipment (typically found in heroic themed games). Default is 100% and follows standard rules. Setting to 50 will halve the calculated weight of equipment. Setting to 0 will effectively disable encumbrance penalties."
             }
+        },
+        "HAP": {
+            "Name": "Heroic Action Points",
+            "Hint": "Optional 6e Rule, where each character rolls 2d6 to gain HAPs for that session.  Characters may spend HAPs for a variety of GM approved actions, typically to improve a failed dice roll."
+        },
+        "HexTemplates": {
+            "Name": "Use hexagonal AOE templates",
+            "Hint": "When the scene has a hexagonal grid, the Area Of Effect templates will follow 5th edition shapes."
         },
         "HitLocation" : {
             "Name": "Hit Locations",
@@ -179,14 +195,23 @@
             }
         },
         "OptionalManeuvers": {
-            "Name": "Optional Maneuvers"
+            "Name": "Optional Maneuvers",
+            "Hint": "Add the optional maneuvers to the maneuvers tab."
         },
-        "UseEndurance": "Use Endurance",
-        "UseKnockback": "Use Knockback",
-        "UseStunned": "Use Stunned",
-        "HAP": {
-            "Name": "Heroic Action Points",
-            "Hint": "Optional 6e Rule, where each character rolls 2d6 to gain HAPs for that session.  Characters may spend HAPs for a variety of GM approved actions, typically to improve a failed dice roll."
-        }
+        "UseEndurance": 
+        {
+            "Name": "Use Endurance",
+            "Hint": "Automate tracking of endurance. For example END will used for attacks and constant powers when in combat."
+        },
+        "UseKnockback": 
+        {
+            "Name": "Use Knockback",
+            "Hint": "Use knockback rules."
+        },
+        "UseStunned": 
+        {
+            "Name": "Use Stunned",
+            "Hint": "Automate applying the stunned condition."
+        }        
     }
 }

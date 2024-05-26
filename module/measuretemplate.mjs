@@ -1,4 +1,5 @@
 import { isGameV12OrLater } from "./utility/compatibility.mjs";
+import { HEROSYS } from "./herosystem6e.mjs";
 
 export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     async _onClickLeft(event) {
@@ -19,15 +20,16 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
      * @returns PIXI.Points
      */
     _computeShape() {
-        const {
-            t: shapeType,
-            distance,
-            direction,
-            flags,
-            angle,
-        } = this.document;
+        const { t: shapeType, distance, direction, angle } = this.document;
 
-        if (flags.is5e) {
+        const HexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+
+        const hexGrid = !(
+            game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
+            game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
+        );
+
+        if (HexTemplates && hexGrid) {
             const isV12 = isGameV12OrLater();
 
             if (shapeType === "circle") {

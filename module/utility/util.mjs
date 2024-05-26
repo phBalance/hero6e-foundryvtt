@@ -1,3 +1,5 @@
+import { HEROSYS } from "../herosystem6e.mjs";
+
 export function modifyRollEquation(equation, value) {
     if (!value) {
         return equation;
@@ -32,12 +34,17 @@ export function getPowerInfo(options) {
     if (is5e === undefined) {
         is5e = options.is5e;
     }
-
-    if (!actor && is5e === undefined) {
+    if (is5e === undefined) {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
-        console.warn(
-            `${xmlid} for ${options.item?.name} has no actor provided. Unable to determine is5e. Assuming 6e.`,
+        const DefaultEdition = game.settings.get(
+            HEROSYS.module,
+            "DefaultEdition",
         );
+        if (DefaultEdition === "five") {
+            is5e = true;
+        } else {
+            is5e = false;
+        }
     }
 
     const powerList = is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
