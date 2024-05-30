@@ -33,6 +33,22 @@ export class HeroRuler {
                 movementRadioSelectRender();
             });
 
+            // Known compatibility issues with DragRuler and FoundryVTT V12
+            // Don't even bother recommending it's use at this time.
+            if (isGameV12OrLater()) {
+                if (
+                    game.modules.get("drag-ruler")?.active &&
+                    game.modules.get("drag-ruler").version === "1.13.8"
+                ) {
+                    ui.notifications.error(
+                        "You may need to disable the DragRuler module as it may cause issues with FoundryVTT V12.",
+                        { console: true, permanent: true },
+                    );
+                }
+                return;
+            }
+
+            // We recommend using Drag Ruler
             if (!game.modules.get("drag-ruler")) {
                 ui.notifications.warn(
                     game.i18n.localize("Warning.DragRuler.Install"),
@@ -40,20 +56,10 @@ export class HeroRuler {
                 return;
             }
 
+            // We recommend using Drag Ruler
             if (!game.modules.get("drag-ruler")?.active) {
                 ui.notifications.warn(
                     game.i18n.localize("Warning.DragRuler.Active"),
-                );
-            }
-
-            // Known compatibility issues with DragRuler and FoundryVTT V12
-            if (
-                isGameV12OrLater() &&
-                game.modules.get("drag-ruler").version === "1.13.8"
-            ) {
-                ui.notifications.error(
-                    "You may need to disable the DragRuler module as it may cause issues with FoundryVTT V12.",
-                    { console: true, permanent: true },
                 );
             }
         });
