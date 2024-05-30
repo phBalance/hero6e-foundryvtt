@@ -470,7 +470,7 @@ export class HeroSystem6eCombat extends Combat {
         if (!combatant) return;
 
         // Reset movement history
-        if (dragRuler) {
+        if (window.dragRuler) {
             await dragRuler.resetMovementHistory(this, combatant.id);
         }
 
@@ -496,8 +496,18 @@ export class HeroSystem6eCombat extends Combat {
             );
             if (!costEndOnlyToActivate) {
                 const end = parseInt(powerUsingEnd.system.end);
-                spentEnd += end;
-                content += `<li>${powerUsingEnd.name} (${end})</li>`;
+                const value = parseInt(
+                    this.combatant.actor.system.characteristics.end.value,
+                );
+                if (value - spentEnd >= end) {
+                    spentEnd += end;
+                    if (end > 0) {
+                        content += `<li>${powerUsingEnd.name} (${end})</li>`;
+                    }
+                } else {
+                    content += `<li>${powerUsingEnd.name} (insufficient END; power turned off)</li>`;
+                    await powerUsingEnd.toggle();
+                }
             }
         }
 
@@ -513,7 +523,7 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        if (spentEnd > 0 && !this.combatant.isFake) {
+        if (content != "" && !this.combatant.isFake) {
             let segment = this.combatant.flags.segment;
             let value = parseInt(
                 this.combatant.actor.system.characteristics.end.value,

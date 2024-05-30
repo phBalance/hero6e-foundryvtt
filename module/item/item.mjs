@@ -464,7 +464,17 @@ export class HeroSystem6eItem extends Item {
                     whisper: ChatMessage.getWhisperRecipients("GM"),
                     speaker,
                 };
-
+                await ChatMessage.create(chatData);
+            } else {
+                const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+                speaker["alias"] = item.actor.name;
+                const chatData = {
+                    user: game.user._id,
+                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    content: `Activated ${item.name}`,
+                    whisper: ChatMessage.getWhisperRecipients("GM"),
+                    speaker,
+                };
                 await ChatMessage.create(chatData);
             }
 
@@ -485,6 +495,18 @@ export class HeroSystem6eItem extends Item {
                 }
             }
         } else {
+            // Let GM know power was deactivated
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+            speaker["alias"] = item.actor.name;
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: `Turned off ${item.name}`,
+                whisper: ChatMessage.getWhisperRecipients("GM"),
+                speaker,
+            };
+            await ChatMessage.create(chatData);
+
             // Remove Invisibility status effect
             if (this.system.XMLID === "INVISIBILITY") {
                 if (this.actor.statuses.has("invisible")) {
