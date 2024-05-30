@@ -1,5 +1,15 @@
 # Releases
-## Version 3.0.71 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+## Version 3.0.72 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- FoundryVTT v12 partial support. We recommend sticking with v11 for now as some key modules do not support v12 yet. If you choose to proceed with v12 there are some known issues:
+  - You should disable the [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module as it currently breaks a few things. [DR#319](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/319) [DR#324](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/324)
+  - We haven't tested much yet so this list is not comprehensive.
+- Improved chat messages during combat for powers that use END each phase.  Powers automatically turn off when there is insufficient END.  GM gets message when any power is toggled.
+- Fixed combat tracker issues with FoundtyVTT V12 where onStartTurn was only called postSegment12.  This was preventing the consumption of END for continuous powers.
+- Movement radio buttons now display even when [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) is not active.  Unslecting a token removes movement radio buttons to avoid confusion.
+
+
+## Version 3.0.71
 
 - FoundryVTT v12 initial support. We recommend sticking with v11 for now as some key modules do not support v12 yet. If you choose to proceed with v12 there are some known issues:
   - You should disable the [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module as it currently breaks a few things. [DR#319](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/319) [DR#324](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/324)

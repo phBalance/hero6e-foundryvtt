@@ -4,10 +4,34 @@ import {
     getSystemDisplayUnits,
 } from "./utility/units.mjs";
 
+import { isGameV12OrLater } from "./utility/compatibility.mjs";
+
 export class HeroRuler {
     static initialize() {
         Hooks.once("ready", function () {
             setHeroRulerLabel();
+
+            Hooks.on("controlToken", function () {
+                const sceneControls = ui.controls;
+                if (sceneControls.activeControl !== "token") {
+                    return;
+                }
+                if (sceneControls.activeTool !== "select") {
+                    return;
+                }
+
+                const tokensControlled = canvas.tokens.controlled.length;
+
+                if (tokensControlled !== 1) {
+                    // remove movement radio buttons
+                    $(".scene-control[data-control='token']")
+                        .find(".radio-container")
+                        .remove();
+                    return;
+                }
+
+                movementRadioSelectRender();
+            });
 
             if (!game.modules.get("drag-ruler")) {
                 ui.notifications.warn(
@@ -19,6 +43,17 @@ export class HeroRuler {
             if (!game.modules.get("drag-ruler")?.active) {
                 ui.notifications.warn(
                     game.i18n.localize("Warning.DragRuler.Active"),
+                );
+            }
+
+            // Known compatibility issues with DragRuler and FoundryVTT V12
+            if (
+                isGameV12OrLater() &&
+                game.modules.get("drag-ruler").version === "1.13.8"
+            ) {
+                ui.notifications.error(
+                    "You may need to disable the DragRuler module as it may cause issues with FoundryVTT V12.",
+                    { console: true, permanent: true },
                 );
             }
         });
@@ -214,28 +249,6 @@ export class HeroRuler {
             dragRuler.registerSystem(HEROSYS.module, HeroSysSpeedProvider);
 
             setHeroRulerLabel();
-        });
-
-        Hooks.on("controlToken", function () {
-            if (!game.modules.get("drag-ruler")?.active) {
-                return;
-            }
-
-            const sceneControls = ui.controls;
-            if (sceneControls.activeControl !== "token") {
-                return;
-            }
-            if (sceneControls.activeTool !== "select") {
-                return;
-            }
-
-            const tokensControlled = canvas.tokens.controlled.length;
-
-            if (tokensControlled !== 1) {
-                return;
-            }
-
-            movementRadioSelectRender();
         });
 
         Hooks.on("renderSceneControls", function (sceneControls) {
