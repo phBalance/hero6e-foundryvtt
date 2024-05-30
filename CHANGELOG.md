@@ -2,6 +2,7 @@
 
 ## Version 3.0.72 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Improved chat messages during combat for powers that use END each phase.  Powers automatically turn off when there is insufficient END.  GM gets message when any power is toggled.
+- Fixed combat tracker issues with FoundtyVTT V12 where onStartTurn was only called postSegment12.  This was preventing the consumption of END for continuous powers.
 
 ## Version 3.0.71
 

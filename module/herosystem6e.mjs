@@ -20,7 +20,7 @@ import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
-import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
+// import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import SettingsHelpers from "./settings/settings-helpers.mjs";
 import { HeroSystem6eTokenHud } from "./bar3/tokenHud.mjs";
 import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
@@ -89,7 +89,7 @@ Hooks.once("init", async function () {
     );
 
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-    CONFIG.ui.combat = HeroSystem6eCombatTracker;
+    //CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     HeroRuler.initialize();
 

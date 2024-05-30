@@ -1,5 +1,5 @@
 import { HEROSYS } from "./herosystem6e.mjs";
-import { clamp } from "./utility/compatibility.mjs";
+import { clamp, isGameV12OrLater } from "./utility/compatibility.mjs";
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
@@ -256,8 +256,17 @@ export class HeroSystem6eCombat extends Combat {
 
     /** @inheritdoc */
     _onUpdate(data, options, userId) {
-        //console.log("_onUpdate", data, options, userId);
+        const priorState = foundry.utils.deepClone(this.current);
         super._onUpdate(data, options, userId);
+
+        // KLUGE: FoundryVTT V12 added a stateChanged check before calling manageTurnEvents that breaks our system.
+        // The default #recordPreviousState looks for the same CombatantID, which we typically have several.
+        // We use a Hero6e version #recordPreviousState.
+        if (isGameV12OrLater()) {
+            const stateChanged = this.#recordPreviousState(priorState);
+            if (stateChanged && options.turnEvents !== false)
+                this._manageTurnEvents();
+        }
 
         // _onUpdate isn't async, so can't call await.
         // Without await is seems to loose track of turn (go from turn=0 to turn=last ).
@@ -443,7 +452,8 @@ export class HeroSystem6eCombat extends Combat {
             current.combatantId !== priorState.combatantId ||
             current.round !== priorState.round ||
             current.turn !== priorState.turn;
-        if (hasChanged) this.previous = priorState;
+        if (hasChanged) this.previous = priorState; // FoundytVTT V11
+        return hasChanged; // FoundtyVTT v12
     }
 
     async _onActorDataUpdate(...args) {
