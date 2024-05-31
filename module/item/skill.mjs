@@ -100,6 +100,29 @@ async function skillRoll(item, actor, html) {
         }
     }
 
+    // Cost END?
+    const endUse = parseInt(item.system.end);
+    const costEnd = item.findModsByXmlid("COSTSEND");
+    if (costEnd && endUse && item.actor) {
+        const newEnd =
+            parseInt(item.actor.system.characteristics.end.value) - endUse;
+
+        if (newEnd >= 0) {
+            await item.actor.update({
+                "system.characteristics.end.value": newEnd,
+            });
+        } else {
+            const chatData = {
+                user: game.user._id,
+                content: `Insufficient END to use ${item.name}.`,
+                speaker: speaker,
+            };
+
+            await ChatMessage.create(chatData);
+            return;
+        }
+    }
+
     const form = html[0].querySelector("form");
     const skillRoller = new HeroRoller().addDice(3);
 
@@ -153,6 +176,11 @@ async function skillRoll(item, actor, html) {
         });
         await item._postUpload();
         rollHtml += `<p>Spent 1 charge.</p>`;
+    }
+
+    // END
+    if (costEnd && endUse && item.actor) {
+        rollHtml += `<p>Spent ${endUse} END.</p>`;
     }
 
     // render card
