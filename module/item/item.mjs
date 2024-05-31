@@ -1095,7 +1095,11 @@ export class HeroSystem6eItem extends Item {
                     (o) => o.XMLID == "CONTINUING",
                 )?.OPTIONID,
             };
-            if (this.system.charges?.value === undefined) {
+            if (
+                this.system.charges?.value === undefined ||
+                this.system.charges?.value === null
+            ) {
+                console.log("Invalid charges. Resetting to max", this);
                 this.system.charges.value ??= this.system.charges.max;
                 changed = true;
             }

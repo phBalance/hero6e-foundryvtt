@@ -88,7 +88,10 @@ async function skillRoll(item, actor, html) {
     // Charges?
     const charges = item.findModsByXmlid("CHARGES");
     if (charges) {
-        if (parseInt(item.system.charges.value) <= 0) {
+        if (
+            !item.system.charges?.value ||
+            parseInt(item.system.charges?.value) <= 0
+        ) {
             const chatData = {
                 user: game.user._id,
                 content: `${item.name} has no charges remaining.`,
