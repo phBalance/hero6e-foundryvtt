@@ -443,10 +443,16 @@ export class HeroSystem6eItem extends Item {
             let end = parseInt(this.system.end);
             let value = parseInt(this.actor.system.characteristics.end.value);
             if (end > value) {
-                ui.notifications.error(
-                    `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.`,
-                );
-                return;
+                if (event?.ctrlKey) {
+                    ui.notifications.info(
+                        `${game.user.name} used CTRL key to force <b>${this.name}</b> on.`,
+                    );
+                } else {
+                    ui.notifications.error(
+                        `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.  Hold CTRL to force.`,
+                    );
+                    return;
+                }
             }
 
             // Only spend the END if we are in combat.
