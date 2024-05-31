@@ -198,6 +198,10 @@ export class HeroSystem6eItem extends Item {
         if (this.system.value !== this.system.max) {
             await this.update({ ["system.value"]: this.system.max });
         }
+
+        if (this.type === "maneuver" && this.system.active) {
+            await this.update({ ["system.active"]: false });
+        }
     }
 
     // Largely used to determine if we can drag to hotbar
