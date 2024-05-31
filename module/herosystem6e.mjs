@@ -446,16 +446,33 @@ Hooks.once("ready", async function () {
     }
 });
 
-// Remove Character from selectable actor types
+// New Actor Dialog
 Hooks.on("renderDialog", (dialog, html) => {
     if (
-        html[0].querySelector(".window-title").textContent != "Create New Actor"
+        html[0].querySelector(".window-title").textContent !=
+            "Create New Actor" &&
+        html[0].querySelector(".window-title").textContent != "Create New Item"
     )
         return;
-    let option = html[0].querySelector("option[value*='character']");
-    if (option) option.remove();
 
-    // rename base2 to base
+    // Remove legacy actor types
+    const characterOption = html[0].querySelector("option[value*='character']");
+    if (characterOption) characterOption.remove();
+
+    // Remove legacy/improper item types
+    // TODO: Replace with a list of valid powers instead of a freeform item, which probably doesn't work anyway.
+    const attackOption = html[0].querySelector("option[value*='attack']");
+    if (attackOption) attackOption.remove();
+    const defenseOption = html[0].querySelector("option[value*='defense']");
+    if (defenseOption) defenseOption.remove();
+    const maneuverOption = html[0].querySelector("option[value*='maneuver']");
+    if (maneuverOption) maneuverOption.remove();
+    const miscOption = html[0].querySelector("option[value*='misc']");
+    if (miscOption) miscOption.remove();
+    const movementOption = html[0].querySelector("option[value*='movement']");
+    if (movementOption) movementOption.remove();
+
+    // rename base2 to base (v11)
     let base2 = html[0].querySelector("option[value*='base2']");
     if (base2) base2.text = base2.text.replace("2", "");
 });

@@ -213,5 +213,28 @@
             "Name": "Use Stunned",
             "Hint": "Automate applying the stunned condition."
         }        
+    },
+
+    "TYPES": {
+        "Actor": {
+            "ai": "AI",
+            "automaton": "Automaton",
+            "base2": "Base",
+            "computer": "Computer",
+            "npc": "NPC",
+            "pc": "PC",
+            "vehicle": "Vehicle"
+        },
+        "Item": {
+            "complication": "Complication",
+            "disadvantage": "Disadvantage",
+            "equipment": "Equipment",
+            "martialart": "Martial Art",
+            "perk": "Perk",
+            "power": "Power",
+            "skill": "Skill",
+            "talent": "Talent"
+        }
     }
 }
+
