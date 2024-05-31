@@ -135,6 +135,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                     item.system.active = !actorEffects.disabled;
                 }
             }
+            if (item.baseInfo?.behaviors?.includes("activatable")) {
+                item.system.showToggle = true;
+            }
 
             // Item in a Framework?
             if (item.parentItem) {
@@ -1018,7 +1021,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             .closest("[data-item-id]")
             .data().itemId;
         const item = this.actor.items.get(itemId);
-        item.toggle();
+        item.toggle(event);
     }
 
     async _onItemEdit(event) {
