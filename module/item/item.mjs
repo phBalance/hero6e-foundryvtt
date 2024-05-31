@@ -182,6 +182,7 @@ export class HeroSystem6eItem extends Item {
             await this.update({
                 [`system.charges.value`]: this.system.charges.max,
             });
+            await this._postUpload();
         }
 
         // Remove temporary effects
@@ -197,6 +198,10 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.value !== this.system.max) {
             await this.update({ ["system.value"]: this.system.max });
+        }
+
+        if (this.type === "maneuver" && this.system.active) {
+            await this.update({ ["system.active"]: false });
         }
     }
 
@@ -443,10 +448,16 @@ export class HeroSystem6eItem extends Item {
             let end = parseInt(this.system.end);
             let value = parseInt(this.actor.system.characteristics.end.value);
             if (end > value) {
-                ui.notifications.error(
-                    `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.`,
-                );
-                return;
+                if (event?.ctrlKey) {
+                    ui.notifications.info(
+                        `${game.user.name} used CTRL key to force <b>${this.name}</b> on.`,
+                    );
+                } else {
+                    ui.notifications.error(
+                        `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.  Hold CTRL to force.`,
+                    );
+                    return;
+                }
             }
 
             // Only spend the END if we are in combat.
@@ -3433,7 +3444,16 @@ export class HeroSystem6eItem extends Item {
             case "CHARGES":
                 {
                     // 1 Recoverable Continuing Charge lasting 1 Minute
-                    result += ", " + modifier.OPTION_ALIAS;
+                    result += ", ";
+                    const maxCharges = parseInt(modifier.OPTION_ALIAS);
+                    if (maxCharges != parseInt(this.system.charges.max)) {
+                        console.error("CHARGES mismatch", item);
+                    }
+                    const currentCharges = parseInt(this.system.charges.value);
+                    if (currentCharges != maxCharges) {
+                        result += `${currentCharges}/`;
+                    }
+                    result += modifier.OPTION_ALIAS;
 
                     let recoverable = (modifier.ADDER || []).find(
                         (o) => o.XMLID == "RECOVERABLE",
@@ -3449,10 +3469,7 @@ export class HeroSystem6eItem extends Item {
                         result += " " + continuing.ALIAS;
                     }
 
-                    result +=
-                        parseInt(modifier.OPTION_ALIAS) > 1
-                            ? " Charges"
-                            : " Charge";
+                    result += maxCharges > 1 ? " Charges" : " Charge";
 
                     if (continuing) {
                         result += " lasting " + continuing.OPTION_ALIAS;

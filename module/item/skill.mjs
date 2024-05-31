@@ -81,6 +81,48 @@ export async function createSkillPopOutFromItem(item, actor) {
 }
 
 async function skillRoll(item, actor, html) {
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+    speaker.alias = actor.name;
+
+    // Charges?
+    const charges = item.findModsByXmlid("CHARGES");
+    if (charges) {
+        if (parseInt(item.system.charges.value) <= 0) {
+            const chatData = {
+                user: game.user._id,
+                content: `${item.name} has no charges remaining.`,
+                speaker: speaker,
+            };
+
+            await ChatMessage.create(chatData);
+            return;
+        }
+    }
+
+    // Cost END?
+    const endUse = parseInt(item.system.end);
+    const costEnd = item.findModsByXmlid("COSTSEND");
+    if (costEnd && endUse && item.actor) {
+        const newEnd =
+            parseInt(item.actor.system.characteristics.end.value) - endUse;
+
+        if (newEnd >= 0) {
+            await item.actor.update({
+                "system.characteristics.end.value": newEnd,
+            });
+        } else {
+            const chatData = {
+                user: game.user._id,
+                content: `Insufficient END to use ${item.name}.`,
+                speaker: speaker,
+            };
+
+            await ChatMessage.create(chatData);
+            return;
+        }
+    }
+
     const form = html[0].querySelector("form");
     const skillRoller = new HeroRoller().addDice(3);
 
@@ -115,7 +157,7 @@ async function skillRoll(item, actor, html) {
     }
 
     await skillRoller.makeSuccessRoll(true, successValue).roll();
-    const succeeded = skillRoller.getSuccess();
+    let succeeded = skillRoller.getSuccess();
     const autoSuccess = skillRoller.getAutoSuccess();
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
@@ -125,11 +167,21 @@ async function skillRoll(item, actor, html) {
     } by ${
         autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
     }`;
-    const rollHtml = await skillRoller.render(flavor);
+    let rollHtml = await skillRoller.render(flavor);
 
-    const token = actor.token;
-    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    speaker.alias = actor.name;
+    // Charges
+    if (charges) {
+        await item.update({
+            "system.charges.value": parseInt(item.system.charges.value) - 1,
+        });
+        await item._postUpload();
+        rollHtml += `<p>Spent 1 charge.</p>`;
+    }
+
+    // END
+    if (costEnd && endUse && item.actor) {
+        rollHtml += `<p>Spent ${endUse} END.</p>`;
+    }
 
     // render card
     const cardData = {

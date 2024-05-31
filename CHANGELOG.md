@@ -13,7 +13,8 @@
 - Fixed combat tracker issues with FoundtyVTT V12 where onStartTurn was only called postSegment12. This was preventing the consumption of END for continuous powers. [#1024](https://github.com/dmdorman/hero6e-foundryvtt/issues/1024)
 - Movement radio buttons now display even when [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) is not active.  Unslecting a token removes movement radio buttons to avoid confusion.
 - Fixed various issue preventing the ability to toggle some powers.
-- You can hold down the control key when toggeling a power on to force success of associated Requires A Roll.  Useful for GM's.
+- You can hold down the control key when toggeling a power to force success of associated Requires A Roll.  Useful for GM's.
+- Skills now support CHARGES and COSTEND modifiers. [#908](https://github.com/dmdorman/hero6e-foundryvtt/issues/908)
 
 
 ## Version 3.0.71
