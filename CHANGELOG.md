@@ -6,12 +6,14 @@
   - [Dice So Nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice) seems to work just fine.
   - [Simple Calendar](https://github.com/vigoren/foundryvtt-simple-calendar) seems to work just fine.
   - [About Face](https://foundryvtt.com/packages/about-face) seems to work just fine.
-  - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) seems to work just fine.  Had to delete all the bars and recreate them, but works.  We plan to drop the built in 3rd bar support as Bar Brawl is superior.
-  - [Elevation Ruler](https://foundryvtt.com/packages/elevationruler) is not currently recommended, but we are looking into Drag Ruler alternatives.  It overrides our custom labels that show movement type and range penalties.  Dropped tokens don't always center in hex.
-  - We have more testing to do, this list is not comprehensive.  Feel free to submit [bug/issues](https://github.com/dmdorman/hero6e-foundryvtt/issues) if you find any v12 bugs that we havne't mentioned.
-- Improved chat messages during combat for powers that use END each phase.  Powers automatically turn off when there is insufficient END.  GM gets message when any power is toggled.
-- Fixed combat tracker issues with FoundtyVTT V12 where onStartTurn was only called postSegment12.  This was preventing the consumption of END for continuous powers. [#1024](https://github.com/dmdorman/hero6e-foundryvtt/issues/1024)
+  - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) seems to work just fine.  Had to delete some the bars and recreate them, but works. We plan to drop the built in 3rd bar support as Bar Brawl is superior.
+  - [Elevation Ruler](https://foundryvtt.com/packages/elevationruler) is not currently recommended, but we are looking into Drag Ruler alternatives. It overrides our custom labels that show movement type and range penalties.  Dropped tokens don't always center in hex.
+  - We have more testing to do, this list is not comprehensive. Feel free to submit [bug/issues](https://github.com/dmdorman/hero6e-foundryvtt/issues) if you find any v12 bugs that we havne't mentioned.
+- Improved chat messages during combat for powers that use END each phase. Powers automatically turn off when there is insufficient END.  GM gets message when any power is toggled.
+- Fixed combat tracker issues with FoundtyVTT V12 where onStartTurn was only called postSegment12. This was preventing the consumption of END for continuous powers. [#1024](https://github.com/dmdorman/hero6e-foundryvtt/issues/1024)
 - Movement radio buttons now display even when [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) is not active.  Unslecting a token removes movement radio buttons to avoid confusion.
+- Fixed various issue preventing the ability to toggle some powers.
+- You can hold down the control key when toggeling a power on to force success of associated Requires A Roll.  Useful for GM's.
 
 
 ## Version 3.0.71

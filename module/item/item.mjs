@@ -431,7 +431,7 @@ export class HeroSystem6eItem extends Item {
         ChatMessage.create(chatData);
     }
 
-    async toggle() {
+    async toggle(event) {
         let item = this;
 
         if (!item.system.active) {
@@ -478,7 +478,7 @@ export class HeroSystem6eItem extends Item {
                 await ChatMessage.create(chatData);
             }
 
-            const success = await RequiresASkillRollCheck(this);
+            const success = await RequiresASkillRollCheck(this, event);
             if (!success) {
                 return;
             }
@@ -540,6 +540,7 @@ export class HeroSystem6eItem extends Item {
                         await item.update({ [attr]: newValue });
                     }
 
+                    // Check if there is an ActiveEffect associated with this item
                     if (firstAE) {
                         const newState = !newValue;
                         await item.update({ [attr]: newState });
@@ -553,6 +554,8 @@ export class HeroSystem6eItem extends Item {
                         for (const activeEffect of effects) {
                             await onActiveEffectToggle(activeEffect, newState);
                         }
+                    } else {
+                        await item.update({ [attr]: newValue });
                     }
                 }
                 break;
@@ -4496,7 +4499,7 @@ export function getItem(id) {
     return null;
 }
 
-export async function RequiresASkillRollCheck(item) {
+export async function RequiresASkillRollCheck(item, event) {
     // Toggles don't need a roll to turn off
     if (item.system?.active === true) return true;
 
@@ -4545,8 +4548,12 @@ export async function RequiresASkillRollCheck(item) {
                             ];
                         if (char) {
                             ui.notifications.warn(
-                                `${item.name} incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`,
+                                `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`,
+                                // { console: true, permanent: true },
                             );
+
+                            // Lets try anyway
+                            value = char?.roll;
                         }
                     }
                     if (skill) {
@@ -4571,7 +4578,8 @@ export async function RequiresASkillRollCheck(item) {
                         OPTION_ALIAS += ` ${value}-`;
                     } else {
                         ui.notifications.warn(
-                            `Expecting 'SKILL roll', where SKILL is the name of an owned skill.`,
+                            `${item.actor.name} has a power ${item.name}. Expecting 'SKILL roll', where SKILL is the name of an owned skill.`,
+                            // { console: true, permanent: true },
                         );
                     }
                 }
@@ -4605,7 +4613,8 @@ export async function RequiresASkillRollCheck(item) {
                         OPTION_ALIAS += ` ${value}-`;
                     } else {
                         ui.notifications.warn(
-                            `Expecting 'CHAR roll', where CHAR is the name of a characteristic.`,
+                            `${item.actor.name} has a power ${item.name}. Expecting 'CHAR roll', where CHAR is the name of a characteristic.`,
+                            // { console: true, permanent: true },
                         );
                     }
                 }
@@ -4613,8 +4622,14 @@ export async function RequiresASkillRollCheck(item) {
 
             default:
                 if (!value) {
-                    ui.notifications.warn(`${OPTION_ALIAS} is not supported.`);
+                    ui.notifications.warn(
+                        `${item.actor.name} has a power ${item.name}. ${OPTION_ALIAS} is not supported.`,
+                        // { console: true, permanent: true },
+                    );
                 }
+
+                // Try to continue
+                value = 11;
         }
 
         const successValue = parseInt(value);
@@ -4622,7 +4637,7 @@ export async function RequiresASkillRollCheck(item) {
             .makeSuccessRoll(true, successValue)
             .addDice(3);
         await activationRoller.roll();
-        const succeeded = activationRoller.getSuccess();
+        let succeeded = activationRoller.getSuccess();
         const autoSuccess = activationRoller.getAutoSuccess();
         const total = activationRoller.getSuccessTotal();
         const margin = successValue - total;
@@ -4634,7 +4649,16 @@ export async function RequiresASkillRollCheck(item) {
                 ? `${Math.abs(margin)}`
                 : `rolling ${total}`
         }`;
-        const cardHtml = await activationRoller.render(flavor);
+        let cardHtml = await activationRoller.render(flavor);
+
+        // FORCE success
+        if (!succeeded && event?.ctrlKey) {
+            ui.notifications.info(
+                `${item.actor.name} succeeded roll because ${game.user.name} used CTRL key.`,
+            );
+            succeeded = true;
+            cardHtml += `<p>Succeeded roll because ${game.user.name} used CTRL key.</p>`;
+        }
 
         const actor = item.actor;
         const token = actor.token;
