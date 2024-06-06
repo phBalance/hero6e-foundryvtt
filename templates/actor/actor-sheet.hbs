@@ -541,7 +541,7 @@
                                     </td>
                                     <td>{{item.system.realCost}}</td>
                                     <td class="left{{#if item.parentItem.type}} item-framework-child-name{{/if}}">
-                                        {{#if (and item.system.childIdx item.system.parentItem)}}
+                                        {{#if (and item.system.childIdx item.parentItem)}}
                                             {{item.system.childIdx}})
                                         {{/if}}
                                         {{{itemFullDescription item}}}
@@ -616,7 +616,7 @@
                                             height="24px" /></div>
                                 </td>
                                 
-                                <td class="left{{#if item.parentItem.type}} item-framework-child-name{{/if}}">
+                                <td class="left{{#if item.parentItem}} item-framework-child-name{{/if}}">
                                     {{#if item.system.childIdx}}
                                         {{item.system.childIdx}})
                                     {{/if}}
@@ -646,6 +646,12 @@
                                     </a>
                                 </td>
                             </tr>
+                        {{else}}
+                            {{!-- <tr>
+                                <td>
+                                    __{{item.name}} {{item.parentItem.type}}
+                                </td>
+                            </tr> --}}
                         {{/if}}
                     {{/each}}
                 </table>
