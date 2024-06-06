@@ -283,6 +283,7 @@ input.left {
 .actor-sheet .sidebar-actions {
     padding: 0;
     border: none;
+    display: block; // For savuori's wider sidebar
 }
 
 .actor-sheet .sidebar-actions button {
