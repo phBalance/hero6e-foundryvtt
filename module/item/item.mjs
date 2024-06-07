@@ -291,7 +291,7 @@ export class HeroSystem6eItem extends Item {
                         ui.notifications.warn(
                             `${this.system.XMLID} roll is not fully supported`,
                         );
-                        return Attack.AttackOptions(this);
+                        return Attack.AttackOptions(this, event);
                 }
 
             case "defense":
@@ -3674,9 +3674,9 @@ export class HeroSystem6eItem extends Item {
     makeAttack() {
         // this.id will be null for temporary items (quench, defense left sidebar summary on actor sheet)
         // Keep this as it is handy for breakpoints
-        if (this.id) {
-            console.log("makeAttack", this);
-        }
+        // if (this.id) {
+        //     console.log("makeAttack", this);
+        // }
 
         const xmlid = this.system.XMLID;
 
@@ -3738,6 +3738,15 @@ export class HeroSystem6eItem extends Item {
                         levels += parseInt(match[0]) * 5; // Below we take these levels (as STR) and determine dice
                     }
                 }
+            }
+        }
+
+        // Fix CHOKE
+        if (this.system.EFFECT?.includes("NND")) {
+            const nndd6 = this.system.EFFECT.match(/NND (\d+)d6/);
+            const d6 = parseInt(nndd6?.[1]);
+            if (d6 > 0) {
+                this.system.DC = d6 * 2; // Were going to halve it later on in this function due to NND;
             }
         }
 
