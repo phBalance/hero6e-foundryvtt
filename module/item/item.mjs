@@ -3757,7 +3757,7 @@ export class HeroSystem6eItem extends Item {
         this.system.dcv = dcv;
         this.system.stunBodyDamage = "stunbody";
 
-        // FLASHDC, BLOCK and DODGE do not use STR
+        // FLASHDC, BLOCK, DODGE do not use STR
         if (["maneuver", "martialart"].includes(this.type)) {
             if (
                 this.system.EFFECT &&
@@ -3767,6 +3767,17 @@ export class HeroSystem6eItem extends Item {
             ) {
                 this.system.usesStrength = false;
             }
+        }
+
+        // MAXSTR = 0 does not use STR (NNDs for example)
+        if (this.system.MAXSTR && parseInt(this.system.MAXSTR) === 0) {
+            this.system.usesStrength = false;
+        }
+
+        // NND (the DC should be halved; suspect because of AVAD/NND implied limitation; Nerve Strike)
+        if (this.system.EFFECT?.includes("NND")) {
+            this.system.dice = Math.floor(parseInt(this.system.DC) / 2);
+            this.system.usesStrength = false;
         }
 
         // Specific power overrides
