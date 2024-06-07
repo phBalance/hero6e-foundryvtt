@@ -51,7 +51,7 @@ Our support ratings:
 | LANGUAGE | A | |
 | LIPREADING | A | |
 | LOCKPICKING | A | |
-| MARTIAL ARTS | C | Good strike, block, dodge support. No weapon element, no NND, no escape |
+| MARTIAL ARTS | C | Good strike, block, dodge support. No weapon element, limited NND, no escape |
 | MECHANICS | A | |
 | MIMICRY | A | |
 | MOVEMENT SKILL LEVELS | D | |
@@ -212,7 +212,7 @@ Our support ratings:
 | ALWAYS ON | D |  |
 | AREA OF EFFECT | B | Any surface not supported, 5e radius and cone templates not correct when bigger than ~7 hexes |
 | ARMOR PIERCING | A | |
-| ATTACK VERSUS ALTERNATE DEFENSE | D |  |
+| ATTACK VERSUS ALTERNATE DEFENSE (AVAD)| B | Prompted to verify defenses |
 | AUTOFIRE | B | Good single target support, poor multiple target support  |
 | BACKLASH | D |  |
 | BASED ON CON | D |  |

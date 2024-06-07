@@ -1005,6 +1005,14 @@ function getAttackTags(item) {
         }
     }
 
+    // MartialArts NND
+    if (item.system.EFFECT?.includes("NND")) {
+        attackTags.push({
+            name: `NND`,
+            title: `No Normal Defense`,
+        });
+    }
+
     return attackTags;
 }
 
@@ -1600,7 +1608,16 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     const automation = game.settings.get(HEROSYS.module, "automation");
 
-    const avad = item.findModsByXmlid("AVAD");
+    // Attack Verses Alternate Defense
+    let avad = item.findModsByXmlid("AVAD");
+
+    // Martial Arts also have NND's which are special AVAD and always/usually PD
+    if (!avad && item.system.EFFECT?.includes("NND")) {
+        avad = {
+            INPUT: "PD",
+        };
+        item.system.INPUT = "PD";
+    }
 
     // Check for conditional defenses
     let ignoreDefenseIds = [];
@@ -1625,6 +1642,36 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         conditionalDefenses.push(...lifeSupport);
     }
 
+    // AVAD characteristic defenses (PD/ED)
+    if (avad) {
+        const pd = parseInt(token.actor.system.characteristics.pd.value);
+        if (pd > 0 && item.system.INPUT === "PD") {
+            conditionalDefenses.push({
+                name: "PD",
+                id: "PD",
+                system: {
+                    XMLID: "PD",
+                    INPUT: "Physical",
+                    LEVELS: pd,
+                    description: `${pd} PD from characteristics`,
+                },
+            });
+        }
+        const ed = parseInt(token.actor.system.characteristics.pd.value);
+        if (ed > 0 && item.system.INPUT === "ED") {
+            conditionalDefenses.push({
+                name: "ED",
+                id: "ED",
+                system: {
+                    XMLID: "ED",
+                    INPUT: "Energy",
+                    LEVELS: ed,
+                    description: `${ed} ED from characteristics`,
+                },
+            });
+        }
+    }
+
     if (conditionalDefenses.length > 0) {
         const template2 = `systems/${HEROSYS.module}/templates/attack/item-conditional-defense-card.hbs`;
 
@@ -1637,43 +1684,44 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 conditions: "",
             };
 
-            // AVAD: Attempt to check likely defenses
-            if (avad) {
-                // PD, ED, MD
-                if (avad.INPUT.toUpperCase() === defense.system.XMLID)
-                    option.checked = true;
+            // Attempt to check likely defenses
 
+            // PD, ED, MD
+            if (avad.INPUT?.toUpperCase() === defense?.system?.XMLID)
+                option.checked = true;
+
+            if (defense instanceof HeroSystem6eItem) {
                 // Damage Reduction
                 if (
-                    avad.INPUT.toUpperCase() == "PD" &&
+                    avad.INPUT?.toUpperCase() == "PD" &&
                     defense.system.INPUT === "Physical"
                 )
                     option.checked = true;
                 if (
-                    avad.INPUT.toUpperCase() == "ED" &&
-                    defense.system.INPUT === "Energy"
+                    avad.INPUT?.toUpperCase() == "ED" &&
+                    defense.system?.INPUT === "Energy"
                 )
                     option.checked = true;
                 if (
                     avad.INPUT.replace("Mental Defense", "MD").toUpperCase() ==
                         "MD" &&
-                    defense.system.INPUT === "Mental"
+                    defense.system?.INPUT === "Mental"
                 )
                     option.checked = true;
 
                 // Damage Negation
                 if (
-                    avad.INPUT.toUpperCase() == "PD" &&
+                    avad.INPUT?.toUpperCase() == "PD" &&
                     defense.findModsByXmlid("PHYSICAL")
                 )
                     option.checked = true;
                 if (
-                    avad.INPUT.toUpperCase() == "ED" &&
-                    defense.findModsByXmlid("ENERGY")
+                    avad.INPUT?.toUpperCase() == "ED" &&
+                    defense?.findModsByXmlid("ENERGY")
                 )
                     option.checked = true;
                 if (
-                    avad.INPUT.replace("Mental Defense", "MD").toUpperCase() ==
+                    avad.INPUT?.replace("Mental Defense", "MD").toUpperCase() ==
                         "MD" &&
                     defense.findModsByXmlid("MENTAL")
                 )
@@ -1681,21 +1729,21 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
                 // Flash Defense
                 if (
-                    avad.INPUT.match(/flash/i) &&
+                    avad.INPUT?.match(/flash/i) &&
                     defense.system.XMLID === "FLASHDEFENSE"
                 )
                     option.checked = true;
 
                 // Power Defense
                 if (
-                    avad.INPUT.match(/power/i) &&
+                    avad.INPUT?.match(/power/i) &&
                     defense.system.XMLID === "POWERDEFENSE"
                 )
                     option.checked = true;
 
                 // Life Support
                 if (
-                    avad.INPUT.match(/life/i) &&
+                    avad.INPUT?.match(/life/i) &&
                     defense.system.XMLID === "LIFESUPPORT"
                 )
                     option.checked = true;
@@ -1722,23 +1770,23 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
                 // FORCEFIELD, RESISTANT PROTECTION
                 if (
-                    avad.INPUT.toUpperCase() == "PD" &&
+                    avad.INPUT?.toUpperCase() == "PD" &&
                     parseInt(defense.system.PDLEVELS || 0) > 0
                 )
                     option.checked = true;
                 if (
-                    avad.INPUT.toUpperCase() == "ED" &&
+                    avad.INPUT?.toUpperCase() == "ED" &&
                     parseInt(defense.system.EDLEVELS || 0) > 0
                 )
                     option.checked = true;
                 if (
-                    avad.INPUT.replace("Mental Defense", "MD").toUpperCase() ==
+                    avad.INPUT?.replace("Mental Defense", "MD").toUpperCase() ==
                         "MD" &&
                     parseInt(defense.system.MDLEVELS || 0) > 0
                 )
                     option.checked = true;
                 if (
-                    avad.INPUT.match(/power/i) &&
+                    avad.INPUT?.match(/power/i) &&
                     parseInt(defense.system.POWDLEVELS || 0) > 0
                 )
                     option.checked = true;
@@ -1791,7 +1839,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         for (let input of inputs) {
             if (!input.checked) {
                 ignoreDefenseIds.push(input.id);
-                defenses.push(token.actor.items.get(input.id));
+                defenses.push(
+                    token.actor.items.get(input.id) ||
+                        conditionalDefenses.find((o) => o.id === input.id),
+                );
             }
         }
 
@@ -1867,7 +1918,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // AVAD All or Nothing
     if (avad) {
-        const nnd = avad.ADDER.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
+        const nnd = avad.ADDER?.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
         if (nnd && damageData.defenseAvad === 0) {
             // render card
             let speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -2041,6 +2092,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
         // misc
         tags: defenseTags,
+        attackTags: getAttackTags(item),
         targetToken: token,
     };
 
