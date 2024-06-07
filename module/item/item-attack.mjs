@@ -1608,8 +1608,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     const automation = game.settings.get(HEROSYS.module, "automation");
 
-    // Attack Verses Alternate Defense
-    let avad = item.findModsByXmlid("AVAD");
+    // Attack Verses Alternate Defense (6e) or NND (5e)
+    let avad = item.findModsByXmlid("AVAD") || item.findModsByXmlid("NND");
 
     // Martial Arts also have NND's which are special AVAD and always/usually PD
     if (!avad && item.system.EFFECT?.includes("NND")) {
@@ -1617,6 +1617,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             INPUT: "PD",
         };
         item.system.INPUT = "PD";
+    }
+
+    // Try to make sure we have a PD/ED/MD type for AVAD
+    if (avad && !avad.INPUT && item.system.INPUT) {
+        avad.INPUT = item.system.INPUT;
     }
 
     // Check for conditional defenses
