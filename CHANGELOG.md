@@ -1,6 +1,9 @@
 # Releases
 
-## Version 3.0.73 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.74 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Improvments to AVAD and NND attacks.
+
+## Version 3.0.73
 - Fix for PC actor sheets failing to open when actor has frameworks or compound equipment. [#1036](https://github.com/dmdorman/hero6e-foundryvtt/issues/1036)
 - The alternate Savuori actor sheet logic now uses the default actor sheet. It still retains the simpler color scheme.
 
