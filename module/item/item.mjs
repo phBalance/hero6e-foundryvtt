@@ -291,7 +291,7 @@ export class HeroSystem6eItem extends Item {
                         ui.notifications.warn(
                             `${this.system.XMLID} roll is not fully supported`,
                         );
-                        return Attack.AttackOptions(this);
+                        return Attack.AttackOptions(this, event);
                 }
 
             case "defense":
@@ -3674,9 +3674,9 @@ export class HeroSystem6eItem extends Item {
     makeAttack() {
         // this.id will be null for temporary items (quench, defense left sidebar summary on actor sheet)
         // Keep this as it is handy for breakpoints
-        if (this.id) {
-            console.log("makeAttack", this);
-        }
+        // if (this.id) {
+        //     console.log("makeAttack", this);
+        // }
 
         const xmlid = this.system.XMLID;
 
@@ -3741,6 +3741,15 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Fix CHOKE
+        if (this.system.EFFECT?.includes("NND")) {
+            const nndd6 = this.system.EFFECT.match(/NND (\d+)d6/);
+            const d6 = parseInt(nndd6?.[1]);
+            if (d6 > 0) {
+                this.system.DC = d6 * 2; // Were going to halve it later on in this function due to NND;
+            }
+        }
+
         this.system.subType = "attack";
         this.system.class = input === "ED" ? "energy" : "physical";
         this.system.dice = levels;
@@ -3757,7 +3766,7 @@ export class HeroSystem6eItem extends Item {
         this.system.dcv = dcv;
         this.system.stunBodyDamage = "stunbody";
 
-        // FLASHDC, BLOCK and DODGE do not use STR
+        // FLASHDC, BLOCK, DODGE do not use STR
         if (["maneuver", "martialart"].includes(this.type)) {
             if (
                 this.system.EFFECT &&
@@ -3767,6 +3776,21 @@ export class HeroSystem6eItem extends Item {
             ) {
                 this.system.usesStrength = false;
             }
+        }
+
+        // MAXSTR = 0 does not use STR (NNDs for example)
+        if (this.system.MAXSTR && parseInt(this.system.MAXSTR) === 0) {
+            this.system.usesStrength = false;
+        }
+
+        // NND (the DC should be halved; suspect because of AVAD/NND implied limitation; Nerve Strike)
+        if (this.system.EFFECT?.includes("NND")) {
+            this.system.dice = Math.floor(parseInt(this.system.DC) / 2);
+            this.system.usesStrength = false;
+            this.system.EFFECT = this.system.EFFECT.replace(
+                `[NNDDC]`,
+                `${this.system.dice}d6 NND`,
+            );
         }
 
         // Specific power overrides
