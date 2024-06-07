@@ -3778,6 +3778,10 @@ export class HeroSystem6eItem extends Item {
         if (this.system.EFFECT?.includes("NND")) {
             this.system.dice = Math.floor(parseInt(this.system.DC) / 2);
             this.system.usesStrength = false;
+            this.system.EFFECT = this.system.EFFECT.replace(
+                `[NNDDC]`,
+                `${this.system.dice}d6 NND`,
+            );
         }
 
         // Specific power overrides
