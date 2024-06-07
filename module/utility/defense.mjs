@@ -5,7 +5,7 @@ function determineDefense(targetActor, attackItem, options) {
         console.error("Invalid attackItem", attackItem);
     }
 
-    const avad = attackItem.findModsByXmlid("AVAD");
+    //const avad = attackItem.findModsByXmlid("AVAD");
     //const attackType = avad ? "avad" : attackItem.system.class;
     let attackType = attackItem.system.class;
     if (attackType === "avad") {
