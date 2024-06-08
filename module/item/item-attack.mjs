@@ -1886,6 +1886,22 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
+    // Some defenses requre a roll not just to active, but on each use.
+    const defenseEveryPhase = token.actor.items.filter(
+        (o) =>
+            (o.system.subType || o.system.type) === "defense" &&
+            o.system.active &&
+            o.findModsByXmlid("EVERYPHASE"),
+    );
+    for (const defense of defenseEveryPhase) {
+        if (!ignoreDefenseIds.includes(defense.id)) {
+            const success = await RequiresASkillRollCheck(defense);
+            if (!success) {
+                ignoreDefenseIds.push(defense.id);
+            }
+        }
+    }
+
     // -------------------------------------------------
     // determine active defenses
     // -------------------------------------------------

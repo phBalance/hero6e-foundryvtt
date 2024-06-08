@@ -4671,10 +4671,9 @@ export async function RequiresASkillRollCheck(item, event) {
                         `${item.actor.name} has a power ${item.name}. ${OPTION_ALIAS} is not supported.`,
                         // { console: true, permanent: true },
                     );
+                    // Try to continue
+                    value = 11;
                 }
-
-                // Try to continue
-                value = 11;
         }
 
         const successValue = parseInt(value);
