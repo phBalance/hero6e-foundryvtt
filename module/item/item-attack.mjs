@@ -1894,9 +1894,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             o.findModsByXmlid("EVERYPHASE"),
     );
     for (const defense of defenseEveryPhase) {
-        const success = await RequiresASkillRollCheck(defense);
-        if (!success) {
-            ignoreDefenseIds.push(defense.id);
+        if (!ignoreDefenseIds.includes(defense.id)) {
+            const success = await RequiresASkillRollCheck(defense);
+            if (!success) {
+                ignoreDefenseIds.push(defense.id);
+            }
         }
     }
 
