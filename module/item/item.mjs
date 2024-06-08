@@ -1301,6 +1301,73 @@ export class HeroSystem6eItem extends Item {
                                     break;
                             }
                             break;
+                        case "PENALTY_SKILL_LEVELS":
+                            // Skip mental powers
+                            if (attackItem.baseInfo.type.includes("mental")) {
+                                continue;
+                            }
+                            switch (this.system.OPTIONID) {
+                                case "SINGLE":
+                                    if (count === 0) {
+                                        // Is this part of a framework/compound power/list?
+                                        if (this.parentItem) {
+                                            if (
+                                                this.parentItem.id ===
+                                                attackItem.parentItem?.id
+                                            ) {
+                                                addMe = true;
+                                            }
+                                        } else {
+                                            addMe = true;
+                                        }
+
+                                        // Assumed penalty type
+                                        if (
+                                            addMe &&
+                                            [
+                                                "limited range",
+                                                "standard",
+                                                "range based on str",
+                                            ].includes(attackItem.system.range)
+                                        ) {
+                                            this.system.penalty ??= "range";
+                                        }
+                                    }
+                                    break;
+                                case "THREE":
+                                    if (count < 3) {
+                                        addMe = true;
+
+                                        // Assumed penalty type
+                                        if (
+                                            addMe &&
+                                            [
+                                                "limited range",
+                                                "standard",
+                                                "range based on str",
+                                            ].includes(attackItem.system.range)
+                                        ) {
+                                            this.system.penalty ??= "range";
+                                        }
+                                    }
+                                    break;
+                                case "ALL":
+                                    addMe = true;
+
+                                    // Assumed penalty type
+                                    if (
+                                        addMe &&
+                                        [
+                                            "limited range",
+                                            "standard",
+                                            "range based on str",
+                                        ].includes(attackItem.system.range)
+                                    ) {
+                                        this.system.penalty ??= "range";
+                                    }
+                                    break;
+                            }
+                            break;
                         case "MENTAL_COMBAT_LEVELS":
                             // Skip non-mental powers
                             if (!attackItem.baseInfo.type.includes("mental")) {
@@ -2650,6 +2717,16 @@ export class HeroSystem6eItem extends Item {
                     system.value +
                     " " +
                     system.OPTION_ALIAS;
+
+                // Penalty details
+                switch (system.penalty) {
+                    case "range":
+                        system.description = system.description.replace(
+                            "a specific negative OCV modifier",
+                            "range OCV penalties",
+                        );
+                        break;
+                }
                 break;
 
             case "RKA":
