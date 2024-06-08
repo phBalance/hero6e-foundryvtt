@@ -2712,7 +2712,7 @@ export class HeroSystem6eItem extends Item {
 
             case "PENALTY_SKILL_LEVELS":
                 system.description =
-                    system.NAME +
+                    (system.NAME || system.ALIAS) +
                     ": +" +
                     system.value +
                     " " +
@@ -2840,7 +2840,7 @@ export class HeroSystem6eItem extends Item {
             case "MENTAL_COMBAT_LEVELS":
             case "COMBAT_LEVELS":
                 // +1 with any single attack
-                system.description = `+${system.value} ${system.OPTION_ALIAS}`;
+                system.description = `${system.ALIAS}: +${system.value} ${system.OPTION_ALIAS}`;
                 break;
 
             case "WEAPON_MASTER":

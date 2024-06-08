@@ -186,8 +186,23 @@ export async function AttackAoeToHit(item, options) {
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (!(item.system.range === "los" || noRangeModifiers || normalRange)) {
-        const rangePenalty =
+        let rangePenalty =
             -calculateRangePenaltyFromDistanceInMetres(distanceToken);
+
+        // PENALTY_SKILL_LEVELS (range)
+        const pslRange = actor.items.find(
+            (o) =>
+                o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
+                o.system.penalty === "range",
+        );
+        if (pslRange) {
+            const pslValue = Math.min(
+                parseInt(pslRange.system.LEVELS),
+                -rangePenalty,
+            );
+            attackHeroRoller.addNumber(pslValue, "Penalty Skill Levels");
+        }
+
         if (rangePenalty) {
             attackHeroRoller.addNumber(rangePenalty, "Range penalty");
         }
@@ -350,6 +365,20 @@ export async function AttackToHit(item, options) {
         let factor = actor.system.is5e ? 4 : 8;
         let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
         rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
+
+        // PENALTY_SKILL_LEVELS (range)
+        const pslRange = actor.items.find(
+            (o) =>
+                o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
+                o.system.penalty === "range",
+        );
+        if (pslRange) {
+            const pslValue = Math.min(
+                parseInt(pslRange.system.LEVELS),
+                -rangePenalty,
+            );
+            heroRoller.addNumber(pslValue, "Penalty Skill Levels");
+        }
 
         if (rangePenalty) {
             heroRoller.addNumber(rangePenalty, "Range penalty");
