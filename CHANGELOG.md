@@ -8,7 +8,7 @@
 - Fix for PC actor sheets failing to open when actor has frameworks or compound equipment. [#1036](https://github.com/dmdorman/hero6e-foundryvtt/issues/1036)
 - The alternate Savuori actor sheet logic now uses the default actor sheet. It still retains the simpler color scheme.
 - Support for multiple Combat Skill Levels associated with an attack.
-- Combat Skill Levels purrchased as powers can be toggled.
+- Combat Skill Levels purrchased as powers can be toggled. [#995](https://github.com/dmdorman/hero6e-foundryvtt/issues/995)
 
 
 ## Version 3.0.72
