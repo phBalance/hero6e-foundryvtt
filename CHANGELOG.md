@@ -2,7 +2,7 @@
 
 ## Version 3.0.74 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Improvments to AVAD and NND attacks.
-- Fixed damage dice for Nerve Strike and similar martial NND attacks.
+- Fixed damage dice for Nerve Strike and similar martial NND attacks. [#885](https://github.com/dmdorman/hero6e-foundryvtt/issues/885)
 - Support for multiple Combat Skill Levels associated with an attack.
 - Combat Skill Levels purrchased as powers can be toggled. [#995](https://github.com/dmdorman/hero6e-foundryvtt/issues/995)
 
