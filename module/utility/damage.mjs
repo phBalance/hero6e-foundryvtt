@@ -416,7 +416,8 @@ export function CombatSkillLevelsForAttack(item) {
             ) &&
             (o.system.ADDER || []).find(
                 (p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name,
-            ),
+            ) &&
+            o.system.active != false,
     );
 
     for (const cslSkill of cslSkills) {
