@@ -368,14 +368,18 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    // Combat Skill Levels
-    let csl = CombatSkillLevelsForAttack(item)?.[0];
-    if (csl.ocv || csl.omcv > 0) {
-        heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
-    }
+    let dcv = parseInt(item.system.dcv || 0);
+    let dmcv = parseInt(item.system.dmcv || 0);
 
-    let dcv = parseInt(item.system.dcv || 0) + csl.dcv;
-    let dmcv = parseInt(item.system.dmcv || 0) + csl.dmcv;
+    // Combat Skill Levels
+
+    for (const csl of CombatSkillLevelsForAttack(item)) {
+        if (csl.ocv || csl.omcv > 0) {
+            heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
+        }
+        dcv += csl.dcv;
+        dmcv += csl.dmcv;
+    }
 
     // Haymaker -5 DCV
     const haymakerManeuver = item.actor.items.find(

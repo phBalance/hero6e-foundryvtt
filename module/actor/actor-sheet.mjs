@@ -166,7 +166,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 let cslSummary = {};
 
                 for (const csl of csls) {
-                    for (const prop of ["ocv", "omcv", "dcv", "dmcv"]) {
+                    for (const prop of ["ocv", "omcv", "dcv", "dmcv", "dc"]) {
                         cslSummary[prop] =
                             csl[prop] + parseInt(cslSummary[prop] || 0);
 

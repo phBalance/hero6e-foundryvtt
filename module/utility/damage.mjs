@@ -68,18 +68,23 @@ export function convertToDcFromItem(item, options) {
     }
 
     // Combat Skill Levels
-    const csl = CombatSkillLevelsForAttack(item)?.[0];
-    if (csl && csl.dc > 0) {
-        // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
-        dc += csl.dc;
 
-        // Each DC should roughly be 5 active points
-        // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
-        // let ratio = (dcPerAp || 5) / 5;  // Typically 1 to 1 radio
-        // dc += (csl.dc * dcPerAp);
-        // console.log(dcPerAp, dc, csl.dc)
+    for (const csl of CombatSkillLevelsForAttack(item)) {
+        if (csl && csl.dc > 0) {
+            // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
+            dc += csl.dc;
 
-        tags.push({ value: `${csl.dc.signedString()}DC`, name: csl.item.name });
+            // Each DC should roughly be 5 active points
+            // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
+            // let ratio = (dcPerAp || 5) / 5;  // Typically 1 to 1 radio
+            // dc += (csl.dc * dcPerAp);
+            // console.log(dcPerAp, dc, csl.dc)
+
+            tags.push({
+                value: `${csl.dc.signedString()}DC`,
+                name: csl.item.name,
+            });
+        }
     }
 
     // Move By (add in velocity)

@@ -84,26 +84,26 @@
       </div>
     {{/if}}
 
-    {{#if cslChoices}}
-      <div class="form-group">
-          <label>
-            {{cslSkill.name}}
-            {{#if (ne cslSkill.name "Combat Skill Levels")}}
+    {{#each csls}}
+       <div class="form-group">
+          <label title="{{{this.cslSkill.system.description}}}">
+            {{this.cslSkill.name}}
+            {{#if (ne this.cslSkill.name "Combat Skill Levels")}}
                 (CSL)
             {{/if}}
         </label>
         <div class="form-fields combat-skill-levels">
           <ol>
-            {{#each csl}}
+            {{#each this.csl}}
             <li>
-              {{radioBoxes this.name @root/cslChoices checked=this.value localize=true}}
+              {{radioBoxes this.name ../cslChoices checked=this.value localize=true}}
             </li>
             {{/each}}
           </ol>
 
         </div>
       </div>
-    {{/if}}
+    {{/each}}
 
   </div>
 
