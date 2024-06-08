@@ -159,9 +159,29 @@ export class HeroSystemActorSheet extends ActorSheet {
                 item.system.subType === "attack" ||
                 item.system.XMLID === "martialart"
             ) {
-                // Combat Skill Levels
-                const csl = CombatSkillLevelsForAttack(item);
+                item.flags.tags = {};
 
+                // Combat Skill Levels
+                const csls = CombatSkillLevelsForAttack(item);
+                let cslSummary = {};
+
+                for (const csl of csls) {
+                    for (const prop of ["ocv", "omcv", "dcv", "dmcv"]) {
+                        cslSummary[prop] =
+                            csl[prop] + parseInt(cslSummary[prop] || 0);
+
+                        if (csl[prop] != 0) {
+                            if (item.flags.tags[prop]) {
+                                item.flags.tags[prop] += "\n";
+                            } else {
+                                item.flags.tags[prop] = "";
+                            }
+                            item.flags.tags[prop] = `${
+                                item.flags.tags[prop]
+                            }${csl[prop].signedString()} ${csl.item.name}`;
+                        }
+                    }
+                }
                 let { dc, end } = convertToDcFromItem(item);
                 item.system.endEstimate = Math.max(
                     item.system.endEstimate,
@@ -213,8 +233,22 @@ export class HeroSystemActorSheet extends ActorSheet {
                                 );
 
                                 item.system.ocvEstimated = (
-                                    parseInt(csl.ocv) + parseInt(velocity / 10)
+                                    parseInt(cslSummary.ocv) +
+                                    parseInt(velocity / 10)
                                 ).signedString();
+
+                                if (parseInt(velocity / 10) != 0) {
+                                    if (item.flags.tag.ocv) {
+                                        item.flags.tagsocv += "\n";
+                                    } else {
+                                        item.flags.tags.ocv = "";
+                                    }
+                                    item.flags.tags.ocv = `${
+                                        item.flags.tags.ocv
+                                    }${parseInt(
+                                        velocity / 10,
+                                    ).signedString()} Velocity`;
+                                }
                             }
                             break;
 
@@ -224,16 +258,34 @@ export class HeroSystemActorSheet extends ActorSheet {
                             ).signedString();
                             item.system.ocvEstimated = (
                                 parseInt(item.system.ocv) +
-                                parseInt(csl.ocv || csl.omcv)
+                                parseInt(cslSummary.ocv || cslSummary.omcv || 0)
                             ).signedString();
+
+                            if (parseInt(item.system.ocv) != 0) {
+                                if (item.flags.tags.ocv) {
+                                    item.flags.tags.ocv += "\n";
+                                } else {
+                                    item.flags.tags.ocv = "";
+                                }
+                                item.flags.tags.ocv = `${item.flags.tags.ocv}${item.system.ocv} ${item.name}`;
+                            }
                     }
                 }
                 if (item.system.dcv != undefined) {
                     item.system.dcv = parseInt(item.system.dcv).signedString();
                     item.system.dcvEstimated = (
                         parseInt(item.system.dcv) +
-                        parseInt(csl.dcv || csl.dmcv)
+                        parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
                     ).signedString();
+
+                    if (parseInt(item.system.dcv) != 0) {
+                        if (item.flags.tags.dcv) {
+                            item.flags.tags.dcv += "\n";
+                        } else {
+                            item.flags.tags.dcv = "";
+                        }
+                        item.flags.tags.dcv = `${item.flags.tags.dcv}${item.system.dcv} ${item.name}`;
+                    }
                 }
 
                 // Set +1 OCV
@@ -247,6 +299,13 @@ export class HeroSystemActorSheet extends ActorSheet {
                     item.system.ocvEstimated = (
                         parseInt(item.system.ocvEstimated) + 1
                     ).signedString();
+
+                    if (item.flags.tags.ocv) {
+                        item.flags.tags.ocv += "\n";
+                    } else {
+                        item.flags.tags.ocv = "";
+                    }
+                    item.flags.tags.ocv += `+1 Set`;
                 }
 
                 // Haymaker -5 DCV
@@ -260,6 +319,13 @@ export class HeroSystemActorSheet extends ActorSheet {
                     item.system.dcvEstimated = (
                         parseInt(item.system.dcvEstimated) - 4
                     ).signedString();
+
+                    if (item.flags.tags.dcv) {
+                        item.flags.tags.dcv += "\n";
+                    } else {
+                        item.flags.tags.dcv = "";
+                    }
+                    item.flags.tags.dcv += `-4 Haymaker`;
                 }
 
                 item.system.phase = item.system.PHASE;

@@ -369,7 +369,7 @@ export async function AttackToHit(item, options) {
     }
 
     // Combat Skill Levels
-    let csl = CombatSkillLevelsForAttack(item);
+    let csl = CombatSkillLevelsForAttack(item)?.[0];
     if (csl.ocv || csl.omcv > 0) {
         heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
     }

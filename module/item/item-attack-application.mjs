@@ -117,7 +117,7 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         // Combat Skill Levels
-        const csl = CombatSkillLevelsForAttack(item);
+        const csl = CombatSkillLevelsForAttack(item)?.[0];
         if (csl && csl.skill) {
             data.cslSkill = csl.skill;
             let mental = csl.skill.system.XMLID === "MENTAL_COMBAT_LEVELS";
