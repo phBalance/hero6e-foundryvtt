@@ -1,12 +1,13 @@
 # Releases
 
-## Version 3.0.74 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Improvments to AVAD and NND attacks.
+## Version 3.0.74 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- We recommend sticking with FoundryVTT v11. The [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) author [is working on v12 support](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/326#issuecomment-2148372052).
+- Improvements to AVAD and NND attacks.
 - Fixed damage dice for Nerve Strike and similar martial NND attacks. [#885](https://github.com/dmdorman/hero6e-foundryvtt/issues/885)
 - Support for multiple Combat Skill Levels associated with an attack.
-- Combat Skill Levels purrchased as powers can be toggled. [#995](https://github.com/dmdorman/hero6e-foundryvtt/issues/995)
+- Combat Skill Levels purchased as powers can be toggled. [#995](https://github.com/dmdorman/hero6e-foundryvtt/issues/995)
 - Support for REQUIRESASKILLROLL and EVERYPHASE for defenses during Apply Damage. [#457](https://github.com/dmdorman/hero6e-foundryvtt/issues/457)
-- Improved Penalty Skill Level support.  PSLs can have attack(s) specified and penalty type specified.  Only the range penalty is currently supported. [#863](https://github.com/dmdorman/hero6e-foundryvtt/issues/863)
+- Improved Penalty Skill Level support. PSLs can have attack(s) specified and penalty type specified.  Only the range penalty is currently supported. [#863](https://github.com/dmdorman/hero6e-foundryvtt/issues/863)
 
 ## Version 3.0.73
 - Fix for PC actor sheets failing to open when actor has frameworks or compound equipment. [#1036](https://github.com/dmdorman/hero6e-foundryvtt/issues/1036)

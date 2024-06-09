@@ -3856,9 +3856,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MAXSTR = 0 does not use STR (NNDs for example)
-        if (this.system.MAXSTR && parseInt(this.system.MAXSTR) === 0) {
-            this.system.usesStrength = false;
-        }
+        // BROKEN: Offensive Strike has MAXSTR = 0, which is wrong, so commenting this out for now.
+        // if (this.system.MAXSTR && parseInt(this.system.MAXSTR) === 0) {
+        //     this.system.usesStrength = false;
+        // }
 
         // NND (the DC should be halved; suspect because of AVAD/NND implied limitation; Nerve Strike)
         if (this.system.EFFECT?.includes("NND")) {
