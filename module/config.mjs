@@ -2591,6 +2591,47 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            editOptions: {
+                showAttacks: true,
+                editableOption_ALIAS: true,
+                choices: [
+                    {
+                        OPTIONID: "SINGLE",
+                        OPTION: "SINGLE",
+                        OPTION_ALIAS:
+                            "to offset a specific negative OCV modifier with any single attack",
+                    },
+                    {
+                        OPTIONID: "THREE",
+                        OPTION: "THREE",
+                        OPTION_ALIAS:
+                            "to offset a specific negative OCV modifier with any three maneuvers or tight group",
+                    },
+                    {
+                        OPTIONID: "ALL",
+                        OPTION: "ALL",
+                        OPTION_ALIAS:
+                            "to offset a specific negative OCV modifier with all attacks",
+                    },
+                    {
+                        OPTIONID: "SINGLEDCV",
+                        OPTION: "SINGLEDCV",
+                        OPTION_ALIAS:
+                            "to offset a specific negative DCV modifier imposed by any single specific condition",
+                    },
+                    {
+                        OPTIONID: "GROUPDCV",
+                        OPTION: "GROUPDCV",
+                        OPTION_ALIAS:
+                            "to offset a specific negative DCV modifier imposed by a group of conditions",
+                    },
+                ],
+                penaltyChoices: {
+                    other: "other",
+                    range: "range",
+                    hitLocation: "hitLocation",
+                },
+            },
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "SINGLE":

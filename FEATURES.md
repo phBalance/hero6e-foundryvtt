@@ -58,7 +58,7 @@ Our support ratings:
 | NAVIGATION | A | |
 | ORATORY | A | |
 | PARAMEDICS | C | Skill roll is automated, but removing bleeding effect is not automated |
-| PENALTY SKILL LEVELS (Combat) | D | |
+| PENALTY SKILL LEVELS (Combat) | C | Only the range penalty is currently supported |
 | PERSUASION | A | |
 | POWER (Varies) | D | |
 | PROFESSIONAL SKILL (Background) | A | |
