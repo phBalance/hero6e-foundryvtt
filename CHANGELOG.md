@@ -1,5 +1,9 @@
 # Releases
 
+## Version 3.0.75 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- FoundryVTT 12.327 tentaive support.
+
+
 ## Version 3.0.74 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - We recommend sticking with FoundryVTT v11. The [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) author [is working on v12 support](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/326#issuecomment-2148372052).
 - Improvements to AVAD and NND attacks.
