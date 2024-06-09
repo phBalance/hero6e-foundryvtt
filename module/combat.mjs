@@ -10,15 +10,45 @@ export class HeroSystem6eCombat extends Combat {
         };
     }
 
-    async HeroSetupSegments() {
+    getUniqueTokens() {
+        const results = [];
+        for (const c of this.combatants.values()) {
+            if (!results.find((o) => o.id === c.token.object.id)) {
+                results.push(c.token.object);
+            }
+        }
+        return results;
+    }
+
+    getUniqueCombatants() {
+        const results = [];
+        for (const c of this.combatants.values()) {
+            if (!results.find((o) => o.token.object.id === c.token.object.id)) {
+                results.push(c);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Roll initiative for one or multiple Combatants within the Combat entity
+     * @param {string|string[]} ids     A Combatant id or Array of ids for which to roll
+     * @param {object} [options={}]     Additional options which modify how initiative rolls are created or presented.
+     * @param {string|null} [options.formula]         A non-default initiative formula to roll. Otherwise the system default is used.
+     * @param {boolean} [options.updateTurn=true]     Update the Combat heroTurn after adding new initiative scores to keep the heroTurn on the same Combatant.
+     * @param {object} [options.messageOptions={}]    Additional options with which to customize created Chat Messages
+     * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete.
+     */
+
+    async rollInitiative(ids) {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | Hero Setup Segments`);
+            console.debug(`Hero | rollInitiative`, ids);
         }
         // We need a unique combatant for each phase the actor acts.
 
         for (const t of this.getUniqueTokens()) {
             let tokenCombatants = this.combatants.filter(
-                (o) => o.tokenId === t.id,
+                (o) => o.tokenId === t.id && t.inCombat,
             );
 
             const lightningReflexes = t.actor?.items.find(
@@ -99,16 +129,14 @@ export class HeroSystem6eCombat extends Combat {
                         if (
                             tokenCombatants[idx].flags.segment != s ||
                             tokenCombatants[idx].flags.initiative !=
-                                (12 - s) * initiativeValue +
-                                    lightningReflexesLevels ||
+                                initiativeValue + lightningReflexesLevels ||
                             tokenCombatants[idx].flags.lightningReflexesAlias !=
                                 lightningReflexesAlias
                         ) {
                             await tokenCombatants[idx].update({
                                 "flags.segment": s,
                                 initiative:
-                                    (12 - s) * initiativeValue +
-                                    lightningReflexesLevels,
+                                    initiativeValue + lightningReflexesLevels,
                                 "flags.lightningReflexesAlias":
                                     lightningReflexesAlias,
                             });
@@ -118,12 +146,11 @@ export class HeroSystem6eCombat extends Combat {
 
                     if (
                         tokenCombatants[idx].flags.segment != s ||
-                        tokenCombatants[idx].flags.initiative !=
-                            (12 - s) * initiativeValue
+                        tokenCombatants[idx].flags.initiative != initiativeValue
                     ) {
                         await tokenCombatants[idx].update({
                             "flags.segment": s,
-                            initiative: (12 - s) * 10 + initiativeValue,
+                            initiative: initiativeValue,
                             "-flags.lightningReflexesAlias": null,
                         });
                     }
@@ -146,79 +173,10 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        // Sort
-        //this.combatants.sort(this._sortCombatants);
-    }
-
-    getUniqueTokens() {
-        const results = [];
-        for (const c of this.combatants.values()) {
-            if (!results.find((o) => o.id === c.token.object.id)) {
-                results.push(c.token.object);
-            }
-        }
-        return results;
-    }
-
-    getUniqueCombatants() {
-        const results = [];
-        for (const c of this.combatants.values()) {
-            if (!results.find((o) => o.token.object.id === c.token.object.id)) {
-                results.push(c);
-            }
-        }
-        return results;
-    }
-
-    /**
-     * Roll initiative for one or multiple Combatants within the Combat entity
-     * @param {string|string[]} ids     A Combatant id or Array of ids for which to roll
-     * @param {object} [options={}]     Additional options which modify how initiative rolls are created or presented.
-     * @param {string|null} [options.formula]         A non-default initiative formula to roll. Otherwise the system default is used.
-     * @param {boolean} [options.updateTurn=true]     Update the Combat heroTurn after adding new initiative scores to keep the heroTurn on the same Combatant.
-     * @param {object} [options.messageOptions={}]    Additional options with which to customize created Chat Messages
-     * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete.
-     */
-
-    async rollInitiative() {
-        await this.HeroSetupSegments();
+        // Likely new turn orders so setupTurns
+        this.setupTurns();
 
         return this;
-
-        //console.log("rollInitiative");
-        // Iterate over Combatants, performing an initiative roll for each
-        // const updates = [];
-        // for (let [id /*, value*/] of this.combatants.entries()) {
-        //     // Get Combatant data (non-strictly)
-        //     const combatant = this.combatants.get(id);
-        //     if (!combatant?.isOwner) return this;
-        //     //if (combatant.hasRolled) continue;
-
-        //     if (!combatant.actor) continue;
-
-        //     // Produce an initiative roll for the Combatant
-        //     let characteristic =
-        //         combatant.actor.system?.initiativeCharacteristic || "dex";
-        //     let dexValue =
-        //         combatant.actor.system.characteristics[characteristic].value;
-        //     let spdValue = combatant.actor.system.characteristics.spd.value;
-        //     //let intValue = combatant.actor.system.characteristics.int.value;
-
-        //     let initiativeValue = dexValue + spdValue / 100; // + intValue / 10000;
-
-        //     if (initiativeValue != combatant.initiative) {
-        //         updates.push({
-        //             _id: id,
-        //             initiative: initiativeValue || 0,
-        //         });
-        //     }
-        // }
-        // if (!updates.length) return this;
-
-        // // Update multiple combatants
-        // await this.updateEmbeddedDocuments("Combatant", updates);
-
-        // return this;
     }
 
     /* -------------------------------------------- */
@@ -233,137 +191,53 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`Hero | Combat Setup Turns`);
         }
 
-        super.setupTurns();
+        // Likely never needed, but here for future reference.
+        // super.setupTurns();
+
+        // Determine the turn order and the current turn
+        const turns = this.combatants.contents.sort(this._sortCombatants);
+        if (this.turn !== null)
+            this.turn = Math.clamp(this.turn, 0, turns.length - 1);
+
+        // Update state tracking
+        let c = turns[this.turn];
+        this.current = this._getCurrentState(c);
+
+        // One-time initialization of the previous state
+        if (!this.previous) this.previous = this.current;
+
+        // Return the array of prepared turns
+        return (this.turns = turns);
     }
 
-    // XsetupTurns() {
-    //     //console.log("setupTurns");
-    //     // Roll Initiative everytime as DEX/INT/SPD may have changed
-    //     // await this.rollAll();
-    //     // Determine the turn order and the current turn
-    //     const turnsRaw = this.combatants.contents.sort(this._sortCombatants);
+    _sortCombatants(a, b) {
+        const segmentA = parseInt(a.flags.segment) || 12;
+        const segmentB = parseInt(b.flags.segment) || 12;
+        const initA = parseFloat(a.initiative) || 0;
+        const initB = parseFloat(b.initiative) || 0;
 
-    //     // Loop thru all combatants, add extra turn if they have LIGHTNING REFLEXES
-    //     for (const combatant of this.combatants) {
-    //         if (!combatant.actor) {
-    //             continue; // Not sure how this could happen
-    //         }
+        let segmentDifference = segmentA - segmentB;
+        if (segmentDifference != 0) {
+            return segmentDifference;
+        }
 
-    //         const lightningReflexes = combatant.actor.items.find(
-    //             (o) =>
-    //                 o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
-    //                 o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
-    //         );
-    //         if (lightningReflexes) {
-    //             const levels =
-    //                 lightningReflexes.system.LEVELS?.value ||
-    //                 lightningReflexes.system.LEVELS ||
-    //                 lightningReflexes.system.levels ||
-    //                 lightningReflexes.system.other.levels ||
-    //                 0;
-    //             const lightning_reflex_initiative = combatant.initiative
-    //                 ? combatant.initiative + parseInt(levels)
-    //                 : null;
-    //             const alias =
-    //                 lightningReflexes.system.OPTION_ALIAS ||
-    //                 lightningReflexes.system.INPUT ||
-    //                 "All Actions";
-    //             const lightning_reflex_alias = "(" + alias + ")";
+        let initDifference = initB - initA;
+        if (initDifference != 0) {
+            return initDifference;
+        }
 
-    //             const combatantLR = new Combatant({
-    //                 tokenId: combatant.tokenId,
-    //                 sceneId: combatant.sceneId,
-    //                 actorId: combatant.actor.id,
-    //                 hidden: combatant.hidden,
-    //                 _id: combatant.id,
-    //             });
+        const typeA = a.actor?.hasPlayerOwner || a.hasPlayerOwner;
+        const typeB = b.actor?.hasPlayerOwner || b.hasPlayerOwner;
 
-    //             combatantLR.initiative = lightning_reflex_initiative;
-    //             combatantLR.flags.lightningReflexesAlias =
-    //                 lightning_reflex_alias;
-
-    //             turnsRaw.push(combatantLR);
-
-    //             // Notice we didn't update the database with combatantLR.
-    //             // Not really sure how we would do that without really messing things up.
-    //             // As a result the flags.lightning_reflex_initiative is likely null,
-    //             // which we will update in the combatTracker::getData()
-    //         }
-    //     }
-
-    //     turnsRaw.sort(this._sortCombatants);
-
-    //     // this.turns is an array of combatants.  These combatants typically appear more than
-    //     // once in the array (1/SPEED).  Any change to one combatant for a specific token seems
-    //     // to update all combatant entries for that specific token.  So we can't store unique
-    //     // data in combatant (like segment number).  Using turnsExtra to store unique data (like segment).
-    //     //this.turnsExtra = []
-
-    //     // Assign Combatant copies to appropriate segments
-    //     // Notice segment[0] is unused
-    //     let turns = [];
-    //     for (let s = 1; s <= 12; s++) {
-    //         for (let t = 0; t < turnsRaw.length; t++) {
-    //             if (!turnsRaw[t].actor) {
-    //                 continue;
-    //             }
-    //             if (
-    //                 HeroSystem6eCombat.hasPhase(
-    //                     turnsRaw[t].actor.system.characteristics.spd.value,
-    //                     s,
-    //                 )
-    //             ) {
-    //                 const combatant = new Combatant(turnsRaw[t]);
-    //                 combatant.flags = {
-    //                     ...turnsRaw[t].flags,
-    //                     segment: s,
-    //                     turn: turns.length,
-    //                 };
-    //                 turns.push(combatant);
-    //             }
-    //         }
-    //     }
-
-    //     if (this.turn !== null)
-    //         this.turn = clamp(this.turn, 0, turns.length - 1);
-
-    //     // Update state tracking
-    //     let c = turns[this.turn];
-    //     this.current = {
-    //         round: this.round,
-    //         turn: this.turn,
-    //         combatantId: c ? c.id : null,
-    //         tokenId: c ? c.tokenId : null,
-    //     };
-
-    //     // One-time initialization of the previous state
-    //     if (!this.previous) this.previous = this.current;
-
-    //     // Return the array of prepared turns
-    //     return (this.turns = turns);
-    // }
-
-    // _sortCombatants(a, b) {
-    //     const initA = Number.isNumeric(a.initiative) ? a.initiative : -9999;
-    //     const initB = Number.isNumeric(b.initiative) ? b.initiative : -9999;
-
-    //     let initDifference = initB - initA;
-    //     if (initDifference != 0) {
-    //         return initDifference;
-    //     }
-
-    //     const typeA = a.actor?.hasPlayerOwner || a.hasPlayerOwner;
-    //     const typeB = b.actor?.hasPlayerOwner || b.hasPlayerOwner;
-
-    //     if (typeA != typeB) {
-    //         if (typeA) {
-    //             return -1;
-    //         }
-    //         if (typeB) {
-    //             return 1;
-    //         }
-    //     }
-    // }
+        if (typeA != typeB) {
+            if (typeA) {
+                return -1;
+            }
+            if (typeB) {
+                return 1;
+            }
+        }
+    }
 
     // _sortSegments(a, b) {
     //     const initA = Number.isNumeric(a.combatant.initiative)
@@ -455,16 +329,6 @@ export class HeroSystem6eCombat extends Combat {
         // Get current combatant
         const oldCombatant = this.combatant;
 
-        // Super
-        await super._onCreateDescendantDocuments(
-            parent,
-            collection,
-            documents,
-            data,
-            options,
-            userId,
-        );
-
         // Setup turns in segment fashion
         //const _turns = this.setupTurns();
 
@@ -481,8 +345,18 @@ export class HeroSystem6eCombat extends Combat {
             await this.update({ turn: this.turn });
         }
 
+        // Super
+        await super._onCreateDescendantDocuments(
+            parent,
+            collection,
+            documents,
+            data,
+            options,
+            userId,
+        );
+
         // Render the collection
-        if (this.active) this.collection.render();
+        //if (this.active) this.collection.render();
     }
 
     /* -------------------------------------------- */
@@ -506,7 +380,7 @@ export class HeroSystem6eCombat extends Combat {
             this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1];
 
         // Super
-        super._onDeleteDescendantDocuments(
+        await super._onDeleteDescendantDocuments(
             parent,
             collection,
             documents,
@@ -514,6 +388,21 @@ export class HeroSystem6eCombat extends Combat {
             options,
             userId,
         );
+
+        // Make sure we delete all combatants with the same tokenID
+        if (collection === "combatants") {
+            for (const doc of documents) {
+                const toDelete = this.combatants.filter(
+                    (c) => c.token.id === doc.token.id,
+                );
+                if (toDelete.length > 0) {
+                    await this.deleteEmbeddedDocuments(
+                        "Combatant",
+                        toDelete.map((c) => c.id),
+                    );
+                }
+            }
+        }
 
         // Setup turns in segment fashion
         // this.setupTurns();
@@ -546,6 +435,8 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
         await this.update({ turn: this.turn, round: this.round });
+
+        await this.rollInitiative();
 
         // Render the collection
         if (this.active) this.collection.render();
