@@ -1693,6 +1693,13 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        // If we have control of this token, reaquire to update movement types
+        const myToken = this.getActiveTokens()?.[0];
+        if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+            myToken.release();
+            myToken.control();
+        }
+
         uploadProgressBar.close(`Done uploading ${this.name}`);
     }
 

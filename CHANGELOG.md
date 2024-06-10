@@ -2,6 +2,9 @@
 
 ## Version 3.0.75 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - FoundryVTT 12.327 tentaive support.
+- Reworked Combat Tracker to more closely align to FoundryVTT v12.
+- Improved chat messages for power toggles to include GM & token owners.
+- Improved initial toggle states during HDC upload.  For example, items in a multipower default to off.
 
 
 ## Version 3.0.74 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
@@ -12,6 +15,7 @@
 - Combat Skill Levels purchased as powers can be toggled. [#995](https://github.com/dmdorman/hero6e-foundryvtt/issues/995)
 - Support for REQUIRESASKILLROLL and EVERYPHASE for defenses during Apply Damage. [#457](https://github.com/dmdorman/hero6e-foundryvtt/issues/457)
 - Improved Penalty Skill Level support. PSLs can have attack(s) specified and penalty type specified.  Only the range penalty is currently supported. [#863](https://github.com/dmdorman/hero6e-foundryvtt/issues/863)
+
 
 ## Version 3.0.73
 - Fix for PC actor sheets failing to open when actor has frameworks or compound equipment. [#1036](https://github.com/dmdorman/hero6e-foundryvtt/issues/1036)

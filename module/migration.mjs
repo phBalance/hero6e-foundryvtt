@@ -261,6 +261,16 @@ export async function migrateWorld() {
         async (actor) => await migrate_actor_items_to_3_0_66(actor),
     );
 
+    // if lastMigration < 3.0.75
+    // move to corrected new item.system.range values
+    await migrateToVersion(
+        "3.0.75",
+        lastMigration,
+        getAllActorsInGame(),
+        "actors' items' range",
+        async (actor) => await migrate_actor_items_to_3_0_75(actor),
+    );
+
     // FOR ALL VERSION MIGRATIONS
     // Reparse all items (description, cost, etc) on every migration
     await migrateToVersion(
@@ -307,6 +317,19 @@ async function migrateActorCostDescription(actor) {
             await ui.notifications.warn(
                 `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
             );
+        }
+    }
+}
+
+async function migrate_actor_items_to_3_0_75(actor) {
+    for (const item of actor.items) {
+        // The string "false" returns true.  Very confusing.
+        // Was causing issues with consuming END for INVISIBILTY each phase.
+        // Removed string "false" from template.json
+        if (item.system.active === "false") {
+            await item.update({
+                "item.system.active": true,
+            });
         }
     }
 }

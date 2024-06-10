@@ -9,7 +9,11 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
-import { getPowerInfo, getModifierInfo } from "../utility/util.mjs";
+import {
+    getPowerInfo,
+    getModifierInfo,
+    whisperUserTargetsForActor,
+} from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
     convertToDcFromItem,
@@ -472,7 +476,7 @@ export class HeroSystem6eItem extends Item {
                     user: game.user._id,
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                     content: `Spent ${end} END to activate ${item.name}`,
-                    whisper: ChatMessage.getWhisperRecipients("GM"),
+                    whisper: whisperUserTargetsForActor(item.actor),
                     speaker,
                 };
                 await ChatMessage.create(chatData);
@@ -483,7 +487,7 @@ export class HeroSystem6eItem extends Item {
                     user: game.user._id,
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                     content: `Activated ${item.name}`,
-                    whisper: ChatMessage.getWhisperRecipients("GM"),
+                    whisper: whisperUserTargetsForActor(item.actor),
                     speaker,
                 };
                 await ChatMessage.create(chatData);
@@ -513,7 +517,7 @@ export class HeroSystem6eItem extends Item {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                 content: `Turned off ${item.name}`,
-                whisper: ChatMessage.getWhisperRecipients("GM"),
+                whisper: whisperUserTargetsForActor(item.actor),
                 speaker,
             };
             await ChatMessage.create(chatData);
@@ -583,6 +587,13 @@ export class HeroSystem6eItem extends Item {
             default:
                 ui.notifications.warn(`${this.name} toggle may be incomplete`);
                 break;
+        }
+
+        // If we have control of this token, reaquire to update movement types
+        const myToken = this.actor?.getActiveTokens()?.[0];
+        if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+            myToken.release();
+            myToken.control();
         }
     }
 
@@ -1115,23 +1126,30 @@ export class HeroSystem6eItem extends Item {
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
         if (
             configPowerInfo &&
-            configPowerInfo.behaviors.includes("activatable")
+            (configPowerInfo.behaviors.includes("activatable") ||
+                configPowerInfo?.type?.includes("characteristic"))
         ) {
             const newDefenseValue = "defense";
-            if (this.system.subType !== newDefenseValue) {
+
+            if (
+                this.system.subType !== newDefenseValue &&
+                configPowerInfo.behaviors.includes("activatable")
+            ) {
                 this.system.subType = newDefenseValue;
                 this.system.showToggle = true;
                 changed = true;
+            }
 
-                if (
-                    this.system.charges?.value > 0 ||
-                    this.system.AFFECTS_TOTAL === false ||
-                    configPowerInfo.duration === "instant"
-                ) {
-                    this.system.active ??= false;
-                } else {
-                    this.system.active ??= true;
-                }
+            // Default toggles to ON unless they are instant, have charges, part of a MULTIPOWER, etc
+            if (
+                this.system.charges?.value > 0 ||
+                this.system.AFFECTS_TOTAL === false ||
+                configPowerInfo.duration === "instant" ||
+                this.parentItem?.system.XMLID === "MULTIPOWER"
+            ) {
+                this.system.active ??= false;
+            } else {
+                this.system.active ??= true;
             }
         }
 
@@ -1446,6 +1464,7 @@ export class HeroSystem6eItem extends Item {
                 },
             ];
             activeEffect.transfer = true;
+            activeEffect.disabled = !this.system.active;
 
             if (activeEffect.update) {
                 await activeEffect.update({
@@ -1483,6 +1502,7 @@ export class HeroSystem6eItem extends Item {
                 },
             ];
             activeEffect.transfer = true;
+            activeEffect.disabled = !this.system.active;
 
             if (activeEffect.update) {
                 const oldMax =
@@ -1538,6 +1558,7 @@ export class HeroSystem6eItem extends Item {
                 },
             ];
             activeEffect.transfer = true;
+            activeEffect.disabled = !this.system.active;
 
             if (activeEffect.update) {
                 await activeEffect.update({
@@ -1567,7 +1588,12 @@ export class HeroSystem6eItem extends Item {
         // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
         // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
         // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
-        if (changed && this.id && this.system.XMLID === "GROWTH") {
+        if (
+            changed &&
+            this.id &&
+            this.system.XMLID === "GROWTH" &&
+            this.system.active
+        ) {
             const details = configPowerInfo?.details(this) || {};
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name =
@@ -1656,7 +1682,12 @@ export class HeroSystem6eItem extends Item {
 
         // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
         // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
-        if (changed && this.id && this.system.XMLID === "SHRINKING") {
+        if (
+            changed &&
+            this.id &&
+            this.system.XMLID === "SHRINKING" &&
+            this.system.active
+        ) {
             const dcvAdd = Math.floor(this.system.value) * 2;
 
             let activeEffect = Array.from(this.effects)?.[0] || {};
