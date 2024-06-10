@@ -1,5 +1,6 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { clamp } from "./utility/compatibility.mjs";
+import { whisperUserTargetsForActor } from "./utility/util.mjs";
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
@@ -66,7 +67,9 @@ export class HeroSystem6eCombat extends Combat {
 
             //Create extra combatants to match SPEED
             let needToCreate =
-                parseInt(t.actor?.system.characteristics.spd.value || 1) *
+                parseInt(
+                    Math.max(1, t.actor?.system.characteristics.spd.value),
+                ) *
                     (lightningReflexes ? 2 : 1) -
                 tokenCombatants.length;
 
@@ -88,7 +91,7 @@ export class HeroSystem6eCombat extends Combat {
                 tokenCombatants = tokenCombatants.concat(created);
             }
 
-            // Perhaps we have to many
+            // Perhaps we have too many
             const toDelete = [];
             for (let i = 0; i < -needToCreate; i++) {
                 toDelete.push(tokenCombatants[i].id);
@@ -98,25 +101,26 @@ export class HeroSystem6eCombat extends Combat {
             }
 
             // Produce an initiative roll for the Combatant.
-            // Notice that below we add (12-sgement) * 10 to the initiatve value so combatants sort properly.
-            //  Then we display the proper initiative in combatTracker.mjs
             const characteristic =
                 tokenCombatants[0].actor?.system?.initiativeCharacteristic ||
                 "dex";
-            const dexValue =
+            const initValue =
                 tokenCombatants[0].actor?.system.characteristics[characteristic]
                     .value || 0;
             const spdValue =
                 tokenCombatants[0].actor?.system.characteristics.spd.value || 0;
-            const initiativeValue = dexValue + spdValue / 100; // + intValue / 10000;
+            const initiativeValue = initValue + spdValue / 100;
 
             // Assign a segment and Initiative
             let idx = 0;
             for (let s = 1; s <= 12; s++) {
                 if (
                     HeroSystem6eCombat.hasPhase(
-                        tokenCombatants[idx].actor?.system.characteristics.spd
-                            .value || 0,
+                        Math.max(
+                            1,
+                            tokenCombatants[idx].actor?.system.characteristics
+                                .spd.value || 0,
+                        ),
                         s,
                     )
                 ) {
@@ -127,10 +131,11 @@ export class HeroSystem6eCombat extends Combat {
                             "All Actions"
                         })`;
                         if (
-                            tokenCombatants[idx].flags.segment != s ||
-                            tokenCombatants[idx].flags.initiative !=
+                            tokenCombatants[idx].flags.segment !== s ||
+                            tokenCombatants[idx].flags.initiative !==
                                 initiativeValue + lightningReflexesLevels ||
-                            tokenCombatants[idx].flags.lightningReflexesAlias !=
+                            tokenCombatants[idx].flags
+                                .lightningReflexesAlias !==
                                 lightningReflexesAlias
                         ) {
                             await tokenCombatants[idx].update({
@@ -145,8 +150,9 @@ export class HeroSystem6eCombat extends Combat {
                     }
 
                     if (
-                        tokenCombatants[idx].flags.segment != s ||
-                        tokenCombatants[idx].flags.initiative != initiativeValue
+                        tokenCombatants[idx].flags.segment !== s ||
+                        tokenCombatants[idx].flags.initiative !==
+                            initiativeValue
                     ) {
                         await tokenCombatants[idx].update({
                             "flags.segment": s,
@@ -159,10 +165,12 @@ export class HeroSystem6eCombat extends Combat {
             }
 
             // Rare case where SPD <= 0 (and for actorless tokens)
+            // NOTE: There is no code to prevent a SPD 0 token from acting, currently GM player needs to handle that manually.
+            // A SPD 0 character can't act, but does get a postSegment12.  In theory the SPD drain will eventually fade.
             if (
                 (tokenCombatants[0].actor?.system.characteristics.spd.value ||
-                    0) == 0 &&
-                tokenCombatants[0].flags.segment != 12
+                    0) <= 0 &&
+                tokenCombatants[0].flags.segment !== 12
             ) {
                 tokenCombatants[0].flags.segment = 12;
                 await tokenCombatants[0].update({
@@ -197,11 +205,20 @@ export class HeroSystem6eCombat extends Combat {
         // Determine the turn order and the current turn
         const turns = this.combatants.contents.sort(this._sortCombatants);
         if (this.turn !== null)
-            this.turn = Math.clamp(this.turn, 0, turns.length - 1);
+            this.turn = clamp(this.turn, 0, turns.length - 1);
 
-        // Update state tracking
-        let c = turns[this.turn];
-        this.current = this._getCurrentState(c);
+        // Update state tracking (v12)
+        // const c = turns[this.turn];
+        // this.current = this._getCurrentState(c);
+
+        // Update state tracking (v11)
+        const c = turns[this.turn];
+        this.current = {
+            round: this.round,
+            turn: this.turn,
+            combatantId: c ? c.id : null,
+            tokenId: c ? c.tokenId : null,
+        };
 
         // One-time initialization of the previous state
         if (!this.previous) this.previous = this.current;
@@ -217,19 +234,19 @@ export class HeroSystem6eCombat extends Combat {
         const initB = parseFloat(b.initiative) || 0;
 
         let segmentDifference = segmentA - segmentB;
-        if (segmentDifference != 0) {
+        if (segmentDifference !== 0) {
             return segmentDifference;
         }
 
-        let initDifference = initB - initA;
-        if (initDifference != 0) {
+        const initDifference = initB - initA;
+        if (initDifference !== 0) {
             return initDifference;
         }
 
         const typeA = a.actor?.hasPlayerOwner || a.hasPlayerOwner;
         const typeB = b.actor?.hasPlayerOwner || b.hasPlayerOwner;
 
-        if (typeA != typeB) {
+        if (typeA !== typeB) {
             if (typeA) {
                 return -1;
             }
@@ -237,33 +254,11 @@ export class HeroSystem6eCombat extends Combat {
                 return 1;
             }
         }
+
+        // Force consistant sorting by token.id
+        //console.warn("Sorting undetermined. Using token.id to break the tie.");
+        return a.token.id.localeCompare(b.token.id);
     }
-
-    // _sortSegments(a, b) {
-    //     const initA = Number.isNumeric(a.combatant.initiative)
-    //         ? a.combatant.initiative
-    //         : -9999;
-    //     const initB = Number.isNumeric(b.combatant.initiative)
-    //         ? b.combatant.initiative
-    //         : -9999;
-
-    //     let initDifference = initB - initA;
-    //     if (initDifference != 0) {
-    //         return initDifference;
-    //     }
-
-    //     const typeA = a.combatant.hasPlayerOwner;
-    //     const typeB = b.combatant.hasPlayerOwner;
-
-    //     if (typeA != typeB) {
-    //         if (typeA) {
-    //             return -1;
-    //         }
-    //         if (typeB) {
-    //             return 1;
-    //         }
-    //     }
-    // }
 
     // Standard HeroSystem rules per SPEED CHART
     static hasPhase(spd, segment) {
@@ -576,7 +571,7 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        if (content != "" && !this.combatant.isFake) {
+        if (content != "" && !this.combatant.isFake && spentEnd > 0) {
             let segment = this.combatant.flags.segment;
             let value = parseInt(
                 this.combatant.actor.system.characteristics.end.value,
@@ -597,26 +592,11 @@ export class HeroSystem6eCombat extends Combat {
             });
             speaker["alias"] = combatant.actor.name;
 
-            const ownerIds = [];
-            for (const [key, value] of Object.entries(
-                combatant.actor.ownership,
-            )) {
-                if (value === CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
-                    ownerIds.push(key);
-                }
-            }
-            const whisperUserTargets = [];
-            for (const user of game.users) {
-                if (ownerIds.includes(user.id)) {
-                    whisperUserTargets.push(user);
-                }
-            }
-
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                 content: content,
-                whisper: whisperUserTargets,
+                whisper: whisperUserTargetsForActor(combatant.actor),
                 speaker,
             };
 

@@ -116,3 +116,24 @@ export function getCharacteristicInfoArrayForActor(actor) {
 
     return powers;
 }
+
+/**
+ *
+ * @param {HeroSystem6eActor} actor
+ * @returns User[]
+ */
+export function whisperUserTargetsForActor(actor) {
+    const ownerIds = [];
+    for (const [key, value] of Object.entries(actor.ownership)) {
+        if (value === CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
+            ownerIds.push(key);
+        }
+    }
+    const whisperUserTargets = [];
+    for (const user of game.users) {
+        if (ownerIds.includes(user.id)) {
+            whisperUserTargets.push(user);
+        }
+    }
+    return whisperUserTargets; // a list of User Ids
+}
