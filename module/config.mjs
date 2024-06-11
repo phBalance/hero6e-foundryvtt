@@ -664,7 +664,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
-            ignoreFor: ["base2", "computer", "ai"],
+            ignoreFor: ["computer", "ai"],
             xml: `<BODY XMLID="BODY" ID="1712377268646" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
             <NOTES />
             </BODY>`,
@@ -4610,7 +4610,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "FORCEWALL",
             type: ["defense", "standard"],
-            behaviors: ["activatable"],
+            behaviors: ["attack"],
             duration: "instant",
             range: "standard",
             costEnd: true,

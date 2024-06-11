@@ -14,7 +14,7 @@ export class HeroSystem6eCombat extends Combat {
     getUniqueTokens() {
         const results = [];
         for (const c of this.combatants.values()) {
-            if (!results.find((o) => o.id === c.token.object.id)) {
+            if (!results.find((o) => o.id === c.token.object?.id)) {
                 results.push(c.token.object);
             }
         }
@@ -24,7 +24,9 @@ export class HeroSystem6eCombat extends Combat {
     getUniqueCombatants() {
         const results = [];
         for (const c of this.combatants.values()) {
-            if (!results.find((o) => o.token.object.id === c.token.object.id)) {
+            if (
+                !results.find((o) => o.token.object.id === c.token.object?.id)
+            ) {
                 results.push(c);
             }
         }

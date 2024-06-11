@@ -9,6 +9,7 @@
             <section class="flexrow">
                 <ul class="attributes flexcol">
 
+                    {{#if hasEND}}
                     <li class="attribute health" data-ability="end">
                         <h4 class="attribute-name box-title">Endurance</h4>
                         <div class="attribute-value multiple characteristic">
@@ -21,6 +22,7 @@
                             </span>
                         </div>
                     </li>
+                    {{/if}}
 
                     <li class="attribute health" data-ability="body">
                         <h4 class="attribute-name box-title">Body</h4>
@@ -35,6 +37,7 @@
                         </div>
                     </li>
 
+                    {{#if hasSTUN}}
                     <li class="attribute health" data-ability="stun">
                         <h4 class="attribute-name box-title">Stun</h4>
                         <div class="attribute-value multiple characteristic">
@@ -47,6 +50,7 @@
                             </span>
                         </div>
                     </li>
+                    {{/if}}
 
                     {{#if useHAP }}
                     <li class="attribute heroic-action-points" data-ability="hap">

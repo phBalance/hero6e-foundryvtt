@@ -115,6 +115,14 @@ function determineDefense(targetActor, attackItem, options) {
         }
     }
 
+    // Bases & Vehicles have resistant PD & ED
+    if (["base2", "vehicle"].includes(targetActor?.type)) {
+        rPD += PD;
+        PD = 0;
+        rED += ED;
+        ED = 0;
+    }
+
     // Impenetrable (defense vs penetrating)
     let impenetrableValue = 0;
 
