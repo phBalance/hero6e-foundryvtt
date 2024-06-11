@@ -412,7 +412,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Characteristics
         const characteristicSet = [];
 
-        let powers = getCharacteristicInfoArrayForActor(this.actor);
+        const powers = getCharacteristicInfoArrayForActor(this.actor);
 
         for (const powerInfo of powers) {
             this.actor.updateRollable(powerInfo.key.toLowerCase());
@@ -886,6 +886,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 });
             }
         }
+        powers;
         data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints);
         let topActivePoints = data.activePointSummary?.[0]?.activePoints;
         data.activePointSummary = data.activePointSummary.filter(
@@ -894,6 +895,10 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // Display Heroic Action Points
         data.useHAP = game.settings.get(game.system.id, "HAP");
+
+        // Not all actor types have END & STUN
+        data.hasEND = powers.find((o) => o.key === "END");
+        data.hasSTUN = powers.find((o) => o.key === "STUN");
 
         return data;
     }
@@ -998,8 +1003,11 @@ export class HeroSystemActorSheet extends ActorSheet {
     async _updateObject(_event, formData) {
         let expandedData = foundry.utils.expandObject(formData);
 
-        const characteristics = ["body", "stun", "end"];
-        for (const characteristic of characteristics) {
+        const characteristics = getCharacteristicInfoArrayForActor(
+            this.actor,
+        ).filter((o) => ["BODY", "STUN", "END"].includes(o.key));
+        for (const _char of characteristics) {
+            const characteristic = _char.key.toLowerCase();
             if (
                 this.actor.system.characteristics[characteristic] &&
                 expandedData.Xsystem.characteristics[characteristic].value !==

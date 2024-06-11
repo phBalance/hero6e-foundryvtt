@@ -1,5 +1,8 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo } from "../utility/util.mjs";
+import {
+    getPowerInfo,
+    getCharacteristicInfoArrayForActor,
+} from "../utility/util.mjs";
 import { determineDefense } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
@@ -666,10 +669,10 @@ export async function AttackToHit(item, options) {
     // If AOE then sort by distance from center
     if (explosion) {
         targetsArray.sort(function (a, b) {
-            let distanceA = canvas.grid.measureDistance(aoeTemplate, a, {
+            const distanceA = canvas.grid.measureDistance(aoeTemplate, a, {
                 gridSpaces: true,
             });
-            let distanceB = canvas.grid.measureDistance(aoeTemplate, b, {
+            const distanceB = canvas.grid.measureDistance(aoeTemplate, b, {
                 gridSpaces: true,
             });
             return distanceA - distanceB;
@@ -679,8 +682,17 @@ export async function AttackToHit(item, options) {
     // Make attacks against all targets
     for (const target of targetsArray) {
         let targetDefenseValue = RoundFavorPlayerUp(
-            target.actor.system.characteristics[toHitChar.toLowerCase()].value,
+            target.actor.system.characteristics[toHitChar.toLowerCase()]?.value,
         );
+
+        // Bases have no DCV.  DCV=3; 0 if adjacent
+        if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
+            if (canvas.grid.measureDistance(actor.token, target) > 2) {
+                targetDefenseValue = 3;
+            } else {
+                targetDefenseValue = 0;
+            }
+        }
 
         const targetHeroRoller = aoeAlwaysHit ? heroRoller : heroRoller.clone();
         let toHitRollTotal = 0;
@@ -2063,8 +2075,14 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         damageDetail.stun = 0;
     }
 
-    // check if target is stunned
-    if (game.settings.get(HEROSYS.module, "stunned")) {
+    // See if token has CON.  Notice we check raw actor type from config, not current actor props as
+    // this token may have originally been a PC, and changed to a BASE.
+    const hasCON = getCharacteristicInfoArrayForActor(token.actor).find(
+        (o) => o.key === "CON",
+    );
+
+    // check if target is stunned.  Must have CON
+    if (game.settings.get(HEROSYS.module, "stunned") && hasCON) {
         // determine if target was Stunned
         if (
             damageDetail.stun > token.actor.system.characteristics.con.value &&
@@ -2170,13 +2188,22 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         (automation === "npcOnly" && token.actor.type === "npc")
     ) {
         let changes = {
-            "system.characteristics.stun.value":
-                token.actor.system.characteristics.stun.value -
-                damageDetail.stun,
             "system.characteristics.body.value":
                 token.actor.system.characteristics.body.value -
                 damageDetail.body,
         };
+
+        // See if token has STUN.  Notice we check raw actor type from config, not current actor props as
+        // this token may have originally been a PC, and changed to a BASE.
+        const hasSTUN = getCharacteristicInfoArrayForActor(token.actor).find(
+            (o) => o.key === "STUN",
+        );
+
+        if (hasSTUN) {
+            changes["system.characteristics.stun.value"] =
+                token.actor.system.characteristics.stun?.value -
+                damageDetail.stun;
+        }
         await token.actor.update(changes);
     }
 
@@ -2650,7 +2677,14 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackRoller = null;
     let knockbackResultTotal = null;
 
-    if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier) {
+    // BASEs do not experience KB
+    const isBase = options?.targetToken?.actor.type === "base2";
+
+    if (
+        game.settings.get(HEROSYS.module, "knockback") &&
+        knockbackMultiplier &&
+        !isBase
+    ) {
         useKnockback = true;
 
         let knockbackDice = 2;
