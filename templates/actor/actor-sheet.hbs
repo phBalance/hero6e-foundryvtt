@@ -593,17 +593,15 @@
             {{!-- Equipment Tab --}}
             <div class="tab tab-body" data-group="primary" data-tab="equipment">
                 <table>
-                    {{#if (or weightTotal priceTotal)}}
-                        <tr class="sticky">
-                            <th colspan="1" class="right">Filter:</th>
-                            <th colspan="2">
-                            <input class="left" name="itemFilters.equipment" type="text"
-                                value="{{options.itemFilters.equipment}}">
-                            </th>
-                            <th colspan="2">WEIGHT: {{weightTotal}}</th>
-                            <th colspan="2">PRICE: {{priceTotal}}</th>
-                        </tr>
-                    {{/if}}
+                    <tr class="sticky">
+                        <th colspan="1" class="right">Filter:</th>
+                        <th colspan="2">
+                        <input class="left" name="itemFilters.equipment" type="text"
+                            value="{{options.itemFilters.equipment}}">
+                        </th>
+                        <th colspan="2">WEIGHT: {{weightTotal}}</th>
+                        <th colspan="2">PRICE: {{priceTotal}}</th>
+                    </tr>
                     <tr class="sticky2">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>

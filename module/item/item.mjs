@@ -333,20 +333,27 @@ export class HeroSystem6eItem extends Item {
         let content = `<div class="item-chat">`;
 
         // Part of a framework (is there a PARENTID?)
-        if (this.system.PARENTID) {
-            const parent = this.actor.items.find(
-                (o) => o.system.ID == this.system.PARENTID,
-            );
-            if (parent) {
-                content += `<p><b>${parent.name}</b>`;
-                if (
-                    parent.system.description &&
-                    parent.system.description != parent.name
-                ) {
-                    content += ` ${parent.system.description}`;
-                }
-                content += ".</p>";
+        if (this.parentItem?.parentItem) {
+            const _parentItem = this.parentItem.parentItem;
+            content += `<p><b>${_parentItem.name}</b>`;
+            if (
+                _parentItem.system.description &&
+                _parentItem.system.description != parent.name
+            ) {
+                content += ` ${_parentItem.system.description}`;
             }
+            content += ".</p>";
+        }
+        if (this.parentItem) {
+            const _parentItem = this.parentItem;
+            content += `<p><b>${_parentItem.name}</b>`;
+            if (
+                _parentItem.system.description &&
+                _parentItem.system.description != parent.name
+            ) {
+                content += ` ${_parentItem.system.description}`;
+            }
+            content += ".</p>";
         }
         content += `<b>${this.name}`;
         if (
