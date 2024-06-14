@@ -2627,9 +2627,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     },
                 ],
                 penaltyChoices: {
-                    other: "other",
-                    range: "range",
-                    hitLocation: "hitLocation",
+                    hitLocation: "Hit Location",
+                    other: "Other",
+                    range: "Range",
                 },
             },
             costPerLevel: function (item) {

@@ -286,12 +286,11 @@ export async function migrateWorld() {
     // The string "false" returns true.  Very confusing.
     // Was causing issues with consuming END for INVISIBILTY each phase.
     // Removed string "false" from template.json
-    // Turn off bar3
     await migrateToVersion(
         "3.0.75",
         lastMigration,
         getAllActorsInGame(),
-        "actors' items' range",
+        "actors' items' active/false",
         async (actor) => await migrate_actor_items_to_3_0_75(actor),
     );
 
@@ -346,7 +345,6 @@ async function migrateActorCostDescription(actor) {
 }
 
 async function migrate_actor_items_to_3_0_75(actor) {
-    game.settings.set(game.system.id, "bar3", false);
     for (const item of actor.items) {
         // The string "false" returns true.  Very confusing.
         // Was causing issues with consuming END for INVISIBILTY each phase.
