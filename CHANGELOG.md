@@ -4,12 +4,14 @@
 - We recommend sticking with FoundryVTT v11.  Known v12 issues:
   - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module breaks several things.
   - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) mostly works.  Oddies changing token images.
-- FoundryVTT 12.327 tentaive support.
+- FoundryVTT 12.327 support.
 - Reworked Combat Tracker to more closely align to FoundryVTT v12.
 - Improved chat messages for power toggles to include GM & token owners.
 - Improved initial toggle states during HDC upload.  For example, items in a multipower default to off.
 - Improved BASE actor type support. PD and ED are now resistant.  BODY now shows in characteristics tab. Implied DCV=3 or 0 if adjacent.
 - [Barrier proof of concept](https://youtu.be/fINMDsyObK0)
+- The built in 3rd token resource bar (END/STUN/BODY) is disabled.  The FoundryVTT default token bars are now STUN/BODY.  Recommend using [Bar Brawl](https://foundryvtt.com/packages/barbrawl) if you want custom token resource bars. 
+
 
 
 ## Version 3.0.74 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
