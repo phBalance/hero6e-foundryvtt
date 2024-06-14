@@ -696,10 +696,19 @@ export class HeroSystem6eItem extends Item {
     ];
     static ItemXmlChildTags = ["ADDER", "MODIFIER", "POWER"];
 
+    static ItemXmlChildTagsUpload = [
+        "ADDER",
+        "MODIFIER",
+        "POWER",
+        "SKILL",
+        "PERK",
+        "TALENT",
+    ];
+
     findModsByXmlid(xmlid) {
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
             if (this.system?.[key]) {
-                const value = this.system[key].find((o) => o.XMLID === xmlid);
+                const value = this.system[key]?.find((o) => o.XMLID === xmlid);
                 if (value) {
                     return value;
                 }
@@ -4662,7 +4671,7 @@ export function getItem(id) {
 
 export async function RequiresASkillRollCheck(item, event) {
     // Toggles don't need a roll to turn off
-    if (item.system?.active === true) return true;
+    //if (item.system?.active === true) return true;
 
     let rar = (item.system.MODIFIER || []).find(
         (o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL",

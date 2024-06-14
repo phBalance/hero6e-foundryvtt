@@ -1364,61 +1364,70 @@ export class HeroSystem6eActor extends Actor {
                         // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
                         if (system.XMLID === "COMPOUNDPOWER") {
                             for (const [key, value] of Object.entries(system)) {
-                                const values = value.length ? value : [value];
-                                for (const system2 of values) {
-                                    if (system2.XMLID) {
-                                        const power = getPowerInfo({
-                                            xmlid: system2.XMLID,
-                                            actor: this,
-                                        });
-                                        if (!power) {
-                                            await ui.notifications.error(
-                                                `${this.name}/${item.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                                {
-                                                    console: true,
-                                                    permanent: true,
+                                // We only care about arrays and objects (array of 1)
+                                if (
+                                    ["object", "array"].includes(typeof value)
+                                ) {
+                                    const values = value.length
+                                        ? value
+                                        : [value];
+                                    for (const system2 of values) {
+                                        if (system2.XMLID) {
+                                            const power = getPowerInfo({
+                                                xmlid: system2.XMLID,
+                                                actor: this,
+                                            });
+                                            if (!power) {
+                                                await ui.notifications.error(
+                                                    `${this.name}/${item.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                    {
+                                                        console: true,
+                                                        permanent: true,
+                                                    },
+                                                );
+                                                continue;
+                                            }
+                                            let itemData2 = {
+                                                name:
+                                                    system2.NAME ||
+                                                    system2.ALIAS ||
+                                                    system2.XMLID,
+                                                type: power.type.includes(
+                                                    "skill",
+                                                )
+                                                    ? "skill"
+                                                    : "power",
+                                                system: {
+                                                    ...system2,
+                                                    PARENTID: system.ID,
+                                                    POSITION: parseInt(
+                                                        system2.POSITION,
+                                                    ),
                                                 },
-                                            );
-                                            continue;
+                                            };
+                                            const item2 =
+                                                await HeroSystem6eItem.create(
+                                                    itemData2,
+                                                    { parent: this },
+                                                );
+                                            try {
+                                                await item2._postUpload();
+                                            } catch (e) {
+                                                console.error(e);
+                                                await ui.notifications.error(
+                                                    `${this.name}/${item.name}/${item2.name}/${item2.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                    {
+                                                        console: true,
+                                                        permanent: true,
+                                                    },
+                                                );
+                                                console.error(e);
+                                                await item2.delete();
+                                                continue;
+                                            }
+                                        } else {
+                                            console.log(key);
                                         }
-                                        let itemData2 = {
-                                            name:
-                                                system2.NAME ||
-                                                system2.ALIAS ||
-                                                system2.XMLID,
-                                            type: power.type.includes("skill")
-                                                ? "skill"
-                                                : "power",
-                                            system: {
-                                                ...system2,
-                                                PARENTID: system.ID,
-                                                POSITION: parseInt(
-                                                    system2.POSITION,
-                                                ),
-                                            },
-                                        };
-                                        const item2 =
-                                            await HeroSystem6eItem.create(
-                                                itemData2,
-                                                { parent: this },
-                                            );
-                                        try {
-                                            await item2._postUpload();
-                                        } catch (e) {
-                                            console.error(e);
-                                            await ui.notifications.error(
-                                                `${this.name}/${item.name}/${item2.name}/${item2.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                                {
-                                                    console: true,
-                                                    permanent: true,
-                                                },
-                                            );
-                                            console.error(e);
-                                            await item2.delete();
-                                            continue;
-                                        }
-                                    } else {
-                                        console.log(key);
                                     }
                                 }
                             }
@@ -1741,7 +1750,9 @@ export class HeroSystem6eActor extends Actor {
             }
 
             if (
-                HeroSystem6eItem.ItemXmlChildTags.includes(child.tagName) &&
+                HeroSystem6eItem.ItemXmlChildTagsUpload.includes(
+                    child.tagName,
+                ) &&
                 !HeroSystem6eItem.ItemXmlTags.includes(
                     child.parentElement?.tagName,
                 )
