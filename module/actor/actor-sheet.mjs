@@ -147,6 +147,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                         : parseInt(item.parentItem.system.POSITION);
                 item.system.childIdx =
                     parseInt(item.system.POSITION) - parseInt(parentPosition);
+                if (item.parentItem?.parentItem) {
+                    item.system.childIdx = `${item.parentItem.system.childIdx}.${item.system.childIdx}`;
+                }
             }
 
             // Endurance
@@ -1020,6 +1023,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         this.options.itemFilters.power = expandedData.itemFilters.power;
         this.options.itemFilters.skill = expandedData.itemFilters.skill;
+        this.options.itemFilters.equipment = expandedData.itemFilters.equipment;
 
         await this.actor.update(expandedData);
 

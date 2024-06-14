@@ -366,7 +366,7 @@
                                     {{#if (and (ne item.system.realCost 0) (ne item.system.XMLID "LIST"))}}
                                         {{item.system.realCost}}</td>
                                     {{/if}}
-                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{/if}}">
+                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{/if}}{{#if item.parentItem.parentItem}}2{{/if}}">
                                     {{#if item.system.childIdx}}
                                         {{#if (eq item.parentItem.type "skill")}}
                                             {{item.system.childIdx}})
@@ -544,7 +544,7 @@
                                                 height="24" /></div>
                                     </td>
                                     <td>{{item.system.realCost}}</td>
-                                    <td class="left{{#if item.parentItem.type}} item-framework-child-name{{/if}}">
+                                    <td class="left{{#if item.parentItem.type}} item-framework-child-name{{/if}}{{#if item.parentItem.parentItem}}2{{/if}}">
                                         {{#if (and item.system.childIdx item.parentItem)}}
                                             {{item.system.childIdx}})
                                         {{/if}}
@@ -595,11 +595,16 @@
                 <table>
                     {{#if (or weightTotal priceTotal)}}
                         <tr class="sticky">
-                            <th>WEIGHT: {{weightTotal}}</th>
-                            <th>PRICE: {{priceTotal}}</th>
+                            <th colspan="1" class="right">Filter:</th>
+                            <th colspan="2">
+                            <input class="left" name="itemFilters.equipment" type="text"
+                                value="{{options.itemFilters.equipment}}">
+                            </th>
+                            <th colspan="2">WEIGHT: {{weightTotal}}</th>
+                            <th colspan="2">PRICE: {{priceTotal}}</th>
                         </tr>
                     {{/if}}
-                    <tr class="sticky">
+                    <tr class="sticky2">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.Description"}}</th>
                         <th>{{localize "ActorSheet.End"}}</th>
@@ -612,7 +617,8 @@
                         </th>
                     </tr>
                     {{#each items as |item id|}}
-                        {{#if (or (eq item.type "equipment") (eq item.parentItem.type "equipment")) }}
+                        {{#if (and (or (eq item.type "equipment") (eq item.parentItem.type "equipment")) (filterItem item
+                        ../options.itemFilters.equipment))}}
                             <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
                                 data-item-id="{{item._id}}">
                                 <td class="item-image-td" style="width:26px">
@@ -620,7 +626,7 @@
                                             height="24px" /></div>
                                 </td>
                                 
-                                <td class="left{{#if item.parentItem}} item-framework-child-name{{/if}}">
+                                <td class="left{{#if item.parentItem}} item-framework-child-name{{/if}}{{#if item.parentItem.parentItem}}2{{/if}}">
                                     {{#if item.system.childIdx}}
                                         {{item.system.childIdx}})
                                     {{/if}}
