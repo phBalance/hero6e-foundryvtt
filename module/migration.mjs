@@ -85,7 +85,7 @@ export async function migrateWorld() {
     content +=
         'If you find any problems, are missing things or just would like a feature that the System is lacking, please report these <a href="https://github.com/dmdorman/hero6e-foundryvtt/issues">HERE</a><br /><br />';
     content +=
-        'There is also a <a href="https://discord.gg/HcUJvJH">discord channel</a> where you can ask questions.';
+        'There is also a <a href="https://discord.com/channels/609528652878839828/770825017729482772">discord channel</a> where you can ask questions.';
 
     // if (installedVersion != "1") {
     //     content += '<h2><b>Short Summery of update:</b></h2>';
