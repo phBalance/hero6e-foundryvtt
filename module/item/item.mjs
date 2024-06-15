@@ -333,20 +333,27 @@ export class HeroSystem6eItem extends Item {
         let content = `<div class="item-chat">`;
 
         // Part of a framework (is there a PARENTID?)
-        if (this.system.PARENTID) {
-            const parent = this.actor.items.find(
-                (o) => o.system.ID == this.system.PARENTID,
-            );
-            if (parent) {
-                content += `<p><b>${parent.name}</b>`;
-                if (
-                    parent.system.description &&
-                    parent.system.description != parent.name
-                ) {
-                    content += ` ${parent.system.description}`;
-                }
-                content += ".</p>";
+        if (this.parentItem?.parentItem) {
+            const _parentItem = this.parentItem.parentItem;
+            content += `<p><b>${_parentItem.name}</b>`;
+            if (
+                _parentItem.system.description &&
+                _parentItem.system.description != parent.name
+            ) {
+                content += ` ${_parentItem.system.description}`;
             }
+            content += ".</p>";
+        }
+        if (this.parentItem) {
+            const _parentItem = this.parentItem;
+            content += `<p><b>${_parentItem.name}</b>`;
+            if (
+                _parentItem.system.description &&
+                _parentItem.system.description != parent.name
+            ) {
+                content += ` ${_parentItem.system.description}`;
+            }
+            content += ".</p>";
         }
         content += `<b>${this.name}`;
         if (
@@ -689,10 +696,19 @@ export class HeroSystem6eItem extends Item {
     ];
     static ItemXmlChildTags = ["ADDER", "MODIFIER", "POWER"];
 
+    static ItemXmlChildTagsUpload = [
+        "ADDER",
+        "MODIFIER",
+        "POWER",
+        "SKILL",
+        "PERK",
+        "TALENT",
+    ];
+
     findModsByXmlid(xmlid) {
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
             if (this.system?.[key]) {
-                const value = this.system[key].find((o) => o.XMLID === xmlid);
+                const value = this.system[key]?.find((o) => o.XMLID === xmlid);
                 if (value) {
                     return value;
                 }
@@ -723,12 +739,13 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Power framework may include this modifier
-        if (this.system.PARENTID && this.actor?.items) {
-            const parent = this.actor.items.find(
-                (o) => o.system.ID == this.system.PARENTID,
-            );
-            if (parent) {
-                return parent.findModsByXmlid(xmlid);
+        if (
+            this.parentItem &&
+            !this.parentItem.XMLID === "COMPOUNDPOWER" &&
+            this.actor?.items
+        ) {
+            if (this.parentItem) {
+                return this.parentItem.findModsByXmlid(xmlid);
             }
         }
 
@@ -4655,7 +4672,7 @@ export function getItem(id) {
 
 export async function RequiresASkillRollCheck(item, event) {
     // Toggles don't need a roll to turn off
-    if (item.system?.active === true) return true;
+    //if (item.system?.active === true) return true;
 
     let rar = (item.system.MODIFIER || []).find(
         (o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL",

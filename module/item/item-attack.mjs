@@ -1867,7 +1867,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                             },
                         },
                         cancel: {
-                            label: "cancel",
+                            label: "Cancel",
                             callback: () => {
                                 resolve(null);
                             },
@@ -1927,13 +1927,15 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
-    // Some defenses requre a roll not just to active, but on each use.
+    // Some defenses requre a roll not just to active, but on each use.  6e EVERYPHASE.  5e ACTIVATIONROLL
     const defenseEveryPhase = token.actor.items.filter(
         (o) =>
             (o.system.subType || o.system.type) === "defense" &&
             o.system.active &&
-            o.findModsByXmlid("EVERYPHASE"),
+            (o.findModsByXmlid("EVERYPHASE") ||
+                o.findModsByXmlid("ACTIVATIONROLL")),
     );
+
     for (const defense of defenseEveryPhase) {
         if (!ignoreDefenseIds.includes(defense.id)) {
             const success = await RequiresASkillRollCheck(defense);

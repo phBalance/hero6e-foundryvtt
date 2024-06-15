@@ -1,18 +1,22 @@
 # Releases
 
 ## Version 3.0.75 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
 - We recommend sticking with FoundryVTT v11.  Known v12 issues:
   - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module breaks several things.
-  - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) mostly works.  Oddies changing token images.
-- FoundryVTT 12.327 tentaive support.
+  - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) mostly works. Oddities changing token images.
+- FoundryVTT 12.327 support.
 - Reworked Combat Tracker to more closely align to FoundryVTT v12.
 - Improved chat messages for power toggles to include GM & token owners.
 - Improved initial toggle states during HDC upload.  For example, items in a multipower default to off.
 - Improved BASE actor type support. PD and ED are now resistant.  BODY now shows in characteristics tab. Implied DCV=3 or 0 if adjacent.
-- [Barrier proof of concept](https://youtu.be/fINMDsyObK0)
+- [Barrier proof of concept](https://youtu.be/fINMDsyObK0).
+- Fix for compound powers within a list, where not all compound items were uploaded.  Also fixed issue where some compound power items were duplicating modifiers. [#964](https://github.com/dmdorman/hero6e-foundryvtt/issues/964)
+- You can now make attack rolls from equipment tab.
 
 
 ## Version 3.0.74 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
 - We recommend sticking with FoundryVTT v11. The [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) author [is working on v12 support](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/326#issuecomment-2148372052).
 - Improvements to AVAD and NND attacks.
 - Fixed damage dice for Nerve Strike and similar martial NND attacks. [#885](https://github.com/dmdorman/hero6e-foundryvtt/issues/885)
@@ -23,10 +27,12 @@
 
 
 ## Version 3.0.73
+
 - Fix for PC actor sheets failing to open when actor has frameworks or compound equipment. [#1036](https://github.com/dmdorman/hero6e-foundryvtt/issues/1036)
 - The alternate Savuori actor sheet logic now uses the default actor sheet. It still retains the simpler color scheme.
 
 ## Version 3.0.72
+
 - FoundryVTT v12 limited support. We recommend sticking with v11 for now as some key modules do not support v12 yet. If you choose to proceed with v12 here is what we have tested:
   - You should disable the [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module as it currently breaks several things. You can CTRL+CLICK+DRAG a token to measure, then spacebar to move for now (default Foundry). [DR#319](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/319) [DR#324](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/324)
   - [Dice So Nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice) seems to work just fine.
