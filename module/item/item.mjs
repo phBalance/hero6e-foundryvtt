@@ -4533,7 +4533,7 @@ export class HeroSystem6eItem extends Item {
                 this.system.XMLID === "HEALING" ||
                 this.system.XMLID === "SUCCOR"
             ) {
-                enhances = this.system.INPUT;
+                enhances = this.system.INPUT || "undefined";
             } else {
                 reduces = this.system.INPUT;
             }
