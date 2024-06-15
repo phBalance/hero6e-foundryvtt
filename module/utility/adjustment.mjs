@@ -239,7 +239,7 @@ export function determineCostPerActivePoint(
         defensivePowerAdjustmentMultiplier(
             targetCharacteristic.toUpperCase(),
             targetActor,
-            targetActor?.is5e || this.is5e,
+            targetActor?.is5e,
         )
     );
 }
