@@ -1,6 +1,10 @@
 # Releases
 
-## Version 3.0.75 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.76 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix for AID and likely other adjustment powers. [#1058](https://github.com/dmdorman/hero6e-foundryvtt/issues/1058)
+
+## Version 3.0.75
 
 - We recommend sticking with FoundryVTT v11.  Known v12 issues:
   - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module breaks several things.
