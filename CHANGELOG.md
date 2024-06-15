@@ -3,6 +3,7 @@
 ## Version 3.0.76 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix for AID and likely other adjustment powers. [#1058](https://github.com/dmdorman/hero6e-foundryvtt/issues/1058)
+- [Video: Aid and Drain - Basic](https://www.youtube.com/watch?v=z3I7SshLlyI)
 
 ## Version 3.0.75
 
