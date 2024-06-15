@@ -739,12 +739,13 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Power framework may include this modifier
-        if (this.system.PARENTID && this.actor?.items) {
-            const parent = this.actor.items.find(
-                (o) => o.system.ID == this.system.PARENTID,
-            );
-            if (parent) {
-                return parent.findModsByXmlid(xmlid);
+        if (
+            this.parentItem &&
+            !this.parentItem.XMLID === "COMPOUNDPOWER" &&
+            this.actor?.items
+        ) {
+            if (this.parentItem) {
+                return this.parentItem.findModsByXmlid(xmlid);
             }
         }
 

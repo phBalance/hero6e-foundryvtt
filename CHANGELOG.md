@@ -10,7 +10,9 @@
 - Improved chat messages for power toggles to include GM & token owners.
 - Improved initial toggle states during HDC upload.  For example, items in a multipower default to off.
 - Improved BASE actor type support. PD and ED are now resistant.  BODY now shows in characteristics tab. Implied DCV=3 or 0 if adjacent.
-- [Barrier proof of concept](https://youtu.be/fINMDsyObK0)
+- [Barrier proof of concept](https://youtu.be/fINMDsyObK0).
+- Fix for compound powers within a list, where not all compound items were uploaded.  Also fixed issue where some compound power items were duplicating modifiers. [#964](https://github.com/dmdorman/hero6e-foundryvtt/issues/964)
+- You can now make attack rolls from equipment tab.
 
 
 ## Version 3.0.74 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
