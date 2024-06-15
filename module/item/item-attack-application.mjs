@@ -121,6 +121,7 @@ export class ItemAttackFormApplication extends FormApplication {
         // data.csl = null;
         // data.cslSkill = null;
         const csls = CombatSkillLevelsForAttack(item);
+        data.csls = undefined;
         for (const csl of csls) {
             let entry = {};
             if (csl && csl.skill) {
