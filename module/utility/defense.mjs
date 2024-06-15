@@ -36,7 +36,9 @@ function determineDefense(targetActor, attackItem, options) {
     // The defenses that are active
     const activeDefenses = targetActor.items.filter(
         (o) =>
-            (o.system.subType === "defense" || o.type === "defense") &&
+            (o.system.subType === "defense" ||
+                o.type === "defense" ||
+                o.baseInfo?.type?.includes("defense")) &&
             (o.system.active ||
                 o.effects.find(() => true)?.disabled === false) &&
             !(options?.ignoreDefenseIds || []).includes(o.id),
