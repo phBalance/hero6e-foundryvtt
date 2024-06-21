@@ -84,6 +84,24 @@
       </div>
     {{/if}}
 
+    {{#if mindScanChoices}}
+      <div class="form-group">
+        <label>Number of Minds</label>
+        <select name="mindScanChoices" data-dtype="text">
+          {{selectOptions mindScanChoices nameAttr="key" labelAttr="label"}}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Familiar Mind</label>
+        <select name="mindScanFamiliar" data-dtype="text">
+          {{selectOptions mindScanFamiliar nameAttr="key" labelAttr="label"}}
+        </select>
+      </div>
+
+
+    {{/if}}
+
     {{#each csls}}
        <div class="form-group">
           <label title="{{{this.cslSkill.system.description}}}">
@@ -124,13 +142,21 @@
     </div>
 
   <footer class="sheet-footer flexcol">
-    {{#if (and noTargets (not aoeText))}}
+    {{#if (and noTargets (not aoeText) (not mindScanChoices))}}
       <div>
         <p class="hero-warning">
           <i class="fas fa-exclamation-triangle"></i>
           {{localize "Items.Attack.NoTargetsSelected"}}
         </p>
         <i>{{localize "Items.Attack.TargetingExplanation"}}</i>
+      </div>
+    {{/if}}
+
+    {{#if mindScanChoices}}
+    <div>
+        <p>
+          <i>Targets will be determiened by the Game Master</i>
+        </p>
       </div>
     {{/if}}
 

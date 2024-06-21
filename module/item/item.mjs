@@ -3963,6 +3963,7 @@ export class HeroSystem6eItem extends Item {
             this.system.noHitLocations = true;
         } else if (xmlid === "MINDSCAN") {
             this.system.class = "mindscan";
+            this.system.targets = "dmcv";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
         } else if (xmlid === "EGOATTACK") {

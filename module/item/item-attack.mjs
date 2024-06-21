@@ -33,6 +33,7 @@ export async function chatListeners(html) {
     html.on("click", "button.apply-damage", this._onApplyDamage.bind(this));
     html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
     html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
+    html.on("click", "button.roll-mindscan", this._onRollMindscan.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -188,7 +189,14 @@ export async function AttackAoeToHit(item, options) {
 
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
-    if (!(item.system.range === "los" || noRangeModifiers || normalRange)) {
+    if (
+        !(
+            item.system.range === "los" ||
+            item.system.range === "special" ||
+            noRangeModifiers ||
+            normalRange
+        )
+    ) {
         let rangePenalty =
             -calculateRangePenaltyFromDistanceInMetres(distanceToken);
 
@@ -344,11 +352,30 @@ export async function AttackToHit(item, options) {
     const noRangeModifiers = !!item.findModsByXmlid("NORANGEMODIFIER");
     const normalRange = !!item.findModsByXmlid("NORMALRANGE");
 
+    // Mind Scan
+    if (parseInt(options.mindScanChoices)) {
+        heroRoller.addNumber(
+            parseInt(options.mindScanChoices),
+            "Number Of Minds",
+        );
+    }
+    if (parseInt(options.mindScanFamiliar)) {
+        heroRoller.addNumber(
+            parseInt(options.mindScanFamiliar),
+            "Mind Familarity",
+        );
+    }
+
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
         game.user.targets.size > 0 &&
-        !(item.system.range === "los" || noRangeModifiers || normalRange)
+        !(
+            item.system.range === "los" ||
+            item.system.range === "special" ||
+            noRangeModifiers ||
+            normalRange
+        )
     ) {
         // Educated guess for token
         let token = actor.getActiveTokens()[0];
@@ -664,7 +691,9 @@ export async function AttackToHit(item, options) {
 
     let targetData = [];
     const targetIds = [];
-    const targetsArray = Array.from(game.user.targets);
+    const targetsArray = options.mindScanChoices
+        ? []
+        : Array.from(game.user.targets); // Mind Scan target will be selected by GM later
 
     // If AOE then sort by distance from center
     if (explosion) {
@@ -679,15 +708,25 @@ export async function AttackToHit(item, options) {
         });
     }
 
+    // At least one target (even if it is bogus)
+    if (targetsArray.length === 0) {
+        targetsArray.push({});
+    }
+
     // Make attacks against all targets
     for (const target of targetsArray) {
         let targetDefenseValue = RoundFavorPlayerUp(
-            target.actor.system.characteristics[toHitChar.toLowerCase()]?.value,
+            target.actor?.system.characteristics[toHitChar.toLowerCase()]
+                ?.value,
         );
 
         // Bases have no DCV.  DCV=3; 0 if adjacent
+        // Mind Scan defers DMCV so use 3 for now
         if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
-            if (canvas.grid.measureDistance(actor.token, target) > 2) {
+            if (
+                !target.actor ||
+                canvas.grid.measureDistance(actor.token, target) > 2
+            ) {
                 targetDefenseValue = 3;
             } else {
                 targetDefenseValue = 0;
@@ -743,7 +782,7 @@ export async function AttackToHit(item, options) {
 
         targetData.push({
             id: target.id,
-            name: target.name,
+            name: target.name || "undefined",
             aoeAlwaysHit: aoeAlwaysHit,
             explosion: explosion,
             toHitChar: toHitChar,
@@ -879,6 +918,7 @@ export async function AttackToHit(item, options) {
     const cardData = {
         // dice rolls
         velocity: options.velocity,
+        toHitRollTotal: targetData?.[0]?.toHitRollTotal,
 
         // data for damage card
         actor,
@@ -896,6 +936,9 @@ export async function AttackToHit(item, options) {
         // misc
         tags: heroRoller.tags(),
         attackTags: getAttackTags(item),
+        maxMinds: CONFIG.HERO.mindScanChoices
+            .find((o) => o.key === parseInt(options.mindScanChoices))
+            ?.label.match(/[\d,]+/)?.[0],
     };
 
     // render card
@@ -1564,6 +1607,149 @@ export async function _onRollDamage(event) {
     };
 
     return ChatMessage.create(chatData);
+}
+
+export async function _onRollMindscan(event) {
+    console.log(event);
+    const button = event.currentTarget;
+    button.blur(); // The button remains highlighted for some reason; kluge to fix.
+    const toHitData = { ...button.dataset };
+    const item = fromUuidSync(event.currentTarget.dataset.itemid);
+
+    // Determine targets based on which button they clicked on
+    let possibleTargets = [];
+    let selectedTargetIds = [];
+    switch (toHitData.target) {
+        case "controlled":
+            // Only tokens that have EGO
+            possibleTargets = canvas.tokens.controlled.filter(
+                (t) =>
+                    t.actor &&
+                    getCharacteristicInfoArrayForActor(t.actor).find(
+                        (o) => o.key === "EGO",
+                    ),
+            );
+            break;
+        case "scene":
+            // Only tokens that have EGO
+            possibleTargets = game.scenes.current.tokens.filter(
+                (t) =>
+                    t.actor &&
+                    getCharacteristicInfoArrayForActor(t.actor).find(
+                        (o) => o.key === "EGO",
+                    ),
+            );
+            break;
+        case "world":
+            // Only tokens that have EGO
+            possibleTargets = game.actors.filter((t) =>
+                getCharacteristicInfoArrayForActor(t.actor).find(
+                    (o) => o.key === "EGO",
+                ),
+            );
+            break;
+        default:
+            console.error("unhandled target");
+    }
+
+    if (possibleTargets.length === 0) {
+        return ui.notifications.warn(
+            `You must select at least one token before rolling Mind Scan.`,
+        );
+    }
+
+    possibleTargets.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Check if maxMinds is >= possibleTargets, if so check them all
+    const maxMinds = parseInt(toHitData.maxminds);
+    if (maxMinds >= possibleTargets.length) {
+        selectedTargetIds = possibleTargets.map((t) => t.id);
+    } else {
+        // If maxMinds is < possibleTargets then pick maxMind targets at random
+        // Use a for loop in an attempt to avoid infinte loop
+        for (let x = 0; x < possibleTargets.length * 10; x++) {
+            if (selectedTargetIds.length < maxMinds) {
+                const i = Math.floor(Math.random() * possibleTargets.length);
+                if (!selectedTargetIds.includes(possibleTargets[i].id)) {
+                    selectedTargetIds.push(possibleTargets[i].id);
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    // Show all these tokens/actors to the GM so they can confirm they are valid options based on mind type.
+    const toHitRollTotal = parseInt(toHitData.toHitRollTotal);
+    const cols = Math.clamp(Math.ceil(possibleTargets.length / 30), 1, 4);
+    let html = `<ol class="columns${cols}">`;
+    for (const target of possibleTargets) {
+        const actor = target.actor || actor;
+        const dmcv = parseInt(
+            (target.actor || target).system.characteristics.dmcv.value,
+        );
+
+        html += `<li title="DMCV=${dmcv}"><input type="checkbox" name="${
+            target.id
+        }" ${selectedTargetIds.includes(target.id) ? 'checked="true"' : ""} ${
+            toHitRollTotal >= dmcv ? "data-hit=true" : ""
+        } />`;
+        // bold targets we hit toHitRollTotal >= DMCV.  target is a token or an actor.
+        if (toHitRollTotal >= dmcv) {
+            html += `<b>${target.name}</b></li>`;
+        } else {
+            html += `${target.name}</li>`;
+        }
+    }
+    html += "</ol>";
+
+    await new Promise((resolve) => {
+        const data = {
+            title: `Confirm Valid Mind Scan targets`,
+            content: html,
+            item: item,
+            buttons: {
+                normal: {
+                    label: "Confirm",
+                    callback: async function (html) {
+                        const knownMindScanTargetsWeHit = Array.from(
+                            html
+                                .find(`input:checked[data-hit="true"]`)
+                                .map(function () {
+                                    return this.name;
+                                }),
+                        );
+                        console.log(knownMindScanTargetsWeHit);
+                        let content = `${item.actor.name} used Mind Scan and knows the presence and general location of following minds:<br>`;
+                        content += "<ol>";
+                        content += knownMindScanTargetsWeHit.reduce(
+                            (accumulator, currentValue) =>
+                                `${accumulator}<li>${
+                                    possibleTargets.find(
+                                        (p) => p.id === currentValue,
+                                    )?.name
+                                }</li>`,
+                            "",
+                        );
+                        content += "</ol>";
+                        const chatData = {
+                            user: game.user._id,
+                            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                            content,
+                        };
+
+                        await ChatMessage.create(chatData);
+                    },
+                },
+                cancel: {
+                    label: "Cancel",
+                },
+            },
+            default: "normal",
+            close: () => resolve({ cancelled: true }),
+        };
+        new Dialog(data, { width: "auto" }).render(true);
+    });
 }
 
 // Event handler for when the Apply Damage button is

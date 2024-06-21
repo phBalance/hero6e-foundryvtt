@@ -116,6 +116,29 @@ export class ItemAttackFormApplication extends FormApplication {
             data.boostableCharges = item.system.charges.value - 1;
         }
 
+        // MINDSCAN
+        if (item.system.XMLID === "MINDSCAN") {
+            data.mindScanChoices = CONFIG.HERO.mindScanChoices;
+
+            data.mindScanFamiliar = [];
+            data.mindScanFamiliar.push({
+                label: `+0`,
+                key: 0,
+            });
+            for (let i = 1; i <= 5; i++) {
+                data.mindScanFamiliar.push({
+                    label: `+${i} Familiar mind`,
+                    key: i,
+                });
+            }
+            for (let i = 1; i <= 5; i++) {
+                data.mindScanFamiliar.push({
+                    label: `${-i} Unfamiliar mind`,
+                    key: -i,
+                });
+            }
+        }
+
         // Combat Skill Levels
         // data.cslChoices = null;
         // data.csl = null;

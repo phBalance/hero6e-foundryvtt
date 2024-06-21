@@ -1,6 +1,6 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { clamp } from "./utility/compatibility.mjs";
-import { whisperUserTargetsForActor } from "./utility/util.mjs";
+import { whisperUserTargetsForActor, expireEffects } from "./utility/util.mjs";
 
 export class HeroSystem6eCombat extends Combat {
     constructor(data, context) {
@@ -519,6 +519,10 @@ export class HeroSystem6eCombat extends Combat {
 
         if (!combatant) return;
 
+        // Expire Effects
+        // We expire on our phase, not on our segment.
+        await expireEffects(combatant.actor);
+
         // Reset movement history
         if (window.dragRuler) {
             await dragRuler.resetMovementHistory(this, combatant.id);
@@ -902,6 +906,9 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async nextTurn() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | nextTurn`);
+        }
         let turn = this.turn ?? -1;
         let skip = this.settings.skipDefeated;
 
@@ -928,13 +935,19 @@ export class HeroSystem6eCombat extends Combat {
         if (segment_next < segment) {
             segment_next += 12;
         }
-        let advanceTime = segment_next - segment;
+        const advanceTime = segment_next - segment;
 
         // Update the document, passing data through a hook first
         const updateData = { round, turn: next };
-        const updateOptions = { advanceTime: advanceTime, direction: 1 };
+        const updateOptions = {}; // { advanceTime: advanceTime, direction: 1 };
+
+        // Advance worldtime NOW, before we _onStartTurn gets called.
+        // Seems to be a bug in core foundryVTT.
+        await game.time.advance(advanceTime);
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
-        return this.update(updateData, updateOptions);
+        let x = await this.update(updateData, updateOptions);
+        console.log(x);
+        return x;
     }
 
     /**
