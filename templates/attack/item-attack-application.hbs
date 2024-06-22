@@ -164,16 +164,15 @@
       </div>
     {{/if}}
 
-    {{#if (and (ne targets.size 1) (not aoeText) mindScanChoices)}}
+    {{#if (and (eq targets.size 0) (not aoeText) mindScanChoices)}}
       <div>
         <p class="hero-warning">
           <i class="fas fa-exclamation-triangle"></i>
-            You must select exactly 1 target.  The GM may have to make this attack for you. Make sure the GM knows your target area.  The GM may have to add the desired target into the scene so it can be targeted.
+            You have no target and will always MISS.  The GM may have to make this attack for you. Make sure the GM knows your target area.  The GM may have to add the desired target into the scene so it can be targeted.
         </p>
         <i>{{localize "Items.Attack.TargetingExplanation"}}</i>
       </div>
     {{/if}}
-    
 
     {{#if mindScanChoices}}
     {{/if}}
@@ -184,7 +183,7 @@
       </button>
     {{/if}}
 
-    <button type="submit" name="roll" {{#if (and (ne targets.size 1) mindScanChoices)}}disabled title="You must select exactly 1 target.  The GM may have to make this attack for you."{{/if}}>
+    <button type="submit" name="roll" >
       {{#if aoeText}}
         Roll Placement
       {{else}}

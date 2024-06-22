@@ -1,6 +1,9 @@
 # Releases
 
-## Version 3.0.77 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.78 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Initial support for Mind Scan.  [Mind Scan proof of concept video](https://www.youtube.com/watch?v=qKxj9jX39f8) [#1066](https://github.com/dmdorman/hero6e-foundryvtt/issues/1066)
+
+## Version 3.0.77
 
 - PD/ED characteristics with resistant modifier are now actually resistant.  Previously the resistant modifier was ignored.  Also PD/ED purchased as characteristics now show in DEFENSES tab for easy reference. [#1063](https://github.com/dmdorman/hero6e-foundryvtt/issues/1063)
 - Fix where the CSL selections were duplciated during AOE template placement. [#1064](https://github.com/dmdorman/hero6e-foundryvtt/issues/1064)
