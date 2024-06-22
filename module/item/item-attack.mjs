@@ -64,6 +64,16 @@ export async function AttackOptions(item) {
         return;
     }
 
+    // if (
+    //     item?.system?.XMLID === "MINDSCAN" &&
+    //     !game.user.isGM &&
+    //     game.settings.get(game.system.id, "SecretMindScan")
+    // ) {
+    //     return ui.notifications.error(
+    //         `${item.name} has several secret components that the GM does not wish to reveal.  The Game Master is required to roll this attack on your behalf.  This "Secret Mind Scan" can be disabled in the settings by the GM.`,
+    //     );
+    // }
+
     const data = {
         item: item,
         actor: actor,
@@ -144,7 +154,9 @@ export async function AttackAoeToHit(item, options) {
 
     const token = actor.getActiveTokens()[0];
     if (!token) {
-        return ui.notifications.error(`Token was not found.`);
+        return ui.notifications.error(
+            `Unable to find a token on this scene associated with ${actor.name}.`,
+        );
     }
 
     const aoeTemplate =

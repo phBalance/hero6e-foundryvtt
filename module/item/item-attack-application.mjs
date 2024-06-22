@@ -47,14 +47,14 @@ export class ItemAttackFormApplication extends FormApplication {
 
         Hooks.on(
             "targetToken",
-            function (...args) {
-                this.updateItem(...args);
+            async function (...args) {
+                await this.updateItem(...args);
             }.bind(this),
         );
     }
 
     async updateItem() {
-        this.render();
+        await this.render();
     }
 
     static get defaultOptions() {
@@ -101,6 +101,10 @@ export class ItemAttackFormApplication extends FormApplication {
         } else {
             data.noTargets = game.user.targets.size === 0;
             data.aoeText = null;
+        }
+
+        if (game.user.targets.size > 0) {
+            data.targets = game.user.targets;
         }
 
         // Initialize aim to the default option values

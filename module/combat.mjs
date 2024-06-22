@@ -12,8 +12,9 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     getUniqueTokens() {
+        // this.combatants.contents.reduce((accumulator, item) => {if (!accumulator.find(o=> o.tokenId === item.tokenId)) {accumulator.push(item);} return accumulator;},[])
         const results = [];
-        for (const c of this.combatants.values()) {
+        for (const c of this.combatants.contents) {
             if (!results.find((o) => o.id === c.token.object?.id)) {
                 results.push(c.token.object);
             }
@@ -44,10 +45,171 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     async rollInitiative(ids) {
+        // Structure input data
+        ids = typeof ids === "string" ? [ids] : ids;
+        if (ids.length === 0) {
+            ids = this.combatants.map((c) => c.id); // Roll All
+        }
+
         if (CONFIG.debug.combat) {
             console.debug(`Hero | rollInitiative`, ids);
         }
         // We need a unique combatant for each phase the actor acts.
+
+        const uniqueTokensToProcess = [];
+
+        for (const id of ids) {
+            const c = this.combatants.find((o) => o.id === id);
+
+            const lightningReflexes = c.actor?.items.find(
+                (o) =>
+                    o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
+                    o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+            );
+
+            //Create extra combatants to match SPEED
+            let targetCombatantsForToken =
+                parseInt(
+                    Math.min(
+                        12,
+                        Math.max(1, c.actor?.system.characteristics.spd?.value), // Bases don't have a SPD
+                    ),
+                ) * (lightningReflexes ? 2 : 1);
+
+            const needToCreate =
+                targetCombatantsForToken -
+                this.combatants.filter((o) => o.tokenId === c.tokenId).length;
+
+            const toCreate = [];
+            for (let i = 0; i < needToCreate; i++) {
+                toCreate.push({
+                    tokenId: c.tokenId,
+                    sceneId: c.sceneId,
+                    actorId: c.actorId,
+                    hidden: c.hidden,
+                });
+            }
+            if (toCreate.length > 0) {
+                await this.createEmbeddedDocuments("Combatant", toCreate);
+                continue; // We just created combat documents, which will call this (RollInitiative) again
+            }
+
+            // Perhaps we have too many (SPD drain for example)
+            if (needToCreate < 0) {
+                await this.deleteEmbeddedDocuments("Combatant", [c.id], {
+                    single: true,
+                });
+                continue; // We just deleted combat documents, which will call this (RollInitiative) again
+            }
+
+            if (!uniqueTokensToProcess.find((t) => t.id === c.tokenId)) {
+                uniqueTokensToProcess.push(c.token);
+            }
+        }
+
+        // Loop thru all the tokens/combatants with ids provided
+        for (const t of uniqueTokensToProcess) {
+            const lightningReflexes = t.actor?.items.find(
+                (o) =>
+                    o.system.XMLID === "LIGHTNING_REFLEXES_ALL" ||
+                    o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+            );
+
+            const lightningReflexesLevels = parseInt(
+                lightningReflexes?.system.LEVELS?.value ||
+                    lightningReflexes?.system.LEVELS ||
+                    lightningReflexes?.system.levels ||
+                    lightningReflexes?.system.other.levels ||
+                    0,
+            );
+
+            // Produce an initiative roll for the Combatant.
+            const characteristic =
+                t.actor?.system?.initiativeCharacteristic || "dex";
+            const initValue =
+                t.actor?.system.characteristics[characteristic]?.value || 0;
+            const spdValue = t.actor?.system.characteristics.spd?.value || 0;
+            const initiativeValue = initValue + spdValue / 100;
+
+            const tokenCombatants = this.combatants.filter(
+                (c) => c.tokenId === t.id,
+            );
+
+            // Assign a segment and Initiative
+            let idx = 0;
+            for (let s = 1; s <= 12; s++) {
+                if (
+                    HeroSystem6eCombat.hasPhase(
+                        Math.max(
+                            1,
+                            tokenCombatants[idx]?.actor?.system.characteristics
+                                .spd?.value || 0,
+                        ),
+                        s,
+                    )
+                ) {
+                    if (lightningReflexes) {
+                        const lightningReflexesAlias = `(${
+                            lightningReflexes.system.OPTION_ALIAS ||
+                            lightningReflexes.system.INPUT ||
+                            "All Actions"
+                        })`;
+                        if (
+                            tokenCombatants[idx].flags.segment !== s ||
+                            tokenCombatants[idx].flags.initiative !==
+                                initiativeValue + lightningReflexesLevels ||
+                            tokenCombatants[idx].flags
+                                .lightningReflexesAlias !==
+                                lightningReflexesAlias
+                        ) {
+                            await tokenCombatants[idx].update({
+                                "flags.segment": s,
+                                initiative:
+                                    initiativeValue + lightningReflexesLevels,
+                                "flags.lightningReflexesAlias":
+                                    lightningReflexesAlias,
+                            });
+                        }
+                        idx++;
+                    }
+
+                    if (
+                        tokenCombatants[idx].flags.segment !== s ||
+                        tokenCombatants[idx].flags.initiative !==
+                            initiativeValue
+                    ) {
+                        try {
+                            await tokenCombatants[idx].update({
+                                "flags.segment": s,
+                                initiative: initiativeValue,
+                                "-flags.lightningReflexesAlias": null,
+                            });
+                        } catch (ex) {
+                            console.error(ex);
+                            return;
+                        }
+                    }
+                    idx++;
+                }
+            }
+
+            // Rare case where SPD <= 0 (and for actorless tokens; bases)
+            // NOTE: There is no code to prevent a SPD 0 token from acting, currently GM player needs to handle that manually.
+            // A SPD 0 character can't act, but does get a postSegment12.  In theory the SPD drain will eventually fade.
+            if (
+                (tokenCombatants[0].actor?.system.characteristics.spd?.value ||
+                    0) <= 0 &&
+                tokenCombatants[0].flags.segment !== 12
+            ) {
+                tokenCombatants[0].flags.segment = 12;
+                await tokenCombatants[0].update({
+                    "flags.segment": 12,
+                    initiative: 10 + initiativeValue,
+                    "-flags.lightningReflexesAlias": null,
+                });
+            }
+        }
+        return this;
 
         for (const t of this.getUniqueTokens()) {
             let tokenCombatants = this.combatants.filter(
@@ -75,6 +237,10 @@ export class HeroSystem6eCombat extends Combat {
                     (lightningReflexes ? 2 : 1) -
                 tokenCombatants.length;
 
+            if (needToCreate < 0) {
+                console.warn("needToCreate <0");
+            }
+
             const toCreate = [];
             for (let i = 0; i < needToCreate; i++) {
                 toCreate.push({
@@ -90,7 +256,11 @@ export class HeroSystem6eCombat extends Combat {
                     "Combatant",
                     toCreate,
                 );
-                tokenCombatants = tokenCombatants.concat(created);
+                //tokenCombatants = tokenCombatants.concat(created);
+
+                tokenCombatants = this.combatants.filter(
+                    (o) => o.tokenId === t.id && t.inCombat,
+                );
             }
 
             // Perhaps we have too many
@@ -100,6 +270,12 @@ export class HeroSystem6eCombat extends Combat {
             }
             if (toDelete.length > 0) {
                 await this.deleteEmbeddedDocuments("Combatant", toDelete);
+                // tokenCombatants = tokenCombatants.filter(
+                //     (o) => !toDelete.includes(o.id),
+                // );
+                tokenCombatants = this.combatants.filter(
+                    (o) => o.tokenId === t.id && t.inCombat,
+                );
             }
 
             // Produce an initiative roll for the Combatant.
@@ -156,11 +332,16 @@ export class HeroSystem6eCombat extends Combat {
                         tokenCombatants[idx].flags.initiative !==
                             initiativeValue
                     ) {
-                        await tokenCombatants[idx].update({
-                            "flags.segment": s,
-                            initiative: initiativeValue,
-                            "-flags.lightningReflexesAlias": null,
-                        });
+                        try {
+                            await tokenCombatants[idx].update({
+                                "flags.segment": s,
+                                initiative: initiativeValue,
+                                "-flags.lightningReflexesAlias": null,
+                            });
+                        } catch (ex) {
+                            console.error(ex);
+                            return;
+                        }
                     }
                     idx++;
                 }
@@ -184,7 +365,7 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // Likely new turn orders so setupTurns
-        this.setupTurns();
+        //this.setupTurns();
 
         return this;
     }
@@ -326,11 +507,21 @@ export class HeroSystem6eCombat extends Combat {
         // Get current combatant
         const oldCombatant = this.combatant;
 
+        // Super
+        await super._onCreateDescendantDocuments(
+            parent,
+            collection,
+            documents,
+            data,
+            options,
+            userId,
+        );
+
         // Setup turns in segment fashion
         //const _turns = this.setupTurns();
 
         // Roll initiative (again?)
-        await this.rollInitiative();
+        await this.rollInitiative(documents.map((o) => o.id));
 
         // Keep the current Combatant the same after adding new Combatants to the Combat
         if (oldCombatant) {
@@ -341,16 +532,6 @@ export class HeroSystem6eCombat extends Combat {
             );
             await this.update({ turn: this.turn });
         }
-
-        // Super
-        await super._onCreateDescendantDocuments(
-            parent,
-            collection,
-            documents,
-            data,
-            options,
-            userId,
-        );
 
         // Render the collection
         //if (this.active) this.collection.render();
@@ -386,17 +567,20 @@ export class HeroSystem6eCombat extends Combat {
             userId,
         );
 
-        // Make sure we delete all combatants with the same tokenID
-        if (collection === "combatants") {
-            for (const doc of documents) {
-                const toDelete = this.combatants.filter(
-                    (c) => c.token.id === doc.token.id,
-                );
-                if (toDelete.length > 0) {
-                    await this.deleteEmbeddedDocuments(
-                        "Combatant",
-                        toDelete.map((c) => c.id),
+        // Make sure we delete all combatants with the same tokenID.
+        // Unless options.single = true; like when SPD lowers.
+        if (!options.single) {
+            if (collection === "combatants") {
+                for (const doc of documents) {
+                    const toDelete = this.combatants.filter(
+                        (c) => c.token.id === doc.token.id,
                     );
+                    if (toDelete.length > 0) {
+                        await this.deleteEmbeddedDocuments(
+                            "Combatant",
+                            toDelete.map((c) => c.id),
+                        );
+                    }
                 }
             }
         }
@@ -433,7 +617,7 @@ export class HeroSystem6eCombat extends Combat {
         }
         await this.update({ turn: this.turn, round: this.round });
 
-        await this.rollInitiative();
+        await this.rollInitiative(documents.map((o) => o.id));
 
         // Render the collection
         if (this.active) this.collection.render();
