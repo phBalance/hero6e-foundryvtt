@@ -41,6 +41,9 @@ export async function onMessageRendered(html) {
     if (!game.user.isGM) {
         html.find(`[data-visibility="gm"]`).remove();
     }
+    if (game.user.isGM) {
+        html.find(`[data-visibility="notgm"]`).remove();
+    }
 
     // visibility based on actor owner
     let element = html.find("div [data-visibility]");
@@ -703,9 +706,7 @@ export async function AttackToHit(item, options) {
 
     let targetData = [];
     const targetIds = [];
-    const targetsArray = options.mindScanChoices
-        ? []
-        : Array.from(game.user.targets); // Mind Scan target will be selected by GM later
+    const targetsArray = Array.from(game.user.targets);
 
     // If AOE then sort by distance from center
     if (explosion) {

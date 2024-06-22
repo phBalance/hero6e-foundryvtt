@@ -14,18 +14,29 @@
             {{#each targetData as |target|}}
             <div class="target-dc">
 
-                <span>Target: {{target.name}}</span>
-                <span data-visibility="gm">
-                    ({{target.toHitChar}} {{target.value}})
-                </span>
-                <br />
-                <span>
-                    Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
-                    {{#if target.aoeAlwaysHit}}
-                        due to AOE
-                    {{/if}}
-                    <span data-visibility="gm" class="resultBy">by {{target.result.by}}</span>
-                </span>
+                {{#if ../maxMinds}}
+                    Target: <span data-visibility="gm">{{target.name}}</span><span data-visibility="notgm"><i>redacted</i></span>
+                    <span data-visibility="gm">
+                        ({{target.toHitChar}} {{target.value}})
+                    </span>
+                    <br />
+                    Result: <span data-visibility="gm" class="{{target.result.hit}}">{{target.result.hit}}
+                    </span>
+                    <span data-visibility="notgm"><i>redacted</i></span>
+                {{else}}
+                    <span>Target: {{target.name}}</span>
+                    <span data-visibility="gm">
+                        ({{target.toHitChar}} {{target.value}})
+                    </span>
+                    <br />
+                    <span>
+                        Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
+                        {{#if target.aoeAlwaysHit}}
+                            due to AOE
+                        {{/if}}
+                        <span data-visibility="gm" class="resultBy">by {{target.result.by}}</span>
+                    </span>
+                {{/if}}
             </div>
             {{/each}}
             {{#unless targetData}}
