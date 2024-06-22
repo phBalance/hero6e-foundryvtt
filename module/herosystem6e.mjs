@@ -27,15 +27,14 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import {
-    getPowerInfo,
+    // getPowerInfo,
     expireEffects,
     getCharacteristicInfoArrayForActor,
 } from "./utility/util.mjs";
 import { migrateWorld } from "./migration.mjs";
-import {
-    performAdjustment,
-    renderAdjustmentChatCards,
-} from "./utility/adjustment.mjs";
+import // performAdjustment,
+// renderAdjustmentChatCards,
+"./utility/adjustment.mjs";
 
 import "./utility/chat-dice.mjs";
 
