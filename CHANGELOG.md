@@ -1,6 +1,15 @@
 # Releases
 
-## Version 3.0.76 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.77 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- PD/ED characteristics with resistant modifier are now actually resistant.  Previously the resistant modifier was ignored.  Also PD/ED purchased as characteristics now show in DEFENSES tab for easy reference. [#1063](https://github.com/dmdorman/hero6e-foundryvtt/issues/1063)
+- Fix where the CSL selections were duplciated during AOE template placement. [#1064](https://github.com/dmdorman/hero6e-foundryvtt/issues/1064)
+- Fix where DCV temporary bonuses from CSLs and other active effects were expiring on our segment instead of on our phase. [#1061](https://github.com/dmdorman/hero6e-foundryvtt/issues/1061)
+- ToHit dialog box now shows a list of all targets.
+- Fix for combat tracker where adding tokens to combat tracker sometimes resulted in error messages, preventing the token from being added. [#1072](https://github.com/dmdorman/hero6e-foundryvtt/issues/1072)
+
+
+## Version 3.0.76
 
 - Fix for AID and likely other adjustment powers. [#1058](https://github.com/dmdorman/hero6e-foundryvtt/issues/1058)
 - [Video: Aid and Drain - Basic](https://www.youtube.com/watch?v=z3I7SshLlyI)

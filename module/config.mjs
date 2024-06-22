@@ -145,6 +145,53 @@ HERO.hitLocationSide = {
     Right: "Right",
 };
 
+HERO.mindScanChoices = [
+    {
+        label: `1 mind; -0 OMCV`,
+        key: 0,
+    },
+    {
+        label: `10 minds; -2 OMCV`,
+        key: -2,
+    },
+    {
+        label: `100 minds (Theater); -4 OMCV`,
+        key: -4,
+    },
+    {
+        label: `1,000 minds (Apartment Building); -6 OMCV`,
+        key: -6,
+    },
+    {
+        label: `10,000 minds (Small Town); -8 OMCV`,
+        key: -8,
+    },
+    {
+        label: `100,000 minds (Large Town); -10 OMCV`,
+        key: -10,
+    },
+    {
+        label: `1,000,000 minds (Major City); -12 OMCV`,
+        key: -12,
+    },
+    {
+        label: `10,000,000 minds (Small Nation); -14 OMCV`,
+        key: -14,
+    },
+    {
+        label: `100,000,000 minds (Large Nation); -16 OMCV`,
+        key: -16,
+    },
+    {
+        label: `1,000,000,000 minds (Continent); -18 OMCV`,
+        key: -18,
+    },
+    {
+        label: `10,000,000,000 minds (Large Planet); -20 OMCV`,
+        key: -20,
+    },
+];
+
 // TODO: This could be created from powers.
 HERO.movementPowers = {
     extradimensionalmovement: "Extra Dimensional Movement",

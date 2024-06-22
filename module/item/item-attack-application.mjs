@@ -47,14 +47,14 @@ export class ItemAttackFormApplication extends FormApplication {
 
         Hooks.on(
             "targetToken",
-            function (...args) {
-                this.updateItem(...args);
+            async function (...args) {
+                await this.updateItem(...args);
             }.bind(this),
         );
     }
 
     async updateItem() {
-        this.render();
+        await this.render();
     }
 
     static get defaultOptions() {
@@ -103,6 +103,10 @@ export class ItemAttackFormApplication extends FormApplication {
             data.aoeText = null;
         }
 
+        if (game.user.targets.size > 0) {
+            data.targets = game.user.targets;
+        }
+
         // Initialize aim to the default option values
         this.data.aim ??= "none";
         this.data.aimSide ??= "none";
@@ -116,11 +120,35 @@ export class ItemAttackFormApplication extends FormApplication {
             data.boostableCharges = item.system.charges.value - 1;
         }
 
+        // MINDSCAN
+        if (item.system.XMLID === "MINDSCAN") {
+            data.mindScanChoices = CONFIG.HERO.mindScanChoices;
+
+            data.mindScanFamiliar = [];
+            data.mindScanFamiliar.push({
+                label: `+0`,
+                key: 0,
+            });
+            for (let i = 1; i <= 5; i++) {
+                data.mindScanFamiliar.push({
+                    label: `+${i} Familiar mind`,
+                    key: i,
+                });
+            }
+            for (let i = 1; i <= 5; i++) {
+                data.mindScanFamiliar.push({
+                    label: `${-i} Unfamiliar mind`,
+                    key: -i,
+                });
+            }
+        }
+
         // Combat Skill Levels
         // data.cslChoices = null;
         // data.csl = null;
         // data.cslSkill = null;
         const csls = CombatSkillLevelsForAttack(item);
+        data.csls = undefined;
         for (const csl of csls) {
             let entry = {};
             if (csl && csl.skill) {

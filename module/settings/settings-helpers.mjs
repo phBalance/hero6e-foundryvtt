@@ -82,6 +82,16 @@ export default class SettingsHelpers {
             onChange: (value) => HEROSYS.log(false, value),
         });
 
+        // game.settings.register(module, "SecretMindScan", {
+        //     name: game.i18n.localize("Settings.SecretMindScan.Name"),
+        //     hint: game.i18n.localize("Settings.SecretMindScan.Hint"),
+        //     scope: "world",
+        //     config: true,
+        //     type: Boolean,
+        //     default: false,
+        //     onChange: (value) => HEROSYS.log(false, value),
+        // });
+
         game.settings.register(module, "equipmentWeightPercentage", {
             name: game.i18n.localize(
                 "Settings.Equipment.WeightPercentage.Name",
