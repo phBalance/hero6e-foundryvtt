@@ -562,7 +562,7 @@ export async function AttackToHit(item, options) {
         useEnd = true;
         let valueEnd = actor.system.characteristics.end.value;
         let itemEnd = (parseInt(item.system.end) || 0) * (autoFireShots || 1);
-        let newEnd = valueEnd - itemEnd;
+        let newEnd = valueEnd; // - itemEnd;
         let spentEnd = itemEnd;
         options.effectiveStr = options.effectiveStr || 0; // May want to get rid of this so we can support HKA with 0 STR (wierd but possible?)
 
