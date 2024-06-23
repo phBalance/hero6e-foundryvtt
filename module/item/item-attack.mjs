@@ -217,7 +217,7 @@ export async function AttackAoeToHit(item, options) {
             normalRange
         )
     ) {
-        let rangePenalty =
+        const rangePenalty =
             -calculateRangePenaltyFromDistanceInMetres(distanceToken);
 
         // PENALTY_SKILL_LEVELS (range)
@@ -406,15 +406,14 @@ export async function AttackToHit(item, options) {
             );
         }
 
-        let target = game.user.targets.first();
-        let distance = token
+        const target = game.user.targets.first();
+        const distance = token
             ? canvas.grid.measureDistance(token, target, {
                   gridSpaces: true,
               })
             : 0;
-        let factor = actor.system.is5e ? 4 : 8;
-        let rangePenalty = -Math.ceil(Math.log2(distance / factor)) * 2;
-        rangePenalty = rangePenalty > 0 ? 0 : rangePenalty;
+        const rangePenalty =
+            calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
         const pslRange = actor.items.find(
