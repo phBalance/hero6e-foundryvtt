@@ -360,6 +360,7 @@ export async function AttackToHit(item, options) {
         .addNumber(11, "Base to hit")
         .addNumber(hitCharacteristic, itemData.uses)
         .addNumber(parseInt(options.ocvMod), "OCV modifier")
+        .addNumber(parseInt(options.omcvMod), "OMCV modifier")
         .addNumber(parseInt(setManeuver?.system.ocv) || 0, "Maneuver OCV");
 
     if (item.system.range === "self") {

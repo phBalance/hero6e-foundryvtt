@@ -36,6 +36,8 @@ import // performAdjustment,
 // renderAdjustmentChatCards,
 "./utility/adjustment.mjs";
 
+import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
+
 import "./utility/chat-dice.mjs";
 
 import "./testing/testing-main.mjs";
@@ -93,6 +95,8 @@ Hooks.once("init", async function () {
 
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
+
+    CONFIG.ui.items = HeroSystem6eItemDirectory;
 
     HeroRuler.initialize();
 
@@ -863,4 +867,12 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`,
         );
     }
+});
+
+Hooks.on("preCreateItem", async function (doc, d, options, userId) {
+    console.log("preCreateItem", doc, d, options, userId);
+});
+
+Hooks.on("createItem", async function (...args) {
+    console.log(...args);
 });

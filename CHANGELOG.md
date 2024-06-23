@@ -7,6 +7,7 @@
 - Correct range penalty calculation for 5e non AoE attacks. [#1077](https://github.com/dmdorman/hero6e-foundryvtt/issues/1077)
 - Attacks from compound powers now preface the attack with the compound power name. [#1070](https://github.com/dmdorman/hero6e-foundryvtt/issues/1070)
 - Tokenizer images are no longer overwritten. [#1070](https://github.com/dmdorman/hero6e-foundryvtt/issues/1070)
+- Improved support for Mental Skill Levels
 
 ## Version 3.0.77
 

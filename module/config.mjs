@@ -2506,8 +2506,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         OPTION_ALIAS: "with a group of Mental Powers",
                     },
                     {
-                        OPTIONID: "ALL",
-                        OPTION: "ALL",
+                        OPTIONID: "BROAD",
+                        OPTION: "BROAD",
                         OPTION_ALIAS: "with all Mental Powers",
                     },
                 ],

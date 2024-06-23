@@ -1513,13 +1513,10 @@ export class HeroSystem6eActor extends Actor {
             this.img.startsWith("tokenizer/") &&
             game.modules.get("vtta-tokenizer")?.active
         ) {
-            console.log(
+            await ui.notifications.warn(
                 `Skipping image upload, because this token (${this.name}) appears to be using tokenizer.`,
             );
-        } else if (
-            heroJson.CHARACTER.IMAGE &&
-            !this.img.startsWith("tokenizer/")
-        ) {
+        } else if (heroJson.CHARACTER.IMAGE) {
             const filename = heroJson.CHARACTER.IMAGE?.FileName;
             const path = "worlds/" + game.world.id + "/tokens";
             const relativePathName = path + "/" + filename;
@@ -1565,10 +1562,9 @@ export class HeroSystem6eActor extends Actor {
             delete heroJson.CHARACTER.IMAGE;
         } else {
             // No image provided. Make sure we're using the default token.
-            // 6/22/2024 AEAUSETH: We no longer force the DEFAULT_TOKEN when one isn't provided,
-            //  instead we just leave it alone, which is typically the DEFAULT_TOKEN, or one the GM/PLAYER already updated.
-            //  This is in support of the Tokenizer module.
-            // changes["img"] = CONST.DEFAULT_TOKEN;
+            // Note we are overwriting any image that may have been there previously.
+            // If they really want the image to stay, they should put it in the HDC file.
+            changes["img"] = CONST.DEFAULT_TOKEN;
         }
 
         uploadProgressBar.advance(`${this.name}: Saving core changes`);
