@@ -1,5 +1,9 @@
 # Releases
 
+## Version 3.0.78 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Correct range penalty calculation for 5e non AoE attacks. [#1077](https://github.com/dmdorman/hero6e-foundryvtt/issues/1077)
+
 ## Version 3.0.77 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - PD/ED characteristics with resistant modifier are now actually resistant.  Previously the resistant modifier was ignored.  Also PD/ED purchased as characteristics now show in DEFENSES tab for easy reference. [#1063](https://github.com/dmdorman/hero6e-foundryvtt/issues/1063)
