@@ -291,19 +291,19 @@ export async function migrateWorld() {
     );
 
     // FOR ALL VERSION MIGRATIONS
-    // Reparse all items (description, cost, etc) on every migration
+    // Reparse actors and all all their items (description, cost, etc) on every migration
     await migrateToVersion(
         game.system.version,
         undefined,
         getAllActorsInGame(),
-        "actors' items' cost and description",
-        async (actor) => await migrateActorCostDescription(actor),
+        "rebuilding actors and their items",
+        async (actor) => await rebuildActors(actor),
     );
 
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
 }
 
-async function migrateActorCostDescription(actor) {
+async function rebuildActors(actor) {
     try {
         if (!actor) return false;
 
@@ -327,6 +327,8 @@ async function migrateActorCostDescription(actor) {
                 );
             }
         }
+
+        actor._postUpload();
     } catch (e) {
         console.log(e);
         if (
