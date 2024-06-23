@@ -59,11 +59,11 @@ div.fifthEd {
   margin: 5px 5px;
 }
 
-.toHit-card .target-dc-result .Miss {
+.toHit-card .target-dc-result .Miss, .item-mindscan-target-card .Miss {
   color: $c-miss;
 }
 
-.toHit-card .target-dc-result .Hit {
+.toHit-card .target-dc-result .Hit, .item-mindscan-target-card .Hit {
   color: $c-hit;
 }
 
@@ -158,10 +158,19 @@ div.dice-standard-effect {
   outline: 1px solid rgba(0, 0, 255, 0.4);
 }
 
+[data-visibility="redacted"] {
+  background-color: black;
+  color:white;
+}
+
 .hexFacing {
   display: block;
   margin-left: auto;
   margin-right: auto;
   width: 50%;
   border: 0;
+}
+
+.mindScanButtons, .roll-mindscanEgo  {
+  line-height: normal;
 }
