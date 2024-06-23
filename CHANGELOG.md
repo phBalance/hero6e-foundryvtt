@@ -1,6 +1,7 @@
 # Releases
 
-## Version 3.0.78 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.78 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
 - Initial support for Mind Scan.  [Mind Scan proof of concept video](https://www.youtube.com/watch?v=qKxj9jX39f8) [#1066](https://github.com/dmdorman/hero6e-foundryvtt/issues/1066)
 - Perception skill moved to top of skill tab. [#1069](https://github.com/dmdorman/hero6e-foundryvtt/issues/1069)
 - Fixed issue where some attacks were charging twice for END. [#1075](https://github.com/dmdorman/hero6e-foundryvtt/issues/1075)
@@ -8,6 +9,9 @@
 - Attacks from compound powers now preface the attack with the compound power name. [#1070](https://github.com/dmdorman/hero6e-foundryvtt/issues/1070)
 - Tokenizer images are no longer overwritten. [#1070](https://github.com/dmdorman/hero6e-foundryvtt/issues/1070)
 - Improved support for Mental Skill Levels
+- Add success rolls for Psychological Limitation/Complication. [#1082](https://github.com/dmdorman/hero6e-foundryvtt/issues/1082)
+- Migrations now rebuild all actor and item data.
+- Add attack and defense tags to adjustment chat cards. [#1059](https://github.com/dmdorman/hero6e-foundryvtt/issues/1059)
 
 ## Version 3.0.77
 
@@ -16,7 +20,6 @@
 - Fix where DCV temporary bonuses from CSLs and other active effects were expiring on our segment instead of on our phase. [#1061](https://github.com/dmdorman/hero6e-foundryvtt/issues/1061)
 - ToHit dialog box now shows a list of all targets.
 - Fix for combat tracker where adding tokens to combat tracker sometimes resulted in error messages, preventing the token from being added. [#1072](https://github.com/dmdorman/hero6e-foundryvtt/issues/1072)
-
 
 ## Version 3.0.76
 

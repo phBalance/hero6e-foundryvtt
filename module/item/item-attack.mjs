@@ -2199,6 +2199,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             token,
             damageDetail,
             defense,
+            defenseTags,
         );
     }
     const senseAffecting = getPowerInfo({
@@ -2495,6 +2496,7 @@ async function _onApplyAdjustmentToSpecificToken(
     token,
     damageDetail,
     defense,
+    defenseTags,
 ) {
     if (
         adjustmentItem.actor.id === token.actor.id &&
@@ -2524,6 +2526,8 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
 
+    const adjustmentItemTags = getAttackTags(adjustmentItem);
+
     const reductionChatMessages = [];
     const reductionTargetActor = token.actor;
     for (const reduce of reducesArray) {
@@ -2540,7 +2544,11 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
     if (reductionChatMessages.length > 0) {
-        await renderAdjustmentChatCards(reductionChatMessages);
+        await renderAdjustmentChatCards(
+            reductionChatMessages,
+            adjustmentItemTags,
+            defenseTags,
+        );
     }
 
     const enhancementChatMessages = [];
@@ -2564,7 +2572,11 @@ async function _onApplyAdjustmentToSpecificToken(
         );
     }
     if (enhancementChatMessages.length > 0) {
-        await renderAdjustmentChatCards(enhancementChatMessages);
+        await renderAdjustmentChatCards(
+            enhancementChatMessages,
+            adjustmentItemTags,
+            [], // don't show any defense tags as this is an enhancement adjustment
+        );
     }
 }
 

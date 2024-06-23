@@ -5932,7 +5932,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "PSYCHOLOGICALLIMITATION",
             type: ["disadvantage"],
-            behaviors: [],
+            behaviors: ["success"],
             name: "Psychological Limitation",
             target: "self only",
             range: "self",

@@ -4299,6 +4299,38 @@ export class HeroSystem6eItem extends Item {
             });
 
             roll = `${rollValue}-`;
+        } else if (skillData.XMLID === "PSYCHOLOGICALLIMITATION") {
+            // Intensity is based on an EGO roll
+            const egoRoll = this.actor.system.characteristics.ego.roll || 0;
+            const intensity = skillData.ADDER.find(
+                (adder) => adder.XMLID === "INTENSITY",
+            )?.OPTIONID;
+            let intensityValue;
+
+            if (intensity === "MODERATE") {
+                intensityValue = 5;
+            } else if (intensity === "STRONG") {
+                intensityValue = 0;
+            } else if (intensity === "TOTAL") {
+                intensityValue = -5;
+            } else {
+                console.error(
+                    `unknown intensity ${intensity} for PSYCHOLOGICALLIMITATION`,
+                );
+                intensityValue = egoRoll;
+            }
+
+            tags.push({
+                value: egoRoll,
+                name: "Ego Roll",
+            });
+
+            tags.push({
+                value: intensityValue,
+                name: `${intensity} intensity`,
+            });
+
+            roll = `${egoRoll + intensityValue}-`;
         } else if (skillData.XMLID === "SOCIALLIMITATION") {
             const occurChance = skillData.ADDER.find(
                 (adder) => adder.XMLID === "OCCUR",
@@ -4313,7 +4345,7 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 14;
             } else {
                 console.error(
-                    `unknown occurChance ${occurChance} for REPUTATION`,
+                    `unknown occurChance ${occurChance} for SOCIALLIMITATION`,
                 );
                 rollValue = 14;
             }
