@@ -232,7 +232,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                     }
 
                     // Signed OCV and DCV
-                    if (item.system.ocv != undefined) {
+                    if (
+                        item.system.ocv != undefined &&
+                        item.system.uses === "ocv"
+                    ) {
                         switch (item.system.ocv) {
                             case "--":
                                 item.system.ocvEstimated = "";
@@ -293,7 +296,11 @@ export class HeroSystemActorSheet extends ActorSheet {
                                 }
                         }
                     }
-                    if (item.system.dcv != undefined) {
+
+                    if (
+                        item.system.dcv != undefined &&
+                        item.system.uses === "ocv"
+                    ) {
                         item.system.dcv = parseInt(
                             item.system.dcv,
                         ).signedString();
@@ -309,6 +316,42 @@ export class HeroSystemActorSheet extends ActorSheet {
                                 item.flags.tags.dcv = "";
                             }
                             item.flags.tags.dcv = `${item.flags.tags.dcv}${item.system.dcv} ${item.name}`;
+                        }
+                    }
+
+                    if (item.system.uses === "omcv") {
+                        const omcv = parseInt(
+                            item.actor?.system.characteristics.omcv?.value || 0,
+                        );
+                        item.system.ocvEstimated = (
+                            omcv + cslSummary.omcv
+                        ).signedString();
+                        if (omcv != 0) {
+                            if (item.flags.tags.omcv) {
+                                item.flags.tags.omcv += "\n";
+                            } else {
+                                item.flags.tags.omcv = "";
+                            }
+                            item.flags.tags.omcv = `${
+                                item.flags.tags.omcv
+                            }${omcv.signedString()} OMCV`;
+                        }
+
+                        const dmcv = parseInt(
+                            item.actor?.system.characteristics.dmcv?.value || 0,
+                        );
+                        item.system.dcvEstimated = (
+                            dmcv + cslSummary.dmcv
+                        ).signedString();
+                        if (dmcv != 0) {
+                            if (item.flags.tags.dmcv) {
+                                item.flags.tags.dmcv += "\n";
+                            } else {
+                                item.flags.tags.dmcv = "";
+                            }
+                            item.flags.tags.dmcv = `${
+                                item.flags.tags.dmcv
+                            }${omcv.signedString()} DMCV`;
                         }
                     }
 
@@ -409,6 +452,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                 // 0 END
                 if (!item.system.endEstimate) {
                     item.system.endEstimate = "";
+                }
+
+                // Mental
+                if (item?.flags?.tags?.omcv) {
+                    item.flags.tags.ocv ??= item.flags.tags.omcv;
+                    item.flags.tags.dcv ??= item.flags.tags.dmcv;
                 }
 
                 items.push(foundry.utils.deepClone(item));
@@ -946,6 +995,14 @@ export class HeroSystemActorSheet extends ActorSheet {
         return data;
     }
 
+    async _onDragStart(...args) {
+        return await super._onDragStart(...args);
+    }
+
+    async _onDropFolder(event, data) {
+        return await super._onDropFolder(event, data);
+    }
+
     /** @override */
     async _onDropItem(event, data) {
         //super._onDropItem(event, data);
@@ -970,7 +1027,8 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     /** @override */
-    async _onDropItemCreate(itemData) {
+    // eslint-disable-next-line no-unused-vars
+    async _onDropItemCreate(itemData, event) {
         itemData = itemData instanceof Array ? itemData : [itemData];
         const newItems = await this.actor.createEmbeddedDocuments(
             "Item",

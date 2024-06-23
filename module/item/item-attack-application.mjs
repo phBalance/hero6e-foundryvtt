@@ -111,6 +111,8 @@ export class ItemAttackFormApplication extends FormApplication {
 
         data.ocvMod ??= item.system.ocv;
         data.dcvMod ??= item.system.dcv;
+        data.omcvMod ??= item.system.ocv; //TODO: May need to make a distincsion between OCV/OMCV
+        data.dmcvMod ??= item.system.dcv;
         data.effectiveStr ??= data.str;
 
         // Boostable Charges

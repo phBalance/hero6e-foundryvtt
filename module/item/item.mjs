@@ -1419,6 +1419,7 @@ export class HeroSystem6eItem extends Item {
                                         addMe = true;
                                     }
                                     break;
+                                case "BROAD":
                                 case "ALL":
                                     addMe = true;
                                     break;
@@ -1839,6 +1840,12 @@ export class HeroSystem6eItem extends Item {
         if (!this.actor?.items) return null;
         return this.actor.items.find(
             (o) => o.system.ID == this.system.PARENTID,
+        );
+    }
+
+    get childItems() {
+        return this.actor?.items.find(
+            (o) => o.system.PARENTID == this.system.ID,
         );
     }
 
@@ -3963,6 +3970,7 @@ export class HeroSystem6eItem extends Item {
             this.system.noHitLocations = true;
         } else if (xmlid === "MINDSCAN") {
             this.system.class = "mindscan";
+            this.system.uses = "omcv";
             this.system.targets = "dmcv";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
