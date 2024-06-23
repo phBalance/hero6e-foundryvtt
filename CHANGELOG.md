@@ -10,6 +10,7 @@
 - Tokenizer images are no longer overwritten. [#1070](https://github.com/dmdorman/hero6e-foundryvtt/issues/1070)
 - Add success rolls for Psychological Limitation/Complication. [#1082](https://github.com/dmdorman/hero6e-foundryvtt/issues/1082)
 - Migrations now rebuild all actor and item data.
+- Add attack and defense tags to adjustment chat cards. [#1059](https://github.com/dmdorman/hero6e-foundryvtt/issues/1059)
 
 ## Version 3.0.77
 
@@ -18,7 +19,6 @@
 - Fix where DCV temporary bonuses from CSLs and other active effects were expiring on our segment instead of on our phase. [#1061](https://github.com/dmdorman/hero6e-foundryvtt/issues/1061)
 - ToHit dialog box now shows a list of all targets.
 - Fix for combat tracker where adding tokens to combat tracker sometimes resulted in error messages, preventing the token from being added. [#1072](https://github.com/dmdorman/hero6e-foundryvtt/issues/1072)
-
 
 ## Version 3.0.76
 

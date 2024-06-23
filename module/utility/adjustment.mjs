@@ -786,7 +786,11 @@ function _generateAdjustmentChatCard(
  * @param {*} cardOrCards
  * @returns {Promise<void>}
  */
-export async function renderAdjustmentChatCards(cardOrCards) {
+export async function renderAdjustmentChatCards(
+    cardOrCards,
+    adjustmentItemTags,
+    defenseTags,
+) {
     if (!Array.isArray(cardOrCards)) {
         cardOrCards = [cardOrCards];
     }
@@ -798,7 +802,10 @@ export async function renderAdjustmentChatCards(cardOrCards) {
 
     const cardData = {
         item: cardOrCards[0].item,
+
         defenseDescription: cardOrCards[0].defenseDescription,
+        defenseTags,
+
         activePoints: cardOrCards[0].adjustment.adjustmentDamageRaw,
         effectsDescription: cardOrCards[0].effectsDescription,
         isEffectFinished: cardOrCards[cardOrCards.length - 1].isEffectFinished,
@@ -806,6 +813,8 @@ export async function renderAdjustmentChatCards(cardOrCards) {
         adjustments: cardOrCards.map((card) => {
             return card.adjustment;
         }),
+
+        adjustmentItemTags,
     };
 
     // render card
