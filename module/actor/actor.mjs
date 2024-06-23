@@ -1301,6 +1301,8 @@ export class HeroSystem6eActor extends Actor {
             1,
         );
 
+        await this.#addFreeStuff(uploadProgressBar);
+
         // ITEMS
 
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
@@ -1450,91 +1452,6 @@ export class HeroSystem6eActor extends Actor {
                 }
                 delete heroJson.CHARACTER[itemTag];
             }
-        }
-
-        // Characters get a few things for free that are not in the HDC.
-        if (this.type === "pc" || this.type === "npc") {
-            uploadProgressBar.advance(
-                `${this.name}: Adding non HDC items for PCs and NPCs`,
-                0,
-            );
-
-            // Perception Skill
-            const itemDataPerception = {
-                name: "Perception",
-                type: "skill",
-                system: {
-                    XMLID: "PERCEPTION",
-                    ALIAS: "Perception",
-                    CHARACTERISTIC: "INT",
-                    state: "trained",
-                    levels: "0",
-                },
-            };
-            const perceptionItem = await HeroSystem6eItem.create(
-                itemDataPerception,
-                {
-                    temporary: this.id ? false : true,
-                    parent: this,
-                },
-            );
-            await perceptionItem._postUpload();
-
-            // MANEUVERS
-            const powerList = this.system.is5e
-                ? CONFIG.HERO.powers5e
-                : CONFIG.HERO.powers6e;
-
-            powerList
-                .filter((power) => power.type.includes("maneuver"))
-                .forEach(async (maneuver) => {
-                    const name = maneuver.name;
-                    const XMLID = maneuver.key;
-
-                    const maneuverDetails = maneuver.maneuverDesc;
-                    const PHASE = maneuverDetails.phase;
-                    const OCV = maneuverDetails.ocv;
-                    const DCV = maneuverDetails.dcv;
-                    const EFFECT = maneuverDetails.effects;
-
-                    const itemData = {
-                        name,
-                        type: "maneuver",
-                        system: {
-                            PHASE,
-                            OCV,
-                            DCV,
-                            EFFECT,
-                            active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
-                            description: EFFECT,
-                            XMLID,
-                            // MARTIALARTS consises of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
-                            // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
-                            //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
-                            //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
-                            //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
-                            //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
-                            //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
-                            DISPLAY: name, // Not sure we should allow editing of basic maneuvers
-                        },
-                    };
-
-                    if (!itemData.name) {
-                        console.error("Missing name", itemData);
-                        return;
-                    }
-
-                    // Skip if temporary actor (Quench)
-                    if (this.id) {
-                        const item = await HeroSystem6eItem.create(itemData, {
-                            parent: this,
-                        });
-                        if (maneuverDetails.attack) {
-                            await item.makeAttack();
-                        }
-                        await item._postUpload();
-                    }
-                });
         }
 
         uploadProgressBar.advance(`${this.name}: Validating powers`);
@@ -1713,6 +1630,93 @@ export class HeroSystem6eActor extends Actor {
         }
 
         uploadProgressBar.close(`Done uploading ${this.name}`);
+    }
+
+    async #addFreeStuff(uploadProgressBar) {
+        // Characters get a few things for free that are not in the HDC.
+        if (this.type === "pc" || this.type === "npc") {
+            uploadProgressBar.advance(
+                `${this.name}: Adding non HDC items for PCs and NPCs`,
+                0,
+            );
+
+            // Perception Skill
+            const itemDataPerception = {
+                name: "Perception",
+                type: "skill",
+                system: {
+                    XMLID: "PERCEPTION",
+                    ALIAS: "Perception",
+                    CHARACTERISTIC: "INT",
+                    state: "trained",
+                    levels: "0",
+                },
+            };
+            const perceptionItem = await HeroSystem6eItem.create(
+                itemDataPerception,
+                {
+                    temporary: this.id ? false : true,
+                    parent: this,
+                },
+            );
+            await perceptionItem._postUpload();
+
+            // MANEUVERS
+            const powerList = this.system.is5e
+                ? CONFIG.HERO.powers5e
+                : CONFIG.HERO.powers6e;
+
+            powerList
+                .filter((power) => power.type.includes("maneuver"))
+                .forEach(async (maneuver) => {
+                    const name = maneuver.name;
+                    const XMLID = maneuver.key;
+
+                    const maneuverDetails = maneuver.maneuverDesc;
+                    const PHASE = maneuverDetails.phase;
+                    const OCV = maneuverDetails.ocv;
+                    const DCV = maneuverDetails.dcv;
+                    const EFFECT = maneuverDetails.effects;
+
+                    const itemData = {
+                        name,
+                        type: "maneuver",
+                        system: {
+                            PHASE,
+                            OCV,
+                            DCV,
+                            EFFECT,
+                            active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
+                            description: EFFECT,
+                            XMLID,
+                            // MARTIALARTS consises of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
+                            // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
+                            //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
+                            //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
+                            //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
+                            //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
+                            //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
+                            DISPLAY: name, // Not sure we should allow editing of basic maneuvers
+                        },
+                    };
+
+                    if (!itemData.name) {
+                        console.error("Missing name", itemData);
+                        return;
+                    }
+
+                    // Skip if temporary actor (Quench)
+                    if (this.id) {
+                        const item = await HeroSystem6eItem.create(itemData, {
+                            parent: this,
+                        });
+                        if (maneuverDetails.attack) {
+                            await item.makeAttack();
+                        }
+                        await item._postUpload();
+                    }
+                });
+        }
     }
 
     static _xmlToJsonNode(json, children) {
