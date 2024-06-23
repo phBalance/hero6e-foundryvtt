@@ -1652,7 +1652,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 20,
-            ignoreFor: ["base2", "computer", "ai"],
+            ignoreFor: [
+                "pc",
+                "npc",
+                "automaton",
+                "vehicle",
+                "base2",
+                "computer",
+                "ai",
+            ], // There aren't really any LEVELS or a .value for this power, no need to show on CHARACTERISTICS tab //
             xml: `<POWER XMLID="EXTRADIMENSIONALMOVEMENT" ID="1709333909749" BASECOST="20.0" LEVELS="0" ALIAS="Extra-Dimensional Movement" POSITION="42" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
