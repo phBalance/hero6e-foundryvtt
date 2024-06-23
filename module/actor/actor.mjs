@@ -1509,7 +1509,8 @@ export class HeroSystem6eActor extends Actor {
         uploadProgressBar.advance(`${this.name}: Uploading image`);
 
         // Images
-        if (heroJson.CHARACTER.IMAGE) {
+        // If tokenizer images already exists then skip image processing
+        if (heroJson.CHARACTER.IMAGE && !this.img.startsWith("tokenizer/")) {
             const filename = heroJson.CHARACTER.IMAGE?.FileName;
             const path = "worlds/" + game.world.id + "/tokens";
             const relativePathName = path + "/" + filename;
@@ -1555,7 +1556,10 @@ export class HeroSystem6eActor extends Actor {
             delete heroJson.CHARACTER.IMAGE;
         } else {
             // No image provided. Make sure we're using the default token.
-            changes["img"] = CONST.DEFAULT_TOKEN;
+            // 6/22/2024 AEAUSETH: We no longer force the DEFAULT_TOKEN when one isn't provided,
+            //  instead we just leave it alone, which is typically the DEFAULT_TOKEN, or one the GM/PLAYER already updated.
+            //  This is in support of the Tokenizer module.
+            // changes["img"] = CONST.DEFAULT_TOKEN;
         }
 
         uploadProgressBar.advance(`${this.name}: Saving core changes`);
