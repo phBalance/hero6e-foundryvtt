@@ -185,6 +185,9 @@
                                             height="24" /></div>
                                 </td>
                                 <td class="left">
+                                    {{#if (eq item.parentItem.system.XMLID "COMPOUNDPOWER")}}
+                                        {{item.parentItem.name}}: 
+                                    {{/if}}
                                     {{{itemName item}}}
                                 </td>
                                 <td title="{{{item.flags.tags.ocv}}}">
