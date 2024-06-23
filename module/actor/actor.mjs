@@ -1509,8 +1509,17 @@ export class HeroSystem6eActor extends Actor {
         uploadProgressBar.advance(`${this.name}: Uploading image`);
 
         // Images
-        // If tokenizer images already exists then skip image processing
-        if (heroJson.CHARACTER.IMAGE && !this.img.startsWith("tokenizer/")) {
+        if (
+            this.img.startsWith("tokenizer/") &&
+            game.modules.get("vtta-tokenizer")?.active
+        ) {
+            console.log(
+                `Skipping image upload, because this token (${this.name}) appears to be using tokenizer.`,
+            );
+        } else if (
+            heroJson.CHARACTER.IMAGE &&
+            !this.img.startsWith("tokenizer/")
+        ) {
             const filename = heroJson.CHARACTER.IMAGE?.FileName;
             const path = "worlds/" + game.world.id + "/tokens";
             const relativePathName = path + "/" + filename;
