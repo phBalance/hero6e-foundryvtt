@@ -36,7 +36,7 @@ import // performAdjustment,
 // renderAdjustmentChatCards,
 "./utility/adjustment.mjs";
 
-import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
+// import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -96,7 +96,7 @@ Hooks.once("init", async function () {
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
-    CONFIG.ui.items = HeroSystem6eItemDirectory;
+    // CONFIG.ui.items = HeroSystem6eItemDirectory;
 
     HeroRuler.initialize();
 

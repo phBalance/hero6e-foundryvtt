@@ -24,6 +24,13 @@ function determineDefense(targetActor, attackItem, options) {
         }
     }
 
+    if (
+        !["physical", "energy", "mental"].includes(attackType) &&
+        attackItem.baseInfo?.type.includes("mental")
+    ) {
+        attackType = "mental";
+    }
+
     const piercing =
         parseInt(attackItem.system.piercing) ||
         attackItem.findModsByXmlid("ARMORPIERCING") ||

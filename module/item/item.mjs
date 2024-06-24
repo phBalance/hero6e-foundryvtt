@@ -3972,6 +3972,7 @@ export class HeroSystem6eItem extends Item {
             this.system.class = "mindscan";
             this.system.uses = "omcv";
             this.system.targets = "dmcv";
+            this.system.knockbackMultiplier = 0;
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
         } else if (xmlid === "EGOATTACK") {
