@@ -726,7 +726,7 @@ export async function AttackToHit(item, options) {
         });
     }
 
-    // At least one target (even if it is bogus)
+    // At least one target (even if it is bogus) so we get the dice roll
     if (targetsArray.length === 0) {
         targetsArray.push({});
     }
@@ -806,34 +806,38 @@ export async function AttackToHit(item, options) {
             }
         }
 
-        targetData.push({
-            id: target.id,
-            name: target.name || "undefined",
-            aoeAlwaysHit: aoeAlwaysHit,
-            explosion: explosion,
-            toHitChar: toHitChar,
-            toHitRollTotal: toHitRollTotal,
-            autoSuccess: autoSuccess,
-            hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
-            value: targetDefenseValue,
-            result: { hit: hit, by: by.toString() },
-            roller:
-                options.mindScanChoices && targetsArray?.[0]?.id === target.id
-                    ? targetHeroRoller
-                    : null,
-            renderedRoll: await targetHeroRoller.render(),
-        });
+        if (target.id) {
+            // Dont' bother to track a bogus target created so we get dice no nice rolls when no target selected.
+            targetData.push({
+                id: target.id,
+                name: target.name || "Select Target",
+                aoeAlwaysHit: aoeAlwaysHit,
+                explosion: explosion,
+                toHitChar: toHitChar,
+                toHitRollTotal: toHitRollTotal,
+                autoSuccess: autoSuccess,
+                hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
+                value: targetDefenseValue,
+                result: { hit: hit, by: by.toString() },
+                roller:
+                    options.mindScanChoices &&
+                    targetsArray?.[0]?.id === target.id
+                        ? targetHeroRoller
+                        : null,
+                renderedRoll: await targetHeroRoller.render(),
+            });
 
-        // Keep track of which tokens were hit so we can apply damage later,
-        // Assume beneficial adjustment powers always hits
-        if (
-            hit === "Hit" ||
-            hit === "Auto Hit" ||
-            item.system.XMLID == "AID" ||
-            item.system.XMLID === "HEALING" ||
-            item.system.XMLID === "SUCCOR"
-        ) {
-            targetIds.push(target.id);
+            // Keep track of which tokens were hit so we can apply damage later,
+            // Assume beneficial adjustment powers always hits
+            if (
+                hit === "Hit" ||
+                hit === "Auto Hit" ||
+                item.system.XMLID == "AID" ||
+                item.system.XMLID === "HEALING" ||
+                item.system.XMLID === "SUCCOR"
+            ) {
+                targetIds.push(target.id);
+            }
         }
     }
 
@@ -1591,9 +1595,36 @@ export async function _onRollMindscan(event) {
 
     const template2 = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
 
+    // We may need to use selected token
+    if (toHitData.target === "Selected") {
+        if (canvas.tokens.controlled.length === 0) {
+            return ui.notifications.error(
+                `You must select a valid token for ${item.name}.`,
+            );
+        }
+
+        if (canvas.tokens.controlled.length > 1) {
+            return ui.notifications.error(
+                `You must select exactly 1 token for ${item.name}.`,
+            );
+        }
+
+        toHitData.target = canvas.tokens.controlled[0].id;
+    }
+
+    const token = canvas.scene.tokens.get(toHitData.target);
+    if (!token) {
+        return ui.notifications.error(`Token details are no longer available.`);
+    }
+    if (token.actor.id === item.actor.id) {
+        return ui.notifications.error(
+            `${token.name} is not a valid target for ${item.name}.  You can't MINDSCAN yourself.`,
+        );
+    }
+
     let data = {
         targetTokenId: toHitData.target,
-        targetName: canvas.scene.tokens.get(toHitData.target)?.name,
+        targetName: token?.name,
         item,
     };
 
@@ -1690,7 +1721,52 @@ export async function _onRollMindscanEgo(event) {
 
     const damageRenderedResult = await damageRoller.render();
 
-    const damageDetail = await _calcDamage(damageRoller, item, toHitData);
+    //const damageDetail = await _calcDamage(damageRoller, item, toHitData);
+
+    // Conditional defense not implemented yet
+    const ignoreDefenseIds = [];
+
+    // -------------------------------------------------
+    // determine active defenses
+    // -------------------------------------------------
+    let defense = "";
+    const [
+        defenseValue,
+        resistantValue,
+        impenetrableValue,
+        damageReductionValue,
+        damageNegationValue,
+        knockbackResistance,
+        defenseTags,
+    ] = determineDefense(token.actor, item, { ignoreDefenseIds });
+    if (damageNegationValue > 0) {
+        defense += "Damage Negation " + damageNegationValue + "DC(s); ";
+    }
+
+    defense =
+        defense + defenseValue + " normal; " + resistantValue + " resistant";
+
+    if (damageReductionValue > 0) {
+        defense += "; damage reduction " + damageReductionValue + "%";
+    }
+
+    const damageData = {};
+    damageData.defenseValue = defenseValue;
+    damageData.resistantValue = resistantValue;
+    damageData.impenetrableValue = impenetrableValue;
+    damageData.damageReductionValue = damageReductionValue;
+    damageData.damageNegationValue = damageNegationValue;
+    damageData.knockbackResistance = knockbackResistance;
+    damageData.defenseAvad =
+        defenseValue +
+        resistantValue +
+        impenetrableValue +
+        damageReductionValue +
+        damageNegationValue +
+        knockbackResistance;
+    damageData.targetToken = token;
+
+    const damageDetail = await _calcDamage(damageRoller, item, damageData);
 
     const cardData = {
         item: item,
@@ -1702,6 +1778,8 @@ export async function _onRollMindscanEgo(event) {
         success: damageRoller.getStunTotal() >= targetEgo,
         buttonText: button.innerHTML.trim(),
         buttonTitle: button.title.replace(/\n/g, " ").trim(),
+        defense,
+        defenseTags,
 
         // dice rolls
         renderedDamageRoll: damageRenderedResult,

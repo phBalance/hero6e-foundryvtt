@@ -17,11 +17,11 @@
                 {{#if ../maxMinds}}
                     {{#if (eq @index 0)}}
                         <div class="target-dc">
-                            <span data-visibility="redacted">
+                            {{!-- <span data-visibility="redacted">
                                     Target: redacted
                                     <br />
                                     Result: redacted
-                            </span>
+                            </span> --}}
                             <div data-visibility="gm">
                                 Target: {{target.name}} ({{target.toHitChar}} {{target.value}})
                                 <br />
@@ -68,7 +68,7 @@
         <hr>
         <div class="tags">
             {{#each tags as |tag id|}}
-                <span class="tag tag_transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}
+                <span class="tag tag_transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}>{{tag.name}}
                     {{tag.value}}
                 </span>
             {{/each}}
@@ -112,8 +112,15 @@
             <button data-visibility="gm" class="roll-mindscan" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
                 data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}"
                 data-effectiveStr="{{effectiveStr}}" data-targetIds="{{targetIds}}" data-velocity="{{velocity}}" 
-                data-boostable-Charges="{{boostableCharges}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="">
+                data-boostable-Charges="{{boostableCharges}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="" title="Will result in a MISS">
                 No Target or Miss
+            </button>
+
+            <button data-visibility="gm" class="roll-mindscan" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
+                data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}"
+                data-effectiveStr="{{effectiveStr}}" data-targetIds="{{targetIds}}" data-velocity="{{velocity}}" 
+                data-boostable-Charges="{{boostableCharges}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="Selected" title="Select a token on the scene">
+                Selected Token
             </button>
 
             {{#each targetData as |target|}}
