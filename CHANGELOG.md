@@ -1,5 +1,10 @@
 # Releases
 
+## Version 3.0.79 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Mind Scan improvements
+- Video: [Hero System 6e (Unofficial) v2 - Mind Scan - Basic](https://youtu.be/eMoYvJQHVsg)
+
+
 ## Version 3.0.78 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Initial support for Mind Scan. [#1066](https://github.com/dmdorman/hero6e-foundryvtt/issues/1066)
