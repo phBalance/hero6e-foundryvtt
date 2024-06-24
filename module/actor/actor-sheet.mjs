@@ -324,7 +324,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                             item.actor?.system.characteristics.omcv?.value || 0,
                         );
                         item.system.ocvEstimated = (
-                            omcv + cslSummary.omcv
+                            omcv + parseInt(cslSummary.omcv || 0)
                         ).signedString();
                         if (omcv != 0) {
                             if (item.flags.tags.omcv) {
@@ -341,7 +341,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                             item.actor?.system.characteristics.dmcv?.value || 0,
                         );
                         item.system.dcvEstimated = (
-                            dmcv + cslSummary.dmcv
+                            dmcv + parseInt(cslSummary.dmcv || 0)
                         ).signedString();
                         if (dmcv != 0) {
                             if (item.flags.tags.dmcv) {
@@ -351,7 +351,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                             }
                             item.flags.tags.dmcv = `${
                                 item.flags.tags.dmcv
-                            }${omcv.signedString()} DMCV`;
+                            }${dmcv.signedString()} DMCV`;
                         }
                     }
 

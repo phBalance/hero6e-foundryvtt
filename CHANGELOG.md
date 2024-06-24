@@ -3,6 +3,8 @@
 ## Version 3.0.78 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Initial support for Mind Scan. [#1066](https://github.com/dmdorman/hero6e-foundryvtt/issues/1066)
+  - Only works when Mind Scan actor & target are in the same scene.
+  - If GM targets a visible token on behalf of the player, that token gets a target dot and my reveal unwanted information.
 - Perception skill moved to top of skill tab. [#1069](https://github.com/dmdorman/hero6e-foundryvtt/issues/1069)
 - Fixed issue where some attacks were charging twice for END. [#1075](https://github.com/dmdorman/hero6e-foundryvtt/issues/1075)
 - Correct range penalty calculation for 5e non AoE attacks. [#1077](https://github.com/dmdorman/hero6e-foundryvtt/issues/1077)
