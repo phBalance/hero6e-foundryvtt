@@ -1,6 +1,6 @@
 # Releases
 
-## Version 3.0.78 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.78 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Initial support for Mind Scan. [#1066](https://github.com/dmdorman/hero6e-foundryvtt/issues/1066)
   - Only works when Mind Scan actor & target are in the same scene.
