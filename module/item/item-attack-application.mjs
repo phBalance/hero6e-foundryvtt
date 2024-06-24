@@ -48,13 +48,22 @@ export class ItemAttackFormApplication extends FormApplication {
         Hooks.on(
             "targetToken",
             async function (...args) {
+                //window.setTimeout(() => this.updateItem(...args), 1);
                 await this.updateItem(...args);
             }.bind(this),
         );
+
+        // Hooks.on(
+        //     "controlToken",
+        //     async function (...args) {
+        //         //window.setTimeout(() => this.updateItem(...args), 1);
+        //         await this.updateItem(...args);
+        //     }.bind(this),
+        // );
     }
 
     async updateItem() {
-        await this.render();
+        await this.render(true);
     }
 
     static get defaultOptions() {
@@ -104,6 +113,12 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         data.targets = game.user.targets;
+        //data.targets = Array.from(game.user.targets);
+
+        // TODO: Future allow for controlled to avoid the targeting circles on tokens.
+        // if (data.targets.length === 0 && item.system.XMLID === "MINDSCAN") {
+        //     data.targets = foundry.utils.deepClone(canvas.tokens.controlled);
+        // }
 
         // Initialize aim to the default option values
         this.data.aim ??= "none";

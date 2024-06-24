@@ -14,12 +14,12 @@
         Attacker: <span class="item-name">{{item.actor.name}}</span>
     </div>
     <div>
-        {{#if (gte stunDamage targetEgo)}}
+        {{!-- {{#if (gte stunDamage targetEgo)}}
             Target: {{targetToken.name}} <span class="item-name" data-visibility="gm">(EGO {{targetsEgo}} + {{egoAdder}} = {{targetEgo}})</span>
-        {{else}}
+        {{else}} --}}
             Target: <span class="item-name" data-visibility="gm">{{targetToken.name}} (EGO {{targetsEgo}} + {{egoAdder}} = {{targetEgo}})</span>
         <span class="item-name" data-visibility="redacted">redacted</span>
-        {{/if}}
+        {{!-- {{/if}} --}}
     </div>
 
     <div class="tags">

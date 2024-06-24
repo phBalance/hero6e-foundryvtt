@@ -37,7 +37,7 @@ export async function chatListeners(html) {
     html.on(
         "click",
         "button.roll-mindscanEgo",
-        this._onRollMindscanEgo.bind(this),
+        this._onRollMindscanEffectRoll.bind(this),
     );
 }
 
@@ -711,7 +711,11 @@ export async function AttackToHit(item, options) {
 
     let targetData = [];
     const targetIds = [];
-    const targetsArray = Array.from(game.user.targets);
+    let targetsArray = Array.from(game.user.targets);
+
+    if (targetsArray.length === 0 && item?.system.XMLID === "MINDSCAN") {
+        targetsArray = canvas.tokens.controlled;
+    }
 
     // If AOE then sort by distance from center
     if (explosion) {
@@ -945,7 +949,8 @@ export async function AttackToHit(item, options) {
             content: `${item.name} ${dcv.signedString()} DCV`,
             speaker,
         };
-        return ChatMessage.create(chatData);
+        await ChatMessage.create(chatData);
+        return;
     }
 
     const cardData = {
@@ -998,7 +1003,8 @@ export async function AttackToHit(item, options) {
         speaker: speaker,
     };
 
-    return ChatMessage.create(chatData);
+    await ChatMessage.create(chatData);
+    return;
 }
 
 function getAttackTags(item) {
@@ -1613,13 +1619,15 @@ export async function _onRollMindscan(event) {
     }
 
     const token = canvas.scene.tokens.get(toHitData.target);
-    if (!token) {
-        return ui.notifications.error(`Token details are no longer available.`);
+    if (!token && toHitData.target) {
+        await ui.notifications.error(`Token details are no longer available.`);
+        return;
     }
-    if (token.actor.id === item.actor.id) {
-        return ui.notifications.error(
+    if (token?.actor.id === item.actor.id) {
+        await ui.notifications.error(
             `${token.name} is not a valid target for ${item.name}.  You can't MINDSCAN yourself.`,
         );
+        return;
     }
 
     let data = {
@@ -1633,12 +1641,13 @@ export async function _onRollMindscan(event) {
         user: game.user._id,
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         content,
+        speaker: ChatMessage.getSpeaker({ actor: item.actor }),
     };
 
     await ChatMessage.create(chatData);
 }
 
-export async function _onRollMindscanEgo(event) {
+export async function _onRollMindscanEffectRoll(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
@@ -1662,14 +1671,14 @@ export async function _onRollMindscanEgo(event) {
 
     const adjustment = item.baseInfo?.type?.includes("adjustment");
     const senseAffecting = item.baseInfo?.type?.includes("sense-affecting");
-    const entangle = item.system.XMLID === "ENTANGLE";
+    //const entangle = item.system.XMLID === "ENTANGLE";
 
-    const increasedMultiplierLevels = parseInt(
-        item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0,
-    );
-    const decreasedMultiplierLevels = parseInt(
-        item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0,
-    );
+    // const increasedMultiplierLevels = parseInt(
+    //     item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0,
+    // );
+    // const decreasedMultiplierLevels = parseInt(
+    //     item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0,
+    // );
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
@@ -1682,18 +1691,19 @@ export async function _onRollMindscanEgo(event) {
 
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
-        .makeNormalRoll(
-            !senseAffecting && !adjustment && !formulaParts.isKilling,
-        )
-        .makeKillingRoll(
-            !senseAffecting && !adjustment && formulaParts.isKilling,
-        )
-        .makeAdjustmentRoll(!!adjustment)
-        .makeFlashRoll(!!senseAffecting)
-        .makeEntangleRoll(entangle)
-        .addStunMultiplier(
-            increasedMultiplierLevels - decreasedMultiplierLevels,
-        )
+        .makeNormalRoll()
+        // .makeNormalRoll(
+        //     !senseAffecting && !adjustment && !formulaParts.isKilling,
+        // )
+        // .makeKillingRoll(
+        //     !senseAffecting && !adjustment && formulaParts.isKilling,
+        // )
+        // .makeAdjustmentRoll(!!adjustment)
+        // .makeFlashRoll(!!senseAffecting)
+        // .makeEntangleRoll(entangle)
+        // .addStunMultiplier(
+        //     increasedMultiplierLevels - decreasedMultiplierLevels,
+        // )
         .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
         .addHalfDice(
             formulaParts.halfDieCount >= 1 ? formulaParts.halfDieCount : 0,
@@ -1704,11 +1714,11 @@ export async function _onRollMindscanEgo(event) {
                 : 0,
         )
         .addNumber(formulaParts.constant)
-        .modifyToStandardEffect(useStandardEffect)
-        .modifyToNoBody(
-            item.system.stunBodyDamage === "stunonly" ||
-                item.system.stunBodyDamage === "effectonly",
-        );
+        .modifyToStandardEffect(useStandardEffect);
+    // .modifyToNoBody(
+    //     item.system.stunBodyDamage === "stunonly" ||
+    //         item.system.stunBodyDamage === "effectonly",
+    // );
     // .addToHitLocation(
     //     includeHitLocation,
     //     toHitData.aim,
@@ -1824,7 +1834,8 @@ export async function _onRollMindscanEgo(event) {
         speaker: speaker,
     };
 
-    return ChatMessage.create(chatData);
+    await ChatMessage.create(chatData);
+    return;
 }
 
 // Event handler for when the Apply Damage button is
@@ -2258,7 +2269,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 speaker: speaker,
             };
 
-            return ChatMessage.create(chatData);
+            await ChatMessage.create(chatData);
+            return;
         }
     }
 
@@ -2716,7 +2728,8 @@ async function _onApplySenseAffectingToSpecificToken(
         speaker: speaker,
     };
 
-    return ChatMessage.create(chatData);
+    await ChatMessage.create(chatData);
+    return;
 }
 
 /**
