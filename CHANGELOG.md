@@ -1,6 +1,7 @@
 # Releases
 
 ## Version 3.0.79 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Fixed issue where the roll to hit window would open "inappropriately" when selecting targets.
 - Mind Scan improvements
 - Video: [Hero System 6e (Unofficial) v2 - Mind Scan - Basic](https://youtu.be/eMoYvJQHVsg)
 
