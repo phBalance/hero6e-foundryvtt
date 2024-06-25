@@ -174,3 +174,19 @@ div.dice-standard-effect {
 .mindScanButtons, .roll-mindscanEgo  {
   line-height: normal;
 }
+
+
+li.directory-item.parentItem {
+  //border-top-color: blue;
+  background: rgba(0,0,255,0.2);
+}
+
+li.directory-item.childItem {
+  padding-left: 15px;
+  background: rgba(0,0,255,0.1);
+  //
+}
+
+.parentChild {
+  border: 1px solid blue;
+}

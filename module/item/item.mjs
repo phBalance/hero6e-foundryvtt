@@ -1838,14 +1838,13 @@ export class HeroSystem6eItem extends Item {
 
     get parentItem() {
         if (!this.system.PARENTID) return null;
-        if (!this.actor?.items) return null;
-        return this.actor.items.find(
+        return (this.actor || game).items.find(
             (o) => o.system.ID == this.system.PARENTID,
         );
     }
 
     get childItems() {
-        return this.actor?.items.find(
+        return (this.actor || game).items.filter(
             (o) => o.system.PARENTID == this.system.ID,
         );
     }
