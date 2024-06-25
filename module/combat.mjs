@@ -60,6 +60,12 @@ export class HeroSystem6eCombat extends Combat {
 
         for (const id of ids) {
             const c = this.combatants.find((o) => o.id === id);
+            if (!c) {
+                // Looks like a timing issue.  When AID/SPD is lowered _onUpdateDescendantDocuments
+                // or when _onDeleteDescendantDocuments is calld, this.combatants may not have been updated yet.
+                console.warn(`Combatant ${id} was not found.`);
+                continue;
+            }
 
             const lightningReflexes = c.actor?.items.find(
                 (o) =>
@@ -390,7 +396,9 @@ export class HeroSystem6eCombat extends Combat {
         options,
         userId,
     ) {
-        //console.log("_onDeleteDescendantDocuments");
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onDeleteDescendantDocuments`, this);
+        }
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
 
@@ -459,7 +467,7 @@ export class HeroSystem6eCombat extends Combat {
         }
         await this.update({ turn: this.turn, round: this.round });
 
-        await this.rollInitiative(documents.map((o) => o.id));
+        //await this.rollInitiative(documents.map((o) => o.id));
 
         // Render the collection
         if (this.active) this.collection.render();
@@ -468,17 +476,31 @@ export class HeroSystem6eCombat extends Combat {
     /* -------------------------------------------- */
 
     /** @inheritdoc */
-    _onUpdateDescendantDocuments(
+    // Note that super is not async
+    async _onUpdateDescendantDocuments(
         parent,
         collection,
         documents,
         changes,
         options,
-        //_userId,
+        // eslint-disable-next-line no-unused-vars
+        userId,
     ) {
-        //console.log("_onUpdateDescendantDocuments");
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onUpdateDescendantDocuments`, this);
+        }
 
-        //super.super._onUpdateDescendantDocuments(..) would be ideal but not likely necessary and difficult to implement.
+        // The super calls setupTurns and slows things way down.  Don't think we really need this.
+        // super._onUpdateDescendantDocuments(
+        //     parent,
+        //     collection,
+        //     documents,
+        //     changes,
+        //     options,
+        //     userId,
+        // );
+
+        //await this.rollInitiative(documents.map((o) => o.id));
 
         // Update the turn order
         const priorState = foundry.utils.deepClone(this.current);
@@ -523,7 +545,9 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async _onActorDataUpdate(...args) {
-        //console.log("_onActorDataUpdate");
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onActorDataUpdate`, this);
+        }
         super._onActorDataUpdate(...args);
         this.setupTurns();
         if (this.active) this.collection.render();
@@ -961,6 +985,7 @@ export class HeroSystem6eCombat extends Combat {
         if (segment_next < segment) {
             segment_next += 12;
         }
+
         const advanceTime = segment_next - segment;
 
         // Update the document, passing data through a hook first
@@ -969,7 +994,12 @@ export class HeroSystem6eCombat extends Combat {
 
         // Advance worldtime NOW, before we _onStartTurn gets called.
         // Seems to be a bug in core foundryVTT.
-        await game.time.advance(advanceTime);
+        if (isNaN(advanceTime)) {
+            console.error("advanceTimeis NaN");
+        } else {
+            await game.time.advance(advanceTime);
+        }
+
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
         let x = await this.update(updateData, updateOptions);
         console.log(x);
