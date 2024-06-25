@@ -1618,7 +1618,10 @@ export async function _onRollMindscan(event) {
         toHitData.target = canvas.tokens.controlled[0].id;
     }
 
-    const token = canvas.scene.tokens.get(toHitData.target);
+    // Look thru all the scenes to find this token
+    const token = game.scenes
+        .find((s) => s.tokens.find((t) => t.id === toHitData.target))
+        ?.tokens.find((t) => t.id === toHitData.target);
     if (!token && toHitData.target) {
         await ui.notifications.error(`Token details are no longer available.`);
         return;
@@ -1660,7 +1663,10 @@ export async function _onRollMindscanEffectRoll(event) {
         );
     }
 
-    let token = canvas.scene.tokens.get(toHitData.target);
+    // Look thru all the scenes to find this token
+    const token = game.scenes
+        .find((s) => s.tokens.find((t) => t.id === toHitData.target))
+        ?.tokens.find((t) => t.id === toHitData.target);
     if (!token) {
         return ui.notifications.error(`Token details are no longer available.`);
     }
