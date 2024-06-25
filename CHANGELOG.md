@@ -2,6 +2,7 @@
 
 ## Version 3.0.79 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Fixed issue where the roll-to-hit window would open "inappropriately" when selecting targets.
+- Fixed Combat Tracker errors when SPD is lowered for combatant. [#1089](https://github.com/dmdorman/hero6e-foundryvtt/issues/1089)
 - Mind Scan improvements.  
   - Can select token(s) without the need to use T to target, limiting the reveal of unwanted information.
   - Can select token(s) across scenes.
