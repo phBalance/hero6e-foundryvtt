@@ -1844,9 +1844,10 @@ export class HeroSystem6eItem extends Item {
     }
 
     get childItems() {
-        return (this.actor || game).items.filter(
+        const children = (this.actor || game).items.filter(
             (o) => o.system.PARENTID == this.system.ID,
         );
+        return children.length === 0 ? null : children;
     }
 
     calcItemPoints() {
