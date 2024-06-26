@@ -1011,7 +1011,6 @@ export class HeroSystemActorSheet extends ActorSheet {
         const itemData = item.toObject();
 
         // Create new system.ID
-        // TODO: Perhaps we could drop system.ID and rely on builtin itemData.id
         itemData.system.ID = new Date().getTime().toString();
 
         // Remove system.PARENTID
@@ -1019,11 +1018,20 @@ export class HeroSystemActorSheet extends ActorSheet {
         delete itemData.system.childIdx;
 
         // Handle item sorting within the same Actor
+        // TODO: Allow drag/drop to change order
         if (this.actor.uuid === item.parent?.uuid)
             return this._onSortItem(event, itemData);
 
         // Create the owned item
-        return this._onDropItemCreate(itemData);
+        await this._onDropItemCreate(itemData);
+
+        // Is this a parent item with children?
+        for (const childItem of item.childItems || []) {
+            const childItemData = childItem.toObject();
+            childItemData.system.ID = new Date().getTime().toString();
+            childItemData.system.PARENTID = itemData.system.ID;
+            await this._onDropItemCreate(childItemData);
+        }
     }
 
     /** @override */
