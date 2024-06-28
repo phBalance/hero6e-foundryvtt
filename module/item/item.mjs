@@ -125,6 +125,18 @@ export class HeroSystem6eItem extends Item {
 
         // assign a default image
         if (!data.img || data.img === "icons/svg/item-bag.svg") {
+            if (this.system.XMLID === "COMPOUNDPOWER") {
+                return this.updateSource({ img: "icons/svg/chest.svg" });
+            }
+            if (this.system.XMLID === "MULTIPOWER") {
+                return this.updateSource({ img: "icons/svg/chest.svg" });
+            }
+            if (this.baseInfo?.type.includes("enhancer")) {
+                return this.updateSource({ img: "icons/svg/chest.svg" });
+            }
+            if (this.baseInfo?.type.includes("framework")) {
+                return this.updateSource({ img: "icons/svg/chest.svg" });
+            }
             if (itemTypeToIcon[this.type]) {
                 this.updateSource({ img: itemTypeToIcon[this.type] });
             }
@@ -1838,16 +1850,22 @@ export class HeroSystem6eItem extends Item {
 
     get parentItem() {
         if (!this.system.PARENTID) return null;
-        if (!this.actor?.items) return null;
-        return this.actor.items.find(
+        // if (this.pack) {
+        //     return game.packs.get(this.pack).getDocument(this.system.PARENTID);
+        // }
+        return (this.actor || game).items.find(
             (o) => o.system.ID == this.system.PARENTID,
         );
     }
 
     get childItems() {
-        return this.actor?.items.find(
+        // if (this.pack) {
+        //     return game.packs.get(this.pack).getDocument(this.system.PARENTID);
+        // }
+        const children = (this.actor || game).items.filter(
             (o) => o.system.PARENTID == this.system.ID,
         );
+        return children.length === 0 ? null : children;
     }
 
     calcItemPoints() {

@@ -1000,18 +1000,71 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     async _onDropFolder(event, data) {
-        return await super._onDropFolder(event, data);
+        //return await super._onDropFolder(event, data);
+
+        // The default super doesn't add the items in the correct order.
+        // Perhaps we can use the super in the future as we improve editing, manual item sorting, etc.
+
+        // Add parent items first (there should be only one, but I suppose there could be more, which we may not handle perfectly)
+        const folder = fromUuidSync(data.uuid);
+
+        let itemsToAdd = folder.contents;
+
+        // Compendiums only have the index entry, so need to get the whole item
+        if (!itemsToAdd?.[0].id) {
+            for (let i = 0; i < itemsToAdd.length; i++) {
+                const entry = itemsToAdd[i];
+                const pack = game.packs.get(fromUuidSync(entry.uuid).pack);
+                const item = await pack.getDocument(entry._id);
+                itemsToAdd[i] = item;
+            }
+        }
+
+        // Make them all objects
+        itemsToAdd = itemsToAdd.map((o) => o.toObject());
+
+        // Compendiums also make it awkward to find parentItem and childItems.
+        // Make this item an object and reuse the parentItem/childItems and ensure only
+        // items from itemsToAdd are considered.
+        for (let i = 0; i < itemsToAdd.length; i++) {
+            const itemData = itemsToAdd[i];
+            itemData.childItems = itemsToAdd.filter(
+                (o) => o.system.PARENTID === itemData.system.ID,
+            );
+            itemsToAdd[i] = itemData;
+        }
+
+        const parents = itemsToAdd.filter((i) => i.childItems.length > 0);
+        for (const parentData of parents) {
+            // Create new system.ID
+            parentData.system.ID = new Date().getTime().toString();
+            await this._onDropItemCreate(parentData);
+            itemsToAdd = itemsToAdd.filter((i) => i._id !== parentData._id);
+
+            // Add children
+            for (const childData of parentData.childItems) {
+                childData.system.ID = new Date().getTime().toString();
+                childData.system.PARENTID = parentData.system.ID;
+                await this._onDropItemCreate(childData);
+                itemsToAdd = itemsToAdd.filter((i) => i._id !== childData._id);
+            }
+        }
+
+        // There may be non children items
+        for (const itemData of itemsToAdd) {
+            itemData.system.ID = new Date().getTime().toString();
+            await this._onDropItemCreate(itemData);
+        }
     }
 
     /** @override */
     async _onDropItem(event, data) {
-        //super._onDropItem(event, data);
+        // return super._onDropItem(event, data);
         if (!this.actor.isOwner) return false;
         const item = await Item.implementation.fromDropData(data);
         const itemData = item.toObject();
 
         // Create new system.ID
-        // TODO: Perhaps we could drop system.ID and rely on builtin itemData.id
         itemData.system.ID = new Date().getTime().toString();
 
         // Remove system.PARENTID
@@ -1019,11 +1072,20 @@ export class HeroSystemActorSheet extends ActorSheet {
         delete itemData.system.childIdx;
 
         // Handle item sorting within the same Actor
+        // TODO: Allow drag/drop to change order
         if (this.actor.uuid === item.parent?.uuid)
             return this._onSortItem(event, itemData);
 
         // Create the owned item
-        return this._onDropItemCreate(itemData);
+        await this._onDropItemCreate(itemData);
+
+        // Is this a parent item with children?
+        for (const childItem of item.childItems || []) {
+            const childItemData = childItem.toObject();
+            childItemData.system.ID = new Date().getTime().toString();
+            childItemData.system.PARENTID = itemData.system.ID;
+            await this._onDropItemCreate(childItemData);
+        }
     }
 
     /** @override */

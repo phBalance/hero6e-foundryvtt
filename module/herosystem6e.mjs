@@ -27,16 +27,15 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import {
-    // getPowerInfo,
     expireEffects,
     getCharacteristicInfoArrayForActor,
 } from "./utility/util.mjs";
 import { migrateWorld } from "./migration.mjs";
-import // performAdjustment,
-// renderAdjustmentChatCards,
-"./utility/adjustment.mjs";
+import "./utility/adjustment.mjs";
 
-// import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
+import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
+import { HeroSystem6eCompendium } from "./compendium.mjs";
+import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -96,7 +95,8 @@ Hooks.once("init", async function () {
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
-    // CONFIG.ui.items = HeroSystem6eItemDirectory;
+    CONFIG.ui.items = HeroSystem6eItemDirectory;
+    CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
 
     HeroRuler.initialize();
 
@@ -152,6 +152,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/item/item-partial-adders-modifiers.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet.hbs`,
+        `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
@@ -875,4 +876,14 @@ Hooks.on("preCreateItem", async function (doc, d, options, userId) {
 
 Hooks.on("createItem", async function (...args) {
     console.log(...args);
+});
+
+// If compendium is created you have to reload to get the new application class.
+// This is known issue https://discord.com/channels/170995199584108546/670336275496042502/1255649814096511107
+Hooks.once("setup", function () {
+    console.log(`Hooks.on "setup"`);
+    // Apply custom application for Compendiums for parent/child features
+    game.packs
+        .filter((p) => p.metadata.type === "Item")
+        .forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
 });
