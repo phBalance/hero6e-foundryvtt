@@ -37,6 +37,7 @@ import // performAdjustment,
 "./utility/adjustment.mjs";
 
 import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
+import { HeroSystem6eCompendium } from "./compendium.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -876,4 +877,14 @@ Hooks.on("preCreateItem", async function (doc, d, options, userId) {
 
 Hooks.on("createItem", async function (...args) {
     console.log(...args);
+});
+
+// If compendium is created you have to reload to get the new application class.
+// This is know issue https://discord.com/channels/170995199584108546/670336275496042502/1255649814096511107
+Hooks.once("setup", function () {
+    console.log(`Hooks.on "setup"`);
+    // Apply custom application for Compendiums for parent/child features
+    game.packs
+        .filter((p) => p.metadata.type === "Item")
+        .forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
 });
