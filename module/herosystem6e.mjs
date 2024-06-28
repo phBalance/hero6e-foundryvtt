@@ -27,17 +27,15 @@ import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import {
-    // getPowerInfo,
     expireEffects,
     getCharacteristicInfoArrayForActor,
 } from "./utility/util.mjs";
 import { migrateWorld } from "./migration.mjs";
-import // performAdjustment,
-// renderAdjustmentChatCards,
-"./utility/adjustment.mjs";
+import "./utility/adjustment.mjs";
 
 import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
+import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 
 import "./utility/chat-dice.mjs";
 
@@ -98,6 +96,7 @@ Hooks.once("init", async function () {
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     CONFIG.ui.items = HeroSystem6eItemDirectory;
+    CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
 
     HeroRuler.initialize();
 
@@ -880,7 +879,7 @@ Hooks.on("createItem", async function (...args) {
 });
 
 // If compendium is created you have to reload to get the new application class.
-// This is know issue https://discord.com/channels/170995199584108546/670336275496042502/1255649814096511107
+// This is known issue https://discord.com/channels/170995199584108546/670336275496042502/1255649814096511107
 Hooks.once("setup", function () {
     console.log(`Hooks.on "setup"`);
     // Apply custom application for Compendiums for parent/child features

@@ -2,6 +2,7 @@
 
 ## Version 3.0.80 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Drag and Drop support for compound powers and multi-powers. [#1068](https://github.com/dmdorman/hero6e-foundryvtt/issues/1068)
+- You can upload Hero Designer Prefabs (*.hdp) as compendiums. [#1067](https://github.com/dmdorman/hero6e-foundryvtt/issues/1067) [#142](https://github.com/dmdorman/hero6e-foundryvtt/issues/142)
 
 ## Version 3.0.79
 - Fixed issue where the roll-to-hit window would open "inappropriately" when selecting targets.

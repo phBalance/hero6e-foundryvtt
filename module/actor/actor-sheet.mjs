@@ -1051,8 +1051,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         // There may be non children items
-        for (const item of itemsToAdd) {
-            const itemData = item.toObject();
+        for (const itemData of itemsToAdd) {
             itemData.system.ID = new Date().getTime().toString();
             await this._onDropItemCreate(itemData);
         }
