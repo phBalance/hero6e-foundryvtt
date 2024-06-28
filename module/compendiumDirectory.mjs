@@ -87,6 +87,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                             metadata.label = defaultName;
                         }
                         const pack =
+                            // eslint-disable-next-line no-undef
                             await CompendiumCollection.createCompendium(
                                 metadata,
                             );
@@ -94,42 +95,6 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                             await pack.setFolder(targetFolderId);
                     },
                 },
-            },
-            xcallback: async (html) => {
-                const form = html.querySelector("#compendium-create");
-                const fd = new FormDataExtended(form);
-                const metadata = fd.object;
-
-                if (metadata.upload) {
-                    return;
-                    // const reader = new FileReader();
-                    // reader.onload = async function (event) {
-                    //     const contents = event.target.result;
-
-                    //     const parser = new DOMParser();
-                    //     const xmlDoc = parser.parseFromString(
-                    //         contents,
-                    //         "text/xml",
-                    //     );
-                    //     await this.actor.uploadFromXml(xmlDoc);
-                    // }.bind(this);
-                    // reader.readAsText(metadata.upload);
-                    // console.log(reader);
-                }
-
-                let targetFolderId = metadata.folder;
-                if (metadata.folder) delete metadata.folder;
-                if (!metadata.label) {
-                    let defaultName = game.i18n.format("DOCUMENT.New", {
-                        type: game.i18n.localize("PACKAGE.TagCompendium"),
-                    });
-                    const count = game.packs.size;
-                    if (count > 0) defaultName += ` (${count + 1})`;
-                    metadata.label = defaultName;
-                }
-                const pack =
-                    await CompendiumCollection.createCompendium(metadata);
-                if (targetFolderId) await pack.setFolder(targetFolderId);
             },
             render: handleRender,
             rejectClose: false,
@@ -163,6 +128,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         };
 
         // Create Compendium
+        // eslint-disable-next-line no-undef
         const pack = await CompendiumCollection.createCompendium(metadata);
         if (targetFolderId) await pack.setFolder(targetFolderId);
         ui.notifications.info(
