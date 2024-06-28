@@ -55,38 +55,5 @@ export class HeroSystem6eCompendium extends Compendium {
                 { pack: packId },
             );
         }
-        return;
-
-        //const newParentId = new Date().getTime().toString();
-        const newItem = await this._handleDroppedEntry(null, data);
-        //await newItem.update({ "system.ID": newParentId });
-        console.log(newItem);
-        //newItem.update([{ "system.ID": newParentId }]);
-
-        for (const childItem of item.childItems) {
-            const psudoData = {
-                type: data.type,
-                uuid: childItem.uuid,
-            };
-
-            const newItem = await this._handleDroppedEntry(null, psudoData);
-            //await newItem.update({ "system.PARENTID": newParentId });
-            console.log(newItem);
-        }
-
-        // Update CHILDREN that we just added
-        // for (const newItem of game.items.filter(
-        //     (i) => i.system.PARENTID === item.system.ID,
-        // )) {
-        //     console.log(
-        //         `Updating ${item.name} PARENTID ${newItem.system.ID} to ${newParentId}`,
-        //     );
-        //     await newItem.update({ "system.PARENTID": newParentId });
-        // }
-
-        // // Update PARENT that we just added
-        // await game.items
-        //     .find((i) => i.system.ID === item.system.ID)
-        //     ?.update({ "system.ID": newParentId });
     }
 }
