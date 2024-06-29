@@ -22,12 +22,12 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
         const item = fromUuidSync(data.uuid);
 
         // Ignore drop if item already exists (dragging to ourselves)
-        if (game.items.find((i) => i.id === item.id)) {
-            console.log(
-                `Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`,
-            );
-            return;
-        }
+        // if (game.items.find((i) => i.id === item.id)) {
+        //     console.log(
+        //         `Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`,
+        //     );
+        //     return;
+        // }
 
         // Do super if there is no parent.
         if (!item.childItems) {
