@@ -544,6 +544,12 @@ export function registerDiceTests(quench) {
                         expect(() => {
                             roller.getEntangleTotal();
                         }).to.throw();
+                        expect(() => {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTotal();
+                        }).to.throw();
                     });
 
                     it("should handle a 1 pip equation", async function () {
@@ -733,6 +739,12 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             roller.getEntangleTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTotal();
                         }).to.throw();
                     });
 
@@ -1275,6 +1287,12 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             roller.getEntangleTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTotal();
                         }).to.throw();
                     });
 
@@ -2171,6 +2189,12 @@ export function registerDiceTests(quench) {
                         expect(() => {
                             roller.getEntangleTotal();
                         }).to.throw();
+                        expect(() => {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTotal();
+                        }).to.throw();
                     });
 
                     it("should return the rolled active points for a lowest roll", async function () {
@@ -2279,6 +2303,12 @@ export function registerDiceTests(quench) {
                         }).to.throw();
                         expect(() => {
                             roller.getEntangleTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTotal();
                         }).to.throw();
                     });
 
@@ -2414,6 +2444,18 @@ export function registerDiceTests(quench) {
                         expect(() => {
                             roller.getAdjustmentTotal();
                         }).to.throw();
+                        expect(() => {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEffectTotal();
+                        }).to.throw();
                     });
 
                     it("should support body calculations for a roll of 1", async function () {
@@ -2459,6 +2501,87 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getEntangleTerms()).to.deep.equal([2, 2, 2, 1, 3]);
                         expect(roller.getEntangleTotal()).to.equal(10);
+                    });
+                });
+
+                describe.only("Effect roll", async function () {
+                    it("should throw if asking for inappropriate interpretations", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeEffectRoll()
+                            .addDice(3)
+                            .addDiceMinus1(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(() => {
+                            return roller.getSuccessTerms();
+                        }).to.throw();
+                        expect(() => {
+                            return roller.getSuccessTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getBodyTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getBodyTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getStunTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getAdjustmentTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEntangleTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getEntangleTotal();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTerms();
+                        }).to.throw();
+                        expect(() => {
+                            roller.getFlashTotal();
+                        }).to.throw();
+                    });
+
+                    it("should support calculations for a roll of 1", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeEffectRoll()
+                            .addDice(3)
+                            .addHalfDice(1)
+                            .addNumber(3);
+
+                        await roller.roll();
+
+                        expect(roller.getEffectTerms()).to.deep.equal([1, 1, 1, 1, 3]);
+                        expect(roller.getEffectTotal()).to.equal(7);
+                    });
+
+                    it("should support calculations for a roll of 6", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeEffectRoll()
+                            .addDice(3)
+                            .addHalfDice(1)
+                            .addNumber(3);
+
+                        await roller.roll();
+
+                        expect(roller.getEffectTerms()).to.deep.equal([6, 6, 6, 3, 3]);
+                        expect(roller.getEffectTotal()).to.equal(24);
                     });
                 });
             });
