@@ -122,9 +122,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
 
         if (targetFolderId) await pack.setFolder(targetFolderId);
 
-        ui.notifications.info(
-            `Creating compendium ${pack.metadata.label} from Hero Designer Prefab file.`,
-        );
+        ui.notifications.info(`Creating compendium ${pack.metadata.label} from Hero Designer Prefab file.`);
 
         const folders = [];
 
@@ -155,14 +153,10 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                     }
                 }
             }
-            ui.notifications.info(
-                `Compendium ${pack.metadata.label} finished upload.`,
-            );
+            ui.notifications.info(`Compendium ${pack.metadata.label} finished upload.`);
         } catch (e) {
             console.log(e);
-            ui.notifications.error(
-                `Compendium ${pack.metadata.label} failed to upload.`,
-            );
+            ui.notifications.error(`Compendium ${pack.metadata.label} failed to upload.`);
         }
     }
 }
