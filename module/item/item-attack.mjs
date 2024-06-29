@@ -17,8 +17,8 @@ export async function chatListeners(html) {
     html.on("click", "button.apply-damage", this._onApplyDamage.bind(this));
     html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
     html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
-    html.on("click", "button.roll-mindscan", this._onRollMindscan.bind(this));
-    html.on("click", "button.roll-mindscanEgo", this._onRollMindscanEffectRoll.bind(this));
+    html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
+    html.on("click", "button.roll-mindscanEgo", this._onRollMindScanEffectRoll.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -1337,7 +1337,7 @@ export async function _onRollDamage(event) {
     }
 
     // PERSONALIMMUNITY
-    // NOTE: We may want to reintorduce this code (CHANGE ENVIRONMENT or large scale MENTAL) at some point.
+    // NOTE: We may want to reintroduce this code (CHANGE ENVIRONMENT or large scale MENTAL) at some point.
     // However at the moment AOE is the primary mechanism to target multiple tokens.
     // const PERSONALIMMUNITY = item.findModsByXmlid("PERSONALIMMUNITY");
     // if (PERSONALIMMUNITY && targetTokens) {
@@ -1400,7 +1400,7 @@ export async function _onRollDamage(event) {
     return ChatMessage.create(chatData);
 }
 
-export async function _onRollMindscan(event) {
+export async function _onRollMindScan(event) {
     console.log(event);
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
@@ -1454,7 +1454,7 @@ export async function _onRollMindscan(event) {
     await ChatMessage.create(chatData);
 }
 
-export async function _onRollMindscanEffectRoll(event) {
+export async function _onRollMindScanEffectRoll(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
@@ -1465,7 +1465,7 @@ export async function _onRollMindscanEffectRoll(event) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    // Look thru all the scenes to find this token
+    // Look through all the scenes to find this token
     const token = game.scenes
         .find((s) => s.tokens.find((t) => t.id === toHitData.target))
         ?.tokens.find((t) => t.id === toHitData.target);
@@ -1479,14 +1479,6 @@ export async function _onRollMindscanEffectRoll(event) {
 
     const adjustment = item.baseInfo?.type?.includes("adjustment");
     const senseAffecting = item.baseInfo?.type?.includes("sense-affecting");
-    //const entangle = item.system.XMLID === "ENTANGLE";
-
-    // const increasedMultiplierLevels = parseInt(
-    //     item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0,
-    // );
-    // const decreasedMultiplierLevels = parseInt(
-    //     item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0,
-    // );
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
@@ -1499,41 +1491,16 @@ export async function _onRollMindscanEffectRoll(event) {
 
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
-        .makeNormalRoll()
-        // .makeNormalRoll(
-        //     !senseAffecting && !adjustment && !formulaParts.isKilling,
-        // )
-        // .makeKillingRoll(
-        //     !senseAffecting && !adjustment && formulaParts.isKilling,
-        // )
-        // .makeAdjustmentRoll(!!adjustment)
-        // .makeFlashRoll(!!senseAffecting)
-        // .makeEntangleRoll(entangle)
-        // .addStunMultiplier(
-        //     increasedMultiplierLevels - decreasedMultiplierLevels,
-        // )
+        .makeEffectRoll()
         .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
         .addHalfDice(formulaParts.halfDieCount >= 1 ? formulaParts.halfDieCount : 0)
         .addDiceMinus1(formulaParts.d6Less1DieCount >= 1 ? formulaParts.d6Less1DieCount : 0)
         .addNumber(formulaParts.constant)
         .modifyToStandardEffect(useStandardEffect);
-    // .modifyToNoBody(
-    //     item.system.stunBodyDamage === "stunonly" ||
-    //         item.system.stunBodyDamage === "effectonly",
-    // );
-    // .addToHitLocation(
-    //     includeHitLocation,
-    //     toHitData.aim,
-    //     includeHitLocation &&
-    //         game.settings.get(HEROSYS.module, "hitLocTracking") === "all",
-    //     toHitData.aim === "none" ? "none" : toHitData.aimSide, // Can't just select a side to hit as that doesn't have a penalty
-    // );
 
     await damageRoller.roll();
 
     const damageRenderedResult = await damageRoller.render();
-
-    //const damageDetail = await _calcDamage(damageRoller, item, toHitData);
 
     // Conditional defense not implemented yet
     const ignoreDefenseIds = [];
@@ -1586,7 +1553,7 @@ export async function _onRollMindscanEffectRoll(event) {
         targetsEgo,
         egoAdder,
         targetEgo,
-        success: damageRoller.getStunTotal() >= targetEgo,
+        success: damageDetail.stun >= targetEgo,
         buttonText: button.innerHTML.trim(),
         buttonTitle: button.title.replace(/\n/g, " ").trim(),
         defense,
@@ -2396,6 +2363,7 @@ async function _calcDamage(heroRoller, item, options) {
         item: item,
     })?.type?.includes("sense-affecting");
     const entangle = item.system.XMLID === "ENTANGLE";
+    const mindScan = item.system.XMLID === "MINDSCAN"; // TODO: Effect roll should be expanded to many other mental powers
 
     let body;
     let stun;
@@ -2412,6 +2380,10 @@ async function _calcDamage(heroRoller, item, options) {
     } else if (entangle) {
         body = heroRoller.getEntangleTotal();
         stun = 0;
+        bodyForPenetrating = 0;
+    } else if (mindScan) {
+        body = 0;
+        stun = heroRoller.getEffectTotal();
         bodyForPenetrating = 0;
     } else {
         body = heroRoller.getBodyTotal();
