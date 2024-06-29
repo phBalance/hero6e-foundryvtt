@@ -997,6 +997,11 @@ export class HeroSystem6eItem extends Item {
 
         changed = this.setInitialRange(configPowerInfo) || changed;
 
+        // Make sure we have the correct skill roll
+        if (this.baseInfo.type.includes("skill")) {
+            this.skillRollUpdateValue();
+        }
+
         changed = this.determinePointCosts() || changed;
 
         // CHARGES

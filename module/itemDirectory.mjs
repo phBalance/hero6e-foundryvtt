@@ -22,6 +22,7 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
         const item = fromUuidSync(data.uuid);
 
         // Ignore drop if item already exists (dragging to ourselves)
+
         if (game.items.find((i) => i.id === item.id)) {
             console.log(`Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`);
             return;
@@ -81,51 +82,67 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
         //     ?.update({ "system.ID": newParentId });
     }
 
-    _getEntryContextOptions() {
-        const options = super._getEntryContextOptions();
-        const idxDelete = options.findIndex((o) => o.name === "SIDEBAR.Delete");
-        if (idxDelete) {
-            const deleteAll = {
-                name: "FOLDER.Delete",
-                icon: '<i class="fas fa-dumpster"></i>',
-                condition: (header) => {
-                    const li = header.closest(".directory-item");
-                    const entry = this.collection.get(li.data("entryId"));
-                    return game.user.isGM && entry.childItems;
-                },
+    // _getEntryContextOptions() {
+    //     const options = super._getEntryContextOptions();
+    //     const idxDelete = options.findIndex((o) => o.name === "SIDEBAR.Delete");
+    //     if (idxDelete) {
+    //         const deleteAll = {
+    //             name: "FOLDER.Delete",
+    //             icon: '<i class="fas fa-dumpster"></i>',
+    //             condition: (header) => {
+    //                 const li = header.closest(".directory-item");
+    //                 const entry = this.collection.get(li.data("entryId"));
+    //                 return game.user.isGM && entry.childItems;
+    //             },
 
-                callback: (header) => {
-                    const li = header.closest(".directory-item");
-                    const entry = this.collection.get(li.data("entryId"));
-                    if (!entry) return;
-                    const type = game.i18n.localize(entry.constructor.metadata.label);
-                    return Dialog.confirm({
-                        title: `${game.i18n.format("FOLDER.Delete", {
-                            type,
-                        })}: ${entry.name}`,
-                        content: `<h4 data-entry-id="${entry.id}">${game.i18n.localize(
-                            "AreYouSure",
-                        )}</h4><p>${game.i18n.format("FOLDER.DeleteWarning", {
-                            type,
-                        })}</p>`,
-                        yes: (header) => {
-                            const entryID = header.find("[data-entry-id]").data("entryId");
-                            const entry = this.collection.get(entryID);
-                            if (!entry) return;
-                            for (const child of entry.childItems) {
-                                child.delete();
-                            }
-                            entry.delete();
-                        },
-                        options: {
-                            top: Math.min(li[0].offsetTop, window.innerHeight - 350),
-                            left: window.innerWidth - 720,
-                        },
-                    });
-                },
-            };
-            options.splice(idxDelete + 1, 0, deleteAll);
+    //             callback: (header) => {
+    //                 const li = header.closest(".directory-item");
+    //                 const entry = this.collection.get(li.data("entryId"));
+    //                 if (!entry) return;
+    //                 const type = game.i18n.localize(entry.constructor.metadata.label);
+    //                 return Dialog.confirm({
+    //                     title: `${game.i18n.format("FOLDER.Delete", {
+    //                         type,
+    //                     })}: ${entry.name}`,
+    //                     content: `<h4 data-entry-id="${entry.id}">${game.i18n.localize(
+    //                         "AreYouSure",
+    //                     )}</h4><p>${game.i18n.format("FOLDER.DeleteWarning", {
+    //                         type,
+    //                     })}</p>`,
+    //                     yes: (header) => {
+    //                         const entryID = header.find("[data-entry-id]").data("entryId");
+    //                         const entry = this.collection.get(entryID);
+    //                         if (!entry) return;
+    //                         for (const child of entry.childItems) {
+    //                             child.delete();
+    //                         }
+    //                         entry.delete();
+    //                     },
+    //                     options: {
+    //                         top: Math.min(li[0].offsetTop, window.innerHeight - 350),
+    //                         left: window.innerWidth - 720,
+    //                     },
+    //                 });
+    //             },
+    //         };
+    //         options.splice(idxDelete + 1, 0, deleteAll);
+    //     }
+    //     return options;
+    // }
+
+    async _handleDroppedFolder(target, data) {
+        console.log("_handleDroppedFolder", target, data);
+        super._handleDroppedFolder(target, data);
+    }
+
+    async _handleDroppedEntry(target, data) {
+        console.log("_handleDroppedEntry", target, data);
+
+        const item = fromUuidSync(data.uuid);
+        if (!item) {
+            return;
         }
-        return options;
+
+        super._handleDroppedEntry(target, data);
     }
 }

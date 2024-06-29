@@ -111,13 +111,18 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         const metadata = {
             label: characterName,
             type: "Item",
+            flags: {
+                versionHeroSystem6eCreated: game.system.version,
+            },
         };
 
         // Create Compendium
         // eslint-disable-next-line no-undef
         const pack = await CompendiumCollection.createCompendium(metadata);
+
         if (targetFolderId) await pack.setFolder(targetFolderId);
-        ui.notifications.info(`Creating compendium ${pack.name} from Hero Designer Prefab file.`);
+
+        ui.notifications.info(`Creating compendium ${pack.metadata.label} from Hero Designer Prefab file.`);
 
         const folders = [];
 
@@ -148,10 +153,10 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                     }
                 }
             }
-            ui.notifications.info(`Compendium ${pack.name} finished upload.`);
+            ui.notifications.info(`Compendium ${pack.metadata.label} finished upload.`);
         } catch (e) {
             console.log(e);
-            ui.notifications.error(`Compendium ${pack.name} failed to upload.`);
+            ui.notifications.error(`Compendium ${pack.metadata.label} failed to upload.`);
         }
     }
 }
