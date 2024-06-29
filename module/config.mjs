@@ -117,14 +117,7 @@ HERO.hitLocationsToHit = {
     18: "Foot",
 };
 
-HERO.sidedLocations = new Set([
-    "Hand",
-    "Shoulder",
-    "Arm",
-    "Thigh",
-    "Leg",
-    "Foot",
-]);
+HERO.sidedLocations = new Set(["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]);
 
 HERO.hitLocations = {
     // Location : [x Stun, x N Stun, x Body, OCV modifier]
@@ -240,8 +233,7 @@ function validatePowers() {
         (power) =>
             !power.duration &&
             (power.type.includes("adjustment ") ||
-                (power.type.includes("attack") &&
-                    !power.type.includes("martial")) ||
+                (power.type.includes("attack") && !power.type.includes("martial")) ||
                 power.type.includes("defense") ||
                 power.type.includes("movement") ||
                 power.type.includes("body-affecting") ||
@@ -295,27 +287,18 @@ HERO.powers5e.validate = validatePowers;
 function addPower(powerDescription6e, powerOverrideFor5e) {
     if (powerDescription6e) {
         if (powerDescription6e.xml) {
-            powerDescription6e.xml = powerDescription6e.xml
-                .replace(/\n/g, "")
-                .trim();
+            powerDescription6e.xml = powerDescription6e.xml.replace(/\n/g, "").trim();
             const parser = new DOMParser();
-            let xml = parser.parseFromString(
-                powerDescription6e.xml.trim(),
-                "text/xml",
-            );
+            let xml = parser.parseFromString(powerDescription6e.xml.trim(), "text/xml");
 
             // Add power properties based on valid XML.
             // NOTE: Chrome will parse partially valid XML, FireFox will not
             // which is why we are checkig for parsererror.
             if (xml.getElementsByTagName("parsererror").length === 0) {
-                powerDescription6e.key ??=
-                    xml.children[0].getAttribute("XMLID");
-                powerDescription6e.name ??=
-                    xml.children[0].getAttribute("ALIAS");
+                powerDescription6e.key ??= xml.children[0].getAttribute("XMLID");
+                powerDescription6e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription6e.type ??= [];
-                powerDescription6e.behaviors ??= [
-                    xml.children[0].tagName.toLowerCase(),
-                ];
+                powerDescription6e.behaviors ??= [xml.children[0].tagName.toLowerCase()];
             } else {
                 //debugger;
             }
@@ -328,30 +311,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     }
 
     if (powerOverrideFor5e) {
-        const powerDescription5e = Object.assign(
-            powerDescription6e ? powerDescription6e : {},
-            powerOverrideFor5e,
-        );
+        const powerDescription5e = Object.assign(powerDescription6e ? powerDescription6e : {}, powerOverrideFor5e);
 
         if (powerDescription5e.xml) {
-            powerDescription5e.xml = powerDescription5e.xml
-                .replace(/\n/g, "")
-                .trim();
+            powerDescription5e.xml = powerDescription5e.xml.replace(/\n/g, "").trim();
             const parser = new DOMParser();
-            let xml = parser.parseFromString(
-                powerDescription5e.xml.trim(),
-                "text/xml",
-            );
+            let xml = parser.parseFromString(powerDescription5e.xml.trim(), "text/xml");
 
             if (xml.getElementsByTagName("parsererror").length === 0) {
-                powerDescription5e.key ??=
-                    xml.children[0].getAttribute("XMLID");
-                powerDescription5e.name ??=
-                    xml.children[0].getAttribute("ALIAS");
+                powerDescription5e.key ??= xml.children[0].getAttribute("XMLID");
+                powerDescription5e.name ??= xml.children[0].getAttribute("ALIAS");
                 powerDescription5e.type ??= [];
-                powerDescription5e.behaviors ??= [
-                    xml.children[0].tagName.toLowerCase(),
-                ];
+                powerDescription5e.behaviors ??= [xml.children[0].tagName.toLowerCase()];
             } else {
                 //debugger;
             }
@@ -1449,8 +1420,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 phase: "1",
                 ocv: "+3",
                 dcv: "1/2",
-                effects:
-                    "Take extra time to aim a Ranged attack at a target, +2 OCV only to offset the Range Modifier",
+                effects: "Take extra time to aim a Ranged attack at a target, +2 OCV only to offset the Range Modifier",
                 attack: false,
             },
         },
@@ -1652,15 +1622,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: "self",
             costEnd: true,
             costPerLevel: 20,
-            ignoreFor: [
-                "pc",
-                "npc",
-                "automaton",
-                "vehicle",
-                "base2",
-                "computer",
-                "ai",
-            ], // There aren't really any LEVELS or a .value for this power, no need to show on CHARACTERISTICS tab //
+            ignoreFor: ["pc", "npc", "automaton", "vehicle", "base2", "computer", "ai"], // There aren't really any LEVELS or a .value for this power, no need to show on CHARACTERISTICS tab //
             xml: `<POWER XMLID="EXTRADIMENSIONALMOVEMENT" ID="1709333909749" BASECOST="20.0" LEVELS="0" ALIAS="Extra-Dimensional Movement" POSITION="42" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="Single Dimension" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -2653,8 +2615,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     {
                         OPTIONID: "SINGLE",
                         OPTION: "SINGLE",
-                        OPTION_ALIAS:
-                            "to offset a specific negative OCV modifier with any single attack",
+                        OPTION_ALIAS: "to offset a specific negative OCV modifier with any single attack",
                     },
                     {
                         OPTIONID: "THREE",
@@ -2665,8 +2626,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     {
                         OPTIONID: "ALL",
                         OPTION: "ALL",
-                        OPTION_ALIAS:
-                            "to offset a specific negative OCV modifier with all attacks",
+                        OPTION_ALIAS: "to offset a specific negative OCV modifier with all attacks",
                     },
                     {
                         OPTIONID: "SINGLEDCV",
@@ -2677,8 +2637,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     {
                         OPTIONID: "GROUPDCV",
                         OPTION: "GROUPDCV",
-                        OPTION_ALIAS:
-                            "to offset a specific negative DCV modifier imposed by a group of conditions",
+                        OPTION_ALIAS: "to offset a specific negative DCV modifier imposed by a group of conditions",
                     },
                 ],
                 penaltyChoices: {
@@ -4812,10 +4771,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     stun: parseInt(item.system.value),
                     reach: Math.pow(2, Math.floor(item.system.value / 3)),
                     kb: parseInt(item.system.value),
-                    mass:
-                        (
-                            Math.pow(2, item.system.value) * 100
-                        ).toLocaleString() + " kg",
+                    mass: (Math.pow(2, item.system.value) * 100).toLocaleString() + " kg",
                     dcv: 2 * Math.floor(item.system.value / 3),
                     perception: 2 * Math.floor(item.system.value / 3),
                     tall: Math.pow(2, Math.floor(item.system.value / 3)) * 2,
@@ -6159,27 +6115,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 let _cost = 0;
                 switch (modifier.OPTIONID) {
                     case "RADIUS":
-                        _cost =
-                            Math.max(1, Math.ceil(Math.log2(levels / 2))) *
-                            0.25;
+                        _cost = Math.max(1, Math.ceil(Math.log2(levels / 2))) * 0.25;
                         break;
                     case "CONE":
-                        _cost =
-                            Math.max(1, Math.ceil(Math.log2(levels / 4))) *
-                            0.25;
+                        _cost = Math.max(1, Math.ceil(Math.log2(levels / 4))) * 0.25;
                         break;
                     case "LINE":
-                        _cost =
-                            Math.max(1, Math.ceil(Math.log2(levels / 8))) *
-                            0.25;
+                        _cost = Math.max(1, Math.ceil(Math.log2(levels / 8))) * 0.25;
                         break;
                     case "SURFACE":
-                        _cost =
-                            Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
+                        _cost = Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
                         break;
                     case "ANY":
-                        _cost =
-                            Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
+                        _cost = Math.max(1, Math.ceil(Math.log2(levels))) * 0.25;
                         break;
                     default:
                         console.warn("Unknown OPTIONID", modifier);
@@ -6342,16 +6290,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         baseDCFalloffFromShape = 1;
                         break;
                     default:
-                        console.error(
-                            `unknown 5e explosion shape ${AOE || modifier}`,
-                            item,
-                        );
+                        console.error(`unknown 5e explosion shape ${AOE || modifier}`, item);
                         break;
                 }
-                const adjustedLevels = Math.max(
-                    0,
-                    levels - baseDCFalloffFromShape,
-                );
+                const adjustedLevels = Math.max(0, levels - baseDCFalloffFromShape);
                 return baseCost + adjustedLevels * 0.25;
             },
             editOptions: {

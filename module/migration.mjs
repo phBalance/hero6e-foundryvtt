@@ -16,17 +16,8 @@ function getAllActorsInGame() {
 
 let skippedBecauseOld = 0;
 
-async function migrateToVersion(
-    migratesToVersion,
-    lastMigration,
-    queue,
-    queueType,
-    asyncFn,
-) {
-    if (
-        !lastMigration ||
-        foundry.utils.isNewerVersion(migratesToVersion, lastMigration)
-    ) {
+async function migrateToVersion(migratesToVersion, lastMigration, queue, queueType, asyncFn) {
+    if (!lastMigration || foundry.utils.isNewerVersion(migratesToVersion, lastMigration)) {
         const originalTotal = queue.length;
         const migrationProgressBar = new HeroProgressBar(
             `Migrating ${originalTotal} ${queueType} to ${migratesToVersion}`,
@@ -37,9 +28,7 @@ async function migrateToVersion(
             const queueElement = queue.pop();
 
             migrationProgressBar.advance(
-                `Migrating ${queueType} ${
-                    originalTotal - queue.length
-                } of ${originalTotal} to ${migratesToVersion}`,
+                `Migrating ${queueType} ${originalTotal - queue.length} of ${originalTotal} to ${migratesToVersion}`,
             );
 
             // Skip super old actors without versionHeroSystem6eUpload
@@ -68,9 +57,7 @@ async function migrateToVersion(
             await asyncFn(queueElement);
         }
 
-        migrationProgressBar.close(
-            `Done migrating ${originalTotal} ${queueType} to ${migratesToVersion}`,
-        );
+        migrationProgressBar.close(`Done migrating ${originalTotal} ${queueType} to ${migratesToVersion}`);
     }
 }
 
@@ -101,9 +88,7 @@ export async function migrateWorld() {
     for (let invalidId of game.actors.invalidDocumentIds) {
         let invalidActor = game.actors.getInvalid(invalidId);
 
-        const validType = Actor.TYPES.filter(
-            (o) => o != "character" && o != "base",
-        ).map((o) => o.replace("2", ""));
+        const validType = Actor.TYPES.filter((o) => o != "character" && o != "base").map((o) => o.replace("2", ""));
 
         if (!validType.includes(invalidActor.type)) {
             await invalidActor.update({ type: "npc" });
@@ -134,9 +119,7 @@ export async function migrateWorld() {
 
         while (queue.length > 0) {
             if (new Date() - d > 4000) {
-                ui.notifications.info(
-                    `Migrating actor data 3.0.35 (${queue.length} remaining)`,
-                );
+                ui.notifications.info(`Migrating actor data 3.0.35 (${queue.length} remaining)`);
                 d = new Date();
             }
             const actor = queue.pop();
@@ -165,9 +148,7 @@ export async function migrateWorld() {
 
         while (queue.length > 0) {
             if (new Date() - d > 4000) {
-                ui.notifications.info(
-                    `Migrating actor data 3.0.49 (${queue.length} remaining)`,
-                );
+                ui.notifications.info(`Migrating actor data 3.0.49 (${queue.length} remaining)`);
                 d = new Date();
             }
             const actor = queue.pop();
@@ -192,11 +173,7 @@ export async function migrateWorld() {
 
         for (const [index, actor] of queue.entries()) {
             if (new Date() - dateNow > 4000) {
-                ui.notifications.info(
-                    `Migrating actor's items to 3.0.53: (${
-                        queue.length - index
-                    } actors remaining)`,
-                );
+                ui.notifications.info(`Migrating actor's items to 3.0.53: (${queue.length - index} actors remaining)`);
                 dateNow = new Date();
             }
 
@@ -214,9 +191,7 @@ export async function migrateWorld() {
         for (const [index, actor] of queue.entries()) {
             if (new Date() - dateNow > 4000) {
                 ui.notifications.info(
-                    `Migrating actor's items and active effects to 3.0.54: (${
-                        queue.length - index
-                    } actors remaining)`,
+                    `Migrating actor's items and active effects to 3.0.54: (${queue.length - index} actors remaining)`,
                 );
                 dateNow = new Date();
             }
@@ -236,9 +211,7 @@ export async function migrateWorld() {
         for (const [index, actor] of queue.entries()) {
             if (new Date() - dateNow > 4000) {
                 ui.notifications.info(
-                    `Migrating actor's active effects to 3.0.59: (${
-                        queue.length - index
-                    } actors remaining)`,
+                    `Migrating actor's active effects to 3.0.59: (${queue.length - index} actors remaining)`,
                 );
                 dateNow = new Date();
             }
@@ -331,13 +304,8 @@ async function rebuildActors(actor) {
         actor._postUpload();
     } catch (e) {
         console.log(e);
-        if (
-            game.user.isGM &&
-            game.settings.get(game.system.id, "alphaTesting")
-        ) {
-            await ui.notifications.warn(
-                `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
-            );
+        if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
+            await ui.notifications.warn(`Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`);
         }
     }
 }
@@ -521,9 +489,7 @@ async function migrate_actor_maneuvers_to_3_0_62(actor) {
     await Promise.all(deletePromises);
 
     // Add all maneuvers for this actor's system version.
-    const powerList = actor.system.is5e
-        ? CONFIG.HERO.powers5e
-        : CONFIG.HERO.powers6e;
+    const powerList = actor.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
 
     powerList
         .filter((power) => power.type.includes("maneuver"))
@@ -585,34 +551,22 @@ async function migrate_actor_items_to_3_0_59(actor) {
 
 async function migrate_actor_active_effects_to_3_0_59(actor) {
     for (const activeEffect of actor.temporaryEffects) {
-        if (
-            activeEffect.flags?.type === "adjustment" &&
-            activeEffect.flags.version === 2
-        ) {
-            const newFormatAdjustmentActiveEffect =
-                foundry.utils.deepClone(activeEffect);
+        if (activeEffect.flags?.type === "adjustment" && activeEffect.flags.version === 2) {
+            const newFormatAdjustmentActiveEffect = foundry.utils.deepClone(activeEffect);
 
             // Rename property.
-            newFormatAdjustmentActiveEffect.flags.adjustmentActivePoints =
-                activeEffect.flags.activePoints;
+            newFormatAdjustmentActiveEffect.flags.adjustmentActivePoints = activeEffect.flags.activePoints;
             delete newFormatAdjustmentActiveEffect.flags.activePoints;
 
             // New property
             let activePointsThatShouldBeAffected = 0;
-            const nameMatch = newFormatAdjustmentActiveEffect.name.match(
-                /^.+ ([0-9]+) .+ \([0-9]+ AP\) \[.*\]/,
-            );
+            const nameMatch = newFormatAdjustmentActiveEffect.name.match(/^.+ ([0-9]+) .+ \([0-9]+ AP\) \[.*\]/);
             if (nameMatch) {
                 activePointsThatShouldBeAffected =
-                    parseInt(nameMatch[1]) *
-                    Math.sign(
-                        newFormatAdjustmentActiveEffect.flags
-                            .adjustmentActivePoints,
-                    );
+                    parseInt(nameMatch[1]) * Math.sign(newFormatAdjustmentActiveEffect.flags.adjustmentActivePoints);
             }
 
-            newFormatAdjustmentActiveEffect.flags.affectedPoints =
-                activePointsThatShouldBeAffected;
+            newFormatAdjustmentActiveEffect.flags.affectedPoints = activePointsThatShouldBeAffected;
 
             // Delete old active effect and create the new one
             await activeEffect.delete();
@@ -645,8 +599,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
             }
 
             const presentAdjustmentActiveEffect = activeEffect;
-            const potentialCharacteristic =
-                presentAdjustmentActiveEffect.flags.keyX;
+            const potentialCharacteristic = presentAdjustmentActiveEffect.flags.keyX;
 
             const costPerActivePoint = determineCostPerActivePoint(
                 potentialCharacteristic,
@@ -654,8 +607,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                 actor,
             );
             const activePointsThatShouldBeAffected = Math.trunc(
-                presentAdjustmentActiveEffect.flags.activePoints /
-                    costPerActivePoint,
+                presentAdjustmentActiveEffect.flags.activePoints / costPerActivePoint,
             );
 
             // The new format differentiates between beneficial adjustments as negative activePoints whereas
@@ -665,8 +617,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                 activeEffect.flags.XMLID === "AID" ||
                 activeEffect.flags.XMLID === "HEALING" ||
                 (activeEffect.flags.XMLID === "TRANSFER" &&
-                    activeEffect.flags.target ===
-                        presentAdjustmentActiveEffect.flags.keyY)
+                    activeEffect.flags.target === presentAdjustmentActiveEffect.flags.keyY)
                     ? -presentAdjustmentActiveEffect.flags.activePoints
                     : presentAdjustmentActiveEffect.flags.activePoints;
 
@@ -695,26 +646,15 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
             };
 
             // If 5e we may have additional changes
-            if (
-                actor.system.is5e &&
-                actor.system.characteristics?.[potentialCharacteristic]
-            ) {
+            if (actor.system.is5e && actor.system.characteristics?.[potentialCharacteristic]) {
                 if (potentialCharacteristic === "dex") {
-                    const charValue =
-                        actor.system.characteristics[potentialCharacteristic]
-                            .value;
+                    const charValue = actor.system.characteristics[potentialCharacteristic].value;
                     const lift = RoundFavorPlayerUp(
-                        (charValue -
-                            actor.system.characteristics[
-                                potentialCharacteristic
-                            ].core) /
-                            3,
+                        (charValue - actor.system.characteristics[potentialCharacteristic].core) / 3,
                     );
 
                     newFormatAdjustmentActiveEffect.changes.push({
-                        key: actor.system.characteristics[
-                            potentialCharacteristic
-                        ]
+                        key: actor.system.characteristics[potentialCharacteristic]
                             ? `system.characteristics.ocv.max`
                             : "system.value",
                         value: lift,
@@ -723,9 +663,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                     newFormatAdjustmentActiveEffect.flags.target.push("ocv");
 
                     newFormatAdjustmentActiveEffect.changes.push({
-                        key: actor.system.characteristics[
-                            potentialCharacteristic
-                        ]
+                        key: actor.system.characteristics[potentialCharacteristic]
                             ? `system.characteristics.dcv.max`
                             : "system.value",
                         value: lift,
@@ -742,21 +680,13 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
 
                     await actor.update(changes);
                 } else if (potentialCharacteristic === "ego") {
-                    const charValue =
-                        actor.system.characteristics[potentialCharacteristic]
-                            .value;
+                    const charValue = actor.system.characteristics[potentialCharacteristic].value;
                     const lift = RoundFavorPlayerUp(
-                        (charValue -
-                            actor.system.characteristics[
-                                potentialCharacteristic
-                            ].core) /
-                            3,
+                        (charValue - actor.system.characteristics[potentialCharacteristic].core) / 3,
                     );
 
                     newFormatAdjustmentActiveEffect.changes.push({
-                        key: actor.system.characteristics[
-                            potentialCharacteristic
-                        ]
+                        key: actor.system.characteristics[potentialCharacteristic]
                             ? `system.characteristics.omcv.max`
                             : "system.value",
                         value: lift,
@@ -765,9 +695,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                     newFormatAdjustmentActiveEffect.flags.target.push("omcv");
 
                     newFormatAdjustmentActiveEffect.changes.push({
-                        key: actor.system.characteristics[
-                            potentialCharacteristic
-                        ]
+                        key: actor.system.characteristics[potentialCharacteristic]
                             ? `system.characteristics.dmcv.max`
                             : "system.value",
                         value: lift,
@@ -818,8 +746,7 @@ async function migrate_actor_items_to_3_0_53(actor) {
         // item.system.CHARACTERISTIC
         if (!item.system.CHARACTERISTIC && item.system.characteristic) {
             await item.update({
-                "system.CHARACTERISTIC":
-                    item.system.characteristic.toUpperCase(),
+                "system.CHARACTERISTIC": item.system.characteristic.toUpperCase(),
             });
         }
 
@@ -832,10 +759,8 @@ async function migrate_actor_items_to_3_0_53(actor) {
         // In the past, we filled in item.system.NAME based on item.system.ALIAS.
         // We no longer need this as our visualizations should be decoupled from data.
         if (
-            item.system.NAME?.toUpperCase().trim() ===
-                item.system.ALIAS?.toUpperCase().trim() &&
-            item.name.toUpperCase().trim() ===
-                item.system.ALIAS?.toUpperCase().trim()
+            item.system.NAME?.toUpperCase().trim() === item.system.ALIAS?.toUpperCase().trim() &&
+            item.name.toUpperCase().trim() === item.system.ALIAS?.toUpperCase().trim()
         ) {
             await item.update({
                 "system.NAME": "",
@@ -899,13 +824,8 @@ async function migrateActor_3_0_42(actor) {
         }
     } catch (e) {
         console.error(e);
-        if (
-            game.user.isGM &&
-            game.settings.get(game.system.id, "alphaTesting")
-        ) {
-            await ui.notifications.warn(
-                `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
-            );
+        if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
+            await ui.notifications.warn(`Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`);
         }
     }
 }
@@ -919,10 +839,7 @@ async function migrateActor_3_0_49(actor) {
             let entry = migrationOnly_combatManeuvers[item.name];
             if (!entry) {
                 for (let key of Object.keys(migrationOnly_combatManeuvers)) {
-                    if (
-                        key.toUpperCase().replace(" ", "") ===
-                        item.name.toUpperCase().replace(" ", "")
-                    ) {
+                    if (key.toUpperCase().replace(" ", "") === item.name.toUpperCase().replace(" ", "")) {
                         entry = migrationOnly_combatManeuvers[key];
                         await item.update({ name: key });
                         break;
@@ -934,10 +851,7 @@ async function migrateActor_3_0_49(actor) {
                 let newEffect = EFFECT;
                 if (EFFECT.match(/v\/(\d+)/)) {
                     let divisor = EFFECT.match(/v\/(\d+)/)[1];
-                    newEffect = EFFECT.replace(
-                        `v/${divisor}`,
-                        `v/${divisor / 2}`,
-                    );
+                    newEffect = EFFECT.replace(`v/${divisor}`, `v/${divisor / 2}`);
                 }
                 if (item.system.EFFECT != newEffect) {
                     await item.update({ "system.EFFECT": newEffect });
@@ -950,10 +864,7 @@ async function migrateActor_3_0_49(actor) {
                 if (["Multiple Attack", "Other Attacks"].includes(item.name)) {
                     await item.delete();
                 } else {
-                    if (
-                        game.user.isGM &&
-                        game.settings.get(game.system.id, "alphaTesting")
-                    ) {
+                    if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
                         await ui.notifications.warn(
                             `Migration failed for ${actor?.name}. ${item.name} not recognized.`,
                         );
@@ -963,35 +874,23 @@ async function migrateActor_3_0_49(actor) {
         }
     } catch (e) {
         console.error(e);
-        if (
-            game.user.isGM &&
-            game.settings.get(game.system.id, "alphaTesting")
-        ) {
-            await ui.notifications.warn(
-                `Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`,
-            );
+        if (game.user.isGM && game.settings.get(game.system.id, "alphaTesting")) {
+            await ui.notifications.warn(`Migration failed for ${actor?.name}. Recommend re-uploading from HDC.`);
         }
     }
 }
 
 function migrationOnly_Pre3_0_61_getPowerInfo(options) {
     const xmlid =
-        options.xmlid ||
-        options.item?.system?.XMLID ||
-        options.item?.system?.xmlid ||
-        options.item?.system?.id;
+        options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id;
 
     const actor = options?.actor || options?.item?.actor;
     if (!actor) {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
-        console.warn(
-            `${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`,
-        );
+        console.warn(`${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`);
     }
 
-    const powerList = actor?.system.is5e
-        ? CONFIG.HERO.powers5e
-        : CONFIG.HERO.powers6e;
+    const powerList = actor?.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     let powerInfo = powerList.find((o) => o.key === xmlid);
 
     if (!powerInfo && options?.item?.type == "maneuver") {
@@ -1011,8 +910,7 @@ function migrationOnly_Pre3_0_61_getPowerInfo(options) {
     }
 
     // LowerCase
-    if (powerInfo?.duration)
-        powerInfo.duration = powerInfo.duration.toLowerCase();
+    if (powerInfo?.duration) powerInfo.duration = powerInfo.duration.toLowerCase();
 
     return powerInfo;
 }
@@ -1021,22 +919,15 @@ function migrationOnly_Pre3_0_61_getPowerInfo(options) {
 // in 3.0.63.
 export function migrationOnly_Pre_XXX_getPowerInfo(options) {
     const xmlid =
-        options.xmlid ||
-        options.item?.system?.XMLID ||
-        options.item?.system?.xmlid ||
-        options.item?.system?.id;
+        options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id;
 
     const actor = options?.actor || options?.item?.actor;
     if (!actor) {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
-        console.warn(
-            `${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`,
-        );
+        console.warn(`${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`);
     }
 
-    const powerList = actor?.system.is5e
-        ? CONFIG.HERO.powers5e
-        : CONFIG.HERO.powers6e;
+    const powerList = actor?.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
     let powerInfo = powerList.find((o) => o.key === xmlid);
 
     // TODO: Why are we modifying the power entries from config here?
@@ -1047,8 +938,7 @@ export function migrationOnly_Pre_XXX_getPowerInfo(options) {
 
     // LowerCase
     // TODO: Make powers correct and remove this
-    if (powerInfo?.duration)
-        powerInfo.duration = powerInfo.duration.toLowerCase();
+    if (powerInfo?.duration) powerInfo.duration = powerInfo.duration.toLowerCase();
 
     return powerInfo;
 }
@@ -1057,65 +947,18 @@ const migrationOnly_combatManeuvers = {
     // Maneuver : [phase, OCV, DCV, Effects, Attack]
     Block: ["1/2", "+0", "+0", "Blocks HTH attacks, Abort", true],
     Brace: ["0", "+2", "1/2", "+2 OCV only to offset the Range Modifier"],
-    Disarm: [
-        "1/2",
-        "-2",
-        "+0",
-        "Disarm target, requires STR vs. STR Roll",
-        true,
-    ],
+    Disarm: ["1/2", "-2", "+0", "Disarm target, requires STR vs. STR Roll", true],
     Dodge: ["1/2", "--", "+3", "Dodge all attacks, Abort", true],
-    Grab: [
-        "1/2",
-        "-1",
-        "-2",
-        "Grab Two Limbs; can Squeeze, Slam, or Throw",
-        true,
-    ],
-    "Grab By": [
-        "1/2 †",
-        "-3",
-        "-4",
-        "Move and Grab object, +(v/10) to STR",
-        true,
-    ],
+    Grab: ["1/2", "-1", "-2", "Grab Two Limbs; can Squeeze, Slam, or Throw", true],
+    "Grab By": ["1/2 †", "-3", "-4", "Move and Grab object, +(v/10) to STR", true],
     Haymaker: ["1/2*", "+0", "-5", "+4 Damage Classes to any attack"],
-    "Move By": [
-        "1/2 †",
-        "-2",
-        "-2",
-        "((STR/2) + (v/10))d6; attacker takes 1/3 damage",
-        true,
-    ],
-    "Move Through": [
-        "1/2 †",
-        "-v/10",
-        "-3",
-        "(STR + (v/6))d6; attacker takes 1/2 or full damage",
-        true,
-    ],
+    "Move By": ["1/2 †", "-2", "-2", "((STR/2) + (v/10))d6; attacker takes 1/3 damage", true],
+    "Move Through": ["1/2 †", "-v/10", "-3", "(STR + (v/6))d6; attacker takes 1/2 or full damage", true],
     //"Multiple Attack": ["1", "var", "1/2", "Attack one or more targets multiple times"],
-    Set: [
-        "1",
-        "+1",
-        "+0",
-        "Take extra time to aim a Ranged attack at a target",
-    ],
+    Set: ["1", "+1", "+0", "Take extra time to aim a Ranged attack at a target"],
     Shove: ["1/2", "-1", "-1", "Push target back 1m per 5 STR used", true],
     Strike: ["1/2", "+0", "+0", "STR damage or by weapon type", true],
-    Throw: [
-        "1/2",
-        "+0",
-        "+0",
-        "Throw object or character, does STR damage",
-        true,
-    ],
-    Trip: [
-        "1/2",
-        "-1",
-        "-2",
-        "Knock a target to the ground, making him Prone",
-        true,
-    ],
+    Throw: ["1/2", "+0", "+0", "Throw object or character, does STR damage", true],
+    Trip: ["1/2", "-1", "-2", "Knock a target to the ground, making him Prone", true],
     //"Other Attacks": ["1/2", "+0", "+0", ""],
 };

@@ -4,14 +4,8 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
 import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
 
-import {
-    HeroSystem6eToken,
-    HeroSystem6eTokenDocument,
-} from "./actor/actor-token.mjs";
-import {
-    HeroSystem6eItem,
-    initializeItemHandlebarsHelpers,
-} from "./item/item.mjs";
+import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-token.mjs";
+import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 //import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.mjs";
 import * as chat from "./chat.mjs";
@@ -26,10 +20,7 @@ import { HeroSystem6eTokenHud } from "./bar3/tokenHud.mjs";
 import { extendTokenConfig } from "./bar3/extendTokenConfig.mjs";
 import { HeroRuler } from "./ruler.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
-import {
-    expireEffects,
-    getCharacteristicInfoArrayForActor,
-} from "./utility/util.mjs";
+import { expireEffects, getCharacteristicInfoArrayForActor } from "./utility/util.mjs";
 import { migrateWorld } from "./migration.mjs";
 import "./utility/adjustment.mjs";
 
@@ -73,8 +64,7 @@ Hooks.once("init", async function () {
      * @type {String}
      */
     CONFIG.Combat.initiative = {
-        formula:
-            "@characteristics.dex.value + (@characteristics.spd.value / 100)",
+        formula: "@characteristics.dex.value + (@characteristics.spd.value / 100)",
         decimals: 2,
     };
 
@@ -88,9 +78,7 @@ Hooks.once("init", async function () {
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     // We can't use the information from system.json in a static context; so we change the load path here.
-    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(
-        HEROSYS.module,
-    );
+    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(HEROSYS.module);
 
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
     CONFIG.ui.combat = HeroSystem6eCombatTracker;
@@ -160,23 +148,15 @@ Hooks.once("init", async function () {
 
 Hooks.once("ready", async function () {
     // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
-    Hooks.on("hotbarDrop", (bar, data, slot) =>
-        createHeroSystem6eMacro(bar, data, slot),
-    );
+    Hooks.on("hotbarDrop", (bar, data, slot) => createHeroSystem6eMacro(bar, data, slot));
 
     if (
         typeof SimpleCalendar != "undefined" &&
         game.user.isGM &&
-        SimpleCalendar.api.getCurrentCalendar().general
-            .gameWorldTimeIntegration != "mixed"
+        SimpleCalendar.api.getCurrentCalendar().general.gameWorldTimeIntegration != "mixed"
     ) {
-        console.log(
-            SimpleCalendar.api.getCurrentCalendar().general
-                .gameWorldTimeIntegration,
-        );
-        return ui.notifications.warn(
-            `Recommend setting Simple Calendar GameWorldTimeIntegration = Mixed`,
-        );
+        console.log(SimpleCalendar.api.getCurrentCalendar().general.gameWorldTimeIntegration);
+        return ui.notifications.warn(`Recommend setting Simple Calendar GameWorldTimeIntegration = Mixed`);
     }
 });
 
@@ -185,12 +165,8 @@ Hooks.on("renderChatMessage", (app, html, data) => {
     chat.displayChatActionButtons(app, html, data);
     HeroSystem6eCardHelpers.onMessageRendered(html);
 });
-Hooks.on("renderChatLog", (app, html) =>
-    HeroSystem6eCardHelpers.chatListeners(html),
-);
-Hooks.on("renderChatPopout", (app, html) =>
-    HeroSystem6eCardHelpers.chatListeners(html),
-);
+Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
+Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 
 // When actor SPD is changed we need to setupTurns again
 Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
@@ -228,9 +204,7 @@ export class HEROSYS {
     static get module() {
         if (HEROSYS.#module === undefined) {
             console.error(`HEROSYS.module accessed before it is assigned`);
-            ui.notifications.error(
-                `HEROSYS.module accessed before it is assigned`,
-            );
+            ui.notifications.error(`HEROSYS.module accessed before it is assigned`);
         }
         return HEROSYS.#module;
     }
@@ -238,16 +212,13 @@ export class HEROSYS {
     static set module(value) {
         if (HEROSYS.#module !== undefined) {
             console.error(`HEROSYS.module assigned after it is assigned`);
-            ui.notifications.error(
-                `HEROSYS.module accessed before it is assigned`,
-            );
+            ui.notifications.error(`HEROSYS.module accessed before it is assigned`);
         }
         HEROSYS.#module = value;
     }
 
     static log(force, ...args) {
-        const shouldLog =
-            force || game.settings.get(game.system.id, "alphaTesting");
+        const shouldLog = force || game.settings.get(game.system.id, "alphaTesting");
 
         if (shouldLog) {
             console.log(this.ID, "|", ...args);
@@ -255,8 +226,7 @@ export class HEROSYS {
     }
 
     static trace(force, ...args) {
-        const shouldTrace =
-            force || game.settings.get(game.system.id, "alphaTesting");
+        const shouldTrace = force || game.settings.get(game.system.id, "alphaTesting");
 
         if (shouldTrace) {
             console.trace(this.ID, "|", ...args);
@@ -293,10 +263,7 @@ async function handleMacroCreation(bar, data, slot, item) {
 
     // Create the macro command
     const command = `game.herosystem6e.rollItemMacro("${item.name}", "${item.type}");`;
-    let macro = game.macros.find(
-        (m) =>
-            m.command === command && m.name === item.name && m.img === item.img,
-    );
+    let macro = game.macros.find((m) => m.command === command && m.name === item.name && m.img === item.img);
     if (!macro) {
         macro = await Macro.create({
             name: item.name,
@@ -360,9 +327,7 @@ async function CreateCustomAttack(actor) {
 
                 let item = await Item.create(json, { parent: actor });
                 item.updateItemDescription();
-                return ui.notifications.info(
-                    `Added ${item.name} to ${actor.name}`,
-                );
+                return ui.notifications.info(`Added ${item.name} to ${actor.name}`);
             } catch (e) {
                 return ui.notifications.error(e);
             }
@@ -383,11 +348,7 @@ function rollItemMacro(itemName, itemType) {
     if (!actor) actor = game.actors.get(speaker.actor);
     let item = actor
         ? actor.items.find(
-              (i) =>
-                  i.name === itemName &&
-                  (!itemType ||
-                      i.type == itemType ||
-                      i.system.subType === itemType),
+              (i) => i.name === itemName && (!itemType || i.type == itemType || i.system.subType === itemType),
           )
         : null;
 
@@ -398,11 +359,7 @@ function rollItemMacro(itemName, itemType) {
         for (let token of canvas.tokens.ownedTokens) {
             actor = token.actor;
             item = actor.items.find(
-                (i) =>
-                    i.name === itemName &&
-                    (!itemType ||
-                        i.type == itemType ||
-                        i.system.subType === itemType),
+                (i) => i.name === itemName && (!itemType || i.type == itemType || i.system.subType === itemType),
             );
             if (item) {
                 break;
@@ -411,9 +368,7 @@ function rollItemMacro(itemName, itemType) {
 
         if (!item)
             return ui.notifications.warn(
-                `Your controlled Actor does not have an ${
-                    itemType || "item"
-                } named ${itemName}`,
+                `Your controlled Actor does not have an ${itemType || "item"} named ${itemName}`,
             );
     }
 
@@ -438,28 +393,18 @@ Hooks.once("ready", async function () {
     // Check if we have already migrated
     const lastMigration = game.settings.get(game.system.id, "lastMigration");
 
-    if (
-        foundry.utils.isNewerVersion(
-            game.system.version.replace("-alpha", ""),
-            lastMigration,
-        )
-    ) {
+    if (foundry.utils.isNewerVersion(game.system.version.replace("-alpha", ""), lastMigration)) {
         migrateWorld();
 
         // Update lastMigration
-        await game.settings.set(
-            game.system.id,
-            "lastMigration",
-            game.system.version.replace("-alpha", ""),
-        );
+        await game.settings.set(game.system.id, "lastMigration", game.system.version.replace("-alpha", ""));
     }
 });
 
 // New Actor Dialog
 Hooks.on("renderDialog", (dialog, html) => {
     if (
-        html[0].querySelector(".window-title").textContent !=
-            "Create New Actor" &&
+        html[0].querySelector(".window-title").textContent != "Create New Actor" &&
         html[0].querySelector(".window-title").textContent != "Create New Item"
     )
         return;
@@ -557,10 +502,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     secondsSinceRecovery += deltaSeconds;
 
     const multiplier = Math.floor(secondsSinceRecovery / 12);
-    secondsSinceRecovery = Math.max(
-        0,
-        secondsSinceRecovery - secondsSinceRecovery * multiplier,
-    );
+    secondsSinceRecovery = Math.max(0, secondsSinceRecovery - secondsSinceRecovery * multiplier);
 
     // Charges and Body use days
     const dt = new Date(worldTime * 1000);
@@ -574,10 +516,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     const actors = Array.from(game.actors);
     const currentTokens = game.scenes.current?.tokens || [];
     for (const token of currentTokens) {
-        if (
-            token.actor &&
-            (!token.actorLink || !actors.find((o) => o.id === token.actor.id))
-        ) {
+        if (token.actor && (!token.actorLink || !actors.find((o) => o.id === token.actor.id))) {
             actors.push(token.actor);
         }
     }
@@ -585,18 +524,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     for (const actor of actors) {
         try {
             // Create a natural body healing if needed (requires permissions)
-            const naturalBodyHealing = actor.temporaryEffects.find(
-                (o) => o.flags.XMLID === "naturalBodyHealing",
-            );
+            const naturalBodyHealing = actor.temporaryEffects.find((o) => o.flags.XMLID === "naturalBodyHealing");
             if (
                 actor.type === "pc" &&
                 !naturalBodyHealing &&
-                parseInt(actor.system.characteristics.body.value) <
-                    parseInt(actor.system.characteristics.body.max)
+                parseInt(actor.system.characteristics.body.value) < parseInt(actor.system.characteristics.body.max)
             ) {
-                const bodyPerMonth = parseInt(
-                    actor.system.characteristics.rec.value,
-                );
+                const bodyPerMonth = parseInt(actor.system.characteristics.rec.value);
                 const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
                 const activeEffect = {
                     name: `Natural Body Healing (${bodyPerMonth}/month)`,
@@ -741,16 +675,12 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 (automation === "all" ||
                     (automation === "npcOnly" && actor.type == "npc") ||
                     (automation === "pcEndOnly" && actor.type === "pc")) &&
-                getCharacteristicInfoArrayForActor(actor).find(
-                    (o) => o.key === "END",
-                ) &&
+                getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "END") &&
                 multiplier > 0
             ) {
                 if (
-                    parseInt(actor.system.characteristics.end.value) <
-                        parseInt(actor.system.characteristics.end.max) ||
-                    parseInt(actor.system.characteristics.stun.value) <
-                        parseInt(actor.system.characteristics.stun.max)
+                    parseInt(actor.system.characteristics.end.value) < parseInt(actor.system.characteristics.end.max) ||
+                    parseInt(actor.system.characteristics.stun.value) < parseInt(actor.system.characteristics.stun.max)
                 ) {
                     // If this is an NPC and their STUN <= 0 then leave them be.
                     // Typically, you should only use the Recovery Time Table for
@@ -764,27 +694,18 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     // From -21 to -30 they get 1 recovery per minute
                     // From -31 they're completely out at the GM's discretion
 
-                    if (
-                        actor.type === "pc" ||
-                        parseInt(actor.system.characteristics.stun.value) > -10
-                    ) {
-                        const rec =
-                            parseInt(actor.system.characteristics.rec.value) *
-                            multiplier;
+                    if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
+                        const rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
                         const endValue = Math.min(
                             parseInt(actor.system.characteristics.end.max),
-                            parseInt(actor.system.characteristics.end.value) +
-                                rec,
+                            parseInt(actor.system.characteristics.end.value) + rec,
                         );
                         const stunValue = Math.min(
                             parseInt(actor.system.characteristics.stun.max),
-                            parseInt(actor.system.characteristics.stun.value) +
-                                rec,
+                            parseInt(actor.system.characteristics.stun.value) + rec,
                         );
 
-                        await actor.removeActiveEffect(
-                            HeroSystem6eActorActiveEffects.stunEffect,
-                        );
+                        await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
 
                         await actor.update(
                             {
@@ -797,19 +718,12 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 }
 
                 // END RESERVE
-                for (const item of actor.items.filter(
-                    (o) => o.system.XMLID === "ENDURANCERESERVE",
-                )) {
-                    const ENDURANCERESERVEREC = item.findModsByXmlid(
-                        "ENDURANCERESERVEREC",
-                    );
+                for (const item of actor.items.filter((o) => o.system.XMLID === "ENDURANCERESERVE")) {
+                    const ENDURANCERESERVEREC = item.findModsByXmlid("ENDURANCERESERVEREC");
                     if (ENDURANCERESERVEREC) {
                         const newValue = Math.min(
                             item.system.max,
-                            item.system.value +
-                                parseInt(
-                                    ENDURANCERESERVEREC.LEVELS * multiplier,
-                                ),
+                            item.system.value + parseInt(ENDURANCERESERVEREC.LEVELS * multiplier),
                         );
                         if (newValue > item.system.value) {
                             await item.update({
@@ -822,9 +736,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
             // Charges Recover each day
             if (today > lastDate) {
-                const itemsWithCharges = actor.items.filter(
-                    (item) => item.system.charges?.max,
-                );
+                const itemsWithCharges = actor.items.filter((item) => item.system.charges?.max);
                 let content = "";
                 for (const item of itemsWithCharges) {
                     let value = parseInt(item.system.charges.value);
@@ -883,7 +795,5 @@ Hooks.on("createItem", async function (...args) {
 Hooks.once("setup", function () {
     console.log(`Hooks.on "setup"`);
     // Apply custom application for Compendiums for parent/child features
-    game.packs
-        .filter((p) => p.metadata.type === "Item")
-        .forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
+    game.packs.filter((p) => p.metadata.type === "Item").forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
 });

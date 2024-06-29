@@ -23,9 +23,7 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
 
         // Ignore drop if item already exists (dragging to ourselves)
         if (game.items.find((i) => i.id === item.id)) {
-            console.log(
-                `Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`,
-            );
+            console.log(`Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`);
             return;
         }
 
@@ -100,24 +98,18 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
                     const li = header.closest(".directory-item");
                     const entry = this.collection.get(li.data("entryId"));
                     if (!entry) return;
-                    const type = game.i18n.localize(
-                        entry.constructor.metadata.label,
-                    );
+                    const type = game.i18n.localize(entry.constructor.metadata.label);
                     return Dialog.confirm({
                         title: `${game.i18n.format("FOLDER.Delete", {
                             type,
                         })}: ${entry.name}`,
-                        content: `<h4 data-entry-id="${
-                            entry.id
-                        }">${game.i18n.localize(
+                        content: `<h4 data-entry-id="${entry.id}">${game.i18n.localize(
                             "AreYouSure",
                         )}</h4><p>${game.i18n.format("FOLDER.DeleteWarning", {
                             type,
                         })}</p>`,
                         yes: (header) => {
-                            const entryID = header
-                                .find("[data-entry-id]")
-                                .data("entryId");
+                            const entryID = header.find("[data-entry-id]").data("entryId");
                             const entry = this.collection.get(entryID);
                             if (!entry) return;
                             for (const child of entry.childItems) {
@@ -126,10 +118,7 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
                             entry.delete();
                         },
                         options: {
-                            top: Math.min(
-                                li[0].offsetTop,
-                                window.innerHeight - 350,
-                            ),
+                            top: Math.min(li[0].offsetTop, window.innerHeight - 350),
                             left: window.innerWidth - 720,
                         },
                     });
