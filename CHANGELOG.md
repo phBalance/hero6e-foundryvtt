@@ -1,17 +1,20 @@
 # Releases
 
-## Version 3.0.80 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.81 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+## Version 3.0.80
+
 - Drag and Drop support for compound powers and multi-powers. [#1068](https://github.com/dmdorman/hero6e-foundryvtt/issues/1068)
 - You can upload Hero Designer Prefabs (*.hdp) as compendiums. [#1067](https://github.com/dmdorman/hero6e-foundryvtt/issues/1067) [#142](https://github.com/dmdorman/hero6e-foundryvtt/issues/142)
 
 ## Version 3.0.79
+
 - Fixed issue where the roll-to-hit window would open "inappropriately" when selecting targets.
 - Fixed Combat Tracker errors when SPD is lowered for combatant. [#1089](https://github.com/dmdorman/hero6e-foundryvtt/issues/1089)
 - Mind Scan improvements.  
   - Can select token(s) without the need to use T to target, limiting the reveal of unwanted information.
   - Can select token(s) across scenes.
 - Video: [Hero System 6e (Unofficial) v2 - Mind Scan - Basic](https://youtu.be/eMoYvJQHVsg)
-
 
 ## Version 3.0.78
 

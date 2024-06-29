@@ -9,16 +9,9 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
-import {
-    getPowerInfo,
-    getModifierInfo,
-    whisperUserTargetsForActor,
-} from "../utility/util.mjs";
+import { getPowerInfo, getModifierInfo, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
-import {
-    convertToDcFromItem,
-    getDiceFormulaFromItemDC,
-} from "../utility/damage.mjs";
+import { convertToDcFromItem, getDiceFormulaFromItemDC } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
@@ -64,10 +57,7 @@ function itemIsManeuver(item) {
 }
 
 function itemIsOptionalManeuver(item) {
-    return (
-        itemIsManeuver(item) &&
-        !!getPowerInfo({ item: item })?.behaviors.includes("optional-maneuver")
-    );
+    return itemIsManeuver(item) && !!getPowerInfo({ item: item })?.behaviors.includes("optional-maneuver");
 }
 
 function filterItem(item, filterString) {
@@ -75,14 +65,8 @@ function filterItem(item, filterString) {
 
     if (
         item.name.toLowerCase().includes(filterString.toLowerCase()) ||
-        (item.system.description &&
-            item.system.description
-                .toLowerCase()
-                .includes(filterString.toLowerCase())) ||
-        (item.system.XMLID &&
-            item.system.XMLID.toLowerCase().includes(
-                filterString.toLowerCase(),
-            ))
+        (item.system.description && item.system.description.toLowerCase().includes(filterString.toLowerCase())) ||
+        (item.system.XMLID && item.system.XMLID.toLowerCase().includes(filterString.toLowerCase()))
     ) {
         return item;
     }
@@ -191,10 +175,7 @@ export class HeroSystem6eItem extends Item {
      */
     async resetToOriginal() {
         // Set Charges to max
-        if (
-            this.system.charges &&
-            this.system.charges.value !== this.system.charges.max
-        ) {
+        if (this.system.charges && this.system.charges.value !== this.system.charges.max) {
             await this.update({
                 [`system.charges.value`]: this.system.charges.max,
             });
@@ -232,9 +213,7 @@ export class HeroSystem6eItem extends Item {
                 return true;
         }
 
-        return getPowerInfo({ item: this })?.behaviors.includes("success")
-            ? true
-            : false;
+        return getPowerInfo({ item: this })?.behaviors.includes("success") ? true : false;
     }
 
     hasSuccessRoll() {
@@ -243,8 +222,7 @@ export class HeroSystem6eItem extends Item {
         });
         return (
             powerInfo?.behaviors.includes("success") ||
-            (this.system.XMLID === "CUSTOMSKILL" &&
-                parseInt(this.system.ROLL) > 0)
+            (this.system.XMLID === "CUSTOMSKILL" && parseInt(this.system.ROLL) > 0)
         );
     }
 
@@ -305,9 +283,7 @@ export class HeroSystem6eItem extends Item {
                     case "THROW":
                     case "TRIP":
                     default:
-                        ui.notifications.warn(
-                            `${this.system.XMLID} roll is not fully supported`,
-                        );
+                        ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`);
                         return Attack.AttackOptions(this, event);
                 }
 
@@ -332,9 +308,7 @@ export class HeroSystem6eItem extends Item {
                     this.skillRollUpdateValue();
                     return createSkillPopOutFromItem(this, this.actor);
                 } else {
-                    ui.notifications.warn(
-                        `${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`,
-                    );
+                    ui.notifications.warn(`${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`);
                 }
             }
         }
@@ -349,10 +323,7 @@ export class HeroSystem6eItem extends Item {
         if (this.parentItem?.parentItem) {
             const _parentItem = this.parentItem.parentItem;
             content += `<p><b>${_parentItem.name}</b>`;
-            if (
-                _parentItem.system.description &&
-                _parentItem.system.description != parent.name
-            ) {
+            if (_parentItem.system.description && _parentItem.system.description != parent.name) {
                 content += ` ${_parentItem.system.description}`;
             }
             content += ".</p>";
@@ -360,19 +331,13 @@ export class HeroSystem6eItem extends Item {
         if (this.parentItem) {
             const _parentItem = this.parentItem;
             content += `<p><b>${_parentItem.name}</b>`;
-            if (
-                _parentItem.system.description &&
-                _parentItem.system.description != parent.name
-            ) {
+            if (_parentItem.system.description && _parentItem.system.description != parent.name) {
                 content += ` ${_parentItem.system.description}`;
             }
             content += ".</p>";
         }
         content += `<b>${this.name}`;
-        if (
-            this.name.toUpperCase().replace(/ /g, "") !=
-            this.system.XMLID.toUpperCase().replace(/_/g, "")
-        ) {
+        if (this.name.toUpperCase().replace(/ /g, "") != this.system.XMLID.toUpperCase().replace(/_/g, "")) {
             content += ` <i>[${this.system.XMLID}]</i> `;
         }
         content += `</b>`;
@@ -422,9 +387,7 @@ export class HeroSystem6eItem extends Item {
                     if (this.actor?.system?.is5e) {
                         range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
                     }
-                    content += ` Maximum Range ${range}${getSystemDisplayUnits(
-                        this.is5e,
-                    )}.`;
+                    content += ` Maximum Range ${range}${getSystemDisplayUnits(this.is5e)}.`;
                 }
                 break;
 
@@ -473,9 +436,7 @@ export class HeroSystem6eItem extends Item {
             let value = parseInt(this.actor.system.characteristics.end.value);
             if (end > value) {
                 if (event?.ctrlKey) {
-                    ui.notifications.info(
-                        `${game.user.name} used CTRL key to force <b>${this.name}</b> on.`,
-                    );
+                    ui.notifications.info(`${game.user.name} used CTRL key to force <b>${this.name}</b> on.`);
                 } else {
                     ui.notifications.error(
                         `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.  Hold CTRL to force.`,
@@ -520,13 +481,8 @@ export class HeroSystem6eItem extends Item {
 
             // Invisibility status effect for SIGHTGROUP?
             if (this.system.XMLID === "INVISIBILITY") {
-                if (
-                    this.system.OPTIONID === "SIGHTGROUP" &&
-                    !this.actor.statuses.has("invisible")
-                ) {
-                    this.actor.addActiveEffect(
-                        HeroSystem6eActorActiveEffects.invisibleEffect,
-                    );
+                if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
+                    this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
                 }
             }
         } else {
@@ -545,9 +501,7 @@ export class HeroSystem6eItem extends Item {
             // Remove Invisibility status effect
             if (this.system.XMLID === "INVISIBILITY") {
                 if (this.actor.statuses.has("invisible")) {
-                    await this.actor.removeActiveEffect(
-                        HeroSystem6eActorActiveEffects.invisibleEffect,
-                    );
+                    await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
                 }
             }
         }
@@ -567,8 +521,7 @@ export class HeroSystem6eItem extends Item {
                     // Is this a defense power?  If so toggle active state
                     const configPowerInfo = item.baseInfo;
                     if (
-                        (configPowerInfo &&
-                            configPowerInfo.type.includes("defense")) ||
+                        (configPowerInfo && configPowerInfo.type.includes("defense")) ||
                         configPowerInfo.behaviors.includes("defense") ||
                         item.type === "equipment"
                     ) {
@@ -581,11 +534,7 @@ export class HeroSystem6eItem extends Item {
                         await item.update({ [attr]: newState });
                         let effects = item.effects
                             .filter(() => true)
-                            .concat(
-                                item.actor.effects.filter(
-                                    (o) => o.origin === item.uuid,
-                                ),
-                            );
+                            .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
                         for (const activeEffect of effects) {
                             await onActiveEffectToggle(activeEffect, newState);
                         }
@@ -634,9 +583,7 @@ export class HeroSystem6eItem extends Item {
             if (FOCUS?.OPTION?.startsWith("I")) return perceptionSuccess;
         }
 
-        const VISIBLE = this.system.MODIFIER?.find(
-            (o) => o.XMLID === "VISIBLE",
-        );
+        const VISIBLE = this.system.MODIFIER?.find((o) => o.XMLID === "VISIBLE");
         if (VISIBLE) {
             if (VISIBLE?.OPTION?.endsWith("OBVIOUS")) {
                 return true;
@@ -648,13 +595,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Parent that's visible?
-        const PARENT = this.actor.items.find(
-            (o) => o.system.ID === (this.system.PARENTID || "null"),
-        );
+        const PARENT = this.actor.items.find((o) => o.system.ID === (this.system.PARENTID || "null"));
         if (PARENT) {
-            const VISIBLE = PARENT.system.MODIFIER?.find(
-                (o) => o.XMLID === "VISIBLE",
-            );
+            const VISIBLE = PARENT.system.MODIFIER?.find((o) => o.XMLID === "VISIBLE");
             if (VISIBLE) {
                 if (VISIBLE?.OPTION.endsWith("OBVIOUS")) {
                     return true;
@@ -673,15 +616,11 @@ export class HeroSystem6eItem extends Item {
         if (!configPowerInfo?.perceivability) {
             // TODO: Should it say that it's not perceivable if we haven't set it.
             return false;
-        } else if (
-            configPowerInfo.perceivability.toLowerCase() === "imperceptible"
-        ) {
+        } else if (configPowerInfo.perceivability.toLowerCase() === "imperceptible") {
             return false;
         } else if (configPowerInfo.perceivability.toLowerCase() === "obvious") {
             return true;
-        } else if (
-            configPowerInfo.perceivability.toLowerCase() === "inobvious"
-        ) {
+        } else if (configPowerInfo.perceivability.toLowerCase() === "inobvious") {
             return perceptionSuccess;
         }
 
@@ -690,33 +629,16 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (game.settings.get(game.system.id, "alphaTesting")) {
-            ui.notifications.warn(
-                `${this.name} has undetermined perceivability`,
-            );
+            ui.notifications.warn(`${this.name} has undetermined perceivability`);
         }
 
         return false;
     }
 
-    static ItemXmlTags = [
-        "SKILLS",
-        "PERKS",
-        "TALENTS",
-        "MARTIALARTS",
-        "POWERS",
-        "DISADVANTAGES",
-        "EQUIPMENT",
-    ];
+    static ItemXmlTags = ["SKILLS", "PERKS", "TALENTS", "MARTIALARTS", "POWERS", "DISADVANTAGES", "EQUIPMENT"];
     static ItemXmlChildTags = ["ADDER", "MODIFIER", "POWER"];
 
-    static ItemXmlChildTagsUpload = [
-        "ADDER",
-        "MODIFIER",
-        "POWER",
-        "SKILL",
-        "PERK",
-        "TALENT",
-    ];
+    static ItemXmlChildTagsUpload = ["ADDER", "MODIFIER", "POWER", "SKILL", "PERK", "TALENT"];
 
     findModsByXmlid(xmlid) {
         for (const key of HeroSystem6eItem.ItemXmlChildTags) {
@@ -739,9 +661,7 @@ export class HeroSystem6eItem extends Item {
                 for (const subMod of this.system[key]) {
                     for (const key2 of ["ADDER", "MODIFIER", "POWER"]) {
                         if (subMod[key2]) {
-                            const value = subMod[key2].find(
-                                (o) => o.XMLID === xmlid,
-                            );
+                            const value = subMod[key2].find((o) => o.XMLID === xmlid);
                             if (value) {
                                 return value;
                             }
@@ -752,11 +672,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Power framework may include this modifier
-        if (
-            this.parentItem &&
-            !this.parentItem.XMLID === "COMPOUNDPOWER" &&
-            this.actor?.items
-        ) {
+        if (this.parentItem && !this.parentItem.XMLID === "COMPOUNDPOWER" && this.actor?.items) {
             if (this.parentItem) {
                 return this.parentItem.findModsByXmlid(xmlid);
             }
@@ -787,9 +703,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        ui.notifications.error(
-            `Unable to find ${id}/${xmlid} from ${this.name}.`,
-        );
+        ui.notifications.error(`Unable to find ${id}/${xmlid} from ${this.name}.`);
         return false;
     }
 
@@ -799,9 +713,7 @@ export class HeroSystem6eItem extends Item {
                 // Intentionally using == here to take advantage of string/int equality
                 const value = this.system[key].find((o) => o.ID == id);
                 if (value) {
-                    this.system[key] = this.system[key].filter(
-                        (o) => o.ID != id,
-                    );
+                    this.system[key] = this.system[key].filter((o) => o.ID != id);
                     await this.update({ system: this.system });
                     return true;
                 }
@@ -811,9 +723,7 @@ export class HeroSystem6eItem extends Item {
                         if (subMod[key2]) {
                             const value = subMod[key2].find((o) => o.ID == id);
                             if (value) {
-                                subMod[key2] = subMod[key2].filter(
-                                    (o) => o.ID != id,
-                                );
+                                subMod[key2] = subMod[key2].filter((o) => o.ID != id);
                                 await this.update({ system: this.system });
                                 return true;
                             }
@@ -823,9 +733,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        ui.notifications.error(
-            `Unable to delete ${id}/${xmlid} from ${this.name}.`,
-        );
+        ui.notifications.error(`Unable to delete ${id}/${xmlid} from ${this.name}.`);
         return false;
     }
 
@@ -842,12 +750,7 @@ export class HeroSystem6eItem extends Item {
                     newValue =
                         newValue > 0
                             ? newValue +
-                              RoundFavorPlayerUp(
-                                  parseInt(
-                                      this.actor?.system.characteristics.ego
-                                          .value,
-                                  ) / 5 || 0,
-                              )
+                              RoundFavorPlayerUp(parseInt(this.actor?.system.characteristics.ego.value) / 5 || 0)
                             : 0;
                 }
 
@@ -881,9 +784,7 @@ export class HeroSystem6eItem extends Item {
 
             changed = true;
         } else {
-            ui.notifications.warn(
-                `${this.actor?.name}/${this.name} doesn't have power (${power}) defined`,
-            );
+            ui.notifications.warn(`${this.actor?.name}/${this.name} doesn't have power (${power}) defined`);
         }
 
         return changed;
@@ -921,14 +822,10 @@ export class HeroSystem6eItem extends Item {
         let changed = false;
 
         const widthDouble = parseInt(
-            (modifier.ADDER || []).find(
-                (adder) => adder.XMLID === "DOUBLEWIDTH",
-            )?.LEVELS || 0,
+            (modifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEWIDTH")?.LEVELS || 0,
         );
         const heightDouble = parseInt(
-            (modifier.ADDER || []).find(
-                (adder) => adder.XMLID === "DOUBLEHEIGHT",
-            )?.LEVELS || 0,
+            (modifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEHEIGHT")?.LEVELS || 0,
         );
         // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
         const width = is5e ? Math.pow(2, widthDouble) : widthDouble || 2;
@@ -949,9 +846,7 @@ export class HeroSystem6eItem extends Item {
                 );
                 switch (modifier.OPTIONID) {
                     case "CONE":
-                        levels = RoundFavorPlayerUp(
-                            1 + activePointsWithoutAoeAdvantage / 5,
-                        );
+                        levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
                         break;
 
                     case "HEX":
@@ -959,19 +854,12 @@ export class HeroSystem6eItem extends Item {
                         break;
 
                     case "LINE":
-                        levels = RoundFavorPlayerUp(
-                            (2 * activePointsWithoutAoeAdvantage) / 5,
-                        );
+                        levels = RoundFavorPlayerUp((2 * activePointsWithoutAoeAdvantage) / 5);
                         break;
 
                     case "ANY":
                     case "RADIUS":
-                        levels = Math.max(
-                            1,
-                            RoundFavorPlayerUp(
-                                activePointsWithoutAoeAdvantage / 10,
-                            ),
-                        );
+                        levels = Math.max(1, RoundFavorPlayerUp(activePointsWithoutAoeAdvantage / 10));
                         break;
 
                     default:
@@ -983,15 +871,10 @@ export class HeroSystem6eItem extends Item {
 
                 // Modify major dimension (radius, length, etc). Line is different from all others.
                 const majorDimensionDoubles = (modifier?.ADDER || []).find(
-                    (adder) =>
-                        adder.XMLID === "DOUBLEAREA" ||
-                        adder.XMLID === "DOUBLELENGTH",
+                    (adder) => adder.XMLID === "DOUBLEAREA" || adder.XMLID === "DOUBLELENGTH",
                 );
                 if (majorDimensionDoubles) {
-                    levels *= Math.pow(
-                        2,
-                        parseInt(majorDimensionDoubles.LEVELS),
-                    );
+                    levels *= Math.pow(2, parseInt(majorDimensionDoubles.LEVELS));
                 }
             } else {
                 // Explosion DC falloff has different defaults based on shape. When
@@ -1003,9 +886,7 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     dcFalloff = 1;
                 }
-                dcFalloff = parseInt(modifier.LEVELS || 0)
-                    ? parseInt(modifier.LEVELS)
-                    : dcFalloff;
+                dcFalloff = parseInt(modifier.LEVELS || 0) ? parseInt(modifier.LEVELS) : dcFalloff;
 
                 // TODO: Can we work with DC given all the adders that are possible at the time of attack?
                 const { dc } = convertToDcFromItem(this, {});
@@ -1018,10 +899,7 @@ export class HeroSystem6eItem extends Item {
 
         // 5e has a slightly different alias for an Explosive Radius in HD.
         // Otherwise, all other shapes seems the same.
-        const type =
-            modifier.OPTION_ALIAS === "Normal (Radius)"
-                ? "Radius"
-                : modifier.OPTION_ALIAS;
+        const type = modifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : modifier.OPTION_ALIAS;
         const newAoe = {
             type: type.toLowerCase(),
             value: levels,
@@ -1132,19 +1010,10 @@ export class HeroSystem6eItem extends Item {
             this.system.charges = {
                 ...this.system.charges,
                 max: parseInt(CHARGES.OPTION_ALIAS),
-                recoverable: (CHARGES.ADDER || []).find(
-                    (o) => o.XMLID == "RECOVERABLE",
-                )
-                    ? true
-                    : false,
-                continuing: (CHARGES.ADDER || []).find(
-                    (o) => o.XMLID == "CONTINUING",
-                )?.OPTIONID,
+                recoverable: (CHARGES.ADDER || []).find((o) => o.XMLID == "RECOVERABLE") ? true : false,
+                continuing: (CHARGES.ADDER || []).find((o) => o.XMLID == "CONTINUING")?.OPTIONID,
             };
-            if (
-                this.system.charges?.value === undefined ||
-                this.system.charges?.value === null
-            ) {
+            if (this.system.charges?.value === undefined || this.system.charges?.value === null) {
                 console.log("Invalid charges. Resetting to max", this);
                 this.system.charges.value ??= this.system.charges.max;
                 changed = true;
@@ -1161,15 +1030,11 @@ export class HeroSystem6eItem extends Item {
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
         if (
             configPowerInfo &&
-            (configPowerInfo.behaviors.includes("activatable") ||
-                configPowerInfo?.type?.includes("characteristic"))
+            (configPowerInfo.behaviors.includes("activatable") || configPowerInfo?.type?.includes("characteristic"))
         ) {
             const newDefenseValue = "defense";
 
-            if (
-                this.system.subType !== newDefenseValue &&
-                configPowerInfo.behaviors.includes("activatable")
-            ) {
+            if (this.system.subType !== newDefenseValue && configPowerInfo.behaviors.includes("activatable")) {
                 this.system.subType = newDefenseValue;
                 this.system.showToggle = true;
                 changed = true;
@@ -1211,8 +1076,7 @@ export class HeroSystem6eItem extends Item {
         // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach. Should probably for anything with range != self
         if (
             configPowerInfo &&
-            (configPowerInfo.behaviors.includes("attack") ||
-                configPowerInfo.behaviors.includes("dice"))
+            (configPowerInfo.behaviors.includes("attack") || configPowerInfo.behaviors.includes("dice"))
         ) {
             const attack = "attack";
             if (this.system.subType !== attack) {
@@ -1256,13 +1120,9 @@ export class HeroSystem6eItem extends Item {
                 let count = 0;
                 for (const attackItem of this.actor.items.filter(
                     (o) =>
-                        (o.type === "attack" ||
-                            o.system.subType === "attack") &&
+                        (o.type === "attack" || o.system.subType === "attack") &&
                         (!o.baseInfo.behaviors.includes("optional-maneuver") ||
-                            game.settings.get(
-                                HEROSYS.module,
-                                "optionalManeuvers",
-                            )),
+                            game.settings.get(HEROSYS.module, "optionalManeuvers")),
                 )) {
                     let addMe = false;
 
@@ -1284,24 +1144,17 @@ export class HeroSystem6eItem extends Item {
                                     }
                                     break;
                                 case "ANYHTH":
-                                    if (
-                                        attackItem.baseInfo.range === "no range"
-                                    ) {
+                                    if (attackItem.baseInfo.range === "no range") {
                                         addMe = true;
                                     }
                                     break;
                                 case "ANYRANGED":
-                                    if (
-                                        attackItem.baseInfo.range === "standard"
-                                    ) {
+                                    if (attackItem.baseInfo.range === "standard") {
                                         addMe = true;
                                     }
                                     break;
                                 default:
-                                    console.warn(
-                                        "Unhandled attack automatic selection",
-                                        this,
-                                    );
+                                    console.warn("Unhandled attack automatic selection", this);
                             }
                             break;
                         case "COMBAT_LEVELS":
@@ -1314,10 +1167,7 @@ export class HeroSystem6eItem extends Item {
                                     if (count === 0) {
                                         // Is this part of a framework/compound power/list?
                                         if (this.parentItem) {
-                                            if (
-                                                this.parentItem.id ===
-                                                attackItem.parentItem?.id
-                                            ) {
+                                            if (this.parentItem.id === attackItem.parentItem?.id) {
                                                 addMe = true;
                                             }
                                         } else {
@@ -1336,16 +1186,12 @@ export class HeroSystem6eItem extends Item {
                                     }
                                     break;
                                 case "HTH":
-                                    if (
-                                        attackItem.baseInfo.range === "no range"
-                                    ) {
+                                    if (attackItem.baseInfo.range === "no range") {
                                         addMe = true;
                                     }
                                     break;
                                 case "RANGED":
-                                    if (
-                                        attackItem.baseInfo.range === "standard"
-                                    ) {
+                                    if (attackItem.baseInfo.range === "standard") {
                                         addMe = true;
                                     }
                                     break;
@@ -1364,10 +1210,7 @@ export class HeroSystem6eItem extends Item {
                                     if (count === 0) {
                                         // Is this part of a framework/compound power/list?
                                         if (this.parentItem) {
-                                            if (
-                                                this.parentItem.id ===
-                                                attackItem.parentItem?.id
-                                            ) {
+                                            if (this.parentItem.id === attackItem.parentItem?.id) {
                                                 addMe = true;
                                             }
                                         } else {
@@ -1377,11 +1220,9 @@ export class HeroSystem6eItem extends Item {
                                         // Assumed penalty type
                                         if (
                                             addMe &&
-                                            [
-                                                "limited range",
-                                                "standard",
-                                                "range based on str",
-                                            ].includes(attackItem.system.range)
+                                            ["limited range", "standard", "range based on str"].includes(
+                                                attackItem.system.range,
+                                            )
                                         ) {
                                             this.system.penalty ??= "range";
                                         }
@@ -1394,11 +1235,9 @@ export class HeroSystem6eItem extends Item {
                                         // Assumed penalty type
                                         if (
                                             addMe &&
-                                            [
-                                                "limited range",
-                                                "standard",
-                                                "range based on str",
-                                            ].includes(attackItem.system.range)
+                                            ["limited range", "standard", "range based on str"].includes(
+                                                attackItem.system.range,
+                                            )
                                         ) {
                                             this.system.penalty ??= "range";
                                         }
@@ -1410,11 +1249,9 @@ export class HeroSystem6eItem extends Item {
                                     // Assumed penalty type
                                     if (
                                         addMe &&
-                                        [
-                                            "limited range",
-                                            "standard",
-                                            "range based on str",
-                                        ].includes(attackItem.system.range)
+                                        ["limited range", "standard", "range based on str"].includes(
+                                            attackItem.system.range,
+                                        )
                                     ) {
                                         this.system.penalty ??= "range";
                                     }
@@ -1444,10 +1281,7 @@ export class HeroSystem6eItem extends Item {
                             }
                             break;
                         default:
-                            console.warn(
-                                "Unhandled attack automatic selection",
-                                this,
-                            );
+                            console.warn("Unhandled attack automatic selection", this);
                     }
 
                     if (addMe) {
@@ -1481,16 +1315,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ACTIVE EFFECTS
-        if (
-            changed &&
-            this.id &&
-            configPowerInfo &&
-            configPowerInfo.type?.includes("movement")
-        ) {
+        if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name =
-                (this.name ? `${this.name}: ` : "") +
-                `${this.system.XMLID} +${this.system.value}`;
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
@@ -1509,26 +1336,16 @@ export class HeroSystem6eItem extends Item {
                 });
                 await this.actor.update({
                     [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                        this.actor.system.characteristics[
-                            this.system.XMLID.toLowerCase()
-                        ].max,
+                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
                 });
             } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [
-                    activeEffect,
-                ]);
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         }
 
-        if (
-            changed &&
-            this.id &&
-            configPowerInfo?.type?.includes("characteristic")
-        ) {
+        if (changed && this.id && configPowerInfo?.type?.includes("characteristic")) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name =
-                (this.name ? `${this.name}: ` : "") +
-                `${this.system.XMLID} +${this.system.value}`;
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
@@ -1541,28 +1358,18 @@ export class HeroSystem6eItem extends Item {
             activeEffect.disabled = !this.system.active;
 
             if (activeEffect.update) {
-                const oldMax =
-                    this.actor.system.characteristics[
-                        this.system.XMLID.toLowerCase()
-                    ].max;
+                const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
                 await activeEffect.update({
                     name: activeEffect.name,
                     changes: activeEffect.changes,
                 });
-                const deltaMax =
-                    this.actor.system.characteristics[
-                        this.system.XMLID.toLowerCase()
-                    ].max - oldMax;
+                const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
                 await this.actor.update({
                     [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                        this.actor.system.characteristics[
-                            this.system.XMLID.toLowerCase()
-                        ].value + deltaMax,
+                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax,
                 });
             } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [
-                    activeEffect,
-                ]);
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         }
 
@@ -1572,9 +1379,7 @@ export class HeroSystem6eItem extends Item {
             const edAdd = Math.floor(this.system.value);
 
             let activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name =
-                (this.name ? `${this.name}: ` : "") +
-                `${this.system.XMLID} ${this.system.value}`;
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
@@ -1602,21 +1407,16 @@ export class HeroSystem6eItem extends Item {
                     changes: activeEffect.changes,
                 });
                 await this.actor.update({
-                    [`system.characteristics.str.value`]:
-                        this.actor.system.characteristics.str.max,
+                    [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
                 });
                 await this.actor.update({
-                    [`system.characteristics.pd.value`]:
-                        this.actor.system.characteristics.pd.max,
+                    [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
                 });
                 await this.actor.update({
-                    [`system.characteristics.ed.value`]:
-                        this.actor.system.characteristics.ed.max,
+                    [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
                 });
             } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [
-                    activeEffect,
-                ]);
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         }
 
@@ -1624,19 +1424,11 @@ export class HeroSystem6eItem extends Item {
         // Growth5e (+10 STR, +2 BODY, +2 STUN, -2" KB, 400 kg, +0 DCV, +0 PER Rolls to perceive character, 3 m tall, 2 m wide)
         // Growth6e (+15 STR, +5 CON, +5 PRE, +3 PD, +3 ED, +3 BODY, +6 STUN, +1m Reach, +12m Running, -6m KB, 101-800 kg, +2 to OCV to hit, +2 to PER Rolls to perceive character, 2-4m tall, 1-2m wide)
         // Growth6e is a static template.  LEVELS are ignored, instead use OPTIONID.
-        if (
-            changed &&
-            this.id &&
-            this.system.XMLID === "GROWTH" &&
-            this.system.active
-        ) {
+        if (changed && this.id && this.system.XMLID === "GROWTH" && this.system.active) {
             const details = configPowerInfo?.details(this) || {};
             let activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name =
-                (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
-            activeEffect.name += `${this.system.XMLID} ${
-                this.is5e ? this.system.value : this.system.OPTIONID
-            }`;
+            activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
+            activeEffect.name += `${this.system.XMLID} ${this.is5e ? this.system.value : this.system.OPTIONID}`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
@@ -1698,38 +1490,26 @@ export class HeroSystem6eItem extends Item {
                     changes: activeEffect.changes,
                 });
                 await this.actor.update({
-                    [`system.characteristics.str.value`]:
-                        this.actor.system.characteristics.str.max,
+                    [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
                 });
                 await this.actor.update({
-                    [`system.characteristics.pd.value`]:
-                        this.actor.system.characteristics.pd.max,
+                    [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
                 });
                 await this.actor.update({
-                    [`system.characteristics.ed.value`]:
-                        this.actor.system.characteristics.ed.max,
+                    [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
                 });
             } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [
-                    activeEffect,
-                ]);
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         }
 
         // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
         // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
-        if (
-            changed &&
-            this.id &&
-            this.system.XMLID === "SHRINKING" &&
-            this.system.active
-        ) {
+        if (changed && this.id && this.system.XMLID === "SHRINKING" && this.system.active) {
             const dcvAdd = Math.floor(this.system.value) * 2;
 
             let activeEffect = Array.from(this.effects)?.[0] || {};
-            activeEffect.name =
-                (this.name ? `${this.name}: ` : "") +
-                `${this.system.XMLID} ${this.system.value}`;
+            activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
             activeEffect.icon = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
@@ -1746,13 +1526,10 @@ export class HeroSystem6eItem extends Item {
                     changes: activeEffect.changes,
                 });
                 await this.actor.update({
-                    [`system.characteristics.dcv.value`]:
-                        this.actor.system.characteristics.dcv.max,
+                    [`system.characteristics.dcv.value`]: this.actor.system.characteristics.dcv.max,
                 });
             } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [
-                    activeEffect,
-                ]);
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         }
 
@@ -1795,9 +1572,7 @@ export class HeroSystem6eItem extends Item {
         itemData.system ??= {};
         itemData.system.is5e = actor.system?.is5e;
 
-        const powerList = actor.system.is5e
-            ? CONFIG.HERO.powers5e
-            : CONFIG.HERO.powers6e;
+        const powerList = actor.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
         for (const itemTag of [
             ...HeroSystem6eItem.ItemXmlTags,
             ...powerList
@@ -1805,8 +1580,7 @@ export class HeroSystem6eItem extends Item {
                     (power) =>
                         power.type.includes("characteristic") ||
                         power.type.includes("framework") ||
-                        (power.type.includes("skill") &&
-                            power.type.includes("enhancer")),
+                        (power.type.includes("skill") && power.type.includes("enhancer")),
                 )
                 .map((power) => power.key),
         ]) {
@@ -1820,9 +1594,7 @@ export class HeroSystem6eItem extends Item {
                     : [heroJson[itemSubTag]]) {
                     itemData = {
                         name: system?.ALIAS || system?.XMLID || itemTag, // simplistic name for now
-                        type: powerList
-                            .filter((o) => o.type?.includes("characteristic"))
-                            .map((o) => o.key)
+                        type: powerList.filter((o) => o.type?.includes("characteristic")).map((o) => o.key)
                             ? "power"
                             : itemTag.toLowerCase().replace(/s$/, ""),
                         system: { ...system, is5e: itemData.system.is5e },
@@ -1858,18 +1630,14 @@ export class HeroSystem6eItem extends Item {
         // if (this.pack) {
         //     return game.packs.get(this.pack).getDocument(this.system.PARENTID);
         // }
-        return (this.actor || game).items.find(
-            (o) => o.system.ID == this.system.PARENTID,
-        );
+        return (this.actor || game).items.find((o) => o.system.ID == this.system.PARENTID);
     }
 
     get childItems() {
         // if (this.pack) {
         //     return game.packs.get(this.pack).getDocument(this.system.PARENTID);
         // }
-        const children = (this.actor || game).items.filter(
-            (o) => o.system.PARENTID == this.system.ID,
-        );
+        const children = (this.actor || game).items.filter((o) => o.system.PARENTID == this.system.ID);
         return children.length === 0 ? null : children;
     }
 
@@ -1933,8 +1701,7 @@ export class HeroSystem6eItem extends Item {
         // Check if configPowerInfo has a more specific costPerLevel
         if (configPowerInfo?.costPerLevel !== undefined) {
             if (typeof configPowerInfo.costPerLevel === "function") {
-                costPerLevel =
-                    parseFloat(configPowerInfo.costPerLevel(this)) || 0;
+                costPerLevel = parseFloat(configPowerInfo.costPerLevel(this)) || 0;
             } else {
                 costPerLevel = parseFloat(configPowerInfo.costPerLevel) || 0;
             }
@@ -1951,9 +1718,7 @@ export class HeroSystem6eItem extends Item {
         if (costPerLevel == 3 / 2 && subCost % 1) {
             let _threePerTwo = Math.ceil(costPerLevel * levels) + 1;
             subCost = _threePerTwo;
-            system.title =
-                (system.title || "") +
-                "3 CP per 2 points; \n+1 level may cost nothing. ";
+            system.title = (system.title || "") + "3 CP per 2 points; \n+1 level may cost nothing. ";
         }
 
         if (system.XMLID === "FORCEWALL") {
@@ -1973,8 +1738,7 @@ export class HeroSystem6eItem extends Item {
 
         if (system.XMLID === "FOLLOWER") {
             cost = Math.ceil((parseInt(system.BASEPOINTS) || 5) / 5);
-            let multiplier =
-                Math.ceil(Math.sqrt(parseInt(system.NUMBER) || 0)) + 1;
+            let multiplier = Math.ceil(Math.sqrt(parseInt(system.NUMBER) || 0)) + 1;
             cost *= multiplier;
         }
 
@@ -1982,19 +1746,15 @@ export class HeroSystem6eItem extends Item {
         let adderCost = 0;
         for (const adder of system.ADDER || []) {
             // Some adders kindly provide a base cost. Some, however, are 0 and so fallback to the LVLCOST and hope it's provided
-            const adderBaseCost =
-                parseInt(adder.BASECOST || adder.LVLCOST) || 0;
+            const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
             //adder.BASECOST_total = adderBaseCost;
 
             if (adder.SELECTED != false) {
                 //TRANSPORT_FAMILIARITY
-                const adderCostPerLevel =
-                    parseFloat(adder.LVLCOST || 0) /
-                        parseFloat(adder.LVLVAL || 1) || 1;
+                const adderCostPerLevel = parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) || 1;
                 const adderLevels = parseInt(adder.LEVELS);
                 //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
-                adder.BASECOST_total =
-                    adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
+                adder.BASECOST_total = adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
 
                 // WEAPONSMITH (selections over 1 cost only 1)
                 if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
@@ -2016,9 +1776,7 @@ export class HeroSystem6eItem extends Item {
                 if (adder2.SELECTED != false) {
                     let adderLevels = Math.max(1, parseInt(adder2.LEVELS));
                     subAdderCost += Math.ceil(adder2BaseCost * adderLevels);
-                    adder2.BASECOST_total = Math.ceil(
-                        adder2BaseCost * adderLevels,
-                    );
+                    adder2.BASECOST_total = Math.ceil(adder2BaseCost * adderLevels);
                 }
             }
 
@@ -2028,15 +1786,8 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Riding discount
-            if (
-                this.system.XMLID === "TRANSPORT_FAMILIARITY" &&
-                this.actor &&
-                subAdderCost > 0
-            ) {
-                if (
-                    adder.XMLID === "RIDINGANIMALS" &&
-                    this.actor.items.find((o) => o.system.XMLID === "RIDING")
-                ) {
+            if (this.system.XMLID === "TRANSPORT_FAMILIARITY" && this.actor && subAdderCost > 0) {
+                if (adder.XMLID === "RIDINGANIMALS" && this.actor.items.find((o) => o.system.XMLID === "RIDING")) {
                     subAdderCost -= 1;
                 }
             }
@@ -2076,9 +1827,7 @@ export class HeroSystem6eItem extends Item {
         //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
         if (configPowerInfo.privateAsAdder && system.MODIFIER) {
             let advantages = 0;
-            for (let modifier of (system.MODIFIER || []).filter(
-                (o) => !o.PRIVATE,
-            )) {
+            for (let modifier of (system.MODIFIER || []).filter((o) => !o.PRIVATE)) {
                 const modPowerInfo = getPowerInfo({
                     item: modifier,
                     actor: this.actor,
@@ -2089,9 +1838,7 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 // Is there a cost function
-                let modCost = modPowerInfo?.cost
-                    ? modPowerInfo.cost(modifier, this)
-                    : 0;
+                let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
 
                 // If not use a the default cost formula
                 if (!modCost) {
@@ -2101,8 +1848,7 @@ export class HeroSystem6eItem extends Item {
                         typeof modPowerInfo?.costPerLevel === "function"
                             ? modPowerInfo.costPerLevel(modifier)
                             : modPowerInfo?.costPerLevel || 0;
-                    modCost +=
-                        parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+                    modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
                 }
 
                 modifier.BASECOST_total = modCost;
@@ -2160,9 +1906,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Is there a cost function
-            let modCost = modPowerInfo?.cost
-                ? modPowerInfo.cost(modifier, this)
-                : 0;
+            let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
 
             const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
 
@@ -2173,8 +1917,7 @@ export class HeroSystem6eItem extends Item {
                     typeof modPowerInfo?.costPerLevel === "function"
                         ? modPowerInfo.costPerLevel(modifier)
                         : modPowerInfo?.costPerLevel || 0;
-                modCost +=
-                    parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+                modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
             }
 
             _myAdvantage += modCost;
@@ -2195,9 +1938,7 @@ export class HeroSystem6eItem extends Item {
                     {
                         // Reduced endurance is double the cost if it's applying against a power with autofire
                         // We track this because we back out the endModifierCost to calculate _activePointsWithoutEndMods.
-                        const autofire = (system.MODIFIER || []).find(
-                            (mod) => mod.XMLID === "AUTOFIRE",
-                        );
+                        const autofire = (system.MODIFIER || []).find((mod) => mod.XMLID === "AUTOFIRE");
                         if (autofire) {
                             endModifierCost = 2 * modifierBaseCost;
                         } else {
@@ -2224,9 +1965,7 @@ export class HeroSystem6eItem extends Item {
                     console.warn(`Missing powerInfo for ${adder.XMLID}`, adder);
                 }
 
-                let adderCost = adderPowerInfo?.cost
-                    ? adderPowerInfo.cost(adder, this)
-                    : 0;
+                let adderCost = adderPowerInfo?.cost ? adderPowerInfo.cost(adder, this) : 0;
 
                 if (!adderCost) {
                     adderCost += parseFloat(adder.BASECOST);
@@ -2234,11 +1973,9 @@ export class HeroSystem6eItem extends Item {
                         typeof adderPowerInfo?.costPerLevel === "function"
                             ? adderPowerInfo.costPerLevel(adder)
                             : adderPowerInfo?.costPerLevel ||
-                              parseFloat(adder.LVLCOST || 0) /
-                                  parseFloat(adder.LVLVAL || 1) ||
+                              parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) ||
                               0;
-                    adderCost +=
-                        parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
+                    adderCost += parseFloat(adder.LEVELS || 0) * adderCostPerLevel;
                 }
 
                 adder.BASECOST_total = adderCost;
@@ -2269,15 +2006,11 @@ export class HeroSystem6eItem extends Item {
         // if (system.XMLID === "NAKEDMODIFIER") {
         //     _activePoints = parseInt(system.LEVELS) * advantages;
         // }
-        system.activePointsDc = RoundFavorPlayerDown(
-            system.basePointsPlusAdders * (1 + advantagesDC),
-        );
+        system.activePointsDc = RoundFavorPlayerDown(system.basePointsPlusAdders * (1 + advantagesDC));
 
         // HALFEND is based on active points without the HALFEND modifier
         if (this.findModsByXmlid("REDUCEDEND")) {
-            system._activePointsWithoutEndMods =
-                system.basePointsPlusAdders *
-                (1 + advantages - endModifierCost);
+            system._activePointsWithoutEndMods = system.basePointsPlusAdders * (1 + advantages - endModifierCost);
         }
 
         let old = system.activePoints;
@@ -2306,11 +2039,7 @@ export class HeroSystem6eItem extends Item {
 
         // Add limitations from parent
         if (this.parentItem) {
-            modifiers.push(
-                ...(this.parentItem.system.MODIFIER || []).filter(
-                    (o) => parseFloat(o.BASECOST) < 0,
-                ),
-            );
+            modifiers.push(...(this.parentItem.system.MODIFIER || []).filter((o) => parseFloat(o.BASECOST) < 0));
         }
 
         let limitations = 0;
@@ -2323,10 +2052,7 @@ export class HeroSystem6eItem extends Item {
                 is5e: this.is5e,
             });
             if (!modPowerInfo) {
-                console.warn(
-                    `Missing powerInfo for ${modifier.XMLID}`,
-                    modifier,
-                );
+                console.warn(`Missing powerInfo for ${modifier.XMLID}`, modifier);
             }
 
             const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
@@ -2348,20 +2074,13 @@ export class HeroSystem6eItem extends Item {
                 // Requires a roll gets interesting with Jammed / Can choose which of two rolls to make from use to use
                 _myLimitation += -adderBaseCost;
 
-                const multiplier = Math.max(
-                    1,
-                    parseFloat(adder.MULTIPLIER || 0),
-                );
+                const multiplier = Math.max(1, parseFloat(adder.MULTIPLIER || 0));
                 _myLimitation *= multiplier;
             }
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
             if (_myLimitation < 0.25) {
-                console.warn(
-                    `${modifier.XMLID} Limitation clamped to -1/4`,
-                    modifier,
-                    this,
-                );
+                console.warn(`${modifier.XMLID} Limitation clamped to -1/4`, modifier, this);
                 _myLimitation = 0.25;
                 system.title =
                     (system.title || "") +
@@ -2409,16 +2128,10 @@ export class HeroSystem6eItem extends Item {
 
         // ADD_MODIFIERS_TO_BASE
         if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
-            const _base =
-                this.actor.system.characteristics[
-                    this.system.XMLID.toLowerCase()
-                ].core;
-            const _cost =
-                getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor })
-                    .costPerLevel || 1;
+            const _base = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].core;
+            const _cost = getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor }).costPerLevel || 1;
             const _baseCost = _base * _cost;
-            const _discount =
-                _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations));
+            const _discount = _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations));
             _realCost -= _discount;
         }
 
@@ -2456,12 +2169,10 @@ export class HeroSystem6eItem extends Item {
         switch (powerXmlId) {
             case "DENSITYINCREASE":
                 // Density Increase (400 kg mass, +10 STR, +2 PD/ED, -2" KB); IIF (-1/4)
-                system.description = `${system.ALIAS} (${
-                    Math.pow(system.value, 2) * 100
-                } kg mass, +${system.value * 5} STR, +${system.value} PD/ED, -${
-                    this.actor?.system.is5e
-                        ? system.value + '"'
-                        : system.value * 2 + "m"
+                system.description = `${system.ALIAS} (${Math.pow(system.value, 2) * 100} kg mass, +${
+                    system.value * 5
+                } STR, +${system.value} PD/ED, -${
+                    this.actor?.system.is5e ? system.value + '"' : system.value * 2 + "m"
                 } KB)`;
                 break;
 
@@ -2485,9 +2196,7 @@ export class HeroSystem6eItem extends Item {
                 }
                 system.description += `, +${details.body} BODY`;
                 system.description += `, +${details.stun} STUN`;
-                system.description += `, +${details.reach}${
-                    this.is5e ? '"' : "m"
-                } Reach`;
+                system.description += `, +${details.reach}${this.is5e ? '"' : "m"} Reach`;
                 if (!this.is5e) {
                     system.description += `, +${details.running}m Running`;
                 }
@@ -2506,24 +2215,17 @@ export class HeroSystem6eItem extends Item {
                 // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
                 // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV) -- Also +3" KB which is not in HD
                 system.description = `${system.ALIAS} (`;
-                system.description += `${(
-                    2 / Math.pow(2, parseInt(system.value))
-                )
+                system.description += `${(2 / Math.pow(2, parseInt(system.value)))
                     .toPrecision(3)
                     .replace(/\.?0+$/, "")} m tall`;
-                system.description += `, ${(
-                    100 / Math.pow(8, parseInt(system.value))
-                )
+                system.description += `, ${(100 / Math.pow(8, parseInt(system.value)))
                     .toPrecision(4)
                     .replace(/\.?0+$/, "")}
                 kg mass`;
-                system.description += `, -${
-                    system.value * 2
-                } PER Rolls to perceive character`;
+                system.description += `, -${system.value * 2} PER Rolls to perceive character`;
                 system.description += `, +${system.value * 2} DCV`;
                 system.description += `, takes +${
-                    system.value * (this.is5e ? 3 : 6) +
-                    getSystemDisplayUnits(this.is5e)
+                    system.value * (this.is5e ? 3 : 6) + getSystemDisplayUnits(this.is5e)
                 } KB`;
 
                 break;
@@ -2543,10 +2245,7 @@ export class HeroSystem6eItem extends Item {
 
             case "MINDSCAN":
                 {
-                    const diceFormula = getDiceFormulaFromItemDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    );
+                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
                     system.description = `${diceFormula} ${system.ALIAS}`;
                 }
                 break;
@@ -2558,14 +2257,10 @@ export class HeroSystem6eItem extends Item {
                     system.description = system.ALIAS + " (";
 
                     let ary = [];
-                    if (parseInt(system.PDLEVELS))
-                        ary.push(system.PDLEVELS + " rPD");
-                    if (parseInt(system.EDLEVELS))
-                        ary.push(system.EDLEVELS + " rED");
-                    if (parseInt(system.MDLEVELS))
-                        ary.push(system.MDLEVELS + " rMD");
-                    if (parseInt(system.POWDLEVELS))
-                        ary.push(system.POWDLEVELS + " rPOW");
+                    if (parseInt(system.PDLEVELS)) ary.push(system.PDLEVELS + " rPD");
+                    if (parseInt(system.EDLEVELS)) ary.push(system.EDLEVELS + " rED");
+                    if (parseInt(system.MDLEVELS)) ary.push(system.MDLEVELS + " rMD");
+                    if (parseInt(system.POWDLEVELS)) ary.push(system.POWDLEVELS + " rPOW");
 
                     system.description += ary.join("/") + ")";
                 }
@@ -2576,43 +2271,29 @@ export class HeroSystem6eItem extends Item {
                     system.description = system.ALIAS + " ";
 
                     let aryFW = [];
-                    if (parseInt(system.PDLEVELS))
-                        aryFW.push(system.PDLEVELS + " rPD");
-                    if (parseInt(system.EDLEVELS))
-                        aryFW.push(system.EDLEVELS + " rED");
-                    if (parseInt(system.MDLEVELS))
-                        aryFW.push(system.MDLEVELS + " rMD");
-                    if (parseInt(system.POWDLEVELS))
-                        aryFW.push(system.POWDLEVELS + " rPOW");
-                    if (parseInt(system.BODYLEVELS))
-                        aryFW.push(system.BODYLEVELS + " BODY");
+                    if (parseInt(system.PDLEVELS)) aryFW.push(system.PDLEVELS + " rPD");
+                    if (parseInt(system.EDLEVELS)) aryFW.push(system.EDLEVELS + " rED");
+                    if (parseInt(system.MDLEVELS)) aryFW.push(system.MDLEVELS + " rMD");
+                    if (parseInt(system.POWDLEVELS)) aryFW.push(system.POWDLEVELS + " rPOW");
+                    if (parseInt(system.BODYLEVELS)) aryFW.push(system.BODYLEVELS + " BODY");
 
                     system.description += aryFW.join("/");
-                    system.description += `(up to ${
-                        parseInt(system.LENGTHLEVELS) + 1
-                    }m long, and ${
+                    system.description += `(up to ${parseInt(system.LENGTHLEVELS) + 1}m long, and ${
                         parseInt(system.HEIGHTLEVELS) + 1
-                    }m tall, and ${
-                        parseFloat(system.WIDTHLEVELS) + 0.5
-                    }m thick)`;
+                    }m tall, and ${parseFloat(system.WIDTHLEVELS) + 0.5}m thick)`;
                 }
                 break;
 
             case "ABSORPTION":
                 {
-                    const reduceAndEnhanceTargets =
-                        this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItemDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    );
+                    const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
+                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
 
-                    system.description = `${system.ALIAS} ${
-                        is5e ? `${diceFormula}` : `${system.value} BODY`
-                    } (${system.OPTION_ALIAS}) to ${
+                    system.description = `${system.ALIAS} ${is5e ? `${diceFormula}` : `${system.value} BODY`} (${
+                        system.OPTION_ALIAS
+                    }) to ${
                         reduceAndEnhanceTargets.valid
-                            ? reduceAndEnhanceTargets.enhances ||
-                              reduceAndEnhanceTargets.reduces
+                            ? reduceAndEnhanceTargets.enhances || reduceAndEnhanceTargets.reduces
                             : "unknown"
                     }`;
                 }
@@ -2625,17 +2306,12 @@ export class HeroSystem6eItem extends Item {
             case "SUPPRESS":
             case "HEALING":
                 {
-                    const reduceAndEnhanceTargets =
-                        this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItemDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    );
+                    const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
+                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
 
                     system.description = `${system.ALIAS} ${
                         reduceAndEnhanceTargets.valid
-                            ? reduceAndEnhanceTargets.enhances ||
-                              reduceAndEnhanceTargets.reduces
+                            ? reduceAndEnhanceTargets.enhances || reduceAndEnhanceTargets.reduces
                             : "unknown"
                     } ${diceFormula}`;
                 }
@@ -2643,47 +2319,31 @@ export class HeroSystem6eItem extends Item {
 
             case "TRANSFER":
                 {
-                    const reduceAndEnhanceTargets =
-                        this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItemDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    );
+                    const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
+                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
 
                     system.description = `${system.ALIAS} ${diceFormula} from ${
-                        reduceAndEnhanceTargets.valid
-                            ? reduceAndEnhanceTargets.reduces
-                            : "unknown"
-                    } to ${
-                        reduceAndEnhanceTargets.valid
-                            ? reduceAndEnhanceTargets.enhances
-                            : "unknown"
-                    }`;
+                        reduceAndEnhanceTargets.valid ? reduceAndEnhanceTargets.reduces : "unknown"
+                    } to ${reduceAndEnhanceTargets.valid ? reduceAndEnhanceTargets.enhances : "unknown"}`;
                 }
                 break;
 
             case "STRETCHING":
-                system.description = `${system.ALIAS} ${
-                    system.value
-                }${getSystemDisplayUnits(this.is5e)}`;
+                system.description = `${system.ALIAS} ${system.value}${getSystemDisplayUnits(this.is5e)}`;
                 break;
 
             case "LEAPING":
             case "RUNNING":
             case "SWIMMING":
                 // Running +25m (12m/37m total)
-                system.description = `${system.ALIAS} +${
-                    system.value
-                }${getSystemDisplayUnits(this.is5e)}`;
+                system.description = `${system.ALIAS} +${system.value}${getSystemDisplayUnits(this.is5e)}`;
                 break;
 
             case "GLIDING":
             case "FLIGHT":
             case "TELEPORTATION":
             case "SWINGING":
-                system.description = `${system.ALIAS} ${
-                    system.value
-                }${getSystemDisplayUnits(this.is5e)}`;
+                system.description = `${system.ALIAS} ${system.value}${getSystemDisplayUnits(this.is5e)}`;
                 break;
             case "TUNNELING":
                 {
@@ -2692,15 +2352,11 @@ export class HeroSystem6eItem extends Item {
                     if (this.actor?.system.is5e) {
                         pd = parseInt(system.value);
                     } else {
-                        const defbonus = (system.ADDER || []).find(
-                            (o) => o.XMLID == "DEFBONUS",
-                        );
+                        const defbonus = (system.ADDER || []).find((o) => o.XMLID == "DEFBONUS");
                         pd = 1 + parseInt(defbonus?.LEVELS || 0);
                     }
 
-                    system.description = `${system.ALIAS} ${
-                        system.value
-                    }${getSystemDisplayUnits(
+                    system.description = `${system.ALIAS} ${system.value}${getSystemDisplayUnits(
                         this.is5e,
                     )} through ${pd} PD materials`;
                 }
@@ -2733,18 +2389,14 @@ export class HeroSystem6eItem extends Item {
                 {
                     // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
                     const { roll } = this._getSkillRollComponents(system);
-                    system.description = `${
-                        system.ALIAS ? system.ALIAS + ": " : ""
-                    }${system.INPUT} ${roll}`;
+                    system.description = `${system.ALIAS ? system.ALIAS + ": " : ""}${system.INPUT} ${roll}`;
                 }
                 break;
 
             case "CONTACT":
                 {
                     const levels = parseInt(system.LEVELS || 1);
-                    system.description = `${system.ALIAS} ${
-                        levels === 1 ? "8-" : `${9 + levels}-`
-                    }`;
+                    system.description = `${system.ALIAS} ${levels === 1 ? "8-" : `${9 + levels}-`}`;
                 }
                 break;
 
@@ -2775,9 +2427,7 @@ export class HeroSystem6eItem extends Item {
                     system.description = `${system.ALIAS}: `;
                 } else {
                     system.description = `${system.ALIAS}: ${
-                        system.LEVELS
-                            ? `+${system.LEVELS}/+${system.LEVELS}d6 `
-                            : ""
+                        system.LEVELS ? `+${system.LEVELS}/+${system.LEVELS}d6 ` : ""
                     }`;
                 }
 
@@ -2790,12 +2440,7 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "PENALTY_SKILL_LEVELS":
-                system.description =
-                    (system.NAME || system.ALIAS) +
-                    ": +" +
-                    system.value +
-                    " " +
-                    system.OPTION_ALIAS;
+                system.description = (system.NAME || system.ALIAS) + ": +" + system.value + " " + system.OPTION_ALIAS;
 
                 // Penalty details
                 switch (system.penalty) {
@@ -2815,10 +2460,7 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
             case "HANDTOHANDATTACK":
                 {
-                    const diceFormula = getDiceFormulaFromItemDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    );
+                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
                     system.description = `${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -2834,24 +2476,16 @@ export class HeroSystem6eItem extends Item {
                 {
                     // Entangle 2d6, 7 PD/2 ED
                     const pd_entangle =
-                        parseInt(system.value || 0) +
-                        parseInt(
-                            this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0,
-                        );
+                        parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
                     const ed_entangle =
-                        parseInt(system.value || 0) +
-                        parseInt(
-                            this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0,
-                        );
+                        parseInt(system.value || 0) + parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
                     system.description = `${system.ALIAS} ${system.value}d6, ${pd_entangle} PD/${ed_entangle} ED`;
                 }
                 break;
 
             case "ELEMENTAL_CONTROL":
                 // Elemental Control, 12-point powers
-                system.description = `${system.NAME || system.ALIAS}, ${
-                    parseInt(system.BASECOST) * 2
-                }-point powers`;
+                system.description = `${system.NAME || system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`;
                 break;
 
             case "MANEUVER":
@@ -2860,8 +2494,7 @@ export class HeroSystem6eItem extends Item {
 
                     // Offensive Strike:  1/2 Phase, -2 OCV, +1 DCV, 8d6 Strike
                     // Killing Strike:  1/2 Phase, -2 OCV, +0 DCV, HKA 1d6 +1
-                    if (system.PHASE)
-                        system.description += ` ${system.PHASE} Phase`;
+                    if (system.PHASE) system.description += ` ${system.PHASE} Phase`;
                     const ocv = parseInt(system.ocv || system.OCV);
                     const dcv = parseInt(system.dcv || system.DCV);
                     if (isNaN(ocv)) {
@@ -2874,29 +2507,17 @@ export class HeroSystem6eItem extends Item {
                         let dc = convertToDcFromItem(this).dc;
                         if (system.EFFECT.search(/\[STRDC\]/) > -1) {
                             const effectiveStrength = 5 * dc;
-                            system.description += `, ${system.EFFECT.replace(
-                                "[STRDC]",
-                                `${effectiveStrength} STR`,
-                            )}`;
+                            system.description += `, ${system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`)}`;
                         } else if (dc) {
-                            const damageDiceFormula = getDiceFormulaFromItemDC(
-                                this,
-                                dc,
-                            );
+                            const damageDiceFormula = getDiceFormulaFromItemDC(this, dc);
                             if (damageDiceFormula) {
                                 system.description += `,`;
 
-                                if (
-                                    system.CATEGORY === "Hand To Hand" &&
-                                    system.EFFECT.indexOf("KILLING") > -1
-                                ) {
+                                if (system.CATEGORY === "Hand To Hand" && system.EFFECT.indexOf("KILLING") > -1) {
                                     system.description += " HKA";
                                 }
 
-                                const dice = system.EFFECT.replace(
-                                    "[NORMALDC]",
-                                    damageDiceFormula,
-                                )
+                                const dice = system.EFFECT.replace("[NORMALDC]", damageDiceFormula)
                                     .replace("[KILLINGDC]", damageDiceFormula)
                                     .replace("[FLASHDC]", damageDiceFormula);
 
@@ -2925,23 +2546,17 @@ export class HeroSystem6eItem extends Item {
             case "WEAPON_MASTER":
                 // Weapon Master:  +1d6 (all Ranged Killing Damage weapons)
                 system.ALIAS = "Weapon Master";
-                system.description = `${system.ALIAS}: +${
-                    parseInt(system.LEVELS) * 3
-                }DC (${system.OPTION_ALIAS})`;
+                system.description = `${system.ALIAS}: +${parseInt(system.LEVELS) * 3}DC (${system.OPTION_ALIAS})`;
                 break;
 
             case "DEADLYBLOW":
                 // Deadly Blow:  +1d6 ([very limited circumstances])
                 system.ALIAS = "Deadly Blow";
-                system.description = `${system.ALIAS}: +${
-                    parseInt(system.LEVELS) * 3
-                }DC (${system.OPTION_ALIAS})`;
+                system.description = `${system.ALIAS}: +${parseInt(system.LEVELS) * 3}DC (${system.OPTION_ALIAS})`;
                 break;
 
             case "RESISTANCE":
-                system.description = `Resistance (+${parseInt(
-                    system.LEVELS,
-                )} to roll)`;
+                system.description = `Resistance (+${parseInt(system.LEVELS)} to roll)`;
                 system.ALIAS = system.description;
                 if (this.name.match(/Resistance \(\+\d+ to roll\)/)) {
                     this.name = system.NAME || system.ALIAS;
@@ -2949,14 +2564,9 @@ export class HeroSystem6eItem extends Item {
                 break;
 
             case "COMBAT_LUCK":
-                system.description = `Combat Luck (${3 * system.value} rPD/${
-                    3 * system.value
-                } rED)`;
+                system.description = `Combat Luck (${3 * system.value} rPD/${3 * system.value} rED)`;
                 // Check to make sure ALIAS is largely folling default format before overriding
-                if (
-                    this.name.trim().length <= 1 ||
-                    this.name.match(/Combat Luck \(\d+ rPD\/\d+ rED\)/)
-                ) {
+                if (this.name.trim().length <= 1 || this.name.match(/Combat Luck \(\d+ rPD\/\d+ rED\)/)) {
                     system.ALIAS = system.description;
                     this.name = system.NAME || system.ALIAS;
                 }
@@ -2972,9 +2582,7 @@ export class HeroSystem6eItem extends Item {
                     // Endurance Reserve  (20 END, 5 REC) (9 Active Points)
                     system.description = system.ALIAS || system.XMLID;
 
-                    const ENDURANCERESERVEREC = this.findModsByXmlid(
-                        "ENDURANCERESERVEREC",
-                    );
+                    const ENDURANCERESERVEREC = this.findModsByXmlid("ENDURANCERESERVEREC");
                     if (ENDURANCERESERVEREC) {
                         if (parseInt(system.value) === parseInt(system.max)) {
                             system.description += ` (${system.max} END, ${ENDURANCERESERVEREC.LEVELS} REC)`;
@@ -2987,17 +2595,13 @@ export class HeroSystem6eItem extends Item {
 
             case "SKILL_LEVELS":
                 //<i>Martial Practice:</i>  +10 with single Skill or Characteristic Roll
-                system.description = `${parseInt(
-                    system.value,
-                ).signedString()} ${system.OPTION_ALIAS}`;
+                system.description = `${parseInt(system.value).signedString()} ${system.OPTION_ALIAS}`;
                 break;
 
             case "VPP":
             case "MULTIPOWER":
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
-                system.description = `${
-                    system.NAME || system.ALIAS
-                }, ${parseInt(system.BASECOST)}-point reserve`;
+                system.description = `${system.NAME || system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`;
                 break;
 
             case "FLASH":
@@ -3006,9 +2610,7 @@ export class HeroSystem6eItem extends Item {
                     //Sight, Hearing and Mental Groups, Normal Smell, Danger Sense and Combat Sense Flash 5 1/2d6
                     // Groups
                     let _groups = [system.OPTION_ALIAS];
-                    for (let addr of (system.ADDER || []).filter(
-                        (o) => o.XMLID.indexOf("GROUP") > -1,
-                    )) {
+                    for (let addr of (system.ADDER || []).filter((o) => o.XMLID.indexOf("GROUP") > -1)) {
                         _groups.push(addr.ALIAS);
                     }
                     if (_groups.length === 1) {
@@ -3026,24 +2628,18 @@ export class HeroSystem6eItem extends Item {
                     for (let addr of (system.ADDER || []).filter(
                         (o) =>
                             o.XMLID.indexOf("GROUP") === -1 &&
-                            o.XMLID.match(
-                                /(NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/,
-                            ),
+                            o.XMLID.match(/(NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/),
                     )) {
                         _singles.push(addr.ALIAS);
                     }
                     if (_singles.length === 1) {
                         system.description += ", " + _singles[0];
                     } else {
-                        system.description +=
-                            ", " + _singles.slice(0, -1).join(", ");
+                        system.description += ", " + _singles.slice(0, -1).join(", ");
                         system.description += " and " + _singles.slice(-1);
                     }
 
-                    const diceFormula = getDiceFormulaFromItemDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    );
+                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
                     system.description += ` ${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -3062,8 +2658,7 @@ export class HeroSystem6eItem extends Item {
                     if (!this.actor) {
                         system.description = `${system.ALIAS}`;
                     } else {
-                        const baseStr =
-                            this.actor.system.characteristics.str.value;
+                        const baseStr = this.actor.system.characteristics.str.value;
                         const additionalClingingStr = system.value;
                         const totalStr = baseStr + additionalClingingStr;
                         system.description = `${system.ALIAS} (${baseStr} + ${additionalClingingStr} = ${totalStr} STR)`;
@@ -3097,8 +2692,7 @@ export class HeroSystem6eItem extends Item {
 
             case "FINDWEAKNESS":
                 {
-                    const { roll } =
-                        this._getNonCharacteristicsBasedRollComponents(system);
+                    const { roll } = this._getNonCharacteristicsBasedRollComponents(system);
 
                     system.description = `${system.ALIAS} ${roll} with ${system.OPTION_ALIAS}`;
                 }
@@ -3106,8 +2700,7 @@ export class HeroSystem6eItem extends Item {
 
             case "DANGER_SENSE":
                 {
-                    const { roll } =
-                        this._getNonCharacteristicsBasedRollComponents(system);
+                    const { roll } = this._getNonCharacteristicsBasedRollComponents(system);
 
                     system.description = `${system.ALIAS} ${roll}`;
                 }
@@ -3183,40 +2776,27 @@ export class HeroSystem6eItem extends Item {
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
-                        system.description =
-                            "+" + system.value + " " + system.ALIAS;
+                        system.description = "+" + system.value + " " + system.ALIAS;
                         break;
                     }
 
                     // Provide a basic description
-                    const _desc =
-                        system.OPTION_ALIAS ||
-                        system.ALIAS ||
-                        system.EFFECT ||
-                        "";
-                    system.description =
-                        (system.INPUT ? system.INPUT + " " : "") + _desc;
+                    const _desc = system.OPTION_ALIAS || system.ALIAS || system.EFFECT || "";
+                    system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
 
                     // Provide dice if this is an attack
                     // TODO: Look at behaviors
-                    const value2 = getDiceFormulaFromItemDC(
-                        this,
-                        convertToDcFromItem(this).dc,
-                    );
+                    const value2 = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
                     if (value2 && !isNaN(value2)) {
                         if (system.description.indexOf(value2) === -1) {
-                            system.description = ` ${value2} ${
-                                system.class || ""
-                            }`;
+                            system.description = ` ${value2} ${system.class || ""}`;
                         }
                     }
 
                     // Add a success roll, if it has one, but only for skills, talents, or perks
                     if (
                         configPowerInfo?.behaviors?.includes("success") &&
-                        configPowerInfo?.type?.find((type) =>
-                            ["skill", "talent", "perk"].includes(type),
-                        )
+                        configPowerInfo?.type?.find((type) => ["skill", "talent", "perk"].includes(type))
                     ) {
                         system.description += ` ${system.roll}`;
                     }
@@ -3270,9 +2850,7 @@ export class HeroSystem6eItem extends Item {
                     case "RECOGNIZED":
                     case "SLEEPING":
                     case "USEFUL":
-                        _adderArray.push(
-                            `${adder.ALIAS} ${adder.OPTION_ALIAS}`,
-                        );
+                        _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS}`);
                         break;
 
                     case "ADDITIONALPD":
@@ -3286,9 +2864,7 @@ export class HeroSystem6eItem extends Item {
                         if (powerXmlId === "CHANGEENVIRONMENT") {
                             _adderArray.push(`, ${adder.ALIAS}`);
                         } else {
-                            _adderArray.push(
-                                adder.OPTION_ALIAS.replace("(", ""),
-                            );
+                            _adderArray.push(adder.OPTION_ALIAS.replace("(", ""));
                         }
                         break;
 
@@ -3332,19 +2908,11 @@ export class HeroSystem6eItem extends Item {
                         if (system.XMLID === "DAMAGENEGATION") {
                             if (parseInt(adder.LEVELS) != 0)
                                 _adderArray.push(
-                                    "-" +
-                                        parseInt(adder.LEVELS) +
-                                        " DCs " +
-                                        adder.ALIAS.replace(" DCs", ""),
+                                    "-" + parseInt(adder.LEVELS) + " DCs " + adder.ALIAS.replace(" DCs", ""),
                                 );
                         } else {
                             if (parseInt(adder.LEVELS) != 0)
-                                _adderArray.push(
-                                    "-" +
-                                        parseInt(adder.LEVELS) +
-                                        " " +
-                                        adder.ALIAS,
-                                );
+                                _adderArray.push("-" + parseInt(adder.LEVELS) + " " + adder.ALIAS);
                         }
                         break;
 
@@ -3374,9 +2942,7 @@ export class HeroSystem6eItem extends Item {
                         // `${adder.ALIAS} (${determineMaxAdjustment(
                         //     this,
                         // )} total points)`,
-                        system.description += `, Can Add Maximum Of ${determineMaxAdjustment(
-                            this,
-                        )} Points`;
+                        system.description += `, Can Add Maximum Of ${determineMaxAdjustment(this)} Points`;
                         //);
                         break;
 
@@ -3399,9 +2965,7 @@ export class HeroSystem6eItem extends Item {
                         {
                             system.description += system.ALIAS + " to ";
                             // Groups
-                            let _groups = _adderArray.filter(
-                                (o) => o.indexOf("Group") > -1,
-                            );
+                            let _groups = _adderArray.filter((o) => o.indexOf("Group") > -1);
                             if (_groups.length === 1) {
                                 system.description += _groups[0];
                             } else {
@@ -3409,14 +2973,11 @@ export class HeroSystem6eItem extends Item {
                                     .slice(0, -1)
                                     .join(", ")
                                     .replace(/ Group/g, "");
-                                system.description +=
-                                    " and " + _groups.slice(-1) + "s";
+                                system.description += " and " + _groups.slice(-1) + "s";
                             }
 
                             // singles
-                            let _singles = _adderArray.filter(
-                                (o) => o.indexOf("Group") === -1,
-                            );
+                            let _singles = _adderArray.filter((o) => o.indexOf("Group") === -1);
                             // spacing
                             if (_groups.length > 0 && _singles.length > 0) {
                                 system.description += ", ";
@@ -3425,11 +2986,8 @@ export class HeroSystem6eItem extends Item {
                             if (_singles.length === 1) {
                                 system.description += _singles[0];
                             } else if (_singles.length > 1) {
-                                system.description += _singles
-                                    .slice(0, -1)
-                                    .join(", ");
-                                system.description +=
-                                    " and " + _singles.slice(-1);
+                                system.description += _singles.slice(0, -1).join(", ");
+                                system.description += " and " + _singles.slice(-1);
                             }
                         }
 
@@ -3441,22 +2999,15 @@ export class HeroSystem6eItem extends Item {
                             " (" +
                             _adderArray
                                 .filter(
-                                    (o) =>
-                                        !o.match(
-                                            /(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i,
-                                        ),
+                                    (o) => !o.match(/(GROUP|NORMAL|SENSE|MINDSCAN|HRRP|RADAR|RADIO|MIND|AWARENESS)/i),
                                 )
                                 .join("; ") +
                             ")";
-                        system.description = system.description.replace(
-                            "()",
-                            "",
-                        );
+                        system.description = system.description.replace("()", "");
                         break;
 
                     default:
-                        system.description +=
-                            " (" + _adderArray.join("; ") + ")";
+                        system.description += " (" + _adderArray.join("; ") + ")";
                         break;
                 }
             }
@@ -3477,10 +3028,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             if (configPowerInfo.type.includes("adjustment")) {
-                system.description +=
-                    " (standard effect: " +
-                    parseInt(system.value * 3) +
-                    " points)";
+                system.description += " (standard effect: " + parseInt(system.value * 3) + " points)";
             } else {
                 system.description += ` (standard effect: ${stun} STUN, ${body} BODY)`;
             }
@@ -3505,13 +3053,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Active Points
-        if (
-            parseInt(system.realCost) != parseInt(system.activePoints) ||
-            this.parentItem
-        ) {
+        if (parseInt(system.realCost) != parseInt(system.activePoints) || this.parentItem) {
             if (system.activePoints) {
-                system.description +=
-                    " (" + system.activePoints + " Active Points);";
+                system.description += " (" + system.activePoints + " Active Points);";
             }
         }
 
@@ -3544,23 +3088,16 @@ export class HeroSystem6eItem extends Item {
             .trim();
 
         // Endurance
-        system.end = Math.max(
-            1,
-            RoundFavorPlayerDown(system.activePoints / 10) || 0,
-        );
+        system.end = Math.max(1, RoundFavorPlayerDown(system.activePoints / 10) || 0);
         const increasedEnd = this.findModsByXmlid("INCREASEDEND");
         if (increasedEnd) {
             system.end *= parseInt(increasedEnd.OPTION.replace("x", ""));
         }
 
         const reducedEnd =
-            this.findModsByXmlid("REDUCEDEND") ||
-            (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
+            this.findModsByXmlid("REDUCEDEND") || (this.parentItem && this.parentItem.findModsByXmlid("REDUCEDEND"));
         if (reducedEnd && reducedEnd.OPTION === "HALFEND") {
-            system.end = RoundFavorPlayerDown(
-                (system._activePointsWithoutEndMods || system.activePoints) /
-                    10,
-            );
+            system.end = RoundFavorPlayerDown((system._activePointsWithoutEndMods || system.activePoints) / 10);
             system.end = Math.max(1, RoundFavorPlayerDown(system.end / 2));
         } else if (reducedEnd && reducedEnd.OPTION === "ZERO") {
             system.end = 0;
@@ -3615,16 +3152,12 @@ export class HeroSystem6eItem extends Item {
                     }
                     result += modifier.OPTION_ALIAS;
 
-                    let recoverable = (modifier.ADDER || []).find(
-                        (o) => o.XMLID == "RECOVERABLE",
-                    );
+                    let recoverable = (modifier.ADDER || []).find((o) => o.XMLID == "RECOVERABLE");
                     if (recoverable) {
                         result += " " + recoverable.ALIAS;
                     }
 
-                    let continuing = (modifier.ADDER || []).find(
-                        (o) => o.XMLID == "CONTINUING",
-                    );
+                    let continuing = (modifier.ADDER || []).find((o) => o.XMLID == "CONTINUING");
                     if (continuing) {
                         result += " " + continuing.ALIAS;
                     }
@@ -3659,11 +3192,7 @@ export class HeroSystem6eItem extends Item {
 
         // Multiple levels?
         if ((parseInt(modifier.LEVELS) || 0) > 1) {
-            if (
-                ["HARDENED", "PENETRATING", "ARMORPIERCING"].includes(
-                    modifier.XMLID,
-                )
-            ) {
+            if (["HARDENED", "PENETRATING", "ARMORPIERCING"].includes(modifier.XMLID)) {
                 result += "x" + parseInt(modifier.LEVELS) + "; ";
             }
         }
@@ -3671,8 +3200,7 @@ export class HeroSystem6eItem extends Item {
         if (modifier.XMLID === "AOE") {
             if (item.system.areaOfEffect.value > 0) {
                 result += `${item.system.areaOfEffect.value}${
-                    modifier.OPTION_ALIAS === "Any Area" &&
-                    !item.actor?.system?.is5e
+                    modifier.OPTION_ALIAS === "Any Area" && !item.actor?.system?.is5e
                         ? ""
                         : getSystemDisplayUnits(item.is5e)
                 } `;
@@ -3680,26 +3208,15 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (modifier.XMLID === "CUMULATIVE" && parseInt(modifier.LEVELS) > 0) {
-            result +=
-                parseInt(system.value) * 6 * (parseInt(modifier.LEVELS) + 1) +
-                " points; ";
+            result += parseInt(system.value) * 6 * (parseInt(modifier.LEVELS) + 1) + " points; ";
         }
 
-        if (
-            modifier.OPTION_ALIAS &&
-            !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)
-        ) {
+        if (modifier.OPTION_ALIAS && !["VISIBLE", "CHARGES", "AVAD", "ABLATIVE"].includes(modifier.XMLID)) {
             switch (modifier.XMLID) {
                 case "AOE":
-                    if (
-                        modifier.OPTION_ALIAS === "One Hex" &&
-                        item.system.areaOfEffect.value > 1
-                    ) {
+                    if (modifier.OPTION_ALIAS === "One Hex" && item.system.areaOfEffect.value > 1) {
                         result += "Radius; ";
-                    } else if (
-                        modifier.OPTION_ALIAS === "Any Area" &&
-                        !item.actor?.system?.is5e
-                    ) {
+                    } else if (modifier.OPTION_ALIAS === "Any Area" && !item.actor?.system?.is5e) {
                         result += "2m Areas; ";
                     } else if (modifier.OPTION_ALIAS === "Line") {
                         const width = item.system.areaOfEffect.width;
@@ -3707,19 +3224,14 @@ export class HeroSystem6eItem extends Item {
 
                         result += `Long, ${height}${getSystemDisplayUnits(
                             item.actor.is5e,
-                        )} Tall, ${width}${getSystemDisplayUnits(
-                            item.actor.is5e,
-                        )} Wide Line; `;
+                        )} Tall, ${width}${getSystemDisplayUnits(item.actor.is5e)} Wide Line; `;
                     } else {
                         result += `${modifier.OPTION_ALIAS}; `;
                     }
                     break;
                 case "EXPLOSION":
                     {
-                        const shape =
-                            modifier.OPTION_ALIAS === "Normal (Radius)"
-                                ? "Radius"
-                                : modifier.OPTION_ALIAS;
+                        const shape = modifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : modifier.OPTION_ALIAS;
                         result += `${shape}; -1 DC/${item.system.areaOfEffect.dcFalloff}"; `;
                     }
                     break;
@@ -3799,10 +3311,7 @@ export class HeroSystem6eItem extends Item {
         // Highly summarized
         if (["FOCUS"].includes(modifier.XMLID)) {
             // 'Focus (OAF; Pen-sized Device in pocket; -1)'
-            result = result.replace(
-                `Focus (${modifier.OPTION}; `,
-                `${modifier.OPTION} (`,
-            );
+            result = result.replace(`Focus (${modifier.OPTION}; `, `${modifier.OPTION} (`);
         }
 
         const configPowerInfo = getPowerInfo({
@@ -3838,12 +3347,10 @@ export class HeroSystem6eItem extends Item {
 
         // Name
         let description = this.system.ALIAS;
-        let name =
-            this.system.NAME || description || this.system.name || this.name;
+        let name = this.system.NAME || description || this.system.name || this.name;
         this.name = name;
 
-        let levels =
-            parseInt(this.system.value) || parseInt(this.system.DC) || 0;
+        let levels = parseInt(this.system.value) || parseInt(this.system.DC) || 0;
         const input = this.system.INPUT;
 
         const ocv = parseInt(this.system.OCV) || 0;
@@ -3856,9 +3363,7 @@ export class HeroSystem6eItem extends Item {
             // HTH
             if (this.system.CATEGORY == "Hand To Hand") {
                 EXTRADC = this.actor.items.find(
-                    (o) =>
-                        o.system.XMLID == "EXTRADC" &&
-                        o.system.ALIAS.indexOf("HTH") > -1,
+                    (o) => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1,
                 );
             }
             // Ranged is not implemented yet
@@ -3877,15 +3382,11 @@ export class HeroSystem6eItem extends Item {
             if (
                 this.actor?.items &&
                 this.actor.items.find(
-                    (o) =>
-                        o.system.XMLID == "WEAPON_ELEMENT" &&
-                        o.system.ADDER.find((o) => o.XMLID == "BAREHAND"),
+                    (o) => o.system.XMLID == "WEAPON_ELEMENT" && o.system.ADDER.find((o) => o.XMLID == "BAREHAND"),
                 )
             ) {
                 let EXTRADC = this.actor.items.find(
-                    (o) =>
-                        o.system.XMLID == "EXTRADC" &&
-                        o.system.ALIAS.indexOf("HTH") > -1,
+                    (o) => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1,
                 );
                 // Extract +2 HTH Damage Class(es)
                 if (EXTRADC) {
@@ -3944,10 +3445,7 @@ export class HeroSystem6eItem extends Item {
         if (this.system.EFFECT?.includes("NND")) {
             this.system.dice = Math.floor(parseInt(this.system.DC) / 2);
             this.system.usesStrength = false;
-            this.system.EFFECT = this.system.EFFECT.replace(
-                `[NNDDC]`,
-                `${this.system.dice}d6 NND`,
-            );
+            this.system.EFFECT = this.system.EFFECT.replace(`[NNDDC]`, `${this.system.dice}d6 NND`);
         }
 
         // Specific power overrides
@@ -4069,13 +3567,8 @@ export class HeroSystem6eItem extends Item {
         // Alternate Combat Value (uses OMCV against DCV)
         const acv = this.findModsByXmlid("ACV");
         if (acv) {
-            this.system.uses = (
-                acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses
-            ).toLowerCase();
-            this.system.targets = (
-                acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] ||
-                this.system.targets
-            ).toLowerCase();
+            this.system.uses = (acv.OPTION_ALIAS.match(/uses (\w+)/)?.[1] || this.system.uses).toLowerCase();
+            this.system.targets = (acv.OPTION_ALIAS.match(/against (\w+)/)?.[1] || this.system.targets).toLowerCase();
         }
 
         const boecv = this.findModsByXmlid("BOECV");
@@ -4188,12 +3681,7 @@ export class HeroSystem6eItem extends Item {
             });
 
             // 2. Adjustments due to level
-            const levelsAdjustment =
-                parseInt(
-                    skillData.LEVELS?.value ||
-                        skillData.LEVELS ||
-                        skillData.levels,
-                ) || 0;
+            const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
             if (levelsAdjustment) {
                 tags.push({
                     value: levelsAdjustment,
@@ -4205,15 +3693,10 @@ export class HeroSystem6eItem extends Item {
             roll = `${rollVal}-`;
         } else if (skillData.XMLID === "REPUTATION") {
             // 2 types of reputation. Positive is a perk ("HOWWELL" adder) and Negative is a disadvantage ("RECOGNIZED" adder).
-            let perkRollValue = parseInt(
-                skillData.ADDER.find((adder) => adder.XMLID === "HOWWELL")
-                    ?.OPTIONID || 0,
-            );
+            let perkRollValue = parseInt(skillData.ADDER.find((adder) => adder.XMLID === "HOWWELL")?.OPTIONID || 0);
 
             if (!perkRollValue) {
-                const disadRollName = skillData.ADDER.find(
-                    (adder) => adder.XMLID === "RECOGNIZED",
-                ).OPTIONID;
+                const disadRollName = skillData.ADDER.find((adder) => adder.XMLID === "RECOGNIZED").OPTIONID;
 
                 if (disadRollName === "SOMETIMES") {
                     perkRollValue = 8;
@@ -4222,9 +3705,7 @@ export class HeroSystem6eItem extends Item {
                 } else if (disadRollName === "ALWAYS") {
                     perkRollValue = 14;
                 } else {
-                    console.error(
-                        `unknown disadRollName ${disadRollName} for REPUTATION`,
-                    );
+                    console.error(`unknown disadRollName ${disadRollName} for REPUTATION`);
                     perkRollValue = 14;
                 }
             }
@@ -4236,9 +3717,7 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${perkRollValue}-`;
         } else if (skillData.XMLID === "ACCIDENTALCHANGE") {
-            const changeChance = skillData.ADDER.find(
-                (adder) => adder.XMLID === "CHANCETOCHANGE",
-            )?.OPTIONID;
+            const changeChance = skillData.ADDER.find((adder) => adder.XMLID === "CHANCETOCHANGE")?.OPTIONID;
             let rollValue;
 
             if (changeChance === "INFREQUENT") {
@@ -4249,9 +3728,7 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 14;
             } else if (!changeChance) {
                 // Shouldn't happen. Give it a default.
-                console.error(
-                    `ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`,
-                );
+                console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
                 rollValue = 8;
             }
 
@@ -4261,35 +3738,19 @@ export class HeroSystem6eItem extends Item {
             });
 
             roll = `${rollValue}-`;
-        } else if (
-            skillData.XMLID === "DEPENDENTNPC" ||
-            skillData.XMLID === "HUNTED"
-        ) {
-            const appearanceChance = skillData.ADDER.find(
-                (adder) => adder.XMLID === "APPEARANCE",
-            )?.OPTIONID;
+        } else if (skillData.XMLID === "DEPENDENTNPC" || skillData.XMLID === "HUNTED") {
+            const appearanceChance = skillData.ADDER.find((adder) => adder.XMLID === "APPEARANCE")?.OPTIONID;
             let chance;
 
-            if (
-                appearanceChance === "EIGHT" ||
-                appearanceChance === "8ORLESS"
-            ) {
+            if (appearanceChance === "EIGHT" || appearanceChance === "8ORLESS") {
                 chance = 8;
-            } else if (
-                appearanceChance === "ELEVEN" ||
-                appearanceChance === "11ORLESS"
-            ) {
+            } else if (appearanceChance === "ELEVEN" || appearanceChance === "11ORLESS") {
                 chance = 11;
-            } else if (
-                appearanceChance === "FOURTEEN" ||
-                appearanceChance === "14ORLESS"
-            ) {
+            } else if (appearanceChance === "FOURTEEN" || appearanceChance === "14ORLESS") {
                 chance = 14;
             } else {
                 // Shouldn't happen. Give it a default.
-                console.error(
-                    `${skillData.XMLID} unknown APPEARANCE adder ${appearanceChance}. Defaulting to 8-`,
-                );
+                console.error(`${skillData.XMLID} unknown APPEARANCE adder ${appearanceChance}. Defaulting to 8-`);
             }
 
             tags.push({
@@ -4299,9 +3760,7 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${chance ? chance : 8}-`;
         } else if (skillData.XMLID === "ENRAGED") {
-            const enrageChance = skillData.ADDER.find(
-                (adder) => adder.XMLID === "CHANCETOGO",
-            )?.OPTIONID;
+            const enrageChance = skillData.ADDER.find((adder) => adder.XMLID === "CHANCETOGO")?.OPTIONID;
             let rollValue;
 
             if (enrageChance === "8-") {
@@ -4312,9 +3771,7 @@ export class HeroSystem6eItem extends Item {
                 rollValue = 14;
             } else if (!enrageChance) {
                 // Shouldn't happen. Give it a default.
-                console.error(
-                    `ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`,
-                );
+                console.error(`ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`);
                 rollValue = 8;
             }
 
@@ -4327,9 +3784,7 @@ export class HeroSystem6eItem extends Item {
         } else if (skillData.XMLID === "PSYCHOLOGICALLIMITATION") {
             // Intensity is based on an EGO roll
             const egoRoll = this.actor.system.characteristics.ego.roll || 0;
-            const intensity = skillData.ADDER.find(
-                (adder) => adder.XMLID === "INTENSITY",
-            )?.OPTIONID;
+            const intensity = skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY")?.OPTIONID;
             let intensityValue;
 
             if (intensity === "MODERATE") {
@@ -4339,9 +3794,7 @@ export class HeroSystem6eItem extends Item {
             } else if (intensity === "TOTAL") {
                 intensityValue = -5;
             } else {
-                console.error(
-                    `unknown intensity ${intensity} for PSYCHOLOGICALLIMITATION`,
-                );
+                console.error(`unknown intensity ${intensity} for PSYCHOLOGICALLIMITATION`);
                 intensityValue = egoRoll;
             }
 
@@ -4357,9 +3810,7 @@ export class HeroSystem6eItem extends Item {
 
             roll = `${egoRoll + intensityValue}-`;
         } else if (skillData.XMLID === "SOCIALLIMITATION") {
-            const occurChance = skillData.ADDER.find(
-                (adder) => adder.XMLID === "OCCUR",
-            )?.OPTIONID;
+            const occurChance = skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTIONID;
             let rollValue;
 
             if (occurChance === "OCCASIONALLY") {
@@ -4369,9 +3820,7 @@ export class HeroSystem6eItem extends Item {
             } else if (occurChance === "VERYFREQUENTLY") {
                 rollValue = 14;
             } else {
-                console.error(
-                    `unknown occurChance ${occurChance} for SOCIALLIMITATION`,
-                );
+                console.error(`unknown occurChance ${occurChance} for SOCIALLIMITATION`);
                 rollValue = 14;
             }
 
@@ -4400,17 +3849,11 @@ export class HeroSystem6eItem extends Item {
         } else if (skillData.XMLID === "DANGER_SENSE") {
             const level = parseInt(skillData.LEVELS || 0);
             if (!skillData.LEVELS) {
-                console.error(
-                    `unknown levels ${skillData.LEVELS} for DANGER_SENSE`,
-                );
+                console.error(`unknown levels ${skillData.LEVELS} for DANGER_SENSE`);
             }
 
-            const perceptionItem = (this.actor?.items || []).find(
-                (power) => power.system.XMLID === "PERCEPTION",
-            );
-            const perceptionRoll = parseInt(
-                perceptionItem?.system.roll?.replace("-", "") || 11,
-            );
+            const perceptionItem = (this.actor?.items || []).find((power) => power.system.XMLID === "PERCEPTION");
+            const perceptionRoll = parseInt(perceptionItem?.system.roll?.replace("-", "") || 11);
 
             tags.push({
                 value: perceptionRoll + level,
@@ -4423,9 +3866,7 @@ export class HeroSystem6eItem extends Item {
             // rolled from the characteristics tab.
             roll = null;
         } else {
-            console.error(
-                `Don't know how to build non characteristic based roll information for ${skillData.XMLID}`,
-            );
+            console.error(`Don't know how to build non characteristic based roll information for ${skillData.XMLID}`);
             roll = null;
         }
 
@@ -4466,24 +3907,14 @@ export class HeroSystem6eItem extends Item {
         } else if (skillData.CHARACTERISTIC) {
             const characteristic = skillData.CHARACTERISTIC.toLowerCase();
 
-            const baseRollValue =
-                skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
+            const baseRollValue = skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
             const characteristicValue =
                 characteristic !== "general" && characteristic != ""
-                    ? this.actor.system.characteristics[`${characteristic}`]
-                          .value
+                    ? this.actor.system.characteristics[`${characteristic}`].value
                     : 0;
-            const characteristicAdjustment = Math.round(
-                characteristicValue / 5,
-            );
-            const levelsAdjustment =
-                parseInt(
-                    skillData.LEVELS?.value ||
-                        skillData.LEVELS ||
-                        skillData.levels,
-                ) || 0;
-            const rollVal =
-                baseRollValue + characteristicAdjustment + levelsAdjustment;
+            const characteristicAdjustment = Math.round(characteristicValue / 5);
+            const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
+            const rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment;
 
             // Provide up to 3 tags to explain how the roll was calculated:
             // 1. Base skill value without modifier due to characteristics
@@ -4491,10 +3922,7 @@ export class HeroSystem6eItem extends Item {
 
             // 2. Adjustment value due to characteristics.
             //    NOTE: Don't show for things like Knowledge Skills which are GENERAL, not characteristic based, or if we have a 0 adjustment
-            if (
-                skillData.CHARACTERISTIC !== "GENERAL" &&
-                characteristicAdjustment
-            ) {
+            if (skillData.CHARACTERISTIC !== "GENERAL" && characteristicAdjustment) {
                 tags.push({
                     value: characteristicAdjustment,
                     name: characteristic,
@@ -4570,27 +3998,17 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.XMLID === "TRANSFER") {
             // Should be something like "STR,CON -> DEX,SPD"
-            const splitSourcesAndTargets = this.system.INPUT
-                ? this.system.INPUT.split(" -> ")
-                : [];
+            const splitSourcesAndTargets = this.system.INPUT ? this.system.INPUT.split(" -> ") : [];
 
             valid =
-                this._areAllAdjustmentTargetsInListValid(
-                    splitSourcesAndTargets[0],
-                    false,
-                ) &&
-                this._areAllAdjustmentTargetsInListValid(
-                    splitSourcesAndTargets[1],
-                    true,
-                );
+                this._areAllAdjustmentTargetsInListValid(splitSourcesAndTargets[0], false) &&
+                this._areAllAdjustmentTargetsInListValid(splitSourcesAndTargets[1], true);
             enhances = splitSourcesAndTargets[1];
             reduces = splitSourcesAndTargets[0];
         } else {
             valid = this._areAllAdjustmentTargetsInListValid(
                 this.system.INPUT,
-                this.system.XMLID === "AID" ||
-                    this.system.XMLID === "ABSORPTION" ||
-                    this.system.XMLID === "SUCCOR",
+                this.system.XMLID === "AID" || this.system.XMLID === "ABSORPTION" || this.system.XMLID === "SUCCOR",
             );
 
             if (
@@ -4610,12 +4028,8 @@ export class HeroSystem6eItem extends Item {
 
             reduces: reduces,
             enhances: enhances,
-            reducesArray: reduces
-                ? reduces.split(",").map((str) => str.trim())
-                : [],
-            enhancesArray: enhances
-                ? enhances.split(",").map((str) => str.trim())
-                : [],
+            reducesArray: reduces ? reduces.split(",").map((str) => str.trim()) : [],
+            enhancesArray: enhances ? enhances.split(",").map((str) => str.trim()) : [],
         };
     }
 
@@ -4643,14 +4057,8 @@ export class HeroSystem6eItem extends Item {
 
             if (this.system.XMLID === "TRANSFER") {
                 return {
-                    maxReduces:
-                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
-                            variableEffect,
-                        ),
-                    maxEnhances:
-                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
-                            variableEffect2,
-                        ),
+                    maxReduces: HeroSystem6eItem._maxNumOf5eAdjustmentEffects(variableEffect),
+                    maxEnhances: HeroSystem6eItem._maxNumOf5eAdjustmentEffects(variableEffect2),
                 };
             } else if (
                 this.system.XMLID === "AID" ||
@@ -4660,17 +4068,11 @@ export class HeroSystem6eItem extends Item {
             ) {
                 return {
                     maxReduces: 0,
-                    maxEnhances:
-                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
-                            variableEffect,
-                        ),
+                    maxEnhances: HeroSystem6eItem._maxNumOf5eAdjustmentEffects(variableEffect),
                 };
             } else {
                 return {
-                    maxReduces:
-                        HeroSystem6eItem._maxNumOf5eAdjustmentEffects(
-                            variableEffect,
-                        ),
+                    maxReduces: HeroSystem6eItem._maxNumOf5eAdjustmentEffects(variableEffect),
                     maxEnhances: 0,
                 };
             }
@@ -4706,9 +4108,8 @@ export class HeroSystem6eItem extends Item {
     // In 5e, explosion is a modifier, in 6e it's an adder to an AOE modifier.
     hasExplosionAdvantage() {
         return !!(
-            this.findModsByXmlid("AOE")?.ADDER?.find(
-                (o) => o.XMLID === "EXPLOSION",
-            ) || this.findModsByXmlid("EXPLOSION")
+            this.findModsByXmlid("AOE")?.ADDER?.find((o) => o.XMLID === "EXPLOSION") ||
+            this.findModsByXmlid("EXPLOSION")
         );
     }
 
@@ -4754,35 +4155,26 @@ export async function RequiresASkillRollCheck(item, event) {
             case "SKILL1PER5":
             case "SKILL1PER20":
                 {
-                    OPTION_ALIAS = OPTION_ALIAS?.split(",")[0]
-                        .replace(/roll/i, "")
-                        .trim();
+                    OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
                     let skill = item.actor.items.find(
                         (o) =>
                             (o.system.subType || o.system.type) === "skill" &&
                             (o.system.XMLID === OPTION_ALIAS.toUpperCase() ||
-                                o.name.toUpperCase() ===
-                                    OPTION_ALIAS.toUpperCase()),
+                                o.name.toUpperCase() === OPTION_ALIAS.toUpperCase()),
                     );
                     if (!skill && rar.COMMENTS) {
                         skill = item.actor.items.find(
                             (o) =>
-                                (o.system.subType || o.system.type) ===
-                                    "skill" &&
-                                (o.system.XMLID ===
-                                    rar.COMMENTS.toUpperCase() ||
-                                    o.name.toUpperCase() ===
-                                        rar.COMMENTS.toUpperCase()),
+                                (o.system.subType || o.system.type) === "skill" &&
+                                (o.system.XMLID === rar.COMMENTS.toUpperCase() ||
+                                    o.name.toUpperCase() === rar.COMMENTS.toUpperCase()),
                         );
                         if (skill) {
                             OPTION_ALIAS = rar.COMMENTS;
                         }
                     }
                     if (!skill && rar.COMMENTS) {
-                        let char =
-                            item.actor.system.characteristics[
-                                rar.COMMENTS.toLowerCase()
-                            ];
+                        let char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
                         if (char) {
                             ui.notifications.warn(
                                 `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${rar.COMMENTS} should be a Characteristic Roll.`,
@@ -4796,21 +4188,9 @@ export async function RequiresASkillRollCheck(item, event) {
                     if (skill) {
                         value = parseInt(skill.system.roll);
                         if (rar.OPTIONID === "SKILL1PER5")
-                            value = Math.max(
-                                3,
-                                value -
-                                    Math.floor(
-                                        parseInt(item.system.activePoints) / 5,
-                                    ),
-                            );
+                            value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 5));
                         if (rar.OPTIONID === "SKILL1PER20")
-                            value = Math.max(
-                                3,
-                                value -
-                                    Math.floor(
-                                        parseInt(item.system.activePoints) / 20,
-                                    ),
-                            );
+                            value = Math.max(3, value - Math.floor(parseInt(item.system.activePoints) / 20));
 
                         OPTION_ALIAS += ` ${value}-`;
                     } else {
@@ -4824,29 +4204,17 @@ export async function RequiresASkillRollCheck(item, event) {
 
             case "CHAR":
                 {
-                    OPTION_ALIAS = OPTION_ALIAS?.split(",")[0]
-                        .replace(/roll/i, "")
-                        .trim();
-                    let char =
-                        item.actor.system.characteristics[
-                            OPTION_ALIAS.toLowerCase()
-                        ];
+                    OPTION_ALIAS = OPTION_ALIAS?.split(",")[0].replace(/roll/i, "").trim();
+                    let char = item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()];
                     if (!char && rar.COMMENTS) {
-                        char =
-                            item.actor.system.characteristics[
-                                rar.COMMENTS.toLowerCase()
-                            ];
+                        char = item.actor.system.characteristics[rar.COMMENTS.toLowerCase()];
                         if (char) {
                             OPTION_ALIAS = rar.COMMENTS;
                         }
                     }
                     if (char) {
                         item.actor.updateRollable(OPTION_ALIAS.toLowerCase());
-                        value = parseInt(
-                            item.actor.system.characteristics[
-                                OPTION_ALIAS.toLowerCase()
-                            ].roll,
-                        );
+                        value = parseInt(item.actor.system.characteristics[OPTION_ALIAS.toLowerCase()].roll);
                         OPTION_ALIAS += ` ${value}-`;
                     } else {
                         ui.notifications.warn(
@@ -4869,9 +4237,7 @@ export async function RequiresASkillRollCheck(item, event) {
         }
 
         const successValue = parseInt(value);
-        const activationRoller = new HeroRoller()
-            .makeSuccessRoll(true, successValue)
-            .addDice(3);
+        const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
         await activationRoller.roll();
         let succeeded = activationRoller.getSuccess();
         const autoSuccess = activationRoller.getAutoSuccess();
@@ -4880,18 +4246,12 @@ export async function RequiresASkillRollCheck(item, event) {
 
         const flavor = `${item.name.toUpperCase()} (${OPTION_ALIAS}) activation ${
             succeeded ? "succeeded" : "failed"
-        } by ${
-            autoSuccess === undefined
-                ? `${Math.abs(margin)}`
-                : `rolling ${total}`
-        }`;
+        } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
         let cardHtml = await activationRoller.render(flavor);
 
         // FORCE success
         if (!succeeded && event?.ctrlKey) {
-            ui.notifications.info(
-                `${item.actor.name} succeeded roll because ${game.user.name} used CTRL key.`,
-            );
+            ui.notifications.info(`${item.actor.name} succeeded roll because ${game.user.name} used CTRL key.`);
             succeeded = true;
             cardHtml += `<p>Succeeded roll because ${game.user.name} used CTRL key.</p>`;
         }

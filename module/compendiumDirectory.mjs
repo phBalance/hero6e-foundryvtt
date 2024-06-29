@@ -15,22 +15,17 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         const types = CONST.COMPENDIUM_DOCUMENT_TYPES.map((documentName) => {
             return {
                 value: documentName,
-                label: game.i18n.localize(
-                    getDocumentClass(documentName).metadata.label,
-                ),
+                label: game.i18n.localize(getDocumentClass(documentName).metadata.label),
             };
         });
         game.i18n.sortObjects(types, "label");
         const folders = this.collection._formatFolderSelectOptions();
-        let html = await renderTemplate(
-            "templates/sidebar/compendium-create.html",
-            {
-                types,
-                folders,
-                folder: targetFolderId,
-                hasFolders: folders.length >= 1,
-            },
-        );
+        let html = await renderTemplate("templates/sidebar/compendium-create.html", {
+            types,
+            folders,
+            folder: targetFolderId,
+            hasFolders: folders.length >= 1,
+        });
         html = html.replace(
             "Document.</p>",
             `Document.</p><label>Hero Designer Prefab</label><input name="upload" class="upload" type="file" accept=".hdp"></input>`,
@@ -51,10 +46,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                 reader.readAsText(event.target.files[0]);
 
                 // Close Create Compendium message box
-                $(event.currentTarget)
-                    .closest(".window-content")
-                    .find("button")
-                    .click();
+                $(event.currentTarget).closest(".window-content").find("button").click();
             });
         }
 
@@ -78,9 +70,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                         if (metadata.folder) delete metadata.folder;
                         if (!metadata.label) {
                             let defaultName = game.i18n.format("DOCUMENT.New", {
-                                type: game.i18n.localize(
-                                    "PACKAGE.TagCompendium",
-                                ),
+                                type: game.i18n.localize("PACKAGE.TagCompendium"),
                             });
                             const count = game.packs.size;
                             if (count > 0) defaultName += ` (${count + 1})`;
@@ -88,11 +78,8 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                         }
                         const pack =
                             // eslint-disable-next-line no-undef
-                            await CompendiumCollection.createCompendium(
-                                metadata,
-                            );
-                        if (targetFolderId)
-                            await pack.setFolder(targetFolderId);
+                            await CompendiumCollection.createCompendium(metadata);
+                        if (targetFolderId) await pack.setFolder(targetFolderId);
                     },
                 },
             },
@@ -114,8 +101,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         HeroSystem6eActor._xmlToJsonNode(heroJson, xml.children);
 
         // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
-        const characterName =
-            heroJson.PREFAB?.CHARACTER_INFO.CHARACTER_NAME.trim();
+        const characterName = heroJson.PREFAB?.CHARACTER_INFO.CHARACTER_NAME.trim();
 
         if (!characterName || characterName.length === 0) {
             console.error("Missing CHARACTER_NAME ", xml);
@@ -135,6 +121,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         const pack = await CompendiumCollection.createCompendium(metadata);
 
         if (targetFolderId) await pack.setFolder(targetFolderId);
+
         ui.notifications.info(
             `Creating compendium ${pack.metadata.label} from Hero Designer Prefab file.`,
         );
@@ -154,11 +141,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                         }
 
                         const itemData = {
-                            name:
-                                system.NAME ||
-                                system?.ALIAS ||
-                                system?.XMLID ||
-                                itemTag,
+                            name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                             type: itemTag.toLowerCase().replace(/s$/, ""),
                             system: system,
                             folder: folders[itemTag].id,

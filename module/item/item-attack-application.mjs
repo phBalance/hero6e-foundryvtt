@@ -1,12 +1,6 @@
 import { CombatSkillLevelsForAttack } from "../utility/damage.mjs";
-import {
-    _processAttackOptions,
-    _processAttackAoeOptions,
-} from "../item/item-attack.mjs";
-import {
-    convertSystemUnitsToMetres,
-    getSystemDisplayUnits,
-} from "../utility/units.mjs";
+import { _processAttackOptions, _processAttackAoeOptions } from "../item/item-attack.mjs";
+import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroAoeTypeToFoundryAoeTypeConversions = {
@@ -33,9 +27,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     this.updateItem(item, changes, options, userId);
                 }
 
-                const cslSkill = CombatSkillLevelsForAttack(
-                    this.data.item,
-                ).skill;
+                const cslSkill = CombatSkillLevelsForAttack(this.data.item).skill;
                 if (cslSkill && item.id === cslSkill.id) {
                     this.updateItem(item, changes, options, userId);
                 }
@@ -89,17 +81,11 @@ export class ItemAttackFormApplication extends FormApplication {
         if (aoe) {
             data.aoeText = aoe.OPTION_ALIAS;
             if (!item.system.areaOfEffect) {
-                ui.notifications.error(
-                    `${
-                        item.system.ALIAS || item.name
-                    } has invalid AOE definition.`,
-                );
+                ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
             }
             const levels = item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
             if (levels) {
-                data.aoeText += ` (${levels}${getSystemDisplayUnits(
-                    item.actor.is5e,
-                )})`;
+                data.aoeText += ` (${levels}${getSystemDisplayUnits(item.actor.is5e)})`;
             }
 
             if (this.getAoeTemplate() || game.user.targets.size > 0) {
@@ -115,11 +101,7 @@ export class ItemAttackFormApplication extends FormApplication {
         data.targets = game.user.targets;
         data.targets = Array.from(game.user.targets);
 
-        if (
-            data.targets.length === 0 &&
-            item.system.XMLID === "MINDSCAN" &&
-            game.user.isGM
-        ) {
+        if (data.targets.length === 0 && item.system.XMLID === "MINDSCAN" && game.user.isGM) {
             data.targets = foundry.utils
                 .deepClone(canvas.tokens.controlled)
                 .filter((t) => t.actor?.id != item.actor?.id);
@@ -184,16 +166,10 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 // CSL radioBoxes names
                 entry.csl = [];
-                for (
-                    let c = 0;
-                    c < parseInt(csl.skill.system.LEVELS || 0);
-                    c++
-                ) {
+                for (let c = 0; c < parseInt(csl.skill.system.LEVELS || 0); c++) {
                     entry.csl.push({
                         name: `${csl.skill.id}.system.csl.${c}`,
-                        value: csl.skill.system.csl
-                            ? csl.skill.system.csl[c]
-                            : "undefined",
+                        value: csl.skill.system.csl ? csl.skill.system.csl[c] : "undefined",
                     });
                 }
 
@@ -203,9 +179,7 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         // DEADLYBLOW
-        const DEADLYBLOW = item.actor.items.find(
-            (o) => o.system.XMLID === "DEADLYBLOW",
-        );
+        const DEADLYBLOW = item.actor.items.find((o) => o.system.XMLID === "DEADLYBLOW");
         if (DEADLYBLOW) {
             item.system.conditionalAttacks ??= {};
             item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
@@ -260,10 +234,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
         this.data.boostableCharges = Math.max(
             0,
-            Math.min(
-                parseInt(formData.boostableCharges),
-                this.data.item.charges?.value - 1,
-            ),
+            Math.min(parseInt(formData.boostableCharges), this.data.item.charges?.value - 1),
         );
 
         this.data.velocity = parseInt(formData.velocity || 0);
@@ -272,11 +243,9 @@ export class ItemAttackFormApplication extends FormApplication {
         const expandedData = foundry.utils.expandObject(formData);
         for (const ca in expandedData?.system?.conditionalAttacks) {
             console.log(ca);
-            this.data.item.system.conditionalAttacks[ca].checked =
-                expandedData.system.conditionalAttacks[ca].checked;
+            this.data.item.system.conditionalAttacks[ca].checked = expandedData.system.conditionalAttacks[ca].checked;
             await this.data.item.update({
-                [`system.conditionalAttacks`]:
-                    this.data.item.system.conditionalAttacks,
+                [`system.conditionalAttacks`]: this.data.item.system.conditionalAttacks,
             });
         }
 
@@ -288,19 +257,12 @@ export class ItemAttackFormApplication extends FormApplication {
         const item = this.data.item;
         // Combat Skill Levels (update SKILL if changed)
         const csls = CombatSkillLevelsForAttack(item);
-        for (const key of Object.keys(formData).filter((o) =>
-            o.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/),
-        )) {
+        for (const key of Object.keys(formData).filter((o) => o.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/))) {
             const value = formData[key];
             const itemId = key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[1];
-            const idx = parseInt(
-                key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[2],
-            );
+            const idx = parseInt(key.match(/([0-9A-Za-z]+)\.system\.csl\.(\d+)/)[2]);
             for (const csl of csls) {
-                if (
-                    csl.skill.id === itemId &&
-                    csl.skill.system.csl[idx] != value
-                ) {
+                if (csl.skill.id === itemId && csl.skill.system.csl[idx] != value) {
                     csl.skill.system.csl[idx] = value;
                     await csl.skill.update({
                         "system.csl": csl.skill.system.csl,
@@ -328,9 +290,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!token) {
-            return ui.notifications.error(
-                `${actor.name} has no token in this scene.  Unable to place AOE template.`,
-            );
+            return ui.notifications.error(`${actor.name} has no token in this scene.  Unable to place AOE template.`);
         }
         const is5e = actor.system.is5e;
 
@@ -372,11 +332,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             case "cone":
                 {
-                    if (
-                        (aoeModifier.adders || []).find(
-                            (adder) => adder.XMLID === "THINCONE",
-                        )
-                    ) {
+                    if ((aoeModifier.adders || []).find((adder) => adder.XMLID === "THINCONE")) {
                         // TODO: The extra 0.1 degree helps with approximating the correct hex counts when not
                         //       not oriented in one of the prime 6 directions. This is because we're not
                         //       hex counting. The extra degree is more incorrect the larger the cone is.
@@ -393,17 +349,14 @@ export class ItemAttackFormApplication extends FormApplication {
 
             case "ray":
                 {
-                    templateData.width =
-                        sizeConversionToMeters * areaOfEffect.width;
+                    templateData.width = sizeConversionToMeters * areaOfEffect.width;
                     templateData.flags.width = areaOfEffect.width;
                     templateData.flags.height = areaOfEffect.height;
                 }
                 break;
 
             case "rect": {
-                const warningMessage = game.i18n.localize(
-                    "Warning.AreaOfEffectUnsupported",
-                );
+                const warningMessage = game.i18n.localize("Warning.AreaOfEffectUnsupported");
 
                 ui.notifications.warn(warningMessage);
 
@@ -426,9 +379,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 y: templateData.y,
             });
         } else {
-            canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [
-                templateData,
-            ]);
+            canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [templateData]);
         }
 
         canvas.templates.activate({ tool: templateType });
@@ -443,9 +394,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     getAoeTemplate() {
         return Array.from(canvas.templates.getDocuments()).find(
-            (o) =>
-                o.user.id === game.user.id &&
-                o.flags.itemId === this.data.item.id,
+            (o) => o.user.id === game.user.id && o.flags.itemId === this.data.item.id,
         );
     }
 }

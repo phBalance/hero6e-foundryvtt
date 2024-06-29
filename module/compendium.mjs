@@ -10,9 +10,7 @@ export class HeroSystem6eCompendium extends Compendium {
 
         // Ignore drop if item already exists (dragging to ourselves)
         if (this.collection.index.has(document.id) === item.id) {
-            console.log(
-                `Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`,
-            );
+            console.log(`Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`);
             return;
         }
         // if (this.collection.index.has(document.id) === item.system.ID)) {
@@ -31,10 +29,7 @@ export class HeroSystem6eCompendium extends Compendium {
         const packId = this.id.replace(/^compendium-/, "");
 
         // Create new folder
-        const folder = await Folder.create(
-            { type: "Item", name: item.name },
-            { pack: packId },
-        );
+        const folder = await Folder.create({ type: "Item", name: item.name }, { pack: packId });
 
         // Add parent to folder
         await HeroSystem6eItem.create(
