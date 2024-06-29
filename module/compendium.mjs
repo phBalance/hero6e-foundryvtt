@@ -1,53 +1,58 @@
 // eslint-disable-next-line no-undef
 export class HeroSystem6eCompendium extends Compendium {
-    //static entryPartial = `systems/hero6efoundryvttv2/templates/sidebar/partials/compendium-index-partial.hbs`;
+    async _handleDroppedEntry(target, data) {
+        console.log("_handleDroppedEntry", target, data);
 
-    async _onDrop(event) {
-        const data = TextEditor.getDragEventData(event);
-        if (!data.type) return;
-        if (!data.type === "item") return;
-        const item = fromUuidSync(data.uuid);
-
-        // Ignore drop if item already exists (dragging to ourselves)
-        if (this.collection.index.has(document.id) === item.id) {
-            console.log(`Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`);
+        const item = await fromUuid(data.uuid);
+        if (!item) {
+            console.error("missing item", data.uuid);
             return;
         }
-        // if (this.collection.index.has(document.id) === item.system.ID)) {
-        //     console.log(
-        //         `Ignoring _onDrop because ${item.name}/${item.id} already exists in this ItemDirectory`,
-        //     );
-        //     return;
-        // }
 
-        // Do super if there is no parent.
-        if (!item.childItems) {
-            return super._onDrop(event);
+        // Don't allow framework items to be moved within ItemDirectory (they should drag/drop the folder)
+        if (item.childItems && item.pack === this.metadata.id) {
+            return ui.notifications.warn(
+                `"Drag/drop <b>${item.name}</b> item is not allowed in this compendium. Use folder instead"`,
+            );
         }
 
-        // Not sure why compendium- is sometimes there, unable to create a folder/item with it, so getting rid of it.
-        const packId = this.id.replace(/^compendium-/, "");
+        // Do super if there is no parent or if this framework is already in ItemDirectory
+        if (!item.childItems) {
+            return super._handleDroppedEntry(target, data);
+        }
+
+        // Find folder we ard dropping to
+        const closestFolder = target ? target.closest(".folder") : null;
+        if (closestFolder) closestFolder.classList.remove("droptarget");
+        const folderTarget = closestFolder ? await fromUuid(closestFolder.dataset.uuid) : null;
 
         // Create new folder
-        const folder = await Folder.create({ type: "Item", name: item.name }, { pack: packId });
+        await this.dropFrameworkItem(folderTarget, item);
+    }
 
-        // Add parent to folder
-        await HeroSystem6eItem.create(
-            {
-                ...item.toObject(),
-                folder: folder.id,
-            },
-            { pack: packId },
-        );
-
-        // Add children to folder
-        for (const childItem of item.childItems) {
+    async dropFrameworkItem(folderTarget, item) {
+        if (item.childItems) {
+            const newFolder = await Folder.create(
+                { type: "Item", name: item.name, folder: folderTarget?.id },
+                { pack: this.metadata.id },
+            );
             await HeroSystem6eItem.create(
                 {
-                    ...childItem.toObject(),
-                    folder: folder.id,
+                    ...item.toObject(),
+                    folder: newFolder?.id,
                 },
-                { pack: packId },
+                { pack: this.metadata.id },
+            );
+            for (const childItem of item.childItems) {
+                await this.dropFrameworkItem(newFolder, childItem);
+            }
+        } else {
+            await HeroSystem6eItem.create(
+                {
+                    ...item.toObject(),
+                    folder: folderTarget?.id,
+                },
+                { pack: this.metadata.id },
             );
         }
     }
