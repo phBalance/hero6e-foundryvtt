@@ -85,13 +85,9 @@
 
         {{#each targetData as |target|}}
             {{#unless target.aoeAlwaysHit}}
-                {{#if (or (eq @index 0) (not ../maxMinds))}}
-                    <div class="card-section" data-visibility="gm">
-                        {{#if ../maxMinds}}
-                        <div class="description-tiny">{{../maxMinds}} mind(s)</div>
-                        {{else}}
+                {{#if (not ../maxMinds)}}
+                    <div class="card-section">
                         <div class="description-tiny">Attack Roll<br>vs.<br>{{target.name}}</div>
-                        {{/if}}
                         <div class="hit-roll">{{{ target.renderedRoll }}}</div>
                         <div class="description-medium">
                             {{{ target.hitRollText }}}
@@ -100,6 +96,20 @@
                             </span>
                         </div>
                     </div>
+                {{else}}
+                    {{!-- Mind Scan - we only want the 1st mind to show the roll info. Only show to GM. --}}
+                    {{#if eq @index 0}}
+                        <div class="card-section" data-visibility="gm">
+                            <div class="description-tiny">{{../maxMinds}} mind(s)</div>
+                            <div class="hit-roll">{{{ target.renderedRoll }}}</div>
+                            <div class="description-medium">
+                                {{{ target.hitRollText }}}
+                                <span data-visibility="gm">
+                                    ({{target.toHitChar}} {{target.value}})
+                                </span>
+                            </div>
+                        </div>
+                    {{/if}}
                 {{/if}}
             {{/unless}}
         {{/each}}
@@ -133,27 +143,6 @@
                     </button>
                 {{/if}}
             {{/each}}
-            {{!-- <div data-visibility="gm">
-                <button class="roll-mindscan" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
-                    data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}"
-                    data-effectiveStr="{{effectiveStr}}" data-targetIds="{{targetIds}}" data-velocity="{{velocity}}" 
-                    data-boostable-Charges="{{boostableCharges}}" data-maxMinds="{{maxMinds}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="controlled" title="Select appropriate token(s) with mouse, drag box around or shift-click.">
-                    Roll Mind Scan
-                </button>
-                <button class="roll-mindscan" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
-                    data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}"
-                    data-effectiveStr="{{effectiveStr}}" data-targetIds="{{targetIds}}" data-velocity="{{velocity}}" 
-                    data-boostable-Charges="{{boostableCharges}}" data-maxMinds="{{maxMinds}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="scene">
-                    All Tokens in Scene ({{maxMinds}} max)
-                </button>
-                <button class="roll-mindscan" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
-                    data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}"
-                    data-effectiveStr="{{effectiveStr}}" data-targetIds="{{targetIds}}" data-velocity="{{velocity}}" 
-                    data-boostable-Charges="{{boostableCharges}}" data-maxMinds="{{maxMinds}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="world">
-                    All Tokens in World ({{maxMinds}} max)
-                </button>
-            </div> --}}
-
         {{else}}
             <div data-visibility="{{actor.id}}">
                 <button class="roll-damage" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
