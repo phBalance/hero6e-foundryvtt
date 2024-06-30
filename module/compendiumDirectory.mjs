@@ -2,7 +2,7 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import { getPowerInfo } from "./utility/util.mjs";
 
-// eslint-disable-next-line no-unde
+// eslint-disable-next-line no-undef
 export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
     constructor(...args) {
         super(...args);
