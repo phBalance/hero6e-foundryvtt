@@ -1,5 +1,19 @@
 export const HERO = {};
 
+HERO.folderColors = {
+    // Base Category
+    Perks: "#0000aa",
+    Powers: "#ff0000",
+    Skills: "#00aa00",
+    Talents: "#00aaaa",
+
+    // Sub Categories of POWER
+    "Powers.Characteristics": "#ff6666",
+    "Powers.Perks": "#ff6666",
+    "Powers.Skill": "#ff6666",
+    "Powers.Talents": "#ff6666",
+};
+
 HERO.bool = {
     true: "True",
     false: "False",

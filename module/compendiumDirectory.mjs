@@ -1,5 +1,6 @@
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
+import { getPowerInfo } from "./utility/util.mjs";
 
 // eslint-disable-next-line no-undef
 export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
@@ -132,8 +133,13 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                     for (const system of heroJson.PREFAB[itemTag]) {
                         // Create new folder
                         if (!folders[itemTag]) {
+                            const name = itemTag.titleCase();
                             folders[itemTag] = await Folder.create(
-                                { type: "Item", name: itemTag },
+                                {
+                                    type: "Item",
+                                    name: name,
+                                    color: CONFIG.HERO.folderColors[name],
+                                },
                                 { pack: pack.metadata.id },
                             );
                         }
@@ -144,16 +150,118 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                             system: system,
                             folder: folders[itemTag].id,
                         };
+
+                        const power = getPowerInfo({
+                            xmlid: system.XMLID,
+                            is5e: heroJson.PREFAB.TEMPLATE.indexOf("5E") > 0,
+                        });
+
+                        // If a framework then make a new subfolder for it, in the proper folder structure
+                        if (power.type.includes("framework") || power.type.includes("compound")) {
+                            const parentFolder =
+                                pack.contents.find((o) => o.system.ID === system.PARENTID)?.folder || folders[itemTag];
+                            const subFolder = await Folder.create(
+                                { type: "Item", name: itemData.name, folder: parentFolder },
+                                { pack: pack.metadata.id },
+                            );
+                            itemData.folder = subFolder.id;
+                        }
+                        // Check if a child
+                        else if (system.PARENTID) {
+                            const parentFolder = pack.contents.find((o) => o.system.ID === system.PARENTID)?.folder;
+                            itemData.folder = parentFolder.id;
+                        }
+
                         console.log(itemData);
                         const item = await HeroSystem6eItem.create(itemData, {
                             pack: pack.metadata.id,
                         });
 
                         await item._postUpload(); // we can probably skip the await here for a possible performance increase
+
+                        // COMPOUNDPOWER is similar to a MULTIPOWER.
+                        // MULTIPOWER uses PARENTID references.
+                        // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
+                        if (system.XMLID === "COMPOUNDPOWER") {
+                            const compoundItems = [];
+                            for (const value of Object.values(system)) {
+                                // We only care about arrays and objects (array of 1)
+                                if (typeof value === "object") {
+                                    const values = value.length ? value : [value];
+                                    for (const system2 of values) {
+                                        if (system2.XMLID) {
+                                            const power = getPowerInfo({
+                                                xmlid: system2.XMLID,
+                                                is5e: heroJson.PREFAB.TEMPLATE.indexOf("5E") > 0,
+                                            });
+                                            if (!power) {
+                                                await ui.notifications.error(
+                                                    `${this.name}/${item.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                    {
+                                                        console: true,
+                                                        permanent: true,
+                                                    },
+                                                );
+                                                continue;
+                                            }
+                                            compoundItems.push(system2);
+                                        }
+                                    }
+                                }
+                            }
+                            compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
+                            for (const system2 of compoundItems) {
+                                const power = getPowerInfo({
+                                    xmlid: system2.XMLID,
+                                    is5e: heroJson.PREFAB.TEMPLATE.indexOf("5E") > 0,
+                                });
+                                let itemData2 = {
+                                    name: system2.NAME || system2.ALIAS || system2.XMLID,
+                                    type: power.type.includes("skill") ? "skill" : "power",
+                                    system: {
+                                        ...system2,
+                                        PARENTID: system.ID,
+                                        POSITION: parseInt(system2.POSITION),
+                                    },
+                                };
+
+                                // Put in proper folder
+                                const parentFolder = pack.contents.find((o) => o.system.ID === system.ID)?.folder;
+                                itemData2.folder = parentFolder?.id;
+
+                                const item2 = await HeroSystem6eItem.create(itemData2, { pack: pack.metadata.id });
+                                try {
+                                    await item2._postUpload();
+                                } catch (e) {
+                                    console.error(e);
+                                    await ui.notifications.error(
+                                        `${this.name}/${item.name}/${item2.name}/${item2.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                        {
+                                            console: true,
+                                            permanent: true,
+                                        },
+                                    );
+                                    console.error(e);
+                                    await item2.delete();
+                                    continue;
+                                }
+                            }
+                        }
                     }
                 }
             }
+
+            // Assign items without PARENTID to a new folder
+            // for (const parent of pack.contents.filter((o) => !o.system.PARENTID)) {
+            //     const parentFolder = await Folder.create(
+            //         { type: "Item", name: parent.name, folder:  },
+            //         { pack: pack.metadata.id },
+            //     );
+            //     await parent.update({ folder: parentFolder.id });
+            // }
+
             ui.notifications.info(`Compendium ${pack.metadata.label} finished upload.`);
+            pack.render(true);
         } catch (e) {
             console.log(e);
             ui.notifications.error(`Compendium ${pack.metadata.label} failed to upload.`);
