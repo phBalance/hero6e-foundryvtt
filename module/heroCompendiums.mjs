@@ -2,9 +2,10 @@ import { HEROSYS } from "./herosystem6e.mjs";
 
 export async function CreateHeroCompendiums() {
     if (!game.user.isGM) return;
-    console.log("createHeroCompendiums");
+
     try {
         CreateHeroItems();
+        CreateHeroMacros();
     } catch (e) {
         console.error(e);
     }
@@ -22,8 +23,53 @@ async function createItem(itemDataArray, packId) {
     }
 }
 
+async function CreateHeroMacros() {
+    const label = "HeroMacro";
+    const metadata = { label: label, name: label.slugify({ strict: true }), type: "Macro" };
+
+    // Delete compendium and re-create it.
+    let pack = game.packs.get(`world.${metadata.name}`);
+    if (pack) {
+        await pack.configure({ locked: false });
+        await pack.deleteCompendium();
+    }
+    // eslint-disable-next-line no-undef
+    pack = await CompendiumCollection.createCompendium(metadata);
+
+    const macroItemsArray = [];
+
+    macroItemsArray.push({
+        img: "icons/svg/regen.svg",
+        name: "Full Health for all tokens in scene",
+        type: "script",
+        command: `
+        Dialog.confirm({
+  title: "Full Health",
+  content: '<p>You are about to heal ' + game.scenes.current.tokens.filter(o=>o.isOwner).length + ' tokens in this scene. This is the same as clicking "Full Health" on each actor sheet. This includes setting all characteristics to max, removing status effects and removing temporary effects.  Do you want to continue?</p>',
+  label: "Full Health",
+  yes: () => {
+      for(const token of game.scenes.current.tokens.filter(o=>o.isOwner)) {
+        console.log(token);
+      token.actor?.FullHealth();
+      }
+    }
+});
+        `,
+        flags: {
+            versionHeroSystem6eManuallyCreated: game.system.version,
+        },
+    });
+
+    await Macro.createDocuments(macroItemsArray, {
+        pack: pack.metadata.id,
+    });
+
+    // Lock Compendium
+    await pack.configure({ locked: true });
+}
+
 async function CreateHeroItems() {
-    const label = "HeroSystem";
+    const label = "HeroItems";
     const metadata = { label: label, name: label.slugify({ strict: true }), type: "Item" };
 
     // Delete compendium and re-create it.
@@ -142,6 +188,7 @@ async function CreateHeroItems() {
     for (const power of powers.filter((o) => o.type.includes("perk") && o.xml)) {
         // Only include powers where XML is defined
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
+        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
         itemData.folder = folderPerk[0].id;
         itemDataArray.push(itemData);
     }
@@ -155,6 +202,7 @@ async function CreateHeroItems() {
     for (const power of powers.filter((o) => o.type.includes("skill") && o.xml)) {
         // Only include powers where XML is defined
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
+        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
         itemData.folder = folderSkill[0].id;
         itemDataArray.push(itemData);
     }
@@ -168,6 +216,7 @@ async function CreateHeroItems() {
     for (const power of powers.filter((o) => o.type.includes("talent") && o.xml)) {
         // Only include powers where XML is defined
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
+        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
         itemData.folder = folderTalent[0].id;
         itemDataArray.push(itemData);
     }
