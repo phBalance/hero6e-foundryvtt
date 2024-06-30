@@ -3,6 +3,7 @@ import { determineCostPerActivePoint } from "./utility/adjustment.mjs";
 import { RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
+import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 
 function getAllActorsInGame() {
     return [
@@ -83,6 +84,9 @@ export async function migrateWorld() {
     };
 
     await ChatMessage.create(chatData);
+
+    // Create or Re-create Compendium
+    CreateHeroCompendiums();
 
     // Fix any invalid actor types
     for (let invalidId of game.actors.invalidDocumentIds) {

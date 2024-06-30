@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+import { CreateHeroCompendiums } from "../heroCompendiums.mjs";
 
 export default class SettingsHelpers {
     // Initialize System Settings after the Init Hook
@@ -167,7 +168,7 @@ export default class SettingsHelpers {
                 five: game.i18n.localize("Settings.DefaultEdition.Choices.five"),
             },
             default: "six",
-            onChange: (value) => HEROSYS.log(false, value),
+            onChange: () => CreateHeroCompendiums(),
             requiresReload: false,
         });
 
