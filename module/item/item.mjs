@@ -3643,6 +3643,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     skillRollUpdateValue() {
+        if (!this.actor?.id) return; // Like during a compendium upload
         const skillData = this.system;
 
         skillData.tags = [];

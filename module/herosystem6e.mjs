@@ -27,12 +27,14 @@ import "./utility/adjustment.mjs";
 import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
+import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 
 import "./utility/chat-dice.mjs";
 
 import "./testing/testing-main.mjs";
 
 Hooks.once("init", async function () {
+    game.CreateHeroCompendiums = CreateHeroCompendiums;
     HEROSYS.module = game.system.id;
     game.herosystem6e = {
         applications: {

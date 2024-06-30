@@ -3,6 +3,7 @@ import { determineCostPerActivePoint } from "./utility/adjustment.mjs";
 import { RoundFavorPlayerUp } from "./utility/round.mjs";
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
+import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 
 function getAllActorsInGame() {
     return [
