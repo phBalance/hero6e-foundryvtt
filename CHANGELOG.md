@@ -1,5 +1,8 @@
 # Releases
 
+## Version 3.0.82 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Improved HDC upload performance.
+
 ## Version 3.0.81 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed bug where conditional defenses prevented some attacks from applying damage. [#1116](https://github.com/dmdorman/hero6e-foundryvtt/issues/1116)
