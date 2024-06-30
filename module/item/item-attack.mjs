@@ -685,7 +685,11 @@ export async function AttackToHit(item, options) {
                 hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
                 value: targetDefenseValue,
                 result: { hit: hit, by: by.toString() },
-                roller: options.mindScanChoices && targetsArray?.[0]?.id === target.id ? targetHeroRoller : null,
+                roller: options.mindScanChoices
+                    ? targetsArray[0].id === target.id
+                        ? targetHeroRoller
+                        : null
+                    : targetHeroRoller,
                 renderedRoll: await targetHeroRoller.render(),
             });
 
