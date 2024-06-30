@@ -89,16 +89,19 @@ async function CreateHeroItems() {
     };
 
     // POWERS
-    const folderPower = await Folder.createDocuments([{ name: "Power", type: "Item", color: "#ff0000" }], {
-        pack: pack.metadata.id,
-    });
+    const folderPower = await Folder.createDocuments(
+        [{ name: "Powers", type: "Item", color: CONFIG.HERO.folderColors["Powers"] }],
+        {
+            pack: pack.metadata.id,
+        },
+    );
 
     const folderPowerCharacteristic = await Folder.createDocuments(
         [
             {
-                name: "Characteristic",
+                name: "Characteristics",
                 type: "Item",
-                color: "#ff6666",
+                color: CONFIG.HERO.folderColors["Characteristics"],
                 folder: folderPower[0].id,
             },
         ],
@@ -110,9 +113,9 @@ async function CreateHeroItems() {
     const folderPowerPerk = await Folder.createDocuments(
         [
             {
-                name: "Perk",
+                name: "Perks",
                 type: "Item",
-                color: "#ff6666",
+                color: CONFIG.HERO.folderColors["Powers.Perks"],
                 folder: folderPower[0].id,
             },
         ],
@@ -124,9 +127,9 @@ async function CreateHeroItems() {
     const folderPowerSkill = await Folder.createDocuments(
         [
             {
-                name: "Skill",
+                name: "Skills",
                 type: "Item",
-                color: "#ff6666",
+                color: CONFIG.HERO.folderColors["Powers.Skill"],
                 folder: folderPower[0].id,
             },
         ],
@@ -138,9 +141,9 @@ async function CreateHeroItems() {
     const folderPowerTalent = await Folder.createDocuments(
         [
             {
-                name: "Talent",
+                name: "Talents",
                 type: "Item",
-                color: "#ff6666",
+                color: CONFIG.HERO.folderColors["Powers.Talents"],
                 folder: folderPower[0].id,
             },
         ],
@@ -181,9 +184,12 @@ async function CreateHeroItems() {
 
     //////////////////////////////////////////////////////////////////////////////
     // PERKS
-    const folderPerk = await Folder.createDocuments([{ name: "Perk", type: "Item", color: "#0000aa" }], {
-        pack: pack.metadata.id,
-    });
+    const folderPerk = await Folder.createDocuments(
+        [{ name: "Perks", type: "Item", color: CONFIG.HERO.folderColors["Perks"] }],
+        {
+            pack: pack.metadata.id,
+        },
+    );
 
     for (const power of powers.filter((o) => o.type.includes("perk") && o.xml)) {
         // Only include powers where XML is defined
@@ -195,9 +201,12 @@ async function CreateHeroItems() {
 
     //////////////////////////////////////////////////////////////////////////////
     // SKILLS
-    const folderSkill = await Folder.createDocuments([{ name: "Skill", type: "Item", color: "#00aa00" }], {
-        pack: pack.metadata.id,
-    });
+    const folderSkill = await Folder.createDocuments(
+        [{ name: "Skills", type: "Item", color: CONFIG.HERO.folderColors["Skills"] }],
+        {
+            pack: pack.metadata.id,
+        },
+    );
 
     for (const power of powers.filter((o) => o.type.includes("skill") && o.xml)) {
         // Only include powers where XML is defined
@@ -209,9 +218,12 @@ async function CreateHeroItems() {
 
     //////////////////////////////////////////////////////////////////////////////
     // TALENT
-    const folderTalent = await Folder.createDocuments([{ name: "Talent", type: "Item", color: "#00aaaa" }], {
-        pack: pack.metadata.id,
-    });
+    const folderTalent = await Folder.createDocuments(
+        [{ name: "Talents", type: "Item", color: CONFIG.HERO.folderColors["Talents"] }],
+        {
+            pack: pack.metadata.id,
+        },
+    );
 
     for (const power of powers.filter((o) => o.type.includes("talent") && o.xml)) {
         // Only include powers where XML is defined
