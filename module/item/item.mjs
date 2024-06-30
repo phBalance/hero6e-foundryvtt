@@ -349,7 +349,7 @@ export class HeroSystem6eItem extends Item {
         const configPowerInfo = getPowerInfo({ item: this });
         switch (this.system.range) {
             case "self": {
-                if (!configPowerInfo.type.includes("skill")) {
+                if (!configPowerInfo?.type.includes("skill")) {
                     content += " Self.";
                 }
 
@@ -616,11 +616,11 @@ export class HeroSystem6eItem extends Item {
         if (!configPowerInfo?.perceivability) {
             // TODO: Should it say that it's not perceivable if we haven't set it.
             return false;
-        } else if (configPowerInfo.perceivability.toLowerCase() === "imperceptible") {
+        } else if (configPowerInfo?.perceivability.toLowerCase() === "imperceptible") {
             return false;
-        } else if (configPowerInfo.perceivability.toLowerCase() === "obvious") {
+        } else if (configPowerInfo?.perceivability.toLowerCase() === "obvious") {
             return true;
-        } else if (configPowerInfo.perceivability.toLowerCase() === "inobvious") {
+        } else if (configPowerInfo?.perceivability.toLowerCase() === "inobvious") {
             return perceptionSuccess;
         }
 
@@ -998,7 +998,7 @@ export class HeroSystem6eItem extends Item {
         changed = this.setInitialRange(configPowerInfo) || changed;
 
         // Make sure we have the correct skill roll
-        if (this.baseInfo.type.includes("skill")) {
+        if (this.baseInfo?.type.includes("skill")) {
             this.skillRollUpdateValue();
         }
 
@@ -1030,11 +1030,11 @@ export class HeroSystem6eItem extends Item {
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
         if (
             configPowerInfo &&
-            (configPowerInfo.behaviors.includes("activatable") || configPowerInfo?.type?.includes("characteristic"))
+            (configPowerInfo.behaviors.includes("activatable") || configPowerInfo.type?.includes("characteristic"))
         ) {
             const newDefenseValue = "defense";
 
-            if (this.system.subType !== newDefenseValue && configPowerInfo.behaviors.includes("activatable")) {
+            if (this.system.subType !== newDefenseValue && configPowerInfo?.behaviors.includes("activatable")) {
                 this.system.subType = newDefenseValue;
                 this.system.showToggle = true;
                 changed = true;
@@ -1044,7 +1044,7 @@ export class HeroSystem6eItem extends Item {
             if (
                 this.system.charges?.value > 0 ||
                 this.system.AFFECTS_TOTAL === false ||
-                configPowerInfo.duration === "instant" ||
+                configPowerInfo?.duration === "instant" ||
                 this.parentItem?.system.XMLID === "MULTIPOWER"
             ) {
                 this.system.active ??= false;
@@ -1538,12 +1538,12 @@ export class HeroSystem6eItem extends Item {
 
     getAttacksWith() {
         const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo.type.includes("mental")) return "omcv";
+        if (configPowerInfo?.type.includes("mental")) return "omcv";
         return "ocv";
     }
     getDefendsWith() {
         const configPowerInfo = getPowerInfo({ item: this });
-        if (configPowerInfo.type.includes("mental")) return "dmcv";
+        if (configPowerInfo?.type.includes("mental")) return "dmcv";
         return "dcv";
     }
 
@@ -1700,10 +1700,10 @@ export class HeroSystem6eItem extends Item {
 
         // Check if configPowerInfo has a more specific costPerLevel
         if (configPowerInfo?.costPerLevel !== undefined) {
-            if (typeof configPowerInfo.costPerLevel === "function") {
-                costPerLevel = parseFloat(configPowerInfo.costPerLevel(this)) || 0;
+            if (typeof configPowerInfo?.costPerLevel === "function") {
+                costPerLevel = parseFloat(configPowerInfo?.costPerLevel(this)) || 0;
             } else {
-                costPerLevel = parseFloat(configPowerInfo.costPerLevel) || 0;
+                costPerLevel = parseFloat(configPowerInfo?.costPerLevel) || 0;
             }
         }
         this.system.costPerLevel = costPerLevel;
@@ -1729,7 +1729,7 @@ export class HeroSystem6eItem extends Item {
             baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness
         } else if (system.XMLID === "DUPLICATION") {
             const points = parseInt(system.POINTS || 0);
-            const cost = points * configPowerInfo.costPerLevel;
+            const cost = points * configPowerInfo?.costPerLevel;
             baseCost += cost;
         }
 
@@ -1825,7 +1825,7 @@ export class HeroSystem6eItem extends Item {
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
         //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
-        if (configPowerInfo.privateAsAdder && system.MODIFIER) {
+        if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
             let advantages = 0;
             for (let modifier of (system.MODIFIER || []).filter((o) => !o.PRIVATE)) {
                 const modPowerInfo = getPowerInfo({
@@ -3027,7 +3027,7 @@ export class HeroSystem6eItem extends Item {
                 body += 1;
             }
 
-            if (configPowerInfo.type.includes("adjustment")) {
+            if (configPowerInfo?.type.includes("adjustment")) {
                 system.description += " (standard effect: " + parseInt(system.value * 3) + " points)";
             } else {
                 system.description += ` (standard effect: ${stun} STUN, ${body} BODY)`;

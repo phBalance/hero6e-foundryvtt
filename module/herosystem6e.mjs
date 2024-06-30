@@ -435,20 +435,18 @@ Hooks.on("renderDialog", (dialog, html) => {
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
     // Show versions
-    if (game.user.isGM) {
-        html.find("header h4").append(`<span>${game.system.version}</span>`);
+    html.find("header h4").append(`<span>${game.system.version}</span>`);
 
-        try {
-            if (data?.actor?.system?.versionHeroSystem6eUpload) {
-                html.find("header h4").append(
-                    ` <span title='Actor version at time of HDC upload'>(${
-                        data?.actor?.system?.versionHeroSystem6eUpload || ""
-                    })</span>`,
-                );
-            }
-        } catch (err) {
-            console.log(err);
+    try {
+        if (data?.actor?.system?.versionHeroSystem6eUpload) {
+            html.find("header h4").append(
+                ` <span title='Actor version at time of HDC upload'>(${
+                    data?.actor?.system?.versionHeroSystem6eUpload || ""
+                })</span>`,
+            );
         }
+    } catch (err) {
+        console.log(err);
     }
 
     // Change Type

@@ -48,18 +48,18 @@
     </div>
 
     <div class="card-section" data-visibility="gm">
-        <div class="description-tiny">Effect</div>
-        <div class="description-medium" >{{ stunDamageEffective }} EFFECT</div>
+        <div class="description-tiny">Mind Scan Effect After Defenses</div>
+        <div class="description-medium" >{{ stunDamageEffective }} Effect</div>
         <div class="description-tiny">{{{ effects }}}</div>
     </div>
 
     {{#if (gte stunDamage targetEgo)}}
         <div>
-            <span class="Hit">SUCCESS: </span>{{buttonText}}. {{buttonTitle}}
+            <span class="Hit">SUCCESS</span> vs {{buttonText}}. {{buttonTitle}}
         </div>
     {{else}}
         <div>
-            <span class="Miss">FAIL: </span> {{buttonText}}. You know nothing more about the target.
+            <span class="Miss">FAIL</span> vs {{buttonText}}. You know nothing more about the target.
         </div>
     {{/if}}
         

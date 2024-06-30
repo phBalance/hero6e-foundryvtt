@@ -69,7 +69,7 @@ export async function migrateWorld() {
     if (game.actors.size === 0 && game.items.size === 0) return;
 
     // Chat Card for GM about new version
-    let content = `Version ${game.system.version} of ${game.system.name} has been installed. Details can be read at <a href="https://github.com/dmdorman/hero6e-foundryvtt/blob/main/CHANGELOG.md">Changelog</a>.<br /><br />If you find any problems, are missing things, or just would like a feature that is lacking, please report these <a href="https://github.com/dmdorman/hero6e-foundryvtt/issues">HERE</a>.<br /><br />There is also a <a href="https://discord.com/channels/609528652878839828/770825017729482772">discord channel</a> where you can interactively communicate with others using ${game.system.name}.`;
+    let content = `Version ${game.system.version} of ${game.system.name} has been installed. Details can be read at <a href="https://github.com/dmdorman/hero6e-foundryvtt/blob/main/CHANGELOG.md">Changelog</a>.<br /><br />If you find any problems, are missing things, or just would like a feature that is lacking, please report these <a href="https://github.com/dmdorman/hero6e-foundryvtt/issues">HERE</a>.<br /><br />There is also a <a href="https://discord.com/channels/609528652878839828/770825017729482772">Discord channel</a> where you can interactively communicate with others using ${game.system.name}.`;
 
     // if (installedVersion != "1") {
     //     content += '<h2><b>Short Summery of update:</b></h2>';

@@ -738,13 +738,15 @@ export class HeroSystemActorSheet extends ActorSheet {
                         data.allConstantEffects.push(d);
 
                         if (game.settings.get(game.system.id, "alphaTesting")) {
-                            console.log(
-                                getPowerInfo({
-                                    xmlid: d.system.XMLID,
-                                    actor: this.actor,
-                                }),
-                            );
-                            ui.notifications.warn(`${d.system.XMLID} has no duration specified.`);
+                            const powerInfo = getPowerInfo({
+                                xmlid: d.system.XMLID,
+                                actor: this.actor,
+                            });
+                            if (!powerInfo) {
+                                ui.notifications.warn(`${d.system.XMLID} has no powerInfo/config.`);
+                            } else {
+                                ui.notifications.warn(`${d.system.XMLID} has no duration specified.`);
+                            }
                         }
                 }
             }
@@ -858,6 +860,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             (i) => i.baseInfo.type.includes("framework") || i.baseInfo.type.includes("compound"),
         );
         if (parentData) {
+            if (parentData.system.is5e !== this.actor.system.is5e) {
+                ui.notifications.warn(
+                    `${parentData.name} is a ${parentData.system.is5e ? "5e" : "6e"} item.  ${this.actor.name} is a ${
+                        this.actor.system.is5e ? "5e" : "6e"
+                    } actor.  Mixing 5e/6e may have unpredictable results.`,
+                );
+            }
             await this.dropFrameworkItem(
                 parentData,
                 parentId,
@@ -865,6 +874,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
         } else {
             for (const itemData of itemsToAdd) {
+                if (itemData.system.is5e !== this.actor.system.is5e) {
+                    ui.notifications.warn(
+                        `${itemData.name} is a ${itemData.system.is5e ? "5e" : "6e"} item.  ${this.actor.name} is a ${
+                            this.actor.system.is5e ? "5e" : "6e"
+                        } actor.  Mixing 5e/6e may have unpredictable results.`,
+                    );
+                }
                 await this.dropFrameworkItem(itemData);
             }
         }
@@ -917,6 +933,14 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Handle item sorting within the same Actor
         // TODO: Allow drag/drop to change order
         if (this.actor.uuid === item.parent?.uuid) return this._onSortItem(event, itemData);
+
+        if (itemData.system.is5e !== this.actor.system.is5e) {
+            ui.notifications.warn(
+                `${itemData.name} is a ${itemData.system.is5e ? "5e" : "6e"} item.  ${this.actor.name} is a ${
+                    this.actor.system.is5e ? "5e" : "6e"
+                } actor.  Mixing 5e/6e may have unpredictable results.`,
+            );
+        }
 
         // Create the owned item
         await this._onDropItemCreate(itemData, itemData.system.PARENTID);

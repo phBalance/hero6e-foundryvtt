@@ -40,7 +40,7 @@ async function CreateHeroMacros() {
 
     macroItemsArray.push({
         img: "icons/svg/regen.svg",
-        name: "Full Health for all tokens in scene",
+        name: "Full Health all owned tokens in scene",
         type: "script",
         command: `
         Dialog.confirm({
