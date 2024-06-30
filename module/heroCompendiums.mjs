@@ -3,24 +3,22 @@ import { HEROSYS } from "./herosystem6e.mjs";
 export async function CreateHeroCompendiums() {
     if (!game.user.isGM) return;
     console.log("createHeroCompendiums");
-    CreateHeroItems();
+    try {
+        CreateHeroItems();
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function createItem(itemDataArray, packId) {
     try {
-        // if (!itemData.system) {
-        //     console.warn("missing system", itemData);
-        //     return;
-        // }
-
         const item = await Item.createDocuments(itemDataArray, {
-            pack: packId, //"hero6efoundryvttv2packs.hero6ePowers",
+            pack: packId,
         });
 
-        //console.log(item[0]);
         await item[0]._postUpload();
-    } catch (ex) {
-        console.error(ex);
+    } catch (e) {
+        console.error(e);
     }
 }
 
