@@ -432,31 +432,37 @@ Hooks.on("renderDialog", (dialog, html) => {
 });
 
 Hooks.on("renderActorSheet", (dialog, html, data) => {
-    html.find("header h4").append(`<span>${game.system.version}</span>`);
+    // Show versions
+    if (game.user.isGM) {
+        html.find("header h4").append(`<span>${game.system.version}</span>`);
 
-    try {
-        if (data?.actor?.system?.versionHeroSystem6eUpload) {
-            html.find("header h4").append(
-                ` <span title='Actor version at time of HDC upload'>(${
-                    data?.actor?.system?.versionHeroSystem6eUpload || ""
-                })</span>`,
-            );
+        try {
+            if (data?.actor?.system?.versionHeroSystem6eUpload) {
+                html.find("header h4").append(
+                    ` <span title='Actor version at time of HDC upload'>(${
+                        data?.actor?.system?.versionHeroSystem6eUpload || ""
+                    })</span>`,
+                );
+            }
+        } catch (err) {
+            console.log(err);
         }
-    } catch (err) {
-        console.log(err);
     }
 
-    let element = document.createElement("a");
-    element.setAttribute(`data-id`, data.actor.id);
-    element.title = data.actor.type.toUpperCase().replace("2", "");
-    element.addEventListener("click", () => {
-        const actor = game.actors.get(event.target.dataset.id);
-        actor.ChangeType();
-    });
+    // Change Type
+    if (game.user.isGM) {
+        let element = document.createElement("a");
+        element.setAttribute(`data-id`, data.actor.id);
+        element.title = data.actor.type.toUpperCase().replace("2", "");
+        element.addEventListener("click", () => {
+            const actor = game.actors.get(event.target.dataset.id);
+            actor.ChangeType();
+        });
 
-    element.innerHTML = `<i class="fal fa-user-robot"></i>Type`;
+        element.innerHTML = `<i class="fal fa-user-robot"></i>Type`;
 
-    html.find("header h4").after(element);
+        html.find("header h4").after(element);
+    }
 });
 
 Hooks.on("renderItemSheet", (dialog, html) => {

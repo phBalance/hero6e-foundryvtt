@@ -2,10 +2,9 @@
 
 ## Version 3.0.81 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-## Version 3.0.81
-
 - Fix bug where conditional defenses prevented some attacks from applying damage.
-- Improved Drag and Drop support to handle compound powers within a framework.
+- Improved Drag and Drop support to handle compound powers within a framework. [#1102](https://github.com/dmdorman/hero6e-foundryvtt/issues/1102) [#1100](https://github.com/dmdorman/hero6e-foundryvtt/issues/1100)
+- Players no longer see system versions and token type on actor sheets. [#1096](https://github.com/dmdorman/hero6e-foundryvtt/issues/1102) [#1096](https://github.com/dmdorman/hero6e-foundryvtt/issues/1100)
 
 
 ## Version 3.0.80
