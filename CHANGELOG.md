@@ -3,7 +3,7 @@
 ## Version 3.0.81 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed bug where conditional defenses prevented some attacks from applying damage.
-- Improved Drag and Drop support to handle compound powers within a framework. [#1102](https://github.com/dmdorman/hero6e-foundryvtt/issues/1102) [#1100](https://github.com/dmdorman/hero6e-foundryvtt/issues/1100)
+- Improved Drag and Drop support to handle compound powers within a framework. [#1102](https://github.com/dmdorman/hero6e-foundryvtt/issues/1102) [#1100](https://github.com/dmdorman/hero6e-foundryvtt/issues/1100) [#1111](https://github.com/dmdorman/hero6e-foundryvtt/issues/1111)
 - Players no longer see system versions and token type on actor sheets. [#1096](https://github.com/dmdorman/hero6e-foundryvtt/issues/1096)
 - HeroItems and HeroMacros compendiums are now created dynamically for each world.  You can drag and drop these compendium items onto an actor sheet or hotbar slot.  Note that the Default Edition (5e/6e) setting is used to create the compendiums. [#141](https://github.com/dmdorman/hero6e-foundryvtt/issues/141) [#1101](https://github.com/dmdorman/hero6e-foundryvtt/issues/1101)
 
