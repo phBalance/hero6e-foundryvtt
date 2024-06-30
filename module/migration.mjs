@@ -85,6 +85,9 @@ export async function migrateWorld() {
 
     await ChatMessage.create(chatData);
 
+    // Create or Re-create Compendium
+    CreateHeroCompendiums();
+
     // Fix any invalid actor types
     for (let invalidId of game.actors.invalidDocumentIds) {
         let invalidActor = game.actors.getInvalid(invalidId);
