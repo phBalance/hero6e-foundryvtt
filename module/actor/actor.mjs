@@ -1031,6 +1031,11 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async uploadFromXml(xml) {
+        const uploadPerformance = {
+            startTime: new Date(),
+            _d: new Date(),
+        };
+
         // Convert xml string to xml document (if necessary)
         if (typeof xml === "string") {
             const parser = new DOMParser();
@@ -1064,13 +1069,16 @@ export class HeroSystem6eActor extends Actor {
         }
 
         // Remove all existing effects
-        await this.deleteEmbeddedDocuments(
-            "ActiveEffect",
-            this.effects.map((o) => o.id),
+        let promiseArray = [];
+        promiseArray.push(
+            this.deleteEmbeddedDocuments(
+                "ActiveEffect",
+                this.effects.map((o) => o.id),
+            ),
         );
 
         // Remove all items from
-        await this.deleteEmbeddedDocuments("Item", Array.from(this.items.keys()));
+        promiseArray.push(this.deleteEmbeddedDocuments("Item", Array.from(this.items.keys())));
 
         let changes = {};
 
@@ -1080,10 +1088,13 @@ export class HeroSystem6eActor extends Actor {
 
         // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
         const characterName = heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME || this.name;
+        uploadPerformance.removeEffects = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
         this.name = characterName;
         changes["name"] = this.name;
 
-        // Reset system property to default
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Reset system properties to defaults
         const _actor = await HeroSystem6eActor.create(
             {
                 name: "Test Actor",
@@ -1105,10 +1116,23 @@ export class HeroSystem6eActor extends Actor {
             }
         }
         if (this.id) {
-            await this.update(changes);
+            for (let prop of Object.keys(this.flags)) {
+                changes[`flags.-=${prop}`] = null;
+            }
+
+            promiseArray.push(this.update(changes));
         }
 
+        // Wait for promiseArray to finish
+        await Promise.all(promiseArray);
+        uploadPerformance.resetToDefault = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
+        promiseArray = [];
         changes = {};
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// WE ARE DONE RESETTING TOKEN PROPS
+        /// NOW LOAD THE HDC STUFF
 
         // Heroic Action Points (always keep the value)
         changes["system.hap.value"] = retainValuesOnUpload.hap;
@@ -1144,7 +1168,8 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (this.system.is5e && this.id) {
-            await this.update({ "system.is5e": this.system.is5e });
+            changes[`system.is5e`] = this.system.is5e;
+            //await this.update({ "system.is5e": this.system.is5e });
         }
 
         const xmlItemsToProcess =
@@ -1163,10 +1188,14 @@ export class HeroSystem6eActor extends Actor {
             1; // Restore retained damage
         const uploadProgressBar = new HeroProgressBar(`${this.name}: Processing HDC file`, xmlItemsToProcess, 1);
 
-        await this.#addFreeStuff(uploadProgressBar);
+        promiseArray.push(this.#addFreeStuff(uploadProgressBar));
+
+        uploadPerformance.progressBarFreeStuff = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         // ITEMS
-
+        let itemPromiseArray = [];
+        const itemsToCreate = [];
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
@@ -1198,23 +1227,27 @@ export class HeroSystem6eActor extends Actor {
                     }
 
                     // Indicate we're processing this aspect of the HDC. If it crashes it should remain showing this progress note.
-                    uploadProgressBar.advance(`${this.name}: Adding ${itemTag} ${itemData.name}`);
+                    //uploadProgressBar.advance(`${this.name}: Adding ${itemTag} ${itemData.name}`);
 
                     if (this.id) {
-                        const item = await HeroSystem6eItem.create(itemData, {
-                            parent: this,
-                        });
-                        try {
-                            await item._postUpload();
-                        } catch (e) {
-                            console.error(e);
-                            await ui.notifications.error(
-                                `${this.name}/${item.name}/${item.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                { console: true, permanent: true },
-                            );
-                            await item.delete();
-                            continue;
-                        }
+                        //const item = await
+                        // itemPromiseArray.push(
+                        //     HeroSystem6eItem.create(itemData, {
+                        //         parent: this,
+                        //     }),
+                        // );
+                        itemsToCreate.push(itemData);
+                        // try {
+                        //     await item._postUpload();
+                        // } catch (e) {
+                        //     console.error(e);
+                        //     await ui.notifications.error(
+                        //         `${this.name}/${item.name}/${item.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                        //         { console: true, permanent: true },
+                        //     );
+                        //     await item.delete();
+                        //     continue;
+                        // }
 
                         // COMPOUNDPOWER is similar to a MULTIPOWER.
                         // MULTIPOWER uses PARENTID references.
@@ -1233,7 +1266,7 @@ export class HeroSystem6eActor extends Actor {
                                             });
                                             if (!power) {
                                                 await ui.notifications.error(
-                                                    `${this.name}/${item.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                    `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
                                                     {
                                                         console: true,
                                                         permanent: true,
@@ -1261,22 +1294,23 @@ export class HeroSystem6eActor extends Actor {
                                         POSITION: parseInt(system2.POSITION),
                                     },
                                 };
-                                const item2 = await HeroSystem6eItem.create(itemData2, { parent: this });
-                                try {
-                                    await item2._postUpload();
-                                } catch (e) {
-                                    console.error(e);
-                                    await ui.notifications.error(
-                                        `${this.name}/${item.name}/${item2.name}/${item2.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                        {
-                                            console: true,
-                                            permanent: true,
-                                        },
-                                    );
-                                    console.error(e);
-                                    await item2.delete();
-                                    continue;
-                                }
+                                //const item2 = await HeroSystem6eItem.create(itemData2, { parent: this });
+                                itemsToCreate.push(itemData2);
+                                // try {
+                                //     //await item2._postUpload();
+                                // } catch (e) {
+                                //     console.error(e);
+                                //     await ui.notifications.error(
+                                //         `${this.name}/${itemData.name}/${item2.name}/${item2.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                //         {
+                                //             console: true,
+                                //             permanent: true,
+                                //         },
+                                //     );
+                                //     console.error(e);
+                                //     //await item2.delete();
+                                //     continue;
+                                // }
                             }
                         }
                     } else {
@@ -1284,14 +1318,30 @@ export class HeroSystem6eActor extends Actor {
                             temporary: true,
                             parent: this,
                         });
-                        //item.id = item.system.XMLID + item.system.POSITION
                         this.items.set(item.system.XMLID + item.system.POSITION, item);
-                        await item._postUpload();
+                        //await item._postUpload();
                     }
+
+                    uploadPerformance.items ??= [];
+                    uploadPerformance.items.push({ name: itemData.name, d: new Date() - uploadPerformance._d });
+                    uploadPerformance._d = new Date();
                 }
                 delete heroJson.CHARACTER[itemTag];
             }
         }
+        uploadPerformance.preItems = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
+        await this.createEmbeddedDocuments("Item", itemsToCreate);
+        uploadPerformance.createItems = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
+
+        await Promise.all(itemPromiseArray);
+        uploadPerformance.itemPromiseArray = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
+
+        await Promise.all(this.items.map((i) => i._postUpload({ render: false, uploadProgressBar })));
+        uploadPerformance.postUpload = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         uploadProgressBar.advance(`${this.name}: Validating powers`);
 
@@ -1312,6 +1362,9 @@ export class HeroSystem6eActor extends Actor {
                 );
             }
         });
+
+        uploadPerformance.validate = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         // Warn about invalid adjustment targets
         for (const item of this.items.filter((item) => item.baseInfo?.type?.includes("adjustment"))) {
@@ -1339,6 +1392,9 @@ export class HeroSystem6eActor extends Actor {
                 }
             }
         }
+
+        uploadPerformance.invalidTargets = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         uploadProgressBar.advance(`${this.name}: Uploading image`);
 
@@ -1392,6 +1448,8 @@ export class HeroSystem6eActor extends Actor {
             // If they really want the image to stay, they should put it in the HDC file.
             changes["img"] = CONST.DEFAULT_TOKEN;
         }
+        uploadPerformance.image = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         uploadProgressBar.advance(`${this.name}: Saving core changes`);
 
@@ -1411,27 +1469,35 @@ export class HeroSystem6eActor extends Actor {
 
         // Save all our changes (unless temporary actor/quench)
         if (this.id) {
-            await this.update(changes);
+            promiseArray.push(this.update(changes));
         }
 
+        await Promise.all(promiseArray);
+        uploadPerformance.nonItems = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
+
         // Set base values to HDC LEVELs and calculate costs of things.
-        await this._postUpload(true);
+        await this._postUpload({ render: false });
+        uploadPerformance.actorPostUpload = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         // Re-run _postUpload for CSL's or items that showAttacks so we can guess associated attacks (now that all attacks are loaded)
         this.items
             .filter((item) => item.system.csl || item.baseInfo?.editOptions?.showAttacks)
             .forEach(async (item) => {
-                await item._postUpload();
+                await item._postUpload({ render: false });
             });
 
         // Re-run _postUpload for SKILLS
         this.items
             .filter((item) => item.type === "skill")
             .forEach(async (item) => {
-                await item._postUpload();
+                await item._postUpload({ render: false });
             });
 
         uploadProgressBar.advance(`${this.name}: Restoring retained damage`);
+        uploadPerformance.postUpload2 = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         // Apply retained damage
         if (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end) {
@@ -1439,13 +1505,18 @@ export class HeroSystem6eActor extends Actor {
             this.system.characteristics.stun.value -= retainValuesOnUpload.stun;
             this.system.characteristics.end.value -= retainValuesOnUpload.end;
             if (this.id) {
-                await this.update({
-                    "system.characteristics.body.value": this.system.characteristics.body.value,
-                    "system.characteristics.stun.value": this.system.characteristics.stun.value,
-                    "system.characteristics.end.value": this.system.characteristics.end.value,
-                });
+                await this.update(
+                    {
+                        "system.characteristics.body.value": this.system.characteristics.body.value,
+                        "system.characteristics.stun.value": this.system.characteristics.stun.value,
+                        "system.characteristics.end.value": this.system.characteristics.end.value,
+                    },
+                    { render: false },
+                );
             }
         }
+        uploadPerformance.retainedDamage = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         // If we have control of this token, reaquire to update movement types
         const myToken = this.getActiveTokens()?.[0];
@@ -1453,8 +1524,14 @@ export class HeroSystem6eActor extends Actor {
             myToken.release();
             myToken.control();
         }
+        uploadPerformance.tokenControl = new Date() - uploadPerformance._d;
+        uploadPerformance._d = new Date();
 
         uploadProgressBar.close(`Done uploading ${this.name}`);
+
+        uploadPerformance.totalTime = new Date() - uploadPerformance.startTime;
+
+        console.log("Upload Performance", uploadPerformance);
     }
 
     async #addFreeStuff(uploadProgressBar) {
@@ -1478,7 +1555,8 @@ export class HeroSystem6eActor extends Actor {
                 temporary: this.id ? false : true,
                 parent: this,
             });
-            await perceptionItem._postUpload();
+            //await
+            perceptionItem._postUpload();
 
             // MANEUVERS
             const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
@@ -1530,7 +1608,8 @@ export class HeroSystem6eActor extends Actor {
                         if (maneuverDetails.attack) {
                             await item.makeAttack();
                         }
-                        await item._postUpload();
+                        //await
+                        item._postUpload();
                     }
                 });
         }

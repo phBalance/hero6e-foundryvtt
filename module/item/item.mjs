@@ -990,7 +990,7 @@ export class HeroSystem6eItem extends Item {
         return originalRange === this.system.range;
     }
 
-    async _postUpload() {
+    async _postUpload(options) {
         const configPowerInfo = this.baseInfo; //getPowerInfo({ item: this });
 
         let changed = this.setInitialItemValueAndMax();
@@ -1311,8 +1311,9 @@ export class HeroSystem6eItem extends Item {
 
         // Save changes
         if (changed && this.id) {
-            await this.update({ system: this.system });
+            await this.update({ system: this.system }, options);
         }
+        options?.uploadProgressBar.advance(`${this.actor.name}: Adding ${this.name}`);
 
         // ACTIVE EFFECTS
         if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {
