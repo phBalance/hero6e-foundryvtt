@@ -1313,7 +1313,7 @@ export class HeroSystem6eItem extends Item {
         if (changed && this.id) {
             await this.update({ system: this.system }, options);
         }
-        options?.uploadProgressBar.advance(`${this.actor.name}: Adding ${this.name}`);
+        options?.uploadProgressBar?.advance(`${this.actor.name}: Adding ${this.name}`);
 
         // ACTIVE EFFECTS
         if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {
