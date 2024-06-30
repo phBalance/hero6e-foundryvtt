@@ -317,7 +317,7 @@ export async function AttackToHit(item, options) {
         heroRoller.addNumber(parseInt(options.mindScanChoices), "Number Of Minds");
     }
     if (parseInt(options.mindScanFamiliar)) {
-        heroRoller.addNumber(parseInt(options.mindScanFamiliar), "Mind Familarity");
+        heroRoller.addNumber(parseInt(options.mindScanFamiliar), "Mind Familiarity");
     }
 
     // There are no range penalties if this is a line of sight power or it has been bought with
@@ -327,7 +327,7 @@ export async function AttackToHit(item, options) {
         !(item.system.range === "los" || item.system.range === "special" || noRangeModifiers || normalRange)
     ) {
         // Educated guess for token
-        let token = actor.getActiveTokens()[0];
+        const token = actor.getActiveTokens()[0];
         if (!token) {
             // We can still proceed without a token for our actor.  We just don't know the range to our potential target.
             ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
@@ -628,8 +628,8 @@ export async function AttackToHit(item, options) {
             }
         }
 
-        // MindScan typially has just 1 target, but could have more.  Use same roll for all targets.
-        const targetHeroRoller = aoeAlwaysHit ? heroRoller : options.mindScanChoices ? heroRoller : heroRoller.clone();
+        // Mind scan typically has just 1 target, but could have more. Use same roll for all targets.
+        const targetHeroRoller = aoeAlwaysHit || options.mindScanChoices ? heroRoller : heroRoller.clone();
         let toHitRollTotal = 0;
         let by = 0;
         let autoSuccess = false;
@@ -641,6 +641,7 @@ export async function AttackToHit(item, options) {
         } else {
             // TODO: Autofire against multiple targets should have increasing difficulty
 
+            // TODO: FIXME: This should not be looking at internals. When mind scan can only affect 1 target, remove.
             if (typeof targetHeroRoller._successRolledValue === "undefined") {
                 //TODO: add a methods to check if roll has been made.
                 await targetHeroRoller.makeSuccessRoll(true, targetDefenseValue).roll();
@@ -676,7 +677,7 @@ export async function AttackToHit(item, options) {
             // Dont' bother to track a bogus target created so we get dice no nice rolls when no target selected.
             targetData.push({
                 id: target.id,
-                name: target.name || "Select Target",
+                name: target.name || "No Target Selected",
                 aoeAlwaysHit: aoeAlwaysHit,
                 explosion: explosion,
                 toHitChar: toHitChar,
@@ -685,7 +686,11 @@ export async function AttackToHit(item, options) {
                 hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
                 value: targetDefenseValue,
                 result: { hit: hit, by: by.toString() },
-                roller: options.mindScanChoices && targetsArray?.[0]?.id === target.id ? targetHeroRoller : null,
+                roller: options.mindScanChoices
+                    ? targetsArray[0].id === target.id
+                        ? targetHeroRoller
+                        : null
+                    : targetHeroRoller,
                 renderedRoll: await targetHeroRoller.render(),
             });
 
