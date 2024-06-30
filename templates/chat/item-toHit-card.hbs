@@ -98,7 +98,7 @@
                     </div>
                 {{else}}
                     {{!-- Mind Scan - we only want the 1st mind to show the roll info. Only show to GM. --}}
-                    {{#if eq @index 0}}
+                    {{#if (eq @index 0)}}
                         <div class="card-section" data-visibility="gm">
                             <div class="description-tiny">{{../maxMinds}} mind(s)</div>
                             <div class="hit-roll">{{{ target.renderedRoll }}}</div>
@@ -139,7 +139,7 @@
                         data-damageMod="{{../damageMod}}" data-hitRollData="{{../hitRollData}}"
                         data-effectiveStr="{{../effectiveStr}}" data-targetIds="{{../targetIds}}" data-velocity="{{../velocity}}" 
                         data-boostable-Charges="{{../boostableCharges}}" data-to-hit-roll-total="{{../toHitRollTotal}}" data-target="{{this.id}}">
-                        {{this.name}}
+                        <b>{{this.name}}</b>
                     </button>
                 {{/if}}
             {{/each}}
