@@ -89,6 +89,11 @@ class Roll3Mock extends RollMock {
     static DieClass = FixedDieRoll(this.fixedRollResult);
 }
 
+class Roll2Mock extends RollMock {
+    static fixedRollResult = 2;
+    static DieClass = FixedDieRoll(this.fixedRollResult);
+}
+
 class Roll1Mock extends RollMock {
     static fixedRollResult = 1;
     static DieClass = FixedDieRoll(this.fixedRollResult);
@@ -705,7 +710,7 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe("normal roll", function () {
+                describe.only("normal roll", function () {
                     it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
@@ -762,6 +767,20 @@ export function registerDiceTests(quench) {
                         expect(roller.getBodyTotal()).deep.to.equal(0);
                     });
 
+                    it("should handle a -1 pip equation", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeNormalRoll().addNumber(-1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).deep.to.equal([-1]);
+                        expect(roller.getStunTotal()).deep.to.equal(-1);
+
+                        expect(roller.getBodyTerms()).deep.to.equal([0]);
+                        expect(roller.getBodyTotal()).deep.to.equal(0);
+                    });
+
                     it("should handle a 1 die equation", async function () {
                         const TestRollMock = Roll6Mock;
 
@@ -776,7 +795,21 @@ export function registerDiceTests(quench) {
                         expect(roller.getBodyTotal()).deep.to.equal(2);
                     });
 
-                    it("should handle a 1 die minus 1 equation", async function () {
+                    it("should handle a minus 1 die equation", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeNormalRoll().addDice(-1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).deep.to.equal([-TestRollMock.fixedRollResult]);
+                        expect(roller.getStunTotal()).deep.to.equal(-TestRollMock.fixedRollResult);
+
+                        expect(roller.getBodyTerms()).deep.to.equal([-2]);
+                        expect(roller.getBodyTotal()).deep.to.equal(-2);
+                    });
+
+                    it("should handle a 1 die minus 1 equation (roll 6)", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock).makeNormalRoll().addDiceMinus1(1);
@@ -788,6 +821,34 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getBodyTerms()).deep.to.equal([1]);
                         expect(roller.getBodyTotal()).deep.to.equal(1);
+                    });
+
+                    it("should handle a 1 die minus 1 equation (roll 2)", async function () {
+                        const TestRollMock = Roll2Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeNormalRoll().addDiceMinus1(1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).deep.to.equal([TestRollMock.fixedRollResult - 1]);
+                        expect(roller.getStunTotal()).deep.to.equal(TestRollMock.fixedRollResult - 1);
+
+                        expect(roller.getBodyTerms()).deep.to.equal([0]);
+                        expect(roller.getBodyTotal()).deep.to.equal(0);
+                    });
+
+                    it("should handle a minus (1 die minus 1) equation", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeNormalRoll().addDiceMinus1(-1);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).deep.to.equal([-1 * (TestRollMock.fixedRollResult - 1)]);
+                        expect(roller.getStunTotal()).deep.to.equal(-1 * (TestRollMock.fixedRollResult - 1));
+
+                        expect(roller.getBodyTerms()).deep.to.equal([-1]);
+                        expect(roller.getBodyTotal()).deep.to.equal(-1);
                     });
 
                     it("should handle a multiple dice equation", async function () {
@@ -806,6 +867,24 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getBodyTerms()).deep.to.equal([2, 2, 2]);
                         expect(roller.getBodyTotal()).deep.to.equal(6);
+                    });
+
+                    it("should handle a multiple negative dice equation", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeNormalRoll().addDice(-3);
+
+                        await roller.roll();
+
+                        expect(roller.getStunTerms()).deep.to.equal([
+                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.fixedRollResult,
+                        ]);
+                        expect(roller.getStunTotal()).deep.to.equal(-3 * TestRollMock.fixedRollResult);
+
+                        expect(roller.getBodyTerms()).deep.to.equal([-2, -2, -2]);
+                        expect(roller.getBodyTotal()).deep.to.equal(-6);
                     });
 
                     it("should calculate BODY correctly for a half die with a roll of 3", async function () {

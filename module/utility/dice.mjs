@@ -322,6 +322,38 @@ export class HeroRoller {
         return this;
     }
 
+    /**
+     * V11 and V12 (or later) behave differently. V11 can have a operatorTerm to start
+     * terms but it cannot have negative dice terms. V12, on the other hand, cannot handle
+     * starting with an operatorTerm and cannot handle negative dice terms.
+     *
+     * @returns {Number} numDice
+     */
+    static WORK_AROUND_STRING = "v12+ work around";
+    #prefixFormula(numDice) {
+        if (isGameV12OrLater() && this._formulaTerms.length === 0) {
+            if (numDice < 0) {
+                this._formulaTerms.push(
+                    new NumericTerm({
+                        number: 0,
+                        options: {
+                            _hrQualifier: HeroRoller.QUALIFIER.NUMBER,
+                            _hrTag: {
+                                name: HeroRoller.WORK_AROUND_STRING,
+                                value: 0,
+                            },
+                        },
+                    }),
+                );
+                this._formulaTerms.push(new OperatorTerm({ operator: "-" }));
+            }
+        } else {
+            this.#addOperatorTerm(numDice >= 0 ? "+" : "-");
+        }
+
+        return Math.abs(numDice);
+    }
+
     #addOperatorTerm(operator) {
         this._formulaTerms.push(new OperatorTerm({ operator: operator }));
     }
@@ -331,11 +363,8 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._formulaTerms.length > 0) {
-            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
-        }
+        numDice = this.#prefixFormula(numDice);
 
-        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
@@ -361,11 +390,8 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._formulaTerms.length > 0) {
-            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
-        }
+        numDice = this.#prefixFormula(numDice);
 
-        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
@@ -391,11 +417,8 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._formulaTerms.length > 0) {
-            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
-        }
+        numDice = this.#prefixFormula(numDice);
 
-        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
@@ -421,11 +444,8 @@ export class HeroRoller {
             return this;
         }
 
-        if (this._formulaTerms.length > 0) {
-            this.#addOperatorTerm(numDice > 0 ? "+" : "-");
-        }
+        numDice = this.#prefixFormula(numDice);
 
-        numDice = this._formulaTerms.length > 0 ? Math.abs(numDice) : numDice;
         this._formulaTerms.push(
             new Die({
                 faces: 6,
@@ -824,10 +844,23 @@ export class HeroRoller {
         return this._hitLocation;
     }
 
+    /**
+     * Make a copy of this existing roller that can be modified without affecting the original.
+     *
+     * @returns HeroRoller
+     */
     clone() {
         return HeroRoller.fromJSON(this.toJSON());
     }
 
+    /**
+     * Make a copy of this existing roller that can be modified without affecting the original however
+     * change the type of roll to the newType (e.g. normal, killing, etc)
+     *
+     * @param {HeroRoller.ROLL_TYPE} newType
+     *
+     * @returns {HeroRoller}
+     */
     async cloneWhileModifyingType(newType) {
         const data = this.toData();
         data._type = newType;
@@ -1026,6 +1059,8 @@ export class HeroRoller {
     }
 
     #calculateValue(originalResult, adjustedResult, termQualifier) {
+        const adjustedResultSign = adjustedResult < 0 ? -1 : 1;
+
         switch (this._type) {
             case HeroRoller.ROLL_TYPE.BASIC:
             case HeroRoller.ROLL_TYPE.SUCCESS:
@@ -1067,13 +1102,13 @@ export class HeroRoller {
                         }
                     }
                 } else {
-                    if (adjustedResult <= 1) {
+                    if (Math.abs(adjustedResult) <= 1) {
                         return 0;
-                    } else if (adjustedResult === 6) {
-                        return 2;
+                    } else if (Math.abs(adjustedResult) === 6) {
+                        return 2 * adjustedResultSign;
                     }
 
-                    return 1;
+                    return 1 * adjustedResultSign;
                 }
 
             case HeroRoller.ROLL_TYPE.KILLING:
@@ -1090,38 +1125,40 @@ export class HeroRoller {
     }
 
     #buildMetadataForDiceTerm(hrExtra, result, lastOperatorMultiplier) {
-        let adjustedValue = lastOperatorMultiplier * result;
+        let adjustedValue;
 
         if (hrExtra.qualifier === HeroRoller.QUALIFIER.HALF_DIE) {
             if (this._standardEffect) {
-                adjustedValue = HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
+                adjustedValue = lastOperatorMultiplier * HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL;
             } else {
-                adjustedValue = Math.ceil(result / 2);
+                adjustedValue = lastOperatorMultiplier * Math.ceil(result / 2);
             }
 
             hrExtra.min = 1;
             hrExtra.max = 3;
         } else if (hrExtra.qualifier === HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE) {
             if (this._standardEffect) {
-                adjustedValue = HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+                adjustedValue = lastOperatorMultiplier * HeroRoller.STANDARD_EFFECT_DIE_ROLL;
             } else {
-                adjustedValue = result - 1;
+                adjustedValue = lastOperatorMultiplier * (result - 1);
             }
 
             hrExtra.min = 0;
             hrExtra.max = 5;
         } else if (hrExtra.qualifier === HeroRoller.QUALIFIER.FULL_DIE_LESS_ONE_MIN_ONE) {
             if (this._standardEffect) {
-                adjustedValue = HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+                adjustedValue = lastOperatorMultiplier * HeroRoller.STANDARD_EFFECT_DIE_ROLL;
             } else {
-                adjustedValue = Math.max(1, result - 1);
+                adjustedValue = lastOperatorMultiplier * Math.max(1, result - 1);
             }
 
             hrExtra.min = 1;
             hrExtra.max = 5;
         } else {
             if (this._standardEffect) {
-                adjustedValue = HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+                adjustedValue = lastOperatorMultiplier * HeroRoller.STANDARD_EFFECT_DIE_ROLL;
+            } else {
+                adjustedValue = lastOperatorMultiplier * result;
             }
 
             hrExtra.min = 1;
@@ -1144,6 +1181,12 @@ export class HeroRoller {
         const _baseTerms = this._rollObj.terms
             .map((term, index) => {
                 if (term instanceof NumericTerm) {
+                    // Filter out the work around start 0 NumericTerm we need to add at the beginning of all terms to handle a
+                    // negative dice term. It is only needed to make the roll's evaluation work correctly.
+                    if (term.options._hrTag?.name === HeroRoller.WORK_AROUND_STRING) {
+                        return undefined;
+                    }
+
                     const number = lastOperatorMultiplier * term.number;
                     const hrExtra = {
                         term: "Numeric",
