@@ -299,13 +299,13 @@ export class HeroSystem6eItem extends Item {
                 const isSkill = powerInfo?.type.includes("skill");
 
                 if (hasSuccessRoll && isSkill) {
-                    this.skillRollUpdateValue();
+                    this.updateRoll();
                     if (!(await RequiresASkillRollCheck(this))) return;
                     return createSkillPopOutFromItem(this, this.actor);
                 } else if (hasSuccessRoll) {
                     // Handle any type of non skill based success roll with a basic roll
                     // TODO: Basic roll.
-                    this.skillRollUpdateValue();
+                    this.updateRoll();
                     return createSkillPopOutFromItem(this, this.actor);
                 } else {
                     ui.notifications.warn(`${this.name} roll (${hasSuccessRoll}/${isSkill}) is not supported`);
@@ -991,16 +991,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     async _postUpload(options) {
-        const configPowerInfo = this.baseInfo; //getPowerInfo({ item: this });
+        const configPowerInfo = this.baseInfo;
 
         let changed = this.setInitialItemValueAndMax();
 
         changed = this.setInitialRange(configPowerInfo) || changed;
 
-        // Make sure we have the correct skill roll
-        if (this.baseInfo?.type.includes("skill")) {
-            this.skillRollUpdateValue();
-        }
+        this.updateRoll();
 
         changed = this.determinePointCosts() || changed;
 
@@ -3643,8 +3640,10 @@ export class HeroSystem6eItem extends Item {
         }
     }
 
-    skillRollUpdateValue() {
-        if (!this.actor?.id) return; // Like during a compendium upload
+    updateRoll() {
+        // TODO: FIXME: If this is required for the compendium then we need to figure
+        // out another way to determine this is in the compendium.
+        // if (!this.actor?.id) return; // Like during a compendium upload
         const skillData = this.system;
 
         skillData.tags = [];
