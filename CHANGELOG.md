@@ -1,9 +1,11 @@
 # Releases
 
 ## Version 3.0.82 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Improved HDC upload performance.
 
-## Version 3.0.81 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Improved HDC upload performance.
+- Correct presence attacks with negative presence. [#838](https://github.com/dmdorman/hero6e-foundryvtt/issues/838)
+
+## Version 3.0.81
 
 - Fixed bug where conditional defenses prevented some attacks from applying damage. [#1116](https://github.com/dmdorman/hero6e-foundryvtt/issues/1116)
 - Improved Drag and Drop support to handle compound powers within a framework. [#1102](https://github.com/dmdorman/hero6e-foundryvtt/issues/1102) [#1100](https://github.com/dmdorman/hero6e-foundryvtt/issues/1100) [#1111](https://github.com/dmdorman/hero6e-foundryvtt/issues/1111)
