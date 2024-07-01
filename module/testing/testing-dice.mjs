@@ -710,7 +710,7 @@ export function registerDiceTests(quench) {
                     });
                 });
 
-                describe.only("normal roll", function () {
+                describe("normal roll", function () {
                     it("should throw if requesting inappropriate pieces of information", async function () {
                         const TestRollMock = Roll6Mock;
 
@@ -2291,7 +2291,7 @@ export function registerDiceTests(quench) {
                         expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.fixedRollResult);
                     });
 
-                    it("should return the rolled active points for a lowest roll", async function () {
+                    it("should return the rolled active points for a highest roll", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock).makeAdjustmentRoll().addDice(3);
@@ -2338,6 +2338,22 @@ export function registerDiceTests(quench) {
                             1,
                         ]);
                         expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.fixedRollResult + 1 * 1);
+                    });
+
+                    it("should return the rolled active points for a negative term roll", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).makeAdjustmentRoll().addDice(-3).addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getAdjustmentTerms()).to.deep.equal([
+                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.fixedRollResult,
+                            1,
+                        ]);
+                        expect(roller.getAdjustmentTotal()).to.equal(-3 * TestRollMock.fixedRollResult + 1 * 1);
                     });
                 });
 
@@ -2402,7 +2418,7 @@ export function registerDiceTests(quench) {
                         expect(roller.getFlashTotal()).to.equal(3 * 0);
                     });
 
-                    it("should return the rolled active points for a lowest roll", async function () {
+                    it("should return the rolled active points for a highest roll", async function () {
                         const TestRollMock = Roll6Mock;
 
                         const roller = new HeroRoller({}, TestRollMock).makeFlashRoll().addDice(3);
@@ -2411,6 +2427,21 @@ export function registerDiceTests(quench) {
 
                         expect(roller.getFlashTerms()).to.deep.equal([2, 2, 2]);
                         expect(roller.getFlashTotal()).to.equal(3 * 2);
+                    });
+
+                    it("should return the rolled active points for a negative term roll", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeFlashRoll()
+                            .addDice(-3)
+                            .addHalfDice(1)
+                            .addNumber(1);
+
+                        await roller.roll();
+
+                        expect(roller.getFlashTerms()).to.deep.equal([-2, -2, -2, 1, 0]);
+                        expect(roller.getFlashTotal()).to.equal(-3 * 2 + 1 * 1 + 1 * 0);
                     });
 
                     it("should return the rolled active points for a multi term roll", async function () {
@@ -2581,9 +2612,24 @@ export function registerDiceTests(quench) {
                         expect(roller.getEntangleTerms()).to.deep.equal([2, 2, 2, 1, 3]);
                         expect(roller.getEntangleTotal()).to.equal(10);
                     });
+
+                    it("should support body calculations for a roll of negative 6", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeEntangleRoll()
+                            .addDice(-3)
+                            .addHalfDice(1)
+                            .addNumber(3);
+
+                        await roller.roll();
+
+                        expect(roller.getEntangleTerms()).to.deep.equal([-2, -2, -2, 1, 3]);
+                        expect(roller.getEntangleTotal()).to.equal(-2);
+                    });
                 });
 
-                describe.only("Effect roll", async function () {
+                describe("Effect roll", async function () {
                     it("should throw if asking for inappropriate interpretations", async function () {
                         const TestRollMock = Roll1Mock;
 
