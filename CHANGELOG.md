@@ -4,6 +4,7 @@
 
 - Improved HDC upload performance.
 - Correct presence attacks with negative presence. [#838](https://github.com/dmdorman/hero6e-foundryvtt/issues/838)
+- Default Knowledge Skills names now include the "knowledge".  This means when you roll a KS the knowledge is included in the chat message. [#1129](https://github.com/dmdorman/hero6e-foundryvtt/issues/1129)
 
 ## Version 3.0.81
 
