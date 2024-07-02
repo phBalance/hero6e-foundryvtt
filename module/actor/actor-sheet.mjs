@@ -347,7 +347,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     }
                 }
 
-                item.skillRollUpdateValue();
+                item.updateRoll();
 
                 // Charges
                 if (parseInt(item.system.charges?.max || 0) > 0) {

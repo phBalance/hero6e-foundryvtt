@@ -3911,7 +3911,7 @@ export class HeroSystem6eItem extends Item {
             const baseRollValue = skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
             const characteristicValue =
                 characteristic !== "general" && characteristic != ""
-                    ? this.actor.system.characteristics[`${characteristic}`].value
+                    ? this.actor?.system.characteristics?.[`${characteristic}`].value || 0
                     : 0;
             const characteristicAdjustment = Math.round(characteristicValue / 5);
             const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
