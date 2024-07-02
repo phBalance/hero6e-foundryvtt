@@ -3641,9 +3641,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     updateRoll() {
-        // TODO: FIXME: If this is required for the compendium then we need to figure
-        // out another way to determine this is in the compendium.
-        // if (!this.actor?.id) return; // Like during a compendium upload
         const skillData = this.system;
 
         skillData.tags = [];
