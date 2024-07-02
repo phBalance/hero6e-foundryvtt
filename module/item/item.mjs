@@ -1023,15 +1023,20 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Toggles
+        if (this.baseInfo?.behaviors.includes("activatable")) {
+            if (!this.system.showToggle) {
+                this.system.showToggle = true;
+                changed = true;
+            }
+        }
+
         // DEFENSES
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
-        if (
-            configPowerInfo &&
-            (configPowerInfo.behaviors.includes("activatable") || configPowerInfo.type?.includes("characteristic"))
-        ) {
+        if (this.baseInfo?.type.includes("defense") || this.baseInfo?.type?.includes("characteristic")) {
             const newDefenseValue = "defense";
 
-            if (this.system.subType !== newDefenseValue && configPowerInfo?.behaviors.includes("activatable")) {
+            if (this.system.subType !== newDefenseValue && this.baseInfo?.behaviors.includes("activatable")) {
                 this.system.subType = newDefenseValue;
                 this.system.showToggle = true;
                 changed = true;
@@ -1051,7 +1056,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MOVEMENT
-        if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
+        if (this.baseInfo?.type.includes("movement")) {
             const movement = "movement";
             if (this.system.subType !== movement) {
                 this.system.subType = movement;
@@ -1061,7 +1066,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // SKILLS
-        if (configPowerInfo && configPowerInfo.type?.includes("skill")) {
+        if (this.baseInfo?.type?.includes("skill")) {
             const skill = "skill";
             if (this.system.subType !== skill) {
                 this.system.subType = skill;
@@ -1332,10 +1337,12 @@ export class HeroSystem6eItem extends Item {
                     name: activeEffect.name,
                     changes: activeEffect.changes,
                 });
-                await this.actor.update({
-                    [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
-                });
+                if (this.actor) {
+                    await this.actor.update({
+                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
+                            this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
+                    });
+                }
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }

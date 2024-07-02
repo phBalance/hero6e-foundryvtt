@@ -852,8 +852,14 @@ export class HeroSystemActorSheet extends ActorSheet {
         let itemsToAdd = folder.contents;
 
         // Compendiums only have the index entry, so need to get the whole item
-        if (!itemsToAdd?.[0].id) {
+        if (folder.pack || !itemsToAdd?.[0].id) {
             itemsToAdd = await game.packs.get(folder.pack).getDocuments({ folder: folder.id });
+        }
+
+        if (itemsToAdd.length === 0 && folder.children) {
+            for (const childFolder of folder.children) {
+                await this.dropFrameworkFolder(childFolder.folder, null);
+            }
         }
 
         const parentData = itemsToAdd.find(
@@ -959,6 +965,14 @@ export class HeroSystemActorSheet extends ActorSheet {
     // eslint-disable-next-line no-unused-vars
     async _onDropItemCreate(itemData, event) {
         itemData = itemData instanceof Array ? itemData : [itemData];
+        for (const i of itemData) {
+            // Make sure newly dropped items are not active
+            if (i.system.active) {
+                i.system.active = false;
+            }
+            // Remove all active effects, _postUpload will recreate them if necessary
+            i.effects = [];
+        }
         const newItems = await this.actor.createEmbeddedDocuments("Item", itemData);
         for (const newItem of newItems) {
             await newItem._postUpload();
