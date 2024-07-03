@@ -471,6 +471,24 @@ export async function AttackToHit(item, options) {
         if (itemData.usesStrength || itemData.usesTk) {
             let strEnd = Math.max(1, Math.round(options.effectiveStr / 10));
 
+            // But wait, may have purchased STR with reduced endurance
+            const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
+            if (strPower) {
+                const strPowerLevels = parseInt(strPower.system.LEVELS);
+                const strREDUCEDEND = strPower.findModsByXmlid("REDUCEDEND");
+                if (strREDUCEDEND) {
+                    if (strREDUCEDEND.OPTIONID === "ZERO") {
+                        strEnd = 0;
+                    } else {
+                        strEnd = Math.max(1, Math.round(Math.min(options.effectiveStr, strPowerLevels) / 20));
+                    }
+                    // Add back in STR that isn't part of strPower
+                    if (options.effectiveStr > strPowerLevels) {
+                        strEnd += Math.max(1, Math.round((options.effectiveStr - strPowerLevels) / 10));
+                    }
+                }
+            }
+
             // TELIKENESIS is more expensive than normal STR
             if (itemData.usesTk) {
                 spentEnd = Math.ceil((spentEnd * options?.effectiveStr) / item.system.LEVELS);
@@ -504,6 +522,17 @@ export async function AttackToHit(item, options) {
 
         if (newEnd < 0) {
             let stunDice = Math.ceil(Math.abs(newEnd) / 2);
+
+            const confirmed = await Dialog.confirm({
+                title: "USING STUN FOR ENDURANCE",
+                content: `<p><b>${item.name}</b> requires ${spentEnd} END. 
+                <b>${actor.name}</b> has ${valueEnd} END. 
+                Do you want to take ${stunDice}d6 STUN to make up for the lack of END?</p>`,
+            });
+
+            if (!confirmed) {
+                return;
+            }
 
             const stunForEndHeroRoller = new HeroRoller().makeBasicRoll().addDice(stunDice);
             await stunForEndHeroRoller.roll();
