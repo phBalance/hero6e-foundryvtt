@@ -76,6 +76,16 @@
       </div>
     {{/if}}
 
+    {{#if (gt item.system.LEVELS 1)}}
+        <div class="form-group">
+        <label>Effective Levels</label>
+        <div class="noflexwrap">
+        <input type="text" name="effectiveLevels" value="{{effectiveLevels}}" />
+        <label>/ {{item.system.LEVELS}}</label>
+        </div>
+      </div>
+    {{/if}}
+
 
     {{#if (or item.system.usesStrength item.system.usesTk)}}
       <div class="form-group">

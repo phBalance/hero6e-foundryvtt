@@ -816,7 +816,7 @@ export class HeroSystem6eItem extends Item {
      * @param {Modifier} modifier
      * @returns
      */
-    buildAoeAttackParameters(modifier) {
+    buildAoeAttackParameters(modifier, options) {
         const is5e = !!this.actor?.system?.is5e;
 
         let changed = false;
@@ -886,7 +886,9 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     dcFalloff = 1;
                 }
-                dcFalloff = parseInt(modifier.LEVELS || 0) ? parseInt(modifier.LEVELS) : dcFalloff;
+                dcFalloff = parseInt(options?.LEVELS || modifier.LEVELS || 0)
+                    ? parseInt(options?.LEVELS || modifier.LEVELS)
+                    : dcFalloff;
 
                 // TODO: Can we work with DC given all the adders that are possible at the time of attack?
                 const { dc } = convertToDcFromItem(this, {});
@@ -988,6 +990,121 @@ export class HeroSystem6eItem extends Item {
         }
 
         return originalRange === this.system.range;
+    }
+
+    AoeAttackParameters(options) {
+        const aoeModifier = this.getAoeModifier();
+        if (aoeModifier) {
+            const is5e = !!this.actor?.system?.is5e;
+
+            const widthDouble = parseInt(
+                (aoeModifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEWIDTH")?.LEVELS || 0,
+            );
+            const heightDouble = parseInt(
+                (aoeModifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEHEIGHT")?.LEVELS || 0,
+            );
+            // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
+            const width = is5e ? Math.pow(2, widthDouble) : widthDouble || 2;
+            const height = is5e ? Math.pow(2, heightDouble) : heightDouble || 2;
+            let levels = 1;
+            let dcFalloff = 0;
+
+            // 5e has a calculated size
+            if (is5e) {
+                // A bit hacky: create effectiveItem based on options.levels
+                let effectiveItemData = new HeroSystem6eItem(
+                    foundry.utils.mergeObject(this.toObject(), { system: { is5e: true } }),
+                );
+                if ((parseInt(options?.levels) || 0) > 0) {
+                    effectiveItemData.name = "Effective";
+                    effectiveItemData.system.LEVELS = parseInt(options?.levels) || 0;
+                    effectiveItemData.calcItemPoints();
+                }
+
+                if (aoeModifier.XMLID === "AOE") {
+                    // not counting the Area Of Effect Advantage.
+                    // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
+                    //       come up short. We need a raw active cost and build up the advantage multipliers from there.
+                    //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+
+                    const activePointsWithoutAoeAdvantage = Math.max(
+                        effectiveItemData.system.basePointsPlusAdders,
+                        effectiveItemData.system.activePoints / (1 + aoeModifier.BASECOST_total),
+                    );
+                    switch (aoeModifier.OPTIONID) {
+                        case "CONE":
+                            levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
+                            break;
+
+                        case "HEX":
+                            levels = 1;
+                            break;
+
+                        case "LINE":
+                            levels = RoundFavorPlayerUp((2 * activePointsWithoutAoeAdvantage) / 5);
+                            break;
+
+                        case "ANY":
+                        case "RADIUS":
+                            levels = Math.max(1, RoundFavorPlayerUp(activePointsWithoutAoeAdvantage / 10));
+                            break;
+
+                        default:
+                            console.error(
+                                `Unhandled 5e AOE OPTIONID ${aoeModifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                            );
+                            break;
+                    }
+
+                    // Modify major dimension (radius, length, etc). Line is different from all others.
+                    const majorDimensionDoubles = (aoeModifier?.ADDER || []).find(
+                        (adder) => adder.XMLID === "DOUBLEAREA" || adder.XMLID === "DOUBLELENGTH",
+                    );
+                    if (majorDimensionDoubles) {
+                        levels *= Math.pow(2, parseInt(majorDimensionDoubles.LEVELS));
+                    }
+                } else {
+                    // Explosion DC falloff has different defaults based on shape. When
+                    // LEVELS are provided they are the absolute value and not additive to the default.
+                    if (aoeModifier.OPTIONID === "CONE") {
+                        dcFalloff = 2;
+                    } else if (aoeModifier.OPTIONID === "LINE") {
+                        dcFalloff = 3;
+                    } else {
+                        dcFalloff = 1;
+                    }
+                    dcFalloff = parseInt(options?.LEVELS || aoeModifier.LEVELS || 0)
+                        ? parseInt(options?.LEVELS || aoeModifier.LEVELS)
+                        : dcFalloff;
+
+                    // TODO: Can we work with DC given all the adders that are possible at the time of attack?
+                    const { dc } = convertToDcFromItem(effectiveItemData, {});
+
+                    levels = dc * dcFalloff;
+                }
+            } else {
+                levels = parseInt(options?.LEVELS || aoeModifier.LEVELS);
+            }
+
+            // 5e has a slightly different alias for an Explosive Radius in HD.
+            // Otherwise, all other shapes seems the same.
+            const type = aoeModifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : aoeModifier.OPTION_ALIAS;
+            const newAoe = {
+                type: type.toLowerCase(),
+                value: levels,
+                width: width,
+                height: height,
+
+                isExplosion: this.hasExplosionAdvantage(),
+                dcFalloff: dcFalloff,
+            };
+
+            return {
+                ...aoeModifier,
+                ...newAoe,
+            };
+        }
+        return null;
     }
 
     async _postUpload(options) {
@@ -1312,7 +1429,7 @@ export class HeroSystem6eItem extends Item {
         changed = oldDescription !== this.system.description || changed;
 
         // Save changes
-        if (changed && this.id) {
+        if (changed && this.id && this.isEmbedded) {
             await this.update({ system: this.system }, options);
         }
         options?.uploadProgressBar?.advance(`${this.actor.name}: Adding ${this.name}`);
@@ -1904,6 +2021,7 @@ export class HeroSystem6eItem extends Item {
             const modPowerInfo = getPowerInfo({
                 item: modifier,
                 actor: this.actor,
+                is5e: this.system.is5e,
             });
 
             // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)

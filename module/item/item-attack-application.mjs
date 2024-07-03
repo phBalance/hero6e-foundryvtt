@@ -77,27 +77,6 @@ export class ItemAttackFormApplication extends FormApplication {
         const data = this.data;
         const item = data.item;
 
-        const aoe = item.getAoeModifier();
-        if (aoe) {
-            data.aoeText = aoe.OPTION_ALIAS;
-            if (!item.system.areaOfEffect) {
-                ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
-            }
-            const levels = item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
-            if (levels) {
-                data.aoeText += ` (${levels}${getSystemDisplayUnits(item.actor.is5e)})`;
-            }
-
-            if (this.getAoeTemplate() || game.user.targets.size > 0) {
-                data.noTargets = false;
-            } else {
-                data.noTargets = true;
-            }
-        } else {
-            data.noTargets = game.user.targets.size === 0;
-            data.aoeText = null;
-        }
-
         data.targets = game.user.targets;
         data.targets = Array.from(game.user.targets);
 
@@ -116,6 +95,41 @@ export class ItemAttackFormApplication extends FormApplication {
         data.omcvMod ??= item.system.ocv; //TODO: May need to make a distincsion between OCV/OMCV
         data.dmcvMod ??= item.system.dcv;
         data.effectiveStr ??= data.str;
+        data.effectiveLevels ??= data.item.system.LEVELS;
+
+        // let effectiveItem = item;
+
+        // // Create a temporary item based on effectiveLevels
+        // if (data.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
+        //     data.effectiveLevels = parseInt(data.effectiveLevels) || 0;
+        //     if (data.effectiveLevels > 0 && data.effectiveLevels !== parseInt(item.system.LEVELS)) {
+        //         const effectiveItemData = item.toObject();
+        //         effectiveItemData.system.LEVELS = data.effectiveLevels;
+        //         effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
+        //         await effectiveItem._postUpload();
+        //     }
+        // }
+
+        const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels }); //  getAoeModifier();
+        if (aoe) {
+            data.aoeText = aoe.OPTION_ALIAS;
+            // if (!item.system.areaOfEffect) {
+            //     ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
+            // }
+            const levels = aoe.value; //item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
+            if (levels) {
+                data.aoeText += ` (${levels}${getSystemDisplayUnits(item.actor.is5e)})`;
+            }
+
+            if (this.getAoeTemplate() || game.user.targets.size > 0) {
+                data.noTargets = false;
+            } else {
+                data.noTargets = true;
+            }
+        } else {
+            data.noTargets = game.user.targets.size === 0;
+            data.aoeText = null;
+        }
 
         // Boostable Charges
         if (item.system.charges?.value > 1) {
@@ -231,6 +245,7 @@ export class ItemAttackFormApplication extends FormApplication {
         this.data.dcvMod = formData.dcvMod;
 
         this.data.effectiveStr = formData.effectiveStr;
+        this.data.effectiveLevels = formData.effectiveLevels;
 
         this.data.boostableCharges = Math.max(
             0,
@@ -238,6 +253,27 @@ export class ItemAttackFormApplication extends FormApplication {
         );
 
         this.data.velocity = parseInt(formData.velocity || 0);
+
+        // const aoe = this.data.item.AoeAttackParameters({ levels: this.data.effectiveLevels }); //  getAoeModifier();
+        // if (aoe) {
+        //     this.data.aoeText = aoe.OPTION_ALIAS;
+        //     // if (!item.system.areaOfEffect) {
+        //     //     ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
+        //     // }
+        //     const levels = aoe.value; //item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
+        //     if (levels) {
+        //         this.data.aoeText += ` (${levels}${getSystemDisplayUnits(this.data.item.actor.is5e)})`;
+        //     }
+
+        //     if (this.getAoeTemplate() || game.user.targets.size > 0) {
+        //         this.data.noTargets = false;
+        //     } else {
+        //         this.data.noTargets = true;
+        //     }
+        // } else {
+        //     this.data.noTargets = game.user.targets.size === 0;
+        //     this.data.aoeText = null;
+        // }
 
         // Save conditionalAttack check
         const expandedData = foundry.utils.expandObject(formData);
@@ -250,7 +286,7 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         // Show any changes
-        //this.render();
+        this.render();
     }
 
     async _updateCsl(event, formData) {
@@ -280,11 +316,13 @@ export class ItemAttackFormApplication extends FormApplication {
      */
     async _spawnAreaOfEffect() {
         const item = this.data.item;
-        const aoeModifier = item.getAoeModifier();
-        const areaOfEffect = item.system.areaOfEffect;
-        if (!aoeModifier || !areaOfEffect) return;
+        // const aoeModifier = item.getAoeModifier();
+        // const areaOfEffect = item.system.areaOfEffect;
 
-        const aoeType = aoeModifier.OPTION.toLowerCase();
+        const areaOfEffect = item.AoeAttackParameters({ levels: this.data.effectiveLevels });
+        if (!areaOfEffect) return;
+
+        const aoeType = areaOfEffect.OPTION.toLowerCase();
         const aoeValue = areaOfEffect.value;
 
         const actor = item.actor;

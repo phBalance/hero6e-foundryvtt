@@ -8,6 +8,7 @@
 - Post-Segment 12 now only performed once per turn during combat.  This resolves some issues where combat is rewound or when actors change their speed. [#1113](https://github.com/dmdorman/hero6e-foundryvtt/issues/1113)
 - You are now prompted before using stun for endurance. [#1125](https://github.com/dmdorman/hero6e-foundryvtt/issues/1125)
 - Fixed costs for Animal Handler. [#1097](https://github.com/dmdorman/hero6e-foundryvtt/issues/1097)
+- Powers can now be used at less than full power. [#1128](https://github.com/dmdorman/hero6e-foundryvtt/issues/1128)
 
 ## Version 3.0.81
 

@@ -67,13 +67,15 @@ export function getModifierInfo(options) {
         options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id;
 
     const actor = options?.actor || options?.item?.actor;
-    if (!actor) {
+    const is5e = actor?.system?.is5e || options.item?.system?.is5e;
+
+    if (typeof is5e === "undefined") {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
-        console.warn(`${xmlid} for ${options.item?.name} has no actor provided. Assuming 6e.`);
+        console.warn(`Unable to determine edition of ${xmlid} for ${options.item?.name}. Assuming 6e.`);
     }
 
     let modifierOverrideInfo = CONFIG.HERO.ModifierOverride[xmlid];
-    if (!modifierOverrideInfo || actor?.system?.is5e) {
+    if (!modifierOverrideInfo || is5e) {
         modifierOverrideInfo = {
             ...modifierOverrideInfo,
             ...CONFIG.HERO.ModifierOverride5e[xmlid],
