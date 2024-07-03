@@ -678,6 +678,23 @@ export class HeroSystem6eCombat extends Combat {
         // Recovery. This includes Stunned characters, although the Post-
         // Segment 12 Recovery does not eliminate the Stunned condition.
 
+        // Only run this once per turn.
+        // So if we go back in time, then forward again, skip PostSegment12
+        if (this.flags.postSegment12Round === this.round) {
+            const content = `Post-Segment 12 (Turn ${this.round - 1})
+            <p>Skipping because this has already been performed on this turn during this combat.  
+            This typically occures when rewinding combat or during speed changes.</p>`;
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: content,
+            };
+
+            await ChatMessage.create(chatData);
+            return;
+        }
+        this.update({ "flags.postSegment12Round": this.round });
+
         const automation = game.settings.get(HEROSYS.module, "automation");
 
         let content = `Post-Segment 12 (Turn ${this.round - 1})`;
