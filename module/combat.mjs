@@ -680,7 +680,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // Only run this once per turn.
         // So if we go back in time, then forward again, skip PostSegment12
-        if (this.flags.postSegment12Round === this.round) {
+        if (this.flags.postSegment12Round?.[this.round]) {
             const content = `Post-Segment 12 (Turn ${this.round - 1})
             <p>Skipping because this has already been performed on this turn during this combat.  
             This typically occures when rewinding combat or during speed changes.</p>`;
@@ -693,7 +693,10 @@ export class HeroSystem6eCombat extends Combat {
             await ChatMessage.create(chatData);
             return;
         }
-        this.update({ "flags.postSegment12Round": this.round });
+        const postSegment12Round = this.flags.postSegment12Round || {};
+        postSegment12Round[this.round] = true;
+
+        this.update({ "flags.postSegment12Round": postSegment12Round });
 
         const automation = game.settings.get(HEROSYS.module, "automation");
 
@@ -790,6 +793,7 @@ export class HeroSystem6eCombat extends Combat {
             round: 1,
             turn: turn,
             previous: { round: 1, turn: Math.max(0, turn - 1) },
+            "flags.-=postSegment12Round": null,
         };
         Hooks.callAll("combatStart", this, updateData);
         await this.update(updateData);
