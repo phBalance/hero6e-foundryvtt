@@ -1827,6 +1827,12 @@ export class HeroSystem6eItem extends Item {
 
         cost += adderCost;
 
+        // Cost override
+        if (typeof this.baseInfo?.cost === "function") {
+            cost = this.baseInfo.cost(this);
+            baseCost = 0;
+        }
+
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
         //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {

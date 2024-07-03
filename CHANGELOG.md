@@ -7,6 +7,7 @@
 - Default Knowledge Skills names now include the "knowledge".  This means when you roll a KS the knowledge is included in the chat message. [#1129](https://github.com/dmdorman/hero6e-foundryvtt/issues/1129)
 - Post-Segment 12 now only performed once per turn during combat.  This resolves some issues where combat is rewound or when actors change their speed. [#1113](https://github.com/dmdorman/hero6e-foundryvtt/issues/1113)
 - You are now prompted before using stun for endurance. [#1125](https://github.com/dmdorman/hero6e-foundryvtt/issues/1125)
+- Fixed costs for Animal Handler. [#1097](https://github.com/dmdorman/hero6e-foundryvtt/issues/1097)
 
 ## Version 3.0.81
 
