@@ -273,6 +273,19 @@ export async function AttackToHit(item, options) {
     }
 
     const actor = item.actor;
+    let effectiveItem = item;
+
+    // Create a temporary item based on effectiveLevels
+    if (options?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
+        options.effectiveLevels = parseInt(options.effectiveLevels) || 0;
+        if (options.effectiveLevels > 0 && options.effectiveLevels !== parseInt(item.system.LEVELS)) {
+            const effectiveItemData = item.toObject();
+            effectiveItemData.system.LEVELS = options.effectiveLevels;
+            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
+            await effectiveItem._postUpload();
+        }
+    }
+
     const itemData = item.system;
 
     const hitCharacteristic = actor.system.characteristics[itemData.uses].value;
@@ -292,7 +305,7 @@ export async function AttackToHit(item, options) {
     // -------------------------------------------------
     // attack roll
     // -------------------------------------------------
-    const setManeuver = item.actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
+    const setManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
 
     const heroRoller = new HeroRoller()
         .makeSuccessRoll()
@@ -380,9 +393,7 @@ export async function AttackToHit(item, options) {
     }
 
     // Haymaker -5 DCV
-    const haymakerManeuver = item.actor.items.find(
-        (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
-    );
+    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active);
     if (haymakerManeuver) {
         dcv -= 4;
     }
@@ -463,13 +474,31 @@ export async function AttackToHit(item, options) {
     if (game.settings.get(HEROSYS.module, "use endurance")) {
         useEnd = true;
         let valueEnd = actor.system.characteristics.end.value;
-        let itemEnd = (parseInt(item.system.end) || 0) * (autoFireShots || 1);
+        let itemEnd = (parseInt(effectiveItem.system.end) || 0) * (autoFireShots || 1);
         let newEnd = valueEnd; // - itemEnd;
         let spentEnd = itemEnd;
         options.effectiveStr = options.effectiveStr || 0; // May want to get rid of this so we can support HKA with 0 STR (wierd but possible?)
 
         if (itemData.usesStrength || itemData.usesTk) {
             let strEnd = Math.max(1, Math.round(options.effectiveStr / 10));
+
+            // But wait, may have purchased STR with reduced endurance
+            const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
+            if (strPower) {
+                const strPowerLevels = parseInt(strPower.system.LEVELS);
+                const strREDUCEDEND = strPower.findModsByXmlid("REDUCEDEND");
+                if (strREDUCEDEND) {
+                    if (strREDUCEDEND.OPTIONID === "ZERO") {
+                        strEnd = 0;
+                    } else {
+                        strEnd = Math.max(1, Math.round(Math.min(options.effectiveStr, strPowerLevels) / 20));
+                    }
+                    // Add back in STR that isn't part of strPower
+                    if (options.effectiveStr > strPowerLevels) {
+                        strEnd += Math.max(1, Math.round((options.effectiveStr - strPowerLevels) / 10));
+                    }
+                }
+            }
 
             // TELIKENESIS is more expensive than normal STR
             if (itemData.usesTk) {
@@ -480,7 +509,7 @@ export async function AttackToHit(item, options) {
             //item.system.endEstimate += strEnd;=            newEnd = parseInt(newEnd) - parseInt(strEnd);
         }
 
-        const enduranceReserve = item.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
+        const enduranceReserve = actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
         if (item.system.USE_END_RESERVE) {
             if (enduranceReserve) {
                 let erValue = parseInt(enduranceReserve.system.value);
@@ -504,6 +533,17 @@ export async function AttackToHit(item, options) {
 
         if (newEnd < 0) {
             let stunDice = Math.ceil(Math.abs(newEnd) / 2);
+
+            const confirmed = await Dialog.confirm({
+                title: "USING STUN FOR ENDURANCE",
+                content: `<p><b>${item.name}</b> requires ${spentEnd} END. 
+                <b>${actor.name}</b> has ${valueEnd} END. 
+                Do you want to take ${stunDice}d6 STUN to make up for the lack of END?</p>`,
+            });
+
+            if (!confirmed) {
+                return;
+            }
 
             const stunForEndHeroRoller = new HeroRoller().makeBasicRoll().addDice(stunDice);
             await stunForEndHeroRoller.roll();
@@ -1244,6 +1284,19 @@ export async function _onRollDamage(event) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
+    let effectiveItem = item;
+
+    // Create a temporary item based on effectiveLevels
+    if (toHitData?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
+        toHitData.effectiveLevels = parseInt(toHitData.effectiveLevels) || 0;
+        if (toHitData.effectiveLevels > 0 && toHitData.effectiveLevels !== parseInt(item.system.LEVELS)) {
+            const effectiveItemData = item.toObject();
+            effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
+            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
+            await effectiveItem._postUpload();
+        }
+    }
+
     const adjustment = getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
@@ -1257,11 +1310,11 @@ export async function _onRollDamage(event) {
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
-    const { dc, tags } = convertToDcFromItem(item, {
+    const { dc, tags } = convertToDcFromItem(effectiveItem, {
         isAction: true,
         ...toHitData,
     });
-    const formulaParts = calculateDiceFormulaParts(item, dc);
+    const formulaParts = calculateDiceFormulaParts(effectiveItem, dc);
 
     const includeHitLocation = game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations;
 
@@ -1290,7 +1343,7 @@ export async function _onRollDamage(event) {
 
     const damageRenderedResult = await damageRoller.render();
 
-    const damageDetail = await _calcDamage(damageRoller, item, toHitData);
+    const damageDetail = await _calcDamage(damageRoller, effectiveItem, toHitData);
 
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
@@ -1445,6 +1498,7 @@ export async function _onRollMindScan(event) {
     let data = {
         targetTokenId: toHitData.target,
         targetName: token?.name,
+        effectiveLevels: toHitData.effectiveLevels,
         item,
     };
 
@@ -1470,6 +1524,19 @@ export async function _onRollMindScanEffectRoll(event) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
+    let effectiveItem = item;
+
+    // Create a temporary item based on effectiveLevels
+    if (toHitData?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
+        toHitData.effectiveLevels = parseInt(toHitData.effectiveLevels) || 0;
+        if (toHitData.effectiveLevels > 0 && toHitData.effectiveLevels !== parseInt(item.system.LEVELS)) {
+            const effectiveItemData = item.toObject();
+            effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
+            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
+            await effectiveItem._postUpload();
+        }
+    }
+
     // Look through all the scenes to find this token
     const token = game.scenes
         .find((s) => s.tokens.find((t) => t.id === toHitData.target))
@@ -1487,12 +1554,12 @@ export async function _onRollMindScanEffectRoll(event) {
 
     const useStandardEffect = item.system.USESTANDARDEFFECT || false;
 
-    const { dc, tags } = convertToDcFromItem(item, {
+    const { dc, tags } = convertToDcFromItem(effectiveItem, {
         isAction: true,
         ...toHitData,
     });
 
-    const formulaParts = calculateDiceFormulaParts(item, dc);
+    const formulaParts = calculateDiceFormulaParts(effectiveItem, dc);
 
     const damageRoller = new HeroRoller()
         .modifyTo5e(actor.system.is5e)
@@ -2638,8 +2705,8 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         } else {
             // If the result is positive, the target is Knocked Back 1" or 2m times the result
             knockbackMessage = `Knocked Back ${
-                knockbackResultTotal * (item.actor.system.is5e ? 1 : 2)
-            }${getSystemDisplayUnits(item.actor.is5e)}`;
+                knockbackResultTotal * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
+            }${getSystemDisplayUnits(item.actor?.is5e || item.system.is5e)}`;
         }
     }
 

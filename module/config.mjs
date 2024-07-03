@@ -1852,6 +1852,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: "self",
             costEnd: false,
+            cost: function (skill) {
+                if (!skill?.system?.ADDER || skill.system.ADDER.length === 0) {
+                    return 3;
+                }
+                return 2 + skill.system.ADDER.length - 1;
+            },
             xml: `<SKILL XMLID="ANIMAL_HANDLER" ID="1709161473096" BASECOST="0.0" LEVELS="0" ALIAS="Animal Handler" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="PRE" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"><NOTES/></SKILL>`,
         },
         {},

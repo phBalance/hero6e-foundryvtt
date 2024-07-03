@@ -816,7 +816,7 @@ export class HeroSystem6eItem extends Item {
      * @param {Modifier} modifier
      * @returns
      */
-    buildAoeAttackParameters(modifier) {
+    buildAoeAttackParameters(modifier, options) {
         const is5e = !!this.actor?.system?.is5e;
 
         let changed = false;
@@ -886,7 +886,9 @@ export class HeroSystem6eItem extends Item {
                 } else {
                     dcFalloff = 1;
                 }
-                dcFalloff = parseInt(modifier.LEVELS || 0) ? parseInt(modifier.LEVELS) : dcFalloff;
+                dcFalloff = parseInt(options?.LEVELS || modifier.LEVELS || 0)
+                    ? parseInt(options?.LEVELS || modifier.LEVELS)
+                    : dcFalloff;
 
                 // TODO: Can we work with DC given all the adders that are possible at the time of attack?
                 const { dc } = convertToDcFromItem(this, {});
@@ -990,6 +992,121 @@ export class HeroSystem6eItem extends Item {
         return originalRange === this.system.range;
     }
 
+    AoeAttackParameters(options) {
+        const aoeModifier = this.getAoeModifier();
+        if (aoeModifier) {
+            const is5e = !!this.actor?.system?.is5e;
+
+            const widthDouble = parseInt(
+                (aoeModifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEWIDTH")?.LEVELS || 0,
+            );
+            const heightDouble = parseInt(
+                (aoeModifier.ADDER || []).find((adder) => adder.XMLID === "DOUBLEHEIGHT")?.LEVELS || 0,
+            );
+            // In 6e, widthDouble and heightDouble are the actual size and not instructions to double like 5e
+            const width = is5e ? Math.pow(2, widthDouble) : widthDouble || 2;
+            const height = is5e ? Math.pow(2, heightDouble) : heightDouble || 2;
+            let levels = 1;
+            let dcFalloff = 0;
+
+            // 5e has a calculated size
+            if (is5e) {
+                // A bit hacky: create effectiveItem based on options.levels
+                let effectiveItemData = new HeroSystem6eItem(
+                    foundry.utils.mergeObject(this.toObject(), { system: { is5e: true } }),
+                );
+                if ((parseInt(options?.levels) || 0) > 0) {
+                    effectiveItemData.name = "Effective";
+                    effectiveItemData.system.LEVELS = parseInt(options?.levels) || 0;
+                    effectiveItemData.calcItemPoints();
+                }
+
+                if (aoeModifier.XMLID === "AOE") {
+                    // not counting the Area Of Effect Advantage.
+                    // TODO: This is not quite correct as it item.system.activePoints are already rounded so this can
+                    //       come up short. We need a raw active cost and build up the advantage multipliers from there.
+                    //       Make sure the value is at least basePointsPlusAdders but this is just a kludge to handle most cases.
+
+                    const activePointsWithoutAoeAdvantage = Math.max(
+                        effectiveItemData.system.basePointsPlusAdders,
+                        effectiveItemData.system.activePoints / (1 + aoeModifier.BASECOST_total),
+                    );
+                    switch (aoeModifier.OPTIONID) {
+                        case "CONE":
+                            levels = RoundFavorPlayerUp(1 + activePointsWithoutAoeAdvantage / 5);
+                            break;
+
+                        case "HEX":
+                            levels = 1;
+                            break;
+
+                        case "LINE":
+                            levels = RoundFavorPlayerUp((2 * activePointsWithoutAoeAdvantage) / 5);
+                            break;
+
+                        case "ANY":
+                        case "RADIUS":
+                            levels = Math.max(1, RoundFavorPlayerUp(activePointsWithoutAoeAdvantage / 10));
+                            break;
+
+                        default:
+                            console.error(
+                                `Unhandled 5e AOE OPTIONID ${aoeModifier.OPTIONID} for ${this.name}/${this.system.XMLID}`,
+                            );
+                            break;
+                    }
+
+                    // Modify major dimension (radius, length, etc). Line is different from all others.
+                    const majorDimensionDoubles = (aoeModifier?.ADDER || []).find(
+                        (adder) => adder.XMLID === "DOUBLEAREA" || adder.XMLID === "DOUBLELENGTH",
+                    );
+                    if (majorDimensionDoubles) {
+                        levels *= Math.pow(2, parseInt(majorDimensionDoubles.LEVELS));
+                    }
+                } else {
+                    // Explosion DC falloff has different defaults based on shape. When
+                    // LEVELS are provided they are the absolute value and not additive to the default.
+                    if (aoeModifier.OPTIONID === "CONE") {
+                        dcFalloff = 2;
+                    } else if (aoeModifier.OPTIONID === "LINE") {
+                        dcFalloff = 3;
+                    } else {
+                        dcFalloff = 1;
+                    }
+                    dcFalloff = parseInt(options?.LEVELS || aoeModifier.LEVELS || 0)
+                        ? parseInt(options?.LEVELS || aoeModifier.LEVELS)
+                        : dcFalloff;
+
+                    // TODO: Can we work with DC given all the adders that are possible at the time of attack?
+                    const { dc } = convertToDcFromItem(effectiveItemData, {});
+
+                    levels = dc * dcFalloff;
+                }
+            } else {
+                levels = parseInt(options?.LEVELS || aoeModifier.LEVELS);
+            }
+
+            // 5e has a slightly different alias for an Explosive Radius in HD.
+            // Otherwise, all other shapes seems the same.
+            const type = aoeModifier.OPTION_ALIAS === "Normal (Radius)" ? "Radius" : aoeModifier.OPTION_ALIAS;
+            const newAoe = {
+                type: type.toLowerCase(),
+                value: levels,
+                width: width,
+                height: height,
+
+                isExplosion: this.hasExplosionAdvantage(),
+                dcFalloff: dcFalloff,
+            };
+
+            return {
+                ...aoeModifier,
+                ...newAoe,
+            };
+        }
+        return null;
+    }
+
     async _postUpload(options) {
         const configPowerInfo = this.baseInfo;
 
@@ -1023,15 +1140,20 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Toggles
+        if (this.baseInfo?.behaviors.includes("activatable")) {
+            if (!this.system.showToggle) {
+                this.system.showToggle = true;
+                changed = true;
+            }
+        }
+
         // DEFENSES
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
-        if (
-            configPowerInfo &&
-            (configPowerInfo.behaviors.includes("activatable") || configPowerInfo.type?.includes("characteristic"))
-        ) {
+        if (this.baseInfo?.type.includes("defense") || this.baseInfo?.type?.includes("characteristic")) {
             const newDefenseValue = "defense";
 
-            if (this.system.subType !== newDefenseValue && configPowerInfo?.behaviors.includes("activatable")) {
+            if (this.system.subType !== newDefenseValue && this.baseInfo?.behaviors.includes("activatable")) {
                 this.system.subType = newDefenseValue;
                 this.system.showToggle = true;
                 changed = true;
@@ -1051,7 +1173,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // MOVEMENT
-        if (configPowerInfo && configPowerInfo.type?.includes("movement")) {
+        if (this.baseInfo?.type.includes("movement")) {
             const movement = "movement";
             if (this.system.subType !== movement) {
                 this.system.subType = movement;
@@ -1061,7 +1183,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // SKILLS
-        if (configPowerInfo && configPowerInfo.type?.includes("skill")) {
+        if (this.baseInfo?.type?.includes("skill")) {
             const skill = "skill";
             if (this.system.subType !== skill) {
                 this.system.subType = skill;
@@ -1307,7 +1429,7 @@ export class HeroSystem6eItem extends Item {
         changed = oldDescription !== this.system.description || changed;
 
         // Save changes
-        if (changed && this.id) {
+        if (changed && this.id && this.isEmbedded) {
             await this.update({ system: this.system }, options);
         }
         options?.uploadProgressBar?.advance(`${this.actor.name}: Adding ${this.name}`);
@@ -1332,10 +1454,12 @@ export class HeroSystem6eItem extends Item {
                     name: activeEffect.name,
                     changes: activeEffect.changes,
                 });
-                await this.actor.update({
-                    [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
-                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
-                });
+                if (this.actor) {
+                    await this.actor.update({
+                        [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]:
+                            this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max,
+                    });
+                }
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
@@ -1820,6 +1944,12 @@ export class HeroSystem6eItem extends Item {
 
         cost += adderCost;
 
+        // Cost override
+        if (typeof this.baseInfo?.cost === "function") {
+            cost = this.baseInfo.cost(this);
+            baseCost = 0;
+        }
+
         // INDEPENDENT ADVANTAGE (aka Naked Advantage)
         // NAKEDMODIFIER uses PRIVATE=="No" to indicate NAKED modifier
         //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
@@ -1891,6 +2021,7 @@ export class HeroSystem6eItem extends Item {
             const modPowerInfo = getPowerInfo({
                 item: modifier,
                 actor: this.actor,
+                is5e: this.system.is5e,
             });
 
             // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)
@@ -2388,6 +2519,7 @@ export class HeroSystem6eItem extends Item {
                     // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
                     const { roll } = this._getSkillRollComponents(system);
                     system.description = `${system.ALIAS ? system.ALIAS + ": " : ""}${system.INPUT} ${roll}`;
+                    this.name = system.NAME || `${this.system.ALIAS}: ${this.system.INPUT?.trim()}`;
                 }
                 break;
 
@@ -3641,9 +3773,6 @@ export class HeroSystem6eItem extends Item {
     }
 
     updateRoll() {
-        // TODO: FIXME: If this is required for the compendium then we need to figure
-        // out another way to determine this is in the compendium.
-        // if (!this.actor?.id) return; // Like during a compendium upload
         const skillData = this.system;
 
         skillData.tags = [];
@@ -3911,7 +4040,7 @@ export class HeroSystem6eItem extends Item {
             const baseRollValue = skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
             const characteristicValue =
                 characteristic !== "general" && characteristic != ""
-                    ? this.actor.system.characteristics[`${characteristic}`].value
+                    ? this.actor?.system.characteristics?.[`${characteristic}`].value || 0
                     : 0;
             const characteristicAdjustment = Math.round(characteristicValue / 5);
             const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
