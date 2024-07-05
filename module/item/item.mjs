@@ -1748,16 +1748,19 @@ export class HeroSystem6eItem extends Item {
         const parentId = this.system?.PARENTID;
         if (!parentId) return null;
 
-        const items = [...(this.actor?.items || []), ...(game.items || [])];
+        const items = this.actor?.items || game.items;
         return items.find((item) => item.system?.ID === parentId) || null;
     }
 
+    /**
+     * Retrieves all child items of the current item based on the PARENTID property.
+     *
+     * @returns {Array|null} An array of child items if found, otherwise null.
+     */
     get childItems() {
-        // if (this.pack) {
-        //     return game.packs.get(this.pack).getDocument(this.system.PARENTID);
-        // }
-        const children = (this.actor || game).items.filter((o) => o.system.PARENTID == this.system.ID);
-        return children.length === 0 ? null : children;
+        const items = this.actor?.items || game.items;
+        const children = items.filter((item) => item.system.PARENTID === this.system.ID);
+        return children.length ? children : null;
     }
 
     calcItemPoints() {
