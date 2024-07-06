@@ -35,23 +35,31 @@ async function migrateToVersion(migratesToVersion, lastMigration, queue, queueTy
             // Skip super old actors without versionHeroSystem6eUpload
             if (queueElement instanceof HeroSystem6eActor) {
                 if (!queueElement.system?.versionHeroSystem6eUpload) {
-                    skippedBecauseOld++;
+                    // Wel hold on a sec what about actors created without uploads?
+                    if (
+                        !foundry.utils.isNewerVersion(
+                            queueElement.system.versionHeroSystem6eCreated || "0.0.0",
+                            "3.0.34",
+                        )
+                    ) {
+                        skippedBecauseOld++;
 
-                    if (skippedBecauseOld < 3) {
-                        ui.notifications.warn(
-                            `The Actor "${queueElement.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
-                        );
-                    } else {
-                        if (skippedBecauseOld === 3) {
+                        if (skippedBecauseOld < 3) {
                             ui.notifications.warn(
-                                `Several additional actors are no longer supported.  Please re-upload them from their HDCs.`,
+                                `The Actor "${queueElement.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
+                            );
+                        } else {
+                            if (skippedBecauseOld === 3) {
+                                ui.notifications.warn(
+                                    `Several additional actors are no longer supported.  Please re-upload them from their HDCs.`,
+                                );
+                            }
+                            console.warn(
+                                `The Actor "${queueElement.name}" was uploaded with an older HeroSystem version and has limited support.  Please re-upload from HDC.`,
                             );
                         }
-                        console.warn(
-                            `The Actor "${queueElement.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
-                        );
+                        continue;
                     }
-                    continue;
                 }
             }
 

@@ -444,6 +444,12 @@ Hooks.on("renderActorSheet", (dialog, html, data) => {
                     data?.actor?.system?.versionHeroSystem6eUpload || ""
                 })</span>`,
             );
+        } else if (data?.actor?.system?.versionHeroSystem6eCreated) {
+            html.find("header h4").append(
+                ` <span title='Actor version at time of creation'>(${
+                    data?.actor?.system?.versionHeroSystem6eCreated || ""
+                })</span>`,
+            );
         }
     } catch (err) {
         console.log(err);
