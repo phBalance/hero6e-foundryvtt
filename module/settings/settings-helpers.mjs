@@ -172,6 +172,21 @@ export default class SettingsHelpers {
             requiresReload: false,
         });
 
+        game.settings.register(module, "StrEnd", {
+            name: game.i18n.localize("Settings.StrEnd.Name"),
+            hint: game.i18n.localize("Settings.StrEnd.Hint"),
+            scope: "world",
+            config: true,
+            type: String,
+            choices: {
+                five: game.i18n.localize("Settings.StrEnd.Choices.five"),
+                ten: game.i18n.localize("Settings.StrEnd.Choices.ten"),
+            },
+            default: "five",
+            onChange: () => CreateHeroCompendiums(),
+            requiresReload: false,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: game.i18n.localize("Settings.AlphaTesting.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.Hint"),
