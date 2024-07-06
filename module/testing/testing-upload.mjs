@@ -5208,7 +5208,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "self");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.SELF);
                     });
                 });
 
@@ -5263,7 +5263,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "no range");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.NO_RANGE);
                     });
                 });
 
@@ -5324,7 +5324,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "standard");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.STANDARD);
                     });
                 });
 
@@ -5388,7 +5388,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "los");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT);
                     });
                 });
 
@@ -5439,7 +5439,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "no range");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.NO_RANGE);
                     });
                 });
 
@@ -5493,7 +5493,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "standard");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.STANDARD);
                     });
                 });
 
@@ -5553,7 +5553,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "los");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT);
                     });
                 });
 
@@ -5607,7 +5607,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "los");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT);
                     });
                 });
 
@@ -5664,7 +5664,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "no range");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.NO_RANGE);
                     });
                 });
 
@@ -5721,7 +5721,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "range based on str");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR);
                     });
                 });
 
@@ -5772,7 +5772,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "los");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT);
                     });
                 });
 
@@ -5826,7 +5826,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "no range");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.NO_RANGE);
                     });
                 });
 
@@ -5880,7 +5880,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "standard");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.STANDARD);
                     });
                 });
 
@@ -5937,7 +5937,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "range based on str");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR);
                     });
                 });
 
@@ -5995,7 +5995,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("range", function () {
-                        assert.equal(item.system.range, "los");
+                        assert.equal(item.system.range, CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT);
                     });
                 });
             });
