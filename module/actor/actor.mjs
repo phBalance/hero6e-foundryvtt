@@ -1713,6 +1713,30 @@ export class HeroSystem6eActor extends Actor {
             await this.update({ [`system.is5e`]: this.system.is5e });
         }
 
+        // isHeroic
+        // Need to be a careful as there are custom templates ('Nekhbet Vulture Child Goddess')
+        // that we are unlikely able to decode heroic status.
+        // Stringify the TEMPLATE for our best chance.
+        let isHeroic = undefined;
+        try {
+            if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Heroic/i)) {
+                isHeroic = true;
+            } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Superheroic/i)) {
+                isHeroic = false;
+            }
+            if (isHeroic != this.system.isHeroic) {
+                changes[`system.isHeroic`] = isHeroic;
+            }
+            if (typeof isHeroic === "undefined") {
+                // Custom Templates
+                // Automations
+                // Barrier
+                console.warn(`Unable to determine isHeroic for ${this.name}.`, this.system.CHARACTER?.TEMPLATE);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0);

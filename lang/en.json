@@ -171,6 +171,14 @@
                 "five": "5th edition"
             }
         },
+        "StrEnd" : {
+            "Name": "Heroic Strength & Endurance",
+            "Hint": "Using STR typipcally costs 1 END per 10 points of STR used.  In heroic campaigns the GM has the option of charging 1 END per 5 STR used.  This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
+            "Choices": {
+                "five": "1 END per 5 STR",
+                "ten": "1 END per 10 STR"
+            }
+        },
         "Equipment": {
             "WeightPercentage": {
                 "Name": "Equipment Weight Percentage",

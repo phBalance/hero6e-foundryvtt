@@ -480,7 +480,9 @@ export async function AttackToHit(item, options) {
         options.effectiveStr = options.effectiveStr || 0; // May want to get rid of this so we can support HKA with 0 STR (wierd but possible?)
 
         if (itemData.usesStrength || itemData.usesTk) {
-            let strEnd = Math.max(1, Math.round(options.effectiveStr / 10));
+            const StrPerEnd =
+                item.actor.system.isHeroic && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
+            let strEnd = Math.max(1, Math.round(options.effectiveStr / StrPerEnd));
 
             // But wait, may have purchased STR with reduced endurance
             const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
@@ -491,11 +493,14 @@ export async function AttackToHit(item, options) {
                     if (strREDUCEDEND.OPTIONID === "ZERO") {
                         strEnd = 0;
                     } else {
-                        strEnd = Math.max(1, Math.round(Math.min(options.effectiveStr, strPowerLevels) / 20));
+                        strEnd = Math.max(
+                            1,
+                            Math.round(Math.min(options.effectiveStr, strPowerLevels) / (StrPerEnd * 2)),
+                        );
                     }
                     // Add back in STR that isn't part of strPower
                     if (options.effectiveStr > strPowerLevels) {
-                        strEnd += Math.max(1, Math.round((options.effectiveStr - strPowerLevels) / 10));
+                        strEnd += Math.max(1, Math.round((options.effectiveStr - strPowerLevels) / StrPerEnd));
                     }
                 }
             }

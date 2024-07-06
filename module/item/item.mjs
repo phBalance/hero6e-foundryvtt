@@ -1739,28 +1739,28 @@ export class HeroSystem6eItem extends Item {
         return itemData;
     }
 
-    // getHdcParent() {
-    //     if (!this.system.PARENTID) return null;
-    //     if (!this.actor?.items) return null;
-    //     return this.actor.items.find(
-    //         (o) => o.system.ID == this.system.PARENTID,
-    //     );
-    // }
-
+    /**
+     * Retrieves the parent item of the current item based on the `PARENTID` property.
+     *
+     * @returns {HeroSystem6eItem|null} The parent item if found, otherwise null.
+     */
     get parentItem() {
-        if (!this.system.PARENTID) return null;
-        // if (this.pack) {
-        //     return game.packs.get(this.pack).getDocument(this.system.PARENTID);
-        // }
-        return (this.actor || game).items.find((o) => o.system.ID == this.system.PARENTID);
+        const parentId = this.system?.PARENTID;
+        if (!parentId) return null;
+
+        const items = this.actor?.items || game.items;
+        return items.find((item) => item.system?.ID === parentId) || null;
     }
 
+    /**
+     * Retrieves all child items of the current item based on the PARENTID property.
+     *
+     * @returns {Array|null} An array of child items if found, otherwise null.
+     */
     get childItems() {
-        // if (this.pack) {
-        //     return game.packs.get(this.pack).getDocument(this.system.PARENTID);
-        // }
-        const children = (this.actor || game).items.filter((o) => o.system.PARENTID == this.system.ID);
-        return children.length === 0 ? null : children;
+        const items = this.actor?.items || game.items;
+        const children = items.filter((item) => item.system.PARENTID === this.system.ID);
+        return children.length ? children : null;
     }
 
     calcItemPoints() {
