@@ -9,7 +9,7 @@
 - You are now prompted before using stun for endurance. [#1125](https://github.com/dmdorman/hero6e-foundryvtt/issues/1125)
 - Fixed costs for Animal Handler. [#1097](https://github.com/dmdorman/hero6e-foundryvtt/issues/1097)
 - Powers can now be used at less than full power. [#1128](https://github.com/dmdorman/hero6e-foundryvtt/issues/1128)
-- Heroic actors now default to using 1 END per 5 STR.  This can be changed back to 1 END per 10 STR in the settings menu.  The actor's heroic/superheric status is now visible on the actor sheet just after the name. [#291](https://github.com/dmdorman/hero6e-foundryvtt/issues/291)
+- Heroic actors can now be set to use 1 END per 5 STR.  This can be changed in the settings menu.  The actor's heroic/superheric status is now visible on the actor sheet just after the name. [#291](https://github.com/dmdorman/hero6e-foundryvtt/issues/291)
 
 ## Version 3.0.81
 

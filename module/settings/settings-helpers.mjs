@@ -182,7 +182,7 @@ export default class SettingsHelpers {
                 five: game.i18n.localize("Settings.StrEnd.Choices.five"),
                 ten: game.i18n.localize("Settings.StrEnd.Choices.ten"),
             },
-            default: "five",
+            default: "ten",
             onChange: () => CreateHeroCompendiums(),
             requiresReload: false,
         });
