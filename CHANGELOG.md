@@ -1,6 +1,9 @@
 # Releases
 
-## Version 3.0.82 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.83 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Fix for some default Knowledge Skills missing the "knowledge" details in chat cards. [#1129](https://github.com/dmdorman/hero6e-foundryvtt/issues/1129)
+
+## Version 3.0.82
 
 - Improved HDC upload performance.
 - Corrected presence attacks with negative presence. [#838](https://github.com/dmdorman/hero6e-foundryvtt/issues/838)
