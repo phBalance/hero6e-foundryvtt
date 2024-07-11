@@ -1425,12 +1425,17 @@ export class HeroSystem6eItem extends Item {
 
         // DESCRIPTION
         const oldDescription = this.system.description;
+        const oldName = this.name;
         this.updateItemDescription();
-        changed = oldDescription !== this.system.description || changed;
+        changed = oldDescription !== this.system.description || oldName !== this.name || changed;
 
         // Save changes
         if (changed && this.id && this.isEmbedded) {
-            await this.update({ system: this.system }, options);
+            const changeObject = { system: this.system };
+            if (oldName !== this.name) {
+                changeObject.name = this.name;
+            }
+            await this.update(changeObject, options);
         }
         options?.uploadProgressBar?.advance(`${this.actor.name}: Adding ${this.name}`);
 

@@ -1,6 +1,9 @@
 # Releases
 
-## Version 3.0.82 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.83 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Fix for some default Knowledge Skills missing the "knowledge" details in chat cards. [#1129](https://github.com/dmdorman/hero6e-foundryvtt/issues/1129)
+
+## Version 3.0.82
 
 - Improved HDC upload performance.
 - Corrected presence attacks with negative presence. [#838](https://github.com/dmdorman/hero6e-foundryvtt/issues/838)
@@ -9,7 +12,7 @@
 - You are now prompted before using stun for endurance. [#1125](https://github.com/dmdorman/hero6e-foundryvtt/issues/1125)
 - Fixed costs for Animal Handler. [#1097](https://github.com/dmdorman/hero6e-foundryvtt/issues/1097)
 - Powers can now be used at less than full power. [#1128](https://github.com/dmdorman/hero6e-foundryvtt/issues/1128)
-- Heroic actors can now be set to use 1 END per 5 STR.  This can be changed in the settings menu.  The actor's heroic/superheric status is now visible on the actor sheet just after the name. [#291](https://github.com/dmdorman/hero6e-foundryvtt/issues/291)
+- Heroic actors can now be set to use 1 END per 5 STR.  This can be changed in the settings menu.  The actor's heroic/superheroic status is now visible on the actor sheet just after the name. [#291](https://github.com/dmdorman/hero6e-foundryvtt/issues/291)
 
 ## Version 3.0.81
 
