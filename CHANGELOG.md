@@ -3,6 +3,7 @@
 ## Version 3.0.84 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix for some 5e actors failing to upload. [#1135](https://github.com/dmdorman/hero6e-foundryvtt/issues/1135)
+- Fix for Combat Luck, where if left as "do not add to totals" during HDC upload, toggling it on resulted in no added defense. [#1134](https://github.com/dmdorman/hero6e-foundryvtt/issues/1134)
 
 ## Version 3.0.83
 

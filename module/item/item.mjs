@@ -1150,7 +1150,11 @@ export class HeroSystem6eItem extends Item {
 
         // DEFENSES
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
-        if (this.baseInfo?.type.includes("defense") || this.baseInfo?.type?.includes("characteristic")) {
+        if (
+            this.baseInfo?.type.includes("defense") ||
+            this.baseInfo?.behaviors?.includes("defense") ||
+            this.baseInfo?.type?.includes("characteristic")
+        ) {
             const newDefenseValue = "defense";
 
             if (this.system.subType !== newDefenseValue && this.baseInfo?.behaviors.includes("activatable")) {
