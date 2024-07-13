@@ -1137,6 +1137,10 @@ export class HeroSystem6eActor extends Actor {
         // Heroic Action Points (always keep the value)
         changes["system.hap.value"] = retainValuesOnUpload.hap;
 
+        // A few critical items.
+        this.system.CHARACTER = heroJson.CHARACTER;
+        this.system.versionHeroSystem6eUpload = game.system.version;
+
         // CHARACTERISTICS
         if (heroJson.CHARACTER?.CHARACTERISTICS) {
             for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
@@ -1168,8 +1172,10 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (this.system.is5e && this.id) {
-            changes[`system.is5e`] = this.system.is5e;
-            //await this.update({ "system.is5e": this.system.is5e });
+            // We can't delay this with the changes array because any items based on this actor needs this value.
+            // Speifically compound power is a problem if we don't set is5e properly for a 5e actor.
+            // changes[`system.is5e`] = this.system.is5e;
+            await this.update({ "system.is5e": this.system.is5e });
         }
 
         const xmlItemsToProcess =
@@ -1459,8 +1465,6 @@ export class HeroSystem6eActor extends Actor {
             "system.CHARACTER": heroJson.CHARACTER,
             "system.versionHeroSystem6eUpload": game.system.version,
         };
-        this.system.CHARACTER = heroJson.CHARACTER;
-        this.system.versionHeroSystem6eUpload = game.system.version;
 
         if (this.prototypeToken) {
             changes[`prototypeToken.name`] = this.name;

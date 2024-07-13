@@ -3571,7 +3571,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "COMBAT_LUCK",
             type: ["talent"],
-            behaviors: ["activatable"],
+            behaviors: ["activatable", "defense"],
             name: "Combat Luck",
             duration: "constant",
             target: "self only",
