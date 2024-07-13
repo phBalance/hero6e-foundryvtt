@@ -2229,7 +2229,7 @@ export class HeroSystem6eItem extends Item {
         let _realCost = system.activePoints;
 
         // Skill Enhancer discount (min cost of 1)
-        if (this.parentItem?.baseInfo.type.includes("enhancer")) {
+        if (this.parentItem?.baseInfo?.type.includes("enhancer")) {
             _realCost = Math.max(1, _realCost - 1);
 
             // NATIVE_TONGUE is always free

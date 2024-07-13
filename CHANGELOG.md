@@ -1,6 +1,11 @@
 # Releases
 
-## Version 3.0.83 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.84 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix for some 5e actors failing to upload. [#1135](https://github.com/dmdorman/hero6e-foundryvtt/issues/1135)
+
+## Version 3.0.83
+
 - Fix for some default Knowledge Skills missing the "knowledge" details in chat cards. [#1129](https://github.com/dmdorman/hero6e-foundryvtt/issues/1129)
 
 ## Version 3.0.82
