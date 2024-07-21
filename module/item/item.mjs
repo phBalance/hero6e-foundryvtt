@@ -348,7 +348,7 @@ export class HeroSystem6eItem extends Item {
         // Range; and Line of Sight (LOS).
         const configPowerInfo = getPowerInfo({ item: this });
         switch (this.system.range) {
-            case "self": {
+            case CONFIG.HERO.RANGE_TYPES.SELF: {
                 if (!configPowerInfo?.type.includes("skill")) {
                     content += " Self.";
                 }
@@ -356,11 +356,11 @@ export class HeroSystem6eItem extends Item {
                 break;
             }
 
-            case "no range":
+            case CONFIG.HERO.RANGE_TYPES.NO_RANGE:
                 content += " No Range.";
                 break;
 
-            case "limited range":
+            case CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE:
                 {
                     let range = this.system.basePointsPlusAdders * 10;
                     if (this.actor?.system?.is5e) {
@@ -372,7 +372,7 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
-            case "range based on str":
+            case CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR:
                 {
                     const runningThrow = this.actor?.strDetails().strThrow;
                     content += ` Maximum Range (running throw based on STR) ${runningThrow}${getSystemDisplayUnits(
@@ -381,7 +381,7 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
-            case "standard":
+            case CONFIG.HERO.RANGE_TYPES.STANDARD:
                 {
                     let range = this.system.basePointsPlusAdders * 10;
                     if (this.actor?.system?.is5e) {
@@ -391,7 +391,7 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
-            case "los":
+            case CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT:
                 content += " Line of Sight.";
                 break;
 
@@ -945,47 +945,47 @@ export class HeroSystem6eItem extends Item {
 
         // Based on EGO combat value comes with line of sight
         if (boecv) {
-            this.system.range = "los";
+            this.system.range = CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT;
         }
 
         // Self only powers cannot be bought to have range unless they become usable on others at which point
         // they gain no range.
-        if (this.system.range === "self") {
+        if (this.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
             if (usableOnOthers) {
-                this.system.range = "no range";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
             }
         }
 
         // No range can be bought to have range.
-        if (this.system.range === "no range") {
+        if (this.system.range === CONFIG.HERO.RANGE_TYPES.NO_RANGE) {
             if (ranged) {
-                this.system.range = "standard";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.STANDARD;
             }
         }
 
         // Standard range can be bought up or bought down.
-        if (this.system.range === "standard") {
+        if (this.system.range === CONFIG.HERO.RANGE_TYPES.STANDARD) {
             if (noRange) {
-                this.system.range = "no range";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
             } else if (los) {
-                this.system.range = "los";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT;
             } else if (limitedRange) {
-                this.system.range = "limited range";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE;
             } else if (rangeBasedOnStrength) {
-                this.system.range = "range based on str";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR;
             }
         }
 
         // Line of sight can be bought down
-        if (this.system.range === "los") {
+        if (this.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT) {
             if (normalRange) {
-                this.system.range = "standard";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.STANDARD;
             } else if (rangeBasedOnStrength) {
-                this.system.range = "range based on str";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR;
             } else if (limitedRange) {
-                this.system.range = "limited range";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE;
             } else if (noRange) {
-                this.system.range = "no range";
+                this.system.range = CONFIG.HERO.RANGE_TYPES.NO_RANGE;
             }
         }
 
@@ -1196,11 +1196,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         // ATTACK
-        // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach. Should probably for anything with range != self
         if (
             configPowerInfo &&
             (configPowerInfo.behaviors.includes("attack") || configPowerInfo.behaviors.includes("dice"))
         ) {
+            // TODO: NOTE: This shouldn't just be for attack type. Should probably get rid of the subType approach. Should probably for anything with range != self
             const attack = "attack";
             if (this.system.subType !== attack) {
                 this.system.subType = attack;

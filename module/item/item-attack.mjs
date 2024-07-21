@@ -160,7 +160,7 @@ export async function AttackAoeToHit(item, options) {
         .addNumber(parseInt(options.ocvMod) || 0, "OCV modifier")
         .addNumber(-parseInt(setManeuver?.system.ocv || 0), "Maneuver OCV");
 
-    if (item.system.range === "self") {
+    if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
         // TODO: Should not be able to use this on anyone else. Should add a check.
     }
 
@@ -172,7 +172,14 @@ export async function AttackAoeToHit(item, options) {
 
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
-    if (!(item.system.range === "los" || item.system.range === "special" || noRangeModifiers || normalRange)) {
+    if (
+        !(
+            item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            noRangeModifiers ||
+            normalRange
+        )
+    ) {
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distanceToken);
 
         // PENALTY_SKILL_LEVELS (range)
@@ -315,7 +322,7 @@ export async function AttackToHit(item, options) {
         .addNumber(parseInt(options.omcvMod), "OMCV modifier")
         .addNumber(parseInt(setManeuver?.system.ocv) || 0, "Maneuver OCV");
 
-    if (item.system.range === "self") {
+    if (item.system.range === CONFIG.HERO.RANGE_TYPES.SELF) {
         // TODO: Should not be able to use this on anyone else. Should add a check.
     }
 
@@ -337,7 +344,12 @@ export async function AttackToHit(item, options) {
     // no range modifiers.
     if (
         game.user.targets.size > 0 &&
-        !(item.system.range === "los" || item.system.range === "special" || noRangeModifiers || normalRange)
+        !(
+            item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
+            item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
+            noRangeModifiers ||
+            normalRange
+        )
     ) {
         // Educated guess for token
         const token = actor.getActiveTokens()[0];
@@ -352,7 +364,7 @@ export async function AttackToHit(item, options) {
                   gridSpaces: true,
               })
             : 0;
-        const rangePenalty = calculateRangePenaltyFromDistanceInMetres(distance);
+        const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
         const pslRange = actor.items.find(
