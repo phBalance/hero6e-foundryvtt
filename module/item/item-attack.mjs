@@ -364,7 +364,7 @@ export async function AttackToHit(item, options) {
                   gridSpaces: true,
               })
             : 0;
-        const rangePenalty = calculateRangePenaltyFromDistanceInMetres(distance);
+        const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
         const pslRange = actor.items.find(
