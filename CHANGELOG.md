@@ -1,6 +1,9 @@
 # Releases
 
-## Version 3.0.85 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.86 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Improve Foundry v12 support
+
+## Version 3.0.85
 
 - Correct range penalty for non AoE attacks. [#1142](https://github.com/dmdorman/hero6e-foundryvtt/issues/1142)
 
