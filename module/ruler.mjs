@@ -107,8 +107,8 @@ export class HeroRuler extends Ruler {
                         "You should upgrade the DragRuler module to version 1.14.2 or later to avoid known incompatibilities.",
                         { console: true, permanent: true },
                     );
-                    return;
                 }
+                return;
             }
 
             // We recommend using Drag Ruler
