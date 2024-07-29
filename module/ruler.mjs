@@ -374,9 +374,9 @@ export class HeroRuler extends Ruler {
             const activeMovementLabel =
                 activeMovement === "none" ? "Running" : movementItems.find((e) => e._id === activeMovement)?.name;
 
-            const rangeMod = calculateRangePenaltyFromDistanceInMetres(this.totalDistance, actor);
+            const rangeMod = -calculateRangePenaltyFromDistanceInMetres(this.totalDistance, actor);
 
-            return `${baseLabel}\n${activeMovementLabel}\n-${rangeMod} Range Modifier`;
+            return `${baseLabel}\n${activeMovementLabel}\n${rangeMod} Range Modifier`;
         }
         return baseLabel;
     }
