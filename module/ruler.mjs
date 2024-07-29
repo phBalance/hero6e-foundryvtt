@@ -3,7 +3,7 @@ import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "./ut
 
 import { isGameV12OrLater } from "./utility/compatibility.mjs";
 
-export class HeroRuler extends CONFIG.Canvas.rulerClass {
+export class HeroRuler extends Ruler {
     static _controlToken() {
         const sceneControls = ui.controls;
         if (sceneControls.activeControl !== "token") {
