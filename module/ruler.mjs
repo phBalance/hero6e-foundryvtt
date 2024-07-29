@@ -31,9 +31,12 @@ export class HeroRuler {
             // Known compatibility issues with DragRuler and FoundryVTT V12
             // Don't even bother recommending it's use at this time.
             if (isGameV12OrLater()) {
-                if (game.modules.get("drag-ruler")?.active && game.modules.get("drag-ruler").version === "1.13.8") {
+                if (
+                    game.modules.get("drag-ruler")?.active &&
+                    foundry.utils.isNewerVersion("1.14.2", game.modules.get("drag-ruler").version)
+                ) {
                     ui.notifications.error(
-                        "You may need to disable the DragRuler module as it may cause issues with FoundryVTT V12.",
+                        "You should upgrade the DragRuler module to version 1.14.2 or later to avoid known incompatibilities.",
                         { console: true, permanent: true },
                     );
                 }
@@ -335,6 +338,10 @@ export class HeroRuler {
 }
 
 function setHeroRulerLabel() {
+    if (isGameV12OrLater()) {
+        return;
+    }
+
     Ruler.prototype._getSegmentLabel = function _getSegmentLabel(
         segmentDistance,
         totalDistanceInMetres, // NOTE: Assuming totalDistance is in metres. We could try to pull out the grid distance etc to be smarter.
