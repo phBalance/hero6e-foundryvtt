@@ -81,7 +81,7 @@ export async function migrateWorld() {
         game.system.version
     } of <a href="https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md">${
         game.system.title || game.system.name
-    }</a> has been installed. Details about recent changes can be read at <a href="https://github.com/dmdorman/hero6e-foundryvtt/blob/main/CHANGELOG.md">Changelog</a>.<br /><br />If you find any problems, are missing things, or just would like a feature that is lacking, please report these <a href="https://github.com/dmdorman/hero6e-foundryvtt/issues">HERE</a>.<br /><br />Check out our <a href="https://www.youtube.com/channel/UCcmq0WFFNZNhRSGwuEHOgRg">YouTube channel</a>.  There is also a <a href="https://discord.com/channels/609528652878839828/770825017729482772">Discord channel</a> where you can interactively communicate with others using <a href="https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md">${
+    }</a> has been installed. Details about recent changes can be viewed at <a href="https://github.com/dmdorman/hero6e-foundryvtt/blob/main/CHANGELOG.md">CHANGELOG</a>.<br /><br />If you find any problems, are missing things, or just would like a feature that is lacking, please report these <a href="https://github.com/dmdorman/hero6e-foundryvtt/issues">HERE</a>.<br /><br />Check out our <a href="https://www.youtube.com/channel/UCcmq0WFFNZNhRSGwuEHOgRg">YouTube channel</a>.  There is also a <a href="https://discord.com/channels/609528652878839828/770825017729482772">Discord channel</a> where you can interactively communicate with others using <a href="https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md">${
         game.system.title || game.system.name
     }</a>.`;
 
