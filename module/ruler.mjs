@@ -3,30 +3,98 @@ import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "./ut
 
 import { isGameV12OrLater } from "./utility/compatibility.mjs";
 
-export class HeroRuler {
-    static initialize() {
-        Hooks.once("ready", function () {
-            setHeroRulerLabel();
+export class HeroRuler extends CONFIG.Canvas.rulerClass {
+    static _controlToken() {
+        const sceneControls = ui.controls;
+        if (sceneControls.activeControl !== "token") {
+            return;
+        }
+        if (sceneControls.activeTool !== "select") {
+            return;
+        }
 
-            Hooks.on("controlToken", function () {
-                const sceneControls = ui.controls;
-                if (sceneControls.activeControl !== "token") {
-                    return;
-                }
-                if (sceneControls.activeTool !== "select") {
-                    return;
-                }
+        const tokensControlled = canvas.tokens.controlled.length;
 
-                const tokensControlled = canvas.tokens.controlled.length;
+        if (tokensControlled !== 1) {
+            // remove movement radio buttons
+            $(".scene-control[data-control='token']").find(".radio-container").remove();
+            return;
+        }
 
-                if (tokensControlled !== 1) {
-                    // remove movement radio buttons
-                    $(".scene-control[data-control='token']").find(".radio-container").remove();
-                    return;
-                }
+        this._movementRadioSelectRender();
+    }
 
-                movementRadioSelectRender();
+    static async _movementRadioSelectRender() {
+        const tokenControlButton = $(".scene-control[data-control='token']");
+
+        const relevantToken = canvas.tokens.controlled[0];
+
+        if (!relevantToken) return;
+        if (!relevantToken.actor) return;
+
+        const movementPowers = relevantToken.actor.system.is5e
+            ? CONFIG.HERO.movementPowers5e
+            : CONFIG.HERO.movementPowers;
+
+        let movementItems = [];
+        for (const key of Object.keys(relevantToken.actor.system.characteristics).filter((o) => movementPowers[o])) {
+            const char = relevantToken.actor.system.characteristics[key];
+            if ((parseInt(char.value) || 0) > 0) {
+                char._id = key;
+                char.name = movementPowers[key];
+                movementItems.push(char);
+            }
+        }
+
+        const renderRadioOptions = () => {
+            const activeMovement =
+                movementItems.length === 0
+                    ? "none"
+                    : movementItems.find((o) => o._id == relevantToken.actor.flags.activeMovement)?._id ||
+                      movementItems[0]._id;
+
+            const radioOptions = movementItems
+                .map(
+                    (item, index) => `
+                <div class="radio" data-tool="${item._id}">
+                    <input id="radio-${index}" name="radio" type="radio" ${
+                        activeMovement === item._id ? "checked" : ""
+                    }>
+                    <label for="radio-${index}" class="radio-label">${item.name} (${item.value}${getSystemDisplayUnits(
+                        relevantToken.actor.is5e,
+                    )})</label>
+                </div>
+            `,
+                )
+                .join("");
+
+            const radioSelect = $(`<div class="radio-container">${radioOptions}</div>`);
+
+            radioSelect.find("[data-tool]").click(async function () {
+                const tool = $(this).attr("data-tool");
+
+                await relevantToken.actor.update({
+                    "flags.activeMovement": tool,
+                });
+
+                renderRadioOptions();
             });
+
+            if (tokenControlButton.find(".radio-container").length > 0) {
+                tokenControlButton.find(".radio-container").remove();
+            }
+
+            tokenControlButton.append(radioSelect);
+        };
+
+        renderRadioOptions();
+    }
+
+    static initialize() {
+        const that = this;
+
+        Hooks.once("ready", function () {
+            Hooks.on("controlToken", that._controlToken.bind(that));
 
             // Known compatibility issues with DragRuler and FoundryVTT V12
             // Don't even bother recommending it's use at this time.
@@ -39,8 +107,8 @@ export class HeroRuler {
                         "You should upgrade the DragRuler module to version 1.14.2 or later to avoid known incompatibilities.",
                         { console: true, permanent: true },
                     );
+                    return;
                 }
-                return;
             }
 
             // We recommend using Drag Ruler
@@ -206,8 +274,6 @@ export class HeroRuler {
             }
 
             dragRuler.registerSystem(HEROSYS.module, HeroSysSpeedProvider);
-
-            setHeroRulerLabel();
         });
 
         Hooks.on("renderSceneControls", function (sceneControls) {
@@ -228,7 +294,7 @@ export class HeroRuler {
                 return;
             }
 
-            movementRadioSelectRender();
+            that._movementRadioSelectRender();
 
             return;
         });
@@ -252,7 +318,7 @@ export class HeroRuler {
                 actor.flags.activeMovement = args?.flags?.activeMovement;
             }
 
-            movementRadioSelectRender();
+            that._movementRadioSelectRender();
         });
 
         Hooks.on("hdcUpload", function () {
@@ -264,132 +330,56 @@ export class HeroRuler {
                 return;
             }
 
-            movementRadioSelectRender();
+            that._movementRadioSelectRender();
         });
-
-        async function movementRadioSelectRender() {
-            const tokenControlButton = $(".scene-control[data-control='token']");
-
-            const relevantToken = canvas.tokens.controlled[0];
-
-            if (!relevantToken) return;
-            if (!relevantToken.actor) return;
-
-            const movementPowers = relevantToken.actor.system.is5e
-                ? CONFIG.HERO.movementPowers5e
-                : CONFIG.HERO.movementPowers;
-
-            let movementItems = [];
-            for (const key of Object.keys(relevantToken.actor.system.characteristics).filter(
-                (o) => movementPowers[o],
-            )) {
-                const char = relevantToken.actor.system.characteristics[key];
-                if ((parseInt(char.value) || 0) > 0) {
-                    char._id = key;
-                    char.name = movementPowers[key];
-                    movementItems.push(char);
-                }
-            }
-
-            const renderRadioOptions = () => {
-                const activeMovement =
-                    movementItems.length === 0
-                        ? "none"
-                        : movementItems.find((o) => o._id == relevantToken.actor.flags.activeMovement)?._id ||
-                          movementItems[0]._id;
-
-                const radioOptions = movementItems
-                    .map(
-                        (item, index) => `
-                    <div class="radio" data-tool="${item._id}">
-                        <input id="radio-${index}" name="radio" type="radio" ${
-                            activeMovement === item._id ? "checked" : ""
-                        }>
-                        <label for="radio-${index}" class="radio-label">${item.name} (${
-                            item.value
-                        }${getSystemDisplayUnits(relevantToken.actor.is5e)})</label>
-                    </div>
-                `,
-                    )
-                    .join("");
-
-                const radioSelect = $(`<div class="radio-container">${radioOptions}</div>`);
-
-                radioSelect.find("[data-tool]").click(async function () {
-                    const tool = $(this).attr("data-tool");
-
-                    await relevantToken.actor.update({
-                        "flags.activeMovement": tool,
-                    });
-
-                    renderRadioOptions();
-                });
-
-                if (tokenControlButton.find(".radio-container").length > 0) {
-                    tokenControlButton.find(".radio-container").remove();
-                }
-
-                tokenControlButton.append(radioSelect);
-            };
-
-            renderRadioOptions();
-        }
-    }
-}
-
-function setHeroRulerLabel() {
-    if (isGameV12OrLater()) {
-        return;
     }
 
-    Ruler.prototype._getSegmentLabel = function _getSegmentLabel(
-        segmentDistance,
-        totalDistanceInMetres, // NOTE: Assuming totalDistance is in metres. We could try to pull out the grid distance etc to be smarter.
-    ) {
-        const relevantToken = canvas.tokens.controlled[0];
-        const actor = relevantToken?.actor;
-        const rangeMod = calculateRangePenaltyFromDistanceInMetres(totalDistanceInMetres, actor);
+    /** V12
+     * Get the text label for a segment of the measured path
+     * @param {RulerMeasurementSegment} segment
+     * @returns {string}
+     * @protected
+     */
 
-        let activeMovementLabel;
-        if (game.modules.get("drag-ruler")?.active && canvas.tokens.controlled.length > 0) {
-            if (!relevantToken || !relevantToken.actor) {
-                return;
-            }
+    /** V11
+     * Get the text label for a segment of the measured path
+     * @param {RulerMeasurementSegment} segment
+     * @param {number} totalDistance
+     * @returns {string}
+     * @protected
+     */
 
-            const movementPowers = relevantToken.actor.system.is5e
-                ? CONFIG.HERO.movementPowers5e
-                : CONFIG.HERO.movementPowers;
-
+    _getSegmentLabel(_segment, _totalDistance) {
+        // second argument only provided in v11
+        // however total distance is avail in v12
+        // both can use this.totalDistance
+        const baseLabel = super._getSegmentLabel(_segment, _totalDistance);
+        if (_segment.last) {
+            const actor = this.token?.actor || canvas.tokens.controlled?.[0]?.actor;
+            if (!actor) return baseLabel;
+            const movementPowers = actor.system.is5e ? CONFIG.HERO.movementPowers5e : CONFIG.HERO.movementPowers;
             const movementItems = [];
-            for (const key of Object.keys(relevantToken.actor.system.characteristics).filter(
-                (o) => movementPowers[o],
-            )) {
-                const char = relevantToken.actor.system.characteristics[key];
+            for (const key of Object.keys(actor.system.characteristics).filter((o) => movementPowers[o])) {
+                const char = actor.system.characteristics[key];
                 if ((parseInt(char.value) || 0) > 0) {
                     char._id = key;
                     char.name = movementPowers[key];
                     movementItems.push(char);
                 }
             }
-
             const activeMovement =
                 movementItems.length === 0
                     ? "none"
-                    : movementItems.find((o) => o._id == relevantToken.actor.flags.activeMovement)?._id ||
-                      movementItems[0]._id;
-
-            activeMovementLabel =
+                    : movementItems.find((o) => o._id == actor.flags.activeMovement)?._id || movementItems[0]._id;
+            const activeMovementLabel =
                 activeMovement === "none" ? "Running" : movementItems.find((e) => e._id === activeMovement)?.name;
+
+            const rangeMod = calculateRangePenaltyFromDistanceInMetres(this.totalDistance, actor);
+
+            return `${baseLabel}\n${activeMovementLabel}\n-${rangeMod} Range Modifier`;
         }
-
-        const label = `[${Math.round(
-            getRoundedDownDistanceInSystemUnits(segmentDistance.distance, actor),
-        )}${getSystemDisplayUnits(actor?.is5e)}]${activeMovementLabel ? `\n${activeMovementLabel}` : ""}\n${
-            rangeMod > 0 ? "-" : ""
-        }${rangeMod} Range Modifier`;
-
-        return label;
-    };
+        return baseLabel;
+    }
 }
 
 /**
