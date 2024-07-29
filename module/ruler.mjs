@@ -3,7 +3,7 @@ import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "./ut
 
 import { isGameV12OrLater } from "./utility/compatibility.mjs";
 
-export class HeroRuler extends CONFIG.Canvas.rulerClass {
+export class HeroRuler extends Ruler {
     static _controlToken() {
         const sceneControls = ui.controls;
         if (sceneControls.activeControl !== "token") {
@@ -107,8 +107,8 @@ export class HeroRuler extends CONFIG.Canvas.rulerClass {
                         "You should upgrade the DragRuler module to version 1.14.2 or later to avoid known incompatibilities.",
                         { console: true, permanent: true },
                     );
-                    return;
                 }
+                return;
             }
 
             // We recommend using Drag Ruler
@@ -374,9 +374,9 @@ export class HeroRuler extends CONFIG.Canvas.rulerClass {
             const activeMovementLabel =
                 activeMovement === "none" ? "Running" : movementItems.find((e) => e._id === activeMovement)?.name;
 
-            const rangeMod = calculateRangePenaltyFromDistanceInMetres(this.totalDistance, actor);
+            const rangeMod = -calculateRangePenaltyFromDistanceInMetres(this.totalDistance, actor);
 
-            return `${baseLabel}\n${activeMovementLabel}\n-${rangeMod} Range Modifier`;
+            return `${baseLabel}\n${activeMovementLabel}\n${rangeMod} Range Modifier`;
         }
         return baseLabel;
     }

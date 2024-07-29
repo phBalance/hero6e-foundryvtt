@@ -1,8 +1,9 @@
 # Releases
 
-## Version 3.0.87 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Improved Ruler labels for v12.  Movement type & total distance only show for last movement segment.
-- Improved DragRuler support for v12.
+## Version 3.0.87 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Reworked ruler code.  Movement type & total distance only show for last movement segment. 
+- DragRuler support for v12. There are still [issues](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/337), so not recommending upgrading to FoundryVTT v12 quite yet.
+- Fix: Players see errors when adding combatants to combat tracker [#1148](https://github.com/dmdorman/hero6e-foundryvtt/issues/1148)
 
 ## Version 3.0.86
 - Improve Foundry v12 support

@@ -43,6 +43,9 @@ export class HeroSystem6eCombat extends Combat {
      */
 
     async rollInitiative(ids) {
+        // Players won't likely have permissions to mess with initiative
+        if (!game.user.isGM) return;
+
         // Structure input data
         ids = typeof ids === "string" ? [ids] : ids;
         if (ids.length === 0) {
