@@ -201,3 +201,11 @@ li.directory-item.childItem {
 .parentChild {
   border: 1px solid blue;
 }
+
+.characteristic-full, .characteristic-casual {
+  max-width: 25px;
+}
+
+.characteristic-roll {
+  max-width: 40px;
+}

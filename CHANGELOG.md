@@ -2,6 +2,7 @@
 
 ## Version 3.0.88 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Fix: GM and Assistant GM see errors when adding combatants to combat tracker [#1150](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
+- Added FULL and CASUAL rolls for base characteristics to CHARACTERISTICS tab.
 
 ## Version 3.0.87
 - Reworked ruler code.  Movement type & total distance only show for last movement segment. 

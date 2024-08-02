@@ -7,7 +7,12 @@ import { determineDefense } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
-import { CombatSkillLevelsForAttack, convertToDcFromItem, getDiceFormulaFromItemDC } from "../utility/damage.mjs";
+import {
+    CombatSkillLevelsForAttack,
+    convertToDcFromItem,
+    getDiceFormulaFromItemDC,
+    convertToDiceParts,
+} from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
 import { calculateVelocityInSystemUnits } from "../ruler.mjs";
@@ -991,6 +996,12 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Rollable characteristic
         html.find(".characteristic-roll").click(this._onCharacteristicRoll.bind(this));
 
+        // Full characteristic
+        html.find(".characteristic-full").click(this._onCharacteristicFull.bind(this));
+
+        // Casual characteristic
+        html.find(".characteristic-casual").click(this._onCharacteristicCasual.bind(this));
+
         // Toggle items
         html.find(".item-toggle").click(this._onItemToggle.bind(this));
 
@@ -1113,6 +1124,106 @@ export class HeroSystemActorSheet extends ActorSheet {
         };
 
         return ChatMessage.create(chatData);
+    }
+
+    async _onCharacteristicDC(event, dc, flavor) {
+        const diceParts = convertToDiceParts(dc);
+        const heroRoller = new HeroRoller().makeNormalRoll().addDice(diceParts.dice);
+        if (diceParts.halfDice) {
+            heroRoller.addHalfDice(1);
+        } else if (diceParts.plus1) {
+            heroRoller.addNumber(1);
+        }
+
+        await heroRoller.roll();
+        const damageRenderedResult = await heroRoller.render();
+
+        //const flavor = `Full ${dataset.label.toUpperCase()} (DC ${dc})`;
+
+        // const cardHtml = await heroRoller.render(flavor);
+
+        // const actor = this.actor;
+        // const token = actor.token;
+        // const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+        // speaker.alias = actor.name;
+
+        // const chatData = {
+        //     type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        //     rolls: heroRoller.rawRolls(),
+        //     user: game.user._id,
+        //     content: cardHtml,
+        //     speaker: speaker,
+        // };
+
+        //return ChatMessage.create(chatData);
+
+        const cardData = {
+            //item: { name: this.token.name, system: { NAME: this.token.name } },
+            // adjustment,
+            // senseAffecting,
+            flavor,
+
+            // dice rolls
+            renderedDamageRoll: damageRenderedResult,
+            //renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
+
+            // hit locations
+            // useHitLoc: damageDetail.useHitLoc,
+            // hitLocText: damageDetail.hitLocText,
+            // hitLocation: damageDetail.hitLocation,
+
+            // body
+            bodyDamage: heroRoller.getBodyTotal(), //damageDetail.bodyDamage,
+            //bodyDamageEffective: damageDetail.body,
+
+            // stun
+            stunDamage: heroRoller.getBodyTotal(), //damageDetail.stunDamage,
+            // stunDamageEffective: damageDetail.stun,
+            // hasRenderedDamageRoll: true,
+            // stunMultiplier: damageDetail.stunMultiplier,
+            // hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
+
+            roller: heroRoller.toJSON(),
+
+            // misc
+            // targetIds: toHitData.targetids,
+            // tags: tags,
+
+            // attackTags: getAttackTags(item),
+            // targetTokens: targetTokens,
+            user: game.user,
+        };
+
+        // render card
+        const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
+        const cardHtml = await renderTemplate(template, cardData);
+        const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+        const chatData = {
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            rolls: heroRoller.rawRolls(),
+            user: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        return ChatMessage.create(chatData);
+    }
+
+    async _onCharacteristicFull(event) {
+        event.preventDefault();
+        const element = event.currentTarget.closest("button");
+        const dataset = element.dataset;
+        const dc = this.actor.system.characteristics[dataset.label].value;
+        await this._onCharacteristicDC(event, dc, `Full ${dataset.label.toUpperCase()} (DC ${dc})`);
+    }
+
+    async _onCharacteristicCasual(event) {
+        event.preventDefault();
+        const element = event.currentTarget.closest("button");
+        const dataset = element.dataset;
+        const dc = this.actor.system.characteristics[dataset.label].value;
+        const halfDc = +(Math.round(dc / 2 + "e+2") + "e-2"); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
+        await this._onCharacteristicDC(event, halfDc, `Casual ${dataset.label.toUpperCase()} (DC ${halfDc})`);
     }
 
     async _onItemToggle(event) {
