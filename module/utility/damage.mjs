@@ -227,7 +227,7 @@ export function convertToDcFromItem(item, options) {
         const WEAPON_MASTER = item.actor.items.find((o) => o.system.XMLID === "WEAPON_MASTER");
         if (WEAPON_MASTER) {
             const weaponMatch = (WEAPON_MASTER.system.ADDER || []).find(
-                (o) => o.XMLID === "ADDER" && o.ALIAS === (item.system.ALIAS || item.name),
+                (o) => o.XMLID === "ADDER" && o.ALIAS === item.name,
             );
             if (weaponMatch) {
                 const dcPlus = 3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
