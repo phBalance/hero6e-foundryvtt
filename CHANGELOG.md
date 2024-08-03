@@ -4,6 +4,7 @@
 - Fix: When 2+ GMs are active, those GMs see errors when adding combatants to combat tracker [#1150](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
 - Added FULL and CASUAL rolls for base characteristics to CHARACTERISTICS tab.
 - Improved Weapon Master [#1151](https://github.com/dmdorman/hero6e-foundryvtt/issues/1151)
+- Improved Requires A Roll for Knowledge Skills
 
 ## Version 3.0.87
 - Reworked ruler code.  Movement type & total distance only show for last movement segment. 
