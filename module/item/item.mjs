@@ -4306,7 +4306,8 @@ export async function RequiresASkillRollCheck(item, event) {
                             (o) =>
                                 (o.system.subType || o.system.type) === "skill" &&
                                 (o.system.XMLID === rar.COMMENTS.toUpperCase() ||
-                                    o.name.toUpperCase() === rar.COMMENTS.toUpperCase()),
+                                    o.name.toUpperCase() === rar.COMMENTS.toUpperCase() ||
+                                    o.system.INPUT?.toUpperCase() === rar.COMMENTS.toUpperCase()),
                         );
                         if (skill) {
                             OPTION_ALIAS = rar.COMMENTS;

@@ -1,6 +1,12 @@
 # Releases
 
-## Version 3.0.87 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.88 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Fix: When 2+ GMs are active, those GMs see errors when adding combatants to combat tracker [#1150](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
+- Added FULL and CASUAL rolls for base characteristics to CHARACTERISTICS tab.
+- Improved Weapon Master [#1151](https://github.com/dmdorman/hero6e-foundryvtt/issues/1151)
+- Improved Requires A Roll for Knowledge Skills
+
+## Version 3.0.87
 - Reworked ruler code.  Movement type & total distance only show for last movement segment. 
 - DragRuler support for v12. There are still [issues](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/337), so not recommending upgrading to FoundryVTT v12 quite yet.
 - Fix: Players see errors when adding combatants to combat tracker [#1148](https://github.com/dmdorman/hero6e-foundryvtt/issues/1148)

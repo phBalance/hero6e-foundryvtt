@@ -242,13 +242,11 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                             game.settings.get(HEROSYS.module, "optionalManeuvers")),
                 )) {
                     // Check if there is an adder (if so attack is checked)
-                    const adder = (this.item.system.ADDER || []).find(
-                        (o) => o.ALIAS === attack.system.ALIAS || o.ALIAS == attack.name,
-                    );
+                    const adder = (this.item.system.ADDER || []).find((o) => o.ALIAS == attack.name);
 
                     data.attacks.push({
                         id: attack.id,
-                        name: attack.system.NAME || attack.name,
+                        name: attack.name, //attack.system.NAME || attack.name,
                         checked: adder ? true : false,
                         title: `${
                             attack.system.XMLID + (attack.system.DISPLAY ? " (" + attack.system.DISPLAY + ")" : "")
@@ -565,7 +563,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         }
 
         // ALIAS should match name
-        this.item.system.ALIAS = this.item.name;
+        //this.item.system.ALIAS = this.item.name;
 
         // Endurance Reserve
         if (expandedData.rec) {
@@ -608,7 +606,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
             for (const [attackId, checked] of Object.entries(expandedData.attacks)) {
                 const attackItem = this.actor.items.find((o) => o.id === attackId);
                 const adder = (this.item.system.ADDER || []).find(
-                    (adder) => adder.XMLID === "ADDER" && adder.ALIAS === (attackItem.system.ALIAS || attackItem.name),
+                    (adder) => adder.XMLID === "ADDER" && adder.ALIAS === attackItem.name,
                 );
 
                 // Create a custom adders that matches attack name
@@ -616,7 +614,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                     const newAdder = {
                         XMLID: "ADDER",
                         ID: new Date().getTime().toString(),
-                        ALIAS: attackItem.system.ALIAS || attackItem.name,
+                        ALIAS: attackItem.name, //attackItem.system.ALIAS ||
                         BASECOST: "0.0",
                         LEVELS: "0",
                         NAME: "",
@@ -631,7 +629,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 // Delete custom adders that matches attack name
                 if (adder && !checked) {
                     this.item.system.ADDER = this.item.system.ADDER.filter(
-                        (o) => o.ALIAS != (attackItem.system.ALIAS || attackItem.name),
+                        (o) => o.ALIAS != attackItem.name, //(attackItem.system.ALIAS ||
                     );
                 }
             }

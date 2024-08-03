@@ -22,6 +22,13 @@
 // Transdimensional, Trigger, Uncontrolled, Usable As Attack,
 // Variable Advantage, and Variable Special Effects.
 
+export function convertToDiceParts(value) {
+    const dice = Math.floor(value / 5);
+    const halfDice = value % 5 >= 2.5 ? 1 : 0;
+    const plus1 = value % 5 < 2.5 && value % 5 > 0 ? 1 : 0;
+    return { dice, halfDice, plus1 };
+}
+
 // Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
     let actor = item.actor;
@@ -220,7 +227,7 @@ export function convertToDcFromItem(item, options) {
         const WEAPON_MASTER = item.actor.items.find((o) => o.system.XMLID === "WEAPON_MASTER");
         if (WEAPON_MASTER) {
             const weaponMatch = (WEAPON_MASTER.system.ADDER || []).find(
-                (o) => o.XMLID === "ADDER" && o.ALIAS === (item.system.ALIAS || item.name),
+                (o) => o.XMLID === "ADDER" && o.ALIAS === item.name,
             );
             if (weaponMatch) {
                 const dcPlus = 3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);

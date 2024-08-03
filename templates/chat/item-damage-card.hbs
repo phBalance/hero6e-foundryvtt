@@ -3,12 +3,19 @@
     tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
     <div>
-        {{#if adjustment}}
-        {{item.system.XMLID}}
-        {{else}}
-        Damage
+        {{#if item}}
+            {{#if adjustment}}
+                {{item.system.XMLID}}
+            {{else}}
+                Damage
+            {{/if}}
+            Roll: <span class="item-name">{{{itemName item}}}</span>
         {{/if}}
-        Roll: <span class="item-name">{{{itemName item}}}</span>
+
+        {{#if flavor}}
+            {{flavor}}
+        {{/if}}
+
     </div>
 
     <div class="tags">
