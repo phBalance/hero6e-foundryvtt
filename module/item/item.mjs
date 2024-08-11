@@ -2521,6 +2521,7 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "ANALYZE":
             case "PROFESSIONAL_SKILL":
             case "KNOWLEDGE_SKILL":
             case "SCIENCE_SKILL":
@@ -2919,6 +2920,14 @@ export class HeroSystem6eItem extends Item {
                         break;
                     }
 
+                    if (configPowerInfo?.type?.includes("skill")) {
+                        system.description = system.ALIAS;
+                        if (system?.INPUT) {
+                            system.description += `: ${system.INPUT}`;
+                        }
+                        break;
+                    }
+
                     // Provide a basic description
                     const _desc = system.OPTION_ALIAS || system.ALIAS || system.EFFECT || "";
                     system.description = (system.INPUT ? system.INPUT + " " : "") + _desc;
@@ -2969,6 +2978,10 @@ export class HeroSystem6eItem extends Item {
                     break;
 
                 default:
+                    if (configPowerInfo?.type?.includes("skill")) {
+                        break;
+                    }
+
                     _adderArray.push(system.INPUT);
                     break;
             }
