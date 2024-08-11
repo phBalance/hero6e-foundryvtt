@@ -217,6 +217,11 @@
             "Name": "Use Endurance",
             "Hint": "Automate tracking of endurance. For example END will used for attacks and constant powers when in combat."
         },
+        "LongTermEndurance": 
+        {
+            "Name": "Long-term Endurance",
+            "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation.  When an actor's average END use per turn exceeds double their REC, max END is lowered."
+        },
         "UseKnockback": 
         {
             "Name": "Use Knockback",

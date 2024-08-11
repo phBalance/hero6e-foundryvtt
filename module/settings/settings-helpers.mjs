@@ -26,6 +26,16 @@ export default class SettingsHelpers {
             onChange: (value) => HEROSYS.log(false, value),
         });
 
+        // game.settings.register(module, "LongTermEndurance", {
+        //     name: game.i18n.localize("Settings.LongTermEndurance.Name"),
+        //     hint: game.i18n.localize("Settings.LongTermEndurance.Hint"),
+        //     scope: "world",
+        //     config: true,
+        //     type: Boolean,
+        //     default: false,
+        //     onChange: (value) => HEROSYS.log(false, value),
+        // });
+
         game.settings.register(module, "knockback", {
             name: game.i18n.localize("Settings.UseKnockback.Name"),
             hint: game.i18n.localize("Settings.UseKnockback.Hint"),
