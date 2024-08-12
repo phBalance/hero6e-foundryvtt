@@ -811,3 +811,14 @@ Hooks.once("setup", function () {
     // Apply custom application for Compendiums for parent/child features
     game.packs.filter((p) => p.metadata.type === "Item").forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
 });
+
+// Rare instance where bar3 leftover causes world loading to fail.
+window.setTimeout(() => {
+    // let _defaultToken = game.settings.get("core", DefaultTokenConfig.SETTING) ?? {};
+    // if (_defaultToken.bar3 && !game.ready) {
+    //     delete _defaultToken.bar3;
+    //     game.settings.set("core", DefaultTokenConfig.SETTING, _defaultToken);
+    //     console.warn("Removing bar3 setting as it may prevent world from reloading. Reload World.");
+    //     //alert("Removing bar3 setting as it may prevent world from reloading. Reload World.");
+    // }
+}, 5000);

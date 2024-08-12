@@ -217,6 +217,16 @@
             "Name": "Use Endurance",
             "Hint": "Automate tracking of endurance. For example END will used for attacks and constant powers when in combat."
         },
+        "LongTermEndurance": 
+        {
+            "Name": "Long-term Endurance",
+            "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation.  When an actor's average END use per turn exceeds double their REC, max END is lowered."
+        },
+        "DiceSkinning": 
+        {
+            "Name": "Dice Skinning (Dice So Nice)",
+            "Hint": "Requires Dice So Nice module.  Dice associated with hit locations, stun multipliers, and knockback have a different dice skin."
+        },
         "UseKnockback": 
         {
             "Name": "Use Knockback",

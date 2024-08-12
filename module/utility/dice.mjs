@@ -967,7 +967,7 @@ export class HeroRoller {
             // NOTE: It appears there is no standard effect for the STUNx per APG p 53
             //       although there don't appear to be any mention of this in other books.
             this._killingStunMultiplierHeroRoller = new HeroRoller(
-                game.settings.get(game.system.id, "alphaTesting")
+                game.settings.get(game.system.id, "DiceSkinning")
                     ? {
                           appearance: foundry.utils.deepClone(DICE_SO_NICE_CUSTOM_SETS.STUNx),
                       }
@@ -998,7 +998,7 @@ export class HeroRoller {
 
             if (this._alreadyHitLocation === "none") {
                 this._hitLocationRoller = new HeroRoller(
-                    game.settings.get(game.system.id, "alphaTesting")
+                    game.settings.get(game.system.id, "DiceSkinning")
                         ? {
                               appearance: foundry.utils.deepClone(DICE_SO_NICE_CUSTOM_SETS.HIT_LOC),
                           }
@@ -1022,7 +1022,7 @@ export class HeroRoller {
                 this._alreadyHitLocationSide === "none"
             ) {
                 this._hitSideRoller = new HeroRoller(
-                    game.settings.get(game.system.id, "alphaTesting")
+                    game.settings.get(game.system.id, "DiceSkinning")
                         ? {
                               appearance: foundry.utils.deepClone(DICE_SO_NICE_CUSTOM_SETS.HIT_LOC_SIDE),
                           }
