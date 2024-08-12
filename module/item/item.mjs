@@ -2921,9 +2921,16 @@ export class HeroSystem6eItem extends Item {
                     }
 
                     if (configPowerInfo?.type?.includes("skill")) {
+                        const { roll } = this._getSkillRollComponents(system);
                         system.description = system.ALIAS;
+                        this.name = system.NAME || system.ALIAS;
                         if (system?.INPUT) {
                             system.description += `: ${system.INPUT}`;
+                            this.name += `: ${system.INPUT}`;
+                        }
+                        // Skill enhancer?
+                        if (roll) {
+                            system.description += ` ${roll}`;
                         }
                         break;
                     }
