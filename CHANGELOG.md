@@ -2,7 +2,7 @@
 
 ## Version 3.0.89 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Improved Analyze skill description. [#1154](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
-- New Dice Skinning feature: Requires Dice So Nice module. Defaults to off, can be enabled per user. Dice associated with hit locations, stun multipliers, and knockback have a different dice skin.
+- New Dice Skinning feature: Dice associated with hit locations, stun multipliers, and knockback have a different dice skin. Requires Dice So Nice module. Defaults to off, can be enabled per user. 
 
 ## Version 3.0.88
 - Fix: When 2+ GMs are active, those GMs see errors when adding combatants to combat tracker [#1150](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
