@@ -28,11 +28,16 @@ export function initializeItemHandlebarsHelpers() {
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
 function itemFullDescription(item) {
+    let desc = item.system.description;
     if (item.system.NAME) {
-        return `<i>${item.system.NAME}:</i> ${item.system.description}`;
+        desc = `<i>${item.system.NAME}:</i> ${item.system.description}`;
     }
 
-    return `${item.system.description}`;
+    if (item.system.NOTES) {
+        desc += `<br><b>Notes:</b> ${item.system.NOTES}`;
+    }
+
+    return desc;
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -409,6 +414,10 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.realCost && !isNaN(this.system.realCost)) {
             content += ` Total Cost: ${this.system.realCost} CP.`;
+        }
+
+        if (this.system.NOTES) {
+            content += `<br><b>Notes:</b> ${this.system.NOTES}`;
         }
 
         content += `</div>`;
@@ -3289,6 +3298,11 @@ export class HeroSystem6eItem extends Item {
         if (["perk", "talent", "complication"]?.includes(type)) {
             system.end = 0;
         }
+
+        // Notes (moved to item-partial-common.hbs)
+        // if (system.NOTES) {
+        //     system.description += `<br> <b>Notes:</b> ${system.NOTES}`;
+        // }
     }
 
     createPowerDescriptionModifier(modifier) {
