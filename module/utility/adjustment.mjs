@@ -328,7 +328,7 @@ function _createNewAdjustmentEffect(
             affectedPoints: 0,
             XMLID: item.system.XMLID,
             source: targetActor.name,
-            target: [potentialCharacteristic || powerTargetName?.uuid],
+            target: [potentialCharacteristic || targetPower?.uuid],
             key: potentialCharacteristic,
         },
         origin: item.uuid,
