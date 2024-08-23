@@ -94,6 +94,16 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
+    if (item.system.XMLID === "MANEUVER") {
+        const EXTRADC = item.actor.items.find((o) => o.system.XMLID === "EXTRADC");
+        const extraDcLevels = parseInt(EXTRADC.system.LEVELS);
+        tags.push({
+            value: `${extraDcLevels.signedString()}DC`,
+            name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
+        });
+        dc += extraDcLevels;
+    }
+
     // Move By (add in velocity)
     // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
     //
