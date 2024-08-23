@@ -195,14 +195,16 @@ export function determineMaxAdjustment(item) {
 
 export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) {
     // TODO: Not sure we need to use the characteristic here...
-    const powerInfo = getPowerInfo({
-        xmlid: targetCharacteristic.toUpperCase(),
-        actor: targetActor,
-    });
+    const powerInfo =
+        targetPower.baseInfo ||
+        getPowerInfo({
+            xmlid: targetCharacteristic.toUpperCase(),
+            actor: targetActor,
+        });
 
     return (
         (targetPower
-            ? parseFloat(targetPower.system.activePoints / targetPower.system.value)
+            ? parseFloat(targetPower.system.activePoints / targetPower.system.LEVELS)
             : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel)) *
         defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e)
     );
@@ -300,7 +302,7 @@ function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
 function _createNewAdjustmentEffect(
     item,
     potentialCharacteristic, // TODO: By this point we should know which it is.
-    powerTargetName,
+    targetPower,
     rawActivePointsDamage,
     targetActor,
     targetSystem,
@@ -309,10 +311,10 @@ function _createNewAdjustmentEffect(
     // TODO: Add a document field
     const activeEffect = {
         name: `${item.system.XMLID || "undefined"} 0 ${
-            (potentialCharacteristic || powerTargetName?.name)?.toUpperCase() // TODO: This will need to change for multiple effects
+            (targetPower?.name || potentialCharacteristic)?.toUpperCase() // TODO: This will need to change for multiple effects
         } (0 AP) [by ${item.actor.name || "undefined"}]`,
         id: `${item.system.XMLID}.${item.id}.${
-            potentialCharacteristic || powerTargetName?.name // TODO: This will need to change for multiple effects
+            targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
         icon: item.img,
         changes: [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
@@ -369,14 +371,21 @@ export async function performAdjustment(
     const isHealing = item.system.XMLID === "HEALING";
     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
-    const targetUpperCaseName = nameOfCharOrPower.toUpperCase();
+    let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
 
     // Search the target for this power.
     // TODO: will return first matching power. How can we distinguish without making users
     //       setup the item for a specific? Will likely need to provide a dialog. That gets
     //       us into the thorny question of what powers have been discovered.
-    const targetPower = targetActor.items.find((item) => item.system.XMLID === targetUpperCaseName);
+    const targetPower = targetActor.items.find(
+        (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
+    );
+    if (targetPower) {
+        // Sometimes we pass an item.id, make sure we output item.name
+        nameOfCharOrPower = item.name;
+        targetUpperCaseName = nameOfCharOrPower.toUpperCase();
+    }
 
     // Find a matching characteristic. Because movement powers are unfortunately setup as
     // characteristics and always exist as properties, we need to check that they actually
@@ -388,6 +397,7 @@ export async function performAdjustment(
 
     // Do we have a target?
     if (!targetCharacteristic && !targetPower) {
+        console.error(`${nameOfCharOrPower} is an invalid target for the adjustmment power ${item.name}`);
         return;
     }
 
@@ -403,13 +413,13 @@ export async function performAdjustment(
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
     // and calculate the total effect
-    const existingEffect = _findExistingMatchingEffect(item, potentialCharacteristic, targetPower, targetSystem);
+    const existingEffect = _findExistingMatchingEffect(item, targetUpperCaseName, targetPower, targetSystem);
 
     const activeEffect =
         existingEffect ||
         _createNewAdjustmentEffect(
             item,
-            potentialCharacteristic,
+            targetUpperCaseName,
             targetPower,
             thisAttackRawActivePointsDamage,
             targetActor,
@@ -541,7 +551,7 @@ export async function performAdjustment(
 
     // Update the effect max value(s)
     activeEffect.name = `${item.system.XMLID || "undefined"} ${Math.abs(totalActivePointsThatShouldBeAffected)} ${(
-        potentialCharacteristic || targetPower?.name
+        targetPower?.name || potentialCharacteristic
     )?.toUpperCase()} (${Math.abs(totalAdjustmentNewActivePoints)} AP) [by ${item.actor.name || "undefined"}]`;
 
     activeEffect.flags.affectedPoints = totalActivePointsThatShouldBeAffected;
@@ -602,7 +612,7 @@ export async function performAdjustment(
         thisAttackActivePointEffectLostDueToNotExceeding,
         defenseDescription,
         effectsDescription,
-        potentialCharacteristic,
+        targetUpperCaseName, //potentialCharacteristic,
         isFade,
         isEffectFinished,
         targetActor,

@@ -4087,7 +4087,7 @@ export class HeroSystem6eItem extends Item {
                     : 0;
             const characteristicAdjustment = Math.round(characteristicValue / 5);
             const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
-            const rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment;
+            var rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment;
 
             // Provide up to 3 tags to explain how the roll was calculated:
             // 1. Base skill value without modifier due to characteristics
@@ -4108,6 +4108,22 @@ export class HeroSystem6eItem extends Item {
                     value: levelsAdjustment,
                     name: "Levels",
                 });
+            }
+
+            const enhancedPerception = this.actor.items.find((o) => o.system.XMLID === "ENHANCEDPERCEPTION");
+            if (enhancedPerception) {
+                if (enhancedPerception.system.OPTIONID === "ALL") {
+                    const levels = parseInt(enhancedPerception.system.LEVELS);
+                    tags.push({
+                        value: levels,
+                        name: enhancedPerception.name,
+                    });
+                    rollVal += levels;
+                } else {
+                    console.warn(
+                        `Unsupported ${enhancedPerception.system.XMLID} OPTIONID ${enhancedPerception.system.OPTIONID}`,
+                    );
+                }
             }
 
             roll = rollVal.toString() + "-";
