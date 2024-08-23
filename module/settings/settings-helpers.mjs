@@ -193,7 +193,16 @@ export default class SettingsHelpers {
                 ten: game.i18n.localize("Settings.StrEnd.Choices.ten"),
             },
             default: "ten",
-            onChange: () => CreateHeroCompendiums(),
+            requiresReload: false,
+        });
+
+        game.settings.register(module, "DoubleDamageLimit", {
+            name: game.i18n.localize("Settings.DoubleDamageLimit.Name"),
+            hint: game.i18n.localize("Settings.DoubleDamageLimit.Hint"),
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: false,
             requiresReload: false,
         });
 

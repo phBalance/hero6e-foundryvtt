@@ -22,6 +22,8 @@
 // Transdimensional, Trigger, Uncontrolled, Usable As Attack,
 // Variable Advantage, and Variable Special Effects.
 
+import { HEROSYS } from "../herosystem6e.mjs";
+
 export function convertToDiceParts(value) {
     const dice = Math.floor(value / 5);
     const halfDice = value % 5 >= 2.5 ? 1 : 0;
@@ -66,6 +68,59 @@ export function convertToDcFromItem(item, options) {
         }
         tags.push({ value: _tag, name: item.name });
     }
+
+    // Add in STR
+    if (item.system.usesStrength) {
+        let str = parseInt(
+            options?.effectivestr != undefined ? options?.effectivestr : actor?.system.characteristics.str.value || 0,
+        );
+
+        // MOVEBY halves STR
+        if (item.system.XMLID === "MOVEBY") {
+            str = str / 2;
+        }
+
+        // STRMINIMUM
+        // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
+        const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
+        if (STRMINIMUM) {
+            const strMinimum = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+            //if (strMinimum && str > strMinimum) {
+            const strMinDc = Math.ceil(strMinimum / 5);
+            dc -= strMinDc;
+            tags.push({
+                value: `-${strMinDc}DC`,
+                name: "STR Minimum",
+                title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
+            });
+            //}
+        }
+
+        let str5 = Math.floor(str / 5);
+        dc += str5;
+        end += Math.max(1, Math.round(str / 10));
+        tags.push({
+            value: `${str5.signedString()}DC`,
+            name: "STR",
+            title: item.system.XMLID === "MOVEBY" ? "MoveBy is half STR" : "",
+        });
+    }
+
+    // Add in TK
+    if (item.system.usesTk) {
+        let tkItems = actor.items.filter((o) => o.system.XMLID === "TELEKINESIS");
+        let str = 0;
+        for (const item of tkItems) {
+            str += parseInt(item.system.LEVELS) || 0;
+        }
+        str = options?.effectivestr != undefined ? options?.effectivestr : str;
+        let str5 = Math.floor(str / 5);
+        dc += str5;
+        end += Math.max(1, Math.round(str / 10));
+        tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
+    }
+
+    var baseDC = dc;
 
     // Boostable Charges
     if (options?.boostableCharges) {
@@ -139,57 +194,6 @@ export function convertToDcFromItem(item, options) {
                 title: `Velocity (${options.velocity}) / ${divisor}`,
             });
         }
-    }
-
-    // Add in STR
-    if (item.system.usesStrength) {
-        let str = parseInt(
-            options?.effectivestr != undefined ? options?.effectivestr : actor?.system.characteristics.str.value || 0,
-        );
-
-        // MOVEBY halves STR
-        if (item.system.XMLID === "MOVEBY") {
-            str = str / 2;
-        }
-
-        // STRMINIMUM
-        // A character using a weapon only adds damage for every full 5 points of STR he has above the weapon’s STR Minimum
-        const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
-        if (STRMINIMUM) {
-            const strMinimum = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
-            //if (strMinimum && str > strMinimum) {
-            const strMinDc = Math.ceil(strMinimum / 5);
-            dc -= strMinDc;
-            tags.push({
-                value: `-${strMinDc}DC`,
-                name: "STR Minimum",
-                title: `${STRMINIMUM.OPTION_ALIAS} ${STRMINIMUM.ALIAS}`,
-            });
-            //}
-        }
-
-        let str5 = Math.floor(str / 5);
-        dc += str5;
-        end += Math.max(1, Math.round(str / 10));
-        tags.push({
-            value: `${str5.signedString()}DC`,
-            name: "STR",
-            title: item.system.XMLID === "MOVEBY" ? "MoveBy is half STR" : "",
-        });
-    }
-
-    // Add in TK
-    if (item.system.usesTk) {
-        let tkItems = actor.items.filter((o) => o.system.XMLID === "TELEKINESIS");
-        let str = 0;
-        for (const item of tkItems) {
-            str += parseInt(item.system.LEVELS) || 0;
-        }
-        str = options?.effectivestr != undefined ? options?.effectivestr : str;
-        let str5 = Math.floor(str / 5);
-        dc += str5;
-        end += Math.max(1, Math.round(str / 10));
-        tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
     }
 
     // ActiveEffects
@@ -304,6 +308,24 @@ export function convertToDcFromItem(item, options) {
     if (item.actor?.statuses?.has("underwater")) {
         dc = Math.max(0, dc - 2);
         tags.push({ value: `-2DC`, name: "Underwater" });
+    }
+
+    // Max Killing Doubling Damage
+    // A character cannot more than
+    // double the Damage Classes of his base attack, no
+    // matter how many different methods he uses to add
+    // damage.
+    const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
+    if (DoubleDamageLimit) {
+        if (dc > baseDC * 2) {
+            const backOutDc = Math.floor(baseDC * 2 - dc);
+            tags.push({
+                value: `${backOutDc}DC`,
+                name: "DoubleDamageLimit",
+                title: `BASEDC=${baseDC}. DC=${dc}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
+            });
+            dc = Math.max(0, dc + backOutDc);
+        }
     }
 
     // Programmer warning

@@ -3,7 +3,8 @@
 ## Version 3.0.90 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Added NOTES to item descriptions [#1140](https://github.com/dmdorman/hero6e-foundryvtt/issues/1140)
 - Initial support for Enhanced Perception [#1157](https://github.com/dmdorman/hero6e-foundryvtt/issues/1157)
-- Fixed missing EXTRADC calculations from Martial Maneuvers [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
+- Fixed missing EXTRADC calculations from Martial Maneuvers. [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
+- Added system setting to limit damage to double the base damage. [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
 
 ## Version 3.0.89
 - Improved Analyze skill description. [#1154](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
