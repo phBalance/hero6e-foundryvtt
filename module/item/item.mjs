@@ -28,11 +28,16 @@ export function initializeItemHandlebarsHelpers() {
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
 function itemFullDescription(item) {
+    let desc = item.system.description;
     if (item.system.NAME) {
-        return `<i>${item.system.NAME}:</i> ${item.system.description}`;
+        desc = `<i>${item.system.NAME}:</i> ${item.system.description}`;
     }
 
-    return `${item.system.description}`;
+    if (item.system.NOTES) {
+        desc += `<br><b>Notes:</b> ${item.system.NOTES}`;
+    }
+
+    return desc;
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -409,6 +414,10 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.realCost && !isNaN(this.system.realCost)) {
             content += ` Total Cost: ${this.system.realCost} CP.`;
+        }
+
+        if (this.system.NOTES) {
+            content += `<br><b>Notes:</b> ${this.system.NOTES}`;
         }
 
         content += `</div>`;
@@ -3289,6 +3298,11 @@ export class HeroSystem6eItem extends Item {
         if (["perk", "talent", "complication"]?.includes(type)) {
             system.end = 0;
         }
+
+        // Notes (moved to item-partial-common.hbs)
+        // if (system.NOTES) {
+        //     system.description += `<br> <b>Notes:</b> ${system.NOTES}`;
+        // }
     }
 
     createPowerDescriptionModifier(modifier) {
@@ -4073,7 +4087,7 @@ export class HeroSystem6eItem extends Item {
                     : 0;
             const characteristicAdjustment = Math.round(characteristicValue / 5);
             const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
-            const rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment;
+            var rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment;
 
             // Provide up to 3 tags to explain how the roll was calculated:
             // 1. Base skill value without modifier due to characteristics
@@ -4094,6 +4108,22 @@ export class HeroSystem6eItem extends Item {
                     value: levelsAdjustment,
                     name: "Levels",
                 });
+            }
+
+            const enhancedPerception = this.actor.items.find((o) => o.system.XMLID === "ENHANCEDPERCEPTION");
+            if (enhancedPerception) {
+                if (enhancedPerception.system.OPTIONID === "ALL") {
+                    const levels = parseInt(enhancedPerception.system.LEVELS);
+                    tags.push({
+                        value: levels,
+                        name: enhancedPerception.name,
+                    });
+                    rollVal += levels;
+                } else {
+                    console.warn(
+                        `Unsupported ${enhancedPerception.system.XMLID} OPTIONID ${enhancedPerception.system.OPTIONID}`,
+                    );
+                }
             }
 
             roll = rollVal.toString() + "-";

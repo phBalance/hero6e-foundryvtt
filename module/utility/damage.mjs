@@ -22,6 +22,8 @@
 // Transdimensional, Trigger, Uncontrolled, Usable As Attack,
 // Variable Advantage, and Variable Special Effects.
 
+import { HEROSYS } from "../herosystem6e.mjs";
+
 export function convertToDiceParts(value) {
     const dice = Math.floor(value / 5);
     const halfDice = value % 5 >= 2.5 ? 1 : 0;
@@ -65,70 +67,6 @@ export function convertToDcFromItem(item, options) {
                 break;
         }
         tags.push({ value: _tag, name: item.name });
-    }
-
-    // Boostable Charges
-    if (options?.boostableCharges) {
-        const _value = parseInt(options.boostableCharges);
-        dc += _value;
-        tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
-    }
-
-    // Combat Skill Levels
-
-    for (const csl of CombatSkillLevelsForAttack(item)) {
-        if (csl && csl.dc > 0) {
-            // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
-            dc += csl.dc;
-
-            // Each DC should roughly be 5 active points
-            // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
-            // let ratio = (dcPerAp || 5) / 5;  // Typically 1 to 1 radio
-            // dc += (csl.dc * dcPerAp);
-            // console.log(dcPerAp, dc, csl.dc)
-
-            tags.push({
-                value: `${csl.dc.signedString()}DC`,
-                name: csl.item.name,
-            });
-        }
-    }
-
-    // Move By (add in velocity)
-    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    //
-    // A character can accelerate at a rate of 5m per meter, up to their
-    // maximum normal Combat Movement in meters per Phase. Thus
-    // a character with 50m of Flight would be moving at a velocity of
-    // 5m after traveling one meter, 10m after traveling two meters,
-    // 15m after traveling three meters, and so on, up to 50m after
-    // traveling ten meters.
-    //
-    // Currently assuming token starts at 0 velocity and ends at 0 velocity.
-    // Under this assumption the max velocity is half the speed.
-
-    let velocityDC = 0;
-    // [NORMALDC] +v/5 Strike, FMove
-    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
-    if ((item.system.EFFECT || "").match(/v\/\d/)) {
-        //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
-        if (!options) {
-            options = {};
-        }
-        options.velocity = parseInt(options?.velocity || 0);
-        let divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]); //10;
-        // if (item.system.XMLID === "MOVETHROUGH") {
-        //     divisor = 6;
-        // }
-        velocityDC = Math.floor(options.velocity / divisor);
-        if (velocityDC > 0) {
-            dc += velocityDC;
-            tags.push({
-                value: `${velocityDC.signedString()}DC`,
-                name: "Velocity",
-                title: `Velocity (${options.velocity}) / ${divisor}`,
-            });
-        }
     }
 
     // Add in STR
@@ -180,6 +118,82 @@ export function convertToDcFromItem(item, options) {
         dc += str5;
         end += Math.max(1, Math.round(str / 10));
         tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
+    }
+
+    var baseDC = dc;
+
+    // Boostable Charges
+    if (options?.boostableCharges) {
+        const _value = parseInt(options.boostableCharges);
+        dc += _value;
+        tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
+    }
+
+    // Combat Skill Levels
+
+    for (const csl of CombatSkillLevelsForAttack(item)) {
+        if (csl && csl.dc > 0) {
+            // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
+            dc += csl.dc;
+
+            // Each DC should roughly be 5 active points
+            // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
+            // let ratio = (dcPerAp || 5) / 5;  // Typically 1 to 1 radio
+            // dc += (csl.dc * dcPerAp);
+            // console.log(dcPerAp, dc, csl.dc)
+
+            tags.push({
+                value: `${csl.dc.signedString()}DC`,
+                name: csl.item.name,
+            });
+        }
+    }
+
+    if (item.system.XMLID === "MANEUVER") {
+        const EXTRADC = item.actor.items.find((o) => o.system.XMLID === "EXTRADC");
+        const extraDcLevels = parseInt(EXTRADC.system.LEVELS);
+        tags.push({
+            value: `${extraDcLevels.signedString()}DC`,
+            name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
+        });
+        dc += extraDcLevels;
+    }
+
+    // Move By (add in velocity)
+    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
+    //
+    // A character can accelerate at a rate of 5m per meter, up to their
+    // maximum normal Combat Movement in meters per Phase. Thus
+    // a character with 50m of Flight would be moving at a velocity of
+    // 5m after traveling one meter, 10m after traveling two meters,
+    // 15m after traveling three meters, and so on, up to 50m after
+    // traveling ten meters.
+    //
+    // Currently assuming token starts at 0 velocity and ends at 0 velocity.
+    // Under this assumption the max velocity is half the speed.
+
+    let velocityDC = 0;
+    // [NORMALDC] +v/5 Strike, FMove
+    // ((STR/2) + (v/10))d6; attacker takes 1/3 damage
+    if ((item.system.EFFECT || "").match(/v\/\d/)) {
+        //if (["MOVEBY", "MOVETHROUGH"].includes(item.system.XMLID)) {
+        if (!options) {
+            options = {};
+        }
+        options.velocity = parseInt(options?.velocity || 0);
+        let divisor = parseInt(item.system.EFFECT.match(/v\/(\d+)/)[1]); //10;
+        // if (item.system.XMLID === "MOVETHROUGH") {
+        //     divisor = 6;
+        // }
+        velocityDC = Math.floor(options.velocity / divisor);
+        if (velocityDC > 0) {
+            dc += velocityDC;
+            tags.push({
+                value: `${velocityDC.signedString()}DC`,
+                name: "Velocity",
+                title: `Velocity (${options.velocity}) / ${divisor}`,
+            });
+        }
     }
 
     // ActiveEffects
@@ -294,6 +308,24 @@ export function convertToDcFromItem(item, options) {
     if (item.actor?.statuses?.has("underwater")) {
         dc = Math.max(0, dc - 2);
         tags.push({ value: `-2DC`, name: "Underwater" });
+    }
+
+    // Max Killing Doubling Damage
+    // A character cannot more than
+    // double the Damage Classes of his base attack, no
+    // matter how many different methods he uses to add
+    // damage.
+    const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
+    if (DoubleDamageLimit) {
+        if (dc > baseDC * 2) {
+            const backOutDc = Math.floor(baseDC * 2 - dc);
+            tags.push({
+                value: `${backOutDc}DC`,
+                name: "DoubleDamageLimit",
+                title: `BASEDC=${baseDC}. DC=${dc}. ${game.i18n.localize("Settings.DoubleDamageLimit.Hint")}`,
+            });
+            dc = Math.max(0, dc + backOutDc);
+        }
     }
 
     // Programmer warning

@@ -2324,12 +2324,66 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
     // Where is the adjustment taking from/giving to?
     const { valid, reducesArray, enhancesArray } = adjustmentItem.splitAdjustmentSourceAndTarget();
     if (!valid) {
-        return ui.notifications.error(
-            `${adjustmentItem.actor.name} has an invalid adjustment sources/targets provided for ${
-                adjustmentItem.system.ALIAS || adjustmentItem.name
-            }. Compute effects manually.`,
-            { permanent: true },
-        );
+        // Show a list of powers from target token
+        if (game.settings.get(game.system.id, "alphaTesting")) {
+            let html = "<table>";
+            for (const item of token.actor.items.filter((o) => o.type === "power")) {
+                html += `<tr>`;
+                html += `<td><input type="checkbox" id="${item.id}" data-dtype="Boolean" /></td>`;
+                html += `<td style="text-align: left"><b>${item.name}</b>: ${item.system.description}</td>`;
+                html += `</tr>`;
+            }
+            html += `</table>`;
+
+            const data = {
+                title: `Pick power to adjust`,
+                content: html,
+                buttons: {
+                    normal: {
+                        label: "Apply",
+                        callback: async function (html) {
+                            return html.find("input:checked");
+                        },
+                    },
+                    cancel: {
+                        label: "Cancel",
+                    },
+                },
+            };
+
+            const checked = await Dialog.wait(data);
+            // while (reducesArray?.length > 0) {
+            //     reducesArray.pop();
+            // }
+            // while (enhancesArray?.length > 0) {
+            //     enhancesArray.pop();
+            // }
+            for (const checkedElement of checked) {
+                const checkedItem = token.actor.items.find((o) => o.id === checkedElement.id);
+                if (reducesArray.length > 0) {
+                    reducesArray.push(checkedItem.id);
+                } else if (enhancesArray.length > 0) {
+                    enhancesArray.push(checkedItem.id);
+                }
+            }
+            if ((reducesArray?.length || 0) + (enhancesArray?.length || 0) === 0) {
+                return ui.notifications.error(
+                    `${adjustmentItem.actor.name} has an invalid adjustment sources/targets provided for ${
+                        adjustmentItem.system.ALIAS || adjustmentItem.name
+                    }. Compute effects manually.`,
+                    { permanent: true },
+                );
+            } else {
+                console.log(reducesArray, enhancesArray);
+            }
+        } else {
+            return ui.notifications.error(
+                `${adjustmentItem.actor.name} has an invalid adjustment sources/targets provided for ${
+                    adjustmentItem.system.ALIAS || adjustmentItem.name
+                }. Compute effects manually.`,
+                { permanent: true },
+            );
+        }
     }
 
     const adjustmentItemTags = getAttackTags(adjustmentItem);

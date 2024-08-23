@@ -222,6 +222,11 @@
             "Name": "Long-term Endurance",
             "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation.  When an actor's average END use per turn exceeds double their REC, max END is lowered."
         },
+        "DoubleDamageLimit": 
+        {
+            "Name": "Double Damage Limit",
+            "Hint": "A character cannot more than double the Damage Classes of his base attack, no matter how many different methods he uses to add damage. This should be enabled for 5E games. It is an optional rule for 6E games."
+        },
         "DiceSkinning": 
         {
             "Name": "Dice Skinning (Dice So Nice)",
