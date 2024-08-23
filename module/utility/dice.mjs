@@ -133,6 +133,7 @@ export class HeroRoller {
         ENTANGLE: "entangle",
         FLASH: "flash",
         EFFECT: "effect",
+        TRANSFORM: "transform",
     };
 
     static QUALIFIER = {
@@ -260,6 +261,14 @@ export class HeroRoller {
     makeEntangleRoll(apply = true) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.ENTANGLE;
+        }
+        return this;
+    }
+
+    makeTransformRoll(apply = true) {
+        console.log("makeTransformRoll");
+        if (apply) {
+            this._type = HeroRoller.ROLL_TYPE.TRANSFORM;
         }
         return this;
     }
@@ -752,6 +761,22 @@ export class HeroRoller {
         throw new Error(`asking for entangle from type ${this._type} doesn't make sense`);
     }
 
+    getTransformTerms() {
+        if (this._type === HeroRoller.ROLL_TYPE.TRANSFORM) {
+            return this.getBaseTerms();
+        }
+
+        throw new Error(`asking for transform from type ${this._type} doesn't make sense`);
+    }
+
+    getTransformTotal() {
+        if (this._type === HeroRoller.ROLL_TYPE.TRANSFORM) {
+            return this.getBaseTotal();
+        }
+
+        throw new Error(`asking for transform from type ${this._type} doesn't make sense`);
+    }
+
     getAdjustmentTerms() {
         if (this._type === HeroRoller.ROLL_TYPE.ADJUSTMENT) {
             return this.getBaseTerms();
@@ -829,6 +854,7 @@ export class HeroRoller {
             console.error(`attempting to get calculatedTerms for roll type ${this._type}`);
         }
 
+        console.log("getCalculatedTerms", this._termsCluster);
         return HeroRoller.#extractPropertyFromTermsCluster(this._termsCluster, "calculated");
     }
 
@@ -1066,6 +1092,7 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.SUCCESS:
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
             case HeroRoller.ROLL_TYPE.EFFECT:
+            case HeroRoller.ROLL_TYPE.TRANSFORM:
                 // Do nothing as there are no calculated values
                 break;
 
@@ -1504,6 +1531,9 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.EFFECT:
                 return "Effect";
 
+            case HeroRoller.ROLL_TYPE.TRANSFORM:
+                return "Transform Damage";
+
             default:
                 console.error(`unknown base purpose type ${this._type}`);
                 return "";
@@ -1516,6 +1546,7 @@ export class HeroRoller {
             case HeroRoller.ROLL_TYPE.SUCCESS:
             case HeroRoller.ROLL_TYPE.ADJUSTMENT:
             case HeroRoller.ROLL_TYPE.EFFECT:
+            case HeroRoller.ROLL_TYPE.TRANSFORM:
                 // No calculated terms
                 return "";
 
@@ -1891,6 +1922,13 @@ export class HeroRoller {
                     annotatedTerms: `Effect breakdown: [${this.getEffectTerms()}}]`,
                     terms: `[${this.getEffectTerms()}}] Effect`,
                     total: `${this.getEffectTotal()} Effect`,
+                };
+
+            case HeroRoller.ROLL_TYPE.TRANSFORM:
+                return {
+                    annotatedTerms: `Transform breakdown: [${this.getTransformTerms()}}]`,
+                    terms: `[${this.getTransformTerms()}}] Transform Damage`,
+                    total: `${this.getTransformTotal()} Transform Damage`,
                 };
 
             default:

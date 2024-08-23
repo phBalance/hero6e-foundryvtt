@@ -73,6 +73,11 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
             roller.makeEntangleRoll();
             break;
 
+        case "t":
+            flavour = HeroRoller.ROLL_TYPE.TRANSFORM;
+            roller.makeTransformRoll();
+            break;
+
         case "s":
             flavour = HeroRoller.ROLL_TYPE.SUCCESS;
             roller.makeSuccessRoll();

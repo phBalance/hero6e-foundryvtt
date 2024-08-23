@@ -5316,11 +5316,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "TRANSFORM",
             type: ["attack", "standard"],
-            behaviors: ["attack"],
+            behaviors: ["attack", "dice"],
             perceivability: "obvious",
             duration: "instant",
             target: "target's DCV",
             range: HERO.RANGE_TYPES.STANDARD,
+            costPerLevel: 15,
             costEnd: true,
             xml: `<POWER XMLID="TRANSFORM" ID="1709334039303" BASECOST="0.0" LEVELS="1" ALIAS="Transform" POSITION="84" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COSMETIC" OPTIONID="COSMETIC" OPTION_ALIAS="Cosmetic" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
