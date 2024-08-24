@@ -1,4 +1,5 @@
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { CombatSkillLevelsForAttack } from "../utility/damage.mjs";
 
 export function registerFullTests(quench) {
     quench.registerBatch(
@@ -1388,6 +1389,180 @@ export function registerFullTests(quench) {
 
                 it("should default to the basic name when there is no name provided in the HDC", async function () {
                     assert.equal(actor.name, defaultActorName);
+                });
+            });
+
+            describe("Martial DCs and Enhanced Perception", function () {
+                const contents = `
+                    <?xml version="1.0" encoding="UTF-16"?>
+                <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic6E.hdt">
+                <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="12" RULES="Default" />
+                <CHARACTER_INFO CHARACTER_NAME="ManeuverActor" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                    <BACKGROUND />
+                    <PERSONALITY />
+                    <QUOTE />
+                    <TACTICS />
+                    <CAMPAIGN_USE />
+                    <APPEARANCE />
+                    <NOTES1 />
+                    <NOTES2 />
+                    <NOTES3 />
+                    <NOTES4 />
+                    <NOTES5 />
+                </CHARACTER_INFO>
+                <CHARACTERISTICS>
+                    <STR XMLID="STR" ID="1710726364049" BASECOST="0.0" LEVELS="40" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </STR>
+                    <DEX XMLID="DEX" ID="1710726364497" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </DEX>
+                    <CON XMLID="CON" ID="1710726363957" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </CON>
+                    <INT XMLID="INT" ID="1710726363828" BASECOST="0.0" LEVELS="2" ALIAS="INT" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </INT>
+                    <EGO XMLID="EGO" ID="1710726364513" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </EGO>
+                    <PRE XMLID="PRE" ID="1710726364620" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </PRE>
+                    <OCV XMLID="OCV" ID="1710726364543" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </OCV>
+                    <DCV XMLID="DCV" ID="1710726363787" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </DCV>
+                    <OMCV XMLID="OMCV" ID="1710726363737" BASECOST="0.0" LEVELS="1" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </OMCV>
+                    <DMCV XMLID="DMCV" ID="1710726364453" BASECOST="0.0" LEVELS="-2" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </DMCV>
+                    <SPD XMLID="SPD" ID="1710726364191" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </SPD>
+                    <PD XMLID="PD" ID="1710726364262" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </PD>
+                    <ED XMLID="ED" ID="1710726364629" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </ED>
+                    <REC XMLID="REC" ID="1710726364570" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </REC>
+                    <END XMLID="END" ID="1710726364551" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </END>
+                    <BODY XMLID="BODY" ID="1710726364030" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </BODY>
+                    <STUN XMLID="STUN" ID="1710726364101" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </STUN>
+                    <RUNNING XMLID="RUNNING" ID="1710726364233" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </RUNNING>
+                    <SWIMMING XMLID="SWIMMING" ID="1710726364470" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </SWIMMING>
+                    <LEAPING XMLID="LEAPING" ID="1710726364250" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </LEAPING>
+                </CHARACTERISTICS>
+                <SKILLS>
+                    <SKILL XMLID="KNOWLEDGE_SKILL" ID="1722647089371" BASECOST="3.0" LEVELS="3" ALIAS="KS" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Magic" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
+                    <NOTES />
+                    </SKILL>
+                    <SKILL XMLID="ANALYZE" ID="1723147179349" BASECOST="3.0" LEVELS="0" ALIAS="Analyze" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Mark Quality" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                    <NOTES />
+                    </SKILL>
+                    <SKILL XMLID="CLIMBING" ID="1723431816452" BASECOST="3.0" LEVELS="0" ALIAS="Climbing" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                    <NOTES />
+                    </SKILL>
+                </SKILLS>
+                <PERKS />
+                <TALENTS />
+                <MARTIALARTS>
+                    <MANEUVER XMLID="MANEUVER" ID="1723406694834" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="2" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="50" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
+                    <NOTES />
+                    </MANEUVER>
+                    <EXTRADC XMLID="EXTRADC" ID="1723406759822" BASECOST="0.0" LEVELS="22" ALIAS="+22 HTH Damage Class(es)" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                    <NOTES />
+                    </EXTRADC>
+                </MARTIALARTS>
+                <POWERS>
+                    <POWER XMLID="ENHANCEDPERCEPTION" ID="1724447218089" BASECOST="0.0" LEVELS="6" ALIAS="Enhanced Perception" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="all Sense Groups" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </POWER>
+                </POWERS>
+                <DISADVANTAGES>
+                    <DISAD XMLID="PSYCHOLOGICALLIMITATION" ID="1719196047424" BASECOST="0.0" LEVELS="0" ALIAS="Psychological Complication" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                    <NOTES />
+                    <ADDER XMLID="SITUATION" ID="1719196086834" BASECOST="10.0" LEVELS="0" ALIAS="Situation Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COMMON" OPTIONID="COMMON" OPTION_ALIAS="(Common" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                        <NOTES />
+                    </ADDER>
+                    <ADDER XMLID="INTENSITY" ID="1719196086840" BASECOST="5.0" LEVELS="0" ALIAS="Intensity Is" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STRONG" OPTIONID="STRONG" OPTION_ALIAS="Strong" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                        <NOTES />
+                    </ADDER>
+                    </DISAD>
+                </DISADVANTAGES>
+                <EQUIPMENT>
+                    <POWER XMLID="COMPOUNDPOWER" ID="1723512936537" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" PRICE="0.0" WEIGHT="0.0" CARRIED="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Magic Sword" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES>My notes</NOTES>
+                    <POWER XMLID="HKA" ID="1723513008909" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                        <NOTES />
+                    </POWER>
+                    <SKILL XMLID="COMBAT_LEVELS" ID="1723513022920" BASECOST="0.0" LEVELS="2" ALIAS="Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
+                        <NOTES />
+                    </SKILL>
+                    </POWER>
+                </EQUIPMENT>
+                </CHARACTER>
+                `;
+
+                let actor;
+
+                before(async () => {
+                    actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        { temporary: true },
+                    );
+
+                    await actor.uploadFromXml(contents);
+                    await actor._postUpload();
+                });
+
+                it("Killing Strike damage", async function () {
+                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage, "11d6+1K");
+                });
+
+                it("HKA damage", async function () {
+                    assert.equal(actor.items.find((o) => o.system.XMLID === "HKA").system.damage, "4d6+1K");
+                });
+
+                it("HKA CSL", async function () {
+                    assert.equal(
+                        CombatSkillLevelsForAttack(actor.items.find((o) => o.system.XMLID === "HKA"))[0].ocv,
+                        2,
+                    );
+                });
+
+                it("Enhanced Perception", async function () {
+                    assert.equal(actor.items.find((o) => o.system.XMLID === "PERCEPTION").system.roll, "17-");
+                });
+
+                it("realCost", async function () {
+                    assert.equal(actor.system.realCost, 161);
+                });
+
+                it("activePoints", async function () {
+                    assert.equal(actor.system.activePoints, 180);
                 });
             });
         },

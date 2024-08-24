@@ -6215,6 +6215,9 @@ export function registerUploadTests(quench) {
                     it("end", function () {
                         assert.equal(item.system.end, 0);
                     });
+                    it("damage", function () {
+                        assert.equal(item.system.description, "1/2 Phase, -2 OCV, +1 DCV, 6d6 Strike");
+                    });
                 });
 
                 describe("Martial Flash", async function () {

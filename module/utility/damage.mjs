@@ -120,7 +120,7 @@ export function convertToDcFromItem(item, options) {
         tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
     }
 
-    var baseDC = dc;
+    let baseDC = dc;
 
     // Boostable Charges
     if (options?.boostableCharges) {
@@ -150,13 +150,21 @@ export function convertToDcFromItem(item, options) {
     }
 
     if (item.system.XMLID === "MANEUVER") {
-        const EXTRADC = item.actor.items.find((o) => o.system.XMLID === "EXTRADC");
-        const extraDcLevels = parseInt(EXTRADC.system.LEVELS);
-        tags.push({
-            value: `${extraDcLevels.signedString()}DC`,
-            name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
-        });
-        dc += extraDcLevels;
+        const EXTRADC = item.actor.items.find((o) => o.system?.XMLID === "EXTRADC");
+        if (EXTRADC) {
+            let extraDcLevels = parseInt(EXTRADC.system.LEVELS);
+
+            // 5E extraDCLevels are halved for killing attacks
+            if (item.system.is5e && item.system.killing) {
+                extraDcLevels = Math.floor(extraDcLevels / 2);
+            }
+
+            tags.push({
+                value: `${extraDcLevels.signedString()}DC`,
+                name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
+            });
+            dc += extraDcLevels;
+        }
     }
 
     // Move By (add in velocity)

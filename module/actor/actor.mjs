@@ -1178,6 +1178,9 @@ export class HeroSystem6eActor extends Actor {
             await this.update({ "system.is5e": this.system.is5e });
         }
 
+        // Quench test may need CHARACTERISTICS, which are set in postUpload
+        await this._postUpload({ render: false });
+
         const xmlItemsToProcess =
             1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
             heroJson.CHARACTER.DISADVANTAGES.length +
@@ -1236,24 +1239,7 @@ export class HeroSystem6eActor extends Actor {
                     //uploadProgressBar.advance(`${this.name}: Adding ${itemTag} ${itemData.name}`);
 
                     if (this.id) {
-                        //const item = await
-                        // itemPromiseArray.push(
-                        //     HeroSystem6eItem.create(itemData, {
-                        //         parent: this,
-                        //     }),
-                        // );
                         itemsToCreate.push(itemData);
-                        // try {
-                        //     await item._postUpload();
-                        // } catch (e) {
-                        //     console.error(e);
-                        //     await ui.notifications.error(
-                        //         `${this.name}/${item.name}/${item.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                        //         { console: true, permanent: true },
-                        //     );
-                        //     await item.delete();
-                        //     continue;
-                        // }
 
                         // COMPOUNDPOWER is similar to a MULTIPOWER.
                         // MULTIPOWER uses PARENTID references.
@@ -1325,7 +1311,57 @@ export class HeroSystem6eActor extends Actor {
                             parent: this,
                         });
                         this.items.set(item.system.XMLID + item.system.POSITION, item);
-                        //await item._postUpload();
+
+                        if (system.XMLID === "COMPOUNDPOWER") {
+                            const compoundItems = [];
+                            for (const value of Object.values(system)) {
+                                // We only care about arrays and objects (array of 1)
+                                if (typeof value === "object") {
+                                    const values = value.length ? value : [value];
+                                    for (const system2 of values) {
+                                        if (system2.XMLID) {
+                                            const power = getPowerInfo({
+                                                xmlid: system2.XMLID,
+                                                actor: this,
+                                            });
+                                            if (!power) {
+                                                await ui.notifications.error(
+                                                    `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                    {
+                                                        console: true,
+                                                        permanent: true,
+                                                    },
+                                                );
+                                                continue;
+                                            }
+                                            compoundItems.push(system2);
+                                        }
+                                    }
+                                }
+                            }
+
+                            compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
+                            for (const system2 of compoundItems) {
+                                const power = getPowerInfo({
+                                    xmlid: system2.XMLID,
+                                    actor: this,
+                                });
+                                const itemData2 = {
+                                    name: system2.NAME || system2.ALIAS || system2.XMLID,
+                                    type: power.type.includes("skill") ? "skill" : "power",
+                                    system: {
+                                        ...system2,
+                                        PARENTID: system.ID,
+                                        POSITION: parseInt(system2.POSITION),
+                                    },
+                                };
+                                const item = await HeroSystem6eItem.create(itemData2, {
+                                    temporary: true,
+                                    parent: this,
+                                });
+                                this.items.set(item.system.XMLID + item.system.POSITION, item);
+                            }
+                        }
                     }
 
                     uploadPerformance.items ??= [];
@@ -1559,6 +1595,9 @@ export class HeroSystem6eActor extends Actor {
                 temporary: this.id ? false : true,
                 parent: this,
             });
+            if (!this.id) {
+                this.items.set(perceptionItem.system.XMLID, perceptionItem);
+            }
             //await
             perceptionItem._postUpload();
 
@@ -1975,7 +2014,9 @@ export class HeroSystem6eActor extends Actor {
         const _disadPoints = Math.min(DISAD_POINTS, this.system.pointsDetail?.disadvantage || 0);
         if (_disadPoints != 0) {
             this.system.pointsDetail.MatchingDisads = -_disadPoints;
+            this.system.activePointsDetail.MatchingDisads = -_disadPoints;
             realCost -= _disadPoints;
+            activePoints -= _disadPoints;
         }
 
         this.system.realCost = realCost;
@@ -1991,6 +2032,9 @@ export class HeroSystem6eActor extends Actor {
                 //{ render: false },
                 { hideChatMessage: true },
             );
+        } else {
+            this.system.points = realCost;
+            this.system.activePoints = activePoints;
         }
     }
 

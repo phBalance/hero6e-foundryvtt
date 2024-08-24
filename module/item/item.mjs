@@ -1221,6 +1221,25 @@ export class HeroSystem6eItem extends Item {
                     this.makeAttack();
                 }
             }
+
+            if (changed) {
+                // if (this.system.ID === "1723406694834") {
+                //     debugger;
+                // }
+                let { dc, end } = convertToDcFromItem(this);
+                this.system.endEstimate = Math.max(this.system.endEstimate, end);
+
+                // text description of damage
+                this.system.damage = getDiceFormulaFromItemDC(this, dc);
+
+                if (dc > 0) {
+                    if (this.system.killing) {
+                        this.system.damage += "K";
+                    } else {
+                        this.system.damage += "N";
+                    }
+                }
+            }
         }
 
         changed = this.buildRangeParameters() || changed;
