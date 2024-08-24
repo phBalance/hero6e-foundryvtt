@@ -140,19 +140,19 @@ export class ItemAttackFormApplication extends FormApplication {
         if (item.system.XMLID === "MINDSCAN") {
             data.mindScanChoices = CONFIG.HERO.mindScanChoices;
 
-            data.mindScanFamiliar = [];
-            data.mindScanFamiliar.push({
+            data.mindScanFamiliarOptions = [];
+            data.mindScanFamiliarOptions.push({
                 label: `+0`,
                 key: 0,
             });
             for (let i = 1; i <= 5; i++) {
-                data.mindScanFamiliar.push({
+                data.mindScanFamiliarOptions.push({
                     label: `+${i} Familiar mind`,
                     key: i,
                 });
             }
             for (let i = 1; i <= 5; i++) {
-                data.mindScanFamiliar.push({
+                data.mindScanFamiliarOptions.push({
                     label: `${-i} Unfamiliar mind`,
                     key: -i,
                 });
@@ -243,9 +243,14 @@ export class ItemAttackFormApplication extends FormApplication {
 
         this.data.ocvMod = formData.ocvMod;
         this.data.dcvMod = formData.dcvMod;
+        this.data.omcvMod = formData.omcvMod;
+        this.data.dmcvMod = formData.dmcvMod;
 
         this.data.effectiveStr = formData.effectiveStr;
         this.data.effectiveLevels = formData.effectiveLevels;
+
+        this.data.mindScanMinds = formData.mindScanMinds;
+        this.data.mindScanFamiliar = formData.mindScanFamiliar;
 
         this.data.boostableCharges = Math.max(
             0,
