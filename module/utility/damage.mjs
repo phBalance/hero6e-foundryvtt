@@ -37,6 +37,7 @@ export function convertToDcFromItem(item, options) {
     let dc = 0;
     let tags = [];
     let end = 0;
+    let baseDcParts = {};
 
     // Killing Attack
     if (item.system.killing) {
@@ -68,6 +69,8 @@ export function convertToDcFromItem(item, options) {
         }
         tags.push({ value: _tag, name: item.name });
     }
+
+    baseDcParts.item = dc;
 
     // Add in STR
     if (item.system.usesStrength) {
@@ -120,7 +123,7 @@ export function convertToDcFromItem(item, options) {
         tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
     }
 
-    let baseDC = dc;
+    baseDcParts.str = dc - baseDcParts.item;
 
     // Boostable Charges
     if (options?.boostableCharges) {
@@ -149,10 +152,11 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
+    let extraDcLevels = 0;
     if (item.system.XMLID === "MANEUVER") {
         const EXTRADC = item.actor.items.find((o) => o.system?.XMLID === "EXTRADC");
         if (EXTRADC) {
-            let extraDcLevels = parseInt(EXTRADC.system.LEVELS);
+            extraDcLevels = parseInt(EXTRADC.system.LEVELS);
 
             // 5E extraDCLevels are halved for killing attacks
             if (item.system.is5e && item.system.killing) {
@@ -325,6 +329,15 @@ export function convertToDcFromItem(item, options) {
     // damage.
     const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
     if (DoubleDamageLimit) {
+        // BaseDC
+        var baseDC = baseDcParts.str;
+        if (["HA", "KHA"].includes(item.system.XMLID) || item.system.CATEGORY === "Hand To Hand") {
+            baseDC = baseDcParts.item;
+        }
+        if (item.system.XMLID === "MANEUVER" && !item.type.USEWEAPON) {
+            baseDC += extraDcLevels;
+        }
+
         if (dc > baseDC * 2) {
             const backOutDc = Math.floor(baseDC * 2 - dc);
             tags.push({
