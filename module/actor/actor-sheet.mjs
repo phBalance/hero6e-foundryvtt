@@ -199,6 +199,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                     // Signed OCV and DCV
                     if (item.system.ocv != undefined && item.system.uses === "ocv") {
+                        const ocv = parseInt(item.actor?.system.characteristics.ocv?.value || 0);
                         switch (item.system.ocv) {
                             case "--":
                                 item.system.ocvEstimated = "";
@@ -213,7 +214,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                                     const velocity = calculateVelocityInSystemUnits(item.actor, token);
 
                                     item.system.ocvEstimated = (
-                                        parseInt(cslSummary.ocv) + parseInt(velocity / 10)
+                                        ocv +
+                                        parseInt(cslSummary.ocv) +
+                                        parseInt(velocity / 10)
                                     ).signedString();
 
                                     if (parseInt(velocity / 10) != 0) {
@@ -232,7 +235,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                             default:
                                 item.system.ocv = parseInt(item.system.ocv).signedString();
                                 item.system.ocvEstimated = (
-                                    parseInt(item.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)
+                                    ocv +
+                                    parseInt(item.system.ocv) +
+                                    parseInt(cslSummary.ocv || cslSummary.omcv || 0)
                                 ).signedString();
 
                                 if (parseInt(item.system.ocv) != 0) {
@@ -247,9 +252,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                     }
 
                     if (item.system.dcv != undefined && item.system.uses === "ocv") {
+                        const dcv = parseInt(item.actor?.system.characteristics.dcv?.value || 0);
                         item.system.dcv = parseInt(item.system.dcv).signedString();
                         item.system.dcvEstimated = (
-                            parseInt(item.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
+                            dcv +
+                            parseInt(item.system.dcv) +
+                            parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
                         ).signedString();
 
                         if (parseInt(item.system.dcv) != 0) {
