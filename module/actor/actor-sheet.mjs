@@ -200,6 +200,14 @@ export class HeroSystemActorSheet extends ActorSheet {
                     // Signed OCV and DCV
                     if (item.system.ocv != undefined && item.system.uses === "ocv") {
                         const ocv = parseInt(item.actor?.system.characteristics.ocv?.value || 0);
+                        if (parseInt(ocv) != 0) {
+                            if (item.flags.tags.ocv) {
+                                item.flags.tags.ocv += "\n";
+                            } else {
+                                item.flags.tags.ocv = "";
+                            }
+                            item.flags.tags.ocv = `${item.flags.tags.ocv}${ocv.signedString()} OCV`;
+                        }
                         switch (item.system.ocv) {
                             case "--":
                                 item.system.ocvEstimated = "";
@@ -234,6 +242,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                             default:
                                 item.system.ocv = parseInt(item.system.ocv).signedString();
+
                                 item.system.ocvEstimated = (
                                     ocv +
                                     parseInt(item.system.ocv) +
@@ -246,13 +255,21 @@ export class HeroSystemActorSheet extends ActorSheet {
                                     } else {
                                         item.flags.tags.ocv = "";
                                     }
-                                    item.flags.tags.ocv = `${item.flags.tags.ocv}${item.system.ocv} ${item.name}`;
+                                    item.flags.tags.ocv += `${item.system.ocv} ${item.name}`;
                                 }
                         }
                     }
 
                     if (item.system.dcv != undefined && item.system.uses === "ocv") {
                         const dcv = parseInt(item.actor?.system.characteristics.dcv?.value || 0);
+                        if (parseInt(dcv) != 0) {
+                            if (item.flags.tags.dcv) {
+                                item.flags.tags.dcv += "\n";
+                            } else {
+                                item.flags.tags.dcv = "";
+                            }
+                            item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
+                        }
                         item.system.dcv = parseInt(item.system.dcv).signedString();
                         item.system.dcvEstimated = (
                             dcv +
