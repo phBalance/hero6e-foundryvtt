@@ -1774,7 +1774,9 @@ export class HeroSystem6eActor extends Actor {
                 // Custom Templates
                 // Automations
                 // Barrier
-                console.warn(`Unable to determine isHeroic for ${this.name}.`, this.system.CHARACTER?.TEMPLATE);
+                if (this.id) {
+                    console.warn(`Unable to determine isHeroic for ${this.name}.`, this.system.CHARACTER?.TEMPLATE);
+                }
             }
         } catch (e) {
             console.error(e);

@@ -38,36 +38,90 @@ export function convertToDcFromItem(item, options) {
     let tags = [];
     let end = 0;
     let baseDcParts = {};
+    let tooltip = null;
+
+    // MartialArts & Maneuvers have DC
+    dc = parseInt(item.system.DC) || 0;
+
+    // 5E Martial DC, EXTRADC, and CSL DCs are halved for killing attacks.  STR/5 DCs are unchanged.
+    // pg 400 (+1 Damage Class); pg 406
+    if (
+        item.is5e &&
+        item.system.killing &&
+        (item.system.XMLID === "MANEUVER" || ["maneuver", "martialart"].includes(item.type))
+    ) {
+        dc = Math.floor(dc / 2);
+        tooltip = "it takes two Extra DCs to add +1 DC to a Killing Damage attack";
+    }
+
+    // NND (the DC should be halved; suspect because of AVAD/NND implied limitation; Nerve Strike)
+    if (item.system.EFFECT?.includes("NND")) {
+        dc = Math.floor(dc / 2);
+        tooltip = "AVAD/NND implied limitation";
+    }
+
+    // Powers use LEVELS, which we will convert to DCs
+    if (!dc) {
+        dc = parseInt(item.system.LEVELS) || 0;
+        if (item.system.killing) {
+            dc *= 3;
+        } else {
+            console.log(item);
+        }
+    }
 
     // Killing Attack
     if (item.system.killing) {
-        dc += parseInt(item.system.dice) * 3;
+        //dc += parseInt(item.system.dice) * 3;
         //dc += parseInt(item.system.DC) || (parseInt(item.system.value) * 3)
-        switch (item.system.extraDice) {
-            case "pip":
-                dc += 1;
-                break;
-            case "half":
-            case "one-pip":
-                dc += 2;
-                break;
+        // switch (item.system.extraDice) {
+        //     case "pip":
+        //         dc += 1;
+        //         break;
+        //     case "half":
+        //     case "one-pip":
+        //         dc += 2;
+        //         break;
+        // }
+        if (item.findModsByXmlid("PLUSONEPIP")) {
+            dc += 1;
         }
-        tags.push({ value: `${dc.signedString()}DC`, name: item.name });
+        if (item.findModsByXmlid("PLUSONEHALFDIE")) {
+            dc += 2;
+        }
+        if (item.findModsByXmlid("MINUSONEPIP")) {
+            // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
+            dc += 2;
+        }
+
+        tags.push({ value: `${dc.signedString()}DC`, name: item.name, title: tooltip });
     } else {
         // Normal Attack
-        dc += parseInt(item.system.dice);
-        let _tag = `${dc.signedString()}DC`;
-        switch (item.system.extraDice) {
-            case "pip":
-                dc += 0.2;
-                _tag += " plus 1";
-                break;
-            case "half":
-                dc += 0.5;
-                _tag += " plus 1d3";
-                break;
+        //dc += parseInt(item.system.dice);
+        // let _tag = `${dc.signedString()}DC`;
+        // switch (item.system.extraDice) {
+        //     case "pip":
+        //         dc += 0.2;
+        //         _tag += " plus 1";
+        //         break;
+        //     case "half":
+        //         dc += 0.5;
+        //         _tag += " plus 1d3";
+        //         break;
+        // }
+        //tags.push({ value: _tag, name: item.name });
+
+        if (item.findModsByXmlid("PLUSONEPIP")) {
+            dc += 0.2;
         }
-        tags.push({ value: _tag, name: item.name });
+        if (item.findModsByXmlid("PLUSONEHALFDIE")) {
+            dc += 0.5;
+        }
+        if (item.findModsByXmlid("MINUSONEPIP")) {
+            // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
+            dc += 0.5;
+        }
+        tags.push({ value: `${dc.signedString()}DC`, name: item.name, title: tooltip });
     }
 
     baseDcParts.item = dc;
@@ -166,6 +220,7 @@ export function convertToDcFromItem(item, options) {
             tags.push({
                 value: `${extraDcLevels.signedString()}DC`,
                 name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
+                title: tooltip,
             });
             dc += extraDcLevels;
         }
