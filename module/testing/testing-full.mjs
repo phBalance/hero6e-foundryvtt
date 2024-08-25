@@ -1489,6 +1489,9 @@ export function registerFullTests(quench) {
                     <MANEUVER XMLID="MANEUVER" ID="1723406694834" BASECOST="4.0" LEVELS="0" ALIAS="Killing Strike" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Killing Strike" OCV="-2" DCV="+0" DC="2" PHASE="1/2" EFFECT="[KILLINGDC]" ADDSTR="Yes" ACTIVECOST="10" DAMAGETYPE="0" MAXSTR="50" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[WEAPONKILLINGDC]">
                     <NOTES />
                     </MANEUVER>
+                    <MANEUVER XMLID="MANEUVER" ID="1724545320876" BASECOST="4.0" LEVELS="0" ALIAS="Martial Strike" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Strike" OCV="+0" DCV="+2" DC="2" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="20" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Weapon [WEAPONDC] Strike">
+                    <NOTES />
+                    </MANEUVER>
                     <EXTRADC XMLID="EXTRADC" ID="1723406759822" BASECOST="0.0" LEVELS="22" ALIAS="+22 HTH Damage Class(es)" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                     <NOTES />
                     </EXTRADC>
@@ -1535,11 +1538,42 @@ export function registerFullTests(quench) {
                     );
 
                     await actor.uploadFromXml(contents);
-                    await actor._postUpload();
                 });
 
                 it("Killing Strike damage", async function () {
                     assert.equal(actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage, "11d6+1K");
+                });
+
+                it("Killing Strike OCV", async function () {
+                    assert.equal(
+                        actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.ocvEstimated,
+                        "+1",
+                    );
+                });
+
+                it("Killing Strike DCV", async function () {
+                    assert.equal(
+                        actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.dcvEstimated,
+                        "+3",
+                    );
+                });
+
+                it("Martial Strike damage", async function () {
+                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage, "34d6N");
+                });
+
+                it("Martial Strike OCV", async function () {
+                    assert.equal(
+                        actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.ocvEstimated,
+                        "+3",
+                    );
+                });
+
+                it("Martial Strike DCV", async function () {
+                    assert.equal(
+                        actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.dcvEstimated,
+                        "+5",
+                    );
                 });
 
                 it("HKA damage", async function () {
@@ -1558,11 +1592,11 @@ export function registerFullTests(quench) {
                 });
 
                 it("realCost", async function () {
-                    assert.equal(actor.system.realCost, 161);
+                    assert.equal(actor.system.realCost, 165);
                 });
 
                 it("activePoints", async function () {
-                    assert.equal(actor.system.activePoints, 180);
+                    assert.equal(actor.system.activePoints, 184);
                 });
             });
         },

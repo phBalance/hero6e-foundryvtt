@@ -6,6 +6,7 @@
 - Fixed missing EXTRADC calculations from Martial Maneuvers. [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
 - Added system setting to limit damage, to double the base damage. [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
 - Fixed inconsistancies with OCV/DCV values on Attack tab.
+- Fixed ability to edit Mind Scan attack adjustments. [#1161](https://github.com/dmdorman/hero6e-foundryvtt/issues/1161)
 
 ## Version 3.0.89
 - Improved Analyze skill description. [#1154](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)

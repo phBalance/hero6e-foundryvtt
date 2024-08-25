@@ -108,15 +108,15 @@
     {{#if mindScanChoices}}
       <div class="form-group">
         <label>Number of Minds</label>
-        <select name="mindScanChoices" data-dtype="text">
-          {{selectOptions mindScanChoices nameAttr="key" labelAttr="label"}}
+        <select name="mindScanMinds" data-dtype="text">
+          {{selectOptions mindScanChoices nameAttr="key" labelAttr="label" selected=mindScanMinds}}
         </select>
       </div>
 
       <div class="form-group">
         <label>Familiar Mind</label>
         <select name="mindScanFamiliar" data-dtype="text">
-          {{selectOptions mindScanFamiliar nameAttr="key" labelAttr="label"}}
+          {{selectOptions mindScanFamiliarOptions nameAttr="key" labelAttr="label" selected=mindScanFamiliar}}
         </select>
       </div>
     {{/if}}

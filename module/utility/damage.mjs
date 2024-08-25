@@ -33,6 +33,9 @@ export function convertToDiceParts(value) {
 
 // Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
+    if (item.system.ALIAS === "Martial Strike") {
+        console.log(item);
+    }
     let actor = item.actor;
     let dc = 0;
     let tags = [];

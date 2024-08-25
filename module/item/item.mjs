@@ -11,8 +11,9 @@ import {
 import { onActiveEffectToggle } from "../utility/effects.mjs";
 import { getPowerInfo, getModifierInfo, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
-import { convertToDcFromItem, getDiceFormulaFromItemDC } from "../utility/damage.mjs";
+import { convertToDcFromItem, getDiceFormulaFromItemDC, CombatSkillLevelsForAttack } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
+import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 
@@ -1116,6 +1117,277 @@ export class HeroSystem6eItem extends Item {
         return null;
     }
 
+    _postUploadDetails() {
+        const item = this;
+        // showToggle
+        const itemEffects = item.effects.find(() => true);
+        if (itemEffects) {
+            item.system.showToggle = true;
+            item.system.active = !itemEffects.disabled;
+        }
+
+        const actorEffects = item.actor.effects.find((o) => o.origin === this.actor.items.get(item._id).uuid);
+        {
+            if (actorEffects) {
+                item.system.showToggle = true;
+                item.system.active = !actorEffects.disabled;
+            }
+        }
+        if (item.baseInfo?.behaviors?.includes("activatable")) {
+            item.system.showToggle = true;
+        }
+
+        // Item in a Framework?
+        if (item.parentItem) {
+            // const parentPosition =
+            //     item.parentItem.system.XMLID === "COMPOUNDPOWER"
+            //         ? -1 // Compound power starts at a random position. Sub powers start at 0.
+            //         : parseInt(item.parentItem.system.POSITION);
+            //item.system.childIdx = parseInt(item.system.POSITION) - parseInt(parentPosition);
+            item.system.childIdx = item.parentItem.childItems?.findIndex((o) => o.id === item.id) + 1;
+
+            if (item.parentItem?.parentItem) {
+                item.system.childIdx = `${item.parentItem.system.childIdx}.${item.system.childIdx}`;
+            }
+        }
+
+        // Endurance
+        item.system.endEstimate = parseInt(item.system.end) || 0;
+
+        // Damage
+        if (
+            item.type == "attack" ||
+            item.type == "maneuver" ||
+            item.system.subType === "attack" ||
+            item.system.XMLID === "martialart"
+        ) {
+            item.flags.tags = {};
+
+            // Combat Skill Levels
+            const csls = CombatSkillLevelsForAttack(item);
+            let cslSummary = {};
+
+            for (const csl of csls) {
+                for (const prop of ["ocv", "omcv", "dcv", "dmcv", "dc"]) {
+                    cslSummary[prop] = csl[prop] + parseInt(cslSummary[prop] || 0);
+
+                    if (csl[prop] != 0) {
+                        if (item.flags.tags[prop]) {
+                            item.flags.tags[prop] += "\n";
+                        } else {
+                            item.flags.tags[prop] = "";
+                        }
+                        item.flags.tags[prop] = `${item.flags.tags[prop]}${csl[prop].signedString()} ${
+                            prop === "dc" ? "DC " : ""
+                        }${csl.item.name}`;
+                    }
+                }
+            }
+            let { dc, end } = convertToDcFromItem(item);
+            item.system.endEstimate = Math.max(item.system.endEstimate, end);
+
+            // text description of damage
+            item.system.damage = getDiceFormulaFromItemDC(item, dc);
+
+            // Standard Effect
+            if (item.system.USESTANDARDEFFECT) {
+                let stun = parseInt(item.system.value * 3);
+                if (
+                    item.findModsByXmlid("PLUSONEHALFDIE") ||
+                    item.findModsByXmlid("MINUSONEPIP") ||
+                    item.findModsByXmlid("PLUSONEPIP")
+                ) {
+                    stun += 1;
+                }
+                item.system.damage = stun;
+            }
+
+            if (dc > 0) {
+                if (item.system.killing) {
+                    item.system.damage += "K";
+                } else {
+                    item.system.damage += "N";
+                }
+            }
+
+            // Signed OCV and DCV
+            if (item.system.ocv != undefined && item.system.uses === "ocv") {
+                const ocv = parseInt(item.actor?.system.characteristics.ocv?.value || 0);
+                if (parseInt(ocv) != 0) {
+                    if (item.flags.tags.ocv) {
+                        item.flags.tags.ocv += "\n";
+                    } else {
+                        item.flags.tags.ocv = "";
+                    }
+                    item.flags.tags.ocv = `${item.flags.tags.ocv}${ocv.signedString()} OCV`;
+                }
+                switch (item.system.ocv) {
+                    case "--":
+                        item.system.ocvEstimated = "";
+                        break;
+
+                    case "-v/10":
+                        {
+                            item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-");
+
+                            const tokens = item.actor.getActiveTokens();
+                            const token = tokens[0];
+                            const velocity = calculateVelocityInSystemUnits(item.actor, token);
+
+                            item.system.ocvEstimated = (
+                                ocv +
+                                parseInt(cslSummary.ocv) +
+                                parseInt(velocity / 10)
+                            ).signedString();
+
+                            if (parseInt(velocity / 10) != 0) {
+                                if (item.flags.tag.ocv) {
+                                    item.flags.tagsocv += "\n";
+                                } else {
+                                    item.flags.tags.ocv = "";
+                                }
+                                item.flags.tags.ocv = `${item.flags.tags.ocv}${parseInt(
+                                    velocity / 10,
+                                ).signedString()} Velocity`;
+                            }
+                        }
+                        break;
+
+                    default:
+                        item.system.ocv = parseInt(item.system.ocv).signedString();
+
+                        item.system.ocvEstimated = (
+                            ocv +
+                            parseInt(item.system.ocv) +
+                            parseInt(cslSummary.ocv || cslSummary.omcv || 0)
+                        ).signedString();
+
+                        if (parseInt(item.system.ocv) != 0) {
+                            if (item.flags.tags.ocv) {
+                                item.flags.tags.ocv += "\n";
+                            } else {
+                                item.flags.tags.ocv = "";
+                            }
+                            item.flags.tags.ocv += `${item.system.ocv} ${item.name}`;
+                        }
+                }
+            }
+
+            if (item.system.dcv != undefined && item.system.uses === "ocv") {
+                const dcv = parseInt(item.actor?.system.characteristics.dcv?.value || 0);
+                if (parseInt(dcv) != 0) {
+                    if (item.flags.tags.dcv) {
+                        item.flags.tags.dcv += "\n";
+                    } else {
+                        item.flags.tags.dcv = "";
+                    }
+                    item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
+                }
+                item.system.dcv = parseInt(item.system.dcv).signedString();
+                item.system.dcvEstimated = (
+                    dcv +
+                    parseInt(item.system.dcv) +
+                    parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
+                ).signedString();
+
+                if (parseInt(item.system.dcv) != 0) {
+                    if (item.flags.tags.dcv) {
+                        item.flags.tags.dcv += "\n";
+                    } else {
+                        item.flags.tags.dcv = "";
+                    }
+                    item.flags.tags.dcv = `${item.flags.tags.dcv}${item.system.dcv} ${item.name}`;
+                }
+            }
+
+            if (item.system.uses === "omcv") {
+                const omcv = parseInt(item.actor?.system.characteristics.omcv?.value || 0);
+                item.system.ocvEstimated = (omcv + parseInt(cslSummary.omcv || 0)).signedString();
+                if (omcv != 0) {
+                    if (item.flags.tags.omcv) {
+                        item.flags.tags.omcv += "\n";
+                    } else {
+                        item.flags.tags.omcv = "";
+                    }
+                    item.flags.tags.omcv = `${item.flags.tags.omcv}${omcv.signedString()} OMCV`;
+                }
+
+                const dmcv = parseInt(item.actor?.system.characteristics.dmcv?.value || 0);
+                item.system.dcvEstimated = (dmcv + parseInt(cslSummary.dmcv || 0)).signedString();
+                if (dmcv != 0) {
+                    if (item.flags.tags.dmcv) {
+                        item.flags.tags.dmcv += "\n";
+                    } else {
+                        item.flags.tags.dmcv = "";
+                    }
+                    item.flags.tags.dmcv = `${item.flags.tags.dmcv}${dmcv.signedString()} DMCV`;
+                }
+            }
+
+            // Set +1 OCV
+            const setManeuver = item.actor.items.find(
+                (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
+            );
+            if (setManeuver) {
+                item.system.ocvEstimated = (parseInt(item.system.ocvEstimated) + 1).signedString();
+
+                if (item.flags.tags.ocv) {
+                    item.flags.tags.ocv += "\n";
+                } else {
+                    item.flags.tags.ocv = "";
+                }
+                item.flags.tags.ocv += `+1 Set`;
+            }
+
+            // Haymaker -5 DCV
+            const haymakerManeuver = item.actor.items.find(
+                (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
+            );
+            if (haymakerManeuver) {
+                item.system.dcvEstimated = (parseInt(item.system.dcvEstimated) - 4).signedString();
+
+                if (item.flags.tags.dcv) {
+                    item.flags.tags.dcv += "\n";
+                } else {
+                    item.flags.tags.dcv = "";
+                }
+                item.flags.tags.dcv += `-4 Haymaker`;
+            }
+
+            item.system.phase = item.system.PHASE;
+        }
+
+        // Defense
+        if (item.type == "defense") {
+            item.system.description =
+                CONFIG.HERO.defenseTypes[item.system.defenseType] ||
+                CONFIG.HERO.defenseTypes5e[item.system.defenseType];
+        }
+
+        item.updateRoll();
+
+        // Charges
+        if (parseInt(item.system.charges?.max || 0) > 0) {
+            const costsEnd = item.findModsByXmlid("COSTSEND");
+            if (item.system.endEstimate === 0 || !costsEnd) item.system.endEstimate = "";
+            item.system.endEstimate += ` [${parseInt(item.system.charges?.value || 0)}${
+                item.system.charges?.recoverable ? "rc" : ""
+            }]`;
+            item.system.endEstimate = item.system.endEstimate.trim();
+        }
+
+        // 0 END
+        if (!item.system.endEstimate) {
+            item.system.endEstimate = "";
+        }
+
+        // Mental
+        if (item?.flags?.tags?.omcv) {
+            item.flags.tags.ocv ??= item.flags.tags.omcv;
+            item.flags.tags.dcv ??= item.flags.tags.dmcv;
+        }
+    }
+
     async _postUpload(options) {
         const configPowerInfo = this.baseInfo;
 
@@ -1691,6 +1963,8 @@ export class HeroSystem6eItem extends Item {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         }
+
+        this._postUploadDetails();
 
         return changed;
     }
@@ -3549,25 +3823,25 @@ export class HeroSystem6eItem extends Item {
         const dcv = parseInt(this.system.DCV) || 0;
 
         // Check if this is a MARTIAL attack.  If so then EXTRA DCs may be present
-        if (this.system.XMLID == "MANEUVER") {
-            let EXTRADC = null;
+        // if (this.system.XMLID == "MANEUVER") {
+        //     let EXTRADC = null;
 
-            // HTH
-            if (this.system.CATEGORY == "Hand To Hand") {
-                EXTRADC = this.actor.items.find(
-                    (o) => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1,
-                );
-            }
-            // Ranged is not implemented yet
+        //     // HTH
+        //     if (this.system.CATEGORY == "Hand To Hand") {
+        //         EXTRADC = this.actor.items.find(
+        //             (o) => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1,
+        //         );
+        //     }
+        //     // Ranged is not implemented yet
 
-            // Extract +2 HTH Damage Class(es)
-            if (EXTRADC) {
-                let match = EXTRADC.system.ALIAS.match(/\+\d+/);
-                if (match) {
-                    levels += parseInt(match[0]);
-                }
-            }
-        }
+        //     // Extract +2 HTH Damage Class(es)
+        //     if (EXTRADC) {
+        //         let match = EXTRADC.system.ALIAS.match(/\+\d+/);
+        //         if (match) {
+        //             levels += parseInt(match[0]);
+        //         }
+        //     }
+        // }
 
         // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
         if (this.system.XMLID == "TELEKINESIS") {

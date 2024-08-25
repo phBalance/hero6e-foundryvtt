@@ -333,8 +333,8 @@ export async function AttackToHit(item, options) {
     const normalRange = !!item.findModsByXmlid("NORMALRANGE");
 
     // Mind Scan
-    if (parseInt(options.mindScanChoices)) {
-        heroRoller.addNumber(parseInt(options.mindScanChoices), "Number Of Minds");
+    if (parseInt(options.mindScanMinds)) {
+        heroRoller.addNumber(parseInt(options.mindScanMinds), "Number Of Minds");
     }
     if (parseInt(options.mindScanFamiliar)) {
         heroRoller.addNumber(parseInt(options.mindScanFamiliar), "Mind Familiarity");
@@ -686,7 +686,7 @@ export async function AttackToHit(item, options) {
         }
 
         // Mind scan typically has just 1 target, but could have more. Use same roll for all targets.
-        const targetHeroRoller = aoeAlwaysHit || options.mindScanChoices ? heroRoller : heroRoller.clone();
+        const targetHeroRoller = aoeAlwaysHit || options.mindScanMinds ? heroRoller : heroRoller.clone();
         let toHitRollTotal = 0;
         let by = 0;
         let autoSuccess = false;
@@ -743,7 +743,7 @@ export async function AttackToHit(item, options) {
                 hitRollText: `${hit} a ${toHitChar} of ${toHitRollTotal}`,
                 value: targetDefenseValue,
                 result: { hit: hit, by: by.toString() },
-                roller: options.mindScanChoices
+                roller: options.mindScanMinds
                     ? targetsArray[0].id === target.id
                         ? targetHeroRoller
                         : null
@@ -892,7 +892,7 @@ export async function AttackToHit(item, options) {
         tags: heroRoller.tags(),
         attackTags: getAttackTags(item),
         maxMinds: CONFIG.HERO.mindScanChoices
-            .find((o) => o.key === parseInt(options.mindScanChoices))
+            .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
     };
 
