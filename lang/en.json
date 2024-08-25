@@ -173,7 +173,7 @@
         },
         "StrEnd" : {
             "Name": "Heroic Strength & Endurance",
-            "Hint": "Using STR typipcally costs 1 END per 10 points of STR used.  In heroic campaigns the GM has the option of charging 1 END per 5 STR used.  This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
+            "Hint": "Using STR typipcally costs 1 END per 10 points of STR used. In heroic campaigns the GM has the option of charging 1 END per 5 STR used. This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
             "Choices": {
                 "five": "1 END per 5 STR",
                 "ten": "1 END per 10 STR"
@@ -187,7 +187,7 @@
         },
         "HAP": {
             "Name": "Heroic Action Points",
-            "Hint": "Optional 6e Rule, where each character rolls 2d6 to gain HAPs for that session.  Characters may spend HAPs for a variety of GM approved actions, typically to improve a failed dice roll."
+            "Hint": "Optional 6e Rule, where each character rolls 2d6 to gain HAPs for that session. Characters may spend HAPs for a variety of GM approved actions, typically to improve a failed dice roll."
         },
         "HexTemplates": {
             "Name": "Use hexagonal AOE templates",
@@ -220,17 +220,17 @@
         "LongTermEndurance": 
         {
             "Name": "Long-term Endurance",
-            "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation.  When an actor's average END use per turn exceeds double their REC, max END is lowered."
+            "Hint": "Automate tracking of optional long-term endurance use. Currently a partial implementation. When an actor's average END use per turn exceeds double their REC, max END is lowered."
         },
         "DoubleDamageLimit": 
         {
             "Name": "Double Damage Limit",
-            "Hint": "A character cannot more than double the Damage Classes of his base attack, no matter how many different methods he uses to add damage. This should be enabled for 5E games. It is an optional rule for 6E games."
+            "Hint": "A character cannot more than double the Damage Classes of his base attack. This should be enabled for 5E games. It is an optional rule for 6E games."
         },
         "DiceSkinning": 
         {
             "Name": "Dice Skinning (Dice So Nice)",
-            "Hint": "Requires Dice So Nice module.  Dice associated with hit locations, stun multipliers, and knockback have a different dice skin."
+            "Hint": "Requires Dice So Nice module. Dice associated with hit locations, stun multipliers, and knockback have a different dice skin."
         },
         "UseKnockback": 
         {

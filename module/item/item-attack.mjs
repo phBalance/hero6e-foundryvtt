@@ -287,8 +287,9 @@ export async function AttackToHit(item, options) {
         options.effectiveLevels = parseInt(options.effectiveLevels) || 0;
         if (options.effectiveLevels > 0 && options.effectiveLevels !== parseInt(item.system.LEVELS)) {
             const effectiveItemData = item.toObject();
+            effectiveItemData._id = null;
             effectiveItemData.system.LEVELS = options.effectiveLevels;
-            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
+            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { parent: item.actor, temporary: true });
             await effectiveItem._postUpload();
         }
     }
@@ -1308,8 +1309,9 @@ export async function _onRollDamage(event) {
         toHitData.effectiveLevels = parseInt(toHitData.effectiveLevels) || 0;
         if (toHitData.effectiveLevels > 0 && toHitData.effectiveLevels !== parseInt(item.system.LEVELS)) {
             const effectiveItemData = item.toObject();
+            effectiveItemData._id = null;
             effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
-            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
+            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { parent: item.actor, temporary: true });
             await effectiveItem._postUpload();
         }
     }
@@ -1548,8 +1550,9 @@ export async function _onRollMindScanEffectRoll(event) {
         toHitData.effectiveLevels = parseInt(toHitData.effectiveLevels) || 0;
         if (toHitData.effectiveLevels > 0 && toHitData.effectiveLevels !== parseInt(item.system.LEVELS)) {
             const effectiveItemData = item.toObject();
+            effectiveItemData._id = null;
             effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
-            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
+            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { parent: item.actor, temporary: true });
             await effectiveItem._postUpload();
         }
     }

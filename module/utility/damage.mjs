@@ -33,9 +33,6 @@ export function convertToDiceParts(value) {
 
 // Determine DC solely from item/attack
 export function convertToDcFromItem(item, options) {
-    if (item.system.ALIAS === "Martial Strike") {
-        console.log(item);
-    }
     let actor = item.actor;
     let dc = 0;
     let tags = [];
@@ -330,10 +327,11 @@ export function convertToDcFromItem(item, options) {
     // double the Damage Classes of his base attack, no
     // matter how many different methods he uses to add
     // damage.
+
     const DoubleDamageLimit = game.settings.get(HEROSYS.module, "DoubleDamageLimit");
     if (DoubleDamageLimit) {
         // BaseDC
-        var baseDC = baseDcParts.str;
+        let baseDC = baseDcParts.str;
         if (["HA", "KHA"].includes(item.system.XMLID) || item.system.CATEGORY === "Hand To Hand") {
             baseDC = baseDcParts.item;
         }
@@ -341,7 +339,8 @@ export function convertToDcFromItem(item, options) {
             baseDC += extraDcLevels;
         }
 
-        if (dc > baseDC * 2) {
+        // NOTE: baseDC > 0 is not great - need to consider things with effect rolls like mind scan and illusions
+        if (baseDC > 0 && dc > baseDC * 2) {
             const backOutDc = Math.floor(baseDC * 2 - dc);
             tags.push({
                 value: `${backOutDc}DC`,

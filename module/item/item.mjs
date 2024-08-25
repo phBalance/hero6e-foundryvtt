@@ -1126,7 +1126,7 @@ export class HeroSystem6eItem extends Item {
             item.system.active = !itemEffects.disabled;
         }
 
-        const actorEffects = item.actor.effects.find((o) => o.origin === this.actor.items.get(item._id).uuid);
+        const actorEffects = item.actor.effects.find((o) => o.origin === item.actor.items.get(item._id).uuid);
         {
             if (actorEffects) {
                 item.system.showToggle = true;
@@ -3816,7 +3816,14 @@ export class HeroSystem6eItem extends Item {
         let name = this.system.NAME || description || this.system.name || this.name;
         this.name = name;
 
-        let levels = parseInt(this.system.value) || parseInt(this.system.DC) || 0;
+        // 5E extraDCLevels are halved for killing attacks
+        // TODO: FIXME: THis needs to be fixed properly as it doesn't actually subtract the DC.
+        let dc = parseInt(this.system.DC);
+        if (this.is5e && this.system.killing && ["maneuver", "martialart"].includes(this.type)) {
+            dc = Math.floor(dc / 2);
+        }
+
+        let levels = parseInt(this.system.value) || dc || 0;
         const input = this.system.INPUT;
 
         const ocv = parseInt(this.system.OCV) || 0;
@@ -4380,7 +4387,7 @@ export class HeroSystem6eItem extends Item {
                     : 0;
             const characteristicAdjustment = Math.round(characteristicValue / 5);
             const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
-            var rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment;
+            let rollVal = baseRollValue + characteristicAdjustment + levelsAdjustment;
 
             // Provide up to 3 tags to explain how the roll was calculated:
             // 1. Base skill value without modifier due to characteristics

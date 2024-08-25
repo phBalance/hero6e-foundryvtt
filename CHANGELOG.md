@@ -1,29 +1,34 @@
 # Releases
 
 ## Version 3.0.90 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
 - Added NOTES to item descriptions [#1140](https://github.com/dmdorman/hero6e-foundryvtt/issues/1140)
 - Initial support for Enhanced Perception [#1157](https://github.com/dmdorman/hero6e-foundryvtt/issues/1157)
-- Fixed missing EXTRADC calculations from Martial Maneuvers. [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
-- Added system setting to limit damage, to double the base damage. [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
-- Fixed inconsistancies with OCV/DCV values on Attack tab.
+- Fixed missing EXTRADC calculations from Martial Maneuvers and 5e killing attack maneuver DCs. [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
+- Added system setting to limit total attack DCs to double the base DCs. This defaults to off! [#1080](https://github.com/dmdorman/hero6e-foundryvtt/issues/1080)
+- Fixed inconsistencies with OCV/DCV values on Attack tab.
 - Fixed ability to edit Mind Scan attack adjustments. [#1161](https://github.com/dmdorman/hero6e-foundryvtt/issues/1161)
 
 ## Version 3.0.89
+
 - Improved Analyze skill description. [#1154](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
-- New Dice Skinning feature: Dice associated with hit locations, stun multipliers, and knockback have a different dice skin. Requires Dice So Nice module. Defaults to off, can be enabled per user. 
+- New Dice Skinning feature: Dice associated with hit locations, stun multipliers, and knockback have a different dice skin. Requires Dice So Nice module. Defaults to off, can be enabled per user.
 
 ## Version 3.0.88
+
 - Fix: When 2+ GMs are active, those GMs see errors when adding combatants to combat tracker [#1150](https://github.com/dmdorman/hero6e-foundryvtt/issues/1150)
 - Added FULL and CASUAL rolls for base characteristics to CHARACTERISTICS tab.
 - Improved Weapon Master [#1151](https://github.com/dmdorman/hero6e-foundryvtt/issues/1151)
 - Improved Requires A Roll for Knowledge Skills
 
 ## Version 3.0.87
+
 - Reworked ruler code.  Movement type & total distance only show for last movement segment. 
 - DragRuler support for v12. There are still [issues](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/337), so not recommending upgrading to FoundryVTT v12 quite yet.
 - Fix: Players see errors when adding combatants to combat tracker [#1148](https://github.com/dmdorman/hero6e-foundryvtt/issues/1148)
 
 ## Version 3.0.86
+
 - Improve Foundry v12 support
 
 ## Version 3.0.85
