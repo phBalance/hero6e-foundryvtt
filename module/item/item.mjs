@@ -1126,7 +1126,7 @@ export class HeroSystem6eItem extends Item {
             item.system.active = !itemEffects.disabled;
         }
 
-        const actorEffects = item.actor.effects.find((o) => o.origin === this.actor.items.get(item._id).uuid);
+        const actorEffects = item.actor.effects.find((o) => o.origin === item.actor.items.get(item._id).uuid);
         {
             if (actorEffects) {
                 item.system.showToggle = true;
