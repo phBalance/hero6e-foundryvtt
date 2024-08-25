@@ -7,15 +7,9 @@ import { determineDefense } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
-import {
-    CombatSkillLevelsForAttack,
-    convertToDcFromItem,
-    getDiceFormulaFromItemDC,
-    convertToDiceParts,
-} from "../utility/damage.mjs";
+import { CombatSkillLevelsForAttack, convertToDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
-import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
