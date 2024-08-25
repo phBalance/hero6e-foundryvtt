@@ -1,5 +1,9 @@
 # Releases
 
+## Version 3.0.91 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed issue creating compendiums [#1172](https://github.com/dmdorman/hero6e-foundryvtt/issues/1172)
+
 ## Version 3.0.90 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Added NOTES to item descriptions [#1140](https://github.com/dmdorman/hero6e-foundryvtt/issues/1140)

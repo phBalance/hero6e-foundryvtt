@@ -1119,6 +1119,12 @@ export class HeroSystem6eItem extends Item {
 
     _postUploadDetails() {
         const item = this;
+
+        // Make sure we have an actor (like when creating compendiums)
+        if (!item.actor) {
+            return;
+        }
+
         // showToggle
         const itemEffects = item.effects.find(() => true);
         if (itemEffects) {
