@@ -3809,6 +3809,9 @@ export class HeroSystem6eItem extends Item {
         //     console.log("makeAttack", this);
         // }
 
+        // AARON: Do we really need makeAttack?
+        // Many of these properties can converted into get properties on the item and calculated on the fly.
+
         const xmlid = this.system.XMLID;
 
         // Name
@@ -3816,8 +3819,7 @@ export class HeroSystem6eItem extends Item {
         let name = this.system.NAME || description || this.system.name || this.name;
         this.name = name;
 
-        // 5E extraDCLevels are halved for killing attacks
-        // TODO: FIXME: THis needs to be fixed properly as it doesn't actually subtract the DC.
+        // 5E Martial DC, EXTRADC, and CSL DCs are halved for killing attacks.  STR/5 DCs are unchanged.
         let dc = parseInt(this.system.DC);
         if (this.is5e && this.system.killing && ["maneuver", "martialart"].includes(this.type)) {
             dc = Math.floor(dc / 2);
@@ -3828,27 +3830,6 @@ export class HeroSystem6eItem extends Item {
 
         const ocv = parseInt(this.system.OCV) || 0;
         const dcv = parseInt(this.system.DCV) || 0;
-
-        // Check if this is a MARTIAL attack.  If so then EXTRA DCs may be present
-        // if (this.system.XMLID == "MANEUVER") {
-        //     let EXTRADC = null;
-
-        //     // HTH
-        //     if (this.system.CATEGORY == "Hand To Hand") {
-        //         EXTRADC = this.actor.items.find(
-        //             (o) => o.system.XMLID == "EXTRADC" && o.system.ALIAS.indexOf("HTH") > -1,
-        //         );
-        //     }
-        //     // Ranged is not implemented yet
-
-        //     // Extract +2 HTH Damage Class(es)
-        //     if (EXTRADC) {
-        //         let match = EXTRADC.system.ALIAS.match(/\+\d+/);
-        //         if (match) {
-        //             levels += parseInt(match[0]);
-        //         }
-        //     }
-        // }
 
         // Check if TELEKINESIS + WeaponElement (BAREHAND) + EXTRADC  (WillForce)
         if (this.system.XMLID == "TELEKINESIS") {

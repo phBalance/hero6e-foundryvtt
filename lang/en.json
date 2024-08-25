@@ -17,6 +17,7 @@
             "AvoidedBy": "Avoided By",
             "Class": "Class",
             "CustomEffects": "Custom Effects",
+            "DC": "Damage Classes",
             "DcvMod": "DCV Modifier",
             "DmcvMod": "DMCV Modifier",
             "DoesKnockback": "Does Knockback",
