@@ -1,6 +1,6 @@
 # Releases
 
-## Version 3.0.90 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.90 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Added NOTES to item descriptions [#1140](https://github.com/dmdorman/hero6e-foundryvtt/issues/1140)
 - Initial support for Enhanced Perception [#1157](https://github.com/dmdorman/hero6e-foundryvtt/issues/1157)
