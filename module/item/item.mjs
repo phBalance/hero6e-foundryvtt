@@ -3817,8 +3817,9 @@ export class HeroSystem6eItem extends Item {
         this.name = name;
 
         // 5E extraDCLevels are halved for killing attacks
+        // TODO: FIXME: THis needs to be fixed properly as it doesn't actually subtract the DC.
         let dc = parseInt(this.system.DC);
-        if (this.system.is5e && this.system.killing && manuever) {
+        if (this.is5e && this.system.killing && ["maneuver", "martialart"].includes(this.type)) {
             dc = Math.floor(dc / 2);
         }
 
