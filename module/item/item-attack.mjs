@@ -2438,7 +2438,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
 async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData, defense) {
     // FLASHDEFENSE
-    const flashDefense = senseAffectingItem.actor.items.find((o) => o.system.XMLID === "FLASHDEFENSE");
+    const flashDefense = token.actor.items.find((o) => o.system.XMLID === "FLASHDEFENSE");
     if (flashDefense) {
         const value = parseInt(flashDefense.system.LEVELS || 0);
         damageData.bodyDamage = Math.max(0, damageData.bodyDamage - value);
@@ -2651,7 +2651,7 @@ async function _calcDamage(heroRoller, item, options) {
     }
 
     // minimum damage rule (needs to be last)
-    if (stun < body) {
+    if (stun < body && !senseAffectingPower) {
         stun = body;
         effects +=
             `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
