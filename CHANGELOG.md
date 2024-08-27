@@ -1,5 +1,9 @@
 # Releases
 
+## Version 3.0.92 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Use the flash defense of the target and not the attacker for sense affecting attacks. [#1174](https://github.com/dmdorman/hero6e-foundryvtt/issues/1174)
+
 ## Version 3.0.91 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed issue creating compendiums [#1172](https://github.com/dmdorman/hero6e-foundryvtt/issues/1172)
