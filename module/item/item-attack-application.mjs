@@ -2,6 +2,7 @@ import { CombatSkillLevelsForAttack } from "../utility/damage.mjs";
 import { _processAttackOptions, _processAttackAoeOptions } from "../item/item-attack.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
+import { Attack } from "../utility/attack.mjs";
 
 const heroAoeTypeToFoundryAoeTypeConversions = {
     any: "rect",
@@ -11,7 +12,7 @@ const heroAoeTypeToFoundryAoeTypeConversions = {
     radius: "circle",
     surface: "rect",
 };
-
+// uses ../templates/attack/item-attack-application.hbs
 export class ItemAttackFormApplication extends FormApplication {
     constructor(data) {
         super();
@@ -202,7 +203,11 @@ export class ItemAttackFormApplication extends FormApplication {
             };
             item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
         }
-
+        data.action = Attack.getActionInfo(
+            data.item,
+            data.targets,
+            data.formData, // use formdata to include player options from the form
+        );
         return data;
     }
 
