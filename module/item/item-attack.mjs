@@ -46,7 +46,6 @@ export async function onMessageRendered(html) {
 
 /// Dialog box for AttackOptions
 export async function AttackOptions(item) {
-
     const actor = item.actor;
     const token = actor.getActiveTokens()[0];
 
@@ -280,11 +279,10 @@ export async function AttackAoeToHit(item, options) {
 /// uses ../templates/chat/item-toHit-card.hbs
 /// manages die rolls and display of hit/miss results
 export async function AttackToHit(item, options) {
-
     if (!item) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
-    
+
     const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
 
     const actor = item.actor;
@@ -903,7 +901,7 @@ export async function AttackToHit(item, options) {
         maxMinds: CONFIG.HERO.mindScanChoices
             .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
-        action
+        action,
     };
 
     action.system = {}; // clear out any system information that would interfere with parsing
@@ -1304,7 +1302,6 @@ async function _rollApplyKnockback(token, knockbackDice) {
 // clicked on item-attack-card2.hbs
 // Notice the chatListeners function in this file.
 export async function _onRollDamage(event) {
-    
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
@@ -1316,7 +1313,7 @@ export async function _onRollDamage(event) {
     }
 
     const action = JSON.parse(toHitData.actiondata);
-    
+
     let effectiveItem = item;
 
     // Create a temporary item based on effectiveLevels
@@ -1475,6 +1472,7 @@ export async function _onRollDamage(event) {
         attackTags: getAttackTags(item),
         targetTokens: targetTokens,
         user: game.user,
+        action,
     };
 
     // render card

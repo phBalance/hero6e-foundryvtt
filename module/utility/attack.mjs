@@ -1,14 +1,12 @@
-﻿export class Attack {
-
+export class Attack {
     static getAttackerToken(item) {
-
         const attackerToken = item.actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!attackerToken) {
             console.error("There is no actor token!");
         }
         return attackerToken;
     }
-    
+
     static getRangeModifier(item, range) {
         const actor = item.actor;
 
@@ -34,10 +32,7 @@
 
             // Brace (+2 OCV only to offset the Range Modifier)
             const braceManeuver = item.actor.items.find(
-                (item) =>
-                    item.type == "maneuver" &&
-                    item.name === "Brace" &&
-                    item.system.active,
+                (item) => item.type == "maneuver" && item.name === "Brace" && item.system.active,
             );
             if (braceManeuver) {
                 //TODO: ???
@@ -46,8 +41,8 @@
         }
         return 0;
     }
-    
-    static getAttackInfo(item, targetedTokens, options, system, isMultipleAttack, isHaymakerAttack) {
+
+    static getAttackInfo(item, targetedTokens, options, system) {
         const targets = [];
         for (let i = 0; i < targetedTokens.length; i++) {
             // these are the targeting data used for the attack(s)
@@ -55,15 +50,10 @@
                 targetId: targetedTokens[i].id,
                 results: [], // todo: for attacks that roll one effect and apply to multiple targets do something different here
             };
-            targetingData.range = canvas.grid.measureDistance(
-                system.attackerToken,
-                targetedTokens[i],
-                { gridSpaces: true },
-            );
-            targetingData.ocv = Attack.getRangeModifier(
-                system.item,
-                targetingData.range,
-            );
+            targetingData.range = canvas.grid.measureDistance(system.attackerToken, targetedTokens[i], {
+                gridSpaces: true,
+            });
+            targetingData.ocv = Attack.getRangeModifier(system.item, targetingData.range);
             targets.push(targetingData);
         }
         return targets;
@@ -77,75 +67,56 @@
                 targetId: targetedTokens[i].id,
                 results: [], // todo: for attacks that roll one effect and apply to multiple targets do something different here
             };
-            targetingData.range = canvas.grid.measureDistance(
-                system.attacker,
-                targetedTokens[i],
-                { gridSpaces: true },
-            );
-            targetingData.ocv = Attack.getRangeModifier(
-                system.item,
-                targetingData.range,
-            );
+            targetingData.range = canvas.grid.measureDistance(system.attacker, targetedTokens[i], { gridSpaces: true });
+            targetingData.ocv = Attack.getRangeModifier(system.item, targetingData.range);
             targets.push(targetingData);
         }
         return targets;
     }
 
-
     static getMultipleAttackManeuverInfo(item, targetedTokens, options, system) {
         const attacks = Attack.getMultipleAttackInfo(item, targetedTokens, options, system);
         return {
-            attackerTokenId : system.attackerToken?.id ?? null,
+            attackerTokenId: system.attackerToken?.id ?? null,
             isMultipleAttack: true,
-            attacks
-        };        
+            attacks,
+        };
     }
     static getHaymakerManeuverInfo(item, targetedTokens, options, system) {
         const attacks = Attack.getHaymakerAttackInfo(item, targetedTokens, options, system);
         return {
-            attackerTokenId : system.attackerToken?.id ?? null,
+            attackerTokenId: system.attackerToken?.id ?? null,
             isHaymakerAttack: true,
-            attacks
+            attacks,
         };
     }
-    
-    static getManeuverInfo(item, targetedTokens, options, system) {
 
+    static getManeuverInfo(item, targetedTokens, options, system) {
         const isMultipleAttack = item.system.XMLID === "MULTIPLEATTACK";
         const isHaymakerAttack = item.system.XMLID === "HAYMAKER";
         // todo: Combined Attack
         // todo: martial maneuver plus a weapon
         // answer: probably a specialized use case of multiple attack
 
-        if(isMultipleAttack){
-            return Attack.getMultipleAttackManeuverInfo(item, targetedTokens, options, system)
+        if (isMultipleAttack) {
+            return Attack.getMultipleAttackManeuverInfo(item, targetedTokens, options, system);
         }
-        if(isHaymakerAttack){
-            return Attack.getHaymakerManeuverInfo(item, targetedTokens, options, system)
+        if (isHaymakerAttack) {
+            return Attack.getHaymakerManeuverInfo(item, targetedTokens, options, system);
         }
         return {
-            attackerTokenId : system.attackerToken?.id ?? null,
-            attacks : Attack.getAttackInfo(item, targetedTokens, options, system)
+            attackerTokenId: system.attackerToken?.id ?? null,
+            attacks: Attack.getAttackInfo(item, targetedTokens, options, system),
         };
     }
 
-    static getCurrentManeuverInfo(maneuver, options, system){
-        if (
-            options?.execute !== undefined &&
-            maneuver.isMultipleAttack
-        ) {
-            const current = {};
-            const attackKey = `attack-${formData.execute}`;
-            const attackKeys = action.maneuver[attackKey];
-            const maneuverItem = item.actor.items.get(attackKeys.itemKey);
-            const maneuverTarget = targetedTokens.find(
-                (token) => token.id === attackKeys.targetKey,
-            );
-            current = this.getManeuverInfo(
-                maneuverItem,
-                [maneuverTarget],
-                options,
-            );
+    static getCurrentManeuverInfo(maneuver, options, system) {
+        if (options?.execute !== undefined && maneuver.isMultipleAttack) {
+            const attackKey = `attack-${options.execute}`;
+            const attackKeys = maneuver[attackKey];
+            const maneuverItem = system.item.actor.items.get(attackKeys.itemKey);
+            const maneuverTarget = system.targetedTokens.find((token) => token.id === attackKeys.targetKey);
+            const current = this.getManeuverInfo(maneuverItem, [maneuverTarget], options);
             current.execute = options.execute;
             current.step = attackKey;
             current.item = maneuverItem; // avoid saving forge objects, except in system
@@ -161,16 +132,16 @@
             return null;
         }
         const system = {
-            attackerToken : Attack.getAttackerToken(item),
+            attackerToken: Attack.getAttackerToken(item),
             item,
-            targetedTokens
-        }
-        const maneuver =  Attack.getManeuverInfo(item, targetedTokens, options, system); // this.getManeuverInfo(item, targetedTokens, formData);
-        const current = Attack.getCurrentManeuverInfo(maneuver, options, system);  // get current attack as a 'maneuver' with just the currently executing attack options
+            targetedTokens,
+        };
+        const maneuver = Attack.getManeuverInfo(item, targetedTokens, options, system); // this.getManeuverInfo(item, targetedTokens, formData);
+        const current = Attack.getCurrentManeuverInfo(maneuver, options, system); // get current attack as a 'maneuver' with just the currently executing attack options
         const action = {
             maneuver,
             current,
-            system
+            system,
         };
         return action;
     }
