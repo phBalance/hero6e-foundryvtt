@@ -6,6 +6,7 @@
 - Fixed TELEKINESIS damage. [#1177](https://github.com/dmdorman/hero6e-foundryvtt/issues/1177)
 - Simplified CSL description when "All Attacks" are specified. [#1178](https://github.com/dmdorman/hero6e-foundryvtt/issues/1178)
 - Improved CSL attack selection for "All Attacks". [#1178](https://github.com/dmdorman/hero6e-foundryvtt/issues/1178)
+- Attacks with advantages that add STR now reduce dice based on DC rules. [#1180](https://github.com/dmdorman/hero6e-foundryvtt/issues/1180)
 
 
 ## Version 3.0.91 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)

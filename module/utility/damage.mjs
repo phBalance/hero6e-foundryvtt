@@ -23,6 +23,7 @@
 // Variable Advantage, and Variable Special Effects.
 
 import { HEROSYS } from "../herosystem6e.mjs";
+import { RoundFavorPlayerUp } from "./round.mjs";
 
 export function convertToDiceParts(value) {
     const dice = Math.floor(value / 5);
@@ -107,6 +108,10 @@ export function convertToDcFromItem(item, options) {
 
     baseDcParts.item = dc;
 
+    // Active Point to CP ratio of base attack.
+    // We need this to properly calculate the DC of STR.
+    const apRatio = item.system.basePointsPlusAdders / item.system.activePoints;
+
     // Add in STR
     if (item.system.usesStrength) {
         let str = parseInt(
@@ -134,13 +139,17 @@ export function convertToDcFromItem(item, options) {
             //}
         }
 
-        let str5 = Math.floor(str / 5);
-        dc += str5;
+        const str5 = Math.floor(str / 5);
+        const str5Dc = RoundFavorPlayerUp(str5 * apRatio);
+
+        dc += str5Dc;
         end += Math.max(1, Math.round(str / 10));
         tags.push({
-            value: `${getDiceFormulaFromItemDC(item, str5)}`, //`${str5.signedString()}DC`,
+            value: `${getDiceFormulaFromItemDC(item, str5Dc)}`, //`${str5.signedString()}DC`,
             name: "STR",
-            title: `${str5.signedString()}DC${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
+            title: `${str5.signedString()}DC${dc != str5 ? `\n${str5} reduced to ${str5Dc} due to advantages` : ""}${
+                item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""
+            }`,
         });
     }
 
