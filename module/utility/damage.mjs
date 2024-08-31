@@ -68,6 +68,11 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
+    // Check for DC override (TELEKINESIS for example)
+    if (typeof item.baseInfo.dcOverride === "function") {
+        dc = item.baseInfo.dcOverride(item);
+    }
+
     // Killing Attack
     if (item.system.killing) {
         if (item.findModsByXmlid("PLUSONEPIP")) {
@@ -87,6 +92,11 @@ export function convertToDcFromItem(item, options) {
             // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
             dc += 0.5;
         }
+    }
+
+    // XMLID != Name tooltip
+    if (item.name != item.system.XMLID) {
+        tooltip = `${item.system.XMLID}\n${tooltip}`;
     }
 
     tags.push({
@@ -134,19 +144,19 @@ export function convertToDcFromItem(item, options) {
         });
     }
 
-    // Add in TK
-    if (item.system.usesTk) {
-        let tkItems = actor.items.filter((o) => o.system.XMLID === "TELEKINESIS");
-        let str = 0;
-        for (const item of tkItems) {
-            str += parseInt(item.system.LEVELS) || 0;
-        }
-        str = options?.effectivestr != undefined ? options?.effectivestr : str;
-        let str5 = Math.floor(str / 5);
-        dc += str5;
-        end += Math.max(1, Math.round(str / 10));
-        tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
-    }
+    // Add in TK (handled in dc override)
+    // if (item.system.usesTk) {
+    //     let tkItems = actor.items.filter((o) => o.system.XMLID === "TELEKINESIS");
+    //     let str = 0;
+    //     for (const item of tkItems) {
+    //         str += parseInt(item.system.LEVELS) || 0;
+    //     }
+    //     str = options?.effectivestr != undefined ? options?.effectivestr : str;
+    //     let str5 = Math.floor(str / 5);
+    //     dc += str5;
+    //     end += Math.max(1, Math.round(str / 10));
+    //     tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
+    // }
 
     baseDcParts.str = dc - baseDcParts.item;
 

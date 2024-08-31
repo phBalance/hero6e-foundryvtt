@@ -5272,6 +5272,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: 1.5,
+            dcOverride: function (item, options) {
+                // The DC's for TELEKINESIS is based on STR.
+                // Each LEVEL of TELEKINESIS is equal to 1 pt of STR.
+                let str = parseInt(item.system.LEVELS) || 0;
+                str = options?.effectivestr != undefined ? options?.effectivestr : str;
+                let str5 = Math.floor(str / 5);
+                const dc = str5;
+                return dc;
+            },
             xml: `<POWER XMLID="TELEKINESIS" ID="1709334027228" BASECOST="0.0" LEVELS="2" ALIAS="Telekinesis" POSITION="79" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
