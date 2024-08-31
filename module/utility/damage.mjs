@@ -95,22 +95,30 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
+    let displayName = "";
     // XMLID != Name tooltip
     if (item.name != item.system.XMLID) {
-        tooltip = `${item.system.XMLID}\n${tooltip}`;
+        if (item.system.XMLID != "MANEUVER") {
+            displayName = item.system.XMLID;
+        } else {
+            if (item.name != item.system.DISPLAY) {
+                displayName = item.system.DISPLAY;
+            }
+        }
     }
 
     tags.push({
         value: `${getDiceFormulaFromItemDC(item, dc)}`,
         name: item.name,
-        title: `${dc.signedString()}DC${tooltip ? `\n${tooltip}` : ""}`,
+        title: `${dc.signedString()}DC${displayName ? `\n${displayName}` : ""}${tooltip ? `\n${tooltip}` : ""}`,
     });
 
     baseDcParts.item = dc;
 
     // Active Point to CP ratio of base attack.
     // We need this to properly calculate the DC of STR.
-    const apRatio = item.system.basePointsPlusAdders / item.system.activePoints;
+    // For some reason we don't "adjust" MartialArts with advantages
+    const apRatio = item.type === "martialart" ? 1 : item.system.basePointsPlusAdders / item.system.activePoints;
 
     // Add in STR
     if (item.system.usesStrength) {
@@ -144,13 +152,16 @@ export function convertToDcFromItem(item, options) {
 
         dc += str5Dc;
         end += Math.max(1, Math.round(str / 10));
-        tags.push({
-            value: `${getDiceFormulaFromItemDC(item, str5Dc)}`, //`${str5.signedString()}DC`,
-            name: "STR",
-            title: `${str5.signedString()}DC${dc != str5 ? `\n${str5} reduced to ${str5Dc} due to advantages` : ""}${
-                item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""
-            }`,
-        });
+
+        if (str5Dc != 0) {
+            tags.push({
+                value: `${getDiceFormulaFromItemDC(item, str5Dc)}`, //`${str5.signedString()}DC`,
+                name: "STR",
+                title: `${str5.signedString()}DC${
+                    str5Dc != str5 ? `\n${str5} reduced to ${str5Dc} due to advantages` : ""
+                }${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
+            });
+        }
     }
 
     // Add in TK (handled in dc override)
@@ -171,17 +182,25 @@ export function convertToDcFromItem(item, options) {
 
     // Boostable Charges
     if (options?.boostableCharges) {
-        const _value = parseInt(options.boostableCharges);
-        dc += _value;
-        tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
+        const boostCharges = parseInt(options.boostableCharges);
+        const boostDc = RoundFavorPlayerUp(boostCharges * apRatio);
+        dc += boostDc;
+        //tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
+        tags.push({
+            value: `${getDiceFormulaFromItemDC(item, boostDc)}`,
+            name: "boostable",
+            title: `${boostDc.signedString()}DC${
+                boostDc != boostCharges ? `\n${boostCharges} reduced to ${boostDc} due to advantages` : ""
+            }`,
+        });
     }
 
     // Combat Skill Levels
-
     for (const csl of CombatSkillLevelsForAttack(item)) {
         if (csl && csl.dc > 0) {
+            const cslDc = RoundFavorPlayerUp(csl.dc * apRatio);
             // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
-            dc += csl.dc;
+            dc += cslDc;
 
             // Each DC should roughly be 5 active points
             // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
@@ -189,15 +208,25 @@ export function convertToDcFromItem(item, options) {
             // dc += (csl.dc * dcPerAp);
             // console.log(dcPerAp, dc, csl.dc)
 
+            // tags.push({
+            //     value: `${csl.dc.signedString()}DC`,
+            //     name: csl.item.name,
+            // });
+
             tags.push({
-                value: `${csl.dc.signedString()}DC`,
+                value: `${getDiceFormulaFromItemDC(item, cslDc)}`,
                 name: csl.item.name,
+                title: `${cslDc.signedString()}DC${
+                    cslDc != csl.dc ? `\n${csl.dc} reduced to ${cslDc} due to advantages` : ""
+                }`,
             });
         }
     }
 
+    // Only Martial Arts, generic maneuvers do not get the EXTRADC purchased in the Martial Arts tab
     let extraDcLevels = 0;
-    if (item.system.XMLID === "MANEUVER") {
+    //if (item.system.XMLID === "MANEUVER") {
+    if (item.type === "martialart") {
         const EXTRADC = item.actor.items.find((o) => o.system?.XMLID === "EXTRADC");
         if (EXTRADC) {
             extraDcLevels = parseInt(EXTRADC.system.LEVELS);
@@ -207,10 +236,17 @@ export function convertToDcFromItem(item, options) {
                 extraDcLevels = Math.floor(extraDcLevels / 2);
             }
 
+            // For some reason we do not "adjust" martial attacks with advantages.
+            const adjustedExtraDc = extraDcLevels; //RoundFavorPlayerUp(extraDcLevels * apRatio);
+
             tags.push({
-                value: `${extraDcLevels.signedString()}DC`,
+                value: `${getDiceFormulaFromItemDC(item, adjustedExtraDc)}`,
                 name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
-                title: tooltip,
+                title: `${adjustedExtraDc.signedString()}DC${
+                    adjustedExtraDc != extraDcLevels
+                        ? `\n${extraDcLevels} reduced to ${adjustedExtraDc} due to advantages`
+                        : ""
+                }${tooltip ? `\n${tooltip}` : ""}`,
             });
             dc += extraDcLevels;
         }
@@ -243,12 +279,18 @@ export function convertToDcFromItem(item, options) {
         //     divisor = 6;
         // }
         velocityDC = Math.floor(options.velocity / divisor);
-        if (velocityDC > 0) {
-            dc += velocityDC;
+        const velocityAdjustedDC = RoundFavorPlayerUp(velocityDC * apRatio);
+
+        if (velocityAdjustedDC > 0) {
+            dc += velocityAdjustedDC;
             tags.push({
-                value: `${velocityDC.signedString()}DC`,
+                value: `${getDiceFormulaFromItemDC(item, velocityAdjustedDC)}`,
                 name: "Velocity",
-                title: `Velocity (${options.velocity}) / ${divisor}`,
+                title: `Velocity (${options.velocity}) / ${divisor}${
+                    velocityAdjustedDC != velocityDC
+                        ? `\n${velocityDC} reduced to ${velocityAdjustedDC} due to advantages`
+                        : ""
+                }`,
             });
         }
     }
@@ -276,8 +318,14 @@ export function convertToDcFromItem(item, options) {
             // && item.type != 'maneuver' && item.system.targets == 'dcv')
             if (item.name == "Strike" || item.type != "maneuver") {
                 if (item.system.targets == "dcv") {
-                    dc += 4;
-                    tags.push({ value: `4DC`, name: "Haymaker" });
+                    const haymakerDc = RoundFavorPlayerUp(4 * apRatio);
+
+                    dc += haymakerDc;
+                    tags.push({
+                        value: `${getDiceFormulaFromItemDC(item, haymakerDc)}`,
+                        name: "Haymaker",
+                        title: `${haymakerDc != 4 ? `\n${4} reduced to ${haymakerDc} due to advantages` : ""}`,
+                    });
                 } else {
                     if (options?.isAction)
                         ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", {
@@ -302,11 +350,14 @@ export function convertToDcFromItem(item, options) {
             );
             if (weaponMatch) {
                 const dcPlus = 3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
-                dc += dcPlus;
+                const masterDc = RoundFavorPlayerUp(dcPlus * apRatio);
+                dc += masterDc;
                 tags.push({
-                    value: `+${dcPlus}DC`,
+                    value: `${getDiceFormulaFromItemDC(item, masterDc)}`,
                     name: "WeaponMaster",
-                    title: WEAPON_MASTER.system.OPTION_ALIAS,
+                    title:
+                        WEAPON_MASTER.system.OPTION_ALIAS +
+                        `${masterDc != dcPlus ? `\n${dcPlus} reduced to ${masterDc} due to advantages` : ""}`,
                 });
             }
         }
@@ -348,11 +399,14 @@ export function convertToDcFromItem(item, options) {
             switch (conditionalAttack.system.XMLID) {
                 case "DEADLYBLOW": {
                     const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-                    dc += dcPlus;
+                    const deadlyDc = RoundFavorPlayerUp(dcPlus * apRatio);
+                    dc += deadlyDc;
                     tags.push({
-                        value: `+${dcPlus}DC`,
+                        value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
                         name: "DeadlyBlow",
-                        title: conditionalAttack.system.OPTION_ALIAS,
+                        title:
+                            conditionalAttack.system.OPTION_ALIAS +
+                            `${deadlyDc != dcPlus ? `\n${dcPlus} reduced to ${deadlyDc} due to advantages` : ""}`,
                     });
                     break;
                 }
