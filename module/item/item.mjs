@@ -3414,6 +3414,18 @@ export class HeroSystem6eItem extends Item {
                         //);
                         break;
 
+                    case "ADDER":
+                        // This is likely a CSL adder that we use to specificy which attacks the CSL applies to.
+                        // If the CLS applies to ALL attacks, don't bother to list them all.
+                        if (this.system.XMLID === "COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+                        if (this.system.XMLID === "MENTAL_COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+
+                        // Otherwise add it to the list of ADDERS as normal.
+                        if (adder.ALIAS.trim()) {
+                            _adderArray.push(adder.ALIAS);
+                        }
+                        break;
+
                     default:
                         if (adder.ALIAS.trim()) {
                             _adderArray.push(adder.ALIAS);
