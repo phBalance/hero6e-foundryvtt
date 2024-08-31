@@ -70,7 +70,7 @@ export function convertToDcFromItem(item, options) {
 
     // Check for DC override (TELEKINESIS for example)
     if (typeof item.baseInfo.dcOverride === "function") {
-        dc = item.baseInfo.dcOverride(item);
+        dc = item.baseInfo.dcOverride(item, options);
     }
 
     // Killing Attack
