@@ -138,9 +138,9 @@ export function convertToDcFromItem(item, options) {
         dc += str5;
         end += Math.max(1, Math.round(str / 10));
         tags.push({
-            value: `${str5.signedString()}DC`,
+            value: `${getDiceFormulaFromItemDC(item, str5)}`, //`${str5.signedString()}DC`,
             name: "STR",
-            title: item.system.XMLID === "MOVEBY" ? "MoveBy is half STR" : "",
+            title: `${str5.signedString()}DC${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
         });
     }
 
