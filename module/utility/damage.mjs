@@ -23,6 +23,7 @@
 // Variable Advantage, and Variable Special Effects.
 
 import { HEROSYS } from "../herosystem6e.mjs";
+import { RoundDc } from "./round.mjs";
 
 export function convertToDiceParts(value) {
     const dice = Math.floor(value / 5);
@@ -68,6 +69,11 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
+    // Check for DC override (TELEKINESIS for example)
+    if (typeof item.baseInfo.dcOverride === "function") {
+        dc = item.baseInfo.dcOverride(item, options);
+    }
+
     // Killing Attack
     if (item.system.killing) {
         if (item.findModsByXmlid("PLUSONEPIP")) {
@@ -89,13 +95,33 @@ export function convertToDcFromItem(item, options) {
         }
     }
 
+    let displayName = "";
+    // XMLID != Name tooltip
+    if (item.name != item.system.XMLID) {
+        if (item.system.XMLID != "MANEUVER") {
+            displayName = item.system.XMLID;
+        } else {
+            if (item.name != item.system.DISPLAY) {
+                displayName = item.system.DISPLAY;
+            }
+        }
+    }
+
     tags.push({
         value: `${getDiceFormulaFromItemDC(item, dc)}`,
         name: item.name,
-        title: `${dc.signedString()}DC${tooltip ? `\n${tooltip}` : ""}`,
+        title: `${dc.signedString()}DC${displayName ? `\n${displayName}` : ""}${tooltip ? `\n${tooltip}` : ""}`,
     });
 
     baseDcParts.item = dc;
+
+    // Active Point to CP ratio of base attack.
+    // We need this to properly calculate the DC of STR.
+    // For some reason we don't "adjust" MartialArts with advantages
+    const apRatio =
+        item.type === "martialart" || !item.system.basePointsPlusAdders
+            ? 1
+            : item.system.basePointsPlusAdders / item.system.activePoints;
 
     // Add in STR
     if (item.system.usesStrength) {
@@ -124,45 +150,60 @@ export function convertToDcFromItem(item, options) {
             //}
         }
 
-        let str5 = Math.floor(str / 5);
-        dc += str5;
+        const str5 = Math.floor(str / 5);
+        const str5Dc = RoundDc(str5 * apRatio);
+
+        dc += str5Dc;
         end += Math.max(1, Math.round(str / 10));
-        tags.push({
-            value: `${str5.signedString()}DC`,
-            name: "STR",
-            title: item.system.XMLID === "MOVEBY" ? "MoveBy is half STR" : "",
-        });
+
+        if (str5Dc != 0) {
+            tags.push({
+                value: `${getDiceFormulaFromItemDC(item, str5Dc)}`, //`${str5.signedString()}DC`,
+                name: "STR",
+                title: `${str5.signedString()}DC${
+                    str5Dc != str5 ? `\n${str5} reduced to ${str5Dc} due to advantages` : ""
+                }${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
+            });
+        }
     }
 
-    // Add in TK
-    if (item.system.usesTk) {
-        let tkItems = actor.items.filter((o) => o.system.XMLID === "TELEKINESIS");
-        let str = 0;
-        for (const item of tkItems) {
-            str += parseInt(item.system.LEVELS) || 0;
-        }
-        str = options?.effectivestr != undefined ? options?.effectivestr : str;
-        let str5 = Math.floor(str / 5);
-        dc += str5;
-        end += Math.max(1, Math.round(str / 10));
-        tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
-    }
+    // Add in TK (handled in dc override)
+    // if (item.system.usesTk) {
+    //     let tkItems = actor.items.filter((o) => o.system.XMLID === "TELEKINESIS");
+    //     let str = 0;
+    //     for (const item of tkItems) {
+    //         str += parseInt(item.system.LEVELS) || 0;
+    //     }
+    //     str = options?.effectivestr != undefined ? options?.effectivestr : str;
+    //     let str5 = Math.floor(str / 5);
+    //     dc += str5;
+    //     end += Math.max(1, Math.round(str / 10));
+    //     tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
+    // }
 
     baseDcParts.str = dc - baseDcParts.item;
 
     // Boostable Charges
     if (options?.boostableCharges) {
-        const _value = parseInt(options.boostableCharges);
-        dc += _value;
-        tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
+        const boostCharges = parseInt(options.boostableCharges);
+        const boostDc = RoundDc(boostCharges * apRatio);
+        dc += boostDc;
+        //tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
+        tags.push({
+            value: `${getDiceFormulaFromItemDC(item, boostDc)}`,
+            name: "boostable",
+            title: `${boostDc.signedString()}DC${
+                boostDc != boostCharges ? `\n${boostCharges} reduced to ${boostDc} due to advantages` : ""
+            }`,
+        });
     }
 
     // Combat Skill Levels
-
     for (const csl of CombatSkillLevelsForAttack(item)) {
         if (csl && csl.dc > 0) {
+            const cslDc = RoundDc(csl.dc * apRatio);
             // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
-            dc += csl.dc;
+            dc += cslDc;
 
             // Each DC should roughly be 5 active points
             // let dcPerAp =  ((dc * 5) / (item.system.activePointsDc || item.system.activePoints)) || 1;
@@ -170,15 +211,25 @@ export function convertToDcFromItem(item, options) {
             // dc += (csl.dc * dcPerAp);
             // console.log(dcPerAp, dc, csl.dc)
 
+            // tags.push({
+            //     value: `${csl.dc.signedString()}DC`,
+            //     name: csl.item.name,
+            // });
+
             tags.push({
-                value: `${csl.dc.signedString()}DC`,
+                value: `${getDiceFormulaFromItemDC(item, cslDc)}`,
                 name: csl.item.name,
+                title: `${cslDc.signedString()}DC${
+                    cslDc != csl.dc ? `\n${csl.dc} reduced to ${cslDc} due to advantages` : ""
+                }`,
             });
         }
     }
 
+    // Only Martial Arts, generic maneuvers do not get the EXTRADC purchased in the Martial Arts tab
     let extraDcLevels = 0;
-    if (item.system.XMLID === "MANEUVER") {
+    //if (item.system.XMLID === "MANEUVER") {
+    if (item.type === "martialart") {
         const EXTRADC = item.actor.items.find((o) => o.system?.XMLID === "EXTRADC");
         if (EXTRADC) {
             extraDcLevels = parseInt(EXTRADC.system.LEVELS);
@@ -188,10 +239,17 @@ export function convertToDcFromItem(item, options) {
                 extraDcLevels = Math.floor(extraDcLevels / 2);
             }
 
+            // For some reason we do not "adjust" martial attacks with advantages.
+            const adjustedExtraDc = extraDcLevels; //RoundFavorPlayerUp(extraDcLevels * apRatio);
+
             tags.push({
-                value: `${extraDcLevels.signedString()}DC`,
+                value: `${getDiceFormulaFromItemDC(item, adjustedExtraDc)}`,
                 name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
-                title: tooltip,
+                title: `${adjustedExtraDc.signedString()}DC${
+                    adjustedExtraDc != extraDcLevels
+                        ? `\n${extraDcLevels} reduced to ${adjustedExtraDc} due to advantages`
+                        : ""
+                }${tooltip ? `\n${tooltip}` : ""}`,
             });
             dc += extraDcLevels;
         }
@@ -224,12 +282,18 @@ export function convertToDcFromItem(item, options) {
         //     divisor = 6;
         // }
         velocityDC = Math.floor(options.velocity / divisor);
-        if (velocityDC > 0) {
-            dc += velocityDC;
+        const velocityAdjustedDC = RoundDc(velocityDC * apRatio);
+
+        if (velocityAdjustedDC > 0) {
+            dc += velocityAdjustedDC;
             tags.push({
-                value: `${velocityDC.signedString()}DC`,
+                value: `${getDiceFormulaFromItemDC(item, velocityAdjustedDC)}`,
                 name: "Velocity",
-                title: `Velocity (${options.velocity}) / ${divisor}`,
+                title: `Velocity (${options.velocity}) / ${divisor}${
+                    velocityAdjustedDC != velocityDC
+                        ? `\n${velocityDC} reduced to ${velocityAdjustedDC} due to advantages`
+                        : ""
+                }`,
             });
         }
     }
@@ -257,8 +321,14 @@ export function convertToDcFromItem(item, options) {
             // && item.type != 'maneuver' && item.system.targets == 'dcv')
             if (item.name == "Strike" || item.type != "maneuver") {
                 if (item.system.targets == "dcv") {
-                    dc += 4;
-                    tags.push({ value: `4DC`, name: "Haymaker" });
+                    const haymakerDc = RoundDc(4 * apRatio);
+
+                    dc += haymakerDc;
+                    tags.push({
+                        value: `${getDiceFormulaFromItemDC(item, haymakerDc)}`,
+                        name: "Haymaker",
+                        title: `${haymakerDc != 4 ? `\n${4} reduced to ${haymakerDc} due to advantages` : ""}`,
+                    });
                 } else {
                     if (options?.isAction)
                         ui.notifications.warn("Haymaker can only be used with attacks targeting DCV.", {
@@ -283,11 +353,14 @@ export function convertToDcFromItem(item, options) {
             );
             if (weaponMatch) {
                 const dcPlus = 3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
-                dc += dcPlus;
+                const masterDc = RoundDc(dcPlus * apRatio);
+                dc += masterDc;
                 tags.push({
-                    value: `+${dcPlus}DC`,
+                    value: `${getDiceFormulaFromItemDC(item, masterDc)}`,
                     name: "WeaponMaster",
-                    title: WEAPON_MASTER.system.OPTION_ALIAS,
+                    title:
+                        WEAPON_MASTER.system.OPTION_ALIAS +
+                        `${masterDc != dcPlus ? `\n${dcPlus} reduced to ${masterDc} due to advantages` : ""}`,
                 });
             }
         }
@@ -329,11 +402,14 @@ export function convertToDcFromItem(item, options) {
             switch (conditionalAttack.system.XMLID) {
                 case "DEADLYBLOW": {
                     const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-                    dc += dcPlus;
+                    const deadlyDc = RoundDc(dcPlus * apRatio);
+                    dc += deadlyDc;
                     tags.push({
-                        value: `+${dcPlus}DC`,
+                        value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
                         name: "DeadlyBlow",
-                        title: conditionalAttack.system.OPTION_ALIAS,
+                        title:
+                            conditionalAttack.system.OPTION_ALIAS +
+                            `${deadlyDc != dcPlus ? `\n${dcPlus} reduced to ${deadlyDc} due to advantages` : ""}`,
                     });
                     break;
                 }

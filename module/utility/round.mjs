@@ -34,3 +34,7 @@ export function RoundFavorPlayerUp(number) {
     if (number % 1 < 0.5) return Math.floor(number);
     return Math.ceil(number);
 }
+
+export function RoundDc(number) {
+    return Math.round((number + Number.EPSILON) * 10) / 10;
+}

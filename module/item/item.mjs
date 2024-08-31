@@ -817,7 +817,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get is5e() {
-        return this.actor?.system?.is5e || this.system?.is5e;
+        return this.actor?.is5e || this.system?.is5e;
     }
 
     /**
@@ -1544,9 +1544,10 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Attempt default weapon selection if showAttacks is defined andthere are no custom adders
+        // Attempt default weapon selection if showAttacks is defined and there are no custom adders
+        // Or the OPTIONID=ALL is specified
         if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
-            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
+            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER") || this.system.OPTIONID === "ALL") {
                 let count = 0;
                 for (const attackItem of this.actor.items.filter(
                     (o) =>
@@ -3412,6 +3413,18 @@ export class HeroSystem6eItem extends Item {
                         // )} total points)`,
                         system.description += `, Can Add Maximum Of ${determineMaxAdjustment(this)} Points`;
                         //);
+                        break;
+
+                    case "ADDER":
+                        // This is likely a CSL adder that we use to specificy which attacks the CSL applies to.
+                        // If the CLS applies to ALL attacks, don't bother to list them all.
+                        if (this.system.XMLID === "COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+                        if (this.system.XMLID === "MENTAL_COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+
+                        // Otherwise add it to the list of ADDERS as normal.
+                        if (adder.ALIAS.trim()) {
+                            _adderArray.push(adder.ALIAS);
+                        }
                         break;
 
                     default:

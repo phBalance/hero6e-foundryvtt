@@ -66,8 +66,14 @@ export function getModifierInfo(options) {
     const xmlid =
         options.xmlid || options.item?.system?.XMLID || options.item?.system?.xmlid || options.item?.system?.id;
 
-    const actor = options?.actor || options?.item?.actor;
-    const is5e = actor?.system?.is5e || options.item?.system?.is5e;
+    // Determine is5e
+    let is5e = options?.actor?.is5e;
+    if (is5e === undefined) {
+        is5e = options.item?.actor?.is5e;
+    }
+    if (is5e === undefined) {
+        is5e = options.item?.is5e;
+    }
 
     if (typeof is5e === "undefined") {
         // This has a problem if we're passed in an XMLID for a power as we don't know the actor so we don't know if it's 5e or 6e
