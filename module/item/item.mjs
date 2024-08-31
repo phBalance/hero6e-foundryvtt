@@ -1545,8 +1545,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Attempt default weapon selection if showAttacks is defined and there are no custom adders
+        // Or the OPTIONID=ALL is specified
         if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
-            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
+            if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER") || this.system.OPTIONID === "ALL") {
                 let count = 0;
                 for (const attackItem of this.actor.items.filter(
                     (o) =>
