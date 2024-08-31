@@ -11,6 +11,7 @@ import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits, calculateRangePenaltyFromDistanceInMetres } from "../ruler.mjs";
+import { Attack } from "../utility/attack.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -274,10 +275,15 @@ export async function AttackAoeToHit(item, options) {
 }
 
 /// ChatMessage showing Attack To Hit
+/// opened after selecting 'Roll to Hit'
+/// uses ../templates/chat/item-toHit-card.hbs
+/// manages die rolls and display of hit/miss results
 export async function AttackToHit(item, options) {
     if (!item) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
+
+    const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
 
     const actor = item.actor;
     let effectiveItem = item;
@@ -895,7 +901,11 @@ export async function AttackToHit(item, options) {
         maxMinds: CONFIG.HERO.mindScanChoices
             .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
+        action,
     };
+
+    action.system = {}; // clear out any system information that would interfere with parsing
+    cardData.actionData = JSON.stringify(action);
 
     // render card
     const template =
@@ -1302,6 +1312,8 @@ export async function _onRollDamage(event) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
+    const action = JSON.parse(toHitData.actiondata);
+
     let effectiveItem = item;
 
     // Create a temporary item based on effectiveLevels
@@ -1460,6 +1472,7 @@ export async function _onRollDamage(event) {
         attackTags: getAttackTags(item),
         targetTokens: targetTokens,
         user: game.user,
+        action,
     };
 
     // render card
