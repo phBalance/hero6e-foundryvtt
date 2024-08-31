@@ -23,7 +23,7 @@
 // Variable Advantage, and Variable Special Effects.
 
 import { HEROSYS } from "../herosystem6e.mjs";
-import { RoundFavorPlayerUp } from "./round.mjs";
+import { RoundDc } from "./round.mjs";
 
 export function convertToDiceParts(value) {
     const dice = Math.floor(value / 5);
@@ -148,7 +148,7 @@ export function convertToDcFromItem(item, options) {
         }
 
         const str5 = Math.floor(str / 5);
-        const str5Dc = RoundFavorPlayerUp(str5 * apRatio);
+        const str5Dc = RoundDc(str5 * apRatio);
 
         dc += str5Dc;
         end += Math.max(1, Math.round(str / 10));
@@ -183,7 +183,7 @@ export function convertToDcFromItem(item, options) {
     // Boostable Charges
     if (options?.boostableCharges) {
         const boostCharges = parseInt(options.boostableCharges);
-        const boostDc = RoundFavorPlayerUp(boostCharges * apRatio);
+        const boostDc = RoundDc(boostCharges * apRatio);
         dc += boostDc;
         //tags.push({ value: `${_value.signedString()}DC`, name: "boostable" });
         tags.push({
@@ -198,7 +198,7 @@ export function convertToDcFromItem(item, options) {
     // Combat Skill Levels
     for (const csl of CombatSkillLevelsForAttack(item)) {
         if (csl && csl.dc > 0) {
-            const cslDc = RoundFavorPlayerUp(csl.dc * apRatio);
+            const cslDc = RoundDc(csl.dc * apRatio);
             // Simple +1 DC for now (checking on discord to found out rules for use AP ratio)
             dc += cslDc;
 
@@ -279,7 +279,7 @@ export function convertToDcFromItem(item, options) {
         //     divisor = 6;
         // }
         velocityDC = Math.floor(options.velocity / divisor);
-        const velocityAdjustedDC = RoundFavorPlayerUp(velocityDC * apRatio);
+        const velocityAdjustedDC = RoundDc(velocityDC * apRatio);
 
         if (velocityAdjustedDC > 0) {
             dc += velocityAdjustedDC;
@@ -318,7 +318,7 @@ export function convertToDcFromItem(item, options) {
             // && item.type != 'maneuver' && item.system.targets == 'dcv')
             if (item.name == "Strike" || item.type != "maneuver") {
                 if (item.system.targets == "dcv") {
-                    const haymakerDc = RoundFavorPlayerUp(4 * apRatio);
+                    const haymakerDc = RoundDc(4 * apRatio);
 
                     dc += haymakerDc;
                     tags.push({
@@ -350,7 +350,7 @@ export function convertToDcFromItem(item, options) {
             );
             if (weaponMatch) {
                 const dcPlus = 3 * Math.max(1, parseInt(WEAPON_MASTER.system.LEVELS) || 1);
-                const masterDc = RoundFavorPlayerUp(dcPlus * apRatio);
+                const masterDc = RoundDc(dcPlus * apRatio);
                 dc += masterDc;
                 tags.push({
                     value: `${getDiceFormulaFromItemDC(item, masterDc)}`,
@@ -399,7 +399,7 @@ export function convertToDcFromItem(item, options) {
             switch (conditionalAttack.system.XMLID) {
                 case "DEADLYBLOW": {
                     const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-                    const deadlyDc = RoundFavorPlayerUp(dcPlus * apRatio);
+                    const deadlyDc = RoundDc(dcPlus * apRatio);
                     dc += deadlyDc;
                     tags.push({
                         value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
