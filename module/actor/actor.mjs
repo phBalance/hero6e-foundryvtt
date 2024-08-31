@@ -1381,7 +1381,17 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.itemPromiseArray = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
-        await Promise.all(this.items.map((i) => i._postUpload({ render: false, uploadProgressBar })));
+        // Do CSL's last so we can property select the attacks
+        await Promise.all(
+            this.items
+                .filter((o) => !["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS"].includes(o.system.XMLID))
+                .map((i) => i._postUpload({ render: false, uploadProgressBar })),
+        );
+        await Promise.all(
+            this.items
+                .filter((o) => ["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS"].includes(o.system.XMLID))
+                .map((i) => i._postUpload({ render: false, uploadProgressBar })),
+        );
         uploadPerformance.postUpload = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
