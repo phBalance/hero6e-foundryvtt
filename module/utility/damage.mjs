@@ -118,7 +118,10 @@ export function convertToDcFromItem(item, options) {
     // Active Point to CP ratio of base attack.
     // We need this to properly calculate the DC of STR.
     // For some reason we don't "adjust" MartialArts with advantages
-    const apRatio = item.type === "martialart" ? 1 : item.system.basePointsPlusAdders / item.system.activePoints;
+    const apRatio =
+        item.type === "martialart" || !item.system.basePointsPlusAdders
+            ? 1
+            : item.system.basePointsPlusAdders / item.system.activePoints;
 
     // Add in STR
     if (item.system.usesStrength) {

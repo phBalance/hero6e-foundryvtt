@@ -1608,8 +1608,7 @@ export class HeroSystem6eActor extends Actor {
             if (!this.id) {
                 this.items.set(perceptionItem.system.XMLID, perceptionItem);
             }
-            //await
-            perceptionItem._postUpload();
+            await perceptionItem._postUpload();
 
             // MANEUVERS
             const powerList = this.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
@@ -1661,8 +1660,7 @@ export class HeroSystem6eActor extends Actor {
                         if (maneuverDetails.attack) {
                             await item.makeAttack();
                         }
-                        //await
-                        item._postUpload();
+                        await item._postUpload();
                     }
                 });
         }
