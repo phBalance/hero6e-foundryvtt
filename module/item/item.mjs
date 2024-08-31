@@ -817,7 +817,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get is5e() {
-        return this.actor?.system?.is5e || this.system?.is5e;
+        return this.actor?.is5e || this.system?.is5e;
     }
 
     /**
@@ -1544,7 +1544,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Attempt default weapon selection if showAttacks is defined andthere are no custom adders
+        // Attempt default weapon selection if showAttacks is defined and there are no custom adders
         if (this.baseInfo?.editOptions?.showAttacks && this.actor?.items) {
             if (!(this.system.ADDER || []).find((o) => o.XMLID === "ADDER")) {
                 let count = 0;
