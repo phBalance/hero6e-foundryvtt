@@ -72,26 +72,28 @@ export function convertToDcFromItem(item, options) {
     // Check for DC override (TELEKINESIS for example)
     if (typeof item.baseInfo.dc === "function") {
         dc = item.baseInfo.dc(item, options);
-    }
-
-    // Killing Attack
-    if (item.system.killing) {
-        if (item.findModsByXmlid("PLUSONEPIP")) {
-            dc += 1;
-        } else if (item.findModsByXmlid("PLUSONEHALFDIE")) {
-            dc += 2;
-        } else if (item.findModsByXmlid("MINUSONEPIP")) {
-            // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
-            dc += 2;
-        }
     } else {
-        if (item.findModsByXmlid("PLUSONEPIP")) {
-            dc += 0.2;
-        } else if (item.findModsByXmlid("PLUSONEHALFDIE")) {
-            dc += 0.5;
-        } else if (item.findModsByXmlid("MINUSONEPIP")) {
-            // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
-            dc += 0.5;
+        // If the item.baseInfo.dc supports PIP adders then Peter thinks the PIP handling shoudld be done there.
+
+        // Killing Attack
+        if (item.system.killing) {
+            if (item.findModsByXmlid("PLUSONEPIP")) {
+                dc += 1;
+            } else if (item.findModsByXmlid("PLUSONEHALFDIE")) {
+                dc += 2;
+            } else if (item.findModsByXmlid("MINUSONEPIP")) {
+                // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
+                dc += 2;
+            }
+        } else {
+            if (item.findModsByXmlid("PLUSONEPIP")) {
+                dc += 0.2;
+            } else if (item.findModsByXmlid("PLUSONEHALFDIE")) {
+                dc += 0.5;
+            } else if (item.findModsByXmlid("MINUSONEPIP")) {
+                // +1d6-1 is equal to +1/2 d6 DC-wise but is uncommon.
+                dc += 0.5;
+            }
         }
     }
 
@@ -161,25 +163,16 @@ export function convertToDcFromItem(item, options) {
                 value: `${getDiceFormulaFromItemDC(item, str5Dc)}`, //`${str5.signedString()}DC`,
                 name: "STR",
                 title: `${str5.signedString()}DC${
-                    str5Dc != str5 ? `\n${str5} reduced to ${str5Dc} due to advantages` : ""
+                    str5Dc != str5
+                        ? `\n${getDiceFormulaFromItemDC(item, str5)} reduced to ${getDiceFormulaFromItemDC(
+                              item,
+                              str5Dc,
+                          )} due to advantages`
+                        : ""
                 }${item.system.XMLID === "MOVEBY" ? "\nMoveBy is half STR" : ""}`,
             });
         }
     }
-
-    // Add in TK (handled in dc override)
-    // if (item.system.usesTk) {
-    //     let tkItems = actor.items.filter((o) => o.system.XMLID === "TELEKINESIS");
-    //     let str = 0;
-    //     for (const item of tkItems) {
-    //         str += parseInt(item.system.LEVELS) || 0;
-    //     }
-    //     str = options?.effectivestr != undefined ? options?.effectivestr : str;
-    //     let str5 = Math.floor(str / 5);
-    //     dc += str5;
-    //     end += Math.max(1, Math.round(str / 10));
-    //     tags.push({ value: `${str5.signedString()}DC`, name: "TK" });
-    // }
 
     baseDcParts.str = dc - baseDcParts.item;
 
@@ -193,7 +186,12 @@ export function convertToDcFromItem(item, options) {
             value: `${getDiceFormulaFromItemDC(item, boostDc)}`,
             name: "boostable",
             title: `${boostDc.signedString()}DC${
-                boostDc != boostCharges ? `\n${boostCharges} reduced to ${boostDc} due to advantages` : ""
+                boostDc != boostCharges
+                    ? `\n${getDiceFormulaFromItemDC(item, boostCharges)} reduced to ${getDiceFormulaFromItemDC(
+                          item,
+                          boostDc,
+                      )} due to advantages`
+                    : ""
             }`,
         });
     }
@@ -219,8 +217,12 @@ export function convertToDcFromItem(item, options) {
             tags.push({
                 value: `${getDiceFormulaFromItemDC(item, cslDc)}`,
                 name: csl.item.name,
-                title: `${cslDc.signedString()}DC${
-                    cslDc != csl.dc ? `\n${csl.dc} reduced to ${cslDc} due to advantages` : ""
+                title: `${csl.dc.signedString()}DC${
+                    cslDc != csl.dc
+                        ? `\n+${getDiceFormulaFromItemDC(item, csl.dc)} reduced to +${
+                              getDiceFormulaFromItemDC(item, cslDc) || 0
+                          } due to advantages`
+                        : ""
                 }`,
             });
         }
@@ -247,7 +249,10 @@ export function convertToDcFromItem(item, options) {
                 name: EXTRADC.name.replace(/\+\d+ HTH/, "").trim(),
                 title: `${adjustedExtraDc.signedString()}DC${
                     adjustedExtraDc != extraDcLevels
-                        ? `\n${extraDcLevels} reduced to ${adjustedExtraDc} due to advantages`
+                        ? `\n${getDiceFormulaFromItemDC(item, extraDcLevels)} reduced to ${getDiceFormulaFromItemDC(
+                              item,
+                              adjustedExtraDc,
+                          )} due to advantages`
                         : ""
                 }${tooltip ? `\n${tooltip}` : ""}`,
             });
@@ -291,7 +296,10 @@ export function convertToDcFromItem(item, options) {
                 name: "Velocity",
                 title: `Velocity (${options.velocity}) / ${divisor}${
                     velocityAdjustedDC != velocityDC
-                        ? `\n${velocityDC} reduced to ${velocityAdjustedDC} due to advantages`
+                        ? `\n${getDiceFormulaFromItemDC(item, velocityDC)} reduced to ${getDiceFormulaFromItemDC(
+                              item,
+                              velocityAdjustedDC,
+                          )} due to advantages`
                         : ""
                 }`,
             });
@@ -327,7 +335,14 @@ export function convertToDcFromItem(item, options) {
                     tags.push({
                         value: `${getDiceFormulaFromItemDC(item, haymakerDc)}`,
                         name: "Haymaker",
-                        title: `${haymakerDc != 4 ? `\n${4} reduced to ${haymakerDc} due to advantages` : ""}`,
+                        title: `${
+                            haymakerDc != 4
+                                ? `\n${getDiceFormulaFromItemDC(item, 4)} reduced to ${getDiceFormulaFromItemDC(
+                                      item,
+                                      haymakerDc,
+                                  )} due to advantages`
+                                : ""
+                        }`,
                     });
                 } else {
                     if (options?.isAction)
@@ -358,9 +373,14 @@ export function convertToDcFromItem(item, options) {
                 tags.push({
                     value: `${getDiceFormulaFromItemDC(item, masterDc)}`,
                     name: "WeaponMaster",
-                    title:
-                        WEAPON_MASTER.system.OPTION_ALIAS +
-                        `${masterDc != dcPlus ? `\n${dcPlus} reduced to ${masterDc} due to advantages` : ""}`,
+                    title: `${dcPlus.signedString()}DC${
+                        masterDc != dcPlus
+                            ? `\n${getDiceFormulaFromItemDC(item, dcPlus)} reduced to ${getDiceFormulaFromItemDC(
+                                  item,
+                                  masterDc,
+                              )} due to advantages`
+                            : ""
+                    }`,
                 });
             }
         }
@@ -409,7 +429,14 @@ export function convertToDcFromItem(item, options) {
                         name: "DeadlyBlow",
                         title:
                             conditionalAttack.system.OPTION_ALIAS +
-                            `${deadlyDc != dcPlus ? `\n${dcPlus} reduced to ${deadlyDc} due to advantages` : ""}`,
+                            `${
+                                deadlyDc != dcPlus
+                                    ? `\n${getDiceFormulaFromItemDC(
+                                          item,
+                                          dcPlus,
+                                      )} reduced to ${getDiceFormulaFromItemDC(item, deadlyDc)} due to advantages`
+                                    : ""
+                            }`,
                     });
                     break;
                 }
