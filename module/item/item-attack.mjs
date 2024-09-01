@@ -12,7 +12,6 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits, calculateRangePenaltyFromDistanceInMetres } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
-import { performTransformation, renderTransformationChatCards } from "../utility/transformation.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -2336,39 +2335,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
 }
 
 async function _onApplyTransformationToSpecificToken(transformationItem, token, damageDetail, defense, defenseTags) {
-    console.log("_onApplyTransformationToSpecificToken", transformationItem, token, damageDetail, defense, defenseTags);
-    if (
-        transformationItem.actor.id === token.actor.id &&
-        ["TRANSFORM"].includes(transformationItem.system.XMLID)
-    ) {
-        await ui.notifications.warn(
-            `${transformationItem.system.XMLID} attacker/source (${transformationItem.actor.name}) and defender/target (${token.actor.name}) are the same.`,
-        );
-    }
-
-    const rawDamageBeforeDefense = damageDetail.bodyDamage;
-    const damageAfterDefense = damageDetail.body;
-
-    const transformationItemTags = getAttackTags(transformationItem);
-
-    console.log("localVariables", {rawDamageBeforeDefense, damageAfterDefense, transformationItemTags});
-
-    const transformationChatMessages = [];
-    const transformationTargetActor = token.actor;
-    transformationChatMessages.push(
-        await performTransformation(
-            transformationItem,
-            damageAfterDefense,
-            defense,
-            damageDetail.effects,
-            false,
-            transformationTargetActor,
-        )
-    );
-
-    if (transformationChatMessages.length > 0) {
-        await renderTransformationChatCards(transformationChatMessages, transformationItemTags, defenseTags);
-    }
+    ui.notifications.warn("Application of transformation damage is not yet implemented.");
 }
 
 async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDetail, defense, defenseTags) {
