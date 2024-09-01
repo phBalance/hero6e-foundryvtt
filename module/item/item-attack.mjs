@@ -2335,7 +2335,8 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
 }
 
 async function _onApplyTransformationToSpecificToken(transformationItem, token, damageDetail, defense, defenseTags) {
-    ui.notifications.warn("Application of transformation damage is not yet implemented.");
+    console.log("_onApplyTransformationToSpecificToken", transformationItem, token, damageDetail, defense, defenseTags);
+    ui.notifications.warn("TRANSFORM damage & defenses are not yet implemented.");
 }
 
 async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDetail, defense, defenseTags) {

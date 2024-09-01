@@ -257,6 +257,7 @@ export class HeroSystem6eItem extends Item {
                     case "SET":
                     case "STRIKE":
                     case "MINDSCAN":
+                    case "TRANSFORM":
                         return Attack.AttackOptions(this, event);
 
                     case "ABSORPTION":
