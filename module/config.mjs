@@ -5272,7 +5272,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: 1.5,
-            dcOverride: function (item, options) {
+            dc: function (item, options) {
                 // The DC's for TELEKINESIS is based on STR.
                 // Each LEVEL of TELEKINESIS is equal to 1 pt of STR.
                 let str = parseInt(item.system.LEVELS) || 0;
