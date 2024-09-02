@@ -5324,11 +5324,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "COSMETIC":
-                        return 3;
+                        return item.is5e ? 5 : 3;
                     case "MINOR":
-                        return 5;
+                        return item.is5e ? 10 : 5;
                     case "MAJOR":
-                        return 10;
+                        return item.is5e ? 15 : 10;
                     case "SEVERE":
                         return 15;
                 }
