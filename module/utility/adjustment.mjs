@@ -196,7 +196,7 @@ export function determineMaxAdjustment(item) {
 export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) {
     // TODO: Not sure we need to use the characteristic here...
     const powerInfo =
-        targetPower.baseInfo ||
+        targetPower?.baseInfo ||
         getPowerInfo({
             xmlid: targetCharacteristic.toUpperCase(),
             actor: targetActor,
