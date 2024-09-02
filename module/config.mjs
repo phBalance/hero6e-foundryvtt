@@ -4434,7 +4434,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "obvious",
             duration: "instant",
             target: "target’s DCV",
-            range: HERO.RANGE_TYPES.NO_RANGE,
+            range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: 10,
             xml: `<POWER XMLID="DRAIN" ID="1711933555522" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
