@@ -152,7 +152,7 @@ export function convertToDcFromItem(item, options) {
             //}
         }
 
-        const str5 = Math.floor(str / 5);
+        const str5 = RoundDc(str / 5);
         const str5Dc = RoundDc(str5 * apRatio);
 
         dc += str5Dc;
