@@ -1,5 +1,9 @@
 # Releases
 
+## Version 3.0.93 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fixed HKA calculation when Double Damage Limit rule is enabled.
+
 ## Version 3.0.92 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed FLASH to use the flash defense of the target and not the attacker. [#1174](https://github.com/dmdorman/hero6e-foundryvtt/issues/1174)
