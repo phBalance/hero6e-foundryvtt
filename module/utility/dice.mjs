@@ -854,7 +854,6 @@ export class HeroRoller {
             console.error(`attempting to get calculatedTerms for roll type ${this._type}`);
         }
 
-        console.log("getCalculatedTerms", this._termsCluster);
         return HeroRoller.#extractPropertyFromTermsCluster(this._termsCluster, "calculated");
     }
 
