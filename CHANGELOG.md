@@ -4,7 +4,7 @@
 - Fixed HKA calculation when Double Damage Limit rule is enabled.
 - Fix for DRAINs and likely other adjustment powers. [#1188](https://github.com/dmdorman/hero6e-foundryvtt/issues/1188)
 - Added CLINGING as a KB modifier.
-
+- Fix: DRAIN has a standard range in 6e.
 
 ## Version 3.0.92 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
