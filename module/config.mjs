@@ -5321,7 +5321,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "instant",
             target: "target's DCV",
             range: HERO.RANGE_TYPES.STANDARD,
-            costPerLevel: function(item) {
+            costPerLevel: function (item) {
                 switch (item.system.OPTIONID) {
                     case "COSMETIC":
                         return 3;

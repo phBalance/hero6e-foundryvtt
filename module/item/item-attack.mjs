@@ -2082,9 +2082,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const damageDetail = await _calcDamage(heroRoller, item, damageData);
 
     // TRANSFORMATION
-    const transformation = getPowerInfo({
-        item: item,
-    })?.XMLID === "TRANSFORM";
+    const transformation =
+        getPowerInfo({
+            item: item,
+        })?.XMLID === "TRANSFORM";
     if (transformation) {
         return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags);
     }
