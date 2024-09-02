@@ -2749,7 +2749,16 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             });
         }
 
-        // TODO: Target is using Clinging +1d6
+        // Target is using Clinging +1d6
+        const clinging = options.targetToken?.actor?.items.find((o) => o.system.XMLID === "CLINGING");
+        if (clinging && clinging.system.active) {
+            knockbackDice += 1;
+            knockbackTags.push({
+                value: "+1d6KB",
+                name: "Clinging",
+                title: `Knockback Modifier\n${clinging.name}`,
+            });
+        }
 
         // Attack did Killing Damage +1d6
         if (item.system.killing) {

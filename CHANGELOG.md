@@ -2,6 +2,7 @@
 
 ## Version 3.0.93 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Fix for DRAINs and likely other adjustment powers. [#1188](https://github.com/dmdorman/hero6e-foundryvtt/issues/1188)
+- Added CLINGING as a KB modifier.
 
 
 ## Version 3.0.92 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
