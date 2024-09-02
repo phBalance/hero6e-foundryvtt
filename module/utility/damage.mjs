@@ -461,7 +461,7 @@ export function convertToDcFromItem(item, options) {
     if (DoubleDamageLimit) {
         // BaseDC
         let baseDC = baseDcParts.str;
-        if (["HA", "KHA"].includes(item.system.XMLID) || item.system.CATEGORY === "Hand To Hand") {
+        if (["HA", "HKA"].includes(item.system.XMLID) || item.system.CATEGORY === "Hand To Hand") {
             baseDC = baseDcParts.item;
         }
         if (item.system.XMLID === "MANEUVER" && !item.type.USEWEAPON) {
