@@ -193,7 +193,7 @@ Our support ratings:
 | TELEKINESIS | B | TK strength based attacks work.  Multiple TK powers are additive for STR. Non-attack uses are poorly implemented. |
 | TELEPATHY | D |  |
 | TELEPORTATION | B | Non-combat penalties not automated |
-| TRANSFORM | F | So many possibilities, most of which are unsupported |
+| TRANSFORM | D | Imports and Attack Rolls supported. Transform Damage application and Transform effects not supported. |
 | TUNNELING | B | Non-combat penalties not automated |
 
 ## Power Modifiers
