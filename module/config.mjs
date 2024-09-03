@@ -5333,6 +5333,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         return 15;
                 }
                 // This should never happen
+                console.error("Invalid TRANSFORM option ID: " + item.system.OPTIONID);
                 return 1;
             },
             costEnd: true,

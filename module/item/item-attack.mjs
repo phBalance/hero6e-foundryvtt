@@ -1442,7 +1442,7 @@ export async function _onRollDamage(event) {
 
     const cardData = {
         item: item,
-        adjustment,
+        useXMLIDDescriptor: adjustment || transform,
         senseAffecting,
 
         // dice rolls
@@ -2558,7 +2558,7 @@ async function _calcDamage(heroRoller, item, options) {
         stun = 0;
         bodyForPenetrating = 0;
     } else if (transform) {
-        body = heroRoller.getTransformTotal();
+        body = heroRoller.getEffectTotal();
         stun = 0;
         bodyForPenetrating = 0;
     } else if (mindScan) {

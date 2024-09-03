@@ -1211,12 +1211,8 @@ export class HeroSystem6eItem extends Item {
             }
 
             if (dc > 0) {
-                if (item.system.XMLID === "TRANSFORM") {
-                    item.system.damage += "T";
-                } else if (item.system.killing) {
+                if (item.system.killing) {
                     item.system.damage += "K";
-                } else {
-                    item.system.damage += "N";
                 }
             }
 
