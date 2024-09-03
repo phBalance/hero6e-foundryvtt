@@ -1442,7 +1442,7 @@ export async function _onRollDamage(event) {
 
     const cardData = {
         item: item,
-        useXMLIDDescriptor: adjustment || transform,
+        nonDmgEffect: adjustment || transform,
         senseAffecting,
 
         // dice rolls
