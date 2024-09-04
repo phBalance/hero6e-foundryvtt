@@ -5408,6 +5408,7 @@ export function registerUploadTests(quench) {
                             },
                             { temporary: true },
                         );
+                        actor.system.is5e = true;
                         await actor._postUpload();
 
                         item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
