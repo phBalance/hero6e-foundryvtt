@@ -255,7 +255,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("6e Martial Strike damage", function () {
-                    assert.equal(item.system.damage, "4d6N");
+                    assert.equal(item.system.damage, "4d6");
                 });
 
                 it("6e Martial Strike description", function () {
@@ -294,7 +294,7 @@ export function registerDamageFunctionTests(quench) {
                 });
 
                 it("NND Choke Hold damage", function () {
-                    assert.equal(item.system.damage, "2d6N");
+                    assert.equal(item.system.damage, "2d6");
                 });
 
                 it("NND Choke Hold description", function () {

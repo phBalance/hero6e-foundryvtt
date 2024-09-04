@@ -1559,7 +1559,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("Martial Strike damage", async function () {
-                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage, "34d6N");
+                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage, "34d6");
                 });
 
                 it("Martial Strike OCV", async function () {

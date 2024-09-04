@@ -4,7 +4,7 @@
 
     <div>
         {{#if item}}
-            {{#if adjustment}}
+            {{#if nonDmgEffect}}
                 {{item.system.XMLID}}
             {{else}}
                 Damage
@@ -44,7 +44,7 @@
                 data-body-damage="{{bodyDamage}}" data-body-damage-effective="{{bodyDamageEffective}}"
                 data-stun-damage="{{stunDamage}}" data-stun-damage-effective="{{stunDamageEffective}}"
                 data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}">
-                {{#if (or adjustment senseAffecting)}}
+                {{#if (or nonDmgEffect senseAffecting)}}
                 Apply {{item.system.XMLID}}
                 {{else}}
                 Apply Damage
@@ -57,7 +57,7 @@
                 data-body-damage="{{../bodyDamage}}" data-body-damage-effective="{{../bodyDamageEffective}}"
                 data-stun-damage="{{../stunDamage}}" data-stun-damage-effective="{{../stunDamageEffective}}"
                 data-roller="{{target.roller}}" data-stun-multiplier="{{../stunMultiplier}}" data-hit-location="{{../hitLocation}}">
-                {{#if ../adjustment}}
+                {{#if ../nonDmgEffect}}
                 Apply {{../item.system.XMLID}} to <b>{{target.token.name}}</b>
                 {{else}}
                 Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.token.name}} {{item.system.XMLID}}</b>
@@ -71,7 +71,7 @@
                 data-body-damage="{{bodyDamage}}" data-body-damage-effective="{{bodyDamageEffective}}"
                 data-stun-damage="{{stunDamage}}" data-stun-damage-effective="{{stunDamageEffective}}"
                 data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}">
-                {{#if adjustment}}
+                {{#if nonDmgEffect}}
                 Apply {{item.system.XMLID}} to <b>ALL</b>
                 {{else}}
                 Apply Damage to <b>ALL</b>

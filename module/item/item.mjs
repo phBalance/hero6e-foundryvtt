@@ -257,6 +257,7 @@ export class HeroSystem6eItem extends Item {
                     case "SET":
                     case "STRIKE":
                     case "MINDSCAN":
+                    case "TRANSFORM":
                         return Attack.AttackOptions(this, event);
 
                     case "ABSORPTION":
@@ -1212,8 +1213,6 @@ export class HeroSystem6eItem extends Item {
             if (dc > 0) {
                 if (item.system.killing) {
                     item.system.damage += "K";
-                } else {
-                    item.system.damage += "N";
                 }
             }
 
@@ -4005,6 +4004,9 @@ export class HeroSystem6eItem extends Item {
         } else if (xmlid === "ENERGYBLAST") {
             this.system.usesStrength = false;
         } else if (xmlid === "RKA") {
+            this.system.usesStrength = false;
+        } else if (xmlid === "TRANSFORM") {
+            this.system.class = "transform";
             this.system.usesStrength = false;
         }
 

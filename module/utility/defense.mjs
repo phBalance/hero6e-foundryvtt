@@ -159,6 +159,7 @@ function determineDefense(targetActor, attackItem, options) {
             break;
         case "mental":
         case "adjustment":
+        case "transform":
             break;
     }
 
@@ -215,6 +216,7 @@ function determineDefense(targetActor, attackItem, options) {
                     break;
 
                 case "adjustment":
+                case "transform":
                     value = parseInt(activeDefense.system.POWDLEVELS) || 0;
                     activeDefense.system.defenseType = "powd";
                     activeDefense.system.resistant = true;
@@ -225,6 +227,9 @@ function determineDefense(targetActor, attackItem, options) {
         if (["POWERDEFENSE"].includes(xmlid)) {
             switch (attackType) {
                 case "adjustment":
+                    activeDefense.system.defenseType = "powd";
+                    break;
+                case "transform":
                     activeDefense.system.defenseType = "powd";
                     break;
             }
@@ -385,7 +390,7 @@ function determineDefense(targetActor, attackItem, options) {
 
             case "powd": // Power Defense
                 POWD += valueAp;
-                if (["adjustment"].includes(attackType) || attackType === "avad") {
+                if (["adjustment", "transform", "avad"].includes(attackType)) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "POWD" + tagXmlids,
@@ -441,7 +446,7 @@ function determineDefense(targetActor, attackItem, options) {
 
             case "rpowd": // Resistant Power Defense
                 rPOWD += valueAp;
-                if (["adjustment"].includes(attackType) || attackType === "avad") {
+                if (["adjustment", "transform", "avad"].includes(attackType)) {
                     if (valueAp > 0)
                         defenseTags.push({
                             name: "rPOWD" + tagXmlids,
@@ -574,6 +579,14 @@ function determineDefense(targetActor, attackItem, options) {
             break;
 
         case "adjustment":
+            defenseValue = POWD;
+            resistantValue = rPOWD;
+            //impenetrableValue = Math.max(POWD, rPOWD);
+            damageReductionValue = DRM;
+            damageNegationValue = DNM;
+            break;
+
+        case "transform":
             defenseValue = POWD;
             resistantValue = rPOWD;
             //impenetrableValue = Math.max(POWD, rPOWD);

@@ -186,6 +186,15 @@ export function registerDiceTests(quench) {
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.ENTANGLE);
                         roller.makeFlashRoll(undefined);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
+
+                        roller.makeTransformRoll(0);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
+                        roller.makeTransformRoll(false);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
+                        roller.makeTransformRoll(null);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
+                        roller.makeTransformRoll(undefined);
+                        expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.EFFECT);
                     });
 
                     it("should be conditional for make functions with negative and default", function () {

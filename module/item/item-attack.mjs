@@ -1335,6 +1335,7 @@ export async function _onRollDamage(event) {
         item: item,
     })?.type?.includes("sense-affecting");
     const entangle = item.system.XMLID === "ENTANGLE";
+    const transform = item.system.XMLID === "TRANSFORM";
 
     const increasedMultiplierLevels = parseInt(item.findModsByXmlid("INCREASEDSTUNMULTIPLIER")?.LEVELS || 0);
     const decreasedMultiplierLevels = parseInt(item.findModsByXmlid("DECREASEDSTUNMULTIPLIER")?.LEVELS || 0);
@@ -1356,6 +1357,7 @@ export async function _onRollDamage(event) {
         .makeAdjustmentRoll(!!adjustment)
         .makeFlashRoll(!!senseAffecting)
         .makeEntangleRoll(entangle)
+        .makeTransformRoll(transform)
         .addStunMultiplier(increasedMultiplierLevels - decreasedMultiplierLevels)
         .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
         .addHalfDice(formulaParts.halfDieCount >= 1 ? formulaParts.halfDieCount : 0)
@@ -1440,7 +1442,7 @@ export async function _onRollDamage(event) {
 
     const cardData = {
         item: item,
-        adjustment,
+        nonDmgEffect: adjustment || transform,
         senseAffecting,
 
         // dice rolls
@@ -2079,6 +2081,15 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // We need to recalculate damage to account for possible Damage Negation
     const damageDetail = await _calcDamage(heroRoller, item, damageData);
 
+    // TRANSFORMATION
+    const transformation =
+        getPowerInfo({
+            item: item,
+        })?.XMLID === "TRANSFORM";
+    if (transformation) {
+        return _onApplyTransformationToSpecificToken(item, token, damageDetail, defense, defenseTags);
+    }
+
     // AID, DRAIN or any adjustment powers
     const adjustment = getPowerInfo({
         item: item,
@@ -2324,6 +2335,11 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
     }
 }
 
+async function _onApplyTransformationToSpecificToken(transformationItem, token, damageDetail, defense, defenseTags) {
+    console.log("_onApplyTransformationToSpecificToken", transformationItem, token, damageDetail, defense, defenseTags);
+    ui.notifications.warn("TRANSFORM damage & defenses are not yet implemented.");
+}
+
 async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDetail, defense, defenseTags) {
     if (
         adjustmentItem.actor.id === token.actor.id &&
@@ -2522,6 +2538,7 @@ async function _calcDamage(heroRoller, item, options) {
         item: item,
     })?.type?.includes("sense-affecting");
     const entangle = item.system.XMLID === "ENTANGLE";
+    const transform = item.system.XMLID === "TRANSFORM";
     const mindScan = item.system.XMLID === "MINDSCAN"; // TODO: Effect roll should be expanded to many other mental powers
 
     let body;
@@ -2538,6 +2555,10 @@ async function _calcDamage(heroRoller, item, options) {
         bodyForPenetrating = 0;
     } else if (entangle) {
         body = heroRoller.getEntangleTotal();
+        stun = 0;
+        bodyForPenetrating = 0;
+    } else if (transform) {
+        body = heroRoller.getEffectTotal();
         stun = 0;
         bodyForPenetrating = 0;
     } else if (mindScan) {
