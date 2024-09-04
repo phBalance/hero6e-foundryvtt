@@ -187,13 +187,13 @@ export function registerDiceTests(quench) {
                         roller.makeFlashRoll(undefined);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
 
-                        roller.makeTransformRoll(0);
+                        roller.makeEffectRoll(0);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
-                        roller.makeTransformRoll(false);
+                        roller.makeEffectRoll(false);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
-                        roller.makeTransformRoll(null);
+                        roller.makeEffectRoll(null);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.FLASH);
-                        roller.makeTransformRoll(undefined);
+                        roller.makeEffectRoll(undefined);
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.EFFECT);
                     });
 

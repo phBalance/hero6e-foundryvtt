@@ -1357,7 +1357,7 @@ export async function _onRollDamage(event) {
         .makeAdjustmentRoll(!!adjustment)
         .makeFlashRoll(!!senseAffecting)
         .makeEntangleRoll(entangle)
-        .makeTransformRoll(transform)
+        .makeEffectRoll(transform)
         .addStunMultiplier(increasedMultiplierLevels - decreasedMultiplierLevels)
         .addDice(formulaParts.d6Count >= 1 ? formulaParts.d6Count : 0)
         .addHalfDice(formulaParts.halfDieCount >= 1 ? formulaParts.halfDieCount : 0)
