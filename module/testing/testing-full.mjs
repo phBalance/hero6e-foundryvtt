@@ -1515,8 +1515,11 @@ export function registerFullTests(quench) {
                 <EQUIPMENT>
                     <POWER XMLID="COMPOUNDPOWER" ID="1723512936537" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" PRICE="0.0" WEIGHT="0.0" CARRIED="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Magic Sword" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                     <NOTES>My notes</NOTES>
-                    <POWER XMLID="HKA" ID="1723513008909" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <POWER XMLID="HKA" ID="1723513008909" BASECOST="0.0" LEVELS="3" ALIAS="Killing Attack - Hand-To-Hand" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                         <NOTES />
+                        <ADDER XMLID="PLUSONEPIP" ID="1725417653175" BASECOST="5.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
                     </POWER>
                     <SKILL XMLID="COMBAT_LEVELS" ID="1723513022920" BASECOST="0.0" LEVELS="2" ALIAS="Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="with any single attack" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No">
                         <NOTES />
@@ -1577,7 +1580,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("HKA damage", async function () {
-                    assert.equal(actor.items.find((o) => o.system.XMLID === "HKA").system.damage, "4d6+1K");
+                    assert.equal(actor.items.find((o) => o.system.XMLID === "HKA").system.damage, "6½d6K");
                 });
 
                 it("HKA CSL", async function () {
@@ -1596,7 +1599,7 @@ export function registerFullTests(quench) {
                 });
 
                 it("activePoints", async function () {
-                    assert.equal(actor.system.activePoints, 184);
+                    assert.equal(actor.system.activePoints, 219);
                 });
             });
         },
