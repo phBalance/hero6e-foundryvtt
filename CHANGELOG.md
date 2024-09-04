@@ -1,13 +1,13 @@
 # Releases
 
 ## Version 3.0.93 (so far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
 - Fixed HKA calculation when Double Damage Limit rule is enabled.
 - Fix for DRAINs and likely other adjustment powers. [#1188](https://github.com/dmdorman/hero6e-foundryvtt/issues/1188)
 - Added CLINGING as a KB modifier.
 - Fix: DRAIN has a standard range in 6e.
 - Fix: Partial STR dice is now added to damage. [#1193](https://github.com/dmdorman/hero6e-foundryvtt/issues/1193)
 - Fixed TRANSFORM to import properly, allowing for proper attack & damage rolls and END cost.
-
 
 ## Version 3.0.92 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
