@@ -555,6 +555,7 @@ export async function AttackToHit(item, options) {
             newEnd -= spentEnd;
         }
 
+        let stunDamageForEnd = 0;
         if (newEnd < 0) {
             // 1d6 STUN for each 2 END spent beyond 0 END- always round END use up to the nearest larger 2 END
             const endSpentAboveZero = Math.max(valueEnd, 0);
@@ -574,12 +575,9 @@ export async function AttackToHit(item, options) {
             const stunForEndHeroRoller = new HeroRoller().makeBasicRoll().addDice(stunDice);
             await stunForEndHeroRoller.roll();
             const stunRenderedResult = await stunForEndHeroRoller.render();
-            const stunDamageTotal = stunForEndHeroRoller.getBasicTotal();
+            stunDamageForEnd = stunForEndHeroRoller.getBasicTotal();
 
-            // NOTE: Gross. Shouldn't be using newEnd to hold stun total
-            newEnd = -stunDamageTotal;
-
-            enduranceText = `Spent ${valueEnd} END and ${stunDamageTotal} STUN`;
+            enduranceText = `Spent ${endSpentAboveZero} END and ${stunDamageForEnd} STUN`;
 
             enduranceText +=
                 ` <i class="fal fa-circle-info" data-tooltip="` +
@@ -616,7 +614,7 @@ export async function AttackToHit(item, options) {
                 changes = {
                     "system.characteristics.end.value": Math.min(valueEnd, 0),
                     "system.characteristics.stun.value":
-                        parseInt(actor.system.characteristics.stun.value) + parseInt(newEnd),
+                        parseInt(actor.system.characteristics.stun.value) - stunDamageForEnd,
                 };
             } else {
                 changes = {
