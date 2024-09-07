@@ -660,6 +660,11 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
+        if (combatant.actor.statuses.has("holding")) {
+            const holding = combatant.actor.effects.contents.find((o) => o.statuses.has("holding"));
+            await holding.delete();
+        }
+
         if (combatant.actor.statuses.has("stunned")) {
             const effect = combatant.actor.effects.contents.find((o) => o.statuses.has("stunned"));
 

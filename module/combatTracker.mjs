@@ -72,6 +72,10 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             if (context.alphaTesting) {
                 turn.name += ` [${t}]`;
             }
+
+            if (turn.effects.has("icons/svg/clockwork.svg")) {
+                turn.css = "holding";
+            }
         }
         context.segments[activeSegment].active = true;
 

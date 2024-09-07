@@ -267,6 +267,12 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         heroIcon: `icons/aborted.svg`,
     };
 
+    static holdingEffect = {
+        id: "holding",
+        name: "Holding An Action",
+        icon: `icons/svg/clockwork.svg`,
+    };
+
     static underwaterEffect = {
         id: "underwater",
         name: "Underwater",
