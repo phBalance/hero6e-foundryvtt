@@ -62,7 +62,10 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
             // Active Segment
             if (turn.active) {
-                activeSegment = turn.flags.segment;
+                activeSegment = turn.flags?.segment || 0;
+                if (!activeSegment) {
+                    console.error("Unable to determine Active Segment");
+                }
             }
 
             // Alpha testing debugging
