@@ -485,9 +485,9 @@ export function convertToDcFromItem(item, options) {
     }
 
     // Programmer warning
-    if (dc <= 0) {
-        console.warn("DC <= 0", dc, item);
-    }
+    // if (dc <= 0) {
+    //     console.warn("DC <= 0", dc, item);
+    // }
 
     return { dc: dc, tags: tags, end: end };
 }

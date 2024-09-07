@@ -556,7 +556,7 @@ export async function AttackToHit(item, options) {
         }
 
         let stunDamageForEnd = 0;
-        if (newEnd < 0) {
+        if (newEnd < 0 && spentEnd > 0) {
             // 1d6 STUN for each 2 END spent beyond 0 END- always round END use up to the nearest larger 2 END
             const endSpentAboveZero = Math.max(valueEnd, 0);
             const stunDice = Math.ceil(Math.abs(spentEnd - endSpentAboveZero) / 2);
