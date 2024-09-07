@@ -555,8 +555,11 @@ export async function AttackToHit(item, options) {
             newEnd -= spentEnd;
         }
 
+        let stunDamageForEnd = 0;
         if (newEnd < 0) {
-            let stunDice = Math.ceil(Math.abs(newEnd) / 2);
+            // 1d6 STUN for each 2 END spent beyond 0 END- always round END use up to the nearest larger 2 END
+            const endSpentAboveZero = Math.max(valueEnd, 0);
+            const stunDice = Math.ceil(Math.abs(spentEnd - endSpentAboveZero) / 2);
 
             const confirmed = await Dialog.confirm({
                 title: "USING STUN FOR ENDURANCE",
@@ -572,11 +575,9 @@ export async function AttackToHit(item, options) {
             const stunForEndHeroRoller = new HeroRoller().makeBasicRoll().addDice(stunDice);
             await stunForEndHeroRoller.roll();
             const stunRenderedResult = await stunForEndHeroRoller.render();
-            const stunDamageTotal = stunForEndHeroRoller.getBasicTotal();
+            stunDamageForEnd = stunForEndHeroRoller.getBasicTotal();
 
-            newEnd = -stunDamageTotal;
-
-            enduranceText = "Spent " + valueEnd + " END and " + Math.abs(newEnd) + " STUN";
+            enduranceText = `Spent ${endSpentAboveZero} END and ${stunDamageForEnd} STUN`;
 
             enduranceText +=
                 ` <i class="fal fa-circle-info" data-tooltip="` +
@@ -608,10 +609,12 @@ export async function AttackToHit(item, options) {
         ) {
             let changes = {};
             if (newEnd < 0) {
+                // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
+                //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
                 changes = {
-                    "system.characteristics.end.value": 0,
+                    "system.characteristics.end.value": Math.min(valueEnd, 0),
                     "system.characteristics.stun.value":
-                        parseInt(actor.system.characteristics.stun.value) + parseInt(newEnd),
+                        parseInt(actor.system.characteristics.stun.value) - stunDamageForEnd,
                 };
             } else {
                 changes = {
