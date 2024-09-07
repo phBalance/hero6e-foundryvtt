@@ -264,13 +264,6 @@ export class HeroRoller {
         return this;
     }
 
-    makeTransformRoll(apply = true) {
-        if (apply) {
-            this._type = HeroRoller.ROLL_TYPE.EFFECT;
-        }
-        return this;
-    }
-
     makeFlashRoll(apply = true) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.FLASH;
