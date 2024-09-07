@@ -1762,6 +1762,17 @@ export class HeroSystem6eItem extends Item {
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
             ];
+            for (const usableas of (this.system.MODIFIER || []).filter((o) => o.XMLID === "USABLEAS")) {
+                for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
+                    if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
+                        activeEffect.changes.push({
+                            key: `system.characteristics.${movementKey.toLowerCase()}.max`,
+                            value: this.system.value,
+                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        });
+                    }
+                }
+            }
             activeEffect.transfer = true;
             activeEffect.disabled = !this.system.active;
 
