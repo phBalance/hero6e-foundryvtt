@@ -178,13 +178,13 @@ export async function migrateWorld() {
     // Default bar3 to TRUE for existing worlds
     // All item's system.characteristic replaced with system.CHARACTERISTIC
     if (foundry.utils.isNewerVersion("3.0.53", lastMigration)) {
-        if (!game.settings.get(game.system.id, "bar3")) {
-            game.settings.set(game.system.id, "bar3", true);
-            // Refresh tokens to make sure they show the 3rd bar
-            for (const token of game.scenes.current?.tokens || []) {
-                token.object.refresh();
-            }
-        }
+        // if (!game.settings.get(game.system.id, "bar3")) {
+        //     game.settings.set(game.system.id, "bar3", true);
+        //     // Refresh tokens to make sure they show the 3rd bar
+        //     for (const token of game.scenes.current?.tokens || []) {
+        //         token.object.refresh();
+        //     }
+        // }
 
         const queue = getAllActorsInGame();
         let dateNow = new Date();
