@@ -12,6 +12,7 @@
 - Fixed issue where adding/removing combatants messed up player combat tracker. [#1199](https://github.com/dmdorman/hero6e-foundryvtt/issues/1199)
 - Fix for errant "bar3" setting that would prevent older worlds from loading after upgrading to FoundryVTT v12. [#1187](https://github.com/dmdorman/hero6e-foundryvtt/issues/1187)
 - Added support for movement powers USABLEAS a secondary type of movement. [#1200](https://github.com/dmdorman/hero6e-foundryvtt/issues/1200)
+- Initial support for HOLDING AN ACTION. [#1206](https://github.com/dmdorman/hero6e-foundryvtt/issues/1206) [#608](https://github.com/dmdorman/hero6e-foundryvtt/issues/608) [#380](https://github.com/dmdorman/hero6e-foundryvtt/issues/380)
 
 ## Version 3.0.92 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

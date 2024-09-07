@@ -174,6 +174,15 @@ export class HeroSystem6eCombat extends Combat {
                                 initiative: initiativeValue,
                                 "-flags.lightningReflexesAlias": null,
                             });
+
+                            // Remove holding
+                            if (tokenCombatants[idx].actor.statuses.has("holding")) {
+                                const holding = tokenCombatants[idx].actor.effects.contents.find((o) =>
+                                    o.statuses.has("holding"),
+                                );
+                                await holding.delete();
+                                console.info(`Removed holding status: ${tokenCombatants[idx].actor.name}`);
+                            }
                         } catch (ex) {
                             console.error(ex);
                             return;
@@ -545,6 +554,12 @@ export class HeroSystem6eCombat extends Combat {
         // Reset movement history
         if (window.dragRuler) {
             await dragRuler.resetMovementHistory(this, combatant.id);
+        }
+
+        if (combatant.actor.statuses.has("holding")) {
+            const holding = combatant.actor.effects.contents.find((o) => o.statuses.has("holding"));
+            await holding.delete();
+            ui.notifications.info(`Removed holding status: ${combatant.actor.name}`);
         }
 
         // STUNNING
