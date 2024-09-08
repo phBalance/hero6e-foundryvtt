@@ -47,30 +47,34 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
         // Looks like super.getData returns a minimal combatant, need to add flags.
         // Handle segments while were at it (as it is stored in flags.segment)
-        let activeSegment = context.combat?.combatant?.flags.segment || 12;
-        for (let t = 0; t < context.turns.length; t++) {
-            const turn = context.turns[t];
-            turn.flags = context.combat.combatants.find((c) => c.id === turn.id)?.flags;
+        try {
+            let activeSegment = context.combat?.combatant?.flags.segment || 12;
+            for (let t = 0; t < context.turns.length; t++) {
+                const turn = context.turns[t];
+                turn.flags = context.combat.combatants.find((c) => c.id === turn.id)?.flags;
 
-            // Add combatant to proper segment
-            if (turn.flags?.segment) {
-                context.segments[turn.flags.segment].push(turn);
-            } else {
-                //context.segments[12].push(turn);
-                //console.error("Unknown segment");
-            }
+                // Add combatant to proper segment
+                if (turn.flags?.segment) {
+                    context.segments[turn.flags.segment].push(turn);
+                } else {
+                    //context.segments[12].push(turn);
+                    //console.error("Unknown segment");
+                }
 
-            // Active Segment
-            if (turn.active) {
-                activeSegment = turn.flags.segment;
-            }
+                // Active Segment
+                if (turn.active && turn.flags.segment) {
+                    activeSegment = turn.flags.segment;
+                }
 
-            // Alpha testing debugging
-            if (context.alphaTesting) {
-                turn.name += ` [${t}]`;
+                // Alpha testing debugging
+                if (context.alphaTesting) {
+                    turn.name += ` [${t}]`;
+                }
             }
+            context.segments[activeSegment].active = true;
+        } catch (e) {
+            console.error(e);
         }
-        context.segments[activeSegment].active = true;
 
         // for (const combatant of context.combat.turns) {
         //     if (!combatant.visible) continue;
