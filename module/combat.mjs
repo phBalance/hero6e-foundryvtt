@@ -44,7 +44,7 @@ export class HeroSystem6eCombat extends Combat {
 
     async rollInitiative(ids) {
         // Only run this once regardless of how many GM's
-        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
+        if (!game.users.activeGM?.isSelf) return this;
 
         // Structure input data
         ids = typeof ids === "string" ? [ids] : ids;
@@ -307,7 +307,11 @@ export class HeroSystem6eCombat extends Combat {
     /** @inheritdoc */
     async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
         // Only run this once regardless of how many GM's
-        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
+        if (!game.users.activeGM?.isSelf) {
+            this.setupTurns();
+            if (this.active) this.collection.render();
+            return;
+        }
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onCreateDescendantDocuments`, this);
@@ -355,7 +359,11 @@ export class HeroSystem6eCombat extends Combat {
     /** @inheritdoc */
     async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
         // Only run this once regardless of how many GM's
-        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
+        if (!game.users.activeGM?.isSelf) {
+            this.setupTurns();
+            if (this.active) this.collection.render();
+            return;
+        }
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onDeleteDescendantDocuments`, this);
@@ -434,7 +442,11 @@ export class HeroSystem6eCombat extends Combat {
         userId,
     ) {
         // Only run this once regardless of how many GM's
-        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
+        if (!game.users.activeGM?.isSelf) {
+            this.setupTurns();
+            if (this.active) this.collection.render();
+            return;
+        }
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onUpdateDescendantDocuments`, this);
@@ -496,7 +508,11 @@ export class HeroSystem6eCombat extends Combat {
 
     async _onActorDataUpdate(...args) {
         // Only run this once regardless of how many GM's
-        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
+        if (!game.users.activeGM?.isSelf) {
+            this.setupTurns();
+            if (this.active) this.collection.render();
+            return;
+        }
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onActorDataUpdate`, this);
