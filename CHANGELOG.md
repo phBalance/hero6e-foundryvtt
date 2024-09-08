@@ -1,7 +1,7 @@
 # Releases
 
 ## Version 3.0.95 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Fixed issue where adding/removing combatants messed up playeres combat tracker. [#1208](https://github.com/dmdorman/hero6e-foundryvtt/issues/1208)
+- Fixed issue where adding/removing combatants messed up playeres combat tracker. [#1199](https://github.com/dmdorman/hero6e-foundryvtt/issues/1199)
 
 ## Version 3.0.94
 - Fix for Combat Tracker
