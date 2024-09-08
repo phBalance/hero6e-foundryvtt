@@ -14,6 +14,7 @@
 - Added support for movement powers USABLEAS a secondary type of movement. [#1200](https://github.com/dmdorman/hero6e-foundryvtt/issues/1200)
 - Initial support for HOLDING AN ACTION. [#1206](https://github.com/dmdorman/hero6e-foundryvtt/issues/1206) [#608](https://github.com/dmdorman/hero6e-foundryvtt/issues/608) [#380](https://github.com/dmdorman/hero6e-foundryvtt/issues/380)
 - Fixed DC calculations with advantaged powers to not included reduced endurance advantages. [#1210](https://github.com/dmdorman/hero6e-foundryvtt/issues/1210)
+- Knocked Out actors take x2 STUN. [#1205](https://github.com/dmdorman/hero6e-foundryvtt/issues/1205)
 
 ## Version 3.0.92 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 

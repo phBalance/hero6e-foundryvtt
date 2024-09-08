@@ -2608,13 +2608,19 @@ async function _calcDamage(heroRoller, item, options) {
         }
     }
 
-    let bodyDamage = body;
-    let stunDamage = stun;
-
     let effects = "";
     if (item.system.EFFECT) {
-        effects = item.system.EFFECT + ";";
+        effects = item.system.EFFECT + "; ";
     }
+
+    const targetActor = game.scenes.current.tokens.get(options.targetTokenId)?.actor;
+    if (targetActor?.statuses.has("knockedOut")) {
+        effects += "Knocked Out x2 STUN;";
+        stun *= 2;
+    }
+
+    let bodyDamage = body;
+    let stunDamage = stun;
 
     // Splits an attack into two equal parts for the purpose of
     // determining BODY damage and applying it to the target’s
