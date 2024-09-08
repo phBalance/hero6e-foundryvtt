@@ -7,11 +7,11 @@
 - Added CLINGING as a KB modifier.
 - Fix: DRAIN has a standard range in 6e.
 - Fix: Partial STR dice is now added to damage. [#1193](https://github.com/dmdorman/hero6e-foundryvtt/issues/1193)
-- Fixed TRANSFORM to import properly, allowing for proper attack & damage rolls and END cost.
+- Fixed TRANSFORM to import, allowing for attack & damage rolls and END cost.  Defenses & associated effects are not implemented.
 - Fix STUN for END calculation especially when starting with negative END. [#1202](https://github.com/dmdorman/hero6e-foundryvtt/issues/1202)
 - Fixed issue where adding/removing combatants messed up player combat tracker. [#1199](https://github.com/dmdorman/hero6e-foundryvtt/issues/1199)
 - Fix for errant "bar3" setting that would prevent older worlds from loading after upgrading to FoundryVTT v12. [#1187](https://github.com/dmdorman/hero6e-foundryvtt/issues/1187)
-- Added support for movement powers USABLEAS a secondary type of movement. [#1200](https://github.com/dmdorman/hero6e-foundryvtt/issues/1200)
+- Added support for movement powers USABLE AS a secondary type of movement. [#1200](https://github.com/dmdorman/hero6e-foundryvtt/issues/1200)
 - Initial support for HOLDING AN ACTION. [#1206](https://github.com/dmdorman/hero6e-foundryvtt/issues/1206) [#608](https://github.com/dmdorman/hero6e-foundryvtt/issues/608) [#380](https://github.com/dmdorman/hero6e-foundryvtt/issues/380)
 - Fixed DC calculations with advantaged powers to not included reduced endurance advantages. [#1210](https://github.com/dmdorman/hero6e-foundryvtt/issues/1210)
 - Knocked Out actors take x2 STUN. [#1205](https://github.com/dmdorman/hero6e-foundryvtt/issues/1205)

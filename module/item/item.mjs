@@ -1763,6 +1763,7 @@ export class HeroSystem6eItem extends Item {
                 },
             ];
             for (const usableas of (this.system.MODIFIER || []).filter((o) => o.XMLID === "USABLEAS")) {
+                let foundMatch = false;
                 for (const movementKey of Object.keys(CONFIG.HERO.movementPowers)) {
                     if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
                         activeEffect.changes.push({
@@ -1770,7 +1771,12 @@ export class HeroSystem6eItem extends Item {
                             value: this.system.value,
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         });
+                        foundMatch = true;
                     }
+                }
+                if (!foundMatch) {
+                    ui.notifications.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`);
+                    console.warn(`${this.name} has unknown USABLE AS "${usableas.ALIAS}"`, usableas);
                 }
             }
             activeEffect.transfer = true;
@@ -2783,6 +2789,13 @@ export class HeroSystem6eItem extends Item {
                     system.description = `${system.ALIAS} ${diceFormula} from ${
                         reduceAndEnhanceTargets.valid ? reduceAndEnhanceTargets.reduces : "unknown"
                     } to ${reduceAndEnhanceTargets.valid ? reduceAndEnhanceTargets.enhances : "unknown"}`;
+                }
+                break;
+
+            case "TRANSFORM":
+                {
+                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    system.description = `${system.OPTION_ALIAS} ${system.ALIAS} ${diceFormula}`;
                 }
                 break;
 

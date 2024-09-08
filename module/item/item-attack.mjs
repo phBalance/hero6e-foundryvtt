@@ -2613,7 +2613,7 @@ async function _calcDamage(heroRoller, item, options) {
         effects = item.system.EFFECT + "; ";
     }
 
-    const targetActor = game.scenes.current.tokens.get(options.targetTokenId)?.actor;
+    const targetActor = (game.scenes.current.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
     if (targetActor?.statuses.has("knockedOut")) {
         effects += "Knocked Out x2 STUN;";
         stun *= 2;
