@@ -61,7 +61,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             }
 
             // Active Segment
-            if (turn.active) {
+            if (turn.active && turn.flags.segment) {
                 activeSegment = turn.flags.segment;
             }
 
