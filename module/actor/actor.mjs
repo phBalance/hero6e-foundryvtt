@@ -315,10 +315,10 @@ export class HeroSystem6eActor extends Actor {
         const chars = this.system.characteristics;
 
         // Shouldn't happen, but you never know
-        if (isNaN(parseInt(chars.stun.value))) {
+        if (chars.stun && isNaN(parseInt(chars.stun.value))) {
             chars.stun.value = 0;
         }
-        if (isNaN(parseInt(chars.end.value))) {
+        if (chars.end && isNaN(parseInt(chars.end.value))) {
             chars.end.value = 0;
         }
 
