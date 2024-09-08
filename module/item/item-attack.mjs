@@ -556,7 +556,7 @@ export async function AttackToHit(item, options) {
         }
 
         let stunDamageForEnd = 0;
-        if (newEnd < 0) {
+        if (newEnd < 0 && spentEnd > 0) {
             // 1d6 STUN for each 2 END spent beyond 0 END- always round END use up to the nearest larger 2 END
             const endSpentAboveZero = Math.max(valueEnd, 0);
             const stunDice = Math.ceil(Math.abs(spentEnd - endSpentAboveZero) / 2);
@@ -2608,13 +2608,19 @@ async function _calcDamage(heroRoller, item, options) {
         }
     }
 
-    let bodyDamage = body;
-    let stunDamage = stun;
-
     let effects = "";
     if (item.system.EFFECT) {
-        effects = item.system.EFFECT + ";";
+        effects = item.system.EFFECT + "; ";
     }
+
+    const targetActor = (game.scenes.current.tokens.get(options.targetTokenId) || options.targetToken)?.actor;
+    if (targetActor?.statuses.has("knockedOut")) {
+        effects += "Knocked Out x2 STUN;";
+        stun *= 2;
+    }
+
+    let bodyDamage = body;
+    let stunDamage = stun;
 
     // Splits an attack into two equal parts for the purpose of
     // determining BODY damage and applying it to the target’s
