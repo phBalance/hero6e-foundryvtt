@@ -714,7 +714,7 @@ export class HeroSystem6eCombat extends Combat {
         if (this.flags.postSegment12Round?.[this.round]) {
             const content = `Post-Segment 12 (Turn ${this.round - 1})
             <p>Skipping because this has already been performed on this turn during this combat.  
-            This typically occures when rewinding combat or during speed changes.</p>`;
+            This typically occurs when rewinding combat or during speed changes.</p>`;
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
