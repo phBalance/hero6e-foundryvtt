@@ -1,6 +1,9 @@
 # Releases
 
-## Version 3.0.93 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.94 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Fix for Combat Tracker
+
+## Version 3.0.93
 
 - Fixed HKA calculation when Double Damage Limit rule is enabled.
 - Fix for DRAINs and likely other adjustment powers. [#1188](https://github.com/dmdorman/hero6e-foundryvtt/issues/1188)
@@ -15,7 +18,7 @@
 - Fixed DC calculations with advantaged powers to not included reduced endurance advantages. [#1210](https://github.com/dmdorman/hero6e-foundryvtt/issues/1210)
 - Knocked Out actors take x2 STUN. [#1205](https://github.com/dmdorman/hero6e-foundryvtt/issues/1205)
 
-## Version 3.0.92 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.92
 
 - Fixed FLASH to use the flash defense of the target and not the attacker. [#1174](https://github.com/dmdorman/hero6e-foundryvtt/issues/1174)
 - Fixed TELEKINESIS damage. [#1177](https://github.com/dmdorman/hero6e-foundryvtt/issues/1177)

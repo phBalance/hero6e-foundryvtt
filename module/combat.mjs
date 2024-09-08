@@ -44,17 +44,7 @@ export class HeroSystem6eCombat extends Combat {
 
     async rollInitiative(ids) {
         // Only run this once regardless of how many GM's
-        // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            // Setup new turns with now deleted combatant
-            this.setupTurns();
-
-            // Find turn that matches current combatant
-            this.setMyTurn(this.combatant, null); //this.turn = this.turns.findIndex((o) => o.id === (oldCombatant.id || nextCombatant.id));
-
-            if (this.active) await this.collection.render();
-            return this;
-        }
+        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
 
         // Structure input data
         ids = typeof ids === "string" ? [ids] : ids;
@@ -180,15 +170,6 @@ export class HeroSystem6eCombat extends Combat {
                                 initiative: initiativeValue,
                                 "-flags.lightningReflexesAlias": null,
                             });
-
-                            // Remove holding
-                            if (tokenCombatants[idx].actor.statuses.has("holding")) {
-                                const holding = tokenCombatants[idx].actor.effects.contents.find((o) =>
-                                    o.statuses.has("holding"),
-                                );
-                                await holding.delete();
-                                console.info(`Removed holding status: ${tokenCombatants[idx].actor.name}`);
-                            }
                         } catch (ex) {
                             console.error(ex);
                             return;
@@ -325,20 +306,8 @@ export class HeroSystem6eCombat extends Combat {
 
     /** @inheritdoc */
     async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
-        // Get current combatant
-        const oldCombatant = this.combatant;
-
         // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            // Setup new turns with now deleted combatant
-            this.setupTurns();
-
-            // Find turn that matches current combatant
-            this.setMyTurn(oldCombatant, null); //this.turn = this.turns.findIndex((o) => o.id === (oldCombatant.id || nextCombatant.id));
-
-            if (this.active) await this.collection.render();
-            return;
-        }
+        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onCreateDescendantDocuments`, this);
@@ -356,6 +325,9 @@ export class HeroSystem6eCombat extends Combat {
 
         // documents = documents.filter((o) => o.actor);
         // if (documents.length === 0) return;
+
+        // Get current combatant
+        const oldCombatant = this.combatant;
 
         // Super
         await super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
@@ -378,37 +350,22 @@ export class HeroSystem6eCombat extends Combat {
         //if (this.active) this.collection.render();
     }
 
-    setMyTurn(oldCombatant, nextCombatant) {
-        this.turn = this.turns.findIndex((o) => o.id === (oldCombatant.id || nextCombatant.id));
-    }
-
     /* -------------------------------------------- */
 
     /** @inheritdoc */
     async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
-        // Get current (active) combatant
-        const oldCombatant = this.combatants.find((o) => o.id === options.oldCombatant?._id) || this.combatant;
-        const nextCombatant =
-            this.combatants.find((o) => o.id === options.nextCombatant?._id) ||
-            this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1];
-
         // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            // Setup new turns with now deleted combatant
-            this.setupTurns();
-
-            // Find turn that matches current combatant
-            this.setMyTurn(oldCombatant, nextCombatant); //this.turn = this.turns.findIndex((o) => o.id === (oldCombatant.id || nextCombatant.id));
-
-            if (this.active) await this.collection.render();
-            return;
-        }
+        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onDeleteDescendantDocuments`, this);
         }
 
         // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
+
+        // Get current (active) combatant
+        const oldCombatant = this.combatant;
+        const nextCombatant = this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1];
 
         // Super
         await super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
@@ -423,7 +380,6 @@ export class HeroSystem6eCombat extends Combat {
                         await this.deleteEmbeddedDocuments(
                             "Combatant",
                             toDelete.map((c) => c.id),
-                            { oldCombatant, nextCombatant },
                         );
                     }
                 }
@@ -478,19 +434,7 @@ export class HeroSystem6eCombat extends Combat {
         userId,
     ) {
         // Only run this once regardless of how many GM's
-        //if (!game.users.activeGM?.isSelf) {
-        // Setup new turns with now deleted combatant
-        //this.setupTurns();
-
-        // const nextCombatant =
-        //     this.combatants.find((o) => o.id === options.nextCombatant?._id) ||
-        //     this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1];
-
-        //this.setMyTurn(this.combatant, nextCombatant); //this.turn = this.turns.findIndex((o) => o.id === (oldCombatant.id || nextCombatant.id));
-
-        //     if (this.active) await this.collection.render();
-        //     return;
-        // }
+        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onUpdateDescendantDocuments`, this);
@@ -512,37 +456,22 @@ export class HeroSystem6eCombat extends Combat {
         const priorState = foundry.utils.deepClone(this.current);
         const combatant = this.combatant;
         this.setupTurns();
-
         this.#recordPreviousState(priorState);
-
-        // Find turn that matches current segment, not necessarily the same combatant (but maybe)
-        //const combatant = documents?.[0];
-        // console.log(
-        //     combatant.name,
-        //     this.turns.find((o) => o.flags.segment >= combatant.flags.segment && o.initiative <= combatant.initiative)
-        //         .name,
-        // );
-        // const sameTurn = this.turns.findIndex(
-        //     (o) => o.flags.segment >= combatant.flags.segment && o.initiative >= combatant.initiative,
-        // );
-
-        this.setMyTurn(combatant);
 
         // When token (turns) are added or deleted this.turns likely points to the wrong turn.
         // Adjust turn order to keep the current Combatant the same (SEGMENT is important for HeroSystem)
-        // let sameTurn = this.turns.findIndex(
-        //     (t) =>
-        //         t.id === combatant?.id &&
-        //         t.flags.segment === combatant?.flags.segment &&
-        //         t.initiative === combatant?.initiative,
-        // );
-        // if (sameTurn < 0) sameTurn = this.turn;
+        let sameTurn = this.turns.findIndex(
+            (t) =>
+                t.id === combatant?.id &&
+                t.flags.segment === combatant?.flags.segment &&
+                t.initiative === combatant?.initiative,
+        );
+        if (sameTurn < 0) sameTurn = this.turn;
 
-        // const adjustedTurn = sameTurn !== this.turn ? sameTurn : undefined;
-        // if (options.turnEvents !== false && adjustedTurn) {
-        //     this._manageTurnEvents(adjustedTurn);
-        //     console.log("adjustedTurn", adjustedTurn);
-        // }
+        const adjustedTurn = sameTurn !== this.turn ? sameTurn : undefined;
+        if (options.turnEvents !== false && adjustedTurn) {
+            this._manageTurnEvents(adjustedTurn);
+        }
 
         // Render the Collection
         if (this.active && options.render !== false) {
@@ -567,20 +496,7 @@ export class HeroSystem6eCombat extends Combat {
 
     async _onActorDataUpdate(...args) {
         // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            // Setup new turns with now deleted combatant
-            this.setupTurns();
-
-            const nextCombatant = this.combatants.find(
-                (o) => o.id === this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1],
-            );
-
-            // Find turn that matches current combatant
-            this.setMyTurn(this.combatant, nextCombatant); //this.turn = this.turns.findIndex((o) => o.id === (oldCombatant.id || nextCombatant.id));
-
-            if (this.active) await this.collection.render();
-            return;
-        }
+        if (game.users.find((o) => o.active && o.isGM).id !== game.user.id) return;
 
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onActorDataUpdate`, this);
@@ -613,12 +529,6 @@ export class HeroSystem6eCombat extends Combat {
         // Reset movement history
         if (window.dragRuler) {
             await dragRuler.resetMovementHistory(this, combatant.id);
-        }
-
-        if (combatant.actor.statuses.has("holding")) {
-            const holding = combatant.actor.effects.contents.find((o) => o.statuses.has("holding"));
-            await holding.delete();
-            ui.notifications.info(`Removed holding status: ${combatant.actor.name}`);
         }
 
         // STUNNING
@@ -942,9 +852,7 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async previousRound() {
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | previousRound`);
-        }
+        //console.log("previousRound");
         let turn = this.round === 0 ? 0 : Math.max(this.turns.length - 1, 0);
         if (this.turn === null) turn = null;
         let round = Math.max(this.round - 1, 0);
@@ -1028,7 +936,7 @@ export class HeroSystem6eCombat extends Combat {
 
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
         let x = await this.update(updateData, updateOptions);
-        //console.log(x);
+        console.log(x);
         return x;
     }
 
@@ -1037,9 +945,6 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async nextRound() {
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | nextRound`);
-        }
         let turn = this.turn === null ? null : 0; // Preserve the fact that it's no-one's turn currently.
         if (this.settings.skipDefeated && turn !== null) {
             turn = this.turns.findIndex((t) => !t.isDefeated);
