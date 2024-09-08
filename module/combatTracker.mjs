@@ -47,7 +47,10 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
         // Looks like super.getData returns a minimal combatant, need to add flags.
         // Handle segments while were at it (as it is stored in flags.segment)
-        let activeSegment = 12;
+        if (context.combat.combatant && !context.combat.combatant.flags.segment) {
+            console.error("Combatant segment is not defined");
+        }
+        let activeSegment = context.combat.combatant?.flags.segment || 12;
         for (let t = 0; t < context.turns.length; t++) {
             const turn = context.turns[t];
             turn.flags = context.combat.combatants.find((c) => c.id === turn.id)?.flags;
@@ -78,6 +81,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
             }
         }
         context.segments[activeSegment].active = true;
+        context.combat.segment = activeSegment;
 
         // for (const combatant of context.combat.turns) {
         //     if (!combatant.visible) continue;
