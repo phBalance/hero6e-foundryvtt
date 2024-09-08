@@ -1,5 +1,6 @@
 import { HEROSYS } from "./herosystem6e.mjs";
-import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "./utility/units.mjs";
+import { getSystemDisplayUnits } from "./utility/units.mjs";
+import { calculateRangePenaltyFromDistanceInMetres } from "./utility/range.mjs";
 
 import { isGameV12OrLater } from "./utility/compatibility.mjs";
 
@@ -431,20 +432,4 @@ export function calculateVelocityInSystemUnits(actor, token) {
     }
 
     return velocity;
-}
-
-/**
- * Calculate range based on a provided distance in metres. Range penalties are essentially
- * the same in 5e and 6e, but there is a difference in the rounding of the distance.
- *
- * @param {number} distanceInMetres
- * @param {object} actor
- */
-export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, actor) {
-    const is5e = actor?.system?.is5e;
-    const roundedDistanceInMetres = getRoundedDownDistanceInSystemUnits(distanceInMetres, actor) * (is5e ? 2 : 1);
-    const basicRangePenalty = Math.ceil(Math.log2(roundedDistanceInMetres / 8)) * 2;
-    const rangePenalty = Math.max(0, basicRangePenalty);
-
-    return rangePenalty;
 }
