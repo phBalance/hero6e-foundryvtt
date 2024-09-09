@@ -1574,12 +1574,12 @@ export class HeroSystem6eItem extends Item {
                                     }
                                     break;
                                 case "ANYHTH":
-                                    if (attackItem.baseInfo.range === "no range") {
+                                    if (attackItem.baseInfo.range === "No Range") {
                                         addMe = true;
                                     }
                                     break;
                                 case "ANYRANGED":
-                                    if (attackItem.baseInfo.range === "standard") {
+                                    if (attackItem.baseInfo.range === "Standard") {
                                         addMe = true;
                                     }
                                     break;
@@ -1616,12 +1616,12 @@ export class HeroSystem6eItem extends Item {
                                     }
                                     break;
                                 case "HTH":
-                                    if (attackItem.baseInfo.range === "no range") {
+                                    if (attackItem.baseInfo.range === "No Range") {
                                         addMe = true;
                                     }
                                     break;
                                 case "RANGED":
-                                    if (attackItem.baseInfo.range === "standard") {
+                                    if (attackItem.baseInfo.range === "Standard") {
                                         addMe = true;
                                     }
                                     break;
