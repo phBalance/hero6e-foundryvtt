@@ -10,8 +10,9 @@ import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
-import { calculateVelocityInSystemUnits, calculateRangePenaltyFromDistanceInMetres } from "../ruler.mjs";
+import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
+import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -141,9 +142,7 @@ export async function AttackAoeToHit(item, options) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
 
-    const distanceToken = canvas.grid.measureDistance(aoeTemplate, token, {
-        gridSpaces: true,
-    });
+    const distanceToken = calculateDistanceBetween(aoeTemplate, token);
     let dcvTargetNumber = 0;
     if (distanceToken > (actor.system.is5e ? 1 : 2)) {
         dcvTargetNumber = 3;
@@ -366,11 +365,7 @@ export async function AttackToHit(item, options) {
         }
 
         const target = game.user.targets.first();
-        const distance = token
-            ? canvas.grid.measureDistance(token, target, {
-                  gridSpaces: true,
-              })
-            : 0;
+        const distance = token ? calculateDistanceBetween(token, target) : 0;
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
@@ -664,12 +659,8 @@ export async function AttackToHit(item, options) {
     // If AOE then sort by distance from center
     if (explosion) {
         targetsArray.sort(function (a, b) {
-            const distanceA = canvas.grid.measureDistance(aoeTemplate, a, {
-                gridSpaces: true,
-            });
-            const distanceB = canvas.grid.measureDistance(aoeTemplate, b, {
-                gridSpaces: true,
-            });
+            const distanceA = calculateDistanceBetween(aoeTemplate, a);
+            const distanceB = calculateDistanceBetween(aoeTemplate, b);
             return distanceA - distanceB;
         });
     }
@@ -688,7 +679,7 @@ export async function AttackToHit(item, options) {
         // Bases have no DCV.  DCV=3; 0 if adjacent
         // Mind Scan defers DMCV so use 3 for now
         if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
-            if (!target.actor || canvas.grid.measureDistance(actor.token, target) > 2) {
+            if (!target.actor || calculateDistanceBetween(actor.token, target) > 2) {
                 targetDefenseValue = 3;
             } else {
                 targetDefenseValue = 0;
@@ -733,7 +724,7 @@ export async function AttackToHit(item, options) {
         if (aoeModifier) {
             // Distance from center
             if (aoeTemplate) {
-                const distanceInMetres = canvas.grid.measureDistance(aoeTemplate, target.center, { gridSpaces: true });
+                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center);
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from center)`;
@@ -741,7 +732,7 @@ export async function AttackToHit(item, options) {
         }
 
         if (target.id) {
-            // Dont' bother to track a bogus target created so we get dice no nice rolls when no target selected.
+            // Don't bother to track a bogus target created so we get dice no nice rolls when no target selected.
             targetData.push({
                 id: target.id,
                 name: target.name || "No Target Selected",
@@ -1406,9 +1397,7 @@ export async function _onRollDamage(event) {
                     // but that isn't always the case.
 
                     // Remove highest terms based on distance
-                    const distance = canvas.grid.measureDistance(aoeTemplate, token.object.center, {
-                        gridSpaces: true,
-                    });
+                    const distance = calculateDistanceBetween(aoeTemplate, token.object.center);
                     const pct = distance / aoeTemplate.distance;
 
                     // TODO: This assumes that the number of terms equals the DC/5 AP. This is
@@ -1741,12 +1730,8 @@ export async function _onApplyDamage(event) {
                 game.scenes.current.templates.find((o) => o.user.id === game.user.id);
 
             targetsArray.sort(function (a, b) {
-                let distanceA = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(a).object, {
-                    gridSpaces: true,
-                });
-                let distanceB = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(b).object, {
-                    gridSpaces: true,
-                });
+                let distanceA = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(a).object);
+                let distanceB = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(b).object);
                 return distanceA - distanceB;
             });
         }
