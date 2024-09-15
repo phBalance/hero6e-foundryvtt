@@ -1,3 +1,5 @@
+import { calculateDistanceBetween } from "./range.mjs";
+
 export class Attack {
     static getAttackerToken(item) {
         const attackerToken = item.actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
@@ -50,9 +52,7 @@ export class Attack {
                 targetId: targetedTokens[i].id,
                 results: [], // todo: for attacks that roll one effect and apply to multiple targets do something different here
             };
-            targetingData.range = canvas.grid.measureDistance(system.attackerToken, targetedTokens[i], {
-                gridSpaces: true,
-            });
+            targetingData.range = calculateDistanceBetween(system.attackerToken, targetedTokens[i]);
             targetingData.ocv = Attack.getRangeModifier(system.item, targetingData.range);
             targets.push(targetingData);
         }
@@ -67,7 +67,7 @@ export class Attack {
                 targetId: targetedTokens[i].id,
                 results: [], // todo: for attacks that roll one effect and apply to multiple targets do something different here
             };
-            targetingData.range = canvas.grid.measureDistance(system.attacker, targetedTokens[i], { gridSpaces: true });
+            targetingData.range = calculateDistanceBetween(system.attacker, targetedTokens[i]);
             targetingData.ocv = Attack.getRangeModifier(system.item, targetingData.range);
             targets.push(targetingData);
         }
