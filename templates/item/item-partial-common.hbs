@@ -86,7 +86,7 @@
 {{/if}}
 
 {{! editOptions.showAttacks}}
-{{#if attacks}}
+{{#if (and attacks (ne system.OPTIONID "ALL"))}}
 <div class="form-group">
     <label>Attacks Included:</label>
     <div class="form-fields csl-attack-list">
