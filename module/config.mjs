@@ -1,3 +1,5 @@
+import { getRoundedUpDistanceInSystemUnits } from "./utility/units.mjs";
+
 export const HERO = {};
 
 HERO.folderColors = {
@@ -1766,6 +1768,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "constant",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            rangeText: function (item) {
+                // The maximum length of the swingline
+                let distanceInMetres = item.system.basePointsPlusAdders * 10;
+                return `Max swingline length ${getRoundedUpDistanceInSystemUnits(distanceInMetres, item.actor)}`;
+            },
             costEnd: true,
             costPerLevel: 0.5,
             ignoreFor: ["base2", "computer", "ai"],
