@@ -1110,7 +1110,7 @@ export async function _onRollKnockback(event) {
                     knockbackResultTotal / 2,
                 )}" data-dtype="Number" />
             </div>
-        <p/>
+        </p>
 
         <p>
         NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
@@ -1157,7 +1157,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
     // Bogus attack item
     const pdContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-            <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                </MODIFIER>
             </POWER>
         `;
     const pdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {
