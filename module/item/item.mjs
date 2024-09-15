@@ -355,7 +355,7 @@ export class HeroSystem6eItem extends Item {
         // Range; and Line of Sight (LOS).
         const configPowerInfo = getPowerInfo({ item: this });
         if (typeof this.baseInfo?.rangeText === "function") {
-            content += ` ${this.baseInfo.rangeText(this)}.`;
+            content += ` ${this.baseInfo.rangeText(this)}${getSystemDisplayUnits(this.is5e)}.`;
         } else {
             switch (this.system.range) {
                 case CONFIG.HERO.RANGE_TYPES.SELF: {
