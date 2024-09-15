@@ -1,4 +1,6 @@
-export const HERO = {};
+import * as heroDice from "./utility/dice.mjs";
+
+export const HERO = { heroDice };
 
 HERO.folderColors = {
     // Base Category
