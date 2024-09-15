@@ -8,7 +8,7 @@ import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustm
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
+import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -1153,7 +1153,10 @@ export async function _onRollKnockback(event) {
 async function _rollApplyKnockback(token, knockbackDice) {
     const actor = token.actor;
 
-    const damageRoller = new HeroRoller().addDice(parseInt(knockbackDice), "Knockback").makeNormalRoll();
+    const damageRoller = new HeroRoller()
+        .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
+        .addDice(parseInt(knockbackDice), "Knockback")
+        .makeNormalRoll();
     await damageRoller.roll();
 
     const damageRenderedResult = await damageRoller.render();
@@ -1267,8 +1270,9 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const speaker = ChatMessage.getSpeaker({ actor: actor });
 
     const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: damageRoller.rawRolls(),
         user: game.user._id,
-
         content: cardHtml,
         speaker: speaker,
     };
@@ -2225,6 +2229,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
     const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: damageDetail.knockbackRoller?.rawRolls(),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -2801,11 +2807,9 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         }
 
         knockbackRoller = new HeroRoller()
+            .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
-            .addNumber(
-                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
-                "Max potential knockback",
-            )
+            .addNumber(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), "Max potential knockback")
             .addNumber(-parseInt(options.knockbackResistance || 0), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
