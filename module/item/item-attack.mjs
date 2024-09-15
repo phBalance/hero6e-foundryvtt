@@ -320,6 +320,8 @@ export async function AttackToHit(item, options) {
     // -------------------------------------------------
     const setManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
 
+    let stunForEndHeroRoller = null;
+
     const heroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
@@ -567,7 +569,10 @@ export async function AttackToHit(item, options) {
                 return;
             }
 
-            const stunForEndHeroRoller = new HeroRoller().makeBasicRoll().addDice(stunDice);
+            stunForEndHeroRoller = new HeroRoller()
+                .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUN_FOR_END)
+                .makeBasicRoll()
+                .addDice(stunDice);
             await stunForEndHeroRoller.roll();
             const stunRenderedResult = await stunForEndHeroRoller.render();
             stunDamageForEnd = stunForEndHeroRoller.getBasicTotal();
@@ -917,6 +922,7 @@ export async function AttackToHit(item, options) {
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()
+            .concat(stunForEndHeroRoller?.rawRolls())
             .filter(Boolean),
         user: game.user._id,
         content: cardHtml,

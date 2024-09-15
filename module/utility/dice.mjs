@@ -45,6 +45,17 @@ export const DICE_SO_NICE_CUSTOM_SETS = {
         },
         visibility: "visible",
     },
+    STUN_FOR_END: {
+        colorset: "STUN for END",
+        foreground: "white",
+        background: "brown",
+        edge: "brown",
+        material: "wood",
+        fontScale: {
+            d6: 1.1,
+        },
+        visibility: "visible",
+    },
 };
 
 // v11/v12 compatibility shim.

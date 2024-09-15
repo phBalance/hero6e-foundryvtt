@@ -4,6 +4,7 @@
 
 - Fix apply knockback dialog for Firefox.
 - Applying knockback now rolls knockback skinned dice.
+- Using STUN for END now uses skinned dice. [#1212](https://github.com/dmdorman/hero6e-foundryvtt/issues/1212)
 
 ## Version 3.0.96
 
