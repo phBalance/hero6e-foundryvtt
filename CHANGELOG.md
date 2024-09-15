@@ -6,6 +6,7 @@
 - Applying knockback now rolls knockback skinned dice.
 - Using STUN for END now uses skinned dice. [#1212](https://github.com/dmdorman/hero6e-foundryvtt/issues/1212)
 - Make HeroRoller class available for script macros. [#1221](https://github.com/dmdorman/hero6e-foundryvtt/issues/1221)
+- When configuring CSL's with all attacks, the attack selections are no longer displayed. [#1226](https://github.com/dmdorman/hero6e-foundryvtt/issues/1226)
 
 ## Version 3.0.96
 
