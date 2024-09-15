@@ -354,60 +354,64 @@ export class HeroSystem6eItem extends Item {
         // Powers have one of four Ranges: Self; No Range; Standard
         // Range; and Line of Sight (LOS).
         const configPowerInfo = getPowerInfo({ item: this });
-        switch (this.system.range) {
-            case CONFIG.HERO.RANGE_TYPES.SELF: {
-                if (!configPowerInfo?.type.includes("skill")) {
-                    content += " Self.";
+        if (typeof this.baseInfo?.rangeText === "function") {
+            content += ` ${this.baseInfo.rangeText(this)}${getSystemDisplayUnits(this.is5e)}.`;
+        } else {
+            switch (this.system.range) {
+                case CONFIG.HERO.RANGE_TYPES.SELF: {
+                    if (!configPowerInfo?.type.includes("skill")) {
+                        content += " Self.";
+                    }
+
+                    break;
                 }
 
-                break;
+                case CONFIG.HERO.RANGE_TYPES.NO_RANGE:
+                    content += " No Range.";
+                    break;
+
+                case CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE:
+                    {
+                        let range = this.system.basePointsPlusAdders * 10;
+                        if (this.actor?.system?.is5e) {
+                            range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
+                        }
+                        content += ` GM Determined Maximum Range (much less than ${range}${getSystemDisplayUnits(
+                            this.is5e,
+                        )}).`;
+                    }
+                    break;
+
+                case CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR:
+                    {
+                        const runningThrow = this.actor?.strDetails().strThrow;
+                        content += ` Maximum Range (running throw based on STR) ${runningThrow}${getSystemDisplayUnits(
+                            this.is5e,
+                        )}.`;
+                    }
+                    break;
+
+                case CONFIG.HERO.RANGE_TYPES.STANDARD:
+                    {
+                        let range = this.system.basePointsPlusAdders * 10;
+                        if (this.actor?.system?.is5e) {
+                            range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
+                        }
+                        content += ` Maximum Range ${range}${getSystemDisplayUnits(this.is5e)}.`;
+                    }
+                    break;
+
+                case CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT:
+                    content += " Line of Sight.";
+                    break;
+
+                default:
+                    console.error("Unhandled range", configPowerInfo);
+                    if (configPowerInfo?.range?.toLowerCase()) {
+                        content += ` ${configPowerInfo?.range?.toLowerCase()}`;
+                    }
+                    break;
             }
-
-            case CONFIG.HERO.RANGE_TYPES.NO_RANGE:
-                content += " No Range.";
-                break;
-
-            case CONFIG.HERO.RANGE_TYPES.LIMITED_RANGE:
-                {
-                    let range = this.system.basePointsPlusAdders * 10;
-                    if (this.actor?.system?.is5e) {
-                        range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
-                    }
-                    content += ` GM Determined Maximum Range (much less than ${range}${getSystemDisplayUnits(
-                        this.is5e,
-                    )}).`;
-                }
-                break;
-
-            case CONFIG.HERO.RANGE_TYPES.RANGE_BASED_ON_STR:
-                {
-                    const runningThrow = this.actor?.strDetails().strThrow;
-                    content += ` Maximum Range (running throw based on STR) ${runningThrow}${getSystemDisplayUnits(
-                        this.is5e,
-                    )}.`;
-                }
-                break;
-
-            case CONFIG.HERO.RANGE_TYPES.STANDARD:
-                {
-                    let range = this.system.basePointsPlusAdders * 10;
-                    if (this.actor?.system?.is5e) {
-                        range = Math.floor(range / 2); // TODO: Should this not be rounded in the player's favour?
-                    }
-                    content += ` Maximum Range ${range}${getSystemDisplayUnits(this.is5e)}.`;
-                }
-                break;
-
-            case CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT:
-                content += " Line of Sight.";
-                break;
-
-            default:
-                console.error("Unhandled range", configPowerInfo);
-                if (configPowerInfo?.range?.toLowerCase()) {
-                    content += ` ${configPowerInfo?.range?.toLowerCase()}`;
-                }
-                break;
         }
 
         if (this.system.end) {
@@ -1574,12 +1578,12 @@ export class HeroSystem6eItem extends Item {
                                     }
                                     break;
                                 case "ANYHTH":
-                                    if (attackItem.baseInfo.range === "no range") {
+                                    if (attackItem.baseInfo.range === "No Range") {
                                         addMe = true;
                                     }
                                     break;
                                 case "ANYRANGED":
-                                    if (attackItem.baseInfo.range === "standard") {
+                                    if (attackItem.baseInfo.range === "Standard") {
                                         addMe = true;
                                     }
                                     break;
@@ -1616,12 +1620,12 @@ export class HeroSystem6eItem extends Item {
                                     }
                                     break;
                                 case "HTH":
-                                    if (attackItem.baseInfo.range === "no range") {
+                                    if (attackItem.baseInfo.range === "No Range") {
                                         addMe = true;
                                     }
                                     break;
                                 case "RANGED":
-                                    if (attackItem.baseInfo.range === "standard") {
+                                    if (attackItem.baseInfo.range === "Standard") {
                                         addMe = true;
                                     }
                                     break;
