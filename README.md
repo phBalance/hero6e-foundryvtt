@@ -70,17 +70,23 @@ Custom maneuvers show under attacks. Basic maneuvers are shown in the maneuver's
 
 ## System Options
 
-- Use Stunned : whether or not attacks can inflict stunned
-- Use Endurance : whether or not endurance will be automatically tracked when using automated attack cards
-- Use Knockback : automates knockback rolls and calculations from attack cards
-- Hit Locations : automates hit location rolls and calculations from attack cards
-- Hit Location (Track Damage Done to Individual Body Parts) : health tracking for individual body parts
-- Optional Maneuvers : adds optional maneuvers to character sheets on .HDC upload
 - Attack Card Automation:
     No Automation: attack card will show attack and damage results, but will not update body, stun, or end from target
     NPCs Only: attack card will subtract effective values from body, stun, and end but only for actors/tokens without a player owner
     PCs(end) and NPCs: same as NPCs only except actors/tokens with a player owner will update end
     PCs and NPCs: attack card will update stun, body, and end for all tokens/actors
+- Use Stunned: whether or not attacks can inflict stunned
+- Use Endurance: whether or not endurance will be automatically tracked when using automated attack cards
+- Use Knockback: automates knockback rolls and calculations from attack cards
+- Hit Locations: automates hit location rolls and calculations from attack cards
+- Hit Location (Track Damage Done to Individual Body Parts) : health tracking for individual body parts
+- Optional Maneuvers: adds optional maneuvers to character sheets on .HDC upload
+- Heroic Action Points: adds Heroic Action Points (HAP) tracking to character sheets
+- Use Hexagonal AOE templates: use 5e shapes (NOTE: 5e uses hexes but 6e does not. If you use hexes to play you likely want to have your shapes be hex based)
+- Default System Rules: when this system cannot determine what version of HERO rules to use, based on your character sheets, it will use this
+- Heroic STR and END: does strength use 1 END per 5 or 10 strength?
+- Double Damage Limit: follow the HERO system rule that limits the max number of DC based for a given base attack
+- Dice Skinning (Dice So Nice!): colour skin the dice that are rolled to help differentiate their purpose
 
 ## Manual Rolling
 
