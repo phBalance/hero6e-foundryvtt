@@ -8,7 +8,7 @@ import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustm
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
+import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -320,6 +320,8 @@ export async function AttackToHit(item, options) {
     // -------------------------------------------------
     const setManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
 
+    let stunForEndHeroRoller = null;
+
     const heroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
@@ -567,7 +569,10 @@ export async function AttackToHit(item, options) {
                 return;
             }
 
-            const stunForEndHeroRoller = new HeroRoller().makeBasicRoll().addDice(stunDice);
+            stunForEndHeroRoller = new HeroRoller()
+                .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUN_FOR_END)
+                .makeBasicRoll()
+                .addDice(stunDice);
             await stunForEndHeroRoller.roll();
             const stunRenderedResult = await stunForEndHeroRoller.render();
             stunDamageForEnd = stunForEndHeroRoller.getBasicTotal();
@@ -917,6 +922,7 @@ export async function AttackToHit(item, options) {
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()
+            .concat(stunForEndHeroRoller?.rawRolls())
             .filter(Boolean),
         user: game.user._id,
         content: cardHtml,
@@ -1095,11 +1101,15 @@ export async function _onRollKnockback(event) {
                 2,
                 item.actor,
             )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked into a solid object, 
-            to a maximum of the PD + BODY of the object hit.  
+            to a maximum of the PD + BODY of the object hit.
+        </p>
+        <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 4,
                 item.actor,
-            )}${getSystemDisplayUnits(item.actor.system.is5e)} knocked back if no object intervenes.
+            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes.
+        </p>
+        <p>
             The character typically winds up prone.
         </p>
         
@@ -1110,10 +1120,10 @@ export async function _onRollKnockback(event) {
                     knockbackResultTotal / 2,
                 )}" data-dtype="Number" />
             </div>
-        <p/>
+        </p>
 
         <p>
-        NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
+            NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
         </p>
     </form>
     `;
@@ -1149,7 +1159,10 @@ export async function _onRollKnockback(event) {
 async function _rollApplyKnockback(token, knockbackDice) {
     const actor = token.actor;
 
-    const damageRoller = new HeroRoller().addDice(parseInt(knockbackDice), "Knockback").makeNormalRoll();
+    const damageRoller = new HeroRoller()
+        .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
+        .addDice(parseInt(knockbackDice), "Knockback")
+        .makeNormalRoll();
     await damageRoller.roll();
 
     const damageRenderedResult = await damageRoller.render();
@@ -1157,7 +1170,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
     // Bogus attack item
     const pdContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-            <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                </MODIFIER>
             </POWER>
         `;
     const pdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {
@@ -1262,8 +1276,9 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const speaker = ChatMessage.getSpeaker({ actor: actor });
 
     const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: damageRoller.rawRolls(),
         user: game.user._id,
-
         content: cardHtml,
         speaker: speaker,
     };
@@ -2220,6 +2235,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
     const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: damageDetail.knockbackRoller?.rawRolls(),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -2796,11 +2813,9 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         }
 
         knockbackRoller = new HeroRoller()
+            .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
-            .addNumber(
-                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
-                "Max potential knockback",
-            )
+            .addNumber(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), "Max potential knockback")
             .addNumber(-parseInt(options.knockbackResistance || 0), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();

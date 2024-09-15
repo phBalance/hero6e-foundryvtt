@@ -1,6 +1,12 @@
 # Releases
 
-## Version 3.0.96 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.97 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix apply knockback dialog for Firefox.
+- Applying knockback now rolls knockback skinned dice.
+- Using STUN for END now uses skinned dice. [#1212](https://github.com/dmdorman/hero6e-foundryvtt/issues/1212)
+
+## Version 3.0.96
 
 - Fixes for combat tracker edge cases.
 
