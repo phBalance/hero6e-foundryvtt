@@ -70,17 +70,23 @@ Custom maneuvers show under attacks. Basic maneuvers are shown in the maneuver's
 
 ## System Options
 
-- Use Stunned : whether or not attacks can inflict stunned
-- Use Endurance : whether or not endurance will be automatically tracked when using automated attack cards
-- Use Knockback : automates knockback rolls and calculations from attack cards
-- Hit Locations : automates hit location rolls and calculations from attack cards
-- Hit Location (Track Damage Done to Individual Body Parts) : health tracking for individual body parts
-- Optional Maneuvers : adds optional maneuvers to character sheets on .HDC upload
 - Attack Card Automation:
     No Automation: attack card will show attack and damage results, but will not update body, stun, or end from target
     NPCs Only: attack card will subtract effective values from body, stun, and end but only for actors/tokens without a player owner
     PCs(end) and NPCs: same as NPCs only except actors/tokens with a player owner will update end
     PCs and NPCs: attack card will update stun, body, and end for all tokens/actors
+- Use Stunned: whether or not attacks can inflict stunned
+- Use Endurance: whether or not endurance will be automatically tracked when using automated attack cards
+- Use Knockback: automates knockback rolls and calculations from attack cards
+- Hit Locations: automates hit location rolls and calculations from attack cards
+- Hit Location (Track Damage Done to Individual Body Parts) : health tracking for individual body parts
+- Optional Maneuvers: adds optional maneuvers to character sheets on .HDC upload
+- Heroic Action Points: adds Heroic Action Points (HAP) tracking to character sheets
+- Use Hexagonal AOE templates: use 5e shapes (NOTE: 5e uses hexes but 6e does not. If you use hexes to play you likely want to have your shapes be hex based)
+- Default System Rules: when this system cannot determine what version of HERO rules to use, based on your character sheets, it will use this
+- Heroic STR and END: does strength use 1 END per 5 or 10 strength?
+- Double Damage Limit: follow the HERO system rule that limits the max number of DC based for a given base attack
+- Dice Skinning (Dice So Nice!): colour skin the dice that are rolled to help differentiate their purpose
 
 ## Manual Rolling
 
@@ -116,6 +122,38 @@ Prefacing the the flavour with an `h` will give you a roll with hit locations. S
 - `/heroRoll 167d6[n]` to drop an atomic bomb on the PCs
 
 ![A nasty roll you don't want to be hit with](./media/big-bomb-roll.png)
+
+### FoundryVTT Macros
+
+`/heroRoll` is available through both chat and script macros.
+
+#### Chat Macros
+
+`/heroRoll` chat macros should work as described above as they are just chat messages.
+
+#### Script Macros
+
+The `HeroRoller` class and all other exports are available through the globally accessible `CONFIG.HERO.heroDice` namespace. You will need to consult the code (see `utility/dice.mjs`) but here is a simplistic example of how to use it and to show the dice rolls with Dice So Nice! skinning.
+
+```javascript
+const damageRoller = new CONFIG.HERO.heroDice.HeroRoller()
+   .setPurpose(CONFIG.HERO.heroDice.DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
+   .addDice(5, "Knockback")
+   .makeNormalRoll();
+await damageRoller.roll();
+
+const cardHtml = await damageRoller.render("Knockback roll");
+
+const chatData = {
+   type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+   rolls: damageRoller.rawRolls(),
+   user: game.user._id,
+   content: cardHtml,
+
+};
+
+return ChatMessage.create(chatData);
+```
 
 ## Known Limitations
 
