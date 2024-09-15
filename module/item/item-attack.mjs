@@ -8,10 +8,11 @@ import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustm
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
+import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
-import { calculateVelocityInSystemUnits, calculateRangePenaltyFromDistanceInMetres } from "../ruler.mjs";
+import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { Attack } from "../utility/attack.mjs";
+import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 
 export async function chatListeners(html) {
     html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
@@ -141,9 +142,7 @@ export async function AttackAoeToHit(item, options) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
 
-    const distanceToken = canvas.grid.measureDistance(aoeTemplate, token, {
-        gridSpaces: true,
-    });
+    const distanceToken = calculateDistanceBetween(aoeTemplate, token);
     let dcvTargetNumber = 0;
     if (distanceToken > (actor.system.is5e ? 1 : 2)) {
         dcvTargetNumber = 3;
@@ -321,6 +320,8 @@ export async function AttackToHit(item, options) {
     // -------------------------------------------------
     const setManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
 
+    let stunForEndHeroRoller = null;
+
     const heroRoller = new HeroRoller()
         .makeSuccessRoll()
         .addNumber(11, "Base to hit")
@@ -366,11 +367,7 @@ export async function AttackToHit(item, options) {
         }
 
         const target = game.user.targets.first();
-        const distance = token
-            ? canvas.grid.measureDistance(token, target, {
-                  gridSpaces: true,
-              })
-            : 0;
+        const distance = token ? calculateDistanceBetween(token, target) : 0;
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
@@ -572,7 +569,10 @@ export async function AttackToHit(item, options) {
                 return;
             }
 
-            const stunForEndHeroRoller = new HeroRoller().makeBasicRoll().addDice(stunDice);
+            stunForEndHeroRoller = new HeroRoller()
+                .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUN_FOR_END)
+                .makeBasicRoll()
+                .addDice(stunDice);
             await stunForEndHeroRoller.roll();
             const stunRenderedResult = await stunForEndHeroRoller.render();
             stunDamageForEnd = stunForEndHeroRoller.getBasicTotal();
@@ -664,12 +664,8 @@ export async function AttackToHit(item, options) {
     // If AOE then sort by distance from center
     if (explosion) {
         targetsArray.sort(function (a, b) {
-            const distanceA = canvas.grid.measureDistance(aoeTemplate, a, {
-                gridSpaces: true,
-            });
-            const distanceB = canvas.grid.measureDistance(aoeTemplate, b, {
-                gridSpaces: true,
-            });
+            const distanceA = calculateDistanceBetween(aoeTemplate, a);
+            const distanceB = calculateDistanceBetween(aoeTemplate, b);
             return distanceA - distanceB;
         });
     }
@@ -688,7 +684,7 @@ export async function AttackToHit(item, options) {
         // Bases have no DCV.  DCV=3; 0 if adjacent
         // Mind Scan defers DMCV so use 3 for now
         if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
-            if (!target.actor || canvas.grid.measureDistance(actor.token, target) > 2) {
+            if (!target.actor || calculateDistanceBetween(actor.token, target) > 2) {
                 targetDefenseValue = 3;
             } else {
                 targetDefenseValue = 0;
@@ -733,7 +729,7 @@ export async function AttackToHit(item, options) {
         if (aoeModifier) {
             // Distance from center
             if (aoeTemplate) {
-                const distanceInMetres = canvas.grid.measureDistance(aoeTemplate, target.center, { gridSpaces: true });
+                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center);
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from center)`;
@@ -741,7 +737,7 @@ export async function AttackToHit(item, options) {
         }
 
         if (target.id) {
-            // Dont' bother to track a bogus target created so we get dice no nice rolls when no target selected.
+            // Don't bother to track a bogus target created so we get dice no nice rolls when no target selected.
             targetData.push({
                 id: target.id,
                 name: target.name || "No Target Selected",
@@ -926,6 +922,7 @@ export async function AttackToHit(item, options) {
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()
+            .concat(stunForEndHeroRoller?.rawRolls())
             .filter(Boolean),
         user: game.user._id,
         content: cardHtml,
@@ -1104,11 +1101,15 @@ export async function _onRollKnockback(event) {
                 2,
                 item.actor,
             )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked into a solid object, 
-            to a maximum of the PD + BODY of the object hit.  
+            to a maximum of the PD + BODY of the object hit.
+        </p>
+        <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 4,
                 item.actor,
-            )}${getSystemDisplayUnits(item.actor.system.is5e)} knocked back if no object intervenes.
+            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes.
+        </p>
+        <p>
             The character typically winds up prone.
         </p>
         
@@ -1119,10 +1120,10 @@ export async function _onRollKnockback(event) {
                     knockbackResultTotal / 2,
                 )}" data-dtype="Number" />
             </div>
-        <p/>
+        </p>
 
         <p>
-        NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
+            NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
         </p>
     </form>
     `;
@@ -1158,7 +1159,10 @@ export async function _onRollKnockback(event) {
 async function _rollApplyKnockback(token, knockbackDice) {
     const actor = token.actor;
 
-    const damageRoller = new HeroRoller().addDice(parseInt(knockbackDice), "Knockback").makeNormalRoll();
+    const damageRoller = new HeroRoller()
+        .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
+        .addDice(parseInt(knockbackDice), "Knockback")
+        .makeNormalRoll();
     await damageRoller.roll();
 
     const damageRenderedResult = await damageRoller.render();
@@ -1166,7 +1170,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
     // Bogus attack item
     const pdContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${damageRoller.getBaseTotal()}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-            <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                <MODIFIER XMLID="NOKB" ID="1716671836182" BASECOST="-0.25" LEVELS="0" ALIAS="No Knockback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                </MODIFIER>
             </POWER>
         `;
     const pdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {
@@ -1271,8 +1276,9 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const speaker = ChatMessage.getSpeaker({ actor: actor });
 
     const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: damageRoller.rawRolls(),
         user: game.user._id,
-
         content: cardHtml,
         speaker: speaker,
     };
@@ -1406,9 +1412,7 @@ export async function _onRollDamage(event) {
                     // but that isn't always the case.
 
                     // Remove highest terms based on distance
-                    const distance = canvas.grid.measureDistance(aoeTemplate, token.object.center, {
-                        gridSpaces: true,
-                    });
+                    const distance = calculateDistanceBetween(aoeTemplate, token.object.center);
                     const pct = distance / aoeTemplate.distance;
 
                     // TODO: This assumes that the number of terms equals the DC/5 AP. This is
@@ -1741,12 +1745,8 @@ export async function _onApplyDamage(event) {
                 game.scenes.current.templates.find((o) => o.user.id === game.user.id);
 
             targetsArray.sort(function (a, b) {
-                let distanceA = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(a).object, {
-                    gridSpaces: true,
-                });
-                let distanceB = canvas.grid.measureDistance(aoeTemplate, game.scenes.current.tokens.get(b).object, {
-                    gridSpaces: true,
-                });
+                let distanceA = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(a).object);
+                let distanceB = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(b).object);
                 return distanceA - distanceB;
             });
         }
@@ -2235,6 +2235,8 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
     const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: damageDetail.knockbackRoller?.rawRolls(),
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -2811,11 +2813,9 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         }
 
         knockbackRoller = new HeroRoller()
+            .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
-            .addNumber(
-                body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), // TODO: Consider supporting multiplication in HeroRoller
-                "Max potential knockback",
-            )
+            .addNumber(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), "Max potential knockback")
             .addNumber(-parseInt(options.knockbackResistance || 0), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();

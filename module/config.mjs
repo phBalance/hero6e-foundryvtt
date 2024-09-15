@@ -1,6 +1,7 @@
 import { getRoundedUpDistanceInSystemUnits } from "./utility/units.mjs";
+import * as heroDice from "./utility/dice.mjs";
 
-export const HERO = {};
+export const HERO = { heroDice };
 
 HERO.folderColors = {
     // Base Category
