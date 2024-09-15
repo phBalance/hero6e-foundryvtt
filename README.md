@@ -123,6 +123,38 @@ Prefacing the the flavour with an `h` will give you a roll with hit locations. S
 
 ![A nasty roll you don't want to be hit with](./media/big-bomb-roll.png)
 
+### FoundryVTT Macros
+
+`/heroRoll` is available through both chat and script macros.
+
+#### Chat Macros
+
+`/heroRoll` chat macros should work as described above as they are just chat messages.
+
+#### Script Macros
+
+The `HeroRoller` class and all other exports are available through the globally accessible `CONFIG.HERO.heroDice` namespace. You will need to consult the code (see `utility/dice.mjs`) but here is a simplistic example of how to use it and to show the dice rolls with Dice So Nice! skinning.
+
+```javascript
+const damageRoller = new CONFIG.HERO.heroDice.HeroRoller()
+   .setPurpose(CONFIG.HERO.heroDice.DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
+   .addDice(5, "Knockback")
+   .makeNormalRoll();
+await damageRoller.roll();
+
+const cardHtml = await damageRoller.render("Knockback roll");
+
+const chatData = {
+   type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+   rolls: damageRoller.rawRolls(),
+   user: game.user._id,
+   content: cardHtml,
+
+};
+
+return ChatMessage.create(chatData);
+```
+
 ## Known Limitations
 
 - The upload of a .HDC file from Hero Designer is a requirement.  You can't create powers, skills, or equipment from scratch.  Character editing is limited within the system. Some power modifiers are supported, some are not, character sheets do not clearly show power modifiers. You can click the chat icon next to a power to see the full description.
