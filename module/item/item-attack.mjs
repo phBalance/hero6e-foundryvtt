@@ -1095,11 +1095,15 @@ export async function _onRollKnockback(event) {
                 2,
                 item.actor,
             )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked into a solid object, 
-            to a maximum of the PD + BODY of the object hit.  
+            to a maximum of the PD + BODY of the object hit.
+        </p>
+        <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 4,
                 item.actor,
-            )}${getSystemDisplayUnits(item.actor.system.is5e)} knocked back if no object intervenes.
+            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes.
+        </p>
+        <p>
             The character typically winds up prone.
         </p>
         
@@ -1113,7 +1117,7 @@ export async function _onRollKnockback(event) {
         </p>
 
         <p>
-        NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
+            NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
         </p>
     </form>
     `;
