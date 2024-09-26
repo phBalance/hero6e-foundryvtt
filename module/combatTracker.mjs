@@ -59,7 +59,11 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
             switch (token.disposition) {
                 case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
-                    turn.css += " combat-tracker-hero-disposition-friendly";
+                    if (token.hasPlayerOwner) {
+                        turn.css += " combat-tracker-hero-disposition-player";
+                    } else {
+                        turn.css += " combat-tracker-hero-disposition-friendly";
+                    }
                     break;
                 case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
                     turn.css += " combat-tracker-hero-disposition-neutral";

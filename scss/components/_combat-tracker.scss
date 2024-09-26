@@ -28,3 +28,10 @@ $combat-tracker-hero-disposition-opacity-hover: 0.6;
 .combat-sidebar li.combatant.combat-tracker-hero-disposition-secret:hover {
     background-color: rgba(166, 18, 212, $combat-tracker-hero-disposition-opacity-hover);
 }
+
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-player {
+    background-color: rgba(0, 212, 0, $combat-tracker-hero-disposition-opacity-default);
+}
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-player:hover {
+    background-color: rgba(0, 212, 0, $combat-tracker-hero-disposition-opacity-hover);
+}

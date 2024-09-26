@@ -153,6 +153,7 @@ Hooks.once("init", async function () {
 Hooks.once("ready", async function () {
     if (game.settings.get(game.system.id, "alphaTesting")) {
         CONFIG.compatibility.mode = 0;
+        CONFIG.debug.combat = true;
     }
 
     // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
