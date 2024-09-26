@@ -213,6 +213,13 @@ Hooks.on("closeTokenConfig", async (tokenConfig) => {
     }
 });
 
+Hooks.on("changeSidebarTab", async (app) => {
+    // Make sure active token is centered in combat tracker when changing Sidebar
+    if (app.tabName === "combat" && game.combat?.active) {
+        app.scrollToTurn();
+    }
+});
+
 Hooks.once("devModeReady", ({ registerPackageDebugFlag }) => {
     registerPackageDebugFlag(HEROSYS.ID);
 });

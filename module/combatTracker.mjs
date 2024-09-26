@@ -22,6 +22,15 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         await super._onCombatControl(event);
     }
 
+    _onSegmentToggleContent(event) {
+        event.preventDefault();
+
+        const header = event.currentTarget;
+        const segment = header.closest(".segment-container");
+        const content = segment.querySelector(".segment-content");
+        content.style.display = content.style.display === "none" ? "block" : "none";
+    }
+
     async getData(options = {}) {
         let context = await super.getData(options);
 
