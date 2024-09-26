@@ -121,7 +121,8 @@
         "RoundPrev": "Previous Turn",
         "RoundNext": "Next Turn",
 
-        "Segment": "Segment"
+        "Segment": "Segment",
+        "CombatantRemoveHero": "Remove Combatant"
         
     },
 

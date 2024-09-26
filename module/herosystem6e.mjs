@@ -828,3 +828,24 @@ Hooks.once("ready", async function () {
         console.warn("Removing errant bar3 setting as it will prevent loading of world in FoundryVTT V12+");
     }
 });
+
+Hooks.on("getCombatTrackerEntryContext", function (html, menu) {
+    const entry = {
+        name: "COMBAT.CombatantRemoveHero",
+        icon: '<i class="fas fa-trash"></i>',
+        callback: (li) => {
+            const combat = game.combats.viewed;
+            const combatant = combat.combatants.get(li.data("combatant-id"));
+            const tokenId = combatant?.tokenId;
+            if (tokenId) {
+                const combatantIds = combat.combatants.reduce((ids, c) => {
+                    if (tokenId === c.tokenId) ids.push(c.id);
+                    return ids;
+                }, []);
+                return combat.deleteEmbeddedDocuments("Combatant", combatantIds);
+            }
+        },
+    };
+    menu.findSplice((o) => o.name === "COMBAT.CombatantRemove");
+    menu.push(entry);
+});

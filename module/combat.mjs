@@ -41,13 +41,49 @@ export class HeroSystem6eCombat extends Combat {
         return this;
     }
 
-    // parent, collection, documents, data, options, userId
-    async _onCreateDescendantDocuments(...args) {
+    async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onCreateDescendantDocuments`);
         }
 
-        await this.rollAll();
-        await super._onCreateDescendantDocuments(...args);
+        // Automatically roll initiative for all combatants created in the combat tracker.
+        // We could use rollAll() here, but rollInitiative is probably more efficient.
+        await this.rollInitiative(documents.map((o) => o.id));
+
+        // Call Super
+        await super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
+
+        // Add or remove extra combatants based on SPD or Lightning Reflexes
+        await this.extraCombatants();
+    }
+
+    async extraCombatants() {
+        const uniqueTokens = Array.from(new Set(this.combatants.map((o) => o.tokenId))); //this.combatants.filter((c, i, ar) => ar.indexOf(c) === i);
+        for (const _tokenId of uniqueTokens) {
+            const _combatant = this.combatants.find((o) => o.tokenId === _tokenId && o.actor);
+            const actor = _combatant?.actor;
+            if (actor) {
+                const targetCombatantCount = parseInt(actor.system.characteristics.spd.value);
+                const currentCombatantCount = this.combatants.filter((o) => o.tokenId).length;
+
+                if (currentCombatantCount < targetCombatantCount) {
+                    await this.createEmbeddedDocuments("Combatant", [_combatant]);
+                }
+
+                // if (currentCombatantCount > targetCombatantCount) {
+                //     await this.deleteEmbeddedDocuments("Combatant", { id: _combatant.id });
+                // }
+            }
+            console.log(actor);
+        }
+    }
+
+    async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onDeleteDescendantDocuments`);
+        }
+
+        // Super
+        await super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
     }
 }
