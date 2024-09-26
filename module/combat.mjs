@@ -204,29 +204,20 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
-    // async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
-    //     if (CONFIG.debug.combat) {
-    //         console.debug(`Hero | _onDeleteDescendantDocuments`);
-    //     }
-
-    //     // Super
-    //     await super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
-    // }
-
-    // async _onUpdateDescendantDocuments(
-    //     parent,
-    //     collection,
-    //     documents,
-    //     changes,
-    //     options,
-    //     // eslint-disable-next-line no-unused-vars
-    //     userId,
-    // ) {
-    //     if (CONFIG.debug.combat) {
-    //         console.debug(`Hero | _onUpdateDescendantDocuments`);
-    //     }
-    //     super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
-
-    //     await this.extraCombatants();
-    // }
+    /**
+     * Get the current history state of the Combat encounter.
+     * @param {Combatant} [combatant]       The new active combatant
+     * @returns {CombatHistoryData}
+     * @protected
+     */
+    _getCurrentState(combatant) {
+        combatant ||= this.combatant;
+        return {
+            round: this.round,
+            turn: this.turn ?? null,
+            combatantId: combatant?.id || null,
+            tokenId: combatant?.tokenId || null,
+            segment: combatant?.flags.segment || null,
+        };
+    }
 }

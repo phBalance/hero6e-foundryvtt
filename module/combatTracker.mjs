@@ -30,6 +30,13 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
         if (!hasCombat) return context;
 
+        // Initialize segments
+        context.segments = [];
+        for (let s = 1; s <= 12; s++) {
+            context.segments[s] = [];
+        }
+
+        // Turns
         const turns = [];
         for (let [i, combatant] of combat.turns.entries()) {
             if (!combatant.visible) continue;
@@ -51,6 +58,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 hasResource: resource !== null,
                 resource: resource,
                 canPing: combatant.sceneId === canvas.scene?.id && game.user.hasPermission("PING_CANVAS"),
+                segment: combatant.flags.segment,
             };
             //if (turn.initiative !== null && !Number.isInteger(turn.initiative)) hasDecimals = true;
             turn.css = [turn.active ? "active" : "", turn.hidden ? "hidden" : "", turn.defeated ? "defeated" : ""]
@@ -83,9 +91,29 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 else if (effect.img) turn.effects.add(effect.img);
             }
             turns.push(turn);
+
+            if (turn.segment) {
+                context.segments[turn.segment].push(turn);
+            }
         }
         context.turns = turns;
 
         return context;
+    }
+
+    /**
+     * Scroll the combat log container to ensure the current Combatant turn is centered vertically
+     */
+    scrollToTurn() {
+        const combat = this.viewed;
+        if (!combat || combat.turn === null) return;
+        let active = this.element.find(".combatant.active")[0];
+        if (!active) return;
+        active.scrollIntoView({ block: "center" });
+    }
+
+    async _render(...args) {
+        await super._render(args);
+        await ui.combat.scrollToTurn();
     }
 }
