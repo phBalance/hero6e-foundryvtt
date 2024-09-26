@@ -6455,7 +6455,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             // costPerLevel: 0.5,
             // dc: true,
-            minumumLimitation: -0.25,
+            minimumLimitation: -0.25,
             xml: `<MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
             <NOTES />
         </MODIFIER>`,
