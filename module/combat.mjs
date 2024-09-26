@@ -36,7 +36,9 @@ export class HeroSystem6eCombat extends Combat {
         if (!updates.length) return this;
 
         // Update multiple combatants
-        await this.updateEmbeddedDocuments("Combatant", updates);
+        if (updates) {
+            await this.updateEmbeddedDocuments("Combatant", updates);
+        }
 
         return this;
     }
@@ -64,26 +66,51 @@ export class HeroSystem6eCombat extends Combat {
             const actor = _combatant?.actor;
             if (actor) {
                 const targetCombatantCount = parseInt(actor.system.characteristics.spd.value);
-                const currentCombatantCount = this.combatants.filter((o) => o.tokenId).length;
+                const currentCombatantCount = this.combatants.filter((o) => o.tokenId === _tokenId).length;
 
                 if (currentCombatantCount < targetCombatantCount) {
-                    await this.createEmbeddedDocuments("Combatant", [_combatant]);
+                    const toCreate = [];
+                    for (let i = 0; i < targetCombatantCount - currentCombatantCount; i++) {
+                        toCreate.push(_combatant);
+                    }
+                    await this.createEmbeddedDocuments("Combatant", toCreate);
                 }
 
-                // if (currentCombatantCount > targetCombatantCount) {
-                //     await this.deleteEmbeddedDocuments("Combatant", { id: _combatant.id });
-                // }
+                if (currentCombatantCount > targetCombatantCount) {
+                    const _combatants = this.combatants.filter((o) => o.tokenId === _tokenId && o.actor);
+                    await this.deleteEmbeddedDocuments(
+                        "Combatant",
+                        _combatants.map((o) => o.id).slice(0, currentCombatantCount - targetCombatantCount),
+                    );
+                }
             }
             console.log(actor);
         }
     }
 
-    async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onDeleteDescendantDocuments`);
-        }
+    // async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+    //     if (CONFIG.debug.combat) {
+    //         console.debug(`Hero | _onDeleteDescendantDocuments`);
+    //     }
 
-        // Super
-        await super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
-    }
+    //     // Super
+    //     await super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
+    // }
+
+    // async _onUpdateDescendantDocuments(
+    //     parent,
+    //     collection,
+    //     documents,
+    //     changes,
+    //     options,
+    //     // eslint-disable-next-line no-unused-vars
+    //     userId,
+    // ) {
+    //     if (CONFIG.debug.combat) {
+    //         console.debug(`Hero | _onUpdateDescendantDocuments`);
+    //     }
+    //     super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
+
+    //     await this.extraCombatants();
+    // }
 }

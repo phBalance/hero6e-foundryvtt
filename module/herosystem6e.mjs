@@ -187,15 +187,27 @@ Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
     ) {
         for (const combat of game.combats) {
             if (combat.active) {
-                if (combat.combatants.find((o) => o.actorId === document.id)) {
+                const _combatants = combat.combatants.filter((o) => o.actorId === document.id);
+                if (_combatants) {
                     // Reroll Initiative (based on new spd/dex/ego/int changes)
-                    await combat.rollAll();
+                    //await combat.rollAll();
+                    await combat.rollInitiative(_combatants.map((o) => o.id));
+                    await combat.extraCombatants();
 
                     // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
                     // Should no longer be needed now that SPD is part of initiative (handled via rollAll/combat:rollInitiative)
                     //await combat.setupTurns();
                 }
             }
+        }
+    }
+});
+
+Hooks.on("closeTokenConfig", async (tokenConfig) => {
+    // We may have changed the disposition, so re-render the combat tracker
+    if (game.combat?.active) {
+        if (game.combat.combatants.find((o) => o.tokenId === tokenConfig.token.id)) {
+            game.combat.collection.render();
         }
     }
 });
