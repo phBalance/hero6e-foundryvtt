@@ -13,6 +13,27 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
         html.find(".segment-hasItems").click((ev) => this._onSegmentToggleContent(ev));
     }
 
+    async _onCombatantControl(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const btn = event.currentTarget;
+        const li = btn.closest(".combatant");
+        const combat = this.viewed;
+        const c = combat.combatants.get(li.dataset.combatantId);
+
+        if (btn.dataset.control === "toggleHidden") {
+            // Need to toggle all combatants associated with this token
+            const _combatants = combat.combatants.filter((o) => o.tokenId === c.tokenId);
+            const updates = [];
+            for (const c2 of _combatants) {
+                updates.push({ _id: c2.id, hidden: !c.hidden });
+            }
+            combat.updateEmbeddedDocuments("Combatant", updates);
+            return;
+        }
+        super._onCombatantControl(event);
+    }
+
     async _onCombatControl(event) {
         const target = event.target;
         if (["fas fa-step-backward", "fas fa-step-forward"].includes(target.className) && !event.shiftKey) {

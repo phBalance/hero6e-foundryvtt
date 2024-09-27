@@ -56,9 +56,9 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Combatant[]}
      */
     setupTurns() {
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | setupTurns`);
-        }
+        // if (CONFIG.debug.combat) {
+        //     console.debug(`Hero | setupTurns`);
+        // }
 
         this.turns ||= [];
 
@@ -134,9 +134,14 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | extraCombatants`);
         }
+
+        // Only 1 GM should do this
+        if (!game.users.activeGM?.isSelf) return;
+
         const uniqueTokens = Array.from(new Set(this.combatants.map((o) => o.tokenId))); //this.combatants.filter((c, i, ar) => ar.indexOf(c) === i);
         for (const _tokenId of uniqueTokens) {
             const _combatant = this.combatants.find((o) => o.tokenId === _tokenId && o.actor);
+            if (!_combatant?.isOwner) continue;
             const actor = _combatant?.actor;
             if (actor) {
                 const lightningReflexes = actor?.items.find(
@@ -154,6 +159,7 @@ export class HeroSystem6eCombat extends Combat {
                         toCreate.push(_combatant);
                     }
                     await this.createEmbeddedDocuments("Combatant", toCreate);
+                    return;
                 }
 
                 if (tokenCombatantCount > targetCombatantCount) {
@@ -162,6 +168,7 @@ export class HeroSystem6eCombat extends Combat {
                         "Combatant",
                         _combatants.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
                     );
+                    return;
                 }
 
                 // Add custom hero flags for segments and such
@@ -209,8 +216,6 @@ export class HeroSystem6eCombat extends Combat {
                 i--;
                 if (i < 0) {
                     return segment;
-                } else {
-                    console.log(index, i);
                 }
             }
         }
@@ -267,6 +272,7 @@ export class HeroSystem6eCombat extends Combat {
             combatantId: combatant?.id || null,
             tokenId: combatant?.tokenId || null,
             segment: combatant?.flags.segment || null,
+            name: combatant?.token?.name || combatant?.actor?.name || null,
         };
     }
 
@@ -282,7 +288,12 @@ export class HeroSystem6eCombat extends Combat {
         const firstSegment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || 0;
 
         this._playCombatSound("startEncounter");
-        const updateData = { round: 1, turn: firstSegment12turn, "flags.-=postSegment12Round": null };
+        const updateData = {
+            round: 1,
+            turn: firstSegment12turn,
+            "flags.-=postSegment12Round": null,
+            "flags.-heroCurrent": null,
+        };
         Hooks.callAll("combatStart", this, updateData);
         return this.update(updateData);
     }
@@ -300,6 +311,17 @@ export class HeroSystem6eCombat extends Combat {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | _onStartTurn: ${combatant.name}`);
         }
+
+        // Lets check to see if combatants were re-ordered
+        if (
+            this.flags.heroCurrent &&
+            this.turns[this.flags.heroCurrent.turn].combatantId != this.flags.heroCurrent.combatantId
+        ) {
+            debugger;
+        }
+
+        // We use heroCurrent to keep our segment & initiative relatively stable when combatants are added/removed.
+        this.update({ "flags.heroCurrent": this.current });
 
         await super._onStartTurn(combatant);
 
@@ -631,5 +653,10 @@ export class HeroSystem6eCombat extends Combat {
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
         await this.update(updateData, updateOptions);
         return;
+    }
+
+    async setHeroCombatTurn() {
+        if (!this.flags.heroCurrent) return;
+        console.log("setHeroCombatTurn");
     }
 }
