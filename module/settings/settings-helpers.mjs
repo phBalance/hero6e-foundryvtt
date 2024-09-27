@@ -217,6 +217,17 @@ export default class SettingsHelpers {
             requiresReload: false,
         });
 
+        game.settings.register(module, "combatTrackerDispositionHighlighting", {
+            name: game.i18n.localize("Settings.combatTrackerDispositionHighlighting.Name"),
+            hint: game.i18n.localize("Settings.combatTrackerDispositionHighlighting.Hint"),
+            scope: "client",
+            config: true,
+            type: Boolean,
+            default: false,
+            onChange: () => ui.combat.render(),
+            requiresReload: false,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: game.i18n.localize("Settings.AlphaTesting.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.Hint"),

@@ -29,10 +29,12 @@ $combat-tracker-hero-disposition-opacity-hover: 0.6;
     background-color: rgba(166, 18, 212, $combat-tracker-hero-disposition-opacity-hover);
 }
 
+// Player
 .combat-sidebar li.combatant.combat-tracker-hero-disposition-player {
     background-color: rgba(0, 212, 0, $combat-tracker-hero-disposition-opacity-default);
 }
-.combat-sidebar li.combatant.combat-tracker-hero-disposition-player:hover {
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-player:hover,
+.combat-sidebar li.combatant.combat-tracker-hero-disposition-player.active  {
     background-color: rgba(0, 212, 0, $combat-tracker-hero-disposition-opacity-hover);
 }
 

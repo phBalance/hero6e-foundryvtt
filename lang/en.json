@@ -173,9 +173,13 @@
                 "five": "5th edition"
             }
         },
+        "combatTrackerDispositionHighlighting": {
+            "Name": "Combat Tracker Disposition Highlighting",
+            "Hint": "The background color of combatants in the combat tracker will match the color associated with the token disposition. Players with a friendly disposition will be green."
+        },
         "StrEnd" : {
             "Name": "Heroic Strength & Endurance",
-            "Hint": "Using STR typipcally costs 1 END per 10 points of STR used. In heroic campaigns the GM has the option of charging 1 END per 5 STR used. This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
+            "Hint": "Using STR typically costs 1 END per 10 points of STR used. In heroic campaigns the GM has the option of charging 1 END per 5 STR used. This setting is ignored for Superheroic characters which will always use 1 END per 10 points of STR.  Heroic vs Superheroic is determined during HDC upload and is based on the Hero Designer template used.",
             "Choices": {
                 "five": "1 END per 5 STR",
                 "ten": "1 END per 10 STR"
@@ -199,7 +203,7 @@
             "Name": "Hit Locations",
             "Tracking": {
                 "Name": "Hit Location Left/Right",
-                "Hint": "Allows diferentation between left and right sides of the body. Currently there is no automation that deals with Impairing or Disabling a specific body part.",
+                "Hint": "Allows differentiation between left and right sides of the body. Currently there is no automation that deals with Impairing or Disabling a specific body part.",
                 "Choices": {
                     "DoNotTrack": "Don't track",
                     "TrackForAll": "Track for all"

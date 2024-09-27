@@ -63,6 +63,8 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 defeated: combatant.isDefeated,
                 hidden: combatant.hidden,
                 initiative: combatant.initiative,
+                initiativeTooltip: combatant.flags.initiativeTooltip,
+                lightningReflexes: combatant.flags.lightningReflexes,
                 hasRolled: combatant.initiative !== null,
                 hasResource: resource !== null,
                 resource: resource,
@@ -74,23 +76,25 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 .join(" ")
                 .trim();
 
-            switch (token.disposition) {
-                case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
-                    if (token.hasPlayerOwner) {
-                        turn.css += " combat-tracker-hero-disposition-player";
-                    } else {
-                        turn.css += " combat-tracker-hero-disposition-friendly";
-                    }
-                    break;
-                case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
-                    turn.css += " combat-tracker-hero-disposition-neutral";
-                    break;
-                case CONST.TOKEN_DISPOSITIONS.HOSTILE:
-                    turn.css += " combat-tracker-hero-disposition-hostile";
-                    break;
-                case CONST.TOKEN_DISPOSITIONS.SECRET:
-                    turn.css += " combat-tracker-hero-disposition-secret";
-                    break;
+            if (game.settings.get(HEROSYS.module, "combatTrackerDispositionHighlighting")) {
+                switch (token.disposition) {
+                    case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
+                        if (token.hasPlayerOwner) {
+                            turn.css += " combat-tracker-hero-disposition-player";
+                        } else {
+                            turn.css += " combat-tracker-hero-disposition-friendly";
+                        }
+                        break;
+                    case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
+                        turn.css += " combat-tracker-hero-disposition-neutral";
+                        break;
+                    case CONST.TOKEN_DISPOSITIONS.HOSTILE:
+                        turn.css += " combat-tracker-hero-disposition-hostile";
+                        break;
+                    case CONST.TOKEN_DISPOSITIONS.SECRET:
+                        turn.css += " combat-tracker-hero-disposition-secret";
+                        break;
+                }
             }
 
             // Actor and Token status effects

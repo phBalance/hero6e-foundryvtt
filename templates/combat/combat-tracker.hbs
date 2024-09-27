@@ -1,4 +1,4 @@
-{{log 'combat-tracker.hbs' this}}
+{{!-- {{log 'combat-tracker.hbs' this}} --}}
 <section class="{{cssClass}} directory flexcol" id="{{cssId}}" data-tab="{{tabName}}">
     <header class="combat-tracker-header">
         {{#if user.isGM}}
@@ -63,40 +63,44 @@
         {{#each segments}}
 
             <li class="segment-container">
-                <h3 class="segment-hasItems segment-header {{#if (eq @index @root.combat.current.segment)}}segment-active{{/if}}">Segment {{@index}} {{#if @root/alphaTesting}}[tokens:{{this.length}}]{{/if}}</h3>
-                <ol class="segment-content" {{#unless (eq @index @root.combat.current.segment)}} style="display:none"
-                    {{/unless}} data-segment-id="{{@index}}">
+                <h3 class="{{#if this.length}}segment-hasItems{{else}}segment-inactive{{/if}} segment-header {{#if (eq @index @root.combat.current.segment)}}segment-active{{/if}}">Segment {{@index}} {{#if @root/alphaTesting}}[tokens:{{this.length}}]{{/if}}</h3>
+                <ol class="segment-content" {{#if (or (eq @index @root.combat.current.segment) (and (eq @root.round 0) (eq @index 12)))}}{{else}} style="display:none"
+                    {{/if}} data-segment-id="{{@index}}">
 
                     {{#each this}}
                     <li class="combatant actor directory-item flexrow {{this.css}}" data-combatant-id="{{this.id}}">
                         <img class="token-image" data-src="{{this.img}}" alt="{{this.name}}"/>
                         <div class="token-name flexcol">
                             <h4>{{this.name}}</h4>
-                            <div class="combatant-controls flexrow">
-                                {{#if @root/user.isGM}}
-                                <a class="combatant-control {{#if this.hidden}}active{{/if}}" aria-label="{{localize 'COMBAT.ToggleVis'}}" role="button" data-tooltip="COMBAT.ToggleVis" data-control="toggleHidden">
-                                    <i class="fas fa-eye-slash"></i>
-                                </a>
-                                <a class="combatant-control {{#if this.defeated}}active{{/if}}" aria-label="{{localize 'COMBAT.ToggleDead'}}" role="button" data-tooltip="COMBAT.ToggleDead" data-control="toggleDefeated">
-                                    <i class="fas fa-skull"></i>
-                                </a>
-                                {{/if}}
-                                {{#if this.canPing}}
-                                <a class="combatant-control" aria-label="{{localize 'COMBAT.PingCombatant'}}" role="button" data-tooltip="COMBAT.PingCombatant" data-control="pingCombatant">
-                                    <i class="fa-solid fa-bullseye-arrow"></i>
-                                </a>
-                                {{/if}}
-                                {{#unless ../user.isGM}}
-                                <a class="combatant-control" aria-label="{{localize 'COMBAT.PanToCombatant'}}" role="button" data-tooltip="COMBAT.PanToCombatant" data-control="panToCombatant">
-                                    <i class="fa-solid fa-arrows-to-eye"></i>
-                                </a>
-                                {{/unless}}
-                                <div class="token-effects">
-                                    {{#each this.effects}}
-                                    <img class="token-effect" src="{{this}}"/>
-                                    {{/each}}
+                            {{#if this.lightningReflexes.levels}}
+                                <h4 title="Lightning Reflexes">LR {{this.lightningReflexes.name}}</h4>
+                            {{else}}
+                                <div class="combatant-controls flexrow">
+                                    {{#if @root/user.isGM}}
+                                    <a class="combatant-control {{#if this.hidden}}active{{/if}}" aria-label="{{localize 'COMBAT.ToggleVis'}}" role="button" data-tooltip="COMBAT.ToggleVis" data-control="toggleHidden">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </a>
+                                    <a class="combatant-control {{#if this.defeated}}active{{/if}}" aria-label="{{localize 'COMBAT.ToggleDead'}}" role="button" data-tooltip="COMBAT.ToggleDead" data-control="toggleDefeated">
+                                        <i class="fas fa-skull"></i>
+                                    </a>
+                                    {{/if}}
+                                    {{#if this.canPing}}
+                                    <a class="combatant-control" aria-label="{{localize 'COMBAT.PingCombatant'}}" role="button" data-tooltip="COMBAT.PingCombatant" data-control="pingCombatant">
+                                        <i class="fa-solid fa-bullseye-arrow"></i>
+                                    </a>
+                                    {{/if}}
+                                    {{#unless ../user.isGM}}
+                                    <a class="combatant-control" aria-label="{{localize 'COMBAT.PanToCombatant'}}" role="button" data-tooltip="COMBAT.PanToCombatant" data-control="panToCombatant">
+                                        <i class="fa-solid fa-arrows-to-eye"></i>
+                                    </a>
+                                    {{/unless}}
+                                    <div class="token-effects">
+                                        {{#each this.effects}}
+                                        <img class="token-effect" src="{{this}}"/>
+                                        {{/each}}
+                                    </div>
                                 </div>
-                            </div>
+                            {{/if}}
                         </div>
 
                         {{#if this.hasResource}}
@@ -107,9 +111,9 @@
 
                         <div class="token-initiative">
                             {{#if this.hasRolled}}
-                            <span class="initiative">{{this.initiative}}</span>
-                            {{else if this.owner}}
-                            <a class="combatant-control roll" aria-label="{{localize 'COMBAT.InitiativeRoll'}}" role="button" data-tooltip="COMBAT.InitiativeRoll" data-control="rollInitiative"></a>
+                            <span class="initiative" data-tooltip="{{{this.initiativeTooltip}}}" >{{this.initiative}}</span>
+                            {{!-- {{else if this.owner}}
+                            <a class="combatant-control roll" aria-label="{{localize 'COMBAT.InitiativeRoll'}}" role="button" data-tooltip="COMBAT.InitiativeRoll" data-control="rollInitiative"></a> --}}
                             {{/if}}
                         </div>
                     </li>
