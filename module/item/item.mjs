@@ -2140,16 +2140,8 @@ export class HeroSystem6eItem extends Item {
         let baseCost = parseFloat(system.BASECOST) || 0;
 
         // Cost per level is NOT included in the HDC file.
-        // We will try to get cost per level via config.js
+        // We will try to get cost per level via config.mjs
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
-        // let costPerLevel = parseFloat(
-        //     system.costPerLevel ||
-        //         configPowerInfo?.costPerLevel ||
-        //         configPowerInfo?.cost ||
-        //         (configPowerInfo?.type == "skill" ? 2 : 0) ||
-        //         baseCost ||
-        //         1,
-        // );
 
         // Default costPerLevel 1
         let costPerLevel = 1;
@@ -4009,13 +4001,6 @@ export class HeroSystem6eItem extends Item {
             this.system.class = "adjustment";
             this.system.usesStrength = false;
             this.system.noHitLocations = true;
-        } else if (xmlid === "MINDSCAN") {
-            this.system.class = "mindscan";
-            this.system.uses = "omcv";
-            this.system.targets = "dmcv";
-            this.system.knockbackMultiplier = 0;
-            this.system.usesStrength = false;
-            this.system.noHitLocations = true;
         } else if (xmlid === "EGOATTACK") {
             this.system.class = "mental";
             this.system.targets = "dmcv";
@@ -4024,16 +4009,13 @@ export class HeroSystem6eItem extends Item {
             this.system.usesStrength = false;
             this.system.stunBodyDamage = "stunonly";
             this.system.noHitLocations = true;
-        } else if (xmlid === "MINDCONTROL") {
-            this.system.class = "mindcontrol";
-            this.system.targets = "dmcv";
-            this.system.uses = "omcv";
-            this.system.knockbackMultiplier = 0;
-            this.system.usesStrength = false;
-            this.system.stunBodyDamage = "stunonly";
-            this.system.noHitLocations = true;
-        } else if (xmlid === "TELEPATHY") {
-            this.system.class = "telepathy";
+        } else if (
+            xmlid === "MINDCONTROL" ||
+            xmlid === "MENTALILLUSIONS" ||
+            xmlid === "MINDSCAN" ||
+            xmlid === "TELEPATHY"
+        ) {
+            this.system.class = "mental";
             this.system.targets = "dmcv";
             this.system.uses = "omcv";
             this.system.knockbackMultiplier = 0;
