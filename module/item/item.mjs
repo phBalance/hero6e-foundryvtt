@@ -2210,7 +2210,7 @@ export class HeroSystem6eItem extends Item {
             const adderBaseCost = parseInt(adder.BASECOST || adder.LVLCOST) || 0;
             //adder.BASECOST_total = adderBaseCost;
 
-            if (adder.SELECTED != false) {
+            if (adder.SELECTED !== false) {
                 //TRANSPORT_FAMILIARITY
                 const adderCostPerLevel = parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) || 1;
                 const adderLevels = parseInt(adder.LEVELS);
@@ -2364,7 +2364,7 @@ export class HeroSystem6eItem extends Item {
             });
 
             // This may be a limitation with an unusual BASECOST (for example REQUIRESASKILLROLL 14-)
-            if (modPowerInfo?.minumumLimitation) {
+            if (modPowerInfo?.minimumLimitation) {
                 continue;
             }
 
@@ -2502,7 +2502,7 @@ export class HeroSystem6eItem extends Item {
                 getPowerInfo({
                     item: o,
                     actor: this.actor,
-                })?.minumumLimitation,
+                })?.minimumLimitation,
         );
 
         // Add limitations from parent
@@ -3571,7 +3571,7 @@ export class HeroSystem6eItem extends Item {
                 item: modifier,
                 actor: this.actor,
             });
-            if (modPowerInfo?.minumumLimitation) {
+            if (modPowerInfo?.minimumLimitation) {
                 continue;
             }
 

@@ -430,7 +430,7 @@ export async function AttackToHit(item, options) {
                 _dcvValue = dmcv;
             }
 
-            let activeEffect = {
+            const activeEffect = {
                 label: `${item.name} ${_dcvValue.signedString()} ${_dcvText}`,
                 icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
                 changes: [
