@@ -907,11 +907,11 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     async _onCharacteristicDC(event, dc, flavor) {
         const diceParts = convertToDiceParts(dc);
-        const heroRoller = new HeroRoller().makeNormalRoll().addDice(diceParts.dice);
+        const characteristicRoller = new HeroRoller().makeNormalRoll().addDice(diceParts.dice);
         if (diceParts.halfDice) {
-            heroRoller.addHalfDice(1);
+            characteristicRoller.addHalfDice(1);
         } else if (diceParts.plus1) {
-            heroRoller.addNumber(1);
+            characteristicRoller.addNumber(1);
         }
 
         // Use STR to escape ENTANGLE
@@ -929,43 +929,22 @@ export class HeroSystemActorSheet extends ActorSheet {
         //     }
         // }
 
-        await heroRoller.roll();
-        const damageRenderedResult = await heroRoller.render();
+        await characteristicRoller.roll();
+        const damageRenderedResult = await characteristicRoller.render();
 
+        // NOTE: This is not the full information required to do damage to an actor. Call it a kludge
+        //       as strength is not an item which we require.
         const cardData = {
-            //item: { name: this.token.name, system: { NAME: this.token.name } },
-            // adjustment,
-            // senseAffecting,
             flavor,
 
             // dice rolls
             renderedDamageRoll: damageRenderedResult,
-            //renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
 
-            // hit locations
-            // useHitLoc: damageDetail.useHitLoc,
-            // hitLocText: damageDetail.hitLocText,
-            // hitLocation: damageDetail.hitLocation,
+            bodyDamage: characteristicRoller.getBodyTotal(),
+            stunDamage: characteristicRoller.getStunTotal(),
 
-            // body
-            bodyDamage: heroRoller.getBodyTotal(), //damageDetail.bodyDamage,
-            //bodyDamageEffective: damageDetail.body,
+            roller: characteristicRoller.toJSON(),
 
-            // stun
-            stunDamage: heroRoller.getBodyTotal(), //damageDetail.stunDamage,
-            // stunDamageEffective: damageDetail.stun,
-            // hasRenderedDamageRoll: true,
-            // stunMultiplier: damageDetail.stunMultiplier,
-            // hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-
-            roller: heroRoller.toJSON(),
-
-            // misc
-            // targetIds: toHitData.targetids,
-            // tags: tags,
-
-            // attackTags: getAttackTags(item),
-            // targetTokens: targetTokens,
             user: game.user,
         };
 
@@ -975,7 +954,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const speaker = ChatMessage.getSpeaker({ actor: this.actor });
         const chatData = {
             type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-            rolls: heroRoller.rawRolls(),
+            rolls: characteristicRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,
             speaker: speaker,
