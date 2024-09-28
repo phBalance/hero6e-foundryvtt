@@ -223,7 +223,7 @@ export default class SettingsHelpers {
             scope: "client",
             config: true,
             type: Boolean,
-            default: false,
+            default: true,
             onChange: () => ui.combat.render(),
             requiresReload: false,
         });
