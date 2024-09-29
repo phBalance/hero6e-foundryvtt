@@ -1,7 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { getPowerInfo, getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
+import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 
@@ -272,7 +272,7 @@ export class HeroSystem6eActor extends Actor {
         }
     }
 
-    async TakeRecovery(asAction) {
+    async TakeRecovery(asAction, token) {
         // RECOVERING
         // Characters use REC to regain lost STUN and expended END.
         // This is known as “Recovering” or “taking a Recovery.”
@@ -292,14 +292,15 @@ export class HeroSystem6eActor extends Actor {
         // to turn off Powers, and Persistent Powers that don’t cost END
         // remain in effect.
 
-        let token = this.token;
-        let speaker = ChatMessage.getSpeaker({ actor: this, token });
-        speaker["alias"] = this.name;
+        token = token || this.getActiveTokens()[0];
+        const speaker = ChatMessage.getSpeaker({ actor: this, token });
+        const tokenName = token?.name || this.name;
+        speaker["alias"] = game.user.name; //game.token?.name || this.name;
 
         // A character who holds their breath does not get to Recover (even
         // on Post-Segment 12)
         if (this.statuses.has("holdingBreath")) {
-            const content = this.name + " <i>is holding their breath</i>.";
+            const content = `${tokenName} <i>is holding their breath</i>.`;
             if (asAction) {
                 const chatData = {
                     user: game.user._id,
@@ -343,7 +344,7 @@ export class HeroSystem6eActor extends Actor {
             { hideChatMessage: true },
         );
 
-        let content = this.name + ` <i>Takes a Recovery</i>`;
+        let content = `${tokenName} <i>Takes a Recovery</i>`;
         if (deltaEnd || deltaStun) {
             content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
         } else {
@@ -355,6 +356,7 @@ export class HeroSystem6eActor extends Actor {
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             content: content,
             speaker: speaker,
+            whisper: [...ChatMessage.getWhisperRecipients(this.name), ...ChatMessage.getWhisperRecipients("GM")],
         };
 
         if (asAction) {
@@ -370,37 +372,57 @@ export class HeroSystem6eActor extends Actor {
     }
 
     // When stunned, knockedout, etc you cannot act
-    canAct(uiNotice) {
+    canAct(uiNotice, event) {
+        let result = true;
+        let badStatus = [];
+
         if (this.statuses.has("knockedOut")) {
-            if (uiNotice) ui.notifications.error(`${this.name} is KNOCKED OUT and cannot act.`);
-            return false;
+            if (uiNotice) badStatus.push("KNOCKED OUT");
+            result = false;
         }
 
         if (this.statuses.has("stunned")) {
-            if (uiNotice) ui.notifications.error(`${this.name} is STUNNED and cannot act.`);
-            return false;
+            badStatus.push("STUNNED");
+            result = false;
         }
 
         if (this.statuses.has("aborted")) {
-            if (uiNotice) ui.notifications.error(`${this.name} has ABORTED and cannot act.`);
-            return false;
+            badStatus.push("ABORTED");
+            result = false;
         }
 
-        // A character
-        // who is Stunned or recovering from being
-        // Stunned can take no Actions, take no Recoveries
-        // (except their free Post-Segment 12 Recovery), cannot
-        // move, and cannot be affected by Presence Attacks.
-
-        // Recovering from being Stunned requires a Full
-        // Phase, and is the only thing the character can do
-        // during that Phase.
-
-        if (this.statuses.has("stunned")) {
-            if (uiNotice) ui.notifications.error(`${this.name} is STUNNED and cannot act.`);
-            return false;
+        if (parseInt(this.system.characteristics.spd?.value || 0) < 1) {
+            if (uiNotice) badStatus.push("SPD1");
+            result = false;
         }
-        return true;
+
+        if (!result && event?.shiftKey) {
+            const speaker = ChatMessage.getSpeaker({
+                actor: this,
+                //token,
+            });
+            speaker["alias"] = game.user.name;
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: `${this.name} is ${badStatus.join(", ")} and cannot act. SHIFT key was used to override.`,
+                whisper: whisperUserTargetsForActor(this),
+                speaker,
+            };
+            ChatMessage.create(chatData);
+
+            result = true;
+        }
+
+        if (!result && !event) {
+            console.error("event missing");
+        }
+
+        if (!result) {
+            ui.notifications.error(`${this.name} is ${badStatus.join(", ")} and cannot act.  Hold SHIFT to override.`);
+        }
+
+        return result;
     }
 
     /**

@@ -63,9 +63,9 @@ export async function AttackOptions(item) {
     const actor = item.actor;
     const token = actor.getActiveTokens()[0];
 
-    if (!actor.canAct(true)) {
-        return;
-    }
+    // if (!actor.canAct(true, event)) {
+    //     return;
+    // }
 
     // if (
     //     item?.system?.XMLID === "MINDSCAN" &&

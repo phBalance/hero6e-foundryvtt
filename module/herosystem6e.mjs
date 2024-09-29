@@ -151,6 +151,11 @@ Hooks.once("init", async function () {
 });
 
 Hooks.once("ready", async function () {
+    if (game.settings.get(game.system.id, "alphaTesting")) {
+        CONFIG.compatibility.mode = 0;
+        CONFIG.debug.combat = true;
+    }
+
     // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
     Hooks.on("hotbarDrop", (bar, data, slot) => createHeroSystem6eMacro(bar, data, slot));
 
@@ -183,9 +188,12 @@ Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
     ) {
         for (const combat of game.combats) {
             if (combat.active) {
-                if (combat.combatants.find((o) => o.actorId === document.id)) {
+                const _combatants = combat.combatants.filter((o) => o.actorId === document.id);
+                if (_combatants) {
                     // Reroll Initiative (based on new spd/dex/ego/int changes)
-                    await combat.rollAll();
+                    //await combat.rollAll();
+                    await combat.rollInitiative(_combatants.map((o) => o.id));
+                    await combat.extraCombatants();
 
                     // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
                     // Should no longer be needed now that SPD is part of initiative (handled via rollAll/combat:rollInitiative)
@@ -193,6 +201,22 @@ Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
                 }
             }
         }
+    }
+});
+
+Hooks.on("closeTokenConfig", async (tokenConfig) => {
+    // We may have changed the disposition, so re-render the combat tracker
+    if (game.combat?.active) {
+        if (game.combat.combatants.find((o) => o.tokenId === tokenConfig.token.id)) {
+            game.combat.collection.render();
+        }
+    }
+});
+
+Hooks.on("changeSidebarTab", async (app) => {
+    // Make sure active token is centered in combat tracker when changing Sidebar
+    if (app.tabName === "combat" && game.combat?.active) {
+        app.scrollToTurn();
     }
 });
 
@@ -823,4 +847,25 @@ Hooks.once("ready", async function () {
         game.settings.set("core", DefaultTokenConfig.SETTING, _defaultToken);
         console.warn("Removing errant bar3 setting as it will prevent loading of world in FoundryVTT V12+");
     }
+});
+
+Hooks.on("getCombatTrackerEntryContext", function (html, menu) {
+    const entry = {
+        name: "COMBAT.CombatantRemoveHero",
+        icon: '<i class="fas fa-trash"></i>',
+        callback: (li) => {
+            const combat = game.combats.viewed;
+            const combatant = combat.combatants.get(li.data("combatant-id"));
+            const tokenId = combatant?.tokenId;
+            if (tokenId) {
+                const combatantIds = combat.combatants.reduce((ids, c) => {
+                    if (tokenId === c.tokenId) ids.push(c.id);
+                    return ids;
+                }, []);
+                return combat.deleteEmbeddedDocuments("Combatant", combatantIds);
+            }
+        },
+    };
+    menu.findSplice((o) => o.name === "COMBAT.CombatantRemove");
+    menu.push(entry);
 });

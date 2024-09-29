@@ -11,223 +11,64 @@ export class HeroSystem6eCombat extends Combat {
         };
     }
 
-    getUniqueTokens() {
-        // this.combatants.contents.reduce((accumulator, item) => {if (!accumulator.find(o=> o.tokenId === item.tokenId)) {accumulator.push(item);} return accumulator;},[])
-        const results = [];
-        for (const c of this.combatants.contents) {
-            if (!results.find((o) => o.id === c.token.object?.id)) {
-                results.push(c.token.object);
-            }
-        }
-        return results;
-    }
-
-    getUniqueCombatants() {
-        const results = [];
-        for (const c of this.combatants.values()) {
-            if (!results.find((o) => o.token.object.id === c.token.object?.id)) {
-                results.push(c);
-            }
-        }
-        return results;
-    }
-
-    /**
-     * Roll initiative for one or multiple Combatants within the Combat entity
-     * @param {string|string[]} ids     A Combatant id or Array of ids for which to roll
-     * @param {object} [options={}]     Additional options which modify how initiative rolls are created or presented.
-     * @param {string|null} [options.formula]         A non-default initiative formula to roll. Otherwise the system default is used.
-     * @param {boolean} [options.updateTurn=true]     Update the Combat heroTurn after adding new initiative scores to keep the heroTurn on the same Combatant.
-     * @param {object} [options.messageOptions={}]    Additional options with which to customize created Chat Messages
-     * @return {Promise<Combat>}        A promise which resolves to the updated Combat entity once updates are complete.
-     */
-
     async rollInitiative(ids) {
-        // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) return this;
-
-        // Structure input data
-        ids = typeof ids === "string" ? [ids] : ids;
-        if (ids.length === 0) {
-            ids = this.combatants.map((c) => c.id); // Roll All
-        }
-
         if (CONFIG.debug.combat) {
             console.debug(`Hero | rollInitiative`, ids);
         }
-        // We need a unique combatant for each phase the actor acts.
-
-        const uniqueTokensToProcess = [];
-
+        ids = typeof ids === "string" ? [ids] : ids;
+        //const currentId = this.combatant?.id;
+        // Iterate over Combatants, performing an initiative roll for each
+        const updates = [];
         for (const id of ids) {
-            const c = this.combatants.find((o) => o.id === id);
-            if (!c) {
-                // Looks like a timing issue.  When AID/SPD is lowered _onUpdateDescendantDocuments
-                // or when _onDeleteDescendantDocuments is calld, this.combatants may not have been updated yet.
-                console.warn(`Combatant ${id} was not found.`);
-                continue;
-            }
+            // Get Combatant data (non-strictly)
+            const combatant = this.combatants.get(id);
+            if (!combatant?.isOwner) continue;
 
-            const lightningReflexes = c.actor?.items.find(
-                (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
-            );
-
-            //Create extra combatants to match SPEED
-            let targetCombatantsForToken =
-                parseInt(
-                    Math.min(
-                        12,
-                        Math.max(1, c.actor?.system.characteristics.spd?.value), // Bases don't have a SPD
-                    ),
-                ) * (lightningReflexes ? 2 : 1);
-
-            const needToCreate =
-                targetCombatantsForToken - this.combatants.filter((o) => o.tokenId === c.tokenId).length;
-
-            const toCreate = [];
-            for (let i = 0; i < needToCreate; i++) {
-                toCreate.push({
-                    tokenId: c.tokenId,
-                    sceneId: c.sceneId,
-                    actorId: c.actorId,
-                    hidden: c.hidden,
-                });
-            }
-            if (toCreate.length > 0) {
-                await this.createEmbeddedDocuments("Combatant", toCreate);
-                continue; // We just created combat documents, which will call this (RollInitiative) again
-            }
-
-            // Perhaps we have too many (SPD drain for example)
-            if (needToCreate < 0) {
-                await this.deleteEmbeddedDocuments("Combatant", [c.id], {
-                    single: true,
-                });
-                continue; // We just deleted combat documents, which will call this (RollInitiative) again
-            }
-
-            if (!uniqueTokensToProcess.find((t) => t.id === c.tokenId)) {
-                uniqueTokensToProcess.push(c.token);
-            }
-        }
-
-        // Loop thru all the tokens/combatants with ids provided
-        for (const t of uniqueTokensToProcess) {
-            const lightningReflexes = t.actor?.items.find(
-                (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
-            );
-
-            const lightningReflexesLevels = parseInt(
-                lightningReflexes?.system.LEVELS?.value ||
-                    lightningReflexes?.system.LEVELS ||
-                    lightningReflexes?.system.levels ||
-                    lightningReflexes?.system.other.levels ||
-                    0,
-            );
-
-            // Produce an initiative roll for the Combatant.
-            const characteristic = t.actor?.system?.initiativeCharacteristic || "dex";
-            const initValue = t.actor?.system.characteristics[characteristic]?.value || 0;
-            const spdValue = t.actor?.system.characteristics.spd?.value || 0;
-            const initiativeValue = initValue + spdValue / 100;
-
-            const tokenCombatants = this.combatants.filter((c) => c.tokenId === t.id);
-
-            // Assign a segment and Initiative
-            let idx = 0;
-            for (let s = 1; s <= 12; s++) {
-                if (
-                    HeroSystem6eCombat.hasPhase(
-                        Math.max(1, tokenCombatants[idx]?.actor?.system.characteristics.spd?.value || 0),
-                        s,
-                    )
-                ) {
-                    if (lightningReflexes) {
-                        const lightningReflexesAlias = `(${
-                            lightningReflexes.system.OPTION_ALIAS || lightningReflexes.system.INPUT || "All Actions"
-                        })`;
-                        if (
-                            tokenCombatants[idx].flags.segment !== s ||
-                            tokenCombatants[idx].flags.initiative !== initiativeValue + lightningReflexesLevels ||
-                            tokenCombatants[idx].flags.lightningReflexesAlias !== lightningReflexesAlias
-                        ) {
-                            await tokenCombatants[idx].update({
-                                "flags.segment": s,
-                                initiative: initiativeValue + lightningReflexesLevels,
-                                "flags.lightningReflexesAlias": lightningReflexesAlias,
-                            });
-                        }
-                        idx++;
-                    }
-
-                    if (
-                        tokenCombatants[idx].flags.segment !== s ||
-                        tokenCombatants[idx].flags.initiative !== initiativeValue
-                    ) {
-                        try {
-                            await tokenCombatants[idx].update({
-                                "flags.segment": s,
-                                initiative: initiativeValue,
-                                "-flags.lightningReflexesAlias": null,
-                            });
-                        } catch (ex) {
-                            console.error(ex);
-                            return;
-                        }
-                    }
-                    idx++;
-                }
-            }
-
-            // Rare case where SPD <= 0 (and for actorless tokens; bases)
-            // NOTE: There is no code to prevent a SPD 0 token from acting, currently GM player needs to handle that manually.
-            // A SPD 0 character can't act, but does get a postSegment12.  In theory the SPD drain will eventually fade.
-            if (
-                (tokenCombatants[0].actor?.system.characteristics.spd?.value || 0) <= 0 &&
-                tokenCombatants[0].flags.segment !== 12
-            ) {
-                tokenCombatants[0].flags.segment = 12;
-                await tokenCombatants[0].update({
-                    "flags.segment": 12,
-                    initiative: 10 + initiativeValue,
-                    "-flags.lightningReflexesAlias": null,
+            // Produce an initiative roll for the Combatant
+            const characteristic = combatant.actor?.system?.initiativeCharacteristic || "dex";
+            const initValue = combatant.actor?.system.characteristics[characteristic]?.value || 0;
+            //const spdValue = combatant.actor?.system.characteristics.spd.value || null;
+            //const initiativeTooltip = `${initValue}${characteristic} ${spdValue}speed`;
+            //const spdValue = Math.max(1, combatant.actor?.system.characteristics.spd?.value || 0);
+            //const initiativeValue = initValue; // + spdValue / 100;
+            if (combatant.flags.initiative != initValue || combatant.flags.initiativeCharacteristic != characteristic) {
+                updates.push({
+                    _id: id,
+                    //initiative: initValue,
+                    "flags.initiative": initValue,
+                    "flags.initiativeCharacteristic": characteristic,
+                    // "flags.initiativeTooltip": initiativeTooltip,
                 });
             }
         }
+        if (!updates.length) return this;
+
+        // Update multiple combatants
+        if (updates) {
+            await this.updateEmbeddedDocuments("Combatant", updates);
+        }
+
         return this;
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Return the Array of combatants sorted into initiative order, breaking ties alphabetically by name.
-     * @return {Combatant[]}
+     * @returns {Combatant[]}
      */
-
     setupTurns() {
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | Combat Setup Turns`);
-        }
+        // if (CONFIG.debug.combat) {
+        //     console.debug(`Hero | setupTurns`);
+        // }
 
-        // Likely never needed, but here for future reference.
-        // super.setupTurns();
+        this.turns ||= [];
 
         // Determine the turn order and the current turn
         const turns = this.combatants.contents.sort(this._sortCombatants);
         if (this.turn !== null) this.turn = clamp(this.turn, 0, turns.length - 1);
 
-        // Update state tracking (v12)
-        // const c = turns[this.turn];
-        // this.current = this._getCurrentState(c);
-
-        // Update state tracking (v11)
-        const c = turns[this.turn];
-        this.current = {
-            round: this.round,
-            turn: this.turn,
-            combatantId: c ? c.id : null,
-            tokenId: c ? c.tokenId : null,
-        };
+        // Update state tracking
+        let c = turns[this.turn];
+        this.current = this._getCurrentState(c);
 
         // One-time initialization of the previous state
         if (!this.previous) this.previous = this.current;
@@ -236,44 +77,259 @@ export class HeroSystem6eCombat extends Combat {
         return (this.turns = turns);
     }
 
+    /**
+     * Define how the array of Combatants is sorted in the displayed list of the tracker.
+     * This method can be overridden by a system or module which needs to display combatants in an alternative order.
+     * The default sorting rules sort in descending order of initiative using combatant IDs for tiebreakers.
+     * @param {Combatant} a     Some combatant
+     * @param {Combatant} b     Some other combatant
+     * @protected
+     */
     _sortCombatants(a, b) {
-        const segmentA = parseInt(a.flags.segment) || 12;
-        const segmentB = parseInt(b.flags.segment) || 12;
-        const initA = parseFloat(a.initiative) || 0;
-        const initB = parseFloat(b.initiative) || 0;
+        // Lightning Reflexes
+        const lrA = Number.isNumeric(a.flags.lightningReflexes?.levels) ? a.flags.lightningReflexes.levels : 0;
+        const lrB = Number.isNumeric(b.flags.lightningReflexes?.levels) ? b.flags.lightningReflexes.levels : 0;
 
-        let segmentDifference = segmentA - segmentB;
-        if (segmentDifference !== 0) {
-            return segmentDifference;
-        }
+        // Sort by segment first
+        const segA = Number.isNumeric(a.flags.segment) ? a.flags.segment : -Infinity;
+        const segB = Number.isNumeric(b.flags.segment) ? b.flags.segment : -Infinity;
 
-        const initDifference = initB - initA;
-        if (initDifference !== 0) {
-            return initDifference;
-        }
+        // Then by initiative (dex or ego)
+        const initA = Number.isNumeric(a.initiative) ? a.initiative + lrA : -Infinity;
+        const initB = Number.isNumeric(b.initiative) ? b.initiative + lrB : -Infinity;
 
-        const typeA = a.actor?.hasPlayerOwner || a.hasPlayerOwner;
-        const typeB = b.actor?.hasPlayerOwner || b.hasPlayerOwner;
+        // Then by spd
+        const spdA = Number.isNumeric(a.flags.spd) ? a.flags.spd : -Infinity;
+        const spdB = Number.isNumeric(b.flags.spd) ? b.flags.spd : -Infinity;
 
-        if (typeA !== typeB) {
-            if (typeA) {
-                return -1;
-            }
-            if (typeB) {
-                return 1;
-            }
-        }
+        // Then by hasPlayerOwner
+        // Finally by tokenId
 
-        // Force consistant sorting by token.id
-        //console.warn("Sorting undetermined. Using token.id to break the tie.");
-        return a.token.id.localeCompare(b.token.id);
+        return (
+            segA - segB ||
+            initB - initA ||
+            spdB - spdA ||
+            a.hasPlayerOwner < b.hasPlayerOwner ||
+            (a.tokenId > b.tokenId ? 1 : -1)
+        );
     }
 
-    // Standard HeroSystem rules per SPEED CHART
+    async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onCreateDescendantDocuments`);
+        }
+
+        // Automatically roll initiative for all combatants created in the combat tracker.
+        // We could use rollAll() here, but rollInitiative is probably more efficient.
+        await this.rollInitiative(documents.map((o) => o.id));
+
+        // Get current combatant
+        const priorState = foundry.utils.deepClone(this.current);
+        this.setupTurns();
+        await this.assignSegments(priorState.tokenId);
+        const combatTurn = this.getCombatTurnHero(priorState);
+
+        // Call Super
+        await super._onCreateDescendantDocuments(
+            parent,
+            collection,
+            documents,
+            data,
+            { ...options, combatTurn: combatTurn },
+            userId,
+        );
+
+        // Add or remove extra combatants based on SPD or Lightning Reflexes
+        await this.extraCombatants();
+    }
+
+    async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onDeleteDescendantDocuments`);
+        }
+
+        // Get current combatant
+        const priorState = foundry.utils.deepClone(this.current);
+        this.setupTurns();
+        await this.assignSegments(priorState.tokenId);
+        const combatTurn = this.getCombatTurnHero(priorState);
+
+        // Call the Super (don't render the likely incorrect turn that default foundry provides)
+        await super._onDeleteDescendantDocuments(
+            parent,
+            collection,
+            documents,
+            ids,
+            { ...options, combatTurn: combatTurn },
+            userId,
+        );
+
+        // Add or remove extra combatants based on SPD or Lightning Reflexes (shouldn't be needed as we have overrides for combatant deletes via UI)
+        await this.extraCombatants();
+    }
+
+    async assignSegments(tokenId) {
+        if (!tokenId) return;
+
+        const tokenCombatants = this.combatants.filter((o) => o.tokenId === tokenId);
+        const tokenCombatantCount = tokenCombatants.length;
+        if (tokenCombatantCount === 0) return;
+        if (!tokenCombatants[0]?.isOwner) return;
+        const actor = tokenCombatants[0].actor;
+        if (!actor) return;
+        const lightningReflexes = actor?.items.find(
+            (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+        );
+        const updates = [];
+        for (let c = 0; c < tokenCombatantCount; c++) {
+            const _combatant = tokenCombatants[c];
+            const spd = clamp(parseInt(_combatant.actor?.system.characteristics.spd.value), 1, 12);
+            // const initiativeTooltip = `${
+            //     _combatant.flags.initiative
+            // }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
+            //     lightningReflexes?.system.LEVELS ? `${lightningReflexes.system.LEVELS}LR` : ""
+            // }`;
+            if (spd) {
+                const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
+                let update = {
+                    _id: _combatant.id,
+                    initiative: _combatant.flags.initiative,
+                    "flags.segment": segment,
+                    "flags.spd": spd,
+                    "flags.initiativeTooltip": `${
+                        _combatant.flags.initiative
+                    }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD`,
+                };
+                if (lightningReflexes && c % 2 === 0) {
+                    update = {
+                        ...update,
+                        "flags.initiativeTooltip": `${
+                            _combatant.flags.initiative
+                        }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
+                            lightningReflexes.system.LEVELS
+                        }LR`,
+                        initiative: _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
+                        "flags.lightningReflexes.levels": parseInt(lightningReflexes.system.LEVELS),
+                        "flags.lightningReflexes.name":
+                            lightningReflexes.system.OPTION_ALIAS || lightningReflexes.system.INPUT || "All Actions",
+                    };
+                } else {
+                    update = {
+                        ...update,
+                        "flags.lightningReflexes": null,
+                    };
+                }
+                // if (
+                //     update.initiative != _combatant.initiative ||
+                //     update.flags?.lightningReflexes?.name != _combatant.flags?.lightningReflexes?.name
+                // ) {
+                updates.push(update);
+                //}
+            }
+        }
+        await this.updateEmbeddedDocuments("Combatant", updates);
+    }
+
+    async extraCombatants() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | extraCombatants`);
+        }
+
+        // Only 1 GM should do this
+        if (!game.users.activeGM?.isSelf) return;
+
+        const uniqueTokens = Array.from(new Set(this.combatants.map((o) => o.tokenId))); //this.combatants.filter((c, i, ar) => ar.indexOf(c) === i);
+        for (const _tokenId of uniqueTokens) {
+            const _combatant = this.combatants.find((o) => o.tokenId === _tokenId && o.actor);
+            if (!_combatant?.isOwner) continue;
+            const actor = _combatant?.actor;
+            if (actor) {
+                const lightningReflexes = actor?.items.find(
+                    (o) =>
+                        o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+                );
+                const targetCombatantCount =
+                    clamp(parseInt(actor.system.characteristics.spd.value), 1, 12) * (lightningReflexes ? 2 : 1);
+                const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
+                const tokenCombatantCount = tokenCombatants.length;
+
+                if (tokenCombatantCount < targetCombatantCount) {
+                    const toCreate = [];
+                    for (let i = 0; i < targetCombatantCount - tokenCombatantCount; i++) {
+                        toCreate.push(_combatant);
+                    }
+                    await this.createEmbeddedDocuments("Combatant", toCreate);
+                    return;
+                }
+
+                if (tokenCombatantCount > targetCombatantCount) {
+                    const _combatants = this.combatants.filter((o) => o.tokenId === _tokenId && o.actor);
+                    await this.deleteEmbeddedDocuments(
+                        "Combatant",
+                        _combatants.map((o) => o.id).slice(0, tokenCombatantCount - targetCombatantCount),
+                    );
+                    return;
+                }
+
+                // Add custom hero flags for segments and such
+                if (tokenCombatantCount === targetCombatantCount) {
+                    await this.assignSegments(_tokenId);
+                    //         const updates = [];
+                    //         for (let c = 0; c < tokenCombatantCount; c++) {
+                    //             const _combatant = tokenCombatants[c];
+                    //             const spd = parseInt(_combatant.actor?.system.characteristics.spd.value);
+                    //             if (spd) {
+                    //                 const segment = HeroSystem6eCombat.getSegment(
+                    //                     spd,
+                    //                     Math.floor(c * (lightningReflexes ? 0.5 : 1)),
+                    //                 );
+                    //                 let update = {
+                    //                     _id: _combatant.id,
+                    //                     initiative: _combatant.flags.initiative,
+                    //                     "flags.segment": segment,
+                    //                     "flags.spd": spd,
+                    //                 };
+                    //                 if (lightningReflexes && c % 2 === 0) {
+                    //                     update = {
+                    //                         ...update,
+                    //                         initiative:
+                    //                             _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
+                    //                         "flags.lightningReflexes.levels": parseInt(lightningReflexes.system.LEVELS),
+                    //                         "flags.lightningReflexes.name":
+                    //                             lightningReflexes.system.OPTION_ALIAS ||
+                    //                             lightningReflexes.system.INPUT ||
+                    //                             "All Actions",
+                    //                     };
+                    //                 }
+                    //                 updates.push(update);
+                    //             }
+                    //         }
+                    //         await this.updateEmbeddedDocuments("Combatant", updates);
+                }
+            }
+        }
+    }
+
+    static getSegment(spd, index) {
+        let i = index;
+        for (let segment = 1; segment <= 12; segment++) {
+            if (HeroSystem6eCombat.hasPhase(spd, segment)) {
+                i--;
+                if (i < 0) {
+                    return segment;
+                }
+            }
+        }
+        return 12;
+    }
+
     static hasPhase(spd, segment) {
-        switch (parseInt(spd)) {
+        switch (clamp(parseInt(spd), 0, 12)) {
+            case 0:
+                // At SPD 0, a character is frozen in place, unable to move or take any other Actions. He can only take Post-Segment 12 Recoveries,
+                return [12].includes(segment);
             case 1:
-                return [7].includes(segment);
+                return [12].includes(segment);
             case 2:
                 return [6, 12].includes(segment);
             case 3:
@@ -297,229 +353,51 @@ export class HeroSystem6eCombat extends Combat {
             case 12:
                 return true;
             default:
-                if (spd < 1) return false;
-                return true;
-        }
-    }
-
-    /* -------------------------------------------- */
-
-    /** @inheritdoc */
-    async _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
-        // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            this.setupTurns();
-            if (this.active) this.collection.render();
-            return;
-        }
-
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onCreateDescendantDocuments`, this);
-        }
-
-        //Missing actor?
-        // let missingActors = documents.filter((o) => !o.actor);
-        // {
-        //     for (let c of missingActors) {
-        //         ui.notifications.warn(
-        //             `${c.name} references an Actor which no longer exists within the World.`,
-        //         );
-        //     }
-        // }
-
-        // documents = documents.filter((o) => o.actor);
-        // if (documents.length === 0) return;
-
-        // Get current combatant
-        const oldCombatant = this.combatant;
-
-        // Super
-        await super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
-
-        // Setup turns in segment fashion
-        //const _turns = this.setupTurns();
-
-        // Roll initiative (again?)
-        await this.rollInitiative(documents.map((o) => o.id));
-
-        // Keep the current Combatant the same after adding new Combatants to the Combat
-        if (oldCombatant) {
-            this.turn = this.turns.findIndex(
-                (o) => o.tokenId === oldCombatant.tokenId && o.flags.segment === oldCombatant.flags.segment,
-            );
-            await this.update({ turn: this.turn });
-        }
-
-        // Render the collection
-        //if (this.active) this.collection.render();
-    }
-
-    /* -------------------------------------------- */
-
-    /** @inheritdoc */
-    async _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
-        // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            this.setupTurns();
-            if (this.active) this.collection.render();
-            return;
-        }
-
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onDeleteDescendantDocuments`, this);
-        }
-
-        // Update the heroTurn order and adjust the combat to keep the combatant the same (unless they were deleted)
-
-        // Get current (active) combatant
-        const oldCombatant = this.combatant;
-        const nextCombatant = this.turns[this.turn + 1 > this.turns.length ? 0 : this.turn + 1];
-
-        // Super
-        await super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
-
-        // Make sure we delete all combatants with the same tokenID.
-        // Unless options.single = true; like when SPD lowers.
-        if (!options.single) {
-            if (collection === "combatants") {
-                for (const doc of documents) {
-                    const toDelete = this.combatants.filter((c) => c.token.id === doc.token.id);
-                    if (toDelete.length > 0) {
-                        await this.deleteEmbeddedDocuments(
-                            "Combatant",
-                            toDelete.map((c) => c.id),
-                        );
-                    }
-                }
-            }
-        }
-
-        // Setup turns in segment fashion
-        // this.setupTurns();
-
-        // When Combat is not started there is no oldCombatant (or current one), so were done.
-        if (!oldCombatant) {
-            return;
-        }
-
-        // If old & new combatant are the same, then default actions are appropriate.
-        if (this.combatants.get(oldCombatant.id)) {
-            this.turn = this.turns.findIndex(
-                (o) => o.tokenId === oldCombatant.tokenId && o.flags.segment === oldCombatant.flags.segment,
-            );
-        } else {
-            // We deleted the combatent so find turn of nextCombatant.
-            // Could be on next round
-
-            if (nextCombatant) {
-                this.turn = this.turns.findIndex(
-                    (o) => o.tokenId === nextCombatant.tokenId && o.flags.segment === nextCombatant.flags.segment,
-                );
-            } else {
-                this.turn = 0;
-                this.round++;
-            }
-        }
-        await this.update({ turn: this.turn, round: this.round });
-
-        //await this.rollInitiative(documents.map((o) => o.id));
-
-        // Render the collection
-        if (this.active) this.collection.render();
-    }
-
-    /* -------------------------------------------- */
-
-    /** @inheritdoc */
-    // Note that super is not async
-    async _onUpdateDescendantDocuments(
-        parent,
-        collection,
-        documents,
-        changes,
-        options,
-        // eslint-disable-next-line no-unused-vars
-        userId,
-    ) {
-        // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            this.setupTurns();
-            if (this.active) this.collection.render();
-            return;
-        }
-
-        if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onUpdateDescendantDocuments`, this);
-        }
-
-        // The super calls setupTurns and slows things way down.  Don't think we really need this.
-        // super._onUpdateDescendantDocuments(
-        //     parent,
-        //     collection,
-        //     documents,
-        //     changes,
-        //     options,
-        //     userId,
-        // );
-
-        //await this.rollInitiative(documents.map((o) => o.id));
-
-        // Update the turn order
-        const priorState = foundry.utils.deepClone(this.current);
-        const combatant = this.combatant;
-        this.setupTurns();
-        this.#recordPreviousState(priorState);
-
-        // When token (turns) are added or deleted this.turns likely points to the wrong turn.
-        // Adjust turn order to keep the current Combatant the same (SEGMENT is important for HeroSystem)
-        let sameTurn = this.turns.findIndex(
-            (t) =>
-                t.id === combatant?.id &&
-                t.flags.segment === combatant?.flags.segment &&
-                t.initiative === combatant?.initiative,
-        );
-        if (sameTurn < 0) sameTurn = this.turn;
-
-        const adjustedTurn = sameTurn !== this.turn ? sameTurn : undefined;
-        if (options.turnEvents !== false && adjustedTurn) {
-            this._manageTurnEvents(adjustedTurn);
-        }
-
-        // Render the Collection
-        if (this.active && options.render !== false) {
-            this.collection.render();
+                // if (spd < 1 && segment === 12) return true;
+                // if (spd === undefined && segment === 12) return true;
+                return false;
         }
     }
 
     /**
-     * Update the previous turn data.
-     * Compare the state with the new current state. Only update the previous state if there is a difference.
-     * @param {CombatHistoryData} priorState      A cloned copy of the current history state before changes
+     * Get the current history state of the Combat encounter.
+     * @param {Combatant} [combatant]       The new active combatant
+     * @returns {CombatHistoryData}
+     * @protected
      */
-    #recordPreviousState(priorState) {
-        const current = this.current;
-        const hasChanged =
-            current.combatantId !== priorState.combatantId ||
-            current.round !== priorState.round ||
-            current.turn !== priorState.turn;
-        if (hasChanged) this.previous = priorState; // FoundytVTT V11
-        return hasChanged; // FoundtyVTT v12
+    _getCurrentState(combatant) {
+        combatant ||= this.combatant;
+        return {
+            round: this.round,
+            turn: this.turn ?? null,
+            combatantId: combatant?.id || null,
+            tokenId: combatant?.tokenId || null,
+            segment: combatant?.flags.segment || null,
+            name: combatant?.token?.name || combatant?.actor?.name || null,
+            initiative: combatant?.initiative || null,
+        };
     }
 
-    async _onActorDataUpdate(...args) {
-        // Only run this once regardless of how many GM's
-        if (!game.users.activeGM?.isSelf) {
-            this.setupTurns();
-            if (this.active) this.collection.render();
-            return;
-        }
-
+    /**
+     * Begin the combat encounter, advancing to round 1 and turn 1
+     * @returns {Promise<Combat>}
+     */
+    async startCombat() {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | _onActorDataUpdate`, this);
+            console.debug(`Hero | extraCombatants`);
         }
-        super._onActorDataUpdate(...args);
-        this.setupTurns();
-        if (this.active) this.collection.render();
+        // Hero combats start with round 1 and segment 12.
+        const firstSegment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || 0;
+
+        this._playCombatSound("startEncounter");
+        const updateData = {
+            round: 1,
+            turn: firstSegment12turn,
+            "flags.-=postSegment12Round": null,
+            "flags.-heroCurrent": null,
+        };
+        Hooks.callAll("combatStart", this, updateData);
+        return this.update(updateData);
     }
 
     /**
@@ -532,11 +410,33 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onStartTurn(combatant) {
-        //console.log("_onStartTurn", combatant.name, this.current);
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onStartTurn: ${combatant.name}`);
+        }
+
+        // Only run onStartTurn on our first combatant per segment
+        const lightningReflexes = combatant.actor?.items.find(
+            (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+        );
 
         await super._onStartTurn(combatant);
 
         if (!combatant) return;
+
+        // Save some properties for future support for rewinding combat tracker
+        // TODO: Include charges for various items
+        combatant.flags.heroHistory ||= {};
+        if (combatant.actor) {
+            combatant.flags.heroHistory[
+                `r${String(this.round).padStart(2, "0")}s${String(this.flags.segment).padStart(2, "0")}`
+            ] = {
+                end: combatant.actor.system.characteristics.end?.value,
+                stun: combatant.actor.system.characteristics.stun?.value,
+                body: combatant.actor.system.characteristics.body?.value,
+            };
+            const updates = [{ _id: combatant.id, "flags.heroHistory": combatant.flags.heroHistory }];
+            this.updateEmbeddedDocuments("Combatant", updates);
+        }
 
         // Expire Effects
         // We expire on our phase, not on our segment.
@@ -544,7 +444,17 @@ export class HeroSystem6eCombat extends Combat {
 
         // Reset movement history
         if (window.dragRuler) {
-            await dragRuler.resetMovementHistory(this, combatant.id);
+            const dragRulerCombatant = this.getCombatantByToken(combatant.tokenId);
+            if (dragRulerCombatant) {
+                await dragRuler.resetMovementHistory(this, dragRulerCombatant.id);
+            } else {
+                console.error("Unable to find dragRulerCombatant");
+            }
+        }
+
+        if (lightningReflexes && !combatant.flags.lightningReflexes) {
+            console.log("Early exit for onStartTurn for non-lightning reflexes combatant");
+            return;
         }
 
         // STUNNING
@@ -591,7 +501,7 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        if (content != "" && !this.combatant.isFake && spentEnd > 0) {
+        if (content != "" && spentEnd > 0) {
             let segment = this.combatant.flags.segment;
             let value = parseInt(this.combatant.actor.system.characteristics.end.value);
             let newEnd = value;
@@ -647,6 +557,9 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndTurn(combatant) {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onEndTurn: ${combatant.name}`);
+        }
         super._onEndTurn(combatant);
 
         // At the end of the Segment, any non-Persistent Powers, and any Skill Levels of any type, turn off for STUNNED actors.
@@ -683,6 +596,14 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
+    async _onEndSegment() {
+        console.log("empty and never called");
+    }
+
+    async _onStartSegment() {
+        console.log("empty and never called");
+    }
+
     /**
      * A workflow that occurs at the end of each Combat Round.
      * This workflow occurs after the Combat document update, prior round information exists in this.previous.
@@ -692,6 +613,9 @@ export class HeroSystem6eCombat extends Combat {
      * @protected
      */
     async _onEndRound() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | _onEndRound`);
+        }
         super._onEndRound();
 
         // Make really sure we only call at the end of the round
@@ -700,9 +624,10 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
-    // TODO: Replace with PostSegment12 activities.
-    // Such as automatic recovery
     async PostSegment12() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | PostSegment12`);
+        }
         // POST-SEGMENT 12 RECOVERY
         // After Segment 12 each Turn, all characters (except those deeply
         // unconscious or holding their breath) get a free Post-Segment 12
@@ -713,7 +638,7 @@ export class HeroSystem6eCombat extends Combat {
         // So if we go back in time, then forward again, skip PostSegment12
         if (this.flags.postSegment12Round?.[this.round]) {
             const content = `Post-Segment 12 (Turn ${this.round - 1})
-            <p>Skipping because this has already been performed on this turn during this combat.  
+            <p>Skipping because this has already been performed on this turn during this combat.
             This typically occurs when rewinding combat or during speed changes.</p>`;
             const chatData = {
                 user: game.user._id,
@@ -760,11 +685,14 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "pcEndOnly" && actor.type === "pc")
             ) {
                 // Make sure combatant is visible in combat tracker
-                if (!combatant.hidden) {
-                    content += "<li>" + (await combatant.actor.TakeRecovery()) + "</li>";
-                } else {
-                    hasHidden = true;
-                    contentHidden += "<li>" + (await combatant.actor.TakeRecovery()) + "</li>";
+                const recoveryText = await combatant.actor.TakeRecovery(false, combatant.token);
+                if (recoveryText) {
+                    if (!combatant.hidden && combatant.hasPlayerOwner) {
+                        content += "<li>" + recoveryText + "</li>";
+                    } else {
+                        hasHidden = true;
+                        contentHidden += "<li>" + recoveryText + "</li>";
+                    }
                 }
 
                 // END RESERVE
@@ -810,24 +738,14 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
-    /**
-     * Begin the combat encounter, advancing to round 1 and turn 1
-     * @returns {Promise<Combat>}
-     */
-    async startCombat() {
-        // Don't call super because we start on segment 12 which is never turn 0.
-        //await super.startCombat();
-
-        this._playCombatSound("startEncounter");
-        const turn = this.turns.findIndex((o) => o.flags.segment === 12) || 1;
-        const updateData = {
-            round: 1,
-            turn: turn,
-            previous: { round: 1, turn: Math.max(0, turn - 1) },
-            "flags.-=postSegment12Round": null,
-        };
-        Hooks.callAll("combatStart", this, updateData);
-        await this.update(updateData);
+    getUniqueCombatants() {
+        const results = [];
+        for (const c of this.combatants.values()) {
+            if (!results.find((o) => o.token.object.id === c.token.object?.id)) {
+                results.push(c);
+            }
+        }
+        return results;
     }
 
     /**
@@ -835,171 +753,69 @@ export class HeroSystem6eCombat extends Combat {
      * @returns {Promise<Combat>}
      */
     async previousTurn() {
-        //console.log("previousTurn");
         if (this.turn === 0 && this.round === 0) return this;
         else if (this.turn <= 0 && this.turn !== null) return this.previousRound();
+        let previousTurn = (this.turn ?? this.turns.length) - 1;
 
         // Hero combats start with round 1 and segment 12.
         // So anything less than segment 12 will call previousTurn
-        let segment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || -1;
-        if (this.round <= 1 && this.turn <= segment12turn) {
-            return this.previousRound();
-        }
-
-        let previousTurn = (this.turn ?? this.turns.length) - 1;
-
-        // Determine segment
-        let segment = this.combatant.flags.segment;
-        let segment_prev = this.turns[previousTurn].flags.segment;
-        let advanceTime = segment_prev - segment;
-        if (advanceTime > 0) {
-            advanceTime = 0;
+        if (this.round <= 1) {
+            const segment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || 0;
+            if (this.turn <= segment12turn) {
+                return this.previousRound();
+            }
         }
 
         // Update the document, passing data through a hook first
         const updateData = { round: this.round, turn: previousTurn };
-        const updateOptions = { advanceTime, direction: -1 };
+        const updateOptions = { direction: -1, worldTime: { delta: -1 * CONFIG.time.turnTime } };
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
-        return this.update(updateData, updateOptions);
+        await this.update(updateData, updateOptions);
+        return;
     }
 
-    /**
-     * Rewind the combat to the previous round
-     * @returns {Promise<Combat>}
-     */
-    async previousRound() {
-        //console.log("previousRound");
-        let turn = this.round === 0 ? 0 : Math.max(this.turns.length - 1, 0);
-        if (this.turn === null) turn = null;
-        let round = Math.max(this.round - 1, 0);
-        //let advanceTime = -1 * (this.turn || 0) * CONFIG.time.turnTime;
-        //if (round > 0) advanceTime -= HERO.time.turn; //CONFIG.time.roundTime;
+    // async setHeroCombatTurn() {
+    //     if (!this.flags.heroCurrent) return ;
+    //     console.log("setHeroCombatTurn");
+    // }
 
-        // Determine segment
-        let segment = this.turns[turn]?.flags.segment || null;
-        let segment_prev = this.combatant?.flags.segment || null;
-        // if (round > 0) {
-        //     segment += 12;
-        // }
-        let advanceTime = segment_prev - segment;
-
-        // Hero combats start with round 1 and segment 12.
-        // So anything less than segment 12 will call previousTurn
-        let segment12turn = this.turns.findIndex((o) => o.flags.segment === 12) || -1;
-        if (round <= 1 && turn < segment12turn) {
-            round = 0;
-            turn = null;
-        }
-        if (round == 0) {
-            turn = null;
-        }
-
-        // Update the document, passing data through a hook first
-        const updateData = { round, turn };
-        const updateOptions = { advanceTime, direction: -1 };
-        Hooks.callAll("combatRound", this, updateData, updateOptions);
-        return this.update(updateData, updateOptions);
-    }
-
-    /**
-     * Advance the combat to the next turn
-     * @returns {Promise<Combat>}
-     */
-    async nextTurn() {
+    getCombatTurnHero(priorState) {
         if (CONFIG.debug.combat) {
-            console.debug(`Hero | nextTurn`);
-        }
-        let turn = this.turn ?? -1;
-        let skip = this.settings.skipDefeated;
-
-        // Determine the next turn number
-        let next = null;
-        if (skip) {
-            for (let [i, t] of this.turns.entries()) {
-                if (i <= turn) continue;
-                if (t.isDefeated) continue;
-                next = i;
-                break;
-            }
-        } else next = turn + 1;
-
-        // Maybe advance to the next round
-        let round = this.round;
-        if (this.round === 0 || next === null || next >= this.turns.length) {
-            return this.nextRound();
+            console.debug(`Hero | getCombatTurnHero`, priorState);
         }
 
-        // Determine segment
-        let segment = this.combatant.flags.segment;
-        let segment_next = this.turns[next].flags.segment;
-        if (segment_next < segment) {
-            segment_next += 12;
+        // Don't bother when combat tracker is empty
+        if (this.turns.length === 0) return this.turn;
+
+        // Combat not started
+        if (this.round === 0) return this.turn;
+
+        // Find Exact match
+        let combatTurn = this.turns.findIndex(
+            (o) =>
+                o.id === priorState.combatantId &&
+                o.flags.segment === priorState.segment &&
+                o.initiative === priorState.initiative,
+        );
+
+        // find closest match
+        if (combatTurn === -1) {
+            combatTurn = this.turns.findIndex(
+                (o) =>
+                    (o.flags.segment === priorState.segment && o.initiative <= priorState.initiative) ||
+                    o.flags.segment > priorState.segment,
+            );
         }
 
-        const advanceTime = segment_next - segment;
-
-        // Update the document, passing data through a hook first
-        const updateData = { round, turn: next };
-        const updateOptions = {}; // { advanceTime: advanceTime, direction: 1 };
-
-        // Advance worldtime NOW, before we _onStartTurn gets called.
-        // Seems to be a bug in core foundryVTT.
-        if (isNaN(advanceTime)) {
-            console.error("advanceTimeis NaN");
-        } else {
-            await game.time.advance(advanceTime);
+        if (combatTurn > -1) {
+            return combatTurn;
         }
 
-        Hooks.callAll("combatTurn", this, updateData, updateOptions);
-        let x = await this.update(updateData, updateOptions);
-        console.log(x);
-        return x;
-    }
+        // There may be oddities when Initiative changes at last turn
+        ui.notifications.warn(
+            "Combat Tracker combatants were modified. Unable to determine which combatant should be active.",
+        );
 
-    /**
-     * Advance the combat to the next round
-     * @returns {Promise<Combat>}
-     */
-    async nextRound() {
-        let turn = this.turn === null ? null : 0; // Preserve the fact that it's no-one's turn currently.
-        if (this.settings.skipDefeated && turn !== null) {
-            turn = this.turns.findIndex((t) => !t.isDefeated);
-            if (turn === -1) {
-                ui.notifications.warn("COMBAT.NoneRemaining", {
-                    localize: true,
-                });
-                turn = 0;
-            }
-        }
-
-        let nextRound = this.round + 1;
-
-        // Determine segment
-        let segment = this.combatant?.flags.segment || null;
-        let segment_next = this.turns[0]?.flags.segment || null;
-        segment_next += 12;
-        const advanceTime = segment_next - segment;
-
-        // Update the document, passing data through a hook first
-        const updateData = { round: nextRound, turn };
-        const updateOptions = { advanceTime, direction: 1 };
-        Hooks.callAll("combatRound", this, updateData, updateOptions);
-        return this.update(updateData, updateOptions);
+        return this.turn;
     }
 }
-
-// class HeroCombatant extends Combatant {
-//     constructor(combatant) {
-//         super();
-//         Object.assign(this, combatant);
-//         this.id = combatant.id;
-//     }
-
-//     id = null;
-//     initiative = null; //Override
-//     turn = null;
-//     segment = null;
-//     alias = null;
-//     isFake = false;
-//     //hasRolled = true; // Initiative is static, but actor DEX/INT/SPD might change
-// }

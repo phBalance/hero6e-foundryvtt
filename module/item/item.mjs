@@ -233,7 +233,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     async roll(event) {
-        if (!this.actor.canAct(true)) return;
+        if (!this.actor.canAct(true, event)) return;
 
         // TODO: Convert to behaviors when powers are fully updated
         switch (this.system.subType || this.type) {
@@ -3059,6 +3059,11 @@ export class HeroSystem6eItem extends Item {
                 }
                 break;
 
+            case "LIGHTNING_REFLEXES_ALL":
+                system.description = `${system.ALIAS}${system.OPTION_ALIAS ? `: ${system.OPTION_ALIAS}` : ``}`;
+                system.name = `${system.NAME || system.ALIAS}`;
+                break;
+
             case "DARKNESS":
             case "INVISIBILITY":
                 // Invisibility to Hearing and Touch Groups  (15 Active Points); Conditional Power Only vs organic perception (-1/2)
@@ -3259,7 +3264,6 @@ export class HeroSystem6eItem extends Item {
             case "NIGHTVISION":
                 system.description = `${system.ALIAS}`;
                 break;
-
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
