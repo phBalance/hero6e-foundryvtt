@@ -35,7 +35,7 @@
 
             {{#if combatCount}}
             {{#if combat.round}}
-            <h3 class="encounter-title noborder">{{localize 'COMBAT.Round'}} {{combat.round}}</h3>
+            <h3 class="encounter-title noborder">{{localize 'COMBAT.Turn'}} {{combat.round}}</h3>
             {{else}}
             <h3 class="encounter-title noborder">{{localize 'COMBAT.NotStarted'}}</h3>
             {{/if}}
@@ -111,7 +111,7 @@
 
                         <div class="token-initiative">
                             {{#if this.hasRolled}}
-                            <span class="initiative" data-tooltip="{{{this.initiativeTooltip}}}" >{{this.initiative}}</span>
+                            <span class="initiative" data-tooltip="{{{this.initiativeTooltip}}}" >{{this.initiative}} {{this.initiativeCharacteristic}}</span>
                             {{!-- {{else if this.owner}}
                             <a class="combatant-control roll" aria-label="{{localize 'COMBAT.InitiativeRoll'}}" role="button" data-tooltip="COMBAT.InitiativeRoll" data-control="rollInitiative"></a> --}}
                             {{/if}}
@@ -137,7 +137,7 @@
             {{/if}}
         {{else if control}}
         <a class="combat-control" aria-label="{{localize 'COMBAT.TurnPrev'}}" role="button"  data-tooltip="COMBAT.TurnPrev" data-control="previousTurn"><i class="fas fa-arrow-left"></i></a>
-        <a class="combat-control center" aria-label="{{localize 'COMBAT.TurnEnd'}}" role="button"  data-control="nextTurn">{{localize 'COMBAT.TurnEnd'}}</a>
+        <a class="combat-control center" aria-label="{{localize 'COMBAT.PhaseEnd'}}" role="button"  data-control="nextTurn">{{localize 'COMBAT.PhaseEnd'}}</a>
         <a class="combat-control" aria-label="{{localize 'COMBAT.TurnNext'}}" role="button"  data-tooltip="COMBAT.TurnNext" data-control="nextTurn"><i class="fas fa-arrow-right"></i></a>
         {{/if}}
     {{/if}}

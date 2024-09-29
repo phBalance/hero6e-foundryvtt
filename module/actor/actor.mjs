@@ -292,14 +292,15 @@ export class HeroSystem6eActor extends Actor {
         // to turn off Powers, and Persistent Powers that don’t cost END
         // remain in effect.
 
-        let token = this.token;
-        let speaker = ChatMessage.getSpeaker({ actor: this, token });
-        speaker["alias"] = this.name;
+        const token = this.token || this.getActiveTokens()[0];
+        const speaker = ChatMessage.getSpeaker({ actor: this, token });
+        const tokenName = token?.name || this.name;
+        speaker["alias"] = game.user.name; //game.token?.name || this.name;
 
         // A character who holds their breath does not get to Recover (even
         // on Post-Segment 12)
         if (this.statuses.has("holdingBreath")) {
-            const content = this.name + " <i>is holding their breath</i>.";
+            const content = `${tokenName} <i>is holding their breath</i>.`;
             if (asAction) {
                 const chatData = {
                     user: game.user._id,
@@ -343,7 +344,7 @@ export class HeroSystem6eActor extends Actor {
             { hideChatMessage: true },
         );
 
-        let content = this.name + ` <i>Takes a Recovery</i>`;
+        let content = `${tokenName} <i>Takes a Recovery</i>`;
         if (deltaEnd || deltaStun) {
             content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
         } else {
@@ -355,6 +356,7 @@ export class HeroSystem6eActor extends Actor {
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             content: content,
             speaker: speaker,
+            whisper: [...ChatMessage.getWhisperRecipients(this.name), ...ChatMessage.getWhisperRecipients("GM")],
         };
 
         if (asAction) {

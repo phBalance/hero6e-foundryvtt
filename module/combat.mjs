@@ -170,9 +170,11 @@ export class HeroSystem6eCombat extends Combat {
 
     async assignSegments(tokenId) {
         if (!tokenId) return;
+
         const tokenCombatants = this.combatants.filter((o) => o.tokenId === tokenId);
         const tokenCombatantCount = tokenCombatants.length;
         if (tokenCombatantCount === 0) return;
+        if (!tokenCombatants[0]?.isOwner) return;
         const actor = tokenCombatants[0].actor;
         if (!actor) return;
         const lightningReflexes = actor?.items.find(
@@ -182,6 +184,11 @@ export class HeroSystem6eCombat extends Combat {
         for (let c = 0; c < tokenCombatantCount; c++) {
             const _combatant = tokenCombatants[c];
             const spd = parseInt(_combatant.actor?.system.characteristics.spd.value);
+            const initiativeTooltip = `${
+                _combatant.flags.initiative
+            }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
+                lightningReflexes?.system.LEVELS ? `${lightningReflexes.system.LEVELS}LR` : ""
+            }`;
             if (spd) {
                 const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
                 let update = {
@@ -189,6 +196,7 @@ export class HeroSystem6eCombat extends Combat {
                     initiative: _combatant.flags.initiative,
                     "flags.segment": segment,
                     "flags.spd": spd,
+                    "flags.initiativeTooltip": initiativeTooltip,
                 };
                 if (lightningReflexes && c % 2 === 0) {
                     update = {
@@ -644,7 +652,7 @@ export class HeroSystem6eCombat extends Combat {
         content += "<ul>";
         contentHidden += "<ul>";
         let hasHidden = false;
-        for (const combatant of this.combatants.filter((o) => !o.defeated)) {
+        for (const combatant of this.getUniqueCombatants().filter((o) => !o.defeated)) {
             const actor = combatant.actor;
 
             // Make sure we have a valid actor
@@ -670,7 +678,7 @@ export class HeroSystem6eCombat extends Combat {
                 // Make sure combatant is visible in combat tracker
                 const recoveryText = await combatant.actor.TakeRecovery();
                 if (recoveryText) {
-                    if (!combatant.hidden) {
+                    if (!combatant.hidden && combatant.hasPlayerOwner) {
                         content += "<li>" + recoveryText + "</li>";
                     } else {
                         hasHidden = true;
@@ -719,6 +727,16 @@ export class HeroSystem6eCombat extends Combat {
                 whisper: ChatMessage.getWhisperRecipients("GM"),
             });
         }
+    }
+
+    getUniqueCombatants() {
+        const results = [];
+        for (const c of this.combatants.values()) {
+            if (!results.find((o) => o.token.object.id === c.token.object?.id)) {
+                results.push(c);
+            }
+        }
+        return results;
     }
 
     /**
