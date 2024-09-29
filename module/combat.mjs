@@ -206,6 +206,11 @@ export class HeroSystem6eCombat extends Combat {
                         "flags.lightningReflexes.name":
                             lightningReflexes.system.OPTION_ALIAS || lightningReflexes.system.INPUT || "All Actions",
                     };
+                } else {
+                    update = {
+                        ...update,
+                        "flags.lightningReflexes": null,
+                    };
                 }
                 // if (
                 //     update.initiative != _combatant.initiative ||
