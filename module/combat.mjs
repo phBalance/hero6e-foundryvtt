@@ -198,14 +198,14 @@ export class HeroSystem6eCombat extends Combat {
                     "flags.spd": spd,
                     "flags.initiativeTooltip": `${
                         _combatant.flags.initiative
-                    }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD`,
+                    }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD`,
                 };
                 if (lightningReflexes && c % 2 === 0) {
                     update = {
                         ...update,
                         "flags.initiativeTooltip": `${
                             _combatant.flags.initiative
-                        }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
+                        }${_combatant.flags.initiativeCharacteristic?.toUpperCase()} ${spd}SPD ${
                             lightningReflexes.system.LEVELS
                         }LR`,
                         initiative: _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
