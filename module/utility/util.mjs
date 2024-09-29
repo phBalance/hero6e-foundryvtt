@@ -148,6 +148,7 @@ export async function getTemporaryEffectsOwnedByActorInCombat(actor) {
                     effects.push(ae);
                 }
             } else {
+                herosyste;
                 // This is likely a core effect, CSL, stunned, etc
                 if (ae.target.id === actor.id) {
                     effects.push(ae);
