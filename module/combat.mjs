@@ -184,11 +184,11 @@ export class HeroSystem6eCombat extends Combat {
         for (let c = 0; c < tokenCombatantCount; c++) {
             const _combatant = tokenCombatants[c];
             const spd = parseInt(_combatant.actor?.system.characteristics.spd.value);
-            const initiativeTooltip = `${
-                _combatant.flags.initiative
-            }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
-                lightningReflexes?.system.LEVELS ? `${lightningReflexes.system.LEVELS}LR` : ""
-            }`;
+            // const initiativeTooltip = `${
+            //     _combatant.flags.initiative
+            // }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
+            //     lightningReflexes?.system.LEVELS ? `${lightningReflexes.system.LEVELS}LR` : ""
+            // }`;
             if (spd) {
                 const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
                 let update = {
@@ -196,11 +196,18 @@ export class HeroSystem6eCombat extends Combat {
                     initiative: _combatant.flags.initiative,
                     "flags.segment": segment,
                     "flags.spd": spd,
-                    "flags.initiativeTooltip": initiativeTooltip,
+                    "flags.initiativeTooltip": `${
+                        _combatant.flags.initiative
+                    }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD`,
                 };
                 if (lightningReflexes && c % 2 === 0) {
                     update = {
                         ...update,
+                        "flags.initiativeTooltip": `${
+                            _combatant.flags.initiative
+                        }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
+                            lightningReflexes.system.LEVELS
+                        }LR`,
                         initiative: _combatant.flags.initiative + parseInt(lightningReflexes?.system.LEVELS || 0),
                         "flags.lightningReflexes.levels": parseInt(lightningReflexes.system.LEVELS),
                         "flags.lightningReflexes.name":
