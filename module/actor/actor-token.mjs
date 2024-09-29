@@ -90,6 +90,14 @@ export class HeroSystem6eToken extends Token {
         await super.toggleCombat(combat);
     }
 
+    _canDragLeftStart(user, event) {
+        let result = super._canDragLeftStart(user, event);
+        if (result && this.actor) {
+            result = this.actor.canAct(true, event);
+        }
+        return result;
+    }
+
     _drawBar(number, bar, data) {
         // Ignore if bar3 not set
         if (!game.settings.get(game.system.id, "bar3")) {

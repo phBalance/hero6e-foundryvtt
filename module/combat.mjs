@@ -64,7 +64,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // Determine the turn order and the current turn
         const turns = this.combatants.contents.sort(this._sortCombatants);
-        if (this.turn !== null) this.turn = Math.clamp(this.turn, 0, turns.length - 1);
+        if (this.turn !== null) this.turn = clamp(this.turn, 0, turns.length - 1);
 
         // Update state tracking
         let c = turns[this.turn];
@@ -183,7 +183,7 @@ export class HeroSystem6eCombat extends Combat {
         const updates = [];
         for (let c = 0; c < tokenCombatantCount; c++) {
             const _combatant = tokenCombatants[c];
-            const spd = parseInt(_combatant.actor?.system.characteristics.spd.value);
+            const spd = clamp(parseInt(_combatant.actor?.system.characteristics.spd.value), 1, 12);
             // const initiativeTooltip = `${
             //     _combatant.flags.initiative
             // }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
@@ -249,7 +249,7 @@ export class HeroSystem6eCombat extends Combat {
                         o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
                 );
                 const targetCombatantCount =
-                    parseInt(actor.system.characteristics.spd.value) * (lightningReflexes ? 2 : 1);
+                    clamp(parseInt(actor.system.characteristics.spd.value), 1, 12) * (lightningReflexes ? 2 : 1);
                 const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
                 const tokenCombatantCount = tokenCombatants.length;
 
@@ -414,26 +414,10 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`Hero | _onStartTurn: ${combatant.name}`);
         }
 
-        // Lets check to see if combatants were re-ordered
-        // try {
-        //     if (
-        //         this.flags.heroCurrent &&
-        //         this.turns[this.flags.heroCurrent.turn]?.id != this.flags.heroCurrent?.combatantId
-        //     ) {
-        //         // find the right turn
-        //         let combatTurn = this.turns.find((o) => o.tokenId === this.flags.heroCurrent.tokenId);
-        //         if (combatTurn != null) {
-        //             debugger;
-        //         }
-        //         debugger;
-        //     }
-        // } catch (ex) {
-        //     console.error(ex);
-        //     debugger;
-        // }
-
-        // // We use heroCurrent to keep our segment & initiative relatively stable when combatants are added/removed.
-        // this.update({ "flags.heroCurrent": this.current });
+        // Only run onStartTurn on our first combatant per segment
+        const lightningReflexes = combatant.actor?.items.find(
+            (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
+        );
 
         await super._onStartTurn(combatant);
 
@@ -444,7 +428,7 @@ export class HeroSystem6eCombat extends Combat {
         combatant.flags.heroHistory ||= {};
         if (combatant.actor) {
             combatant.flags.heroHistory[
-                `r${String(this.round).padStart(2, "0")}s${String(this.segment).padStart(2, "0")}`
+                `r${String(this.round).padStart(2, "0")}s${String(this.flags.segment).padStart(2, "0")}`
             ] = {
                 end: combatant.actor.system.characteristics.end?.value,
                 stun: combatant.actor.system.characteristics.stun?.value,
@@ -466,6 +450,11 @@ export class HeroSystem6eCombat extends Combat {
             } else {
                 console.error("Unable to find dragRulerCombatant");
             }
+        }
+
+        if (lightningReflexes && !combatant.flags.lightningReflexes) {
+            console.log("Early exit for onStartTurn for non-lightning reflexes combatant");
+            return;
         }
 
         // STUNNING
@@ -512,7 +501,7 @@ export class HeroSystem6eCombat extends Combat {
             }
         }
 
-        if (content != "" && !this.combatant.isFake && spentEnd > 0) {
+        if (content != "" && spentEnd > 0) {
             let segment = this.combatant.flags.segment;
             let value = parseInt(this.combatant.actor.system.characteristics.end.value);
             let newEnd = value;
@@ -607,6 +596,14 @@ export class HeroSystem6eCombat extends Combat {
         }
     }
 
+    async _onEndSegment() {
+        console.log("empty and never called");
+    }
+
+    async _onStartSegment() {
+        console.log("empty and never called");
+    }
+
     /**
      * A workflow that occurs at the end of each Combat Round.
      * This workflow occurs after the Combat document update, prior round information exists in this.previous.
@@ -688,7 +685,7 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "pcEndOnly" && actor.type === "pc")
             ) {
                 // Make sure combatant is visible in combat tracker
-                const recoveryText = await combatant.actor.TakeRecovery();
+                const recoveryText = await combatant.actor.TakeRecovery(false, combatant.token);
                 if (recoveryText) {
                     if (!combatant.hidden && combatant.hasPlayerOwner) {
                         content += "<li>" + recoveryText + "</li>";

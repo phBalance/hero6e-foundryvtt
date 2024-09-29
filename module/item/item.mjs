@@ -233,7 +233,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     async roll(event) {
-        if (!this.actor.canAct(true)) return;
+        if (!this.actor.canAct(true, event)) return;
 
         // TODO: Convert to behaviors when powers are fully updated
         switch (this.system.subType || this.type) {
