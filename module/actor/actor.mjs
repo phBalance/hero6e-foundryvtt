@@ -297,6 +297,28 @@ export class HeroSystem6eActor extends Actor {
         const tokenName = token?.name || this.name;
         speaker["alias"] = game.user.name; //game.token?.name || this.name;
 
+        // Bases don't get/need a recovery
+        if (this.type === "base2") {
+            console.log(`${token?.name || this.name} has type ${this.type} and does not get/need a recovery.`);
+            if (asAction) {
+                ui.notifications.warn(
+                    `${token?.name || this.name} has type ${this.type} and does not get/need a recovery.`,
+                );
+            }
+            return `${tokenName} does not get a recovery.`;
+        }
+
+        // Catchall for no stun or end (shouldn't be needed as base type check above should be sufficient)
+        if ((this.system.characteristics.end?.max || 0) === 0 && (this.system.characteristics.stun?.max || 0) === 0) {
+            console.log(`${token?.name || this.name} has no STUN or END thus does not get/need a recovery.`);
+            if (asAction) {
+                ui.notifications.warn(
+                    `${token?.name || this.name} has no STUN or END thus does not get/need a recovery.`,
+                );
+            }
+            return `${tokenName} does not get a recovery.`;
+        }
+
         // A character who holds their breath does not get to Recover (even
         // on Post-Segment 12)
         if (this.statuses.has("holdingBreath")) {

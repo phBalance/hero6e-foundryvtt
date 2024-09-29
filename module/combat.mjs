@@ -183,7 +183,7 @@ export class HeroSystem6eCombat extends Combat {
         const updates = [];
         for (let c = 0; c < tokenCombatantCount; c++) {
             const _combatant = tokenCombatants[c];
-            const spd = clamp(parseInt(_combatant.actor?.system.characteristics.spd.value), 1, 12);
+            const spd = clamp(parseInt(_combatant.actor?.system.characteristics.spd?.value || 0), 1, 12);
             // const initiativeTooltip = `${
             //     _combatant.flags.initiative
             // }${_combatant.flags.initiativeCharacteristic.toUpperCase()} ${spd}SPD ${
@@ -249,7 +249,7 @@ export class HeroSystem6eCombat extends Combat {
                         o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
                 );
                 const targetCombatantCount =
-                    clamp(parseInt(actor.system.characteristics.spd.value), 1, 12) * (lightningReflexes ? 2 : 1);
+                    clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) * (lightningReflexes ? 2 : 1);
                 const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
                 const tokenCombatantCount = tokenCombatants.length;
 
@@ -441,6 +441,12 @@ export class HeroSystem6eCombat extends Combat {
         // Expire Effects
         // We expire on our phase, not on our segment.
         await expireEffects(combatant.actor);
+
+        // Stop holding
+        if (combatant.actor.statuses.has("holding")) {
+            const ae = combatant.actor.effects.find((effect) => effect.statuses.has("holding"));
+            combatant.actor.removeActiveEffect(ae);
+        }
 
         // Reset movement history
         if (window.dragRuler) {

@@ -7,6 +7,17 @@
 - Using STUN for END now uses skinned dice. [#1212](https://github.com/dmdorman/hero6e-foundryvtt/issues/1212)
 - Make HeroRoller class available for script macros. [#1221](https://github.com/dmdorman/hero6e-foundryvtt/issues/1221)
 - When configuring CSL's with all attacks, the attack selections are no longer displayed. [#1226](https://github.com/dmdorman/hero6e-foundryvtt/issues/1226)
+- Fixed mental powers displays wrong effect for damage rolls. [#1258](https://github.com/dmdorman/hero6e-foundryvtt/issues/1258)
+- Reworked Combat Tracker
+  - The background color of combatants changes based on token disposition.  Can be changed in settings.
+  - END for powers is spent on first phase of token's segment (only important with Lightning Reflexes).
+  - Holding status now shows token image on right hand side of combat tracker.
+  - Drag Ruler now tracks movement correctly between phases. [#1247](https://github.com/dmdorman/hero6e-foundryvtt/issues/1247)
+- Fixed issue with BASE's taking a recovery.  They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
+
+
+
+
 
 ## Version 3.0.96
 
