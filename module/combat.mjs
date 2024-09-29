@@ -459,7 +459,7 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         if (lightningReflexes && !combatant.flags.lightningReflexes) {
-            console.log("Early exit for onStartTurn for non-lightning reflexes combatant");
+            //console.log("Early exit for onStartTurn for non-lightning reflexes combatant");
             return;
         }
 
