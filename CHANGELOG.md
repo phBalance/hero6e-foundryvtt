@@ -13,7 +13,8 @@
   - END for powers is spent on first phase of token's segment (only important with Lightning Reflexes).
   - Holding status now shows token image on right hand side of combat tracker.
   - Drag Ruler now tracks movement correctly between phases. [#1247](https://github.com/dmdorman/hero6e-foundryvtt/issues/1247)
-- Fixed issue with BASE's taking a recovery.  They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
+- Fixed issue with BASES taking a recovery.  They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
+- You can now hold SHIFT to make attacks even when you get a cannot act message. [#1213](https://github.com/dmdorman/hero6e-foundryvtt/issues/1213)
 
 
 
