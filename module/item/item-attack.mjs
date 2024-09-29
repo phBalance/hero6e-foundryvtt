@@ -59,7 +59,7 @@ function isStunBasedEffectRoll(item) {
 }
 
 /// Dialog box for AttackOptions
-export async function AttackOptions(item, event) {
+export async function AttackOptions(item) {
     const actor = item.actor;
     const token = actor.getActiveTokens()[0];
 
