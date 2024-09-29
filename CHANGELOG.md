@@ -1,6 +1,7 @@
 # Releases
 
-## Version 3.0.97 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.97 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- FoundryVTT v12 is supported. Drag Ruler works with v12 although has a few minor bugs. We recommend upgrading to FoundryVTT 12 between your sessions when you do not have an active combat.  Support for FoundryVTT v11 will end soon.
 - Fix smart CSL selection for HTH and RANGED.
 - Fix apply knockback dialog for Firefox.
 - Applying knockback now rolls knockback skinned dice.
@@ -15,9 +16,6 @@
   - Drag Ruler now tracks movement correctly between phases. [#1247](https://github.com/dmdorman/hero6e-foundryvtt/issues/1247)
 - Fixed issue with BASES taking a recovery.  They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
 - You can now hold SHIFT to make attacks even when you get a cannot act message. [#1213](https://github.com/dmdorman/hero6e-foundryvtt/issues/1213)
-
-
-
 
 
 ## Version 3.0.96
