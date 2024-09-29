@@ -374,7 +374,6 @@ export class HeroSystem6eActor extends Actor {
     // When stunned, knockedout, etc you cannot act
     canAct(uiNotice, event) {
         let result = true;
-        let content = "${this.name} is ";
         let badStatus = [];
 
         if (this.statuses.has("knockedOut")) {
