@@ -91,6 +91,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
                 resource: resource,
                 canPing: combatant.sceneId === canvas.scene?.id && game.user.hasPermission("PING_CANVAS"),
                 segment: combatant.flags.segment,
+                holding: combatant.actor?.statuses.has("holding"),
             };
             //if (turn.initiative !== null && !Number.isInteger(turn.initiative)) hasDecimals = true;
             turn.css = [turn.active ? "active" : "", turn.hidden ? "hidden" : "", turn.defeated ? "defeated" : ""]

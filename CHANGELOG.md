@@ -1,12 +1,23 @@
 # Releases
 
-## Version 3.0.97 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.97 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- FoundryVTT v12 is supported. The latest Drag Ruler works with v12 although has a few minor bugs. We recommend upgrading to FoundryVTT 12 between your sessions when you do not have an active combat.  Support for FoundryVTT v11 will end soon.
 - Fix smart CSL selection for HTH and RANGED.
 - Fix apply knockback dialog for Firefox.
 - Applying knockback now rolls knockback skinned dice.
 - Using STUN for END now uses skinned dice. [#1212](https://github.com/dmdorman/hero6e-foundryvtt/issues/1212)
 - Make HeroRoller class available for script macros. [#1221](https://github.com/dmdorman/hero6e-foundryvtt/issues/1221)
 - When configuring CSL's with all attacks, the attack selections are no longer displayed. [#1226](https://github.com/dmdorman/hero6e-foundryvtt/issues/1226)
+- Fixed mental powers displays wrong effect for damage rolls. [#1258](https://github.com/dmdorman/hero6e-foundryvtt/issues/1258)
+- Reworked Combat Tracker
+  - The background color of combatants changes based on token disposition.  Can be changed in settings.
+  - END for powers is spent on first phase of token's segment (only important with Lightning Reflexes).
+  - Holding status now shows token image on right hand side of combat tracker.
+  - Drag Ruler now tracks movement correctly between phases. [#1247](https://github.com/dmdorman/hero6e-foundryvtt/issues/1247)
+  - Post segment 12 chat cards only show player recoveries to everyone.  Non-player recoveries are whispered to GM.
+- Fixed issue with BASES taking a recovery.  They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
+- You can now hold SHIFT to make attacks even when you get a cannot act message. [#1213](https://github.com/dmdorman/hero6e-foundryvtt/issues/1213)
+
 
 ## Version 3.0.96
 
