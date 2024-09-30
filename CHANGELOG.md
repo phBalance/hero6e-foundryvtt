@@ -1,6 +1,9 @@
 # Releases
 
-## Version 3.0.97 & 3.0.98 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.99 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- PENALTY_SKILL_LEVELS with all attacks no longer show all attacks in the power description.
+
+## Version 3.0.97 & 3.0.98
 - FoundryVTT v12 is supported. The latest Drag Ruler works with v12 although has a few minor bugs. We recommend upgrading to FoundryVTT 12 between your sessions when you do not have an active combat.  Support for FoundryVTT v11 will end soon.
 - Fix smart CSL selection for HTH and RANGED.
 - Fix apply knockback dialog for Firefox.
