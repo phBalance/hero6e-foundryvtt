@@ -3461,6 +3461,7 @@ export class HeroSystem6eItem extends Item {
                         // If the CLS applies to ALL attacks, don't bother to list them all.
                         if (this.system.XMLID === "COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
                         if (this.system.XMLID === "MENTAL_COMBAT_LEVELS" && this.system.OPTIONID === "ALL") break;
+                        if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.OPTIONID === "ALL") break;
 
                         // Otherwise add it to the list of ADDERS as normal.
                         if (adder.ALIAS.trim()) {
