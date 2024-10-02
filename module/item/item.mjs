@@ -1298,8 +1298,6 @@ export class HeroSystem6eItem extends Item {
                     }
                     item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
                 }
-                //todo: why parse if we already changed it to an int?
-                // todo: ok, wait, what?
                 item.system.dcv = parseInt(item.system.dcv).signedString();
                 item.system.dcvEstimated = (
                     dcv +
