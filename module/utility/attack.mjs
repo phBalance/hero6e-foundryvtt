@@ -1,10 +1,9 @@
-import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "./range.mjs";
-
+import { calculateDistanceBetween } from "./range.mjs";
 
 export class Attack {
     static async makeActionActiveEffects(action) {
         const cvModifiers = action.current.cvModifiers;
-        const item = action.system.item[action.current.itemId];
+        // const item = action.system.item[action.current.itemId];
 
         const actor = action.system.actor;
         Attack.removeActionActiveEffects(actor);
@@ -56,7 +55,7 @@ export class Attack {
             if (dcv < 0) {
                 icon = "icons/svg/downgrade.svg";
             }
-            label += `${comma?',':''} ${dcv.signedString()} DCV`;
+            label += `${comma ? "," : ""} ${dcv.signedString()} DCV`;
             comma = true;
             changes.push({
                 key: `system.characteristics.dcv.value`,
@@ -73,7 +72,7 @@ export class Attack {
         //     //     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
         //     // });
         // }
-        
+
         // todo: this disallows setting the dcv to x0
         if (cvModifier.cvMod.dcvMultiplier && cvModifier.cvMod.dcvMultiplier != 1) {
             const dcvMultiplier = cvModifier.cvMod.dcvMultiplier;
@@ -81,17 +80,17 @@ export class Attack {
             if (dcvMultiplier < 1) {
                 icon = "icons/svg/downgrade.svg";
             }
-            if(dcvMultiplier != 0 && dcvMultiplier < 1){
-                multiplierString = `1/${1.0/dcvMultiplier}`;
+            if (dcvMultiplier != 0 && dcvMultiplier < 1) {
+                multiplierString = `1/${1.0 / dcvMultiplier}`;
             }
-            label += `${comma?',':''} x${multiplierString} DCV`;
+            label += `${comma ? "," : ""} x${multiplierString} DCV`;
             changes.push({
                 key: `system.characteristics.dcv.value`,
                 value: cvModifier.cvMod.dcvMultiplier,
                 mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
             });
         }
-        if(changes.length < 1){
+        if (changes.length < 1) {
             console.warn("Effect would have no effect:", cvModifier);
             return;
         }
@@ -299,7 +298,7 @@ export class Attack {
             cvModifiers: [],
             results: [], // todo: for attacks that roll one effect and apply to multiple targets do something different here
         };
-        
+
         target.range = calculateDistanceBetween(system.attackerToken, targetedToken);
         if (item) {
             target.cvModifiers.push(
@@ -443,8 +442,8 @@ export class Attack {
             system.currentItem = maneuverItem;
             system.currentTargets = [maneuverTarget];
 
-            const multipleAttackItem = system.item[maneuver.itemId];
-            const xmlid = multipleAttackItem.system.XMLID;
+            // const multipleAttackItem = system.item[maneuver.itemId];
+            // const xmlid = multipleAttackItem.system.XMLID;
             // keep range mods to ourselves until we can agree on a single solution
             // current.attacks.forEach((attack)=>{ attack.targets.forEach((target)=>{
             //     current.ocvModifiers = [].concat(current.ocvModifiers, target.ocvModifiers );

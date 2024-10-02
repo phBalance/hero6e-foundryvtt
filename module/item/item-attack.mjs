@@ -302,7 +302,7 @@ export async function AttackToHit(item, options) {
     const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
-    
+
     const actor = item.actor;
     let effectiveItem = item;
 
@@ -414,11 +414,8 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    //todo: why parse if we already changed it to an int?
     let dcv = parseInt(item.system.dcv || 0);
-    let dmcv = parseInt(item.system.dmcv || 0);
 
-    // todo: move this into a more private space:
     const cvModifiers = action.current.cvModifiers;
 
     // Combat Skill Levels
@@ -436,9 +433,42 @@ export async function AttackToHit(item, options) {
         }
         dcv += csl.dcv;
         cvMod.dcv += csl.dcv;
-        // todo: I'm unsure that CSV will add to dcv and dmcv at the same time
-        dmcv += csl.dmcv;
     }
+
+    let dmcv = parseInt(item.system.dmcv || 0);
+    if (dmcv != 0) {
+        // Make sure we don't already have this activeEffect
+        let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
+        if (!prevActiveEffect) {
+            // Estimate of how many seconds the DCV penalty lasts (until next phase).
+            // In combat.js#_onStartTurn we remove this AE for exact timing.
+            let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
+            let _dcvText = "DMCV";
+            let _dcvValue = dmcv;
+
+            const activeEffect = {
+                label: `${item.name} ${_dcvValue.signedString()} ${_dcvText}`,
+                icon: dcv < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg",
+                changes: [
+                    {
+                        key: `system.characteristics.${_dcvText.toLowerCase()}.value`,
+                        value: _dcvValue,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ],
+                origin: item.uuid,
+                duration: {
+                    seconds: seconds,
+                },
+                flags: {
+                    nextPhase: true,
+                },
+            };
+            //await item.addActiveEffect(activeEffect);
+            await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        }
+    }
+
     Object.keys(skillLevelMods).forEach((key) => {
         const cvMod = Attack.makeCvModifierFromItem(
             action.system.item[key],
@@ -947,13 +977,6 @@ export async function AttackToHit(item, options) {
     return;
 }
 
-// given that actor's action, apply one or more effects that will modify the actor's OCV & DCV
-// according to their current action.
-// This includes all combat skill levels, overall levels, specific levels
-// multiple attacks / haymaker / brace
-
-function makeActionActiveEffect(){}
-
 function getAttackTags(item) {
     // Attack Tags
     let attackTags = [];
@@ -1015,13 +1038,13 @@ function getAttackTags(item) {
     for (const mod of item.system.MODIFIER || []) {
         switch (mod.XMLID) {
             case "AUTOFIRE":
-            {
-                const autoFireShots = parseInt(mod.OPTION_ALIAS.match(/\d+/));
-                attackTags.push({
-                    name: `${mod.ALIAS || mod.XMLID}(${autoFireShots})`,
-                    title: `${mod.OPTION_ALIAS || ""}`,
-                });
-            }
+                {
+                    const autoFireShots = parseInt(mod.OPTION_ALIAS.match(/\d+/));
+                    attackTags.push({
+                        name: `${mod.ALIAS || mod.XMLID}(${autoFireShots})`,
+                        title: `${mod.OPTION_ALIAS || ""}`,
+                    });
+                }
                 break;
 
             case "EXPLOSION":
@@ -1118,16 +1141,16 @@ export async function _onRollKnockback(event) {
     <form autocomplete="off">
         <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
-        2,
-        item.actor,
-    )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked into a solid object, 
+                2,
+                item.actor,
+            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked into a solid object, 
             to a maximum of the PD + BODY of the object hit.
         </p>
         <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
-        4,
-        item.actor,
-    )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes.
+                4,
+                item.actor,
+            )}${getSystemDisplayUnits(item.actor.system.is5e)} they are knocked back if no object intervenes.
         </p>
         <p>
             The character typically winds up prone.
@@ -1137,8 +1160,8 @@ export async function _onRollKnockback(event) {
             <div class="form-group">
                 <label>KB damage dice</label>
                 <input type="text" name="knockbackDice" value="${Math.floor(
-        knockbackResultTotal / 2,
-    )}" data-dtype="Number" />
+                    knockbackResultTotal / 2,
+                )}" data-dtype="Number" />
             </div>
         </p>
 
@@ -1395,7 +1418,7 @@ export async function _onRollDamage(event) {
         .modifyToStandardEffect(useStandardEffect)
         .modifyToNoBody(
             item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly ||
-            item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly,
+                item.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly,
         )
         .addToHitLocation(
             includeHitLocation,

@@ -3883,7 +3883,6 @@ export class HeroSystem6eItem extends Item {
 
         const xmlid = this.system.XMLID;
 
-
         // Name
         let description = this.system.ALIAS;
         let name = this.system.NAME || description || this.system.name || this.name;
