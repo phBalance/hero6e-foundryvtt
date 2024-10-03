@@ -262,7 +262,12 @@ export class ItemAttackFormApplication extends FormApplication {
             return processAttackOptions(this.data.item, formData);
         }
         this.data.formData ??= {};
+        if (event.submitter?.name === "continueMultiattack") {
+            this.data.formData.continueMultiattack = true;
+        }
         if (event.submitter?.name === "executeMultiattack") {
+            // todo: cancel a missed and continue anyway
+            
             const begin = this.data.action.current.execute === undefined;
             // we pressed the button to execute multiple attacks
             // the first time does not get a roll, but sets up the first attack
@@ -271,7 +276,7 @@ export class ItemAttackFormApplication extends FormApplication {
             } else {
                 // the subsequent presses will roll the attack and set up the next attack
                 // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
-
+                
                 // this is the roll:
                 await processAttackOptions(this.data.item, this.data.formData);
                 this.data.formData.execute = this.data.action.current.execute + 1;
@@ -285,19 +290,19 @@ export class ItemAttackFormApplication extends FormApplication {
                 return await new ItemAttackFormApplication(this.data).render(true);
             }
         }
-        if (event.submitter?.name === "missedMultiattack") {
+        else if (event.submitter?.name === "missedMultiattack") {
             // TODO: charge user the end cost for the remaining attacks
             canvas.tokens.activate();
             await this.close();
             return;
         }
-        if (event.submitter?.name === "cancelMultiattack") {
+        else if (event.submitter?.name === "cancelMultiattack") {
             // TODO: saves the end cost for the remaining attacks
             canvas.tokens.activate();
             await this.close();
             return;
         }
-        if (event.submitter?.name === "aoe") {
+        else if (event.submitter?.name === "aoe") {
             return this._spawnAreaOfEffect(this.data);
         }
         // collect the changed data; all of these changes can go into get data

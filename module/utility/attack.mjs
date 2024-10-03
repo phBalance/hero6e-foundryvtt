@@ -411,11 +411,13 @@ export class Attack {
     static getCurrentManeuverInfo(maneuver, options, system) {
         if (options?.execute !== undefined && maneuver.isMultipleAttack) {
             let lastAttackHit = true;
-            options?.rolledResult?.forEach((roll) => {
-                if (roll.result.hit === "Miss") {
-                    lastAttackHit = false;
-                }
-            });
+            if(!options.continueMultiattack){
+                options?.rolledResult?.forEach((roll) => {
+                    if (roll.result.hit === "Miss") {
+                        lastAttackHit = false;
+                    }
+                });
+            }
             let execute = options.execute;
             if (lastAttackHit === false) {
                 const attackKey = `attack-${execute - 1}`;
