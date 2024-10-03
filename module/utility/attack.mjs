@@ -411,7 +411,7 @@ export class Attack {
     static getCurrentManeuverInfo(maneuver, options, system) {
         if (options?.execute !== undefined && maneuver.isMultipleAttack) {
             let lastAttackHit = true;
-            if(!options.continueMultiattack){
+            if (!options.continueMultiattack) {
                 options?.rolledResult?.forEach((roll) => {
                     if (roll.result.hit === "Miss") {
                         lastAttackHit = false;
