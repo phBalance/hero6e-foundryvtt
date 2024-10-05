@@ -27,7 +27,7 @@ export class EffectsPanel extends Application {
 
     async getData(options) {
         const context = await super.getData(options);
-        context.effects = this.actor?.effects;
+        context.effects = this.actor?.appliedEffects; //effects;
         return context;
     }
 }

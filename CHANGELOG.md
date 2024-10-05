@@ -1,6 +1,10 @@
 # Releases
 
-## Version 3.0.99 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.100 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Added Effect Panel showing more details about effects on a token.
+
+
+## Version 3.0.99
 - PENALTY_SKILL_LEVELS with all attacks no longer show all attacks in the power description.
 
 ## Version 3.0.97 & 3.0.98
