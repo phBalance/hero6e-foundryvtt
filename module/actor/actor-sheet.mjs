@@ -993,7 +993,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         // TODO: Allow drag/drop to change order
         if (this.actor.uuid === item.parent?.uuid) return this._onSortItem(event, itemData);
 
-        if (itemData.system.is5e !== this.actor.system.is5e) {
+        if (itemData.system.is5e !== undefined && itemData.system.is5e !== this.actor.is5e) {
             ui.notifications.warn(
                 `${itemData.name} is a ${itemData.system.is5e ? "5e" : "6e"} item.  ${this.actor.name} is a ${
                     this.actor.system.is5e ? "5e" : "6e"
@@ -1007,10 +1007,6 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Is this a parent item with children?
         for (const child of item.childItems || []) {
             await this.DropItemFramework(child, itemData.system.ID);
-            // const childItemData = childItem.toObject();
-            // childItemData.system.ID = new Date().getTime().toString();
-            // childItemData.system.PARENTID = itemData.system.ID;
-            // await this._onDropItemCreate(childItemData);
         }
     }
 
