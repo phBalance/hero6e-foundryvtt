@@ -27,18 +27,18 @@ export class HeroSystem6eCombat extends Combat {
             // Produce an initiative roll for the Combatant
             const characteristic = combatant.actor?.system?.initiativeCharacteristic || "dex";
             const initValue = combatant.actor?.system.characteristics[characteristic]?.value || 0;
-            //const spdValue = combatant.actor?.system.characteristics.spd.value || null;
-            //const initiativeTooltip = `${initValue}${characteristic} ${spdValue}speed`;
-            //const spdValue = Math.max(1, combatant.actor?.system.characteristics.spd?.value || 0);
-            //const initiativeValue = initValue; // + spdValue / 100;
             if (combatant.flags.initiative != initValue || combatant.flags.initiativeCharacteristic != characteristic) {
-                updates.push({
-                    _id: id,
-                    //initiative: initValue,
-                    "flags.initiative": initValue,
-                    "flags.initiativeCharacteristic": characteristic,
-                    // "flags.initiativeTooltip": initiativeTooltip,
-                });
+                // monks-combat-marker shows error with tokenDocument.object is nul..
+                // tokenDocument is supposed to have an object.
+                // Unclear why it is missing sometimes.
+                // KLUGE: Do not update initiative when tokenDocument.object is missing.
+                if (combatant.token.object) {
+                    updates.push({
+                        _id: id,
+                        "flags.initiative": initValue,
+                        "flags.initiativeCharacteristic": characteristic,
+                    });
+                }
             }
         }
         if (!updates.length) return this;
@@ -219,15 +219,17 @@ export class HeroSystem6eCombat extends Combat {
                         "flags.lightningReflexes": null,
                     };
                 }
-                // if (
-                //     update.initiative != _combatant.initiative ||
-                //     update.flags?.lightningReflexes?.name != _combatant.flags?.lightningReflexes?.name
-                // ) {
-                updates.push(update);
-                //}
+                if (
+                    update.initiative != _combatant.initiative ||
+                    update.flags?.lightningReflexes?.name != _combatant.flags?.lightningReflexes?.name
+                ) {
+                    updates.push(update);
+                }
             }
         }
-        await this.updateEmbeddedDocuments("Combatant", updates);
+        if (updates.length > 0) {
+            await this.updateEmbeddedDocuments("Combatant", updates);
+        }
     }
 
     async extraCombatants() {
