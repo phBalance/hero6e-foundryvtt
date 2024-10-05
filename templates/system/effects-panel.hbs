@@ -1,0 +1,95 @@
+{{ log 'HEROSYS effects-panel' this }}
+<article id="effects-panel">
+{{#each effects}}
+    <div class="effect-item" data-item-id="this.id">
+        <div class="effect-info">
+            <h1>
+                {{this.name}}
+                {{!-- Aura: Bless --}}
+                {{!-- <a data-action="send-to-chat" data-tooltip="Send to Chat"><i class="fa-solid fa-fw fa-comment-alt"></i></a>
+                    <a data-action="edit" data-tooltip="Edit Item"><i class="fa-solid fa-fw fa-pencil"></i></a> --}}
+            </h1>
+            <div class="tags">
+                {{!-- {{#each this.statuses}}
+                    <div class="tag tag_secondary">{{this}}</div>
+                    <div class="tag">{{this}}</div>
+                {{/each}} --}}
+
+                {{#if this.flags.XMLID}}
+                    <div class="tag">{{this.flags.XMLID}}</div>
+                {{else if this.parent.system.XMLID}}
+                    <div class="tag">{{this.parent.system.XMLID}}</div>
+                {{/if}}
+            </div>
+            
+            {{!-- {{#if this.duration.remaining}}
+            <div class="duration">
+                Seconds Remaining: {{this.duration.remaining}}
+            </div>
+            {{/if}} --}}
+
+            {{!-- {{#if this.flags.affectedPoints}}
+            <div class="affectedPoints">
+                Affected Points: {{this.flags.affectedPoints}}
+            </div>
+            {{/if}} --}}
+
+            {{#if this.flags.target}}
+            <div class="target">
+                Target: {{this.flags.target}}
+            </div>
+            {{/if}}
+
+            {{#if this.flags.source}}
+            <div class="source">
+                Source: {{this.flags.source}}
+            </div>
+            {{/if}}
+
+            {{#if this.changes}}
+                <table>
+                    <head>
+                        <tr>
+                            <th>Attribute Key</th>
+                            <th>Change Mode</th>
+                            <th>Effect Value</th>
+                        </tr>
+                    </head>
+                    <body>
+                    {{#each this.changes}}
+                        <tr>
+                            <td>{{this.key}}</td>
+                            <td>
+                                {{#if (eq this.mode 1)}}Multiply
+                                {{else if (eq this.mode 2)}}Add
+                                {{else if (eq this.mode 3)}}Downgrade
+                                {{else if (eq this.mode 4)}}Upgrade
+                                {{else if (eq this.mode 5)}}Override
+                                {{else}}{{this.mode}}
+                                {{/if}}
+                            </td>
+                            <td>{{this.value}}</td>
+                        </tr>
+                    {{/each}}
+                    </body>
+                </table>
+            {{/if}}
+
+            {{!-- <div class="instructions">
+    
+                        <div>[Left Click] Increase value</div>
+                        <div>[Right Click] Decrease value</div>
+            </div> --}}
+            <div class="description">
+                <p>{{{this.description}}}</p>
+            </div>
+        </div>
+        {{!-- <div class="icon"></div> --}}
+        {{!-- <div class="linked"></div> --}}
+        {{!-- <div class="value-wrapper"></div> --}}
+        <div class="icon" style="background-image: url({{this.img}})">
+            <span>{{this.name}}</span>
+        </div>
+    </div>
+    {{/each}}
+</article>
