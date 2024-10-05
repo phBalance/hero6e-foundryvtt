@@ -251,4 +251,14 @@ export class HeroSystem6eToken extends Token {
     //     HEROSYS.log(false, "_onCreate", data)
     //     alert("_onCreate")
     // }
+
+    _onControl(options) {
+        if (game.ready) game[HEROSYS.module].effectPanel.refresh();
+        return super._onControl(options);
+    }
+
+    _onRelease(options) {
+        if (game.ready) game[HEROSYS.module].effectPanel.refresh();
+        return super._onRelease(options);
+    }
 }

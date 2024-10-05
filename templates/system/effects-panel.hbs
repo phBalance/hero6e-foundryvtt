@@ -1,0 +1,13 @@
+{{ log 'HEROSYS effects-panel' this }}
+<article id="effects-panel">
+{{#each effects}}
+    <div class="effect-item" data-item-id="this.id">
+        {{!-- <div class="icon"></div> --}}
+        {{!-- <div class="linked"></div> --}}
+        {{!-- <div class="value-wrapper"></div> --}}
+        <div class="icon" style="background-image: url({{this.img}})">
+            <span>{{this.name}}</span>
+        </div>
+    </div>
+    {{/each}}
+</article>

@@ -32,6 +32,7 @@ import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 import "./utility/chat-dice.mjs";
 
 import "./testing/testing-main.mjs";
+import { EffectsPanel } from "./effects-panel.mjs";
 
 Hooks.once("init", async function () {
     game.CreateHeroCompendiums = CreateHeroCompendiums;
@@ -141,6 +142,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/item/item-partial-common.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet.hbs`,
         `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
+        `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
@@ -154,6 +156,24 @@ Hooks.once("init", () => {
     //CONFIG.ui.chat =
     CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
     //CONFIG.ui.hotbar =
+
+    // Insert templates into DOM tree so Applications can render into
+    if (document.querySelector("#ui-top") !== null) {
+        // Template element for effects-panel
+        const uiTop = document.querySelector("#ui-top");
+        const template = document.createElement("template");
+        template.setAttribute("id", "hero-effects-panel");
+        uiTop?.insertAdjacentElement("afterend", template);
+    }
+    game[HEROSYS.module] ??= {};
+    game[HEROSYS.module].effectPanel = new EffectsPanel();
+});
+
+Hooks.on("canvasReady", () => {
+    // Effect Panel singleton application
+    game[HEROSYS.module].effectPanel.render(true);
+    if (!canvas.scene) return;
+    if (game.ready) canvas.scene.reset();
 });
 
 Hooks.once("ready", async function () {
