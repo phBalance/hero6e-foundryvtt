@@ -1,5 +1,5 @@
 import { CombatSkillLevelsForAttack } from "../utility/damage.mjs";
-import { _processAttackOptions, _processAttackAoeOptions } from "../item/item-attack.mjs";
+import { processAttackOptions } from "../item/item-attack.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { Attack } from "../utility/attack.mjs";
@@ -12,7 +12,9 @@ const heroAoeTypeToFoundryAoeTypeConversions = {
     radius: "circle",
     surface: "rect",
 };
-// uses ../templates/attack/item-attack-application.hbs
+/* *
+ * uses ../templates/attack/item-attack-application.hbs
+ * */
 export class ItemAttackFormApplication extends FormApplication {
     constructor(data) {
         super();
@@ -203,16 +205,43 @@ export class ItemAttackFormApplication extends FormApplication {
             };
             item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
         }
+
         data.action = Attack.getActionInfo(
             data.item,
             data.targets,
             data.formData, // use formdata to include player options from the form
         );
+        // the title seems to be fixed when the form is initialized,
+        // and doesn't change afterwards even if we come through here again
+        // todo: figure out how to adjust the title when we want it to
+        if (data.action.maneuver.isMultipleAttack) {
+            this.options.title = `${this.data?.item?.actor?.name} multiple attack.`;
+        } else if (data.action.maneuver.isHaymakerAttack) {
+            this.options.title = `${this.data?.item?.actor?.name} haymaker attack.`;
+        } else {
+            this.options.title = `${this.data?.item?.actor?.name} select attack options and roll to hit`;
+        }
         return data;
     }
 
     activateListeners(html) {
         super.activateListeners(html);
+        // add to multiattack
+        html.find(".add-multiattack").click(this._onAddAttackToMultipleAttackManeuver.bind(this));
+        html.find(".remove-multiattack").click(this._onRemoveAttackFromMultipleAttackManeuver.bind(this));
+    }
+
+    async _onAddAttackToMultipleAttackManeuver() {
+        if (Attack.addMultipleAttack(this.data)) {
+            this.render();
+        }
+    }
+
+    async _onRemoveAttackFromMultipleAttackManeuver(event) {
+        const multipleAttackKey = event.target.dataset.multiattack;
+        if (Attack.removeMultipleAttack(this.data, multipleAttackKey)) {
+            this.render();
+        }
     }
 
     async _render(...args) {
@@ -225,21 +254,56 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     async _updateObject(event, formData) {
+        // changes to the form pass through here
         if (event.submitter?.name === "roll") {
             canvas.tokens.activate();
             await this.close();
 
-            const aoe = this.data.item.getAoeModifier();
-            if (aoe) {
-                return _processAttackAoeOptions(this.data.item, formData);
-            }
-
-            return _processAttackOptions(this.data.item, formData);
+            return processAttackOptions(this.data.item, formData);
         }
+        this.data.formData ??= {};
+        if (event.submitter?.name === "continueMultiattack") {
+            this.data.formData.continueMultiattack = true;
+        }
+        if (event.submitter?.name === "executeMultiattack") {
+            // todo: cancel a missed and continue anyway
 
-        if (event.submitter?.name === "aoe") {
+            const begin = this.data.action.current.execute === undefined;
+            // we pressed the button to execute multiple attacks
+            // the first time does not get a roll, but sets up the first attack
+            if (begin) {
+                this.data.formData.execute = 0;
+            } else {
+                // the subsequent presses will roll the attack and set up the next attack
+                // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
+
+                // this is the roll:
+                await processAttackOptions(this.data.item, this.data.formData);
+                this.data.formData.execute = this.data.action.current.execute + 1;
+            }
+            const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;
+            // this is the last step
+            if (end) {
+                canvas.tokens.activate();
+                await this.close();
+            } else {
+                return await new ItemAttackFormApplication(this.data).render(true);
+            }
+        } else if (event.submitter?.name === "missedMultiattack") {
+            // TODO: charge user the end cost for the remaining attacks
+            canvas.tokens.activate();
+            await this.close();
+            return;
+        } else if (event.submitter?.name === "cancelMultiattack") {
+            // TODO: saves the end cost for the remaining attacks
+            canvas.tokens.activate();
+            await this.close();
+            return;
+        } else if (event.submitter?.name === "aoe") {
             return this._spawnAreaOfEffect(this.data);
         }
+        // collect the changed data; all of these changes can go into get data
+        this.data.formData = { ...this.data.formData, ...formData };
 
         this._updateCsl(event, formData);
 
