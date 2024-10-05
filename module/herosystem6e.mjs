@@ -83,10 +83,6 @@ Hooks.once("init", async function () {
     CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(HEROSYS.module);
 
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-    CONFIG.ui.combat = HeroSystem6eCombatTracker;
-
-    CONFIG.ui.items = HeroSystem6eItemDirectory;
-    CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
 
     CONFIG.Canvas.rulerClass = HeroRuler;
 
@@ -148,6 +144,16 @@ Hooks.once("init", async function () {
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
+});
+
+Hooks.once("init", () => {
+    // Assign the Sidebar subclasses
+    //CONFIG.ui.actors =
+    CONFIG.ui.items = HeroSystem6eItemDirectory;
+    CONFIG.ui.combat = HeroSystem6eCombatTracker;
+    //CONFIG.ui.chat =
+    CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
+    //CONFIG.ui.hotbar =
 });
 
 Hooks.once("ready", async function () {
