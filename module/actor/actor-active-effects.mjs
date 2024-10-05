@@ -1,3 +1,4 @@
+import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 export class HeroSystem6eActorActiveEffects extends ActiveEffect {
@@ -340,5 +341,20 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 break;
         }
         changes[change.key] = update;
+    }
+
+    _onCreate(data, options, userId) {
+        super._onCreate(data, options, userId);
+        game[HEROSYS.module].effectPanel.refresh();
+    }
+
+    _onUpdate(options, userId) {
+        super._onUpdate(options, userId);
+        game[HEROSYS.module].effectPanel.refresh();
+    }
+
+    _onDelete(options, userId) {
+        super._onDelete(options, userId);
+        game[HEROSYS.module].effectPanel.refresh();
     }
 }
