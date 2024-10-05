@@ -15,7 +15,7 @@ export class EffectsPanel extends Application {
     }
 
     get actor() {
-        return this.token?.actor ?? game.user?.character ?? null;
+        return this.token?.actor ?? null; // ?? game.user?.character ?? null;
     }
 
     /**

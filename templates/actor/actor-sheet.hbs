@@ -137,16 +137,14 @@
     <nav class="sheet-navigation flexrow" data-group="primary">
 
         <a class="item-nav" data-tab="attacks">Attacks</a>
+        <a class="item-nav" data-tab="defenses">Defenses</a>
+        <a class="item-nav" data-tab="movement">Movement</a>
         {{#if hasMartialArts}}
             <a class="item-nav" data-tab="martialArts">MartialArts</a>
         {{/if}}
-        <a class="item-nav" data-tab="defenses">Defenses</a>
         <a class="item-nav" data-tab="skills">Skills</a>
-
         <a class="item-nav" data-tab="maneuvers">Maneuvers</a>
-        <a class="item-nav" data-tab="movement">Movement</a>
         <a class="item-nav" data-tab="powers">Powers</a>
-
         {{#if hasEquipment}}
             <a class="item-nav" data-tab="equipment">Equipment</a>
         {{/if}}
@@ -181,12 +179,12 @@
                     {{#each items as |item id|}}
                         {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack")))}}
                             <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
-                                data-item-id="{{item._id}}">
+                                data-item-id="{{item._id}}" >
                                 <td>
                                     <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                             height="24" /></div>
                                 </td>
-                                <td class="left">
+                                <td class="left" data-tooltip="{{item.name}}: {{item.system.description}}">
                                     {{#if (eq item.parentItem.system.XMLID "COMPOUNDPOWER")}}
                                         {{item.parentItem.name}}: 
                                     {{/if}}

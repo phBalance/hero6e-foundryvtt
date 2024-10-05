@@ -2,6 +2,7 @@
 
 ## Version 3.0.100 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Added Effect Panel showing more details about effects on a token.
+- Initial support for MULTIPLE ATTACK maneuver.
 
 
 ## Version 3.0.99
