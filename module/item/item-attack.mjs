@@ -129,12 +129,12 @@ export async function AttackOptions(item) {
     await new ItemAttackFormApplication(data).render(true);
 }
 
-export async function _processAttackOptions(item, formData) {
-    await AttackToHit(item, formData);
-}
-
-export async function _processAttackAoeOptions(item, formData) {
-    await AttackAoeToHit(item, formData);
+export async function processAttackOptions(item, formData) {
+    if (item.getAoeModifier()) {
+        await AttackAoeToHit(item, formData);
+    } else {
+        await AttackToHit(item, formData);
+    }
 }
 
 export async function AttackAoeToHit(item, options) {
@@ -290,12 +290,18 @@ export async function AttackAoeToHit(item, options) {
 /// opened after selecting 'Roll to Hit'
 /// uses ../templates/chat/item-toHit-card.hbs
 /// manages die rolls and display of hit/miss results
+/// At this point the user has _committed_ to the attack that they
+/// chose with the die-roll icon and adjusted with the Attack Options
+/// menu.
+/// There was a die roll, and we display the attack to hit results.
 export async function AttackToHit(item, options) {
     if (!item) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
     const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
+    item = action.system.item[action.current.itemId];
+    const targets = action.system.currentTargets;
 
     const actor = item.actor;
     let effectiveItem = item;
@@ -364,7 +370,7 @@ export async function AttackToHit(item, options) {
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
-        game.user.targets.size > 0 &&
+        targets.size > 0 &&
         !(
             item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
             item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
@@ -379,7 +385,7 @@ export async function AttackToHit(item, options) {
             ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
         }
 
-        const target = game.user.targets.first();
+        const target = targets.first();
         const distance = token ? calculateDistanceBetween(token, target) : 0;
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
@@ -409,39 +415,36 @@ export async function AttackToHit(item, options) {
     }
 
     let dcv = parseInt(item.system.dcv || 0);
-    let dmcv = parseInt(item.system.dmcv || 0);
+
+    const cvModifiers = action.current.cvModifiers;
 
     // Combat Skill Levels
-
+    const skillLevelMods = {};
     for (const csl of CombatSkillLevelsForAttack(item)) {
+        const id = csl.skill.id;
+        skillLevelMods[id] = skillLevelMods[id] ?? { ocv: 0, dcv: 0, dc: 0 };
+        const cvMod = skillLevelMods[id];
+        action.system.item[id] = csl.skill;
+
+        cvMod.dc += csl.dc;
         if (csl.ocv || csl.omcv > 0) {
-            heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
+            cvMod.ocv += csl.ocv || csl.omcv;
+            //heroRoller.addNumber(csl.ocv || csl.omcv, csl.item.name);
         }
         dcv += csl.dcv;
-        dmcv += csl.dmcv;
+        cvMod.dcv += csl.dcv;
     }
 
-    // Haymaker -5 DCV
-    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active);
-    if (haymakerManeuver) {
-        dcv -= 4;
-    }
-
-    if (dcv != 0 || dmcv != 0) {
+    let dmcv = parseInt(item.system.dmcv || 0);
+    if (dmcv != 0) {
         // Make sure we don't already have this activeEffect
         let prevActiveEffect = Array.from(item.actor.allApplicableEffects()).find((o) => o.origin === item.uuid);
         if (!prevActiveEffect) {
             // Estimate of how many seconds the DCV penalty lasts (until next phase).
             // In combat.js#_onStartTurn we remove this AE for exact timing.
             let seconds = Math.ceil(12 / parseInt(item.actor.system.characteristics.spd.value));
-
-            let _dcvText = "DCV";
-            let _dcvValue = dcv;
-
-            if (dmcv != 0) {
-                _dcvText = "DMCV";
-                _dcvValue = dmcv;
-            }
+            let _dcvText = "DMCV";
+            let _dcvValue = dmcv;
 
             const activeEffect = {
                 label: `${item.name} ${_dcvValue.signedString()} ${_dcvText}`,
@@ -465,6 +468,30 @@ export async function AttackToHit(item, options) {
             await item.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
         }
     }
+
+    Object.keys(skillLevelMods).forEach((key) => {
+        const cvMod = Attack.makeCvModifierFromItem(
+            action.system.item[key],
+            action.system,
+            skillLevelMods[key].ocv,
+            skillLevelMods[key].dcv,
+            skillLevelMods[key].dc,
+        );
+        cvModifiers.push(cvMod);
+    });
+    // Haymaker -5 DCV
+    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active);
+    if (haymakerManeuver) {
+        //todo: if it is -5 , then why -4?
+        dcv -= 4;
+    }
+
+    cvModifiers.forEach((cvModifier) => {
+        if (cvModifier.cvMod.ocv) {
+            heroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
+        }
+    });
+    Attack.makeActionActiveEffects(action);
 
     // [x Stun, x N Stun, x Body, OCV modifier]
     const noHitLocationsPower = !!item.system.noHitLocations;
@@ -494,6 +521,10 @@ export async function AttackToHit(item, options) {
     }
 
     heroRoller.addDice(-3);
+    // This is the actual roll to hit. In order to provide for a die roll
+    // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
+    // and lastly we subtract the die roll. The value returned is the maximum DCV hit
+    // (so we can be sneaky and not tell the target's DCV out loud).
 
     const autofire = item.findModsByXmlid("AUTOFIRE");
     const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
@@ -668,7 +699,7 @@ export async function AttackToHit(item, options) {
 
     let targetData = [];
     const targetIds = [];
-    let targetsArray = Array.from(game.user.targets);
+    let targetsArray = Array.from(targets);
 
     if (targetsArray.length === 0 && item?.system.XMLID === "MINDSCAN") {
         targetsArray = canvas.tokens.controlled;
@@ -788,7 +819,7 @@ export async function AttackToHit(item, options) {
     if (autofire) {
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
-            const singleTarget = Array.from(game.user.targets)[0];
+            const singleTarget = Array.from(targets)[0];
             const toHitRollTotal = targetData[0].toHitRollTotal;
             const firstShotResult = targetData[0].result.hit;
             const autoSuccess = targetData[0].autoSuccess;
@@ -915,7 +946,7 @@ export async function AttackToHit(item, options) {
             ?.label.match(/[\d,]+/)?.[0],
         action,
     };
-
+    options.rolledResult = targetData;
     action.system = {}; // clear out any system information that would interfere with parsing
     cardData.actionData = JSON.stringify(action);
 
@@ -1079,7 +1110,6 @@ function getAttackTags(item) {
 }
 
 export async function _onRollAoeDamage(event) {
-    //console.log("_onRollAoeDamage");
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
