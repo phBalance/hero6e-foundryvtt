@@ -1162,11 +1162,10 @@ function getAttackTags(item) {
     }
 
     // STUN/BODY/EFFECT Only
-    if (item.system.stunBodyDamage !== "stunbody") {
-        const phrase = CONFIG.HERO.stunBodyDamages[item.system.stunBodyDamage];
+    if (item.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody) {
         attackTags.push({
-            name: phrase,
-            title: phrase,
+            name: item.system.stunBodyDamage,
+            title: item.system.stunBodyDamage,
         });
     }
 
