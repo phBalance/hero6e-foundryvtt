@@ -1002,12 +1002,6 @@ export class HeroRoller {
             this._useHitLocation &&
             (this._type === HeroRoller.ROLL_TYPE.NORMAL || this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
-            // We now allow attacking ENTANGLEs and FOCI, which aren't true hitLocations
-            if (!CONFIG.HERO.hitLocations[this._alreadyHitLocation]) {
-                console.warn(`Invalid hitLoc`, this._alreadyHitLocation);
-                return;
-            }
-
             let locationName;
 
             if (this._alreadyHitLocation === "none") {
@@ -1042,8 +1036,11 @@ export class HeroRoller {
                 locationSide = this._alreadyHitLocationSide;
             }
 
+            const item = locationName.includes(".Item.") ? fromUuidSync(locationName) : undefined;
+            const activeEffect = locationName.includes(".ActiveEffect.") ? fromUuidSync(locationName) : undefined;
+
             this._hitLocation = {
-                name: locationName,
+                name: item?.name || activeEffect?.name || locationName,
                 side: locationSide,
                 fullName:
                     CONFIG.HERO.sidedLocations.has(locationName) && this._useHitLocationSide
@@ -1052,10 +1049,12 @@ export class HeroRoller {
                 stunMultiplier: Math.max(
                     1,
                     (this._type === HeroRoller.ROLL_TYPE.KILLING
-                        ? CONFIG.HERO.hitLocations[locationName][0]
-                        : CONFIG.HERO.hitLocations[locationName][1]) + this._killingAdditionalStunMultiplier,
+                        ? CONFIG.HERO.hitLocations[locationName]?.[0] || 1
+                        : CONFIG.HERO.hitLocations[locationName]?.[1] || 1) + this._killingAdditionalStunMultiplier,
                 ),
-                bodyMultiplier: CONFIG.HERO.hitLocations[locationName][2],
+                bodyMultiplier: CONFIG.HERO.hitLocations[locationName]?.[2] || 1,
+                item,
+                activeEffect,
             };
         }
     }

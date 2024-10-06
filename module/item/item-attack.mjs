@@ -1844,6 +1844,15 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplyEntangleToSpecificToken(item, token, originalRoll);
     }
 
+    // Targeting ENTANGLE/FOCI
+    if (heroRoller.getHitLocation().activeEffect) {
+        return _onApplyDamageToActiveEffect(item, token, originalRoll);
+    }
+
+    if (heroRoller.getHitLocation().item) {
+        return ui.notifications.error(`Damaging FOCI is not currently supported.`);
+    }
+
     // Attack Verses Alternate Defense (6e) or NND (5e)
     let avad = item.findModsByXmlid("AVAD") || item.findModsByXmlid("NND");
 
@@ -2405,6 +2414,127 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     ChatMessage.create(chatData);
 }
 
+export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
+    // Get fully functional ActiveEffect that we can damage (update)
+    const damageActiveEffect = token.actor.temporaryEffects.find(
+        (o) => o.id === originalRoll.getHitLocation().activeEffect._id,
+    );
+    if (!damageActiveEffect) {
+        return ui.notifications.error(`Attack details are no longer available.`);
+    }
+    const attackItem = item;
+
+    // We currently only support ENTANGLE
+    if (damageActiveEffect.flags.XMLID !== "ENTANGLE") {
+        return ui.notifications.error(`Damaging ${damageActiveEffect.flags.XMLID} is not currently supported.`);
+    }
+
+    let defense;
+    let defenseType;
+    switch (attackItem.system.class) {
+        case "physical":
+            defense = damageActiveEffect.flags.entangleDefense.rPD;
+            defenseType = "rPD";
+            break;
+        case "energy":
+            defense = damageActiveEffect.flags.entangleDefense.rED;
+            defenseType = "rED";
+            break;
+        case "mental":
+            defense = damageActiveEffect.flags.entangleDefense.rMD;
+            defenseType = "rPMD";
+            break;
+    }
+
+    if (!defense) {
+        return ui.notifications.error(
+            `Unable to determien appropraite defenses for ${damageActiveEffect.name} vs ${attackItem.name}.`,
+        );
+    }
+
+    const defenseTags = [
+        {
+            name: defenseType,
+            value: defense,
+            resistant: true,
+            title: `Entangle ${defenseType}`,
+        },
+    ];
+
+    const bodyDamage = Math.max(0, originalRoll.getBodyTotal() - defense);
+    const stunDamage = Math.max(0, originalRoll.getStunTotal() - defense);
+    let effectsFinal;
+    if (bodyDamage > 0) {
+        if (bodyDamage < damageActiveEffect.flags.body) {
+            const newBody = damageActiveEffect.flags.body - bodyDamage;
+            const name = `${damageActiveEffect.flags.XMLID} ${newBody} BODY ${damageActiveEffect.flags.entangleDefense.string}`;
+            damageActiveEffect.update({ name, "flags.body": newBody });
+            effectsFinal = `Entangle has ${newBody} BODY remaining.`;
+        } else {
+            damageActiveEffect.parent.removeActiveEffect(damageActiveEffect);
+            effectsFinal = `Entangle was destroyed.`;
+        }
+    }
+
+    const cardData = {
+        item: item,
+
+        // Incoming Damage Information
+        incomingDamageSummary: originalRoll.getTotalSummary(),
+        incomingAnnotatedDamageTerms: originalRoll.getAnnotatedTermsSummary(),
+
+        // dice rolls
+        roller: originalRoll,
+        // renderedDamageRoll: damageRenderedResult,
+        // renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
+
+        // body
+        //bodyDamage: damageDetail.bodyDamage,
+        bodyDamageEffective: bodyDamage,
+
+        // stun
+        // stunDamage: damageDetail.stunDamage,
+        stunDamageEffective: stunDamage,
+        // hasRenderedDamageRoll: true,
+        // stunMultiplier: damageDetail.stunMultiplier,
+        // hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
+
+        // damage info
+        // damageString: heroRoller.getTotalSummary(),
+        // useHitLoc: damageDetail.useHitLoc,
+        // hitLocText: damageDetail.hitLocText,
+
+        // effects
+        effects: effectsFinal,
+
+        // defense
+        defense: `${defense} resistant`,
+        // damageNegationValue: damageNegationValue,
+
+        // misc
+        tags: defenseTags,
+        attackTags: getAttackTags(item),
+        targetToken: token,
+    };
+
+    // render card
+    const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        //rolls: damageDetail.knockbackRoller?.rawRolls(),
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    ChatMessage.create(chatData);
+
+    // TODO: Chat Card
+}
+
 async function _performAbsorptionForToken(token, absorptionItems, damageDetail, damageItem) {
     const attackType = damageItem.system.class; // TODO: avad?
 
@@ -2808,8 +2938,11 @@ async function _calcDamage(heroRoller, item, options) {
             stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
-
-        hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
+        if (heroRoller.getHitLocation().item || heroRoller.getHitLocation().activeEffect) {
+            hitLocText = `Hit ${hitLocation}`;
+        } else {
+            hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
+        }
     }
 
     // apply damage reduction
