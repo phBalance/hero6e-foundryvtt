@@ -1149,6 +1149,9 @@ export class HeroSystem6eItem extends Item {
         if (item.baseInfo?.behaviors?.includes("activatable")) {
             item.system.showToggle = true;
         }
+        if (item.baseInfo?.type?.includes("sense")) {
+            item.system.showToggle = true;
+        }
 
         // Endurance
         item.system.endEstimate = parseInt(item.system.end) || 0;
