@@ -2253,6 +2253,17 @@ export class HeroSystem6eItem extends Item {
             adderCost += subAdderCost;
         }
 
+        //HACK for ENTANGLE +1PD/ED in 6e
+        //Normallly we would use a function in CONFIG.mjs
+        // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
+        if (this.system.XMLID === "ENTANGLE" && this.system.ADDER) {
+            const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+            const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+            if ((additionalPD + additionalED) % 2 === 0) {
+                adderCost -= 1;
+            }
+        }
+
         // Categorized skills cost 2 per category and +1 per each subcategory.
         // If no catagories selected then assume 3 pts
         // if (configPowerInfo?.categorized && adderCost >= 4) {
