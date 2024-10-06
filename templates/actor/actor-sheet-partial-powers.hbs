@@ -1,0 +1,29 @@
+<div class="tab tab-body" data-group="primary" data-tab="powers">
+    <table>
+        <tr class="sticky">
+            <th colspan="2" class="right">Filter:</th>
+            <th colspan="4">
+                <input class="left" name="itemFilters.power" type="text"
+                    value="{{options.itemFilters.power}}">
+            </th>
+        </tr>
+        <tr class="sticky2">
+            <th></th>
+            <th>{{localize "ActorSheet.Cost"}}</th>
+            {{!-- <th class="left">{{localize "ActorSheet.Name"}}</th> --}}
+            <th class="left">{{localize "ActorSheet.Description"}}</th>
+            <th>{{localize "ActorSheet.End"}}</th>
+            <th>{{localize "ActorSheet.Active"}}</th>
+            <th>
+                <a class="item-control item-create" title="Create power" data-type="power">
+                    <i class="fas fa-plus"></i> Add Power</a>
+            </th>
+        </tr>
+        {{#each items as |item id|}}
+            {{!-- Show powers and things in a framework or compound power --}}
+            {{#if (and (eq item.type "power") (not item.parentItem) (filterItem item ../options.itemFilters.power))}}
+                {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') item }}
+            {{/if}}
+        {{/each}}
+    </table>
+    </div>

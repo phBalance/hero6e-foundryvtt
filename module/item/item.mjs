@@ -1149,19 +1149,8 @@ export class HeroSystem6eItem extends Item {
         if (item.baseInfo?.behaviors?.includes("activatable")) {
             item.system.showToggle = true;
         }
-
-        // Item in a Framework?
-        if (item.parentItem) {
-            // const parentPosition =
-            //     item.parentItem.system.XMLID === "COMPOUNDPOWER"
-            //         ? -1 // Compound power starts at a random position. Sub powers start at 0.
-            //         : parseInt(item.parentItem.system.POSITION);
-            //item.system.childIdx = parseInt(item.system.POSITION) - parseInt(parentPosition);
-            item.system.childIdx = item.parentItem.childItems?.findIndex((o) => o.id === item.id) + 1;
-
-            if (item.parentItem?.parentItem) {
-                item.system.childIdx = `${item.parentItem.system.childIdx}.${item.system.childIdx}`;
-            }
+        if (item.baseInfo?.type?.includes("sense")) {
+            item.system.showToggle = true;
         }
 
         // Endurance
@@ -2103,8 +2092,19 @@ export class HeroSystem6eItem extends Item {
      */
     get childItems() {
         const items = this.actor?.items || game.items;
-        const children = items.filter((item) => item.system.PARENTID === this.system.ID);
+        const children = items
+            .filter((item) => item.system.PARENTID === this.system.ID)
+            ?.sort((a, b) => (a.sort || 0) - (b.sort || 0));
         return children.length ? children : null;
+    }
+
+    get childIdx() {
+        if (!this.parentItem) return null;
+        let result = this.parentItem.childItems?.findIndex((o) => o.id === this.id) + 1;
+        if (this.parentItem?.parentItem) {
+            result = `${this.parentItem.childIdx}.${result}`;
+        }
+        return result;
     }
 
     calcItemPoints() {
@@ -3902,7 +3902,7 @@ export class HeroSystem6eItem extends Item {
             if (
                 this.actor?.items &&
                 this.actor.items.find(
-                    (o) => o.system.XMLID == "WEAPON_ELEMENT" && o.system.ADDER.find((o) => o.XMLID == "BAREHAND"),
+                    (o) => o.system.XMLID == "WEAPON_ELEMENT" && o.system.ADDER?.find((o) => o.XMLID == "BAREHAND"),
                 )
             ) {
                 let EXTRADC = this.actor.items.find(

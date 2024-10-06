@@ -6,7 +6,7 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 import { determineDefense } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
-import { getPowerInfo, getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
+import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { CombatSkillLevelsForAttack, convertToDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
@@ -49,6 +49,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                     `The Actor "${data.actor.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
                 );
             }
+
+            // Items returned by the super have been neutered, we want the full class so we can use parentItem and childItem getters.
+            data.items = Array.from(data.actor.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
             const equipmentWeightPercentage =
                 parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
@@ -97,14 +100,15 @@ export class HeroSystemActorSheet extends ActorSheet {
                 data.activePointsTitle = "Total Active Points (estimate)";
             }
 
-            // override actor.items (which is a map) to an array with some custom properties
-            let items = [];
+            // // override actor.items (which is a map) to an array with some custom properties
+            // let items = [];
             for (let item of data.actor.items) {
                 // Update Attack Details (estimateOCV, DCV, Damage)
                 item._postUploadDetails();
 
                 if (item.type == "martialart") {
                     data.hasMartialArts = true;
+                    continue;
                 }
 
                 if (item.type == "equipment") {
@@ -128,312 +132,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                         item.system.PRICEtext = "";
                     }
                 }
-
-                // // showToggle
-                // const itemEffects = item.effects.find(() => true);
-                // if (itemEffects) {
-                //     item.system.showToggle = true;
-                //     item.system.active = !itemEffects.disabled;
-                // }
-
-                // const actorEffects = data.actor.effects.find((o) => o.origin === this.actor.items.get(item._id).uuid);
-                // {
-                //     if (actorEffects) {
-                //         item.system.showToggle = true;
-                //         item.system.active = !actorEffects.disabled;
-                //     }
-                // }
-                // if (item.baseInfo?.behaviors?.includes("activatable")) {
-                //     item.system.showToggle = true;
-                // }
-
-                // // Item in a Framework?
-                // if (item.parentItem) {
-                //     // const parentPosition =
-                //     //     item.parentItem.system.XMLID === "COMPOUNDPOWER"
-                //     //         ? -1 // Compound power starts at a random position. Sub powers start at 0.
-                //     //         : parseInt(item.parentItem.system.POSITION);
-                //     //item.system.childIdx = parseInt(item.system.POSITION) - parseInt(parentPosition);
-                //     item.system.childIdx = item.parentItem.childItems.findIndex((o) => o.id === item.id) + 1;
-
-                //     if (item.parentItem?.parentItem) {
-                //         item.system.childIdx = `${item.parentItem.system.childIdx}.${item.system.childIdx}`;
-                //     }
-                // }
-
-                // // Endurance
-                // item.system.endEstimate = parseInt(item.system.end) || 0;
-
-                // // Damage
-                // if (
-                //     item.type == "attack" ||
-                //     item.type == "maneuver" ||
-                //     item.system.subType === "attack" ||
-                //     item.system.XMLID === "martialart"
-                // ) {
-                //     item.flags.tags = {};
-
-                //     // Combat Skill Levels
-                //     const csls = CombatSkillLevelsForAttack(item);
-                //     let cslSummary = {};
-
-                //     for (const csl of csls) {
-                //         for (const prop of ["ocv", "omcv", "dcv", "dmcv", "dc"]) {
-                //             cslSummary[prop] = csl[prop] + parseInt(cslSummary[prop] || 0);
-
-                //             if (csl[prop] != 0) {
-                //                 if (item.flags.tags[prop]) {
-                //                     item.flags.tags[prop] += "\n";
-                //                 } else {
-                //                     item.flags.tags[prop] = "";
-                //                 }
-                //                 item.flags.tags[prop] = `${item.flags.tags[prop]}${csl[prop].signedString()} ${
-                //                     prop === "dc" ? "DC " : ""
-                //                 }${csl.item.name}`;
-                //             }
-                //         }
-                //     }
-                //     let { dc, end } = convertToDcFromItem(item);
-                //     item.system.endEstimate = Math.max(item.system.endEstimate, end);
-
-                //     // text description of damage
-                //     item.system.damage = getDiceFormulaFromItemDC(item, dc);
-
-                //     // Standard Effect
-                //     if (item.system.USESTANDARDEFFECT) {
-                //         let stun = parseInt(item.system.value * 3);
-                //         if (
-                //             item.findModsByXmlid("PLUSONEHALFDIE") ||
-                //             item.findModsByXmlid("MINUSONEPIP") ||
-                //             item.findModsByXmlid("PLUSONEPIP")
-                //         ) {
-                //             stun += 1;
-                //         }
-                //         item.system.damage = stun;
-                //     }
-
-                //     if (dc > 0) {
-                //         if (item.system.killing) {
-                //             item.system.damage += "K";
-                //         } else {
-                //             item.system.damage += "N";
-                //         }
-                //     }
-
-                //     // Signed OCV and DCV
-                //     if (item.system.ocv != undefined && item.system.uses === "ocv") {
-                //         const ocv = parseInt(item.actor?.system.characteristics.ocv?.value || 0);
-                //         if (parseInt(ocv) != 0) {
-                //             if (item.flags.tags.ocv) {
-                //                 item.flags.tags.ocv += "\n";
-                //             } else {
-                //                 item.flags.tags.ocv = "";
-                //             }
-                //             item.flags.tags.ocv = `${item.flags.tags.ocv}${ocv.signedString()} OCV`;
-                //         }
-                //         switch (item.system.ocv) {
-                //             case "--":
-                //                 item.system.ocvEstimated = "";
-                //                 break;
-
-                //             case "-v/10":
-                //                 {
-                //                     item.system.ocv = ("+" + parseInt(item.system.ocv)).replace("+-", "-");
-
-                //                     const tokens = item.actor.getActiveTokens();
-                //                     const token = tokens[0];
-                //                     const velocity = calculateVelocityInSystemUnits(item.actor, token);
-
-                //                     item.system.ocvEstimated = (
-                //                         ocv +
-                //                         parseInt(cslSummary.ocv) +
-                //                         parseInt(velocity / 10)
-                //                     ).signedString();
-
-                //                     if (parseInt(velocity / 10) != 0) {
-                //                         if (item.flags.tag.ocv) {
-                //                             item.flags.tagsocv += "\n";
-                //                         } else {
-                //                             item.flags.tags.ocv = "";
-                //                         }
-                //                         item.flags.tags.ocv = `${item.flags.tags.ocv}${parseInt(
-                //                             velocity / 10,
-                //                         ).signedString()} Velocity`;
-                //                     }
-                //                 }
-                //                 break;
-
-                //             default:
-                //                 item.system.ocv = parseInt(item.system.ocv).signedString();
-
-                //                 item.system.ocvEstimated = (
-                //                     ocv +
-                //                     parseInt(item.system.ocv) +
-                //                     parseInt(cslSummary.ocv || cslSummary.omcv || 0)
-                //                 ).signedString();
-
-                //                 if (parseInt(item.system.ocv) != 0) {
-                //                     if (item.flags.tags.ocv) {
-                //                         item.flags.tags.ocv += "\n";
-                //                     } else {
-                //                         item.flags.tags.ocv = "";
-                //                     }
-                //                     item.flags.tags.ocv += `${item.system.ocv} ${item.name}`;
-                //                 }
-                //         }
-                //     }
-
-                //     if (item.system.dcv != undefined && item.system.uses === "ocv") {
-                //         const dcv = parseInt(item.actor?.system.characteristics.dcv?.value || 0);
-                //         if (parseInt(dcv) != 0) {
-                //             if (item.flags.tags.dcv) {
-                //                 item.flags.tags.dcv += "\n";
-                //             } else {
-                //                 item.flags.tags.dcv = "";
-                //             }
-                //             item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
-                //         }
-                //         item.system.dcv = parseInt(item.system.dcv).signedString();
-                //         item.system.dcvEstimated = (
-                //             dcv +
-                //             parseInt(item.system.dcv) +
-                //             parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
-                //         ).signedString();
-
-                //         if (parseInt(item.system.dcv) != 0) {
-                //             if (item.flags.tags.dcv) {
-                //                 item.flags.tags.dcv += "\n";
-                //             } else {
-                //                 item.flags.tags.dcv = "";
-                //             }
-                //             item.flags.tags.dcv = `${item.flags.tags.dcv}${item.system.dcv} ${item.name}`;
-                //         }
-                //     }
-
-                //     if (item.system.uses === "omcv") {
-                //         const omcv = parseInt(item.actor?.system.characteristics.omcv?.value || 0);
-                //         item.system.ocvEstimated = (omcv + parseInt(cslSummary.omcv || 0)).signedString();
-                //         if (omcv != 0) {
-                //             if (item.flags.tags.omcv) {
-                //                 item.flags.tags.omcv += "\n";
-                //             } else {
-                //                 item.flags.tags.omcv = "";
-                //             }
-                //             item.flags.tags.omcv = `${item.flags.tags.omcv}${omcv.signedString()} OMCV`;
-                //         }
-
-                //         const dmcv = parseInt(item.actor?.system.characteristics.dmcv?.value || 0);
-                //         item.system.dcvEstimated = (dmcv + parseInt(cslSummary.dmcv || 0)).signedString();
-                //         if (dmcv != 0) {
-                //             if (item.flags.tags.dmcv) {
-                //                 item.flags.tags.dmcv += "\n";
-                //             } else {
-                //                 item.flags.tags.dmcv = "";
-                //             }
-                //             item.flags.tags.dmcv = `${item.flags.tags.dmcv}${dmcv.signedString()} DMCV`;
-                //         }
-                //     }
-
-                //     // Set +1 OCV
-                //     const setManeuver = item.actor.items.find(
-                //         (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
-                //     );
-                //     if (setManeuver) {
-                //         item.system.ocvEstimated = (parseInt(item.system.ocvEstimated) + 1).signedString();
-
-                //         if (item.flags.tags.ocv) {
-                //             item.flags.tags.ocv += "\n";
-                //         } else {
-                //             item.flags.tags.ocv = "";
-                //         }
-                //         item.flags.tags.ocv += `+1 Set`;
-                //     }
-
-                //     // Haymaker -5 DCV
-                //     const haymakerManeuver = item.actor.items.find(
-                //         (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
-                //     );
-                //     if (haymakerManeuver) {
-                //         item.system.dcvEstimated = (parseInt(item.system.dcvEstimated) - 4).signedString();
-
-                //         if (item.flags.tags.dcv) {
-                //             item.flags.tags.dcv += "\n";
-                //         } else {
-                //             item.flags.tags.dcv = "";
-                //         }
-                //         item.flags.tags.dcv += `-4 Haymaker`;
-                //     }
-
-                //     item.system.phase = item.system.PHASE;
-                // }
-
-                // // Defense
-                // if (item.type == "defense") {
-                //     item.system.description =
-                //         CONFIG.HERO.defenseTypes[item.system.defenseType] ||
-                //         CONFIG.HERO.defenseTypes5e[item.system.defenseType];
-                // }
-
-                // if (item.type == "martialart") {
-                //     data.hasMartialArts = true;
-                // }
-
-                // if (item.type == "equipment") {
-                //     data.hasEquipment = true;
-
-                //     item.system.weight = (parseFloat(item.system.WEIGHT || 0) * equipmentWeightPercentage).toFixed(1);
-
-                //     if (item.system.active) {
-                //         weightTotal += parseFloat(item.system.weight || 0);
-                //     }
-                //     if (parseFloat(item.system.weight || 0) > 0) {
-                //         item.system.WEIGHTtext = parseFloat(item.system.weight) + "kg";
-                //     } else {
-                //         item.system.WEIGHTtext = "";
-                //     }
-
-                //     priceTotal += parseFloat(item.system.PRICE || 0);
-                //     if (parseFloat(item.system.PRICE || 0) > 0) {
-                //         item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE));
-                //     } else {
-                //         item.system.PRICEtext = "";
-                //     }
-                // }
-
-                // item.updateRoll();
-
-                // // Charges
-                // if (parseInt(item.system.charges?.max || 0) > 0) {
-                //     const costsEnd = item.findModsByXmlid("COSTSEND");
-                //     if (item.system.endEstimate === 0 || !costsEnd) item.system.endEstimate = "";
-                //     item.system.endEstimate += ` [${parseInt(item.system.charges?.value || 0)}${
-                //         item.system.charges?.recoverable ? "rc" : ""
-                //     }]`;
-                //     item.system.endEstimate = item.system.endEstimate.trim();
-                // }
-
-                // // 0 END
-                // if (!item.system.endEstimate) {
-                //     item.system.endEstimate = "";
-                // }
-
-                // // Mental
-                // if (item?.flags?.tags?.omcv) {
-                //     item.flags.tags.ocv ??= item.flags.tags.omcv;
-                //     item.flags.tags.dcv ??= item.flags.tags.dmcv;
-                // }
-
-                items.push(foundry.utils.deepClone(item));
             }
-
-            // Sort attacks
-            // Sorting is tricky and not done at the moment.
-            // Sorting just the attacks may sort powers as well, which can mess up frameworks.
-            //data.items = items.filter(o=> o.system.subType === 'attack' || o.attack === 'attack');
-            //data.items.sort((a, b) => a.name.localeCompare(b.name) );
-            //data.items = [...data.items, ...items.filter(o=> !(o.system.subType === 'attack' || o.attack === 'attack') )]
-            //data.items = items.sort((a, b) => ((a.system.subType === 'attack' || a.attack === 'attack') && (b.system.subType === 'attack' || b.attack === 'attack')) ? a.name.localeCompare(b.name) : 0);
-            data.items = items;
 
             if (data.hasEquipment) {
                 if (parseFloat(weightTotal).toFixed(1) > 0 || parseFloat(priceTotal).toFixed(2) > 0) {
@@ -862,7 +561,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     });
                 }
             }
-            powers;
+
             data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints);
             let topActivePoints = data.activePointSummary?.[0]?.activePoints;
             data.activePointSummary = data.activePointSummary.filter((o) => o.activePoints >= topActivePoints * 0.5);
@@ -973,6 +672,16 @@ export class HeroSystemActorSheet extends ActorSheet {
         if (!this.actor.isOwner) return false;
         const item = await Item.implementation.fromDropData(data);
 
+        const sameActor = item.actor?.id === this.actor.id;
+        if (sameActor) {
+            return super._onDropItem(event, data);
+        }
+
+        if (item.type === "maneuver") {
+            ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
+            return;
+        }
+
         await this.DropItemFramework(item);
     }
 
@@ -987,13 +696,13 @@ export class HeroSystemActorSheet extends ActorSheet {
         if (parentId) {
             itemData.system.PARENTID = parentId;
         }
-        delete itemData.system.childIdx;
+        delete itemData.system.childIdx; // Not really used as of 3.0.100, but good to clean up any older items
 
         // Handle item sorting within the same Actor
         // TODO: Allow drag/drop to change order
         if (this.actor.uuid === item.parent?.uuid) return this._onSortItem(event, itemData);
 
-        if (itemData.system.is5e !== this.actor.system.is5e) {
+        if (itemData.system.is5e !== undefined && itemData.system.is5e !== this.actor.is5e) {
             ui.notifications.warn(
                 `${itemData.name} is a ${itemData.system.is5e ? "5e" : "6e"} item.  ${this.actor.name} is a ${
                     this.actor.system.is5e ? "5e" : "6e"
@@ -1004,13 +713,35 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Create the owned item
         await this._onDropItemCreate(itemData, itemData.system.PARENTID);
 
+        const actor = this.actor;
+        const token = actor.token;
+        const dropName = token?.name || actor.getActiveTokens()?.[0]?.name || actor.name;
+        const dragName =
+            item.actor?.token?.name ||
+            item.actor?.getActiveTokens()?.[0]?.name ||
+            item.actor?.name ||
+            item.compendium?.name ||
+            (item.uuid.startsWith("Item.") ? "ItemSidebar" : null);
+        // const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+        // speaker.alias = actor.name;
+        const chatData = {
+            user: game.user._id,
+            whisper: [...whisperUserTargetsForActor(actor), ...whisperUserTargetsForActor(item.actor)],
+            //speaker: speaker,
+        };
+
+        // Delete original if equipment and it belonged to an actor (as opposed to item sidebar or compendium)?
+        if (item.type === "equipment" && item.actor) {
+            item.delete();
+            chatData.content = `<b>${item.name}</b> was transferred from <b>${dragName}</b> to <b>${dropName}</b>.`;
+        } else {
+            chatData.content = `<b>${item.name}</b> was copied from <b>${dragName}</b> to <b>${dropName}</b>.`;
+        }
+        ChatMessage.create(chatData);
+
         // Is this a parent item with children?
         for (const child of item.childItems || []) {
             await this.DropItemFramework(child, itemData.system.ID);
-            // const childItemData = childItem.toObject();
-            // childItemData.system.ID = new Date().getTime().toString();
-            // childItemData.system.PARENTID = itemData.system.ID;
-            // await this._onDropItemCreate(childItemData);
         }
     }
 
@@ -1290,6 +1021,13 @@ export class HeroSystemActorSheet extends ActorSheet {
     async _onItemDelete(event) {
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
+
+        // Do not allow deleting of item with children
+        if (item.childItems) {
+            ui.notifications.error(`You cannot delete ${item.name} because there are child items.`);
+            return;
+        }
+
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
             content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),
