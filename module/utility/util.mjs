@@ -120,8 +120,9 @@ export function getCharacteristicInfoArrayForActor(actor) {
  * @returns User[]
  */
 export function whisperUserTargetsForActor(actor) {
+    if (!actor) return [];
     const ownerIds = [];
-    for (const [key, value] of Object.entries(actor.ownership)) {
+    for (const [key, value] of Object.entries(actor?.ownership)) {
         if (value === CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
             ownerIds.push(key);
         }

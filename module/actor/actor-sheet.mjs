@@ -6,7 +6,7 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 import { determineDefense } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
-import { getPowerInfo, getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
+import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { CombatSkillLevelsForAttack, convertToDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
@@ -696,7 +696,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         if (parentId) {
             itemData.system.PARENTID = parentId;
         }
-        delete itemData.system.childIdx;
+        delete itemData.system.childIdx; // Not really used as of 3.0.100, but good to clean up any older items
 
         // Handle item sorting within the same Actor
         // TODO: Allow drag/drop to change order
@@ -712,6 +712,32 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // Create the owned item
         await this._onDropItemCreate(itemData, itemData.system.PARENTID);
+
+        const actor = this.actor;
+        const token = actor.token;
+        const dropName = token?.name || actor.getActiveTokens()?.[0]?.name || actor.name;
+        const dragName =
+            item.actor?.token?.name ||
+            item.actor?.getActiveTokens()?.[0]?.name ||
+            item.actor?.name ||
+            item.compendium?.name ||
+            (item.uuid.startsWith("Item.") ? "ItemSidebar" : null);
+        // const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+        // speaker.alias = actor.name;
+        const chatData = {
+            user: game.user._id,
+            whisper: [...whisperUserTargetsForActor(actor), ...whisperUserTargetsForActor(item.actor)],
+            //speaker: speaker,
+        };
+
+        // Delete original if equipment and it belonged to an actor (as opposed to item sidebar or compendium)?
+        if (item.type === "equipment" && item.actor) {
+            item.delete();
+            chatData.content = `<b>${item.name}</b> was transferred from <b>${dragName}</b> to <b>${dropName}</b>.`;
+        } else {
+            chatData.content = `<b>${item.name}</b> was copied from <b>${dragName}</b> to <b>${dropName}</b>.`;
+        }
+        ChatMessage.create(chatData);
 
         // Is this a parent item with children?
         for (const child of item.childItems || []) {
