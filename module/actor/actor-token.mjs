@@ -92,6 +92,20 @@ export class HeroSystem6eToken extends Token {
 
     _canDragLeftStart(user, event) {
         let result = super._canDragLeftStart(user, event);
+
+        // If in combat, do not allow tokens to move when it is not their turn.
+        if (
+            !game.user.isGM &&
+            this.inCombat &&
+            this.combatant.combat.started &&
+            this.combatant.combat.current?.tokenId !== this.id &&
+            game.settings.get(HEROSYS.module, "CombatMovementOnlyOnActorsPhase")
+        ) {
+            ui.notifications.warn("Combat has started and you must wait for your phase to move.");
+            result = false;
+        }
+
+        // Do not allow movement when actor cannot act.  SHIFT will override in canAct()
         if (result && this.actor) {
             result = this.actor.canAct(true, event);
         }

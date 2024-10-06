@@ -228,6 +228,17 @@ export default class SettingsHelpers {
             requiresReload: false,
         });
 
+        game.settings.register(module, "CombatMovementOnlyOnActorsPhase", {
+            name: game.i18n.localize("Settings.CombatMovementOnlyOnActorsPhase.Name"),
+            hint: game.i18n.localize("Settings.CombatMovementOnlyOnActorsPhase.Hint"),
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: true,
+            onChange: () => ui.combat.render(),
+            requiresReload: false,
+        });
+
         game.settings.register(module, "alphaTesting", {
             name: game.i18n.localize("Settings.AlphaTesting.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.Hint"),
