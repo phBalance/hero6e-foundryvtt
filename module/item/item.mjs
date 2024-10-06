@@ -3899,7 +3899,7 @@ export class HeroSystem6eItem extends Item {
             if (
                 this.actor?.items &&
                 this.actor.items.find(
-                    (o) => o.system.XMLID == "WEAPON_ELEMENT" && o.system.ADDER.find((o) => o.XMLID == "BAREHAND"),
+                    (o) => o.system.XMLID == "WEAPON_ELEMENT" && o.system.ADDER?.find((o) => o.XMLID == "BAREHAND"),
                 )
             ) {
                 let EXTRADC = this.actor.items.find(

@@ -21,20 +21,24 @@
         <td>{{this.system.endEstimate}}</td>
 
         <td>
-            {{#if (ne this.system.subType "attack")}}
+            {{#if (or (eq this.system.subType "attack") this.system.roll)}}
+                <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
+            {{/if}}
+            {{!-- {{#if (ne this.system.subType "attack")}} --}}
                 {{#if this.system.showToggle}}
                     <input class="item-toggle" type="checkbox" title="CTRL to force toggle"
                         Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
                         data-action="toggle" />
                 {{/if}}
-                {{#if this.system.roll}}
+                {{!-- {{#if this.system.roll}}
                     <button type="button" class="item-rollable" data-roll="{{this.system.roll}}"
                         data-label="{{item._id}}">{{numberFormat this.system.roll decimals=0
                         sign=false}}-</button>
-                {{/if}}
-            {{else}}
+                {{/if}} --}}
+            {{!-- {{else}}
                 <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
-            {{/if}}
+            {{/if}} --}}
+
         </td>
     {{/if}}
     <td>
