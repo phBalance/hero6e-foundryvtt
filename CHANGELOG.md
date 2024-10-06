@@ -6,6 +6,7 @@
 - Fixed issue with powers sometimes uploading out of order. [#1138](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)
 - You can now drag/drop items within the same actor to change their order.
 - Equipment drag/drop between actors is now a move instead of a copy.  ChatMessages are whispered to owners of tokens when drag/drop occurs.
+- Fixed issues where some powers were not toggleable. [##1248](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)
 
 
 ## Version 3.0.99
