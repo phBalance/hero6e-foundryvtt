@@ -1002,6 +1002,12 @@ export class HeroRoller {
             this._useHitLocation &&
             (this._type === HeroRoller.ROLL_TYPE.NORMAL || this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
+            // We now allow attacking ENTANGLEs and FOCI, which aren't true hitLocations
+            if (!CONFIG.HERO.hitLocations[this._alreadyHitLocation]) {
+                console.warn(`Invalid hitLoc`, this._alreadyHitLocation);
+                return;
+            }
+
             let locationName;
 
             if (this._alreadyHitLocation === "none") {

@@ -121,11 +121,14 @@
       {{!-- Aim (hit location) form group --}}
       <div class="form-group" {{#unless useHitLoc}}style="display: none;"{{/unless}}>
         <label>Aim</label>
-        <select name="aim" id="aim">
+        {{!-- <select name="aim" id="aim">
           <option value="none">None</option>
           {{#each hitLoc as |hitLoc key|}}
             <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
           {{/each}}
+        </select> --}}
+        <select name="aim" style="max-width:234px">
+          {{selectOptions hitLoc selected=aim nameAttr="key" labelAttr="label" disabled="disabled"}}
         </select>
       </div>
 

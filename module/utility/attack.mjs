@@ -16,7 +16,7 @@ export class Attack {
     // they also get pulled in the start of turn (nextPhase flag)
     static async removeActionActiveEffects(actor) {
         const prevActiveEffects = actor.effects.filter((o) => o.flags.actionEffect);
-        console.log(prevActiveEffects);
+        //console.log(prevActiveEffects);
         for (const ae of prevActiveEffects) {
             await ae.delete();
         }

@@ -115,7 +115,7 @@ export async function AttackOptions(item) {
     // TODO: This needs to be considered. AOE does not preclude hit locations.
     if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
         data.useHitLoc = true;
-        data.hitLoc = CONFIG.HERO.hitLocations;
+        //data.hitLoc = CONFIG.HERO.hitLocations;
         data.hitLocSide =
             game.settings.get(HEROSYS.module, "hitLocTracking") === "all" ? CONFIG.HERO.hitLocationSide : null;
 
@@ -505,7 +505,12 @@ export async function AttackToHit(item, options) {
             game.settings.get(HEROSYS.module, "hitLocTracking") === "all" && options.aimSide !== "none"
                 ? `${options.aimSide} ${options.aim}`
                 : options.aim;
-        heroRoller.addNumber(CONFIG.HERO.hitLocations[options.aim][3], aimTargetLocation);
+        const aimOcvPenalty = CONFIG.HERO.hitLocations[options.aim]?.[3] || 0;
+        if (aimOcvPenalty) {
+            heroRoller.addNumber(aimOcvPenalty, aimTargetLocation);
+        } else {
+            console.warn(`${item.name} has missing aimOcvPenalty`, aimTargetLocation);
+        }
 
         // Penalty Skill Levels
         if (options.usePsl) {
