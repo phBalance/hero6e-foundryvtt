@@ -2949,29 +2949,27 @@ export class HeroSystem6eItem extends Item {
             case "ENTANGLE":
                 {
                     // Entangle 2d6, 7 rPD/2 rED or Entangle 2d6 5 rMD
-                    const baseDef = parseInt(system.value || 0);
+                    // const baseDef = parseInt(system.value || 0);
 
-                    const additionalDef = parseInt(this.findModsByXmlid("ADDITIONALDEF")?.LEVELS || 0);
-                    const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
-                    const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+                    // const additionalDef = parseInt(this.findModsByXmlid("ADDITIONALDEF")?.LEVELS || 0);
+                    // const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+                    // const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
 
-                    const rPD = baseDef + additionalPD;
-                    const rED = baseDef + additionalED;
-                    // 6e +1 DEF = +2 rMD. NOTE: HD doesn't have ability to buy MD in 6e.
-                    const rMD = baseDef + 2 * (additionalDef || additionalPD + additionalED);
+                    // const rPD = baseDef + additionalPD;
+                    // const rED = baseDef + additionalED;
+                    // // 6e +1 DEF = +2 rMD. NOTE: HD doesn't have ability to buy MD in 6e.
+                    // const rMD = baseDef + 2 * (additionalDef || additionalPD + additionalED);
 
-                    // BOECV for 5e, ACV for 6e
-                    const mentalEntangle =
-                        (this.findModsByXmlid("BOECV") &&
-                            this.findModsByXmlid("TAKESNODAMAGE") &&
-                            this.findModsByXmlid("VERSUSEGO")) ||
-                        (this.findModsByXmlid("ACV") &&
-                            this.findModsByXmlid("TAKESNODAMAGE") &&
-                            this.findModsByXmlid("VERSUSEGO"));
+                    // // BOECV for 5e, ACV for 6e
+                    // const mentalEntangle =
+                    //     (this.findModsByXmlid("BOECV") &&
+                    //         this.findModsByXmlid("TAKESNODAMAGE") &&
+                    //         this.findModsByXmlid("VERSUSEGO")) ||
+                    //     (this.findModsByXmlid("ACV") &&
+                    //         this.findModsByXmlid("TAKESNODAMAGE") &&
+                    //         this.findModsByXmlid("VERSUSEGO"));
 
-                    system.description = `${system.ALIAS} ${system.value}d6, ${
-                        mentalEntangle ? `${rMD} rMD` : `${rPD} rPD/${rED} rED`
-                    }`;
+                    system.description = `${system.ALIAS} ${system.value}d6, ${this.baseInfo.defense(this).string}`;
                 }
                 break;
 

@@ -393,6 +393,41 @@ export class HeroSystem6eActor extends Actor {
         return content;
     }
 
+    // Only used by _canDragLeftStart to prevent ENTANGLED tokens from moving
+    canMove(uiNotice, event) {
+        let result = true;
+        let badStatus = [];
+
+        if (this.statuses.has("entangled")) {
+            badStatus.push("ENTANGLED");
+            result = false;
+        }
+
+        if (!result && event?.shiftKey) {
+            const speaker = ChatMessage.getSpeaker({
+                actor: this,
+                //token,
+            });
+            speaker["alias"] = game.user.name;
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: `${this.name} is ${badStatus.join(", ")} and cannot move. SHIFT key was used to override.`,
+                whisper: whisperUserTargetsForActor(this),
+                speaker,
+            };
+            ChatMessage.create(chatData);
+
+            result = true;
+        }
+
+        if (!result) {
+            ui.notifications.error(`${this.name} is ${badStatus.join(", ")} and cannot act.  Hold SHIFT to override.`);
+        }
+
+        return result;
+    }
+
     // When stunned, knockedout, etc you cannot act
     canAct(uiNotice, event) {
         let result = true;

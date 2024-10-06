@@ -109,6 +109,12 @@ export class HeroSystem6eToken extends Token {
         if (result && this.actor) {
             result = this.actor.canAct(true, event);
         }
+
+        // Entangled tokens typically can't move
+        if (result && this.actor) {
+            result = this.actor.canMove(true, event);
+        }
+
         return result;
     }
 

@@ -1495,7 +1495,8 @@ export async function _onRollDamage(event) {
 
     const cardData = {
         item: item,
-        nonDmgEffect: adjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item),
+        nonDmgEffect:
+            adjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item) || item.baseInfo?.nonDmgEffect,
         senseAffecting,
 
         // dice rolls
@@ -1832,8 +1833,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     const heroRoller = HeroRoller.fromJSON(damageData.roller);
     const originalRoll = heroRoller.clone();
-
     const automation = game.settings.get(HEROSYS.module, "automation");
+
+    if (item.system.XMLID === "ENTANGLE") {
+        return _onApplyEntangleToSpecificToken(item, token, originalRoll);
+    }
 
     // Attack Verses Alternate Defense (6e) or NND (5e)
     let avad = item.findModsByXmlid("AVAD") || item.findModsByXmlid("NND");
@@ -2317,6 +2321,83 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     return damageChatMessage;
+}
+
+export async function _onApplyEntangleToSpecificToken(item, token, originalRoll) {
+    const entangleDefense = item.baseInfo.defense(item);
+    let body = originalRoll.getEntangleTotal();
+
+    // Entangle Active Effect
+    // Get current or a base Entangle Effect
+    // If a character is affected by more than one Entangle, use the
+    // highest BODY and the highest PD and ED for all the Entangles,
+    // then add +1 BODY for each additional Entangle.
+    // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
+    const prevEntangle = token.actor.effects.find((o) =>
+        o.statuses.has(HeroSystem6eActorActiveEffects.entangledEffect.id),
+    );
+    if (prevEntangle) {
+        entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense.rPD) || 0);
+        entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense.rED) || 0);
+        entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense.rMD) || 0);
+        (entangleDefense.string = `${
+            entangleDefense.mentalEntangle
+                ? `${entangleDefense.rMD} rMD`
+                : `${entangleDefense.rPD} rPD/${entangleDefense.rED} rED`
+        }`),
+            (body = Math.max(body, parseInt(prevEntangle.flags.body) || 0) + 1);
+    }
+    const effecttData = {
+        ...HeroSystem6eActorActiveEffects.entangledEffect,
+        ...prevEntangle,
+        name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
+        flags: {
+            body: body,
+            entangleDefense,
+            XMLID: item.system.XMLID,
+            source: item.actor.name,
+        },
+        origin: item.uuid,
+    };
+    if (prevEntangle) {
+        prevEntangle.update({ name: effecttData.name, flags: effecttData.flags, origin: effecttData.origin });
+    } else {
+        token.actor.addActiveEffect(effecttData);
+    }
+
+    const cardData = {
+        item: item,
+
+        // Incoming Damage Information
+        incomingDamageSummary: originalRoll.getTotalSummary(),
+        incomingAnnotatedDamageTerms: originalRoll.getAnnotatedTermsSummary(),
+
+        // dice rolls
+        roller: originalRoll,
+
+        // damage info
+        effects: `${token.name} is entangled.  The entangle has ${body} BODY ${entangleDefense.string}. ${
+            prevEntangle ? `This entangle augmented a previous ${prevEntangle.flags.body} body entangle.` : ""
+        }`,
+
+        // misc
+        attackTags: getAttackTags(item),
+        targetToken: token,
+    };
+
+    // render card
+    const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    ChatMessage.create(chatData);
 }
 
 async function _performAbsorptionForToken(token, absorptionItems, damageDetail, damageItem) {
