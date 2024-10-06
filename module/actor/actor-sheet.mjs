@@ -677,6 +677,11 @@ export class HeroSystemActorSheet extends ActorSheet {
             return super._onDropItem(event, data);
         }
 
+        if (item.type === "maneuver") {
+            ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
+            return;
+        }
+
         await this.DropItemFramework(item);
     }
 
@@ -990,6 +995,13 @@ export class HeroSystemActorSheet extends ActorSheet {
     async _onItemDelete(event) {
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
+
+        // Do not allow deleting of item with children
+        if (item.childItems) {
+            ui.notifications.error(`You cannot delete ${item.name} because there are child items.`);
+            return;
+        }
+
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
             content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),

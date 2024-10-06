@@ -26,22 +26,7 @@
             {{#if (and (eq item.type "equipment") (not item.parentItem) (filterItem item
             ../options.itemFilters.equipment))
             }}
-                {{#if (eq item.system.XMLID "LIST")}}
-                    <tr class="item" data-item-id="{{this._id}}">
-                        <td height="24"></td>
-                        <td class="left">{{item.system.ALIAS}}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {{else}}
-                    {{!-- stand alone equipment and equipment frameworks --}}
-                    {{> (getModulePath 'actor/actor-sheet-partial-equipment-item.hbs') item }}
-                {{/if}}
+                {{> (getModulePath 'actor/actor-sheet-partial-equipment-item.hbs') item }}
             {{/if}}
         {{/each}}
     </table>

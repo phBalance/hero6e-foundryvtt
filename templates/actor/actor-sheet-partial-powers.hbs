@@ -22,19 +22,7 @@
         {{#each items as |item id|}}
             {{!-- Show powers and things in a framework or compound power --}}
             {{#if (and (eq item.type "power") (not item.parentItem) (filterItem item ../options.itemFilters.power))}}
-                {{#if (eq item.system.XMLID "LIST")}}
-                    <tr class="item" data-item-id="{{this._id}}">
-                        <td height="24"></td>
-                        <td></td>
-                        <td class="left">{{item.system.ALIAS}}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {{else}}
-                    {{!-- stand alone powers and power frameworks --}}
-                    {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') item }}
-                {{/if}}
+                {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') item }}
             {{/if}}
         {{/each}}
     </table>
