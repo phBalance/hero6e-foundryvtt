@@ -50,6 +50,9 @@ export class HeroSystemActorSheet extends ActorSheet {
                 );
             }
 
+            // Items returned by the super have been neutered, we want the full class so we can use parentItem and childItem getters.
+            data.items = Array.from(data.actor.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
+
             const equipmentWeightPercentage =
                 parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
 
@@ -105,6 +108,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                 if (item.type == "martialart") {
                     data.hasMartialArts = true;
+                    continue;
                 }
 
                 if (item.type == "equipment") {
@@ -557,7 +561,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     });
                 }
             }
-            powers;
+
             data.activePointSummary.sort((a, b) => b.activePoints - a.activePoints);
             let topActivePoints = data.activePointSummary?.[0]?.activePoints;
             data.activePointSummary = data.activePointSummary.filter((o) => o.activePoints >= topActivePoints * 0.5);
@@ -668,7 +672,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         if (!this.actor.isOwner) return false;
         const item = await Item.implementation.fromDropData(data);
 
-        const sameActor = item.actor.id === this.actor.id;
+        const sameActor = item.actor?.id === this.actor.id;
         if (sameActor) {
             return super._onDropItem(event, data);
         }

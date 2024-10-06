@@ -1249,13 +1249,16 @@ export class HeroSystem6eActor extends Actor {
         // ITEMS
         let itemPromiseArray = [];
         const itemsToCreate = [];
+        let sortBase = 0;
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
+            sortBase += 1000;
             if (heroJson.CHARACTER[itemTag]) {
                 for (const system of heroJson.CHARACTER[itemTag]) {
                     const itemData = {
                         name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
                         type: itemTag.toLowerCase().replace(/s$/, ""),
                         system: system,
+                        sort: sortBase + parseInt(system.POSITION || 0),
                     };
 
                     // Hack in some basic information with names.
@@ -1327,25 +1330,10 @@ export class HeroSystem6eActor extends Actor {
                                         ...system2,
                                         PARENTID: system.ID,
                                         POSITION: parseInt(system2.POSITION),
+                                        sort: itemData.sort + 100 + parseInt(system2.POSITION),
                                     },
                                 };
-                                //const item2 = await HeroSystem6eItem.create(itemData2, { parent: this });
                                 itemsToCreate.push(itemData2);
-                                // try {
-                                //     //await item2._postUpload();
-                                // } catch (e) {
-                                //     console.error(e);
-                                //     await ui.notifications.error(
-                                //         `${this.name}/${itemData.name}/${item2.name}/${item2.system.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                //         {
-                                //             console: true,
-                                //             permanent: true,
-                                //         },
-                                //     );
-                                //     console.error(e);
-                                //     //await item2.delete();
-                                //     continue;
-                                // }
                             }
                         }
                     } else {
@@ -1413,6 +1401,7 @@ export class HeroSystem6eActor extends Actor {
                 delete heroJson.CHARACTER[itemTag];
             }
         }
+
         uploadPerformance.preItems = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
         await this.createEmbeddedDocuments("Item", itemsToCreate);

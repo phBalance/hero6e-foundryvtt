@@ -3,6 +3,8 @@
 ## Version 3.0.100 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Added Effect Panel showing more details about effects on a token.
 - Initial support for MULTIPLE ATTACK maneuver.
+- Fixed issue with powers sometimes uploading out of order. [#1138](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)
+- You can now drag/drop items within the same actor to change their order.
 
 
 ## Version 3.0.99
