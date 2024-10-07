@@ -676,8 +676,8 @@ export async function AttackToHit(item, options) {
     //     if (charges <= 0) {
     //         return ui.notifications.error(`${item.name} has no more charges.`);
     //     }
-    //     options.boostableCharges = clamp(parseInt(options.boostableCharges) || 0, 0, Math.min(charges - 1, 4)); // Maximum of 4
-    //     let spentCharges = 1 + options.boostableCharges;
+    //     options.boostableCharges = clamp(parseInt(options.boostableChargesToUse) || 0, 0, Math.min(charges - 1, 4)); // Maximum of 4
+    //     let spentCharges = 1 + options.boostableChargesToUse;
     //     if (enduranceText === "") {
     //         enduranceText = `Spent ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
     //     } else {
@@ -3277,7 +3277,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  * @returns
  */
 function calculateRequiredResourcesToUse(item, options) {
-    const chargesRequired = calculateRequiredCharges(item, options.boostableCharges);
+    const chargesRequired = calculateRequiredCharges(item, options.boostableChargesToUse || 0);
     const endRequired = calculateRequiredEnd(item, options);
 
     return {
@@ -3286,7 +3286,7 @@ function calculateRequiredResourcesToUse(item, options) {
     };
 }
 
-function calculateRequiredCharges(item, options) {
+function calculateRequiredCharges(item, boostableChargesToUse) {
     const startingCharges = parseInt(item.system.charges?.value || 0);
     const maximumCharges = item.system.charges?.max || 0;
     let chargesToUse = 0;
@@ -3294,11 +3294,7 @@ function calculateRequiredCharges(item, options) {
     // Does this item use charges?
     if (maximumCharges > 0) {
         // Maximum of 4
-        const boostableChargesUsed = clamp(
-            parseInt(options.boostableCharges) || 0,
-            0,
-            Math.min(startingCharges - 1, 4),
-        );
+        const boostableChargesUsed = clamp(boostableChargesToUse, 0, Math.min(startingCharges - 1, 4));
         chargesToUse = 1 + boostableChargesUsed;
     }
 

@@ -85,6 +85,7 @@
 
     </div>
     {{!-- END multiple-attack-section --}}
+
     {{!-- BEGIN standard-attack-section --}}
     <div class="standard-attack-section" {{#if (or action.current.isMultipleAttack action.current.isHaymakerAttack) }}style="display: none;"{{/if}} >
 
@@ -227,11 +228,10 @@
         </div>
       {{/if}}
 
-      {{#if boostableCharges}}
+      {{#if boostableChargesAvailable}}
         <div class="form-group">
-          <label>Boostable ({{boostableCharges}})</label>
-          {{!-- <input type="text" name="boostableCharges" value="0" /> --}}
-          {{numberInput boostableCharges name="boostableCharges" step=1 min=0 max=999}}
+          <label>Boostable ({{boostableChargesAvailable}})</label>
+          {{numberInput boostableChargesToUse name="boostableChargesToUse" step=1 min=0 max=999}}
         </div>
       {{/if}}
 
@@ -363,9 +363,6 @@
       </div>
     {{/if}}
     
-    {{#if mindScanChoices}}
-    {{/if}}
-
     {{#if aoeText}}
       <button class="aoe-button" type="submit" name="aoe">
         Place {{aoeText}} template
