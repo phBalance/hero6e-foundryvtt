@@ -740,7 +740,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         ChatMessage.create(chatData);
 
         // Is this a parent item with children?
-        for (const child of item.childItems || []) {
+        for (const child of item.childItems) {
             await this.DropItemFramework(child, itemData.system.ID);
         }
     }
@@ -1019,7 +1019,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const item = this.actor.items.get(itemId);
 
         // Do not allow deleting of item with children
-        if (item.childItems) {
+        if (item.childItems.length > 0) {
             ui.notifications.error(`You cannot delete ${item.name} because there are child items.`);
             return;
         }

@@ -2095,13 +2095,13 @@ export class HeroSystem6eItem extends Item {
         const items = this.actor?.items || game.items;
         const children = items
             .filter((item) => item.system.PARENTID === this.system.ID)
-            ?.sort((a, b) => (a.sort || 0) - (b.sort || 0));
-        return children.length ? children : null;
+            .sort((a, b) => (a.sort || 0) - (b.sort || 0));
+        return children; //children.length ? children : null;
     }
 
     get childIdx() {
         if (!this.parentItem) return null;
-        let result = this.parentItem.childItems?.findIndex((o) => o.id === this.id) + 1;
+        let result = this.parentItem.childItems.findIndex((o) => o.id === this.id) + 1;
         if (this.parentItem?.parentItem) {
             result = `${this.parentItem.childIdx}.${result}`;
         }

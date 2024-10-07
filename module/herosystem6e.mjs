@@ -146,7 +146,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-powers-item.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-partial-equipment-item.hbs`,
-        `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
+        // `systems/${HEROSYS.module}/templates/sidebar/partials/document-partial.hbs`,
         `systems/${HEROSYS.module}/templates/system/effects-panel.hbs`,
     ];
     // Handlebars Templates and Partials

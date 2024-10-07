@@ -10,14 +10,14 @@ export class HeroSystem6eCompendium extends Compendium {
         }
 
         // Don't allow framework items to be moved within ItemDirectory (they should drag/drop the folder)
-        if (item.childItems && item.pack === this.metadata.id) {
+        if (item.childItems.length > 0 && item.pack === this.metadata.id) {
             return ui.notifications.warn(
                 `"Drag/drop <b>${item.name}</b> item is not allowed in this compendium. Use folder instead"`,
             );
         }
 
         // Do super if there is no parent or if this framework is already in ItemDirectory
-        if (!item.childItems) {
+        if (item.childItems.length === 0) {
             return super._handleDroppedEntry(target, data);
         }
 
@@ -31,7 +31,7 @@ export class HeroSystem6eCompendium extends Compendium {
     }
 
     async dropFrameworkItem(folderTarget, item) {
-        if (item.childItems) {
+        if (item.childItems.length > 0) {
             const newFolder = await Folder.create(
                 { type: "Item", name: item.name, folder: folderTarget?.id },
                 { pack: this.metadata.id },
