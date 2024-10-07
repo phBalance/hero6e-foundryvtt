@@ -986,6 +986,8 @@ function getAttackTags(item) {
     // Attack Tags
     let attackTags = [];
 
+    if (!item) return attackTags;
+
     attackTags.push({ name: item.system.class });
 
     if (item.system.killing) {
@@ -1825,6 +1827,25 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const button = event.currentTarget;
     const damageData = { ...button.dataset };
     const item = fromUuidSync(damageData.itemid);
+
+    const heroRoller = HeroRoller.fromJSON(damageData.roller);
+
+    const token = canvas.tokens.get(tokenId);
+    if (!token) {
+        return ui.notifications.warn(`You must select at least one token before applying damage.`);
+    }
+
+    // Unique case where we use STR to break free of ENTANGLE
+    // if (!item && heroRoller.getHitLocation().activeEffect?.flags.XMLID === "ENTANGLE") {
+    //     const fakeItem = {
+    //         name: "Strength",
+    //         system: {
+    //             class: "physical",
+    //         },
+    //     };
+    //     return _onApplyDamageToActiveEffect(fakeItem, token, heroRoller);
+    // }
+
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
@@ -1832,12 +1853,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const token = canvas.tokens.get(tokenId);
-    if (!token) {
-        return ui.notifications.warn(`You must select at least one token before applying damage.`);
-    }
-
-    const heroRoller = HeroRoller.fromJSON(damageData.roller);
     const originalRoll = heroRoller.clone();
     const automation = game.settings.get(HEROSYS.module, "automation");
 
@@ -2436,7 +2451,7 @@ export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
 
     let defense;
     let defenseType;
-    switch (attackItem.system.class) {
+    switch (attackItem?.system.class) {
         case "physical":
             defense = damageActiveEffect.flags.entangleDefense.rPD;
             defenseType = "rPD";
