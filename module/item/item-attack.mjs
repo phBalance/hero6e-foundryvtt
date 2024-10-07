@@ -1451,6 +1451,7 @@ export async function _onRollDamage(event) {
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
+                subTarget: damageRoller.getHitLocation().item?.name || damageRoller.getHitLocation().activeEffect?.name,
             };
 
             // TODO: Add in explosion handling (or flattening)
@@ -2416,12 +2417,16 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
 export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
     // Get fully functional ActiveEffect that we can damage (update)
-    const damageActiveEffect = token.actor.temporaryEffects.find(
-        (o) => o.id === originalRoll.getHitLocation().activeEffect._id,
-    );
+    const damageActiveEffect = fromUuidSync(originalRoll.getHitLocation().fullName);
     if (!damageActiveEffect) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
+
+    // damageActiveEffect should belong to token
+    if (damageActiveEffect.parent.id !== token.actor.id) {
+        return ui.notifications.error(`Unable to locate <b>${damageActiveEffect.name}</b> on <b>${token.name}</b>.`);
+    }
+
     const attackItem = item;
 
     // We currently only support ENTANGLE

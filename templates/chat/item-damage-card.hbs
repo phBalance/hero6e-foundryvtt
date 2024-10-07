@@ -60,7 +60,11 @@
                 {{#if ../nonDmgEffect}}
                 Apply {{../item.system.XMLID}} to <b>{{target.token.name}}</b>
                 {{else}}
-                Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.token.name}} {{item.system.XMLID}}</b>
+                    {{#if target.subTarget}}
+                        Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.subTarget}} {{item.system.XMLID}}</b>
+                    {{else}}
+                        Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.token.name}} {{item.system.XMLID}}</b>
+                    {{/if}}
                 {{/if}}
             </button>
             {{/each}}
