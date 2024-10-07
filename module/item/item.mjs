@@ -240,24 +240,25 @@ export class HeroSystem6eItem extends Item {
         switch (this.system.subType || this.type) {
             case "attack":
                 switch (this.system.XMLID) {
-                    case "HKA":
-                    case "RKA":
-                    case "ENERGYBLAST":
-                    case "HANDTOHANDATTACK":
-                    case "TELEKINESIS":
-                    case "EGOATTACK":
                     case "AID":
-                    case "DRAIN":
-                    case "HEALING":
-                    case "SUCCOR":
-                    case "TRANSFER":
-                    case "FLASH":
                     case "BLOCK":
                     case "DODGE":
+                    case "DRAIN":
+                    case "EGOATTACK":
+                    case "ENERGYBLAST":
+                    case "ENTANGLE":
+                    case "FLASH":
+                    case "HANDTOHANDATTACK":
                     case "HAYMAKER":
+                    case "HEALING":
+                    case "HKA":
+                    case "MINDSCAN":
+                    case "RKA":
                     case "SET":
                     case "STRIKE":
-                    case "MINDSCAN":
+                    case "SUCCOR":
+                    case "TELEKINESIS":
+                    case "TRANSFER":
                     case "TRANSFORM":
                         return ItemAttack.AttackOptions(this, event);
 
