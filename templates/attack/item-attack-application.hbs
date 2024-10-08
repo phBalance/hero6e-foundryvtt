@@ -117,23 +117,30 @@
         </div>
       {{/each}}
 
+      {{!ENTANGLE}}
+      {{#if entangleExists}}
+        <div class="form-group">
+          <label>Target Entangle</label>
+          <input class="item-toggle" type="checkbox" name="targetEntangle" {{checked
+            targetEntangle}} data-dtype="Boolean" />
+        </div>
+
+      {{/if}}
+
 
       {{!-- Aim (hit location) form group --}}
-      <div class="form-group" {{#unless useHitLoc}}style="display: none;"{{/unless}}>
+      {{#if useHitLoc}}
+      <div class="form-group">
         <label>Aim</label>
-        {{!-- <select name="aim" id="aim">
-          <option value="none">None</option>
-          {{#each hitLoc as |hitLoc key|}}
-            <option value={{key}}{{#if (eq key @root/aim)}} selected{{/if}}>{{key}}</option>
-          {{/each}}
-        </select> --}}
         <select name="aim" style="max-width:234px">
           {{selectOptions hitLoc selected=aim nameAttr="key" labelAttr="label" disabled="disabled"}}
         </select>
       </div>
+      {{/if}}
 
       {{!-- Aim side (hit location side) form group --}}
-      <div class="form-group" {{#unless hitLocSide}}style="display: none;"{{/unless}}>
+      {{#if hitLocSide}}
+      <div class="form-group">
         <label>Aim Side</label>
         <select name="aimSide" id="aimSide">
           <option value="none">None</option>
@@ -142,9 +149,11 @@
           {{/each}}
         </select>
       </div>
+      {{/if}}
 
       {{!-- Penalty skill levels --}}
-      <div class="description" {{#unless PENALTY_SKILL_LEVELS}}style="display: none;"{{/unless}}>
+      {{#if PENALTY_SKILL_LEVELS}}
+      <div class="description" >
         <b>{{PENALTY_SKILL_LEVELS.name}}
           {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
         </b>: {{PENALTY_SKILL_LEVELS.system.description}}
@@ -154,6 +163,7 @@
         <label>Use Penalty Skill Levels</label>
         <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
       </div>
+      {{/if}}
 
       {{#if mindScanChoices}}
         <div class="form-group">
@@ -190,6 +200,7 @@
           <label>Effective Levels</label>
           <div class="noflexwrap">
             <input type="text" name="effectiveLevels" value="{{effectiveLevels}}" />
+            {{!-- {{numberInput effectiveLevels name="effectiveLevels" step=1 min=1 max=999}} --}}
             <label>/ {{item.system.LEVELS}}</label>
           </div>
         </div>
@@ -201,6 +212,7 @@
           <label>Effective Strength</label>
           <div class="noflexwrap">
             <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
+            {{!-- {{numberInput effectiveStr name="effectiveStr" step=1 min=1 max=999}} --}}
             <label>/ {{str}}</label>
           </div>
         </div>

@@ -80,153 +80,169 @@ export class ItemAttackFormApplication extends FormApplication {
         const data = this.data;
         const item = data.item;
 
-        //data.targets = game.user.targets;
-        data.targets = Array.from(game.user.targets);
+        try {
+            //data.targets = game.user.targets;
+            data.targets = Array.from(game.user.targets);
 
-        if (data.targets.length === 0 && item.system.XMLID === "MINDSCAN" && game.user.isGM) {
-            data.targets = foundry.utils
-                .deepClone(canvas.tokens.controlled)
-                .filter((t) => t.actor?.id != item.actor?.id);
-        }
-
-        // Initialize aim to the default option values
-        this.data.aim ??= "none";
-        this.data.aimSide ??= "none";
-
-        data.ocvMod ??= item.system.ocv;
-        data.dcvMod ??= item.system.dcv;
-        data.omcvMod ??= item.system.ocv; //TODO: May need to make a distinction between OCV/OMCV
-        data.dmcvMod ??= item.system.dcv;
-        data.effectiveStr ??= data.str;
-        data.effectiveLevels ??= data.item.system.LEVELS;
-
-        data.hitLoc = [];
-        data.useHitLoc = false;
-        const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels }); //  getAoeModifier();
-        if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
-            for (const key of Object.keys(CONFIG.HERO.hitLocations)) {
-                data.hitLoc.push({ key: key, label: key });
+            if (data.targets.length === 0 && item.system.XMLID === "MINDSCAN" && game.user.isGM) {
+                data.targets = foundry.utils
+                    .deepClone(canvas.tokens.controlled)
+                    .filter((t) => t.actor?.id != item.actor?.id);
             }
-            data.useHitLoc = true;
-        }
 
-        // Allow targeting of ENTANGLES & FOCI
-        // if (data.targets.length === 1) {
-        //     for (const entry of data.targets[0].actor?.targetableItems) {
-        //         data.hitLoc.push({ key: entry.uuid, label: entry.name }); //disabled: true
-        //         data.useHitLoc = true;
-        //     }
-        // }
-        if (data.useHitLoc) {
-            data.hitLoc = [{ key: "none", label: "None" }, ...data.hitLoc];
-        }
+            // Initialize aim to the default option values
+            this.data.aim ??= "none";
+            this.data.aimSide ??= "none";
 
-        if (aoe) {
-            data.aoeText = aoe.OPTION_ALIAS;
-            // if (!item.system.areaOfEffect) {
-            //     ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
+            data.ocvMod ??= item.system.ocv;
+            data.dcvMod ??= item.system.dcv;
+            data.omcvMod ??= item.system.ocv; //TODO: May need to make a distinction between OCV/OMCV
+            data.dmcvMod ??= item.system.dcv;
+            data.effectiveStr ??= data.str;
+            data.effectiveLevels ??= data.item.system.LEVELS;
+
+            // Is there an ENTANGLE on any of the targets
+            // If so assume we are targeting the entangle
+            const entangles = [];
+            for (const target of data.targets) {
+                const ae = target.actor?.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+                if (ae) {
+                    entangles.push(ae);
+                }
+            }
+            data.entangleExists = true;
+            data.targetEntangle ??= true;
+
+            data.hitLoc = [];
+            data.useHitLoc = false;
+            const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels }); //  getAoeModifier();
+            if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
+                for (const key of Object.keys(CONFIG.HERO.hitLocations)) {
+                    data.hitLoc.push({ key: key, label: key });
+                }
+                data.useHitLoc = true;
+            }
+
+            // Allow targeting of ENTANGLES & FOCI
+            // if (data.targets.length === 1) {
+            //     for (const entry of data.targets[0].actor?.targetableItems) {
+            //         data.hitLoc.push({ key: entry.uuid, label: entry.name }); //disabled: true
+            //         data.useHitLoc = true;
+            //     }
             // }
-            const levels = aoe.value; //item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
-            if (levels) {
-                data.aoeText += ` (${levels}${getSystemDisplayUnits(item.actor.is5e)})`;
+            if (data.useHitLoc) {
+                data.hitLoc = [{ key: "none", label: "None" }, ...data.hitLoc];
             }
 
-            if (this.getAoeTemplate() || game.user.targets.size > 0) {
-                data.noTargets = false;
-            } else {
-                data.noTargets = true;
-            }
-        } else {
-            data.noTargets = game.user.targets.size === 0;
-            data.aoeText = null;
-        }
-
-        // Boostable Charges
-        if (item.system.charges?.value > 1) {
-            data.boostableCharges = item.system.charges.value - 1;
-        }
-
-        // MINDSCAN
-        if (item.system.XMLID === "MINDSCAN") {
-            data.mindScanChoices = CONFIG.HERO.mindScanChoices;
-
-            data.mindScanFamiliarOptions = [];
-            data.mindScanFamiliarOptions.push({
-                label: `+0`,
-                key: 0,
-            });
-            for (let i = 1; i <= 5; i++) {
-                data.mindScanFamiliarOptions.push({
-                    label: `+${i} Familiar mind`,
-                    key: i,
-                });
-            }
-            for (let i = 1; i <= 5; i++) {
-                data.mindScanFamiliarOptions.push({
-                    label: `${-i} Unfamiliar mind`,
-                    key: -i,
-                });
-            }
-        }
-
-        // Combat Skill Levels
-        // data.cslChoices = null;
-        // data.csl = null;
-        // data.cslSkill = null;
-        const csls = CombatSkillLevelsForAttack(item);
-        data.csls = undefined;
-        for (const csl of csls) {
-            let entry = {};
-            if (csl && csl.skill) {
-                entry.cslSkill = csl.skill;
-                let mental = csl.skill.system.XMLID === "MENTAL_COMBAT_LEVELS";
-                let _ocv = mental ? "omcv" : "ocv";
-                let _dcv = mental ? "dmcv" : "dcv";
-                entry.cslChoices = { [_ocv]: _ocv };
-                if (csl.skill.system.OPTION != "SINGLE") {
-                    entry.cslChoices[_dcv] = _dcv;
-                    entry.cslChoices.dc = "dc";
+            if (aoe) {
+                data.aoeText = aoe.OPTION_ALIAS;
+                // if (!item.system.areaOfEffect) {
+                //     ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
+                // }
+                const levels = aoe.value; //item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
+                if (levels) {
+                    data.aoeText += ` (${levels}${getSystemDisplayUnits(item.actor.is5e)})`;
                 }
 
-                // CSL radioBoxes names
-                entry.csl = [];
-                for (let c = 0; c < parseInt(csl.skill.system.LEVELS || 0); c++) {
-                    entry.csl.push({
-                        name: `${csl.skill.id}.system.csl.${c}`,
-                        value: csl.skill.system.csl ? csl.skill.system.csl[c] : "undefined",
+                if (this.getAoeTemplate() || game.user.targets.size > 0) {
+                    data.noTargets = false;
+                } else {
+                    data.noTargets = true;
+                }
+            } else {
+                data.noTargets = game.user.targets.size === 0;
+                data.aoeText = null;
+            }
+
+            // Boostable Charges
+            if (item.system.charges?.value > 1) {
+                data.boostableCharges = item.system.charges.value - 1;
+            }
+
+            // MINDSCAN
+            if (item.system.XMLID === "MINDSCAN") {
+                data.mindScanChoices = CONFIG.HERO.mindScanChoices;
+
+                data.mindScanFamiliarOptions = [];
+                data.mindScanFamiliarOptions.push({
+                    label: `+0`,
+                    key: 0,
+                });
+                for (let i = 1; i <= 5; i++) {
+                    data.mindScanFamiliarOptions.push({
+                        label: `+${i} Familiar mind`,
+                        key: i,
                     });
                 }
-
-                data.csls ??= [];
-                data.csls.push(entry);
+                for (let i = 1; i <= 5; i++) {
+                    data.mindScanFamiliarOptions.push({
+                        label: `${-i} Unfamiliar mind`,
+                        key: -i,
+                    });
+                }
             }
-        }
 
-        // DEADLYBLOW
-        const DEADLYBLOW = item.actor.items.find((o) => o.system.XMLID === "DEADLYBLOW");
-        if (DEADLYBLOW) {
-            item.system.conditionalAttacks ??= {};
-            item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
-                ...DEADLYBLOW,
-                id: DEADLYBLOW.id,
-            };
-            item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
-        }
+            // Combat Skill Levels
+            // data.cslChoices = null;
+            // data.csl = null;
+            // data.cslSkill = null;
+            const csls = CombatSkillLevelsForAttack(item);
+            data.csls = undefined;
+            for (const csl of csls) {
+                let entry = {};
+                if (csl && csl.skill) {
+                    entry.cslSkill = csl.skill;
+                    let mental = csl.skill.system.XMLID === "MENTAL_COMBAT_LEVELS";
+                    let _ocv = mental ? "omcv" : "ocv";
+                    let _dcv = mental ? "dmcv" : "dcv";
+                    entry.cslChoices = { [_ocv]: _ocv };
+                    if (csl.skill.system.OPTION != "SINGLE") {
+                        entry.cslChoices[_dcv] = _dcv;
+                        entry.cslChoices.dc = "dc";
+                    }
 
-        data.action = Attack.getActionInfo(
-            data.item,
-            data.targets,
-            data.formData, // use formdata to include player options from the form
-        );
-        // the title seems to be fixed when the form is initialized,
-        // and doesn't change afterwards even if we come through here again
-        // todo: figure out how to adjust the title when we want it to
-        if (data.action.maneuver.isMultipleAttack) {
-            this.options.title = `${this.data?.item?.actor?.name} multiple attack.`;
-        } else if (data.action.maneuver.isHaymakerAttack) {
-            this.options.title = `${this.data?.item?.actor?.name} haymaker attack.`;
-        } else {
-            this.options.title = `${this.data?.item?.actor?.name} select attack options and roll to hit`;
+                    // CSL radioBoxes names
+                    entry.csl = [];
+                    for (let c = 0; c < parseInt(csl.skill.system.LEVELS || 0); c++) {
+                        entry.csl.push({
+                            name: `${csl.skill.id}.system.csl.${c}`,
+                            value: csl.skill.system.csl ? csl.skill.system.csl[c] : "undefined",
+                        });
+                    }
+
+                    data.csls ??= [];
+                    data.csls.push(entry);
+                }
+            }
+
+            // DEADLYBLOW
+            const DEADLYBLOW = item.actor.items.find((o) => o.system.XMLID === "DEADLYBLOW");
+            if (DEADLYBLOW) {
+                item.system.conditionalAttacks ??= {};
+                item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
+                    ...DEADLYBLOW,
+                    id: DEADLYBLOW.id,
+                };
+                item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
+            }
+
+            data.action = Attack.getActionInfo(
+                data.item,
+                data.targets,
+                data.formData, // use formdata to include player options from the form
+            );
+            // the title seems to be fixed when the form is initialized,
+            // and doesn't change afterwards even if we come through here again
+            // todo: figure out how to adjust the title when we want it to
+            if (data.action.maneuver.isMultipleAttack) {
+                this.options.title = `${this.data?.item?.actor?.name} multiple attack.`;
+            } else if (data.action.maneuver.isHaymakerAttack) {
+                this.options.title = `${this.data?.item?.actor?.name} haymaker attack.`;
+            } else {
+                this.options.title = `${this.data?.item?.actor?.name} select attack options and roll to hit`;
+            }
+        } catch (ex) {
+            console.error(ex);
         }
         return data;
     }
@@ -261,6 +277,14 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     async _updateObject(event, formData) {
+        // Take all the data we updated in the form and apply it.
+        this.data = { ...this.data, ...formData };
+
+        // We may need to tweak the results
+        this.render();
+
+        return;
+
         // changes to the form pass through here
         if (event.submitter?.name === "roll") {
             canvas.tokens.activate();
@@ -314,26 +338,21 @@ export class ItemAttackFormApplication extends FormApplication {
 
         this._updateCsl(event, formData);
 
-        this.data.aim = formData.aim;
-        this.data.aimSide = formData.aimSide;
-
-        this.data.ocvMod = formData.ocvMod;
-        this.data.dcvMod = formData.dcvMod;
-        this.data.omcvMod = formData.omcvMod;
-        this.data.dmcvMod = formData.dmcvMod;
-
-        this.data.effectiveStr = formData.effectiveStr;
-        this.data.effectiveLevels = formData.effectiveLevels;
-
-        this.data.mindScanMinds = formData.mindScanMinds;
-        this.data.mindScanFamiliar = formData.mindScanFamiliar;
-
-        this.data.boostableCharges = Math.max(
-            0,
-            Math.min(parseInt(formData.boostableCharges), this.data.item.charges?.value - 1),
-        );
-
-        this.data.velocity = parseInt(formData.velocity || 0);
+        // this.data.aim = formData.aim;
+        // this.data.aimSide = formData.aimSide;
+        // this.data.ocvMod = formData.ocvMod;
+        // this.data.dcvMod = formData.dcvMod;
+        // this.data.omcvMod = formData.omcvMod;
+        // this.data.dmcvMod = formData.dmcvMod;
+        // this.data.effectiveStr = formData.effectiveStr;
+        // this.data.effectiveLevels = formData.effectiveLevels;
+        // this.data.mindScanMinds = formData.mindScanMinds;
+        // this.data.mindScanFamiliar = formData.mindScanFamiliar;
+        // this.data.boostableCharges = Math.max(
+        //     0,
+        //     Math.min(parseInt(formData.boostableCharges), this.data.item.charges?.value - 1),
+        // );
+        //this.data.velocity = parseInt(formData.velocity || 0);
 
         // const aoe = this.data.item.AoeAttackParameters({ levels: this.data.effectiveLevels }); //  getAoeModifier();
         // if (aoe) {
