@@ -2479,6 +2479,11 @@ export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
             resistant: true,
             title: `Entangle ${defenseType}`,
         },
+        {
+            name: "body",
+            value: damageActiveEffect.flags.body,
+            title: `Entangle Body`,
+        },
     ];
 
     const bodyDamage = Math.max(0, originalRoll.getBodyTotal() - defense);

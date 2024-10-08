@@ -6690,6 +6690,60 @@ export function registerUploadTests(quench) {
                     });
                 });
 
+                describe("NORMAL ENTANGLE +1PD +1ED (6e)", async function () {
+                    const contents = `
+                        <POWER XMLID="ENTANGLE" ID="1726444520895" BASECOST="0.0" LEVELS="2" ALIAS="Entangle" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <ADDER XMLID="ADDITIONALPD" ID="1726444611655" BASECOST="0.0" LEVELS="1" ALIAS="+2 Additional PD" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="2.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="ADDITIONALED" ID="1726444612388" BASECOST="0.0" LEVELS="1" ALIAS="+2 Additional ED" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="2.0" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            temporary: true,
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(item.system.description, "Entangle 2d6, 3 rPD/3 rED");
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 25);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 25);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 2);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 2);
+                    });
+                });
+
                 describe("MENTAL ENTANGLE (6e)", async function () {
                     const contents = `
                         <POWER XMLID="ENTANGLE" ID="1726444532291" BASECOST="0.0" LEVELS="2" ALIAS="Entangle" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">

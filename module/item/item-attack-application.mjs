@@ -111,12 +111,12 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         // Allow targeting of ENTANGLES & FOCI
-        if (data.targets.length === 1) {
-            for (const entry of data.targets[0].actor?.targetableItems) {
-                data.hitLoc.push({ key: entry.uuid, label: entry.name }); //disabled: true
-                data.useHitLoc = true;
-            }
-        }
+        // if (data.targets.length === 1) {
+        //     for (const entry of data.targets[0].actor?.targetableItems) {
+        //         data.hitLoc.push({ key: entry.uuid, label: entry.name }); //disabled: true
+        //         data.useHitLoc = true;
+        //     }
+        // }
         if (data.useHitLoc) {
             data.hitLoc = [{ key: "none", label: "None" }, ...data.hitLoc];
         }

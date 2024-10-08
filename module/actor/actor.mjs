@@ -2117,11 +2117,4 @@ export class HeroSystem6eActor extends Actor {
     get is5e() {
         return this?.system.is5e;
     }
-
-    get targetableItems() {
-        const ae = this.temporaryEffects.filter((o) => o.flags.XMLID === "ENTANGLE");
-        const foci = this.items.filter((o) => o.findModsByXmlid("FOCUS"));
-
-        return [...ae, ...foci];
-    }
 }

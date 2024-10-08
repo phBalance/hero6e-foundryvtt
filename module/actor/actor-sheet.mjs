@@ -915,19 +915,19 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         // Use STR to escape ENTANGLE
-        const element = event.currentTarget.closest("button");
-        const dataset = element.dataset;
-        if (dataset.label === "str") {
-            const entangle = this.actor.targetableItems.find((o) => o.flags?.XMLID === "ENTANGLE");
-            if (entangle) {
-                heroRoller.addToHitLocation(
-                    true, //includeHitLocation,
-                    entangle.uuid, // hitLocation
-                    false, //useHitLocationSide
-                    "none", //alreadyHitLocationSide
-                );
-            }
-        }
+        // const element = event.currentTarget.closest("button");
+        // const dataset = element.dataset;
+        // if (dataset.label === "str") {
+        //     const entangle = this.actor.targetableItems.find((o) => o.flags?.XMLID === "ENTANGLE");
+        //     if (entangle) {
+        //         heroRoller.addToHitLocation(
+        //             true, //includeHitLocation,
+        //             entangle.uuid, // hitLocation
+        //             false, //useHitLocationSide
+        //             "none", //alreadyHitLocationSide
+        //         );
+        //     }
+        // }
 
         await heroRoller.roll();
         const damageRenderedResult = await heroRoller.render();
