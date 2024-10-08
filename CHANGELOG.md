@@ -9,7 +9,7 @@
 - Fixed issues where some powers were not toggleable. [#1248](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)
 - Added setting to prevent player movement when in combat and not their phase. [#1241](https://github.com/dmdorman/hero6e-foundryvtt/issues/1241)
 - Entangle improvements [#186](https://github.com/dmdorman/hero6e-foundryvtt/issues/186) [#551](https://github.com/dmdorman/hero6e-foundryvtt/issues/551) [#1230](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
-- Initial support for applying an entangle to a token, tracking body & defenses. Attacks can target the entangle and do damage.
+- Initial support for applying an entangle to a token, tracking body & defenses. Attacks still cannot target entangles, coming soon.
 
 
 ## Version 3.0.99
