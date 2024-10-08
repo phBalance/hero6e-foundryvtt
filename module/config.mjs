@@ -4502,6 +4502,35 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: 10,
             costEnd: true,
+            nonDmgEffect: true,
+            defense: function (item) {
+                const baseDef = parseInt(item.system.LEVELS || 0);
+
+                const additionalDef = parseInt(item.findModsByXmlid("ADDITIONALDEF")?.LEVELS || 0);
+                const additionalPD = parseInt(item.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+                const additionalED = parseInt(item.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+
+                const rPD = baseDef + additionalPD;
+                const rED = baseDef + additionalED;
+                // 6e +1 DEF = +2 rMD. NOTE: HD doesn't have ability to buy MD in 6e.
+                const rMD = baseDef + 2 * (additionalDef || additionalPD + additionalED);
+
+                // BOECV for 5e, ACV for 6e
+                const mentalEntangle =
+                    (item.findModsByXmlid("BOECV") &&
+                        item.findModsByXmlid("TAKESNODAMAGE") &&
+                        item.findModsByXmlid("VERSUSEGO")) ||
+                    (item.findModsByXmlid("ACV") &&
+                        item.findModsByXmlid("TAKESNODAMAGE") &&
+                        item.findModsByXmlid("VERSUSEGO"));
+                return {
+                    rPD,
+                    rED,
+                    rMD: mentalEntangle ? rMD : 0,
+                    mentalEntangle,
+                    string: `${mentalEntangle ? `${rMD} rMD` : `${rPD} rPD/${rED} rED`}`,
+                };
+            },
             xml: `<POWER XMLID="ENTANGLE" ID="1709342612255" BASECOST="0.0" LEVELS="1" ALIAS="Entangle" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},

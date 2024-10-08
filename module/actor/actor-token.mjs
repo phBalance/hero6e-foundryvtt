@@ -91,10 +91,11 @@ export class HeroSystem6eToken extends Token {
     }
 
     _canDragLeftStart(user, event) {
-        let result = super._canDragLeftStart(user, event);
+        let canDragLeftStart = super._canDragLeftStart(user, event);
 
         // If in combat, do not allow tokens to move when it is not their turn.
         if (
+            canDragLeftStart &&
             !game.user.isGM &&
             this.inCombat &&
             this.combatant.combat.started &&
@@ -102,14 +103,20 @@ export class HeroSystem6eToken extends Token {
             game.settings.get(HEROSYS.module, "CombatMovementOnlyOnActorsPhase")
         ) {
             ui.notifications.warn("Combat has started and you must wait for your phase to move.");
-            result = false;
+            canDragLeftStart = false;
         }
 
         // Do not allow movement when actor cannot act.  SHIFT will override in canAct()
-        if (result && this.actor) {
-            result = this.actor.canAct(true, event);
+        if (canDragLeftStart && this.actor) {
+            canDragLeftStart = this.actor.canAct(true, event);
         }
-        return result;
+
+        // Entangled tokens typically can't move
+        if (canDragLeftStart && this.actor) {
+            canDragLeftStart = this.actor.canMove(true, event);
+        }
+
+        return canDragLeftStart;
     }
 
     _drawBar(number, bar, data) {

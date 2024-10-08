@@ -740,7 +740,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         ChatMessage.create(chatData);
 
         // Is this a parent item with children?
-        for (const child of item.childItems || []) {
+        for (const child of item.childItems) {
             await this.DropItemFramework(child, itemData.system.ID);
         }
     }
@@ -914,27 +914,23 @@ export class HeroSystemActorSheet extends ActorSheet {
             heroRoller.addNumber(1);
         }
 
+        // Use STR to escape ENTANGLE
+        // const element = event.currentTarget.closest("button");
+        // const dataset = element.dataset;
+        // if (dataset.label === "str") {
+        //     const entangle = this.actor.targetableItems.find((o) => o.flags?.XMLID === "ENTANGLE");
+        //     if (entangle) {
+        //         heroRoller.addToHitLocation(
+        //             true, //includeHitLocation,
+        //             entangle.uuid, // hitLocation
+        //             false, //useHitLocationSide
+        //             "none", //alreadyHitLocationSide
+        //         );
+        //     }
+        // }
+
         await heroRoller.roll();
         const damageRenderedResult = await heroRoller.render();
-
-        //const flavor = `Full ${dataset.label.toUpperCase()} (DC ${dc})`;
-
-        // const cardHtml = await heroRoller.render(flavor);
-
-        // const actor = this.actor;
-        // const token = actor.token;
-        // const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-        // speaker.alias = actor.name;
-
-        // const chatData = {
-        //     type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        //     rolls: heroRoller.rawRolls(),
-        //     user: game.user._id,
-        //     content: cardHtml,
-        //     speaker: speaker,
-        // };
-
-        //return ChatMessage.create(chatData);
 
         const cardData = {
             //item: { name: this.token.name, system: { NAME: this.token.name } },
@@ -1023,7 +1019,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const item = this.actor.items.get(itemId);
 
         // Do not allow deleting of item with children
-        if (item.childItems) {
+        if (item.childItems.length > 0) {
             ui.notifications.error(`You cannot delete ${item.name} because there are child items.`);
             return;
         }

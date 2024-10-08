@@ -1,0 +1,52 @@
+{{ log 'HEROSYS apply-entangle-card' this }}
+<div class="hero chat-card apply-damage-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+  tokenId}}data-token-id="{{tokenId}}" {{/if}}>
+
+  <header class="card-header flexrow">
+    {{!-- <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" /> --}}
+    <h3>{{item.name}} vs {{targetToken.name}}</h3>
+  </header>
+
+  <div>
+    Attacker: <span class="item-name">{{#if isKnockBack}}Knockback{{else}}{{item.actor.name}}{{/if}}</span>
+  </div>
+  <div>
+    Attack: <span class="item-name">{{{itemName item}}}</span>
+  </div>
+
+  {{#if isKnockBack}} {{!-- Show dice details for KnockBack ApplyDamage --}}
+    <div>
+    {{{renderedDamageRoll}}}
+    </div>
+  {{else}} {{!-- Typical apply damage --}}
+    <div class="apply-damage-amount">
+      <span title="{{incomingAnnotatedDamageTerms}}">{{incomingDamageSummary}}</span>
+      {{#if useHitLoc}}
+        <div class="description-tiny">{{ hitLocText }}</div>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  <div class="tags">
+    {{#each attackTags as |tag id|}}
+        <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+    {{/each}}
+  </div>
+
+  <hr>
+
+  <div class="tags">
+    {{#each tags as |tag id|}}
+    <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}</span>
+    {{/each}}
+  </div>
+
+
+  <div class="card-section">
+    <div class="description-tiny">Effect</div>
+    {{!-- <div class="description-medium">{{ bodyDamageEffective }} BODY; {{ stunDamageEffective }} STUN</div> --}}
+    <div class="description-tiny">{{{ effects }}}</div>
+  </div>
+
+  
+</div>

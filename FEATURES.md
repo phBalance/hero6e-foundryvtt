@@ -152,8 +152,8 @@ Our support ratings:
 | DRAIN | B | Works for characteristics, cannot drain powers |
 | DUPLICATION | F | You will have to create a separate HDC file and import that for each duplicate. No injury support. |
 | ENDURANCE RESERVE | B | Only 1 endurance reserve is supported |
-| ENHANCED SENSES | C | | Enhanced Perception ALL is the only enhanced sense currently supported.
-| ENTANGLE | C | |
+| ENHANCED SENSES | C | | Enhanced Perception ALL is the only enhanced sense currently supported. |
+| ENTANGLE | B | You cannot target or damage an entangle. |
 | EXTRA-DIMENSIONAL MOVEMENT | D | |
 | EXTRA LIMBS | B | Limited game mechanics, largely storytelling power. |
 | FTL TRAVEL | D | |

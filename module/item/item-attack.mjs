@@ -115,7 +115,7 @@ export async function AttackOptions(item) {
     // TODO: This needs to be considered. AOE does not preclude hit locations.
     if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
         data.useHitLoc = true;
-        data.hitLoc = CONFIG.HERO.hitLocations;
+        //data.hitLoc = CONFIG.HERO.hitLocations;
         data.hitLocSide =
             game.settings.get(HEROSYS.module, "hitLocTracking") === "all" ? CONFIG.HERO.hitLocationSide : null;
 
@@ -505,7 +505,12 @@ export async function AttackToHit(item, options) {
             game.settings.get(HEROSYS.module, "hitLocTracking") === "all" && options.aimSide !== "none"
                 ? `${options.aimSide} ${options.aim}`
                 : options.aim;
-        heroRoller.addNumber(CONFIG.HERO.hitLocations[options.aim][3], aimTargetLocation);
+        const aimOcvPenalty = CONFIG.HERO.hitLocations[options.aim]?.[3] || 0;
+        if (aimOcvPenalty) {
+            heroRoller.addNumber(aimOcvPenalty, aimTargetLocation);
+        } else {
+            console.warn(`${item.name} has missing aimOcvPenalty`, aimTargetLocation);
+        }
 
         // Penalty Skill Levels
         if (options.usePsl) {
@@ -981,6 +986,8 @@ function getAttackTags(item) {
     // Attack Tags
     let attackTags = [];
 
+    if (!item) return attackTags;
+
     attackTags.push({ name: item.system.class });
 
     if (item.system.killing) {
@@ -1446,6 +1453,7 @@ export async function _onRollDamage(event) {
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
+                subTarget: damageRoller.getHitLocation().item?.name || damageRoller.getHitLocation().activeEffect?.name,
             };
 
             // TODO: Add in explosion handling (or flattening)
@@ -1495,7 +1503,8 @@ export async function _onRollDamage(event) {
 
     const cardData = {
         item: item,
-        nonDmgEffect: adjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item),
+        nonDmgEffect:
+            adjustment || isBodyBasedEffectRoll(item) || isStunBasedEffectRoll(item) || item.baseInfo?.nonDmgEffect,
         senseAffecting,
 
         // dice rolls
@@ -1818,6 +1827,25 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const button = event.currentTarget;
     const damageData = { ...button.dataset };
     const item = fromUuidSync(damageData.itemid);
+
+    const heroRoller = HeroRoller.fromJSON(damageData.roller);
+
+    const token = canvas.tokens.get(tokenId);
+    if (!token) {
+        return ui.notifications.warn(`You must select at least one token before applying damage.`);
+    }
+
+    // Unique case where we use STR to break free of ENTANGLE
+    // if (!item && heroRoller.getHitLocation().activeEffect?.flags.XMLID === "ENTANGLE") {
+    //     const fakeItem = {
+    //         name: "Strength",
+    //         system: {
+    //             class: "physical",
+    //         },
+    //     };
+    //     return _onApplyDamageToActiveEffect(fakeItem, token, heroRoller);
+    // }
+
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
@@ -1825,15 +1853,21 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const token = canvas.tokens.get(tokenId);
-    if (!token) {
-        return ui.notifications.warn(`You must select at least one token before applying damage.`);
+    const originalRoll = heroRoller.clone();
+    const automation = game.settings.get(HEROSYS.module, "automation");
+
+    if (item.system.XMLID === "ENTANGLE") {
+        return _onApplyEntangleToSpecificToken(item, token, originalRoll);
     }
 
-    const heroRoller = HeroRoller.fromJSON(damageData.roller);
-    const originalRoll = heroRoller.clone();
+    // Targeting ENTANGLE/FOCI
+    if (heroRoller.getHitLocation().activeEffect) {
+        return _onApplyDamageToActiveEffect(item, token, originalRoll);
+    }
 
-    const automation = game.settings.get(HEROSYS.module, "automation");
+    if (heroRoller.getHitLocation().item) {
+        return ui.notifications.error(`Damaging FOCI is not currently supported.`);
+    }
 
     // Attack Verses Alternate Defense (6e) or NND (5e)
     let avad = item.findModsByXmlid("AVAD") || item.findModsByXmlid("NND");
@@ -2319,6 +2353,213 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     return damageChatMessage;
 }
 
+export async function _onApplyEntangleToSpecificToken(item, token, originalRoll) {
+    const entangleDefense = item.baseInfo.defense(item);
+    let body = originalRoll.getEntangleTotal();
+
+    // Entangle Active Effect
+    // Get current or a base Entangle Effect
+    // If a character is affected by more than one Entangle, use the
+    // highest BODY and the highest PD and ED for all the Entangles,
+    // then add +1 BODY for each additional Entangle.
+    // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
+    const prevEntangle = token.actor.effects.find((o) =>
+        o.statuses.has(HeroSystem6eActorActiveEffects.entangledEffect.id),
+    );
+    if (prevEntangle) {
+        entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense.rPD) || 0);
+        entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense.rED) || 0);
+        entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense.rMD) || 0);
+        (entangleDefense.string = `${
+            entangleDefense.mentalEntangle
+                ? `${entangleDefense.rMD} rMD`
+                : `${entangleDefense.rPD} rPD/${entangleDefense.rED} rED`
+        }`),
+            (body = Math.max(body, parseInt(prevEntangle.flags.body) || 0) + 1);
+    }
+    const effecttData = {
+        ...HeroSystem6eActorActiveEffects.entangledEffect,
+        ...prevEntangle,
+        name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
+        flags: {
+            body: body,
+            entangleDefense,
+            XMLID: item.system.XMLID,
+            source: item.actor.name,
+        },
+        origin: item.uuid,
+    };
+    if (prevEntangle) {
+        prevEntangle.update({ name: effecttData.name, flags: effecttData.flags, origin: effecttData.origin });
+    } else {
+        token.actor.addActiveEffect(effecttData);
+    }
+
+    const cardData = {
+        item: item,
+
+        // Incoming Damage Information
+        incomingDamageSummary: originalRoll.getTotalSummary(),
+        incomingAnnotatedDamageTerms: originalRoll.getAnnotatedTermsSummary(),
+
+        // dice rolls
+        roller: originalRoll,
+
+        // damage info
+        effects: `${token.name} is entangled.  The entangle has ${body} BODY ${entangleDefense.string}. ${
+            prevEntangle ? `This entangle augmented a previous ${prevEntangle.flags.body} body entangle.` : ""
+        }`,
+
+        // misc
+        attackTags: getAttackTags(item),
+        targetToken: token,
+    };
+
+    // render card
+    const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    ChatMessage.create(chatData);
+}
+
+export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
+    // Get fully functional ActiveEffect that we can damage (update)
+    const damageActiveEffect = fromUuidSync(originalRoll.getHitLocation().fullName);
+    if (!damageActiveEffect) {
+        return ui.notifications.error(`Attack details are no longer available.`);
+    }
+
+    // damageActiveEffect should belong to token
+    if (damageActiveEffect.parent.id !== token.actor.id) {
+        return ui.notifications.error(`Unable to locate <b>${damageActiveEffect.name}</b> on <b>${token.name}</b>.`);
+    }
+
+    const attackItem = item;
+
+    // We currently only support ENTANGLE
+    if (damageActiveEffect.flags.XMLID !== "ENTANGLE") {
+        return ui.notifications.error(`Damaging ${damageActiveEffect.flags.XMLID} is not currently supported.`);
+    }
+
+    let defense;
+    let defenseType;
+    switch (attackItem?.system.class) {
+        case "physical":
+            defense = damageActiveEffect.flags.entangleDefense.rPD;
+            defenseType = "rPD";
+            break;
+        case "energy":
+            defense = damageActiveEffect.flags.entangleDefense.rED;
+            defenseType = "rED";
+            break;
+        case "mental":
+            defense = damageActiveEffect.flags.entangleDefense.rMD;
+            defenseType = "rPMD";
+            break;
+    }
+
+    if (!defense) {
+        return ui.notifications.error(
+            `Unable to determien appropraite defenses for ${damageActiveEffect.name} vs ${attackItem.name}.`,
+        );
+    }
+
+    const defenseTags = [
+        {
+            name: defenseType,
+            value: defense,
+            resistant: true,
+            title: `Entangle ${defenseType}`,
+        },
+        {
+            name: "body",
+            value: damageActiveEffect.flags.body,
+            title: `Entangle Body`,
+        },
+    ];
+
+    const bodyDamage = Math.max(0, originalRoll.getBodyTotal() - defense);
+    const stunDamage = Math.max(0, originalRoll.getStunTotal() - defense);
+    let effectsFinal;
+    if (bodyDamage > 0) {
+        if (bodyDamage < damageActiveEffect.flags.body) {
+            const newBody = damageActiveEffect.flags.body - bodyDamage;
+            const name = `${damageActiveEffect.flags.XMLID} ${newBody} BODY ${damageActiveEffect.flags.entangleDefense.string}`;
+            damageActiveEffect.update({ name, "flags.body": newBody });
+            effectsFinal = `Entangle has ${newBody} BODY remaining.`;
+        } else {
+            damageActiveEffect.parent.removeActiveEffect(damageActiveEffect);
+            effectsFinal = `Entangle was destroyed.`;
+        }
+    }
+
+    const cardData = {
+        item: item,
+
+        // Incoming Damage Information
+        incomingDamageSummary: originalRoll.getTotalSummary(),
+        incomingAnnotatedDamageTerms: originalRoll.getAnnotatedTermsSummary(),
+
+        // dice rolls
+        roller: originalRoll,
+        // renderedDamageRoll: damageRenderedResult,
+        // renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
+
+        // body
+        //bodyDamage: damageDetail.bodyDamage,
+        bodyDamageEffective: bodyDamage,
+
+        // stun
+        // stunDamage: damageDetail.stunDamage,
+        stunDamageEffective: stunDamage,
+        // hasRenderedDamageRoll: true,
+        // stunMultiplier: damageDetail.stunMultiplier,
+        // hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
+
+        // damage info
+        // damageString: heroRoller.getTotalSummary(),
+        // useHitLoc: damageDetail.useHitLoc,
+        // hitLocText: damageDetail.hitLocText,
+
+        // effects
+        effects: effectsFinal,
+
+        // defense
+        defense: `${defense} resistant`,
+        // damageNegationValue: damageNegationValue,
+
+        // misc
+        tags: defenseTags,
+        attackTags: getAttackTags(item),
+        targetToken: token,
+    };
+
+    // render card
+    const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
+    const cardHtml = await renderTemplate(template, cardData);
+    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        //rolls: damageDetail.knockbackRoller?.rawRolls(),
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    ChatMessage.create(chatData);
+
+    // TODO: Chat Card
+}
+
 async function _performAbsorptionForToken(token, absorptionItems, damageDetail, damageItem) {
     const attackType = damageItem.system.class; // TODO: avad?
 
@@ -2722,8 +2963,11 @@ async function _calcDamage(heroRoller, item, options) {
             stun = RoundFavorPlayerDown(stun * hitLocationStunMultiplier);
             body = RoundFavorPlayerDown(body * hitLocationBodyMultiplier);
         }
-
-        hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
+        if (heroRoller.getHitLocation().item || heroRoller.getHitLocation().activeEffect) {
+            hitLocText = `Hit ${hitLocation}`;
+        } else {
+            hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
+        }
     }
 
     // apply damage reduction

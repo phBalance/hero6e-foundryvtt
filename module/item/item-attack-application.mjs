@@ -80,7 +80,7 @@ export class ItemAttackFormApplication extends FormApplication {
         const data = this.data;
         const item = data.item;
 
-        data.targets = game.user.targets;
+        //data.targets = game.user.targets;
         data.targets = Array.from(game.user.targets);
 
         if (data.targets.length === 0 && item.system.XMLID === "MINDSCAN" && game.user.isGM) {
@@ -100,20 +100,27 @@ export class ItemAttackFormApplication extends FormApplication {
         data.effectiveStr ??= data.str;
         data.effectiveLevels ??= data.item.system.LEVELS;
 
-        // let effectiveItem = item;
+        data.hitLoc = [];
+        data.useHitLoc = false;
+        const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels }); //  getAoeModifier();
+        if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
+            for (const key of Object.keys(CONFIG.HERO.hitLocations)) {
+                data.hitLoc.push({ key: key, label: key });
+            }
+            data.useHitLoc = true;
+        }
 
-        // // Create a temporary item based on effectiveLevels
-        // if (data.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
-        //     data.effectiveLevels = parseInt(data.effectiveLevels) || 0;
-        //     if (data.effectiveLevels > 0 && data.effectiveLevels !== parseInt(item.system.LEVELS)) {
-        //         const effectiveItemData = item.toObject();
-        //         effectiveItemData.system.LEVELS = data.effectiveLevels;
-        //         effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { temporary: true });
-        //         await effectiveItem._postUpload();
+        // Allow targeting of ENTANGLES & FOCI
+        // if (data.targets.length === 1) {
+        //     for (const entry of data.targets[0].actor?.targetableItems) {
+        //         data.hitLoc.push({ key: entry.uuid, label: entry.name }); //disabled: true
+        //         data.useHitLoc = true;
         //     }
         // }
+        if (data.useHitLoc) {
+            data.hitLoc = [{ key: "none", label: "None" }, ...data.hitLoc];
+        }
 
-        const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels }); //  getAoeModifier();
         if (aoe) {
             data.aoeText = aoe.OPTION_ALIAS;
             // if (!item.system.areaOfEffect) {

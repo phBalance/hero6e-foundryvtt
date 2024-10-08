@@ -240,24 +240,25 @@ export class HeroSystem6eItem extends Item {
         switch (this.system.subType || this.type) {
             case "attack":
                 switch (this.system.XMLID) {
-                    case "HKA":
-                    case "RKA":
-                    case "ENERGYBLAST":
-                    case "HANDTOHANDATTACK":
-                    case "TELEKINESIS":
-                    case "EGOATTACK":
                     case "AID":
-                    case "DRAIN":
-                    case "HEALING":
-                    case "SUCCOR":
-                    case "TRANSFER":
-                    case "FLASH":
                     case "BLOCK":
                     case "DODGE":
+                    case "DRAIN":
+                    case "EGOATTACK":
+                    case "ENERGYBLAST":
+                    case "ENTANGLE":
+                    case "FLASH":
+                    case "HANDTOHANDATTACK":
                     case "HAYMAKER":
+                    case "HEALING":
+                    case "HKA":
+                    case "MINDSCAN":
+                    case "RKA":
                     case "SET":
                     case "STRIKE":
-                    case "MINDSCAN":
+                    case "SUCCOR":
+                    case "TELEKINESIS":
+                    case "TRANSFER":
                     case "TRANSFORM":
                         return ItemAttack.AttackOptions(this, event);
 
@@ -2094,13 +2095,13 @@ export class HeroSystem6eItem extends Item {
         const items = this.actor?.items || game.items;
         const children = items
             .filter((item) => item.system.PARENTID === this.system.ID)
-            ?.sort((a, b) => (a.sort || 0) - (b.sort || 0));
-        return children.length ? children : null;
+            .sort((a, b) => (a.sort || 0) - (b.sort || 0));
+        return children; //children.length ? children : null;
     }
 
     get childIdx() {
         if (!this.parentItem) return null;
-        let result = this.parentItem.childItems?.findIndex((o) => o.id === this.id) + 1;
+        let result = this.parentItem.childItems.findIndex((o) => o.id === this.id) + 1;
         if (this.parentItem?.parentItem) {
             result = `${this.parentItem.childIdx}.${result}`;
         }
@@ -2251,6 +2252,17 @@ export class HeroSystem6eItem extends Item {
             }
 
             adderCost += subAdderCost;
+        }
+
+        //HACK for ENTANGLE +1PD/ED in 6e
+        //Normallly we would use a function in CONFIG.mjs
+        // https://github.com/dmdorman/hero6e-foundryvtt/issues/1230
+        if (this.system.XMLID === "ENTANGLE" && !this.is5e && this.system.ADDER) {
+            const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+            const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+            if (additionalPD % 2 === 1 && additionalED % 2 === 1) {
+                adderCost -= 1;
+            }
         }
 
         // Categorized skills cost 2 per category and +1 per each subcategory.
@@ -2949,29 +2961,27 @@ export class HeroSystem6eItem extends Item {
             case "ENTANGLE":
                 {
                     // Entangle 2d6, 7 rPD/2 rED or Entangle 2d6 5 rMD
-                    const baseDef = parseInt(system.value || 0);
+                    // const baseDef = parseInt(system.value || 0);
 
-                    const additionalDef = parseInt(this.findModsByXmlid("ADDITIONALDEF")?.LEVELS || 0);
-                    const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
-                    const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
+                    // const additionalDef = parseInt(this.findModsByXmlid("ADDITIONALDEF")?.LEVELS || 0);
+                    // const additionalPD = parseInt(this.findModsByXmlid("ADDITIONALPD")?.LEVELS || 0);
+                    // const additionalED = parseInt(this.findModsByXmlid("ADDITIONALED")?.LEVELS || 0);
 
-                    const rPD = baseDef + additionalPD;
-                    const rED = baseDef + additionalED;
-                    // 6e +1 DEF = +2 rMD. NOTE: HD doesn't have ability to buy MD in 6e.
-                    const rMD = baseDef + 2 * (additionalDef || additionalPD + additionalED);
+                    // const rPD = baseDef + additionalPD;
+                    // const rED = baseDef + additionalED;
+                    // // 6e +1 DEF = +2 rMD. NOTE: HD doesn't have ability to buy MD in 6e.
+                    // const rMD = baseDef + 2 * (additionalDef || additionalPD + additionalED);
 
-                    // BOECV for 5e, ACV for 6e
-                    const mentalEntangle =
-                        (this.findModsByXmlid("BOECV") &&
-                            this.findModsByXmlid("TAKESNODAMAGE") &&
-                            this.findModsByXmlid("VERSUSEGO")) ||
-                        (this.findModsByXmlid("ACV") &&
-                            this.findModsByXmlid("TAKESNODAMAGE") &&
-                            this.findModsByXmlid("VERSUSEGO"));
+                    // // BOECV for 5e, ACV for 6e
+                    // const mentalEntangle =
+                    //     (this.findModsByXmlid("BOECV") &&
+                    //         this.findModsByXmlid("TAKESNODAMAGE") &&
+                    //         this.findModsByXmlid("VERSUSEGO")) ||
+                    //     (this.findModsByXmlid("ACV") &&
+                    //         this.findModsByXmlid("TAKESNODAMAGE") &&
+                    //         this.findModsByXmlid("VERSUSEGO"));
 
-                    system.description = `${system.ALIAS} ${system.value}d6, ${
-                        mentalEntangle ? `${rMD} rMD` : `${rPD} rPD/${rED} rED`
-                    }`;
+                    system.description = `${system.ALIAS} ${system.value}d6, ${this.baseInfo.defense(this).string}`;
                 }
                 break;
 

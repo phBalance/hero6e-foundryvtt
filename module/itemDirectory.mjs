@@ -15,14 +15,14 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
         }
 
         // Don't allow framework items to be moved within ItemDirectory (they should drag/drop the folder)
-        if (item.childItems && item.uuid.startsWith("Item")) {
+        if (item.childItems.length > 0 && item.uuid.startsWith("Item")) {
             return ui.notifications.warn(
                 `"Drag/drop <b>${item.name}</b> item is not allowed in item sidebar. Use folder instead"`,
             );
         }
 
         // Do super if there is no parent or if this framework is already in ItemDirectory
-        if (!item.childItems) {
+        if (item.childItems.length === 0) {
             return super._handleDroppedEntry(target, data);
         }
 
@@ -36,7 +36,7 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
     }
 
     async dropFrameworkItem(folderTarget, item) {
-        if (item.childItems) {
+        if (item.childItems.length > 0) {
             const newFolder = await Folder.create({ type: "Item", name: item.name, folder: folderTarget?.id });
             await HeroSystem6eItem.create({
                 ...item.toObject(),
