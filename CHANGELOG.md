@@ -1,6 +1,10 @@
 # Releases
 
-## Version 3.0.100 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 3.0.101 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- We not longer test/verify this system with FoundryVTT V11.  We encourage you upgrade tou FoundryVTT v12.
+- Talent/Skill/Perks as powers now toggle [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
+
+## Version 3.0.100
 - Added Effect Panel showing more details about effects on a token.
 - Initial support for MULTIPLE ATTACK maneuver.
 - Fixed issue with powers sometimes uploading out of order. [#1138](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)

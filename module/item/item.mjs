@@ -1154,6 +1154,11 @@ export class HeroSystem6eItem extends Item {
             item.system.showToggle = true;
         }
 
+        // Talent/Skill/Perk as Powers are technically toggleable
+        if (item.type === "power" && ["talent", "skill", "perk"].find((o) => item.#baseInfo?.type.includes(o))) {
+            item.system.showToggle = true;
+        }
+
         // Endurance
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
