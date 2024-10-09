@@ -1154,6 +1154,11 @@ export class HeroSystem6eItem extends Item {
             item.system.showToggle = true;
         }
 
+        // Talent/Skill/Perk as Powers are technically toggleable
+        if (item.type === "power" && ["talent", "skill", "perk"].find((o) => item.#baseInfo?.type.includes(o))) {
+            item.system.showToggle = true;
+        }
+
         // Endurance
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
@@ -1729,6 +1734,14 @@ export class HeroSystem6eItem extends Item {
                         this.system.ADDER.push(newAdder);
                         count++;
                     }
+                }
+            }
+
+            if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
+                if (this.system.OPTION_ALIAS.match(/range/i)) {
+                    this.system.penalty ??= "range";
+                } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+                    this.system.penalty ??= "hitLocation";
                 }
             }
         }

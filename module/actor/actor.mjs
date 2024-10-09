@@ -1439,7 +1439,7 @@ export class HeroSystem6eActor extends Actor {
 
         uploadPerformance.preItems = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
-        await this.createEmbeddedDocuments("Item", itemsToCreate);
+        await this.createEmbeddedDocuments("Item", itemsToCreate, { render: false, renderSheet: false });
         uploadPerformance.createItems = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
@@ -1882,11 +1882,13 @@ export class HeroSystem6eActor extends Actor {
                 overrideValues
             ) {
                 if (this.id) {
-                    await this.update({
-                        [`system.characteristics.${key.toLowerCase()}.value`]:
-                            this.system.characteristics[key.toLowerCase()].max,
-                    });
-                    //changes[`system.characteristics.${key.toLowerCase()}.value`] = this.system.characteristics[key.toLowerCase()].max
+                    await this.update(
+                        {
+                            [`system.characteristics.${key.toLowerCase()}.value`]:
+                                this.system.characteristics[key.toLowerCase()].max,
+                        },
+                        { hideChatMessage: true },
+                    );
                 } else {
                     this.system.characteristics[key.toLowerCase()].value =
                         this.system.characteristics[key.toLowerCase()].max;

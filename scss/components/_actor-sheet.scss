@@ -423,9 +423,14 @@ form div.attack-card div.description {
     padding-left: 5px;
   }
 
-  #item-attack-form-application .noflexwrap input[type="text"]
+#item-attack-form-application .noflexwrap input[type="text"], #item-attack-form-application .noflexwrap input[type="number"]
 {
   width: auto; 
   margin-right: 5px;
   margin-left: -4px; //* needed to align to previous rows, not sure why **//
+}
+
+#item-attack-form-application input[type="checkbox"]
+{
+    margin-left: -2px;
 }

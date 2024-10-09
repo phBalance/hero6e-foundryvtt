@@ -3,7 +3,12 @@ import { getPowerInfo, getCharacteristicInfoArrayForActor } from "../utility/uti
 import { determineDefense } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
-import { calculateDiceFormulaParts, CombatSkillLevelsForAttack, convertToDcFromItem } from "../utility/damage.mjs";
+import {
+    calculateDiceFormulaParts,
+    CombatSkillLevelsForAttack,
+    PenaltySkillLevelsForAttack,
+    convertToDcFromItem,
+} from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
@@ -118,12 +123,6 @@ export async function AttackOptions(item) {
         //data.hitLoc = CONFIG.HERO.hitLocations;
         data.hitLocSide =
             game.settings.get(HEROSYS.module, "hitLocTracking") === "all" ? CONFIG.HERO.hitLocationSide : null;
-
-        // Penalty Skill Levels
-        const PENALTY_SKILL_LEVELS = actor.items.find((o) => o.system.XMLID === "PENALTY_SKILL_LEVELS");
-        if (PENALTY_SKILL_LEVELS) {
-            data.PENALTY_SKILL_LEVELS = PENALTY_SKILL_LEVELS;
-        }
     }
 
     await new ItemAttackFormApplication(data).render(true);
@@ -196,8 +195,8 @@ export async function AttackAoeToHit(item, options) {
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distanceToken);
 
         // PENALTY_SKILL_LEVELS (range)
-        const pslRange = actor.items.find(
-            (o) => o.system.XMLID === "PENALTY_SKILL_LEVELS" && o.system.penalty === "range",
+        const pslRange = PenaltySkillLevelsForAttack(item).find(
+            (o) => o.system.penalty === "range" && o.system.checked,
         );
         if (pslRange) {
             const pslValue = Math.min(parseInt(pslRange.system.LEVELS), -rangePenalty);
@@ -370,7 +369,7 @@ export async function AttackToHit(item, options) {
     // There are no range penalties if this is a line of sight power or it has been bought with
     // no range modifiers.
     if (
-        targets.size > 0 &&
+        targets.length > 0 &&
         !(
             item.system.range === CONFIG.HERO.RANGE_TYPES.LINE_OF_SIGHT ||
             item.system.range === CONFIG.HERO.RANGE_TYPES.SPECIAL ||
@@ -385,13 +384,13 @@ export async function AttackToHit(item, options) {
             ui.notifications.warn(`${actor.name} has no token in this scene.  Range penalties will be ignored.`);
         }
 
-        const target = targets.first();
+        const target = targets[0];
         const distance = token ? calculateDistanceBetween(token, target) : 0;
         const rangePenalty = -calculateRangePenaltyFromDistanceInMetres(distance);
 
         // PENALTY_SKILL_LEVELS (range)
-        const pslRange = actor.items.find(
-            (o) => o.system.XMLID === "PENALTY_SKILL_LEVELS" && o.system.penalty === "range",
+        const pslRange = PenaltySkillLevelsForAttack(item).find(
+            (o) => o.system.penalty === "range" && o.system.checked,
         );
         if (pslRange) {
             const pslValue = Math.min(parseInt(pslRange.system.LEVELS), -rangePenalty);
@@ -514,13 +513,12 @@ export async function AttackToHit(item, options) {
 
         // Penalty Skill Levels
         if (options.usePsl) {
-            const PENALTY_SKILL_LEVELS = actor.items.find((o) => o.system.XMLID === "PENALTY_SKILL_LEVELS");
-            if (PENALTY_SKILL_LEVELS) {
-                let pslValue = Math.min(
-                    PENALTY_SKILL_LEVELS.system.LEVELS,
-                    Math.abs(CONFIG.HERO.hitLocations[options.aim][3]),
-                );
-                heroRoller.addNumber(pslValue, PENALTY_SKILL_LEVELS.name);
+            const pslHit = PenaltySkillLevelsForAttack(item).find(
+                (o) => o.system.penalty === "hitLocation" && o.system.checked,
+            );
+            if (pslHit) {
+                let pslValue = Math.min(pslHit.system.LEVELS, Math.abs(CONFIG.HERO.hitLocations[options.aim][3]));
+                heroRoller.addNumber(pslValue, pslHit.name);
             }
         }
     }
