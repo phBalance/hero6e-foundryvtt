@@ -1,9 +1,9 @@
 # Releases
 
 ## Version 3.0.101 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- We not longer test/verify this system with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.
+- We no longer test/verify with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.
 - Talent/Skill/Perks as powers now toggle. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
-- Improved Penalty Skill Levels. You can now have more than one PSL for different attacks.
+- Improved/fixed Penalty Skill Levels. You can now have more than one PSL for different attacks.
 - Slight performance increase when uploading HDC files.
 
 
