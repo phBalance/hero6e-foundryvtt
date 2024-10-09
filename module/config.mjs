@@ -1969,6 +1969,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "constant",
             target: "self only",
             costEnd: false,
+            refreshAttackDialogWhenChanged: true,
             range: HERO.RANGE_TYPES.SELF,
             editOptions: {
                 showAttacks: true,
@@ -2455,6 +2456,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            refreshAttackDialogWhenChanged: true,
             editOptions: {
                 showAttacks: true,
                 editableOption_ALIAS: true,

@@ -594,3 +594,19 @@ export function CombatSkillLevelsForAttack(item) {
 
     return results;
 }
+
+export function PenaltySkillLevelsForAttack(item) {
+    let results = [];
+
+    // Guard
+    if (!item.actor) return results;
+
+    const psls = item.actor.items.filter(
+        (o) =>
+            ["PENALTY_SKILL_LEVELS"].includes(o.system.XMLID) &&
+            (o.system.ADDER || []).find((p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name) &&
+            o.system.active != false,
+    );
+
+    return psls;
+}

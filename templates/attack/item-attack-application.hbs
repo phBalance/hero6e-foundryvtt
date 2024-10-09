@@ -1,4 +1,4 @@
-{{ log 'HEROSYS ITEM ATTACK APPLICATION CARD item-attack-application' this }}
+{{!-- {{ log 'HEROSYS ITEM ATTACK APPLICATION CARD item-attack-application' this }} --}}
 <form data-actor-id="{{actor.id}}" data-item-id="{{item.id}}" data-token-id="{{token.id}}">
   <div class="hero chat-card item-card attack-card">
     <header class="card-header flexrow">
@@ -120,9 +120,11 @@
       {{!ENTANGLE}}
       {{#if entangleExists}}
         <div class="form-group">
-          <label>Target Entangle</label>
-          <input class="item-toggle" type="checkbox" name="targetEntangle" {{checked
-            targetEntangle}} data-dtype="Boolean" />
+          <label>Target Entangle(s)</label>
+          <div>
+            <input class="item-toggle" type="checkbox" name="targetEntangle" {{checked
+              targetEntangle}} data-dtype="Boolean" />
+          </div>
         </div>
 
       {{/if}}
@@ -152,46 +154,53 @@
       {{/if}}
 
       {{!-- Penalty skill levels --}}
-      {{#if PENALTY_SKILL_LEVELS}}
-      <div class="description" >
-        <b>{{PENALTY_SKILL_LEVELS.name}}
-          {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
-        </b>: {{PENALTY_SKILL_LEVELS.system.description}}
-      </div>
+      {{!-- {{#each PENALTY_SKILL_LEVELS}}
+        <div class="description" >
+          <b>{{PENALTY_SKILL_LEVELS.name}}
+            {{#if PENALTY_SKILL_LEVELS.system.SFX}} ({{PENALTY_SKILL_LEVELS.system.SFX}}){{/if}}
+          </b>: {{PENALTY_SKILL_LEVELS.system.description}}
+        </div>
 
-      <div class="form-group" {{#unless PENALTY_SKILL_LEVELS}}style="display: none;"{{/unless}}>
-        <label>Use Penalty Skill Levels</label>
-        <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
-      </div>
-      {{/if}}
+        <div class="form-group" {{#unless PENALTY_SKILL_LEVELS}}style="display: none;"{{/unless}}>
+          <label>Use Penalty Skill Levels</label>
+          <input class="item-toggle" name="usePsl" type="checkbox" {{checked usePsl}} data-dtype="Boolean" />
+        </div>
+      {{/if}} --}}
+
+
 
       {{#if mindScanChoices}}
         <div class="form-group">
           <label>{{localize "Items.Attack.OmcvMod"}}</label>
-          <input type="text" name="omcvMod" value="{{omcvMod}}" />
+          {{!-- <input type="text" name="omcvMod" value="{{omcvMod}}" /> --}}
+          {{numberInput omcvMod name="omcvMod" step=1 min=-99 max=99}}
         </div>
 
         <div class="form-group">
           <label>{{localize "Items.Attack.DmcvMod"}}</label>
-          <input type="text" name="dmcvMod" value="{{dmcvMod}}" />
+          {{!-- <input type="text" name="dmcvMod" value="{{dmcvMod}}" /> --}}
+          {{numberInput dmcvMod name="dmcvMod" step=1 min=-99 max=99}}
         </div>
       {{else}}
         <div class="form-group">
           <label>{{localize "Items.Attack.OcvMod"}}</label>
-          <input type="text" name="ocvMod" value="{{ocvMod}}" />
+          {{!-- <input type="text" name="ocvMod" value="{{ocvMod}}" /> --}}
+          {{numberInput ocvMod name="ocvMod" step=1 min=-99 max=99}}
         </div>
 
         <div class="form-group">
           <label>{{localize "Items.Attack.DcvMod"}}</label>
-          <input type="text" name="dcvMod" value="{{dcvMod}}" />
+          {{!-- <input type="text" name="dcvMod" value="{{dcvMod}}" /> --}}
+          {{numberInput dcvMod name="dcvMod" step=1 min=-99 max=99}}
         </div>
       {{/if}}
 
       {{#if showVelocity}}
         <div class="form-group">
           <label>{{localize "Items.Attack.Velocity"}} ({{velocitySystemUnits}}/phase)</label>
-          <input type="text" name="velocity" value="{{velocity}}"
-                 title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." />
+          {{!-- <input type="text" name="velocity" value="{{velocity}}"
+                 title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed." /> --}}
+          {{numberInput velocity name="velocity" step=1 min=0 max=999 title="Typically you assume a starting velocity of 0, accelerate up to half your full move, then decelerate back to a 0 velocity.  A character can accelerate at a rate of 5m per meter.  If the Drag Ruler module is enabled, combat has started, and token has moved on its phase, then a velocity estimate is provided.  A simplistic solution is to assume velocity is equal to the movement speed."}}  
         </div>
       {{/if}}
 
@@ -199,8 +208,8 @@
         <div class="form-group">
           <label>Effective Levels</label>
           <div class="noflexwrap">
-            <input type="text" name="effectiveLevels" value="{{effectiveLevels}}" />
-            {{!-- {{numberInput effectiveLevels name="effectiveLevels" step=1 min=1 max=999}} --}}
+            {{!-- <input type="text" name="effectiveLevels" value="{{effectiveLevels}}" /> --}}
+            {{numberInput effectiveLevels name="effectiveLevels" step=1 min=1 max=999}}
             <label>/ {{item.system.LEVELS}}</label>
           </div>
         </div>
@@ -211,8 +220,8 @@
         <div class="form-group">
           <label>Effective Strength</label>
           <div class="noflexwrap">
-            <input type="text" name="effectiveStr" value="{{effectiveStr}}" />
-            {{!-- {{numberInput effectiveStr name="effectiveStr" step=1 min=1 max=999}} --}}
+            {{!-- <input type="text" name="effectiveStr" value="{{effectiveStr}}" /> --}}
+            {{numberInput effectiveStr name="effectiveStr" step=1 min=1 max=999}}
             <label>/ {{str}}</label>
           </div>
         </div>
@@ -221,8 +230,8 @@
       {{#if boostableCharges}}
         <div class="form-group">
           <label>Boostable ({{boostableCharges}})</label>
-          <input type="text" name="boostableCharges" value="0" />
-
+          {{!-- <input type="text" name="boostableCharges" value="0" /> --}}
+          {{numberInput boostableCharges name="boostableCharges" step=1 min=0 max=999}}
         </div>
       {{/if}}
 
@@ -240,6 +249,31 @@
             {{selectOptions mindScanFamiliarOptions nameAttr="key" labelAttr="label" selected=mindScanFamiliar}}
           </select>
         </div>
+      {{/if}}
+
+      {{!-- Penalty Skill Levels --}}
+      {{#if psls.length}}
+      <div class="form-group">
+        <label>
+          Penalty Skill Levels
+        </label>
+        <div>
+          <table>
+            {{#each psls}}
+              <tr>
+                <td style="width:1%">
+                  <input class="item-toggle" id="{{this.id}}" type="checkbox" name="{{this.id}}.system.checked" {{checked
+                    this.system.checked}} data-dtype="Boolean" />
+                </td>
+                <td style="text-align:left">
+                  {{!-- <b>{{this.name}}</b>:  --}}
+                  {{this.system.description}}
+                </td>
+              </tr>
+            {{/each}}
+          </table>
+        </div>
+      </div>
       {{/if}}
 
       {{#each csls}}

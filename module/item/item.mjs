@@ -1736,6 +1736,14 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
             }
+
+            if (this.system.XMLID === "PENALTY_SKILL_LEVELS" && !this.system.penalty) {
+                if (this.system.OPTION_ALIAS.match(/range/i)) {
+                    this.system.penalty ??= "range";
+                } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
+                    this.system.penalty ??= "hitLocation";
+                }
+            }
         }
 
         // DESCRIPTION

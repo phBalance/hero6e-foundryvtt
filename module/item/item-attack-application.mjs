@@ -1,4 +1,4 @@
-import { CombatSkillLevelsForAttack } from "../utility/damage.mjs";
+import { CombatSkillLevelsForAttack, PenaltySkillLevelsForAttack } from "../utility/damage.mjs";
 import { processAttackOptions } from "../item/item-attack.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
@@ -21,44 +21,52 @@ export class ItemAttackFormApplication extends FormApplication {
         this.data = data;
         this.options.title = `${this.data?.item?.actor?.name} roll to hit`;
 
-        Hooks.on(
-            "updateItem",
-            function (item, changes, options, userId) {
-                if (!this.rendered) return;
+        // const _updateItem = async function (item, changes, options, userId) {
+        //     if (!this.rendered) return;
 
-                if (item.id === this.data.item.id) {
-                    this.updateItem(item, changes, options, userId);
-                }
+        //     if (item.id === this.data.item.id) {
+        //         this.updateItem(item, changes, options, userId);
+        //     }
 
-                const cslSkill = CombatSkillLevelsForAttack(this.data.item).skill;
-                if (cslSkill && item.id === cslSkill.id) {
-                    this.updateItem(item, changes, options, userId);
-                }
-                if (!cslSkill && data.cslSkill) {
-                    this.updateItem(item, changes, options, userId);
-                }
-            }.bind(this),
-        );
+        //     const cslSkill = CombatSkillLevelsForAttack(this.data.item).skill;
+        //     if (cslSkill && item.id === cslSkill.id) {
+        //         this.updateItem(item, changes, options, userId);
+        //     }
+        //     if (!cslSkill && data.cslSkill) {
+        //         this.updateItem(item, changes, options, userId);
+        //     }
+        // };
+        // Hooks.on("updateItem", _updateItem.bind(this));
 
-        Hooks.on(
-            "targetToken",
-            async function (...args) {
-                window.setTimeout(() => this.updateItem(...args), 1);
-                // await this.updateItem(...args);
-            }.bind(this),
-        );
+        const _targetToken = async function () {
+            this.refresh();
+        };
+        Hooks.on("targetToken", _targetToken.bind(this));
 
-        Hooks.on(
-            "controlToken",
-            async function (...args) {
-                window.setTimeout(() => this.updateItem(...args), 1);
-                // await this.updateItem(...args);
-            }.bind(this),
-        );
+        const _controlToken = async function () {
+            this.refresh();
+        };
+        Hooks.on("controlToken", _controlToken.bind(this));
+
+        // If  CSLs change on the Actor we need to know
+        const _updateItem = async function (item) {
+            //, changes, options, userId) {
+            if (this.data.actor.id === item.actor.id && item.baseInfo?.refreshAttackDialogWhenChanged) {
+                this.refresh();
+            }
+        };
+        Hooks.on("updateItem", _updateItem.bind(this));
     }
 
-    async updateItem() {
-        await this.render();
+    // async close(options = {}) {
+    //     Hooks.off("targetToken", this._targetToken);
+    //     Hooks.off("controlToken", this._controlToken);
+    //     Hooks.off("updateItem", this._updateItem);
+    //     return super.close(options);
+    // }
+
+    refresh() {
+        foundry.utils.debounce(this.render(), 100);
     }
 
     static get defaultOptions() {
@@ -94,12 +102,18 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.aim ??= "none";
             this.data.aimSide ??= "none";
 
-            data.ocvMod ??= item.system.ocv;
-            data.dcvMod ??= item.system.dcv;
-            data.omcvMod ??= item.system.ocv; //TODO: May need to make a distinction between OCV/OMCV
-            data.dmcvMod ??= item.system.dcv;
-            data.effectiveStr ??= data.str;
-            data.effectiveLevels ??= data.item.system.LEVELS;
+            // We are using the numberInput handlebar helper which requires NUMBERS, thus the parseInt
+            // Set the initial values on the form
+            data.ocvMod ??= parseInt(item.system.ocv);
+            data.dcvMod ??= parseInt(item.system.dcv);
+            data.omcvMod ??= parseInt(item.system.ocv); //TODO: May need to make a distinction between OCV/OMCV
+            data.dmcvMod ??= parseInt(item.system.dcv);
+            data.effectiveStr ??= parseInt(data.str);
+            data.effectiveLevels ??= parseInt(data.item.system.LEVELS);
+
+            // Penalty Skill Levels
+            // Currently only supports range PSL
+            data.psls = PenaltySkillLevelsForAttack(item).filter((o) => o.system.penalty === "range");
 
             // Is there an ENTANGLE on any of the targets
             // If so assume we are targeting the entangle
@@ -110,7 +124,7 @@ export class ItemAttackFormApplication extends FormApplication {
                     entangles.push(ae);
                 }
             }
-            data.entangleExists = true;
+            data.entangleExists = entangles.length > 0 ? true : false;
             data.targetEntangle ??= true;
 
             data.hitLoc = [];
@@ -277,15 +291,26 @@ export class ItemAttackFormApplication extends FormApplication {
     }
 
     async _updateObject(event, formData) {
+        // CSL & PSL format is non-standard, need to deal with those
+        const extendedFormData = foundry.utils.expandObject(formData);
+        const updates = [];
+        for (const key of Object.keys(extendedFormData)) {
+            if (key.length === 16) {
+                const extendedItem = this.data.actor.items.find((o) => o.id === key);
+                if (extendedItem) {
+                    updates.push({ _id: key, ...extendedFormData[key] });
+                    delete extendedFormData[key];
+                }
+            }
+        }
+        if (updates) {
+            const actualUpdates = await this.data.actor.updateEmbeddedDocuments("Item", updates);
+            console.log(actualUpdates);
+        }
+
         // Take all the data we updated in the form and apply it.
-        this.data = { ...this.data, ...formData };
+        this.data = foundry.utils.mergeObject(this.data, extendedFormData);
 
-        // We may need to tweak the results
-        this.render();
-
-        return;
-
-        // changes to the form pass through here
         if (event.submitter?.name === "roll") {
             canvas.tokens.activate();
             await this.close();
@@ -336,7 +361,7 @@ export class ItemAttackFormApplication extends FormApplication {
         // collect the changed data; all of these changes can go into get data
         this.data.formData = { ...this.data.formData, ...formData };
 
-        this._updateCsl(event, formData);
+        //this._updateCsl(event, formData);
 
         // this.data.aim = formData.aim;
         // this.data.aimSide = formData.aimSide;
