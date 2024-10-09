@@ -4476,7 +4476,7 @@ export class HeroSystem6eItem extends Item {
 
             const enhancedPerception = this.actor.items.find((o) => o.system.XMLID === "ENHANCEDPERCEPTION");
             if (enhancedPerception) {
-                if (enhancedPerception.system.OPTIONID === "ALL") {
+                if (["ALL", "SIGHTGROUP"].includes(enhancedPerception.system.OPTIONID)) {
                     const levels = parseInt(enhancedPerception.system.LEVELS);
                     tags.push({
                         value: levels,
