@@ -125,7 +125,13 @@ export class ItemAttackFormApplication extends FormApplication {
                 }
             }
             data.entangleExists = entangles.length > 0 ? true : false;
-            data.targetEntangle ??= true;
+            data.targetEntangle ??= data.entangleExists;
+
+            // But an ENTANGLE attack doesn't target an ENTANGLE
+            if (data.item.system.XMLID === "ENTANGLE") {
+                data.entangleExists = false;
+                data.targetEntangle = false;
+            }
 
             data.hitLoc = [];
             data.useHitLoc = false;

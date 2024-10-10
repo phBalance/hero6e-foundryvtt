@@ -787,7 +787,7 @@ export async function AttackToHit(item, options) {
             // Don't bother to track a bogus target created so we get dice no nice rolls when no target selected.
             targetData.push({
                 id: target.id,
-                name: target.name || "No Target Selected",
+                name: `${target.name || "No Target Selected"}${options.targetEntangle ? " [ENTANGLE]" : ""}`,
                 aoeAlwaysHit: aoeAlwaysHit,
                 explosion: explosion,
                 toHitChar: toHitChar,
@@ -2380,13 +2380,19 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         ...prevEntangle,
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
         flags: {
-            body: body,
             entangleDefense,
             XMLID: item.system.XMLID,
             source: item.actor.name,
         },
         origin: item.uuid,
     };
+    const changeBody = effecttData.changes.find((o) => o.key === "body");
+    if (changeBody) {
+        changeBody.value === body;
+    } else {
+        effecttData.changes.push({ key: "body", value: body, mode: 5 });
+    }
+
     if (prevEntangle) {
         prevEntangle.update({ name: effecttData.name, flags: effecttData.flags, origin: effecttData.origin });
     } else {
