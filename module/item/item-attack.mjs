@@ -2368,6 +2368,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
     const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled")); //token.actor.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
     if (prevEntangle) {
+        const prevBody = parseInt(prevEntangle.changes?.find((o) => o.key === "body")?.value) || 0;
         entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense?.rPD) || 0);
         entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense?.rED) || 0);
         entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense?.rMD) || 0);
@@ -2376,7 +2377,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
                 ? `${entangleDefense.rMD} rMD`
                 : `${entangleDefense.rPD} rPD/${entangleDefense.rED} rED`
         }`),
-            (body = Math.max(body, parseInt(prevEntangle.flags.body) || 0) + 1);
+            (body = Math.max(body, prevBody + 1));
     }
     const effecttData = {
         //...HeroSystem6eActorActiveEffects.entangledEffect,
@@ -2400,7 +2401,12 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     }
 
     if (prevEntangle) {
-        prevEntangle.update({ name: effecttData.name, flags: effecttData.flags, origin: effecttData.origin });
+        prevEntangle.update({
+            name: effecttData.name,
+            flags: effecttData.flags,
+            changes: effecttData.changes,
+            origin: effecttData.origin,
+        });
     } else {
         token.actor.addActiveEffect(effecttData);
     }
