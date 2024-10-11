@@ -2366,13 +2366,11 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     // highest BODY and the highest PD and ED for all the Entangles,
     // then add +1 BODY for each additional Entangle.
     // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
-    const prevEntangle = token.actor.effects.find((o) =>
-        o.statuses.has(HeroSystem6eActorActiveEffects.entangledEffect.id),
-    );
+    const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled")); //token.actor.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
     if (prevEntangle) {
-        entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense.rPD) || 0);
-        entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense.rED) || 0);
-        entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense.rMD) || 0);
+        entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense?.rPD) || 0);
+        entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense?.rED) || 0);
+        entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense?.rMD) || 0);
         (entangleDefense.string = `${
             entangleDefense.mentalEntangle
                 ? `${entangleDefense.rMD} rMD`
@@ -2381,8 +2379,10 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
             (body = Math.max(body, parseInt(prevEntangle.flags.body) || 0) + 1);
     }
     const effecttData = {
-        ...HeroSystem6eActorActiveEffects.entangledEffect,
-        ...prevEntangle,
+        //...HeroSystem6eActorActiveEffects.entangledEffect,
+        id: "entangled",
+        icon: HeroSystem6eActorActiveEffects.entangledEffect.icon,
+        changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.entangledEffect.changes),
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
         flags: {
             entangleDefense,
@@ -2391,10 +2391,11 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         },
         origin: item.uuid,
     };
-    const changeBody = effecttData.changes.find((o) => o.key === "body");
+    const changeBody = effecttData.changes?.find((o) => o.key === "body");
     if (changeBody) {
         changeBody.value === body;
     } else {
+        effecttData.changes ??= [];
         effecttData.changes.push({ key: "body", value: body, mode: 5 });
     }
 
