@@ -2367,8 +2367,8 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     // then add +1 BODY for each additional Entangle.
     // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
     const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled")); //token.actor.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+    const prevBody = parseInt(prevEntangle.changes?.find((o) => o.key === "body")?.value) || 0;
     if (prevEntangle) {
-        const prevBody = parseInt(prevEntangle.changes?.find((o) => o.key === "body")?.value) || 0;
         entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense?.rPD) || 0);
         entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense?.rED) || 0);
         entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense?.rMD) || 0);
@@ -2423,7 +2423,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
         // damage info
         effects: `${token.name} is entangled.  The entangle has ${body} BODY ${entangleDefense.string}. ${
-            prevEntangle ? `This entangle augmented a previous ${prevEntangle.flags.body} body entangle.` : ""
+            prevEntangle ? `This entangle augmented a previous ${prevBody} body entangle.` : ""
         }`,
 
         // misc
