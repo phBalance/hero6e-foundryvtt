@@ -138,7 +138,7 @@
                     <button data-visibility="gm" class="roll-mindscan" data-itemId="{{../item.uuid}}" data-aim="{{../aim}}" data-aim-side="{{../aimSide}}"
                         data-damageMod="{{../damageMod}}" data-hitRollData="{{../hitRollData}}"
                         data-effectiveStr="{{../effectiveStr}}" data-effective-Levels="{{../effectiveLevels}}" data-targetIds="{{../targetIds}}" data-velocity="{{../velocity}}" 
-                        data-boostable-Charges="{{../boostableCharges}}" data-to-hit-roll-total="{{../toHitRollTotal}}" data-target="{{this.id}}">
+                        data-boostable-Charges="{{../boostableCharges}}" data-target-Entangle="{{targetEntangle}}" data-to-hit-roll-total="{{../toHitRollTotal}}" data-target="{{this.id}}">
                         <b>{{this.name}}</b>
                     </button>
                 {{/if}}
@@ -148,7 +148,7 @@
                 <button class="roll-damage" data-itemId="{{item.uuid}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
                     data-damageMod="{{damageMod}}" data-hitRollData="{{hitRollData}}" data-actionData="{{actionData}}"
                     data-effectiveStr="{{effectiveStr}}" data-effective-Levels="{{effectiveLevels}}" data-targetIds="{{targetIds}}" data-velocity="{{velocity}}" 
-                    data-boostable-Charges="{{boostableCharges}}">
+                    data-boostable-Charges="{{boostableCharges}}" data-target-Entangle="{{targetEntangle}}">
                     {{#if (or adjustment senseAffecting)}}
                         Roll {{item.system.XMLID}}
                     {{else}}

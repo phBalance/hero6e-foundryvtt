@@ -4,7 +4,7 @@
 
   <header class="card-header flexrow">
     {{!-- <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" /> --}}
-    <h3>{{item.name}} vs {{targetToken.name}}</h3>
+    <h3>{{item.name}} vs {{targetToken.name}}{{#if targetEntangle}} [ENTANGLE]{{/if}}</h3>
   </header>
 
   <div>
@@ -53,7 +53,7 @@
   {{/if}}
 
   <div class="card-section">
-    <div class="description-tiny">Defense: {{ defense }}</div>
+    <div class="description-tiny">{{#if targetEntangle}}ENTANGLE {{/if}}Defense: {{ defense }}</div>
   </div>
 
   <div class="card-section">
