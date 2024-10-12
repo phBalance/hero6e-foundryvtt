@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS effects-panel' this }} --}}
+{{ log 'HEROSYS effects-panel' this }}
 <article id="effects-panel">
 {{#each effects}}
     <div class="effect-item" data-item-id="this.id">
@@ -22,11 +22,11 @@
                 {{/if}}
             </div>
             
-            {{!-- {{#if this.duration.remaining}}
+            {{#if this.duration.label}}
             <div class="duration">
-                Seconds Remaining: {{this.duration.remaining}}
+                Duration: {{this.duration.label}}
             </div>
-            {{/if}} --}}
+            {{/if}}
 
             {{!-- {{#if this.flags.affectedPoints}}
             <div class="affectedPoints">
