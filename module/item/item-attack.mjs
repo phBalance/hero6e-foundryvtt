@@ -528,8 +528,6 @@ export async function AttackToHit(item, options) {
     heroRoller.addDice(-3);
 
     // What resources are required to activate this power?
-    // TODO: PH: FIXME: Adding start
-    // TODO: I hate these options being passed along at bottom.
     const resourcesRequired = calculateRequiredResourcesToUse(item, options);
 
     const startingCharges = parseInt(item.system.charges?.value || 0);
@@ -537,21 +535,22 @@ export async function AttackToHit(item, options) {
     const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
     const actorEndurance = item.actor.system.characteristics.end.value;
 
-    // TODO: Extract to function when it's more folsom
-
     // Does the actor have enough charges available?
     if (resourcesRequired.charges > 0 && resourcesRequired.charges > startingCharges) {
-        return ui.notifications.error(`${item.name} does not have ${resourcesRequired.charges} charges remaining.`);
+        return ui.notifications.error(
+            `${item.name} does not have ${resourcesRequired.charges} charge${
+                resourcesRequired.charges > 1 ? "s" : ""
+            } remaining.`,
+        );
     }
 
     // Does the actor have enough endurance available?
-    // TODO: Refactor into an analoguous resourcesRequired structure that includes STUN? Make resourcesRequired include STUN?
     let actualStunCostObj = null;
     if (item.system.USE_END_RESERVE) {
         if (enduranceReserve) {
             if (resourcesRequired.end > reserveEnd) {
                 return await ui.notifications.error(
-                    `${item.name} needs ${resourcesRequired.end} END, but ${enduranceReserve.name} only has ${reserveEnd} END.`,
+                    `${item.name} needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
                 );
             }
         } else {
@@ -3037,12 +3036,13 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  * Calculate the total expendable cost to use this item
  *
  * @param {HeroSystem6eItem} item
- * @param {number} boostableCharges
- * @returns
+ * @param {Object} options
+ *
+ * @returns Object
  */
 function calculateRequiredResourcesToUse(item, options) {
     const chargesRequired = calculateRequiredCharges(item, options.boostableChargesToUse || 0);
-    const endRequired = calculateRequiredEnd(item, options);
+    const endRequired = calculateRequiredEnd(item, parseInt(options.effectiveStr) || 0);
 
     return {
         charges: chargesRequired,
@@ -3050,6 +3050,14 @@ function calculateRequiredResourcesToUse(item, options) {
     };
 }
 
+/**
+ * Calculate the total expendable charges, with boostable charges, to use this item
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {number} boostableChargesToUse
+ *
+ * @returns number
+ */
 function calculateRequiredCharges(item, boostableChargesToUse) {
     const startingCharges = parseInt(item.system.charges?.value || 0);
     const maximumCharges = item.system.charges?.max || 0;
@@ -3065,7 +3073,15 @@ function calculateRequiredCharges(item, boostableChargesToUse) {
     return chargesToUse;
 }
 
-function calculateRequiredEnd(item, options) {
+/**
+ * Calculate the total expendable endurance to use this item
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {number} effectiveStr
+ *
+ * @returns number
+ */
+function calculateRequiredEnd(item, effectiveStr) {
     let endToUse = 0;
 
     if (game.settings.get(HEROSYS.module, "use endurance")) {
@@ -3076,13 +3092,10 @@ function calculateRequiredEnd(item, options) {
         endToUse = itemEndurance;
 
         // TODO: May want to get rid of this so we can support HKA with 0 STR (weird but possible?)
-        // TODO: PH: FIXME: Do we need to pass this back as well?
-        options.effectiveStr = options.effectiveStr || 0;
-
         if (item.system.usesStrength || item.system.usesTk) {
             const strPerEnd =
                 item.actor.system.isHeroic && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
-            let strEnd = Math.max(1, Math.round(options.effectiveStr / strPerEnd));
+            let strEnd = Math.max(1, Math.round(effectiveStr / strPerEnd));
 
             // But wait, may have purchased STR with reduced endurance
             const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
@@ -3093,22 +3106,18 @@ function calculateRequiredEnd(item, options) {
                     if (strREDUCEDEND.OPTIONID === "ZERO") {
                         strEnd = 0;
                     } else {
-                        strEnd = Math.max(
-                            1,
-                            Math.round(Math.min(options.effectiveStr, strPowerLevels) / (strPerEnd * 2)),
-                        );
+                        strEnd = Math.max(1, Math.round(Math.min(effectiveStr, strPowerLevels) / (strPerEnd * 2)));
                     }
                     // Add back in STR that isn't part of strPower
-                    if (options.effectiveStr > strPowerLevels) {
-                        strEnd += Math.max(1, Math.round((options.effectiveStr - strPowerLevels) / strPerEnd));
+                    if (effectiveStr > strPowerLevels) {
+                        strEnd += Math.max(1, Math.round((effectiveStr - strPowerLevels) / strPerEnd));
                     }
                 }
             }
 
             // TELEKINESIS is more expensive than normal STR
-            // TODO: PH: FIXME: SHouldn't TK be additive with base cost?
             if (item.system.usesTk) {
-                endToUse = Math.ceil((endToUse * options?.effectiveStr) / item.system.LEVELS);
+                endToUse = Math.ceil((endToUse * effectiveStr) / parseInt(item.system.LEVELS || 1));
             } else {
                 endToUse = endToUse + strEnd;
             }
@@ -3154,7 +3163,6 @@ async function rollStunForEnd(stunDice) {
 async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpendObj, chargesToSpend) {
     let resourceUsageDescription;
 
-    // TODO: Move deducting endurance into separate methods
     // Deduct endurance
     // none: "No Automation",
     // npcOnly: "NPCs Only (end, stun, body)",
@@ -3173,10 +3181,6 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
 
                 resourceUsageDescription = `Spent ${endToSpend} END from Endurance Reserve`;
 
-                // TODO: Shouldn't this happen automatically when we update? If so remove this and update on reserve
-                enduranceReserve.system.value = actorNewEndurance;
-                enduranceReserve.updateItemDescription();
-
                 await enduranceReserve.update({
                     "system.value": actorNewEndurance,
                     "system.description": enduranceReserve.system.description,
@@ -3193,11 +3197,8 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
                 const endSpentAboveZero = Math.max(actorEndurance, 0);
                 actorNewEndurance = Math.min(actorEndurance, 0);
 
-                // TODO: Combine these
-                resourceUsageDescription = `Spent ${endSpentAboveZero} END`;
-
-                resourceUsageDescription +=
-                    ` and ${stunToSpendObj.damage} STUN <i class="fal fa-circle-info" data-tooltip="` +
+                resourceUsageDescription =
+                    `Spent ${endSpentAboveZero} END and ${stunToSpendObj.damage} STUN <i class="fal fa-circle-info" data-tooltip="` +
                     `<b>USING STUN FOR ENDURANCE</b><br>` +
                     `A character at 0 END who still wishes to perform Actions
                         may use STUN as END. The character takes 1d6 STUN Only
