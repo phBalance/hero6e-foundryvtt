@@ -77,10 +77,10 @@
     </span>
 
     <div class="hit-roll">
-        {{#if useEnd}}
-        <div class="card-section">
-            <div class="description-tiny">{{{ enduranceText }}}</div>
-        </div>
+        {{#if resourcesUsedDescription}}
+            <div class="card-section">
+                <div class="description-tiny">{{{ resourcesUsedDescription }}}</div>
+            </div>
         {{/if}}
 
         {{#each targetData as |target|}}

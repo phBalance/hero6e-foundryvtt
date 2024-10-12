@@ -12,8 +12,18 @@ export function isGameV12OrLater() {
  * FoundryVTT overloads Math to add the clamped or clamp method depending on the version.
  * Just provide a straight implementation.
  *
+ * If max < min then min = max
+ *
+ * @param {number} num - The number to clamp
+ * @param {number} min - The lower bound to clamp num to
+ * @param {number} max - The upper bound to clamp num to
+ *
  * @returns number
  */
 export function clamp(num, min, max) {
+    if (max < min) {
+        max = min;
+    }
+
     return Math.min(Math.max(num, min), max);
 }

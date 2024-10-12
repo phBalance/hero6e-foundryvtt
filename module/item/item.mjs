@@ -3965,7 +3965,7 @@ export class HeroSystem6eItem extends Item {
         this.system.ocv = ocv;
         this.system.dcv = dcv;
 
-        this.system.stunBodyDamage = "stunbody";
+        this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
 
         // FLASHDC, BLOCK, DODGE do not use STR
         if (["maneuver", "martialart"].includes(this.type)) {
@@ -4175,7 +4175,7 @@ export class HeroSystem6eItem extends Item {
 
         const doesBody = this.findModsByXmlid("DOESBODY");
         if (doesBody) {
-            this.system.stunBodyDamage = "stunbody";
+            this.system.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunbody;
         }
     }
 
