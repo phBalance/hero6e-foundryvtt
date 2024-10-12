@@ -1772,7 +1772,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // Targeting ENTANGLE
-    const targetEntangle = damageData.targetEntangle === "true";
+    const targetEntangle = damageData.targetEntangle === "true" || damageData.targetEntangle === true;
     const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
     if (targetEntangle && entangleAE) {
         return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE);
