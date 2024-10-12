@@ -4,7 +4,8 @@
 - Dropped support for FoundryV11.
 - Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
 - Entangles can now be attacked.
-- Fixed issue where world time was not advancing during combat.  FLASH and other effects related to world time now expire properly. [#438]
+- Fixed issue where world time was not advancing during combat.  
+- Improved FLASH and FLASHDEFENSE. [#438](https://github.com/dmdorman/hero6e-foundryvtt/issues/438) [#303](https://github.com/dmdorman/hero6e-foundryvtt/issues/303)
 
 ## Version 3.0.101
 - We no longer test/verify with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.

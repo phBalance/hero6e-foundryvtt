@@ -2675,12 +2675,23 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 }
 
 async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData, defense) {
+    const defenseTags = [];
+    let totalDefense = 0;
+
     // FLASHDEFENSE
-    const flashDefense = token.actor.items.find((o) => o.system.XMLID === "FLASHDEFENSE");
-    if (flashDefense) {
-        const value = parseInt(flashDefense.system.LEVELS || 0);
-        damageData.bodyDamage = Math.max(0, damageData.bodyDamage - value);
-        defense = `${value} Flash Defense`;
+    for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.system.active)) {
+        if (senseAffectingItem.system.OPTIONID === flashDefense.system.OPTIONID) {
+            const value = parseInt(flashDefense.system.LEVELS || 0);
+            totalDefense += value;
+            damageData.bodyDamage = Math.max(0, damageData.bodyDamage - totalDefense);
+            defense = `${totalDefense} Flash Defense`;
+
+            defenseTags.push({
+                value: value,
+                name: flashDefense.system.XMLID,
+                title: flashDefense.name,
+            });
+        }
     }
 
     // Create new ActiveEffect
@@ -2712,6 +2723,8 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
 
         // misc
         targetToken: token,
+        tags: defenseTags,
+        attackTags: getAttackTags(senseAffectingItem),
     };
 
     // render card
