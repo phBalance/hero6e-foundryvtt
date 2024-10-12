@@ -459,7 +459,7 @@
                 "width": 0,
                 "height": 0
             },
-            "stunBodyDamage": "stunbody"
+            "stunBodyDamage": "Stun and Body"
         },
         "defense": {
             "templates": ["base"],

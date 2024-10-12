@@ -323,8 +323,6 @@ export async function AttackToHit(item, options) {
 
     const toHitChar = CONFIG.HERO.defendsWith[itemData.targets];
 
-    const automation = game.settings.get(HEROSYS.module, "automation");
-
     const adjustment = getPowerInfo({
         item: item,
     })?.type?.includes("adjustment");
@@ -523,170 +521,68 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    heroRoller.addDice(-3);
     // This is the actual roll to hit. In order to provide for a die roll
     // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
     // and lastly we subtract the die roll. The value returned is the maximum DCV hit
     // (so we can be sneaky and not tell the target's DCV out loud).
+    heroRoller.addDice(-3);
 
-    const autofire = item.findModsByXmlid("AUTOFIRE");
-    const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+    // What resources are required to activate this power?
+    const resourcesRequired = calculateRequiredResourcesToUse(item, options);
 
-    let useEnd = false;
-    let enduranceText = "";
-    if (game.settings.get(HEROSYS.module, "use endurance")) {
-        useEnd = true;
-        let valueEnd = actor.system.characteristics.end.value;
-        let itemEnd = (parseInt(effectiveItem.system.end) || 0) * (autoFireShots || 1);
-        let newEnd = valueEnd; // - itemEnd;
-        let spentEnd = itemEnd;
-        options.effectiveStr = options.effectiveStr || 0; // May want to get rid of this so we can support HKA with 0 STR (wierd but possible?)
+    const startingCharges = parseInt(item.system.charges?.value || 0);
+    const enduranceReserve = actor.items.find((item) => item.system.XMLID === "ENDURANCERESERVE");
+    const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
+    const actorEndurance = item.actor.system.characteristics.end.value;
 
-        if (itemData.usesStrength || itemData.usesTk) {
-            const StrPerEnd =
-                item.actor.system.isHeroic && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
-            let strEnd = Math.max(1, Math.round(options.effectiveStr / StrPerEnd));
+    // Does the actor have enough charges available?
+    if (resourcesRequired.charges > 0 && resourcesRequired.charges > startingCharges) {
+        return ui.notifications.error(
+            `${item.name} does not have ${resourcesRequired.charges} charge${
+                resourcesRequired.charges > 1 ? "s" : ""
+            } remaining.`,
+        );
+    }
 
-            // But wait, may have purchased STR with reduced endurance
-            const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
-            if (strPower) {
-                const strPowerLevels = parseInt(strPower.system.LEVELS);
-                const strREDUCEDEND = strPower.findModsByXmlid("REDUCEDEND");
-                if (strREDUCEDEND) {
-                    if (strREDUCEDEND.OPTIONID === "ZERO") {
-                        strEnd = 0;
-                    } else {
-                        strEnd = Math.max(
-                            1,
-                            Math.round(Math.min(options.effectiveStr, strPowerLevels) / (StrPerEnd * 2)),
-                        );
-                    }
-                    // Add back in STR that isn't part of strPower
-                    if (options.effectiveStr > strPowerLevels) {
-                        strEnd += Math.max(1, Math.round((options.effectiveStr - strPowerLevels) / StrPerEnd));
-                    }
-                }
-            }
-
-            // TELIKENESIS is more expensive than normal STR
-            if (itemData.usesTk) {
-                spentEnd = Math.ceil((spentEnd * options?.effectiveStr) / item.system.LEVELS);
-            } else {
-                spentEnd = parseInt(spentEnd) + parseInt(strEnd);
-            }
-            //item.system.endEstimate += strEnd;=            newEnd = parseInt(newEnd) - parseInt(strEnd);
-        }
-
-        const enduranceReserve = actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
-        if (item.system.USE_END_RESERVE) {
-            if (enduranceReserve) {
-                let erValue = parseInt(enduranceReserve.system.value);
-                if (spentEnd > erValue) {
-                    return await ui.notifications.error(
-                        `${item.name} needs ${spentEnd} END, but ${enduranceReserve.name} only has ${erValue} END.`,
-                    );
-                }
-                erValue -= spentEnd;
-                enduranceReserve.system.value = erValue;
-                enduranceReserve.updateItemDescription();
-                await enduranceReserve.update({
-                    "system.value": enduranceReserve.system.value,
-                    "system.description": enduranceReserve.system.description,
-                });
-                newEnd = valueEnd;
+    // Does the actor have enough endurance available?
+    let actualStunCostObj = null;
+    if (item.system.USE_END_RESERVE) {
+        if (enduranceReserve) {
+            if (resourcesRequired.end > reserveEnd) {
+                return await ui.notifications.error(
+                    `${item.name} needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
+                );
             }
         } else {
-            newEnd -= spentEnd;
+            return await ui.notifications.error(`${item.name} needs an endurance reserve to spend END but none found.`);
         }
-
-        let stunDamageForEnd = 0;
-        if (newEnd < 0 && spentEnd > 0) {
-            // 1d6 STUN for each 2 END spent beyond 0 END- always round END use up to the nearest larger 2 END
-            const endSpentAboveZero = Math.max(valueEnd, 0);
-            const stunDice = Math.ceil(Math.abs(spentEnd - endSpentAboveZero) / 2);
+    } else {
+        if (resourcesRequired.end > actorEndurance) {
+            // Is the actor willing to use STUN to make up for the lack of END?
+            const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(item, resourcesRequired.end);
 
             const confirmed = await Dialog.confirm({
                 title: "USING STUN FOR ENDURANCE",
-                content: `<p><b>${item.name}</b> requires ${spentEnd} END. 
-                <b>${actor.name}</b> has ${valueEnd} END. 
-                Do you want to take ${stunDice}d6 STUN to make up for the lack of END?</p>`,
+                content: `<p><b>${item.name}</b> requires ${resourcesRequired.end} END. 
+                <b>${actor.name}</b> has ${actorEndurance} END. 
+                Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
             });
-
             if (!confirmed) {
                 return;
             }
 
-            stunForEndHeroRoller = new HeroRoller()
-                .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUN_FOR_END)
-                .makeBasicRoll()
-                .addDice(stunDice);
-            await stunForEndHeroRoller.roll();
-            const stunRenderedResult = await stunForEndHeroRoller.render();
-            stunDamageForEnd = stunForEndHeroRoller.getBasicTotal();
-
-            enduranceText = `Spent ${endSpentAboveZero} END and ${stunDamageForEnd} STUN`;
-
-            enduranceText +=
-                ` <i class="fal fa-circle-info" data-tooltip="` +
-                `<b>USING STUN FOR ENDURANCE</b><br>` +
-                `A character at 0 END who still wishes to perform Actions
-                may use STUN as END. The character takes 1d6 STUN Only
-                damage (with no defense) for every 2 END (or fraction thereof)
-                expended. Yes, characters can Knock themselves out this way.` +
-                `"></i> `;
-            enduranceText += stunRenderedResult;
-
-            await ui.notifications.warn(`${actor.name} used STUN for ENDURANCE.`);
-        } else {
-            enduranceText = "Spent " + spentEnd + " END";
-
-            if (item.system.USE_END_RESERVE && enduranceReserve) {
-                enduranceText += `<br>from ${enduranceReserve.name} (${enduranceReserve.system.value}/${enduranceReserve.system.max})`;
-            }
-        }
-
-        // none: "No Automation",
-        // npcOnly: "NPCs Only (end, stun, body)",
-        // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
-        // all: "PCs and NPCs (end, stun, body)"
-        if (
-            automation === "all" ||
-            (automation === "npcOnly" && actor.type == "npc") ||
-            (automation === "pcEndOnly" && actor.type === "pc")
-        ) {
-            let changes = {};
-            if (newEnd < 0) {
-                // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
-                //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
-                changes = {
-                    "system.characteristics.end.value": Math.min(valueEnd, 0),
-                    "system.characteristics.stun.value":
-                        parseInt(actor.system.characteristics.stun.value) - stunDamageForEnd,
-                };
-            } else {
-                changes = {
-                    "system.characteristics.end.value": newEnd,
-                };
-            }
-            await actor.update(changes);
+            actualStunCostObj = await rollStunForEnd(potentialStunCost.stunDice);
         }
     }
 
-    // Charges
-    if (item.system.charges?.max > 0) {
-        let charges = parseInt(item.system.charges?.value || 0);
-        if (charges <= 0) {
-            return ui.notifications.error(`${item.name} has no more charges.`);
-        }
-        options.boostableCharges = clamp(parseInt(options.boostableCharges) || 0, 0, Math.min(charges - 1, 4)); // Maximum of 4
-        let spentCharges = 1 + options.boostableCharges;
-        if (enduranceText === "") {
-            enduranceText = `Spent ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
-        } else {
-            enduranceText += ` and ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
-        }
-        item.update({ "system.charges.value": charges - spentCharges });
-    }
+    // The actor is now committed to spending the resources to activate the power
+    const resourcesUsedDescription = await spendResourcesToUse(
+        item,
+        enduranceReserve,
+        resourcesRequired.end,
+        actualStunCostObj,
+        resourcesRequired.charges,
+    );
 
     const aoeModifier = item.getAoeModifier();
     const aoeTemplate =
@@ -819,7 +715,10 @@ export async function AttackToHit(item, options) {
     }
 
     // AUTOFIRE
+    const autofire = item.findModsByXmlid("AUTOFIRE");
     if (autofire) {
+        const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+
         // Autofire check for multiple hits on single target
         if (targetData.length === 1) {
             const singleTarget = Array.from(targets)[0];
@@ -877,7 +776,7 @@ export async function AttackToHit(item, options) {
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: enduranceText,
+            content: resourcesUsedDescription,
             whisper: ChatMessage.getWhisperRecipients("GM"),
             speaker,
         };
@@ -938,8 +837,8 @@ export async function AttackToHit(item, options) {
         targetIds: targetIds,
 
         // endurance
-        useEnd: useEnd,
-        enduranceText: enduranceText,
+        useEnd: resourcesRequired.end,
+        resourcesUsedDescription,
 
         // misc
         tags: heroRoller.tags(),
@@ -1026,11 +925,10 @@ function getAttackTags(item) {
     }
 
     // STUN/BODY/EFFECT Only
-    if (item.system.stunBodyDamage !== "stunbody") {
-        const phrase = CONFIG.HERO.stunBodyDamages[item.system.stunBodyDamage];
+    if (item.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody) {
         attackTags.push({
-            name: phrase,
-            title: phrase,
+            name: item.system.stunBodyDamage,
+            title: item.system.stunBodyDamage,
         });
     }
 
@@ -3132,4 +3030,209 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         knockbackRoller,
         knockbackResultTotal,
     };
+}
+
+/**
+ * Calculate the total expendable cost to use this item
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {Object} options
+ *
+ * @returns Object
+ */
+function calculateRequiredResourcesToUse(item, options) {
+    const chargesRequired = calculateRequiredCharges(item, options.boostableChargesToUse || 0);
+    const endRequired = calculateRequiredEnd(item, parseInt(options.effectiveStr) || 0);
+
+    return {
+        charges: chargesRequired,
+        end: endRequired,
+    };
+}
+
+/**
+ * Calculate the total expendable charges, with boostable charges, to use this item
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {number} boostableChargesToUse
+ *
+ * @returns number
+ */
+function calculateRequiredCharges(item, boostableChargesToUse) {
+    const startingCharges = parseInt(item.system.charges?.value || 0);
+    const maximumCharges = item.system.charges?.max || 0;
+    let chargesToUse = 0;
+
+    // Does this item use charges?
+    if (maximumCharges > 0) {
+        // Maximum of 4
+        const boostableChargesUsed = clamp(boostableChargesToUse, 0, Math.min(startingCharges - 1, 4));
+        chargesToUse = 1 + boostableChargesUsed;
+    }
+
+    return chargesToUse;
+}
+
+/**
+ * Calculate the total expendable endurance to use this item
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {number} effectiveStr
+ *
+ * @returns number
+ */
+function calculateRequiredEnd(item, effectiveStr) {
+    let endToUse = 0;
+
+    if (game.settings.get(HEROSYS.module, "use endurance")) {
+        const autofire = item.findModsByXmlid("AUTOFIRE");
+        const autoFireShots = autofire ? parseInt(autofire.OPTION_ALIAS.match(/\d+/)) : 0;
+        const itemEndurance = (parseInt(item.system.end) || 0) * (autoFireShots || 1);
+
+        endToUse = itemEndurance;
+
+        // TODO: May want to get rid of this so we can support HKA with 0 STR (weird but possible?)
+        if (item.system.usesStrength || item.system.usesTk) {
+            const strPerEnd =
+                item.actor.system.isHeroic && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
+            let strEnd = Math.max(1, Math.round(effectiveStr / strPerEnd));
+
+            // But wait, may have purchased STR with reduced endurance
+            const strPower = item.actor.items.find((o) => o.type === "power" && o.system.XMLID === "STR");
+            if (strPower) {
+                const strPowerLevels = parseInt(strPower.system.LEVELS);
+                const strREDUCEDEND = strPower.findModsByXmlid("REDUCEDEND");
+                if (strREDUCEDEND) {
+                    if (strREDUCEDEND.OPTIONID === "ZERO") {
+                        strEnd = 0;
+                    } else {
+                        strEnd = Math.max(1, Math.round(Math.min(effectiveStr, strPowerLevels) / (strPerEnd * 2)));
+                    }
+                    // Add back in STR that isn't part of strPower
+                    if (effectiveStr > strPowerLevels) {
+                        strEnd += Math.max(1, Math.round((effectiveStr - strPowerLevels) / strPerEnd));
+                    }
+                }
+            }
+
+            // TELEKINESIS is more expensive than normal STR
+            if (item.system.usesTk) {
+                endToUse = Math.ceil((endToUse * effectiveStr) / parseInt(item.system.LEVELS || 1));
+            } else {
+                endToUse = endToUse + strEnd;
+            }
+        }
+    }
+
+    return endToUse;
+}
+
+function calculateRequiredStunDiceForLackOfEnd(item, end) {
+    const actorEnd = item.actor.system.characteristics.end.value;
+    let endSpentAboveZero = 0;
+    let stunDice = 0;
+
+    if (end > 0 && actorEnd - end < 0) {
+        // 1d6 STUN for each 2 END spent beyond 0 END - always round END use up to the nearest larger 2 END
+        endSpentAboveZero = Math.max(actorEnd, 0);
+        stunDice = Math.ceil(Math.abs(end - endSpentAboveZero) / 2);
+    }
+
+    return {
+        endSpentAboveZero,
+        stunDice,
+    };
+}
+
+async function rollStunForEnd(stunDice) {
+    const stunForEndHeroRoller = new HeroRoller()
+        .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUN_FOR_END)
+        .makeBasicRoll()
+        .addDice(stunDice);
+
+    await stunForEndHeroRoller.roll();
+
+    const damage = stunForEndHeroRoller.getBasicTotal();
+
+    return {
+        damage,
+        roller: stunForEndHeroRoller,
+    };
+}
+
+async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpendObj, chargesToSpend) {
+    let resourceUsageDescription;
+
+    // Deduct endurance
+    // none: "No Automation",
+    // npcOnly: "NPCs Only (end, stun, body)",
+    // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
+    // all: "PCs and NPCs (end, stun, body)"
+    const automation = game.settings.get(HEROSYS.module, "automation");
+    if (
+        automation === "all" ||
+        (automation === "npcOnly" && item.actor.type == "npc") ||
+        (automation === "pcEndOnly" && item.actor.type === "pc")
+    ) {
+        if (item.system.USE_END_RESERVE) {
+            if (enduranceReserve) {
+                const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
+                const actorNewEndurance = reserveEnd - endToSpend;
+
+                resourceUsageDescription = `Spent ${endToSpend} END from Endurance Reserve`;
+
+                await enduranceReserve.update({
+                    "system.value": actorNewEndurance,
+                    "system.description": enduranceReserve.system.description,
+                });
+            }
+        } else {
+            const actorStun = item.actor.system.characteristics.stun.value;
+            const actorEndurance = item.actor.system.characteristics.end.value;
+            let actorNewEndurance = actorEndurance - endToSpend;
+
+            const actorChanges = {};
+
+            if (actorNewEndurance < 0) {
+                const endSpentAboveZero = Math.max(actorEndurance, 0);
+                actorNewEndurance = Math.min(actorEndurance, 0);
+
+                resourceUsageDescription =
+                    `Spent ${endSpentAboveZero} END and ${stunToSpendObj.damage} STUN <i class="fal fa-circle-info" data-tooltip="` +
+                    `<b>USING STUN FOR ENDURANCE</b><br>` +
+                    `A character at 0 END who still wishes to perform Actions
+                        may use STUN as END. The character takes 1d6 STUN Only
+                        damage (with no defense) for every 2 END (or fraction thereof)
+                        expended. Yes, characters can Knock themselves out this way.` +
+                    `"></i>`;
+
+                const stunRenderedResult = await stunToSpendObj.roller.render();
+                resourceUsageDescription += stunRenderedResult;
+
+                await ui.notifications.warn(`${item.actor.name} used ${stunToSpendObj.damage} STUN for ENDURANCE.`);
+
+                // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
+                //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
+                actorChanges["system.characteristics.stun.value"] = actorStun - stunToSpendObj.damage;
+            } else {
+                resourceUsageDescription = `Spent ${endToSpend} END`;
+            }
+
+            actorChanges["system.characteristics.end.value"] = actorNewEndurance;
+
+            await item.actor.update(actorChanges);
+        }
+    }
+
+    // Spend charges
+    const startingCharges = parseInt(item.system.charges?.value || 0);
+    await item.update({ "system.charges.value": startingCharges - chargesToSpend });
+
+    if (chargesToSpend > 0) {
+        resourceUsageDescription = `${resourceUsageDescription}${
+            resourceUsageDescription ? " and " : ""
+        }${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`;
+    }
+
+    return resourceUsageDescription;
 }
