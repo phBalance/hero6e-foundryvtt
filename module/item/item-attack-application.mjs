@@ -175,9 +175,9 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // Boostable Charges
-            if (item.system.charges?.value > 1) {
-                data.boostableCharges = item.system.charges.value - 1;
-            }
+            // if (item.system.charges?.value > 1) {
+            //     data.boostableCharges = item.system.charges.value - 1;
+            // }
 
             // MINDSCAN
             if (item.system.XMLID === "MINDSCAN") {

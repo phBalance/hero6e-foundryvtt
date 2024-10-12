@@ -2,7 +2,7 @@
 
 ## Version 3.0.102 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Enhanced Senses "Sight Group" now adds to PERCEPTION skill roll. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
-
+- Entangles can now be attacked.
 
 ## Version 3.0.101
 - We no longer test/verify with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.

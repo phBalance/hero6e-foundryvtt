@@ -678,7 +678,7 @@ export async function AttackToHit(item, options) {
         if (charges <= 0) {
             return ui.notifications.error(`${item.name} has no more charges.`);
         }
-        options.boostableCharges = clamp(parseInt(options.boostableCharges) || 0, 0, Math.min(charges - 1, 4)); // Maximum of 4
+        options.boostableCharges = 0; //clamp(parseInt(options.boostableCharges) || 0, 0, Math.min(charges - 1, 4)); // Maximum of 4
         let spentCharges = 1 + options.boostableCharges;
         if (enduranceText === "") {
             enduranceText = `Spent ${spentCharges} charge${spentCharges > 1 ? "s" : ""}`;
@@ -1453,7 +1453,7 @@ export async function _onRollDamage(event) {
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
-                subTarget: targetEntangle ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
+                subTarget: entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
             };
 
             // TODO: Add in explosion handling (or flattening)
@@ -1862,7 +1862,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // Targeting ENTANGLE
-    const targetEntangle = Boolean(damageData.targetEntangle);
+    const targetEntangle = damageData.targetEntangle === "true";
     const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
     if (targetEntangle && entangleAE) {
         return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE);
@@ -2367,7 +2367,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     // then add +1 BODY for each additional Entangle.
     // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
     const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled")); //token.actor.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
-    const prevBody = parseInt(prevEntangle.changes?.find((o) => o.key === "body")?.value) || 0;
+    const prevBody = parseInt(prevEntangle?.changes?.find((o) => o.key === "body")?.value) || 0;
     if (prevEntangle) {
         entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense?.rPD) || 0);
         entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense?.rED) || 0);

@@ -110,6 +110,22 @@ function determineDefense(targetActor, attackItem, options) {
         }
     }
 
+    // PD bought as hardened
+    for (const item of activeDefenses.filter((o) => o.system.XMLID == "PD" && o.system.active)) {
+        if (item.findModsByXmlid("HARDENED")) {
+            const levels = parseInt(item.system.value) || 0;
+            PD -= levels;
+        }
+    }
+
+    // ED bought as hardened
+    for (const item of activeDefenses.filter((o) => o.system.XMLID == "ED" && o.system.active)) {
+        if (item.findModsByXmlid("HARDENED")) {
+            const levels = parseInt(item.system.value) || 0;
+            ED -= levels;
+        }
+    }
+
     // Bases & Vehicles have resistant PD & ED
     if (["base2", "vehicle"].includes(targetActor?.type)) {
         rPD += PD;
@@ -192,6 +208,16 @@ function determineDefense(targetActor, attackItem, options) {
         );
         if (impenetrable > 0) {
             tagXmlids.push(`i${impenetrable}`);
+        }
+
+        // PD
+        if (xmlid === "PD") {
+            activeDefense.system.defenseType = "pd";
+        }
+
+        // ED
+        if (xmlid === "ED") {
+            activeDefense.system.defenseType = "ed";
         }
 
         // Resistant Defenses
