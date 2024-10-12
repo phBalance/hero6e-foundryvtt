@@ -38,15 +38,26 @@
         <label>Skill Mods</label>
             <table>
             {{#each skillMods}}
+                {{#if this.system.active}}
                 <tr>
                     <td style="width:1%">
-                    <input class="item-toggle" id="{{this.id}}" type="checkbox" name="{{this.id}}.system.checked" {{checked
-                        this.system.checked}} data-dtype="Boolean" />
+                        <input class="item-toggle" id="{{this.id}}" type="checkbox" name="{{this.id}}.system.checked" {{checked
+                        this.system.checked}} data-dtype="Boolean"/>
                     </td>
                     <td style="text-align:left">
                         {{this.system.description}}
                     </td>
-                </tr>      
+                </tr>   
+                {{else}}
+                <tr title="This power is inactive" style="opacity:50%">
+                    <td>
+                        <i class="fas fa-ban"></i>
+                    </td>
+                    <td style="text-align:left">
+                        {{this.system.description}}
+                    </td>
+                </tr>
+                {{/if}}   
             {{/each}}
             </table>
             </div>

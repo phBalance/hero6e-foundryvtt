@@ -1444,7 +1444,8 @@ export class HeroSystem6eItem extends Item {
         if (
             this.baseInfo?.type.includes("defense") ||
             this.baseInfo?.behaviors?.includes("defense") ||
-            this.baseInfo?.type?.includes("characteristic")
+            this.baseInfo?.type?.includes("characteristic") ||
+            (["power", "equipment"].includes(this.type) && this.baseInfo?.type?.includes("sense"))
         ) {
             const newDefenseValue = "defense";
 
@@ -4474,19 +4475,14 @@ export class HeroSystem6eItem extends Item {
                 });
             }
 
-            const enhancedPerception = this.actor.items.find((o) => o.system.XMLID === "ENHANCEDPERCEPTION");
-            if (enhancedPerception) {
-                if (["ALL", "SIGHTGROUP"].includes(enhancedPerception.system.OPTIONID)) {
+            for (const enhancedPerception of this.actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION")) {
+                if (enhancedPerception.system.checked && enhancedPerception.system.active) {
                     const levels = parseInt(enhancedPerception.system.LEVELS);
                     tags.push({
                         value: levels,
                         name: enhancedPerception.name,
                     });
                     rollVal += levels;
-                } else {
-                    console.warn(
-                        `Unsupported ${enhancedPerception.system.XMLID} OPTIONID ${enhancedPerception.system.OPTIONID}`,
-                    );
                 }
             }
 

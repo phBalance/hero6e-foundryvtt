@@ -1,7 +1,7 @@
 # Releases
 
 ## Version 3.0.102 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Enhanced Senses "Sight Group" now adds to PERCEPTION skill roll. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
+- Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
 - Entangles can now be attacked.
 
 ## Version 3.0.101
