@@ -33,7 +33,24 @@
         <input type="number" name="mod" value="0" />
     </div>
 
-
+    {{#if skillMods.length}}
+        <div class="form-group">
+        <label>Skill Mods</label>
+            <table>
+            {{#each skillMods}}
+                <tr>
+                    <td style="width:1%">
+                    <input class="item-toggle" id="{{this.id}}" type="checkbox" name="{{this.id}}.system.checked" {{checked
+                        this.system.checked}} data-dtype="Boolean" />
+                    </td>
+                    <td style="text-align:left">
+                        {{this.system.description}}
+                    </td>
+                </tr>      
+            {{/each}}
+            </table>
+            </div>
+    {{/if}}
 
     <hr>
     <div>

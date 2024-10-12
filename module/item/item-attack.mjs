@@ -683,7 +683,7 @@ export async function AttackToHit(item, options) {
             // Don't bother to track a bogus target created so we get dice no nice rolls when no target selected.
             targetData.push({
                 id: target.id,
-                name: target.name || "No Target Selected",
+                name: `${target.name || "No Target Selected"}${options.targetEntangle ? " [ENTANGLE]" : ""}`,
                 aoeAlwaysHit: aoeAlwaysHit,
                 explosion: explosion,
                 toHitChar: toHitChar,
@@ -1346,10 +1346,12 @@ export async function _onRollDamage(event) {
     for (const id of toHitData.targetids.split(",")) {
         let token = canvas.scene.tokens.get(id);
         if (token) {
+            const targetEntangle = Boolean(toHitData.targetEntangle);
+            const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
-                subTarget: damageRoller.getHitLocation().item?.name || damageRoller.getHitLocation().activeEffect?.name,
+                subTarget: targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
             };
 
             // TODO: Add in explosion handling (or flattening)
@@ -1427,6 +1429,7 @@ export async function _onRollDamage(event) {
 
         // misc
         targetIds: toHitData.targetids,
+        targetEntangle: toHitData.targetEntangle,
         tags: tags,
 
         attackTags: getAttackTags(item),
@@ -1756,9 +1759,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplyEntangleToSpecificToken(item, token, originalRoll);
     }
 
-    // Targeting ENTANGLE/FOCI
-    if (heroRoller.getHitLocation().activeEffect) {
-        return _onApplyDamageToActiveEffect(item, token, originalRoll);
+    // Targeting ENTANGLE
+    const targetEntangle = damageData.targetEntangle === "true";
+    const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
+    if (targetEntangle && entangleAE) {
+        return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE);
     }
 
     if (heroRoller.getHitLocation().item) {
@@ -2259,34 +2264,47 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     // highest BODY and the highest PD and ED for all the Entangles,
     // then add +1 BODY for each additional Entangle.
     // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
-    const prevEntangle = token.actor.effects.find((o) =>
-        o.statuses.has(HeroSystem6eActorActiveEffects.entangledEffect.id),
-    );
+    const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled")); //token.actor.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+    const prevBody = parseInt(prevEntangle?.changes?.find((o) => o.key === "body")?.value) || 0;
     if (prevEntangle) {
-        entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense.rPD) || 0);
-        entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense.rED) || 0);
-        entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense.rMD) || 0);
+        entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense?.rPD) || 0);
+        entangleDefense.rED = Math.max(entangleDefense.rED, parseInt(prevEntangle.flags.entangleDefense?.rED) || 0);
+        entangleDefense.rMD = Math.max(entangleDefense.rMD, parseInt(prevEntangle.flags.entangleDefense?.rMD) || 0);
         (entangleDefense.string = `${
             entangleDefense.mentalEntangle
                 ? `${entangleDefense.rMD} rMD`
                 : `${entangleDefense.rPD} rPD/${entangleDefense.rED} rED`
         }`),
-            (body = Math.max(body, parseInt(prevEntangle.flags.body) || 0) + 1);
+            (body = Math.max(body, prevBody + 1));
     }
     const effecttData = {
-        ...HeroSystem6eActorActiveEffects.entangledEffect,
-        ...prevEntangle,
+        //...HeroSystem6eActorActiveEffects.entangledEffect,
+        id: "entangled",
+        icon: HeroSystem6eActorActiveEffects.entangledEffect.icon,
+        changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.entangledEffect.changes),
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
         flags: {
-            body: body,
             entangleDefense,
             XMLID: item.system.XMLID,
             source: item.actor.name,
         },
         origin: item.uuid,
     };
+    const changeBody = effecttData.changes?.find((o) => o.key === "body");
+    if (changeBody) {
+        changeBody.value === body;
+    } else {
+        effecttData.changes ??= [];
+        effecttData.changes.push({ key: "body", value: body, mode: 5 });
+    }
+
     if (prevEntangle) {
-        prevEntangle.update({ name: effecttData.name, flags: effecttData.flags, origin: effecttData.origin });
+        prevEntangle.update({
+            name: effecttData.name,
+            flags: effecttData.flags,
+            changes: effecttData.changes,
+            origin: effecttData.origin,
+        });
     } else {
         token.actor.addActiveEffect(effecttData);
     }
@@ -2303,7 +2321,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
         // damage info
         effects: `${token.name} is entangled.  The entangle has ${body} BODY ${entangleDefense.string}. ${
-            prevEntangle ? `This entangle augmented a previous ${prevEntangle.flags.body} body entangle.` : ""
+            prevEntangle ? `This entangle augmented a previous ${prevBody} body entangle.` : ""
         }`,
 
         // misc
@@ -2326,46 +2344,46 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     ChatMessage.create(chatData);
 }
 
-export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
+export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, entangleAE) {
     // Get fully functional ActiveEffect that we can damage (update)
-    const damageActiveEffect = fromUuidSync(originalRoll.getHitLocation().fullName);
-    if (!damageActiveEffect) {
-        return ui.notifications.error(`Attack details are no longer available.`);
+
+    // targetEntangle should belong to token
+    if (entangleAE.parent?.id !== token.actor?.id) {
+        return ui.notifications.error(`Unable to locate <b>${entangleAE.name}</b> on <b>${token.name}</b>.`);
     }
 
-    // damageActiveEffect should belong to token
-    if (damageActiveEffect.parent.id !== token.actor.id) {
-        return ui.notifications.error(`Unable to locate <b>${damageActiveEffect.name}</b> on <b>${token.name}</b>.`);
-    }
-
-    const attackItem = item;
-
-    // We currently only support ENTANGLE
-    if (damageActiveEffect.flags.XMLID !== "ENTANGLE") {
-        return ui.notifications.error(`Damaging ${damageActiveEffect.flags.XMLID} is not currently supported.`);
+    // Make sure this is an ENTANGLE
+    if (entangleAE.flags.XMLID !== "ENTANGLE") {
+        return ui.notifications.error(`Damaging ${entangleAE.flags.XMLID} is not currently supported.`);
     }
 
     let defense;
     let defenseType;
     switch (attackItem?.system.class) {
         case "physical":
-            defense = damageActiveEffect.flags.entangleDefense.rPD;
+            defense = entangleAE.flags.entangleDefense.rPD;
             defenseType = "rPD";
             break;
         case "energy":
-            defense = damageActiveEffect.flags.entangleDefense.rED;
+            defense = entangleAE.flags.entangleDefense.rED;
             defenseType = "rED";
             break;
         case "mental":
-            defense = damageActiveEffect.flags.entangleDefense.rMD;
+            defense = entangleAE.flags.entangleDefense.rMD;
             defenseType = "rPMD";
             break;
     }
 
     if (!defense) {
         return ui.notifications.error(
-            `Unable to determien appropraite defenses for ${damageActiveEffect.name} vs ${attackItem.name}.`,
+            `Unable to determine appropraite defenses for ${entangleAE.name} vs ${attackItem.name}.`,
         );
+    }
+
+    const bodyChangeIdx = entangleAE.changes.findIndex((o) => o.key === "body");
+    const body = entangleAE.changes[bodyChangeIdx]?.value;
+    if (!body) {
+        return ui.notifications.error(`Unable to determine BODY for ${entangleAE.name} vs ${attackItem.name}.`);
     }
 
     const defenseTags = [
@@ -2377,7 +2395,7 @@ export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
         },
         {
             name: "body",
-            value: damageActiveEffect.flags.body,
+            value: body,
             title: `Entangle Body`,
         },
     ];
@@ -2386,19 +2404,21 @@ export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
     const stunDamage = Math.max(0, originalRoll.getStunTotal() - defense);
     let effectsFinal;
     if (bodyDamage > 0) {
-        if (bodyDamage < damageActiveEffect.flags.body) {
-            const newBody = damageActiveEffect.flags.body - bodyDamage;
-            const name = `${damageActiveEffect.flags.XMLID} ${newBody} BODY ${damageActiveEffect.flags.entangleDefense.string}`;
-            damageActiveEffect.update({ name, "flags.body": newBody });
+        if (bodyDamage < body) {
+            const newBody = body - bodyDamage;
+            const name = `${entangleAE.flags.XMLID} ${newBody} BODY ${entangleAE.flags.entangleDefense.string}`;
+            entangleAE.update({ name });
+            entangleAE.changes[bodyChangeIdx].value = newBody;
+            entangleAE.update({ changes: entangleAE.changes });
             effectsFinal = `Entangle has ${newBody} BODY remaining.`;
         } else {
-            damageActiveEffect.parent.removeActiveEffect(damageActiveEffect);
+            entangleAE.parent.removeActiveEffect(entangleAE);
             effectsFinal = `Entangle was destroyed.`;
         }
     }
 
     const cardData = {
-        item: item,
+        item: attackItem,
 
         // Incoming Damage Information
         incomingDamageSummary: originalRoll.getTotalSummary(),
@@ -2434,14 +2454,15 @@ export async function _onApplyDamageToActiveEffect(item, token, originalRoll) {
 
         // misc
         tags: defenseTags,
-        attackTags: getAttackTags(item),
+        targetEntangle: true,
+        attackTags: getAttackTags(attackItem),
         targetToken: token,
     };
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
-    const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    const speaker = ChatMessage.getSpeaker({ actor: attackItem.actor });
 
     const chatData = {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,

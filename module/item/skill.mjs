@@ -30,12 +30,15 @@ async function _renderSkillForm(item, actor, stateData) {
         }
     }
 
+    //const skillMods = actor.items.filter((o) => o.baseInfo?.skillMod === item.system.XMLID);
+
     const templateData = {
         actor: actor.system,
         tokenId: token?.uuid || null,
         item: item,
         state: stateData,
         skillLevels,
+        //skillMods,
     };
 
     var path = `systems/${HEROSYS.module}/templates/pop-out/item-skill-card.hbs`;

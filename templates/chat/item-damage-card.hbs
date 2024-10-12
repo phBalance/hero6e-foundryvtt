@@ -43,7 +43,7 @@
             <button class="apply-damage" title="Apply damage to selected tokens." data-itemId="{{item.uuid}}"
                 data-body-damage="{{bodyDamage}}" data-body-damage-effective="{{bodyDamageEffective}}"
                 data-stun-damage="{{stunDamage}}" data-stun-damage-effective="{{stunDamageEffective}}"
-                data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}">
+                data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}" data-target-Entangle="{{targetEntangle}}">
                 {{#if (or nonDmgEffect senseAffecting)}}
                 Apply {{item.system.XMLID}}
                 {{else}}
@@ -56,7 +56,7 @@
                 data-target-token-id="{{target.token.id}}"
                 data-body-damage="{{../bodyDamage}}" data-body-damage-effective="{{../bodyDamageEffective}}"
                 data-stun-damage="{{../stunDamage}}" data-stun-damage-effective="{{../stunDamageEffective}}"
-                data-roller="{{target.roller}}" data-stun-multiplier="{{../stunMultiplier}}" data-hit-location="{{../hitLocation}}">
+                data-roller="{{target.roller}}" data-stun-multiplier="{{../stunMultiplier}}" data-hit-location="{{../hitLocation}}" data-target-Entangle="{{../targetEntangle}}">
                 {{#if ../nonDmgEffect}}
                 Apply {{../item.system.XMLID}} to <b>{{target.token.name}}</b>
                 {{else}}
@@ -74,7 +74,7 @@
                 data-target-Ids="{{targetIds}}"
                 data-body-damage="{{bodyDamage}}" data-body-damage-effective="{{bodyDamageEffective}}"
                 data-stun-damage="{{stunDamage}}" data-stun-damage-effective="{{stunDamageEffective}}"
-                data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}">
+                data-roller="{{roller}}" data-stun-multiplier="{{stunMultiplier}}" data-hit-location="{{hitLocation}}" data-target-Entangle="{{targetEntangle}}">
                 {{#if nonDmgEffect}}
                 Apply {{item.system.XMLID}} to <b>ALL</b>
                 {{else}}
