@@ -28,7 +28,7 @@
                     <td>{{item.system.ocvEstimated}}</td>
                     <td>{{item.system.dcvEstimated}}</td>
                     <td>
-                        {{#if item.system.dice}}
+                        {{#if (eq item.system.subType "attack")}}
                             <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
                         {{/if}}
                     </td>
