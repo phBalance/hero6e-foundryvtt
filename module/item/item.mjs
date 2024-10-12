@@ -452,14 +452,60 @@ export class HeroSystem6eItem extends Item {
             let end = parseInt(this.system.end);
             let value = parseInt(this.actor.system.characteristics.end.value);
             if (end > value) {
-                if (event?.ctrlKey) {
-                    ui.notifications.info(`${game.user.name} used CTRL key to force <b>${this.name}</b> on.`);
+                if (event?.shiftKey) {
+                    const speaker = ChatMessage.getSpeaker({
+                        actor: this,
+                        //token,
+                    });
+                    speaker["alias"] = game.user.name;
+                    const chatData = {
+                        user: game.user._id,
+                        type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                        content: `${game.user.name} used SHIFT key to force <b>${this.name}</b> on.`,
+                        whisper: whisperUserTargetsForActor(this),
+                        speaker,
+                    };
+                    ChatMessage.create(chatData);
                 } else {
                     ui.notifications.error(
-                        `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.  Hold CTRL to force.`,
+                        `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.  Hold SHIFT to force.`,
                     );
                     return;
                 }
+            }
+
+            // Spend CHARGE to toggle power on
+            // Notice that item.system.charges is used to provide details
+            const charges = this.findModsByXmlid("CHARGES");
+            if (charges) {
+                if (this.system.charges.value <= 0) {
+                    if (event?.shiftKey) {
+                        const speaker = ChatMessage.getSpeaker({
+                            actor: this,
+                            //token,
+                        });
+                        speaker["alias"] = game.user.name;
+                        const chatData = {
+                            user: game.user._id,
+                            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                            content: `${game.user.name} used SHIFT key to force <b>${this.name}</b> on.`,
+                            whisper: whisperUserTargetsForActor(this),
+                            speaker,
+                        };
+                        ChatMessage.create(chatData);
+                    } else {
+                        ui.notifications.error(
+                            `Unable to active ${this.name}.  ${item.actor.name} has ${this.system.charges.value} CHARGES.  Hold SHIFT to force.`,
+                        );
+                        return;
+                    }
+                }
+                this.system.charges.value -= 1;
+                this.update({ "system.charges": this.system.charges });
+
+                // Charges expire, find the Active Effect
+                // const ae = this.effects.contents?.[0];
+                // ae.update({ "duration.seconds": 1 });
             }
 
             // Only spend the END if we are in combat.
@@ -575,7 +621,12 @@ export class HeroSystem6eItem extends Item {
                 break;
         }
 
-        // If we have control of this token, reaquire to update movement types
+        // Charges expire
+        // if (charges) {
+        //     // Find the active effect
+        // }
+
+        // If we have control of this token, re-acquire to update movement types
         const myToken = this.actor?.getActiveTokens()?.[0];
         if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
             myToken.release();

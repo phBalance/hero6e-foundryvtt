@@ -267,7 +267,7 @@
                                 </td>
                                 <td>{{item.system.end}}</td>
                                 <td>
-                                    <input class="item-toggle" type="checkbox" title="CTRL to force toggle" {{checked item.system.active}}
+                                    <input class="item-toggle" type="checkbox" {{checked item.system.active}}
                                         data-dtype="Boolean" />
                                 </td>
                                 <td>
@@ -438,7 +438,7 @@
                                 <td>{{item.system.value}}</td>
                                 <td>{{item.system.velValue}}</td>
                                 <td>
-                                    {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"  title="CTRL to force toggle"
+                                    {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"  
                                         name="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
                                         data-action="toggle" />
                                     {{/if}}
@@ -624,7 +624,7 @@
                                             sign=false}}-</button>
                                     {{/if}}
                                     {{#if item.system.showToggle}}
-                                        <input class="item-toggle" type="checkbox"  title="CTRL to force toggle" {{checked item.system.active}}
+                                        <input class="item-toggle" type="checkbox"  {{checked item.system.active}}
                                             data-dtype="Boolean" />
                                     {{/if}}
                                 </td>
