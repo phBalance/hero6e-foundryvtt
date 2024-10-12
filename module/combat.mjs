@@ -840,7 +840,10 @@ export class HeroSystem6eCombat extends Combat {
         const newRunningSegment = this.round * 12 + this.combatant?.flags.segment;
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
-            await game.time.advance(advanceTime);
+            // NaN Typically occurs when previous round ends combat
+            if (!isNaN(advanceTime)) {
+                await game.time.advance(advanceTime);
+            }
         }
         return _previousRound;
     }
