@@ -757,13 +757,37 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     /**
+     * Advance the combat to the next turn
+     * @returns {Promise<Combat>}
+     */ async nextTurn() {
+        const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const originalRound = this.round;
+        const _nextTurn = await super.nextTurn();
+        const newRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const newRound = this.round;
+
+        if (originalRunningSegment != newRunningSegment && originalRound === newRound) {
+            const advanceTime = newRunningSegment - originalRunningSegment;
+            //console.log(originalRunningSegment, newRunningSegment, newRunningSegment - originalRunningSegment);
+            await game.time.advance(advanceTime);
+        }
+
+        return _nextTurn;
+    }
+
+    /**
      * Rewind the combat to the previous turn
      * @returns {Promise<Combat>}
      */
     async previousTurn() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | previousTurn`);
+        }
         if (this.turn === 0 && this.round === 0) return this;
         else if (this.turn <= 0 && this.turn !== null) return this.previousRound();
         let previousTurn = (this.turn ?? this.turns.length) - 1;
+
+        const originalRunningSegment = this.round * 12 + this.combatant.flags.segment;
 
         // Hero combats start with round 1 and segment 12.
         // So anything less than segment 12 will call previousTurn
@@ -778,14 +802,51 @@ export class HeroSystem6eCombat extends Combat {
         const updateData = { round: this.round, turn: previousTurn };
         const updateOptions = { direction: -1, worldTime: { delta: -1 * CONFIG.time.turnTime } };
         Hooks.callAll("combatTurn", this, updateData, updateOptions);
-        await this.update(updateData, updateOptions);
-        return;
+        const _previousTurn = await this.update(updateData, updateOptions);
+
+        const newRunningSegment = this.round * 12 + this.combatant.flags.segment;
+        if (originalRunningSegment != newRunningSegment) {
+            const advanceTime = newRunningSegment - originalRunningSegment;
+            await game.time.advance(advanceTime);
+        }
+
+        return _previousTurn;
     }
 
-    // async setHeroCombatTurn() {
-    //     if (!this.flags.heroCurrent) return ;
-    //     console.log("setHeroCombatTurn");
-    // }
+    /**
+     * Advance the combat to the next round
+     * @returns {Promise<Combat>}
+     */
+    async nextRound() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | nextRound`);
+        }
+        const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const _nextRound = await super.nextRound();
+        const newRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        if (originalRunningSegment != newRunningSegment) {
+            const advanceTime = newRunningSegment - originalRunningSegment;
+            await game.time.advance(advanceTime);
+        }
+        return _nextRound;
+    }
+
+    async previousRound() {
+        if (CONFIG.debug.combat) {
+            console.debug(`Hero | previousRound`);
+        }
+        const originalRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        const _previousRound = await super.previousRound();
+        const newRunningSegment = this.round * 12 + this.combatant?.flags.segment;
+        if (originalRunningSegment != newRunningSegment) {
+            const advanceTime = newRunningSegment - originalRunningSegment;
+            // NaN Typically occurs when previous round ends combat
+            if (!isNaN(advanceTime)) {
+                await game.time.advance(advanceTime);
+            }
+        }
+        return _previousRound;
+    }
 
     getCombatTurnHero(priorState) {
         if (CONFIG.debug.combat) {

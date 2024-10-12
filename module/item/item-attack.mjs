@@ -1009,6 +1009,18 @@ function getAttackTags(item) {
         });
     }
 
+    // Martial FLASH
+    if (item.system.EFFECT?.includes("FLASHDC")) {
+        attackTags.push({
+            name: `Flash`,
+            title: item.name,
+        });
+        attackTags.push({
+            name: item.system.INPUT,
+            title: item.name,
+        });
+    }
+
     return attackTags;
 }
 
@@ -1760,7 +1772,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // Targeting ENTANGLE
-    const targetEntangle = damageData.targetEntangle === "true";
+    const targetEntangle = damageData.targetEntangle === "true" || damageData.targetEntangle === true;
     const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
     if (targetEntangle && entangleAE) {
         return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE);
@@ -2081,9 +2093,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags);
     }
-    const senseAffecting = getPowerInfo({
-        item: item,
-    })?.type?.includes("sense-affecting");
+    const senseAffecting =
+        getPowerInfo({
+            item: item,
+        })?.type?.includes("sense-affecting") || item.system.EFFECT?.includes("FLASHDC");
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(item, token, damageDetail, defense);
     }
@@ -2675,19 +2688,35 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 }
 
 async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, damageData, defense) {
+    const defenseTags = [];
+    let totalDefense = 0;
+
     // FLASHDEFENSE
-    const flashDefense = token.actor.items.find((o) => o.system.XMLID === "FLASHDEFENSE");
-    if (flashDefense) {
-        const value = parseInt(flashDefense.system.LEVELS || 0);
-        damageData.bodyDamage = Math.max(0, damageData.bodyDamage - value);
-        defense = `${value} Flash Defense`;
+    for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.system.active)) {
+        if (
+            senseAffectingItem.system.OPTIONID === flashDefense.system.OPTIONID ||
+            flashDefense.system.OPTIONID.includes(senseAffectingItem.system.INPUT?.toUpperCase())
+        ) {
+            const value = parseInt(flashDefense.system.LEVELS || 0);
+            totalDefense += value;
+            damageData.bodyDamage = Math.max(0, damageData.bodyDamage - totalDefense);
+            defense = `${totalDefense} Flash Defense`;
+
+            defenseTags.push({
+                value: value,
+                name: flashDefense.system.XMLID,
+                title: flashDefense.name,
+            });
+        }
     }
 
     // Create new ActiveEffect
     if (damageData.bodyDamage > 0) {
         token.actor.addActiveEffect({
             ...HeroSystem6eActorActiveEffects.blindEffect,
-            name: `${senseAffectingItem.system.XMLID} ${damageData.bodyDamage} [${senseAffectingItem.actor.name}]`,
+            name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${
+                damageData.bodyDamage
+            } [${senseAffectingItem.actor.name}]`,
             duration: {
                 seconds: damageData.bodyDamage,
             },
@@ -2712,6 +2741,8 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
 
         // misc
         targetToken: token,
+        tags: defenseTags,
+        attackTags: getAttackTags(senseAffectingItem),
     };
 
     // render card

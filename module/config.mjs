@@ -4622,6 +4622,41 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
+            editOptions: {
+                editableOption_ALIAS: true,
+                choices: [
+                    {
+                        OPTIONID: "HEARINGGROUP",
+                        OPTION: "HEARINGGROUP",
+                        OPTION_ALIAS: "Hearing Group",
+                    },
+                    {
+                        OPTIONID: "MENTALGROUP",
+                        OPTION: "MENTALGROUP",
+                        OPTION_ALIAS: "Mental Group",
+                    },
+                    {
+                        OPTIONID: "RADIOGROUP",
+                        OPTION: "RADIOGROUP",
+                        OPTION_ALIAS: "Radio Group",
+                    },
+                    {
+                        OPTIONID: "SIGHTGROUP",
+                        OPTION: "SIGHTGROUP",
+                        OPTION_ALIAS: "Sight Group",
+                    },
+                    {
+                        OPTIONID: "SMELLGROUP",
+                        OPTION: "SMELLGROUP",
+                        OPTION_ALIAS: "Smell/Taste Group",
+                    },
+                    {
+                        OPTIONID: "TOUCHGROUP",
+                        OPTION: "TOUCHGROUP",
+                        OPTION_ALIAS: "Touch Group",
+                    },
+                ],
+            },
             costEnd: false,
             costPerLevel: 1,
             xml: `<POWER XMLID="FLASHDEFENSE" ID="1711933981614" BASECOST="0.0" LEVELS="1" ALIAS="Flash Defense" POSITION="45" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,

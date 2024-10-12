@@ -914,20 +914,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             characteristicRoller.addNumber(1);
         }
 
-        // Use STR to escape ENTANGLE
-        // const element = event.currentTarget.closest("button");
-        // const dataset = element.dataset;
-        // if (dataset.label === "str") {
-        //     const entangle = this.actor.targetableItems.find((o) => o.flags?.XMLID === "ENTANGLE");
-        //     if (entangle) {
-        //         heroRoller.addToHitLocation(
-        //             true, //includeHitLocation,
-        //             entangle.uuid, // hitLocation
-        //             false, //useHitLocationSide
-        //             "none", //alreadyHitLocationSide
-        //         );
-        //     }
-        // }
+        //STR should have an item for potential damage, just like a strike
+        let item;
+        const element = event.currentTarget.closest("button");
+        const dataset = element.dataset;
+        if (dataset.label === "str") {
+            item = this.actor.items.find((o) => o.system.XMLID === "STRIKE");
+        }
 
         await characteristicRoller.roll();
         const damageRenderedResult = await characteristicRoller.render();
@@ -936,6 +929,8 @@ export class HeroSystemActorSheet extends ActorSheet {
         //       as strength is not an item which we require.
         const cardData = {
             flavor,
+            item,
+            targetEntangle: "true",
 
             // dice rolls
             renderedDamageRoll: damageRenderedResult,

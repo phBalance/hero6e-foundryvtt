@@ -30,7 +30,9 @@ async function _renderSkillForm(item, actor, stateData) {
         }
     }
 
-    //const skillMods = actor.items.filter((o) => o.baseInfo?.skillMod === item.system.XMLID);
+    // Enhanced Perception
+    const skillMods =
+        item.system.XMLID === "PERCEPTION" ? actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION") : ""; //o.baseInfo?.skillMod === item.system.XMLID);
 
     const templateData = {
         actor: actor.system,
@@ -38,7 +40,7 @@ async function _renderSkillForm(item, actor, stateData) {
         item: item,
         state: stateData,
         skillLevels,
-        //skillMods,
+        skillMods,
     };
 
     var path = `systems/${HEROSYS.module}/templates/pop-out/item-skill-card.hbs`;
@@ -114,7 +116,8 @@ async function skillRoll(item, actor, html) {
         }
     }
 
-    const form = html[0].querySelector("form");
+    const formElement = html[0].querySelector("form");
+    const formData = new FormDataExtended(formElement)?.object;
     const skillRoller = new HeroRoller().addDice(3);
 
     const tags = foundry.utils.deepClone(item.system.tags);
@@ -125,8 +128,19 @@ async function skillRoll(item, actor, html) {
         successValue = successValue + tag.value;
     }
 
+    // SkillMods
+    for (const [modKey, modValue] of Object.entries(formData)) {
+        const modShortKey = modKey.split(".")[0];
+        if (modShortKey.length === 16) {
+            const modItem = actor.items.find((o) => o.id === modShortKey);
+            if (modItem) {
+                await modItem.update({ "system.checked": modValue });
+            }
+        }
+    }
+
     // Skill Levels
-    const skillLevelInputs = form.querySelectorAll("INPUT:checked");
+    const skillLevelInputs = formElement.querySelectorAll("INPUT:checked");
     for (const skillLevelInput of skillLevelInputs) {
         const skillLevel = actor.items.get(skillLevelInput.id);
         const level = parseInt(skillLevel.system.LEVELS || 0);
@@ -141,7 +155,7 @@ async function skillRoll(item, actor, html) {
     }
 
     // Roll Modifier, from form, which can be negative or positive.
-    const modValue = parseInt(form.mod.value || 0);
+    const modValue = parseInt(formElement.mod.value || 0);
     if (modValue !== 0) {
         tags.push({ value: modValue, name: "Roll Mod" });
         successValue = successValue + modValue;
