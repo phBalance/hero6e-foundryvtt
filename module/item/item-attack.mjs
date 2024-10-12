@@ -1453,7 +1453,7 @@ export async function _onRollDamage(event) {
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
-                subTarget: entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
+                subTarget: targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
             };
 
             // TODO: Add in explosion handling (or flattening)
