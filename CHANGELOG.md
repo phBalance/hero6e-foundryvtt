@@ -6,6 +6,7 @@
 - Entangles can now be attacked.
 - Fixed issue where world time was not advancing during combat.  
 - Improved FLASH and FLASHDEFENSE. [#794](https://github.com/dmdorman/hero6e-foundryvtt/issues/794) [#438](https://github.com/dmdorman/hero6e-foundryvtt/issues/438) [#303](https://github.com/dmdorman/hero6e-foundryvtt/issues/303) [#458](https://github.com/dmdorman/hero6e-foundryvtt/issues/458) [#670](https://github.com/dmdorman/hero6e-foundryvtt/issues/670)
+- Improvements for boostable Charges. [#1292](https://github.com/dmdorman/hero6e-foundryvtt/issues/1292)
 
 ## Version 3.0.101
 - We no longer test/verify with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.
