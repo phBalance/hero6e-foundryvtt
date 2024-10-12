@@ -1009,6 +1009,18 @@ function getAttackTags(item) {
         });
     }
 
+    // Martial FLASH
+    if (item.system.EFFECT?.includes("FLASHDC")) {
+        attackTags.push({
+            name: `Flash`,
+            title: item.name,
+        });
+        attackTags.push({
+            name: item.system.INPUT,
+            title: item.name,
+        });
+    }
+
     return attackTags;
 }
 
@@ -2081,9 +2093,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     if (adjustment) {
         return _onApplyAdjustmentToSpecificToken(item, token, damageDetail, defense, defenseTags);
     }
-    const senseAffecting = getPowerInfo({
-        item: item,
-    })?.type?.includes("sense-affecting");
+    const senseAffecting =
+        getPowerInfo({
+            item: item,
+        })?.type?.includes("sense-affecting") || item.system.EFFECT?.includes("FLASHDC");
     if (senseAffecting) {
         return _onApplySenseAffectingToSpecificToken(item, token, damageDetail, defense);
     }
@@ -2680,7 +2693,10 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
 
     // FLASHDEFENSE
     for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.system.active)) {
-        if (senseAffectingItem.system.OPTIONID === flashDefense.system.OPTIONID) {
+        if (
+            senseAffectingItem.system.OPTIONID === flashDefense.system.OPTIONID ||
+            flashDefense.system.OPTIONID.includes(senseAffectingItem.system.INPUT?.toUpperCase())
+        ) {
             const value = parseInt(flashDefense.system.LEVELS || 0);
             totalDefense += value;
             damageData.bodyDamage = Math.max(0, damageData.bodyDamage - totalDefense);
@@ -2698,7 +2714,9 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     if (damageData.bodyDamage > 0) {
         token.actor.addActiveEffect({
             ...HeroSystem6eActorActiveEffects.blindEffect,
-            name: `${senseAffectingItem.system.XMLID} ${damageData.bodyDamage} [${senseAffectingItem.actor.name}]`,
+            name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${
+                damageData.bodyDamage
+            } [${senseAffectingItem.actor.name}]`,
             duration: {
                 seconds: damageData.bodyDamage,
             },

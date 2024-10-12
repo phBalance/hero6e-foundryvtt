@@ -717,19 +717,26 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             }
 
             // Update Flash name?
-            const flashEffects = actor.temporaryEffects.filter((o) => o.flags.XMLID === "FLASH");
+            const flashEffects = actor.temporaryEffects.filter((o) => ["FLASH", "MANEUVER"].includes(o.flags.XMLID));
             for (const flashAe of flashEffects) {
-                if (flashAe.flags.XMLID === "FLASH") {
-                    const senseAffectingItem = fromUuidSync(flashAe.origin);
-                    if (senseAffectingItem) {
-                        const d = flashAe._prepareDuration();
-                        if (d.remaining > 0) {
-                            const newName = `${senseAffectingItem.system.XMLID} ${d.remaining} [${senseAffectingItem.actor.name}]`;
-                            flashAe.update({ name: newName });
-                        } else {
-                            flashAe.delete();
-                        }
-                        //game[HEROSYS.module].effectPanel.refresh();
+                const senseAffectingItem = fromUuidSync(flashAe.origin);
+
+                // Double check maneuver to make sure it is a flash
+                if (
+                    senseAffectingItem.system.XMLID === "MANEUVER" &&
+                    !senseAffectingItem.system.EFFECT.includes("FLASH")
+                )
+                    break;
+                if (senseAffectingItem) {
+                    const d = flashAe._prepareDuration();
+                    if (d.remaining > 0) {
+                        const newName = `${senseAffectingItem.system.XMLID.replace(
+                            "MANEUVER",
+                            senseAffectingItem.system.ALIAS,
+                        )} ${d.remaining} [${senseAffectingItem.actor.name}]`;
+                        flashAe.update({ name: newName });
+                    } else {
+                        flashAe.delete();
                     }
                 }
             }
