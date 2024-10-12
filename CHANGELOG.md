@@ -1,10 +1,16 @@
 # Releases
 
-## Version 4.0.1 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.2 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Strength rolls should use endurance. [#1253](https://github.com/dmdorman/hero6e-foundryvtt/issues/1253)
+
+## Version 4.0.1
+
 - Added Penalty Skill Level support for encumbrance. Also fixed some LBS/KG issues. [#1308](https://github.com/dmdorman/hero6e-foundryvtt/issues/1308)
 - Equipment now uploads with proper carried state.
 
 ## Version 4.0.0
+
 - Dropped support for FoundryV11. You must use FoundryVTT v12 to use this version of Hero System 6e (Unofficial) v2. 
 - Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1288)
 - Entangles can now be attacked.
@@ -17,13 +23,14 @@
 - Fix broken stun body damage tags. [#1296](https://github.com/dmdorman/hero6e-foundryvtt/issues/1296)
 
 ## Version 3.0.101
+
 - We no longer test/verify with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.
 - Talent/Skill/Perks as powers now toggle. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
 - Improved/fixed Penalty Skill Levels. You can now have more than one PSL for different attacks.
 - Slight performance increase when uploading HDC files.
 
-
 ## Version 3.0.100
+
 - Added Effect Panel showing more details about effects on a token.
 - Initial support for MULTIPLE ATTACK maneuver.
 - Fixed issue with powers sometimes uploading out of order. [#1138](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)
@@ -34,11 +41,12 @@
 - Entangle improvements [#186](https://github.com/dmdorman/hero6e-foundryvtt/issues/186) [#551](https://github.com/dmdorman/hero6e-foundryvtt/issues/551) [#1230](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
 - Initial support for applying an entangle to a token, tracking body & defenses. Attacks still cannot target entangles, coming soon.
 
-
 ## Version 3.0.99
+
 - PENALTY_SKILL_LEVELS with all attacks no longer show all attacks in the power description.
 
 ## Version 3.0.97 & 3.0.98
+
 - FoundryVTT v12 is supported. The latest Drag Ruler works with v12 although has a few minor bugs. We recommend upgrading to FoundryVTT 12 between your sessions when you do not have an active combat.  Support for FoundryVTT v11 will end soon.
 - Fix smart CSL selection for HTH and RANGED.
 - Fix apply knockback dialog for Firefox.
@@ -56,7 +64,6 @@
   - Post segment 12 chat cards only show player recoveries to everyone.  Non-player recoveries are whispered to GM.
 - Fixed issue with BASES taking a recovery.  They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
 - You can now hold SHIFT to make attacks even when you get a cannot act message. [#1213](https://github.com/dmdorman/hero6e-foundryvtt/issues/1213)
-
 
 ## Version 3.0.96
 
