@@ -372,7 +372,7 @@ async function CreateCustomAttack(actor) {
     "penetrating": 0,
     "ocv": "+0",
     "dcv": "+0",
-    "stunBodyDamage": "stunbody"
+    "stunBodyDamage": "Stun and Body"
     }
 }
 

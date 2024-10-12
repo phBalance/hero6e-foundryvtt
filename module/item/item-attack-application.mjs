@@ -175,9 +175,8 @@ export class ItemAttackFormApplication extends FormApplication {
             }
 
             // Boostable Charges
-            // if (item.system.charges?.value > 1) {
-            //     data.boostableCharges = item.system.charges.value - 1;
-            // }
+            data.boostableChargesAvailable = item.system.charges?.value > 1 ? item.system.charges.value - 1 : 0;
+            data.boostableChargesToUse ??= 0;
 
             // MINDSCAN
             if (item.system.XMLID === "MINDSCAN") {
@@ -255,14 +254,14 @@ export class ItemAttackFormApplication extends FormApplication {
             // and doesn't change afterwards even if we come through here again
             // todo: figure out how to adjust the title when we want it to
             if (data.action.maneuver.isMultipleAttack) {
-                this.options.title = `${this.data?.item?.actor?.name} multiple attack.`;
+                this.options.title = `${this.data?.item?.actor?.name} multiple attack`;
             } else if (data.action.maneuver.isHaymakerAttack) {
-                this.options.title = `${this.data?.item?.actor?.name} haymaker attack.`;
+                this.options.title = `${this.data?.item?.actor?.name} haymaker attack`;
             } else {
                 this.options.title = `${this.data?.item?.actor?.name} select attack options and roll to hit`;
             }
-        } catch (ex) {
-            console.error(ex);
+        } catch (error) {
+            console.error(error);
         }
         return data;
     }
@@ -323,11 +322,12 @@ export class ItemAttackFormApplication extends FormApplication {
 
             return processAttackOptions(this.data.item, formData);
         }
+
         this.data.formData ??= {};
+
         if (event.submitter?.name === "continueMultiattack") {
             this.data.formData.continueMultiattack = true;
-        }
-        if (event.submitter?.name === "executeMultiattack") {
+        } else if (event.submitter?.name === "executeMultiattack") {
             // todo: cancel a missed and continue anyway
 
             const begin = this.data.action.current.execute === undefined;
@@ -364,6 +364,7 @@ export class ItemAttackFormApplication extends FormApplication {
         } else if (event.submitter?.name === "aoe") {
             return this._spawnAreaOfEffect(this.data);
         }
+
         // collect the changed data; all of these changes can go into get data
         this.data.formData = { ...this.data.formData, ...formData };
 
