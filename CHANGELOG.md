@@ -1,6 +1,7 @@
 # Releases
 
 ## Version 4.0.2 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Encumbrance related improvements.
 
 
 ## Version 4.0.1
