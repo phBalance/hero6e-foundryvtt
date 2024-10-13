@@ -906,12 +906,14 @@ export class HeroSystemActorSheet extends ActorSheet {
 
     async _onCharacteristicDC(event, dc, flavor) {
         const diceParts = convertToDiceParts(dc);
-        const characteristicRoller = new HeroRoller().makeNormalRoll().addDice(diceParts.dice);
-        if (diceParts.halfDice) {
-            characteristicRoller.addHalfDice(1);
-        } else if (diceParts.plus1) {
-            characteristicRoller.addNumber(1);
-        }
+        const characteristicRoller = new HeroRoller()
+            .makeNormalRoll()
+            .addDice(diceParts.dice)
+            .addHalfDice(diceParts.halfDice ? 1 : 0)
+            .addNumber(diceParts.plus1 ? 1 : 0);
+
+        await characteristicRoller.roll();
+        const damageRenderedResult = await characteristicRoller.render();
 
         //STR should have an item for potential damage, just like a strike
         let item;
@@ -920,9 +922,6 @@ export class HeroSystemActorSheet extends ActorSheet {
         if (dataset.label === "str") {
             item = this.actor.items.find((o) => o.system.XMLID === "STRIKE");
         }
-
-        await characteristicRoller.roll();
-        const damageRenderedResult = await characteristicRoller.render();
 
         // NOTE: This is not the full information required to do damage to an actor. Call it a kludge
         //       as strength is not an item which we require.
