@@ -1561,7 +1561,7 @@ export class HeroSystem6eItem extends Item {
             this.baseInfo?.type.includes("defense") ||
             this.baseInfo?.behaviors?.includes("defense") ||
             this.baseInfo?.type?.includes("characteristic") ||
-            (["power", "equipment"].includes(this.type) && ["sense"].includes(this.baseInfo?.type))
+            (["power", "equipment"].includes(this.type) && this.baseInfo?.type?.includes("sense"))
         ) {
             const newDefenseValue = "defense";
 
