@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.0 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.1 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Added Penalty Skill Level support for encumbrance. Also fixed some LBS/KG issues. [#1308](https://github.com/dmdorman/hero6e-foundryvtt/issues/1308)
+- Equipment now uploads with proper carried state.
+
+## Version 4.0.0
 - Dropped support for FoundryV11. You must use FoundryVTT v12 to use this version of Hero System 6e (Unofficial) v2. 
 - Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1288)
 - Entangles can now be attacked.

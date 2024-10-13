@@ -1549,13 +1549,19 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // DEFENSES
+        // Carried Equipment
+        if (this.system.CARRIED && this.system.active === undefined) {
+            this.system.active = true;
+            changed = true;
+        }
+
+        // ShowToggles & Activatable & default active
         // TODO: NOTE: This shouldn't just be for defense type. Should probably get rid of the subType approach.
         if (
             this.baseInfo?.type.includes("defense") ||
             this.baseInfo?.behaviors?.includes("defense") ||
             this.baseInfo?.type?.includes("characteristic") ||
-            (["power", "equipment"].includes(this.type) && this.baseInfo?.type?.includes("sense"))
+            (["power", "equipment"].includes(this.type) && ["sense"].includes(this.baseInfo?.type))
         ) {
             const newDefenseValue = "defense";
 

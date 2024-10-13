@@ -710,16 +710,7 @@ export class HeroSystem6eActor extends Actor {
         // Encumbrance (requires permissions to mess with ActiveEffects)
         if (game.user.isGM) {
             const { strLiftKg } = this.strDetails();
-            let encumbrance = 0;
-            const itemsWithWeight = this.items.filter((o) => o.system.WEIGHT && o.system.active);
-            for (const item of itemsWithWeight) {
-                encumbrance += parseFloat(item.system.WEIGHT);
-            }
-
-            // encumbrancePercentage
-            const equipmentWeightPercentage =
-                parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
-            encumbrance *= equipmentWeightPercentage;
+            let encumbrance = this.encumbrance;
 
             // Is actor encumbered?
             let dcvDex = 0;
@@ -729,19 +720,49 @@ export class HeroSystem6eActor extends Actor {
             }
             if (encumbrance / strLiftKg >= 0.25) {
                 dcvDex = -2;
-                move = -2;
+                //move = -2;
             }
             if (encumbrance / strLiftKg >= 0.5) {
                 dcvDex = -3;
-                move = -4;
+                //move = -4;
             }
             if (encumbrance / strLiftKg >= 0.75) {
                 dcvDex = -4;
-                move = -8;
+                //move = -8;
             }
             if (encumbrance / strLiftKg >= 0.9) {
                 dcvDex = -5;
-                move = -16;
+                //move = -16;
+            }
+
+            // Penalty Skill Levels for encumbrance
+            for (const pslEncumbrance of this.items.filter(
+                (o) =>
+                    o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
+                    o.system.OPTIONID.includes("DCV") &&
+                    o.system.OPTION_ALIAS.match(/encumbrance/i) &&
+                    (o.type === "skill" || o.system.active),
+            )) {
+                dcvDex = Math.min(0, dcvDex + parseInt(pslEncumbrance.system.LEVELS));
+            }
+
+            // Movement
+            switch (dcvDex) {
+                case -1:
+                    move = 0;
+                    break;
+                case -2:
+                    move = -2;
+                    break;
+                case -3:
+                    move = -4;
+                    break;
+                case -4:
+                    move = -8;
+                    break;
+                case -5:
+                    move = -16;
+                    break;
             }
 
             const name = `Encumbered ${Math.floor((encumbrance / strLiftKg) * 100)}%`;
@@ -799,9 +820,9 @@ export class HeroSystem6eActor extends Actor {
                         },
                     ],
                     origin: this.uuid,
-                    duration: {
-                        seconds: 3.154e7 * 100, // 100 years should be close to infinity
-                    },
+                    // duration: {
+                    //     seconds: 3.154e7 * 100, // 100 years should be close to infinity
+                    // },
                     flags: {
                         dcvDex: dcvDex,
                         // temporary: true,
@@ -2118,5 +2139,24 @@ export class HeroSystem6eActor extends Actor {
 
     get is5e() {
         return this?.system.is5e;
+    }
+
+    get encumbrance() {
+        // encumbrancePercentage
+        const equipmentWeightPercentage =
+            parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
+
+        // Hero Designer appears to store WEIGHT as LBS instead of KG.
+        const equipment = this.items.filter((o) => o.type === "equipment" && o.system.active);
+        const weightLbs = equipment.reduce((a, b) => a + parseFloat(b.system.WEIGHT), 0);
+        const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
+
+        return Math.ceil(weightKg);
+    }
+
+    get netWorth() {
+        const equipment = this.items.filter((o) => o.type === "equipment" && o.system.active);
+        const price = equipment.reduce((a, b) => a + parseFloat(b.system.PRICE), 0);
+        return price.toFixed(2);
     }
 }

@@ -53,8 +53,8 @@ export class HeroSystemActorSheet extends ActorSheet {
             // Items returned by the super have been neutered, we want the full class so we can use parentItem and childItem getters.
             data.items = Array.from(data.actor.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
-            const equipmentWeightPercentage =
-                parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
+            // const equipmentWeightPercentage =
+            //     parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
 
             // Alpha Testing (use to show/hide effects)
             data.alphaTesting = game.settings.get(game.system.id, "alphaTesting");
@@ -114,31 +114,33 @@ export class HeroSystemActorSheet extends ActorSheet {
                 if (item.type == "equipment") {
                     data.hasEquipment = true;
 
-                    item.system.weight = (parseFloat(item.system.WEIGHT || 0) * equipmentWeightPercentage).toFixed(1);
+                    // item.system.weight = (parseFloat(item.system.WEIGHT || 0) * equipmentWeightPercentage).toFixed(1);
 
-                    if (item.system.active) {
-                        weightTotal += parseFloat(item.system.weight || 0);
-                    }
-                    if (parseFloat(item.system.weight || 0) > 0) {
-                        item.system.WEIGHTtext = parseFloat(item.system.weight) + "kg";
-                    } else {
-                        item.system.WEIGHTtext = "";
-                    }
+                    // if (item.system.active) {
+                    //     weightTotal += parseFloat(item.system.weight || 0);
+                    // }
+                    // if (parseFloat(item.system.weight || 0) > 0) {
+                    //     item.system.WEIGHTtext = parseFloat(item.system.weight) + "kg";
+                    // } else {
+                    //     item.system.WEIGHTtext = "";
+                    // }
 
-                    priceTotal += parseFloat(item.system.PRICE || 0);
-                    if (parseFloat(item.system.PRICE || 0) > 0) {
-                        item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE));
-                    } else {
-                        item.system.PRICEtext = "";
-                    }
+                    // priceTotal += parseFloat(item.system.PRICE || 0);
+                    // if (parseFloat(item.system.PRICE || 0) > 0) {
+                    //     item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE));
+                    // } else {
+                    //     item.system.PRICEtext = "";
+                    // }
                 }
             }
 
             if (data.hasEquipment) {
-                if (parseFloat(weightTotal).toFixed(1) > 0 || parseFloat(priceTotal).toFixed(2) > 0) {
-                    data.weightTotal = parseFloat(weightTotal).toFixed(1) + "kg";
-                    data.priceTotal = "$" + parseFloat(priceTotal).toFixed(2);
-                }
+                data.weightTotal = `${this.actor.encumbrance} kg`;
+                data.priceTotal = `$${this.actor.netWorth}`;
+                // if (parseFloat(weightTotal).toFixed(1) > 0 || parseFloat(priceTotal).toFixed(2) > 0) {
+                //     data.weightTotal = parseFloat(weightTotal).toFixed(1) + "kg";
+                //     data.priceTotal = "$" + parseFloat(priceTotal).toFixed(2);
+                // }
             }
 
             // Characteristics
