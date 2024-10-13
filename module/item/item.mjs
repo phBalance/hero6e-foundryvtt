@@ -4585,16 +4585,20 @@ export class HeroSystem6eItem extends Item {
                 });
             }
 
-            // for (const enhancedPerception of this.actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION")) {
-            //     if (enhancedPerception.system.checked && enhancedPerception.system.active) {
-            //         const levels = parseInt(enhancedPerception.system.LEVELS);
-            //         tags.push({
-            //             value: levels,
-            //             name: enhancedPerception.name,
-            //         });
-            //         rollVal += levels;
-            //     }
-            // }
+            for (const enhancedPerception of this.actor.items.filter(
+                (o) => o.system.XMLID === "ENHANCEDPERCEPTION" && o.system.OPTIONID === "ALL",
+            )) {
+                enhancedPerception.system.checked = true;
+                if (enhancedPerception.system.active) {
+                    const levels = parseInt(enhancedPerception.system.LEVELS);
+                    tags.push({
+                        value: levels,
+                        name: enhancedPerception.name,
+                        itemId: enhancedPerception.id,
+                    });
+                    rollVal += levels;
+                }
+            }
 
             roll = rollVal.toString() + "-";
         } else {

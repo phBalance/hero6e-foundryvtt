@@ -42,7 +42,7 @@
                 <tr>
                     <td style="width:1%">
                         <input class="item-toggle" id="{{this.id}}" type="checkbox" {{checked
-                        this.system.checked}} data-dtype="Boolean"/>
+                        this.system.checked}} data-dtype="Boolean" {{#if (eq this.system.OPTIONID "ALL")}}disabled{{/if}}/>
                     </td>
                     <td style="text-align:left">
                         {{this.system.description}}

@@ -151,7 +151,7 @@ async function skillRoll(item, actor, html) {
     for (const skillLevelInput of skillLevelInputs) {
         const skillLevel = actor.items.get(skillLevelInput.id);
         const level = parseInt(skillLevel.system.LEVELS || 0);
-        if (level > 0) {
+        if (level > 0 && !tags.find((o) => o.itemId === skillLevel.id)) {
             tags.push({
                 value: level,
                 name: skillLevel.name,
