@@ -173,7 +173,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.actor && this.type === "equipment") {
-            this.actor.applyEncumbrancePenalty();
+            await this.actor.applyEncumbrancePenalty();
+        }
+
+        if (this.actor && this.system.XMLID === "PENALTY_SKILL_LEVELS") {
+            await this.actor.applyEncumbrancePenalty();
         }
     }
 
@@ -1859,6 +1863,8 @@ export class HeroSystem6eItem extends Item {
                     this.system.penalty ??= "range";
                 } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
                     this.system.penalty ??= "hitLocation";
+                } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+                    this.system.penalty ??= "encumbrance";
                 }
             }
         }

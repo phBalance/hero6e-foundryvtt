@@ -2648,6 +2648,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     hitLocation: "Hit Location",
                     other: "Other",
                     range: "Range",
+                    encumbrance: "Encumbrance",
                 },
             },
             costPerLevel: function (item) {

@@ -1,6 +1,9 @@
 # Releases
 
-## Version 4.0.1 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.2 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+
+## Version 4.0.1
 - Added Penalty Skill Level support for encumbrance. Also fixed some LBS/KG issues. [#1308](https://github.com/dmdorman/hero6e-foundryvtt/issues/1308)
 - Equipment now uploads with proper carried state.
 

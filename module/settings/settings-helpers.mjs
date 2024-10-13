@@ -111,14 +111,14 @@ export default class SettingsHelpers {
                 step: 10,
             },
             default: 100,
-            onChange: () => {
+            onChange: async () => {
                 for (let actor of game.actors.contents) {
-                    actor.applyEncumbrancePenalty();
+                    await actor.applyEncumbrancePenalty();
                 }
                 for (const scene of game.scenes.contents) {
                     for (const token of scene.tokens) {
                         if (!token.actorLink && token.actor) {
-                            token.actor.applyEncumbrancePenalty();
+                            await token.actor.applyEncumbrancePenalty();
                         }
                     }
                 }
