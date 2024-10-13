@@ -82,9 +82,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 );
             }
 
-            let weightTotal = 0;
-            let priceTotal = 0;
-
             data.pointsTitle = "";
             data.activePointsTitle = "";
             if (data.actor.system.pointsDetail) {
