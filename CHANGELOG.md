@@ -9,6 +9,7 @@
 - Improvements for boostable Charges. [#1292](https://github.com/dmdorman/hero6e-foundryvtt/issues/1292)
 - Added missing roll icons on Martial Arts tab. [#1277](https://github.com/dmdorman/hero6e-foundryvtt/issues/1277)
 - Initial support for continuing charges.
+- Fixes for combat tracker and SPD changes.
 
 ## Version 3.0.101
 - We no longer test/verify with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.
