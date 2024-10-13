@@ -746,8 +746,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             // There is an opportunity to improve/refactor this.
             for (const aeWithCharges of actor.temporaryEffects.filter((o) => o.parent?.system.active)) {
                 console.log(aeWithCharges);
-                if (aeWithCharges.duration._worldTime <= game.time.worldTime + aeWithCharges.duration.seconds) {
-                    aeWithCharges.parent.toggle();
+                if (game.time.worldTime >= aeWithCharges.flags.startTime + aeWithCharges.duration.seconds) {
+                    await aeWithCharges.parent.toggle();
+                } else {
+                    if (game.ready) game[HEROSYS.module].effectPanel.refresh();
                 }
             }
         } catch (e) {

@@ -8,7 +8,7 @@
         </header>
     </div>
 
-    {{#if skillLevels}}
+    {{!-- {{#if skillLevels}}
     <div class="form-fields  csl-attack-list">
         <div class="hero chat-card item-card">
             <h3>Verify the following Skill Levels apply to this skill.</h3>
@@ -26,7 +26,7 @@
             {{/each}}
         </table>
     </div>
-    {{/if}}
+    {{/if}} --}}
 
     <div class="form-group">
         <label>Roll Modifier</label>
@@ -41,7 +41,7 @@
                 {{#if this.system.active}}
                 <tr>
                     <td style="width:1%">
-                        <input class="item-toggle" id="{{this.id}}" type="checkbox" name="{{this.id}}.system.checked" {{checked
+                        <input class="item-toggle" id="{{this.id}}" type="checkbox" {{checked
                         this.system.checked}} data-dtype="Boolean"/>
                     </td>
                     <td style="text-align:left">

@@ -509,6 +509,7 @@ export class HeroSystem6eItem extends Item {
                     let seconds = 1;
                     const continuing = this.findModsByXmlid("CONTINUING");
                     if (continuing) {
+                        // TODO: Extract (look in adjustment)
                         switch (continuing.OPTIONID) {
                             case "EXTRAPHASE":
                                 seconds = 2;
@@ -559,7 +560,7 @@ export class HeroSystem6eItem extends Item {
                     }
 
                     console.log(
-                        await ae.update({ "duration.seconds": seconds, "flags.starttime": game.time.worldTime }),
+                        await ae.update({ "duration.seconds": seconds, "flags.startTime": game.time.worldTime }),
                     );
                 } else {
                     console.log("No associated Active Effect", this);
@@ -4584,16 +4585,16 @@ export class HeroSystem6eItem extends Item {
                 });
             }
 
-            for (const enhancedPerception of this.actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION")) {
-                if (enhancedPerception.system.checked && enhancedPerception.system.active) {
-                    const levels = parseInt(enhancedPerception.system.LEVELS);
-                    tags.push({
-                        value: levels,
-                        name: enhancedPerception.name,
-                    });
-                    rollVal += levels;
-                }
-            }
+            // for (const enhancedPerception of this.actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION")) {
+            //     if (enhancedPerception.system.checked && enhancedPerception.system.active) {
+            //         const levels = parseInt(enhancedPerception.system.LEVELS);
+            //         tags.push({
+            //             value: levels,
+            //             name: enhancedPerception.name,
+            //         });
+            //         rollVal += levels;
+            //     }
+            // }
 
             roll = rollVal.toString() + "-";
         } else {
