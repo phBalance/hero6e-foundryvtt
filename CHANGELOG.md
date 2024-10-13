@@ -3,6 +3,7 @@
 ## Version 4.0.2 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 - Encumbrance related improvements.
 - Fix for 5e DAMAGE RESISTANCE and PD/ED purchased as a power, where the PD/ED was counted twice. [#1297](https://github.com/dmdorman/hero6e-foundryvtt/issues/1297)
+- Improved KNOWLEDGE_SKILL descriptions. [#1278](https://github.com/dmdorman/hero6e-foundryvtt/issues/1278)
 
 
 ## Version 4.0.1

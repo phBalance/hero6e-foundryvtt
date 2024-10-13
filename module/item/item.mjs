@@ -3010,8 +3010,10 @@ export class HeroSystem6eItem extends Item {
                 {
                     // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
                     const { roll } = this._getSkillRollComponents(system);
-                    system.description = `${system.ALIAS ? system.ALIAS + ": " : ""}${system.INPUT} ${roll}`;
-                    this.name = system.NAME || `${this.system.ALIAS}: ${this.system.INPUT?.trim()}`;
+                    system.description = `${system.ALIAS ? system.ALIAS + ": " : ""}${
+                        system.INPUT || system.TYPE
+                    } ${roll}`;
+                    this.name = system.NAME || `${this.system.ALIAS}: ${(this.system.INPUT || system.TYPE)?.trim()}`;
                 }
                 break;
 
