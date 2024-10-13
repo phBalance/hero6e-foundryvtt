@@ -35,7 +35,7 @@
     <td>{{this.system.PRICEtext}}</td>
     <td>{{this.system.WEIGHTtext}}</td>
     <td>
-        <input class="item-toggle" type="checkbox"  title="CTRL to force toggle" name="this.system.active"  {{checked
+        <input class="item-toggle" type="checkbox"  name="this.system.active"  {{checked
             this.system.active}} data-dtype="Boolean" />
     </td>
     {{/if}}
@@ -44,13 +44,13 @@
                 <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
         {{/if}}
         {{#if this.system.showToggle}}
-            <input class="item-toggle" type="checkbox" title="CTRL to force toggle"
+            <input class="item-toggle" type="checkbox" 
                 Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
                 data-action="toggle" />
         {{/if}}
         {{!-- {{#if (ne this.system.subType "attack")}}
             {{#if this.system.showToggle}}
-                <input class="item-toggle" type="checkbox" title="CTRL to force toggle"
+                <input class="item-toggle" type="checkbox" 
                     Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
                     data-action="toggle" />
             {{/if}}

@@ -740,6 +740,18 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                     }
                 }
             }
+
+            // Power Toggles with charges
+            // Aaron was unable to make the AE transfer from item to actor and also expire, so we handle them here.
+            // There is an opportunity to improve/refactor this.
+            for (const aeWithCharges of actor.temporaryEffects.filter((o) => o.parent?.system.active)) {
+                console.log(aeWithCharges);
+                if (game.time.worldTime >= aeWithCharges.flags.startTime + aeWithCharges.duration.seconds) {
+                    await aeWithCharges.parent.toggle();
+                } else {
+                    if (game.ready) game[HEROSYS.module].effectPanel.refresh();
+                }
+            }
         } catch (e) {
             console.error(e, actor, actor?.temporaryEffects[0]);
         }

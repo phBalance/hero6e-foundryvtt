@@ -8,6 +8,7 @@ async function _renderSkillForm(item, actor, stateData) {
     let skillLevels = Array.from(actor.items.filter((o) => o.system.XMLID === "SKILL_LEVELS"));
     for (let s of skillLevels) {
         s.system.checked = false;
+        s.system.active = true;
 
         // OPTION_ALIAS has name of skill
         if (s.system.OPTION_ALIAS.toUpperCase().indexOf(item.name.toUpperCase()) > -1) {
@@ -30,9 +31,13 @@ async function _renderSkillForm(item, actor, stateData) {
         }
     }
 
-    // Enhanced Perception
-    const skillMods =
-        item.system.XMLID === "PERCEPTION" ? actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION") : ""; //o.baseInfo?.skillMod === item.system.XMLID);
+    // Enhanced Perception + Skill Levels
+    const skillMods = [
+        ...skillLevels,
+        ...(item.system.XMLID === "PERCEPTION"
+            ? actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION")
+            : []),
+    ];
 
     const templateData = {
         actor: actor.system,
@@ -120,14 +125,6 @@ async function skillRoll(item, actor, html) {
     const formData = new FormDataExtended(formElement)?.object;
     const skillRoller = new HeroRoller().addDice(3);
 
-    const tags = foundry.utils.deepClone(item.system.tags);
-
-    // Build success requirement from the base tags
-    let successValue = 0;
-    for (const tag of tags) {
-        successValue = successValue + tag.value;
-    }
-
     // SkillMods
     for (const [modKey, modValue] of Object.entries(formData)) {
         const modShortKey = modKey.split(".")[0];
@@ -139,12 +136,22 @@ async function skillRoll(item, actor, html) {
         }
     }
 
+    item.updateRoll();
+
+    const tags = foundry.utils.deepClone(item.system.tags);
+
+    // Build success requirement from the base tags
+    let successValue = 0;
+    for (const tag of tags) {
+        successValue = successValue + tag.value;
+    }
+
     // Skill Levels
     const skillLevelInputs = formElement.querySelectorAll("INPUT:checked");
     for (const skillLevelInput of skillLevelInputs) {
         const skillLevel = actor.items.get(skillLevelInput.id);
         const level = parseInt(skillLevel.system.LEVELS || 0);
-        if (level > 0) {
+        if (level > 0 && !tags.find((o) => o.itemId === skillLevel.id)) {
             tags.push({
                 value: level,
                 name: skillLevel.name,

@@ -221,7 +221,8 @@ export class HeroSystem6eCombat extends Combat {
                 }
                 if (
                     update.initiative != _combatant.initiative ||
-                    update.flags?.lightningReflexes?.name != _combatant.flags?.lightningReflexes?.name
+                    update["flags.lightningReflexes.name"] != _combatant.flags?.lightningReflexes?.name ||
+                    update["flags.segment"] != _combatant.flags?.segment
                 ) {
                     updates.push(update);
                 }

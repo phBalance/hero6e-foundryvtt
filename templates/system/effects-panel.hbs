@@ -22,10 +22,12 @@
                 {{/if}}
             </div>
             
-            {{#if this.duration.label}}
-            <div class="duration">
-                Duration: {{this.duration.label}}
-            </div>
+            {{#if this.flags.label}}
+                {{#if (ne this.flags.label "None")}}
+                <div class="duration">
+                    Duration: {{this.flags.label}}
+                </div>
+                {{/if}}
             {{/if}}
 
             {{!-- {{#if this.flags.affectedPoints}}

@@ -1,13 +1,16 @@
 # Releases
 
-## Version 3.1.0 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Dropped support for FoundryV11.
-- Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
+## Version 4.0.0 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+- Dropped support for FoundryV11. You must use FoundryVTT v12 to use this version of Hero System 6e (Unofficial) v2. 
+- Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1288)
 - Entangles can now be attacked.
 - Fixed issue where world time was not advancing during combat.  
 - Improved FLASH and FLASHDEFENSE. [#794](https://github.com/dmdorman/hero6e-foundryvtt/issues/794) [#438](https://github.com/dmdorman/hero6e-foundryvtt/issues/438) [#303](https://github.com/dmdorman/hero6e-foundryvtt/issues/303) [#458](https://github.com/dmdorman/hero6e-foundryvtt/issues/458) [#670](https://github.com/dmdorman/hero6e-foundryvtt/issues/670)
 - Improvements for boostable Charges. [#1292](https://github.com/dmdorman/hero6e-foundryvtt/issues/1292)
 - Added missing roll icons on Martial Arts tab. [#1277](https://github.com/dmdorman/hero6e-foundryvtt/issues/1277)
+- Initial support for continuing charges.
+- Fixes for combat tracker and SPD changes.
+- Fix broken stun body damage tags. [#1296](https://github.com/dmdorman/hero6e-foundryvtt/issues/1296)
 
 ## Version 3.0.101
 - We no longer test/verify with FoundryVTT V11. We encourage you upgrade to FoundryVTT v12.

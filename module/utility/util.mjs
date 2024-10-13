@@ -174,7 +174,7 @@ export async function expireEffects(actor) {
     for (const ae of temporaryEffects) {
         // Determine XMLID, ITEM, ACTOR
         let origin = await fromUuid(ae.origin);
-        let item = origin instanceof HeroSystem6eItem ? origin : null;
+        let item = origin instanceof HeroSystem6eItem ? origin : ae.parent || null;
         let aeActor = origin instanceof HeroSystem6eActor ? origin : item?.actor || actor;
         let XMLID = ae.flags.XMLID || item?.system?.XMLID;
 
