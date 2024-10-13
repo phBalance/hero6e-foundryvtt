@@ -4317,7 +4317,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["defense"],
             behaviors: ["activatable"],
             //perceivability: "obvious",
-            duration: "instant",
+            duration: "persistent",
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
