@@ -1,7 +1,7 @@
 # Releases
 
 ## Version 4.0.0 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
-- Dropped support for FoundryV11.
+- Dropped support for FoundryV11. You must use FoundryVTT v12 to use this version of Hero System 6e (Unofficial) v2. 
 - Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1288)
 - Entangles can now be attacked.
 - Fixed issue where world time was not advancing during combat.  
