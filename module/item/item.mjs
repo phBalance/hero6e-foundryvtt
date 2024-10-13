@@ -444,7 +444,7 @@ export class HeroSystem6eItem extends Item {
         let item = this;
 
         if (!item.system.active) {
-            if (!this.actor.canAct(true)) {
+            if (!this.actor.canAct(true, event)) {
                 return;
             }
 
@@ -504,8 +504,66 @@ export class HeroSystem6eItem extends Item {
                 this.update({ "system.charges": this.system.charges });
 
                 // Charges expire, find the Active Effect
-                // const ae = this.effects.contents?.[0];
-                // ae.update({ "duration.seconds": 1 });
+                const ae = this.effects.contents?.[0];
+                if (ae) {
+                    let seconds = 1;
+                    const continuing = this.findModsByXmlid("CONTINUING");
+                    if (continuing) {
+                        switch (continuing.OPTIONID) {
+                            case "EXTRAPHASE":
+                                seconds = 2;
+                                break;
+                            case "TURN":
+                                seconds = 12;
+                                break;
+                            case "MINUTE":
+                                seconds = 60;
+                                break;
+                            case "FIVEMINUTES":
+                                seconds = 60 * 5;
+                                break;
+                            case "TWENTYMINUTES":
+                                seconds = 60 * 20;
+                                break;
+                            case "HOUR":
+                                seconds = 60 * 60;
+                                break;
+                            case "SIXHOURS":
+                                seconds = 60 * 60 * 6;
+                                break;
+                            case "ONEDAY":
+                                seconds = 60 * 60 * 24;
+                                break;
+                            case "ONEWEEK":
+                                seconds = 60 * 60 * 24 * 7;
+                                break;
+                            case "ONEMONTH":
+                                seconds = 60 * 60 * 24 * 30;
+                                break;
+                            case "ONESEASON":
+                                seconds = 60 * 60 * 24 * 90;
+                                break;
+                            case "ONEYEAR":
+                                seconds = 60 * 60 * 24 * 365;
+                                break;
+                            case "FIVEYEARS":
+                                seconds = 60 * 60 * 24 * 365 * 5;
+                                break;
+                            case "TWENTYFIVEYEARS":
+                                seconds = 60 * 60 * 24 * 365 * 25;
+                                break;
+                            case "ONECENTURY":
+                                seconds = 60 * 60 * 24 * 365 * 100;
+                                break;
+                        }
+                    }
+
+                    console.log(
+                        await ae.update({ "duration.seconds": seconds, "flags.starttime": game.time.worldTime }),
+                    );
+                } else {
+                    console.log("No associated Active Effect", this);
+                }
             }
 
             // Only spend the END if we are in combat.

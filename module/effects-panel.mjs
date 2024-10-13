@@ -28,6 +28,14 @@ export class EffectsPanel extends Application {
     async getData(options) {
         const context = await super.getData(options);
         context.effects = this.actor?.appliedEffects; //effects;
+
+        if (context.effects) {
+            for (const ae of context.effects) {
+                const d = ae._prepareDuration();
+                ae.flags.label = d.label;
+            }
+        }
+
         return context;
     }
 }
