@@ -15,7 +15,6 @@
         {{#if flavor}}
             {{flavor}}
         {{/if}}
-
     </div>
 
     <div class="tags">
@@ -31,6 +30,12 @@
     </div>
 
     <div class="hit-roll">
+        {{!-- TODO: This should probably be only in the to hit card --}}
+        {{#if resourcesUsedDescription}}
+            <div class="card-section">
+                <div class="description-tiny">{{{ resourcesUsedDescription }}}</div>
+            </div>
+        {{/if}}
 
         <div class="card-section">
             {{#if useHitLoc}}

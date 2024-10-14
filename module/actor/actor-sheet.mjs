@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "./actor.mjs";
 
 import { HeroSystem6eItem } from "../item/item.mjs";
+import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
 
 import { determineDefense } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
@@ -10,6 +11,7 @@ import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsFor
 import { CombatSkillLevelsForAttack, convertToDcFromItem, convertToDiceParts } from "../utility/damage.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
+import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
@@ -772,13 +774,13 @@ export class HeroSystemActorSheet extends ActorSheet {
         html.find(".item-rollable").click(this._onItemRoll.bind(this));
 
         // Rollable characteristic
-        html.find(".characteristic-roll").click(this._onCharacteristicRoll.bind(this));
+        html.find(".characteristic-roll").click(this._onCharacteristicSuccessRoll.bind(this));
 
         // Full characteristic
-        html.find(".characteristic-full").click(this._onCharacteristicFull.bind(this));
+        html.find(".characteristic-full").click(this._onPrimaryCharacteristicFullRoll.bind(this));
 
         // Casual characteristic
-        html.find(".characteristic-casual").click(this._onCharacteristicCasual.bind(this));
+        html.find(".characteristic-casual").click(this._onPrimaryCharacteristicCasualRoll.bind(this));
 
         // Toggle items
         html.find(".item-toggle").click(this._onItemToggle.bind(this));
@@ -868,7 +870,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         item.chat();
     }
 
-    async _onCharacteristicRoll(event) {
+    async _onCharacteristicSuccessRoll(event) {
         event.preventDefault();
         const element = event.currentTarget.closest("button");
         const dataset = element.dataset;
@@ -882,9 +884,9 @@ export class HeroSystemActorSheet extends ActorSheet {
         const useAutoSuccess = autoSuccess !== undefined;
         const success = useAutoSuccess ? autoSuccess : margin >= 0;
 
-        const flavor = `${dataset.label.toUpperCase()} (${charRoll}-) roll ${success ? "succeeded" : "failed"} ${
-            useAutoSuccess ? `due to automatic ${autoSuccess ? "success" : "failure"}` : `by ${Math.abs(margin)}`
-        }`;
+        const flavor = `${dataset.label.toUpperCase()} (${charRoll}-) characteristic roll ${
+            success ? "succeeded" : "failed"
+        } ${useAutoSuccess ? `due to automatic ${autoSuccess ? "success" : "failure"}` : `by ${Math.abs(margin)}`}`;
 
         const cardHtml = await heroRoller.render(flavor);
 
@@ -904,31 +906,91 @@ export class HeroSystemActorSheet extends ActorSheet {
         return ChatMessage.create(chatData);
     }
 
-    async _onCharacteristicDC(event, dc, flavor) {
-        const diceParts = convertToDiceParts(dc);
+    // TODO: static? and/or make these not methods?
+    async _onPrimaryCharacteristicRoll(event, characteristicValue, flavor) {
+        const element = event.currentTarget.closest("button");
+        const dataset = element.dataset;
+        const isStrengthRoll = dataset.label === "str";
+
+        // Strength use consumes resources. No other characteristic roll does.
+        if (isStrengthRoll) {
+            await this._onStrengthCharacteristicRoll(characteristicValue, flavor);
+        } else {
+            await this._onPrimaryNonStrengthCharacteristicRoll(characteristicValue, flavor);
+        }
+    }
+
+    // TODO: static?
+    async _onPrimaryNonStrengthCharacteristicRoll(characteristicValue, flavor) {
+        // NOTE: Characteristics can't have +1 to their roll.
+        const diceParts = convertToDiceParts(characteristicValue);
+        const characteristicRoller = new HeroRoller()
+            .makeBasicRoll()
+            .addDice(diceParts.dice)
+            .addHalfDice(diceParts.halfDice ? 1 : 0);
+
+        await characteristicRoller.roll();
+
+        const cardHtml = await characteristicRoller.render(flavor);
+
+        const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+        const chatData = {
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            rolls: characteristicRoller.rawRolls(),
+            user: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        return ChatMessage.create(chatData);
+    }
+
+    // TODO: static?
+    async _onStrengthCharacteristicRoll(characteristicValue, flavor) {
+        // STR should have an item for potential damage, just like a strike and should consume resources
+        let item;
+
+        // Strength use consumes resources. No other characteristic roll does.
+        // TODO: The item should be 0 base end but str based
+        item = this.actor.items.find((o) => o.system.XMLID === "STRIKE");
+
+        if (!item) {
+            return ui.notifications.error(`Unable to find STRIKE item for ${this.actor.name}. Cannot perform attack`);
+        }
+
+        const strengthUsed = { effectiveStr: characteristicValue };
+
+        // Consume resources
+        const {
+            error: resourceError,
+            warning: resourceWarning,
+            resourcesRequired,
+            resourcesUsedDescription,
+        } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, strengthUsed);
+        if (resourceError) {
+            return ui.notifications.error(resourceError);
+        } else if (resourceWarning) {
+            return ui.notifications.warn(resourceWarning);
+        }
+
+        // NOTE: Characteristics can't have +1 to their roll.
+        const diceParts = convertToDiceParts(characteristicValue);
         const characteristicRoller = new HeroRoller()
             .makeNormalRoll()
             .addDice(diceParts.dice)
-            .addHalfDice(diceParts.halfDice ? 1 : 0)
-            .addNumber(diceParts.plus1 ? 1 : 0);
+            .addHalfDice(diceParts.halfDice ? 1 : 0);
 
         await characteristicRoller.roll();
         const damageRenderedResult = await characteristicRoller.render();
 
-        //STR should have an item for potential damage, just like a strike
-        let item;
-        const element = event.currentTarget.closest("button");
-        const dataset = element.dataset;
-        if (dataset.label === "str") {
-            item = this.actor.items.find((o) => o.system.XMLID === "STRIKE");
-        }
-
         // NOTE: This is not the full information required to do damage to an actor. Call it a kludge
-        //       as strength is not an item which we require.
+        //       as raw strength is not an attack item.
         const cardData = {
             flavor,
             item,
             targetEntangle: "true",
+
+            resourcesUsedDescription,
 
             // dice rolls
             renderedDamageRoll: damageRenderedResult,
@@ -956,21 +1018,29 @@ export class HeroSystemActorSheet extends ActorSheet {
         return ChatMessage.create(chatData);
     }
 
-    async _onCharacteristicFull(event) {
+    async _onPrimaryCharacteristicFullRoll(event) {
         event.preventDefault();
         const element = event.currentTarget.closest("button");
         const dataset = element.dataset;
-        const dc = this.actor.system.characteristics[dataset.label].value;
-        await this._onCharacteristicDC(event, dc, `Full ${dataset.label.toUpperCase()} (DC ${dc})`);
+        const characteristicValue = this.actor.system.characteristics[dataset.label].value;
+        await this._onPrimaryCharacteristicRoll(
+            event,
+            characteristicValue,
+            `Full ${dataset.label.toUpperCase()} Roll (${characteristicValue} ${dataset.label.toUpperCase()})`,
+        );
     }
 
-    async _onCharacteristicCasual(event) {
+    async _onPrimaryCharacteristicCasualRoll(event) {
         event.preventDefault();
         const element = event.currentTarget.closest("button");
         const dataset = element.dataset;
-        const dc = this.actor.system.characteristics[dataset.label].value;
-        const halfDc = +(Math.round(dc / 2 + "e+2") + "e-2"); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
-        await this._onCharacteristicDC(event, halfDc, `Casual ${dataset.label.toUpperCase()} (DC ${halfDc})`);
+        const characteristicValue = this.actor.system.characteristics[dataset.label].value;
+        const halfCharacteristicValue = RoundFavorPlayerUp(+(Math.round(characteristicValue / 2 + "e+2") + "e-2")); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
+        await this._onPrimaryCharacteristicRoll(
+            event,
+            halfCharacteristicValue,
+            `Casual ${dataset.label.toUpperCase()} Roll (${halfCharacteristicValue} ${dataset.label.toUpperCase()})`,
+        );
     }
 
     async _onItemToggle(event) {
@@ -992,7 +1062,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         // Do not allow deleting of item with children
         if (item.childItems.length > 0) {
-            ui.notifications.error(`You cannot delete ${item.name} because there are child items.`);
+            await ui.notifications.error(`You cannot delete ${item.name} because there are child items.`);
             return;
         }
 

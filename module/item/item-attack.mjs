@@ -3052,7 +3052,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  *
  * @returns Object discriminated union based on error or warning being falsy/truthy
  */
-async function userInteractiveVerifyOptionallyPromptThenSpendResources(item, options) {
+export async function userInteractiveVerifyOptionallyPromptThenSpendResources(item, options) {
     // What resources are required to activate this power?
     const resourcesRequired = calculateRequiredResourcesToUse(item, options);
 
@@ -3208,6 +3208,7 @@ function calculateRequiredEnd(item, effectiveStr) {
             if (item.system.usesTk) {
                 endToUse = Math.ceil((endToUse * effectiveStr) / parseInt(item.system.LEVELS || 1));
             } else {
+                // TODO: Endurance use from STR can only happen once per phase
                 endToUse = endToUse + strEnd;
             }
         }
