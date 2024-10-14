@@ -611,6 +611,16 @@ export class HeroSystem6eItem extends Item {
                     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
                 }
             }
+
+            // Special Visions
+            if (this.#baseInfo?.sight) {
+                const token = this.actor.getActiveTokens()?.[0];
+                if (token) {
+                    await token.document.update({
+                        sight: this.#baseInfo?.sight,
+                    });
+                }
+            }
         } else {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -628,6 +638,16 @@ export class HeroSystem6eItem extends Item {
             if (this.system.XMLID === "INVISIBILITY") {
                 if (this.actor.statuses.has("invisible")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
+                }
+            }
+
+            // Remove Special Visions
+            if (this.#baseInfo?.sight) {
+                const token = this.actor.getActiveTokens()?.[0];
+                if (token) {
+                    await token.document.update({
+                        sight: { visionMode: "basic", range: 0, color: undefined },
+                    });
                 }
             }
         }
