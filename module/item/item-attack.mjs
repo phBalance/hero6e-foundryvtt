@@ -3251,7 +3251,7 @@ async function rollStunForEnd(stunDice) {
     const stunForEndHeroRoller = new HeroRoller()
         .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUN_FOR_END)
         .makeBasicRoll()
-        .addDice(stunDice);
+        .addDice(stunDice, "STUN for END");
 
     await stunForEndHeroRoller.roll();
 
@@ -3310,14 +3310,17 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
                 const endSpentAboveZero = Math.max(actorEndurance, 0);
                 actorNewEndurance = Math.min(actorEndurance, 0);
 
-                resourceUsageDescription =
-                    `Spent ${endSpentAboveZero} END and ${stunToSpendObj.damage} STUN <i class="fal fa-circle-info" data-tooltip="` +
-                    `<b>USING STUN FOR ENDURANCE</b><br>` +
-                    `A character at 0 END who still wishes to perform Actions
+                resourceUsageDescription = `
+                    <span>
+                        Spent ${endSpentAboveZero} END and ${stunToSpendObj.damage} STUN
+                        <i class="fal fa-circle-info" data-tooltip="<b>USING STUN FOR ENDURANCE</b><br>
+                        A character at 0 END who still wishes to perform Actions
                         may use STUN as END. The character takes 1d6 STUN Only
                         damage (with no defense) for every 2 END (or fraction thereof)
-                        expended. Yes, characters can Knock themselves out this way.` +
-                    `"></i>`;
+                        expended. Yes, characters can Knock themselves out this way.
+                        "></i>
+                    </span>
+                    `;
 
                 const stunRenderedResult = await stunToSpendObj.roller.render();
                 resourceUsageDescription += stunRenderedResult;
