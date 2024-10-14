@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo, getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
+import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { determineDefense } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
@@ -67,21 +67,6 @@ function isStunBasedEffectRoll(item) {
 export async function AttackOptions(item) {
     const actor = item.actor;
     const token = actor.getActiveTokens()[0];
-
-    // if (!actor.canAct(true, event)) {
-    //     return;
-    // }
-
-    // if (
-    //     item?.system?.XMLID === "MINDSCAN" &&
-    //     !game.user.isGM &&
-    //     game.settings.get(game.system.id, "SecretMindScan")
-    // ) {
-    //     return ui.notifications.error(
-    //         `${item.name} has several secret components that the GM does not wish to reveal.  The Game Master is required to roll this attack on your behalf.  This "Secret Mind Scan" can be disabled in the settings by the GM.`,
-    //     );
-    // }
-
     const data = {
         item: item,
         actor: actor,
@@ -533,7 +518,10 @@ export async function AttackToHit(item, options) {
         warning: resourceWarning,
         resourcesRequired,
         resourcesUsedDescription,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, options);
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
+        ...options,
+        ...{ noResourceUse: false },
+    });
     if (resourceError) {
         return ui.notifications.error(resourceError);
     } else if (resourceWarning) {
@@ -3063,6 +3051,8 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  * @returns Object discriminated union based on error or warning being falsy/truthy
  */
 export async function userInteractiveVerifyOptionallyPromptThenSpendResources(item, options) {
+    const useResources = !options.noResourceUse;
+
     // What resources are required to activate this power?
     const resourcesRequired = calculateRequiredResourcesToUse(item, options);
 
@@ -3072,47 +3062,56 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
     const actorEndurance = actor.system.characteristics.end.value;
 
-    // Does the actor have enough charges available?
-    if (resourcesRequired.charges > 0 && resourcesRequired.charges > startingCharges) {
-        return {
-            error: `${item.name} does not have ${resourcesRequired.charges} charge${
-                resourcesRequired.charges > 1 ? "s" : ""
-            } remaining.`,
-        };
-    }
-
     // Does the actor have enough endurance available?
-    let actualStunCostObj = null;
-    if (item.system.USE_END_RESERVE) {
-        if (enduranceReserve) {
-            if (resourcesRequired.end > reserveEnd) {
+    let actualStunDamage = 0;
+    let actualStunRoller = null;
+    if (resourcesRequired.end) {
+        if (item.system.USE_END_RESERVE) {
+            if (enduranceReserve) {
+                if (resourcesRequired.end > reserveEnd && useResources) {
+                    return {
+                        error: `${item.name} needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
+                    };
+                }
+            } else {
                 return {
-                    error: `${item.name} needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
+                    error: `${item.name} needs an endurance reserve to spend END but none found.`,
                 };
             }
         } else {
-            return {
-                error: `${item.name} needs an endurance reserve to spend END but none found.`,
-            };
-        }
-    } else {
-        if (resourcesRequired.end > actorEndurance) {
-            // Is the actor willing to use STUN to make up for the lack of END?
-            const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.end);
+            if (resourcesRequired.end > actorEndurance && useResources) {
+                // Is the actor willing to use STUN to make up for the lack of END?
+                const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.end);
 
-            const confirmed = await Dialog.confirm({
-                title: "USING STUN FOR ENDURANCE",
-                content: `<p><b>${item.name}</b> requires ${resourcesRequired.end} END. 
+                const confirmed = await Dialog.confirm({
+                    title: "USING STUN FOR ENDURANCE",
+                    content: `<p><b>${item.name}</b> requires ${resourcesRequired.end} END. 
                 <b>${actor.name}</b> has ${actorEndurance} END. 
                 Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
-            });
-            if (!confirmed) {
-                return {
-                    warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference.`,
-                };
-            }
+                });
+                if (!confirmed) {
+                    return {
+                        warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference.`,
+                    };
+                }
 
-            actualStunCostObj = await rollStunForEnd(potentialStunCost.stunDice);
+                ({ damage: actualStunDamage, roller: actualStunRoller } = await rollStunForEnd(
+                    potentialStunCost.stunDice,
+                ));
+
+                resourcesRequired.end = potentialStunCost.endSpentAboveZero;
+            }
+        }
+    }
+
+    // Does the actor have enough charges available?
+    if (resourcesRequired.charges > 0) {
+        if (resourcesRequired.charges > startingCharges && useResources) {
+            return {
+                error: `${item.name} does not have ${resourcesRequired.charges} charge${
+                    resourcesRequired.charges > 1 ? "s" : ""
+                } remaining.`,
+            };
         }
     }
 
@@ -3121,13 +3120,34 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         item,
         enduranceReserve,
         resourcesRequired.end,
-        actualStunCostObj,
+        actualStunDamage,
+        actualStunRoller,
         resourcesRequired.charges,
+        !useResources,
     );
+
+    // Let users know what resources were not consumed
+    if (!useResources) {
+        const speaker = ChatMessage.getSpeaker({
+            actor: actor,
+        });
+        speaker.alias = item.actor.name;
+
+        const chatData = {
+            user: game.user._id,
+            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            content: `${game.user.name} is using SHIFT to override using ${resourcesUsedDescription} for <b>${item.name}</b>`,
+            whisper: whisperUserTargetsForActor(this),
+            speaker,
+        };
+        await ChatMessage.create(chatData);
+    }
 
     return {
         resourcesRequired,
-        resourcesUsedDescription,
+        resourcesUsedDescription: useResources
+            ? `Spent ${resourcesUsedDescription}`
+            : `${resourcesUsedDescription} overridden with SHIFT`,
     };
 }
 
@@ -3240,7 +3260,7 @@ function calculateRequiredStunDiceForLackOfEnd(actor, enduranceToUse) {
     let stunDice = 0;
 
     if (enduranceToUse > 0 && actorEnd - enduranceToUse < 0) {
-        // 1d6 STUN for each 2 END spent beyond 0 END - always round END use up to the nearest larger 2 END
+        // 1d6 STUN for each 2 END spent beyond 0 END - always round up
         endSpentAboveZero = Math.max(actorEnd, 0);
         stunDice = Math.ceil(Math.abs(enduranceToUse - endSpentAboveZero) / 2);
     }
@@ -3274,17 +3294,28 @@ async function rollStunForEnd(stunDice) {
 }
 
 /**
+ * Spend all resources (END, STUN, charges) provided. Assumes numbers are possible.
  *
  * @param {HeroSystem6eItem} item
  * @param {HeroSystem6eItem} enduranceReserve
  * @param {number} endToSpend
- * @param {Object} stunToSpendObj
+ * @param {number} stunToSpend
+ * @param {HeroRoller} stunToSpendRoller
  * @param {number} chargesToSpend
+ * @param {boolean} noResourceUse - true if you would like to simulate the resources being used without using them (aka dry run)
  * @returns
  */
-async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpendObj, chargesToSpend) {
+async function spendResourcesToUse(
+    item,
+    enduranceReserve,
+    endToSpend,
+    stunToSpend,
+    stunToSpendRoller,
+    chargesToSpend,
+    noResourceUse,
+) {
     const actor = item.actor;
-    let resourceUsageDescription;
+    let resourceUsageDescription = "";
 
     // Deduct endurance
     // none: "No Automation",
@@ -3292,37 +3323,38 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
     // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
     // all: "PCs and NPCs (end, stun, body)"
     const automation = game.settings.get(HEROSYS.module, "automation");
-    if (
-        automation === "all" ||
-        (automation === "npcOnly" && actor.type == "npc") ||
-        (automation === "pcEndOnly" && actor.type === "pc")
-    ) {
-        if (item.system.USE_END_RESERVE) {
-            if (enduranceReserve) {
-                const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
-                const actorNewEndurance = reserveEnd - endToSpend;
+    const actorInCombat = actor.inCombat;
+    const noEnduranceUse =
+        actorInCombat && // TODO: Not sure if we should have this or not. We had it in toggle() but not elsewhere.
+        (automation === "all" ||
+            (automation === "npcOnly" && actor.type == "npc") ||
+            (automation === "pcEndOnly" && actor.type === "pc"));
 
-                resourceUsageDescription = `Spent ${endToSpend} END from Endurance Reserve`;
+    if (item.system.USE_END_RESERVE) {
+        if (enduranceReserve) {
+            const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
+            const actorNewEndurance = reserveEnd - endToSpend;
 
+            resourceUsageDescription = `${endToSpend} END from Endurance Reserve`;
+
+            if (!noResourceUse && !noEnduranceUse) {
                 await enduranceReserve.update({
                     "system.value": actorNewEndurance,
                     "system.description": enduranceReserve.system.description,
                 });
             }
-        } else {
-            const actorStun = actor.system.characteristics.stun.value;
-            const actorEndurance = actor.system.characteristics.end.value;
-            let actorNewEndurance = actorEndurance - endToSpend;
+        }
+    } else if (endToSpend || stunToSpend) {
+        const actorStun = actor.system.characteristics.stun.value;
+        const actorEndurance = actor.system.characteristics.end.value;
+        const actorNewEndurance = actorEndurance - endToSpend;
 
-            const actorChanges = {};
+        const actorChanges = {};
 
-            if (actorNewEndurance < 0) {
-                const endSpentAboveZero = Math.max(actorEndurance, 0);
-                actorNewEndurance = Math.min(actorEndurance, 0);
-
-                resourceUsageDescription = `
+        if (stunToSpend > 0) {
+            resourceUsageDescription = `
                     <span>
-                        Spent ${endSpentAboveZero} END and ${stunToSpendObj.damage} STUN
+                        ${endToSpend} END and ${stunToSpend} STUN
                         <i class="fal fa-circle-info" data-tooltip="<b>USING STUN FOR ENDURANCE</b><br>
                         A character at 0 END who still wishes to perform Actions
                         may use STUN as END. The character takes 1d6 STUN Only
@@ -3332,32 +3364,35 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
                     </span>
                     `;
 
-                const stunRenderedResult = await stunToSpendObj.roller.render();
-                resourceUsageDescription += stunRenderedResult;
+            const stunRenderedResult = await stunToSpendRoller.render();
+            resourceUsageDescription += stunRenderedResult;
 
-                await ui.notifications.warn(`${actor.name} used ${stunToSpendObj.damage} STUN for ENDURANCE.`);
+            await ui.notifications.warn(`${actor.name} used ${stunToSpend} STUN for ENDURANCE.`);
 
-                // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
-                //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
-                actorChanges["system.characteristics.stun.value"] = actorStun - stunToSpendObj.damage;
-            } else {
-                resourceUsageDescription = `Spent ${endToSpend} END`;
-            }
+            // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
+            //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
+            actorChanges["system.characteristics.stun.value"] = actorStun - stunToSpend;
+        } else {
+            resourceUsageDescription = `${endToSpend} END`;
+        }
 
-            actorChanges["system.characteristics.end.value"] = actorNewEndurance;
+        actorChanges["system.characteristics.end.value"] = actorNewEndurance;
 
+        if (!noResourceUse && !noEnduranceUse) {
             await actor.update(actorChanges);
         }
     }
 
     // Spend charges
-    const startingCharges = parseInt(item.system.charges?.value || 0);
-    await item.update({ "system.charges.value": startingCharges - chargesToSpend });
-
     if (chargesToSpend > 0) {
         resourceUsageDescription = `${resourceUsageDescription}${
             resourceUsageDescription ? " and " : ""
         }${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`;
+
+        if (!noResourceUse) {
+            const startingCharges = parseInt(item.system.charges?.value || 0);
+            await item.update({ "system.charges.value": startingCharges - chargesToSpend });
+        }
     }
 
     return resourceUsageDescription;

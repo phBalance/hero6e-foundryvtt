@@ -271,3 +271,89 @@ export async function expireEffects(actor) {
     }
     await renderAdjustmentChatCards(adjustmentChatMessages);
 }
+
+/**
+ * A number of HDC advantages and powers have very similar OPTIONID values.
+ *
+ * @param {string} optionId
+ * @returns {number} Should be >= 0 unless there is an error.
+ */
+export function hdcTimeOptionIdToSeconds(durationOptionId) {
+    let seconds = 12;
+
+    switch (durationOptionId) {
+        case "EXTRAPHASE":
+            // TODO: This is not correct as it depends on speed and what segment we're on.
+            seconds = 2;
+            break;
+
+        case "TURN":
+            seconds = 12;
+            break;
+
+        case "MINUTE":
+            seconds = 60;
+            break;
+
+        case "FIVEMINUTES":
+            seconds = 60 * 5;
+            break;
+
+        case "20MINUTES":
+        case "TWENTYMINUTES":
+            seconds = 60 * 20;
+            break;
+
+        case "HOUR":
+            seconds = 60 * 60;
+            break;
+
+        case "6HOURS":
+        case "SIXHOURS":
+            seconds = 60 * 60 * 6;
+            break;
+
+        case "DAY":
+        case "ONEDAY":
+            seconds = 60 * 60 * 24;
+            break;
+
+        case "WEEK":
+        case "ONEWEEK":
+            seconds = 60 * 60 * 24 * 7;
+            break;
+
+        case "MONTH":
+        case "ONEMONTH":
+            seconds = 60 * 60 * 24 * 30;
+            break;
+
+        case "SEASON":
+        case "ONESEASON":
+            seconds = 60 * 60 * 24 * 90;
+            break;
+
+        case "YEAR":
+        case "ONEYEAR":
+            seconds = 60 * 60 * 24 * 365;
+            break;
+
+        case "FIVEYEARS":
+            seconds = 60 * 60 * 24 * 365 * 5;
+            break;
+
+        case "TWENTYFIVEYEARS":
+            seconds = 60 * 60 * 24 * 365 * 25;
+            break;
+
+        case "ONECENTURY":
+            seconds = 60 * 60 * 24 * 365 * 100;
+            break;
+
+        default:
+            seconds = -1;
+            break;
+    }
+
+    return seconds;
+}
