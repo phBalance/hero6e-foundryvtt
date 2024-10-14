@@ -1380,7 +1380,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 });
 
                 if (confirmed) {
-                    await ae.parent.toggle();
+                    await ae.parent.toggle(event);
                 }
                 continue;
             }
