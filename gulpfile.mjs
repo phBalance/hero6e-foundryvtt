@@ -10,6 +10,7 @@ const sass = gulpSass(dartSass);
 
 const SASS_FILES = ["scss/**/*.scss"];
 const JAVASCRIPT_FILES = ["**/*.js", "**/*.mjs", "!node_modules/**"];
+const MARKDOWN_FILES = ["**/*.md", "!node_modules/**"];
 
 /* ----------------------------------------- */
 /*  Source Code Standard Validation
@@ -56,20 +57,20 @@ function autoFixScssFilesByLint() {
 const lintAutoFix = gulp.parallel(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint);
 
 function validateFilesByPrettier() {
-    return gulp.src([...JAVASCRIPT_FILES, ...SASS_FILES]).pipe(gulpPrettier.check());
+    return gulp.src([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES]).pipe(gulpPrettier.check());
 }
 const prettier = gulp.series(validateFilesByPrettier);
 
 function autoFixFilesByPrettier() {
     return gulp
-        .src([...JAVASCRIPT_FILES, ...SASS_FILES])
+        .src([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES])
         .pipe(gulpPrettier())
         .pipe(gulp.dest((file) => file.base));
 }
 const prettierAutoFix = gulp.series(autoFixFilesByPrettier);
 
-const validate = gulp.parallel(validateJavaScriptFilesByLint, validateFilesByPrettier);
-const autoFix = gulp.series(autoFixFilesByPrettier, autoFixJavaScriptFilesByLint);
+const validate = gulp.parallel(validateJavaScriptFilesByLint, validateScssFilesByLint, validateFilesByPrettier);
+const autoFix = gulp.series(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint, autoFixFilesByPrettier);
 
 /* ----------------------------------------- */
 /*  Compile Sass
@@ -104,7 +105,7 @@ const css = gulp.series(compileSass);
 
 function watchUpdates() {
     gulp.watch(SASS_FILES, css);
-    gulp.watch(JAVASCRIPT_FILES, validate);
+    gulp.watch([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES], validate);
 }
 
 /* ----------------------------------------- */

@@ -1,3 +1,5 @@
+# Pack Readme
+
 Discord example of how to unpack/pack compendiums: https://discord.com/channels/732325252788387980/734755256524865557/1195023034877218927
 FVTT command line tool: https://github.com/foundryvtt/foundryvtt-cli
 
@@ -11,10 +13,11 @@ Current Configuration: {
 }
 ```
 
-Unpack existing compendium.  Creates a /packs/heroMacros/_source folder with a json entry per macro.
+Unpack existing compendium. Creates a /packs/heroMacros/\_source folder with a json entry per macro.
 `fvtt package unpack -c "heroMacros"`
 
 Packing the compendium should be done in two places.
-1. `npm run pack` will create compendiums using _source/*.json files.  Probably can't use GULP because foundryvtt-cli refuses to work with open compendiums.
+
+1. `npm run pack` will create compendiums using \_source/\*.json files. Probably can't use GULP because foundryvtt-cli refuses to work with open compendiums.
 2. /.github/workflows/release.yml should include pack macro commands.
-`fvtt package pack "heroMacros"`
+   `fvtt package pack "heroMacros"`

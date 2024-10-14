@@ -71,10 +71,10 @@ Custom maneuvers show under attacks. Basic maneuvers are shown in the maneuver's
 ## System Options
 
 - Attack Card Automation:
-    No Automation: attack card will show attack and damage results, but will not update body, stun, or end from target
-    NPCs Only: attack card will subtract effective values from body, stun, and end but only for actors/tokens without a player owner
-    PCs(end) and NPCs: same as NPCs only except actors/tokens with a player owner will update end
-    PCs and NPCs: attack card will update stun, body, and end for all tokens/actors
+  - No Automation: attack card will show attack and damage results, but will not update body, stun, or end from target
+  - NPCs Only: attack card will subtract effective values from body, stun, and end but only for actors/tokens without a player owner
+  - PCs(end) and NPCs: same as NPCs only except actors/tokens with a player owner will update end
+  - PCs and NPCs: attack card will update stun, body, and end for all tokens/actors
 - Use Stunned: whether or not attacks can inflict stunned
 - Use Endurance: whether or not endurance will be automatically tracked when using automated attack cards
 - Use Knockback: automates knockback rolls and calculations from attack cards
@@ -137,19 +137,18 @@ The `HeroRoller` class and all other exports are available through the globally 
 
 ```javascript
 const damageRoller = new CONFIG.HERO.heroDice.HeroRoller()
-   .setPurpose(CONFIG.HERO.heroDice.DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
-   .addDice(5, "Knockback")
-   .makeNormalRoll();
+  .setPurpose(CONFIG.HERO.heroDice.DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
+  .addDice(5, "Knockback")
+  .makeNormalRoll();
 await damageRoller.roll();
 
 const cardHtml = await damageRoller.render("Knockback roll");
 
 const chatData = {
-   type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-   rolls: damageRoller.rawRolls(),
-   user: game.user._id,
-   content: cardHtml,
-
+  type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+  rolls: damageRoller.rawRolls(),
+  user: game.user._id,
+  content: cardHtml,
 };
 
 return ChatMessage.create(chatData);
@@ -157,7 +156,7 @@ return ChatMessage.create(chatData);
 
 ## Known Limitations
 
-- The upload of a .HDC file from Hero Designer is a requirement.  You can't create powers, skills, or equipment from scratch.  Character editing is limited within the system. Some power modifiers are supported, some are not, character sheets do not clearly show power modifiers. You can click the chat icon next to a power to see the full description.
+- The upload of a .HDC file from Hero Designer is a requirement. You can't create powers, skills, or equipment from scratch. Character editing is limited within the system. Some power modifiers are supported, some are not, character sheets do not clearly show power modifiers. You can click the chat icon next to a power to see the full description.
 - Untested/limited support for vehicles, automations, computers, etc.
 - Power frameworks are partially supported.
 - The following are largely not implemented
@@ -201,7 +200,7 @@ This is a 6E framework, however 5E is very similar to 6E and with a few minor ch
 5. Is there a way to change measuring distance to 1" for 5e campaigns?
    - You can change it scene by scene by opening the scene settings -> grid then edit 'Grid Scale'
 6. Marking a token as dead marks all identical tokens as dead. [#247](https://github.com/dmdorman/hero6e-foundryvtt/issues/247)
-   - You need to turn off *Link Actor Data* in the actor Prototype Token or Token screen.
+   - You need to turn off _Link Actor Data_ in the actor Prototype Token or Token screen.
    - Named actors can have tokens on several scenes, and by default their properties are linked to the master actor. So as you move from scene to scene their STUN/BODY/Statuses and all other properties remain the same.
    - Generic actors should have their link actor data unchecked, which allows you to make distinct changes to the tokens, those changes do not affect the master actor. There are also options on the Prototype token to add a number or adjective to the token name.
 
