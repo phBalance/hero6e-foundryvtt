@@ -676,13 +676,14 @@ export class HeroSystem6eItem extends Item {
 
                     // Check if there is an ActiveEffect associated with this item
                     if (firstAE) {
-                        const newState = !newValue;
-                        await item.update({ [attr]: newState });
-                        let effects = item.effects
+                        //const newState = !newValue;
+                        const newActiveState = firstAE.disabled;
+                        // await item.update({ [attr]: newState });
+                        const effects = item.effects
                             .filter(() => true)
                             .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
                         for (const activeEffect of effects) {
-                            await onActiveEffectToggle(activeEffect, newState);
+                            await onActiveEffectToggle(activeEffect, newActiveState);
                         }
                     } else {
                         await item.update({ [attr]: newValue });

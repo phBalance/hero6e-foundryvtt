@@ -1746,6 +1746,14 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
 
+    // TESTING - VISION TESTING - AARON
+    // const basicMode = token.detectionModes.find((m) => m.id === "basicSight");
+    // const visionSource = token.vision;
+    // console.log(basicMode, visionSource);
+    //basicMode.testVisibility(visionSource, basicMode, config);
+
+    //debugger;
+
     // Unique case where we use STR to break free of ENTANGLE
     // if (!item && heroRoller.getHitLocation().activeEffect?.flags.XMLID === "ENTANGLE") {
     //     const fakeItem = {

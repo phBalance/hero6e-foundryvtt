@@ -5,6 +5,7 @@
 - Fix for 5e DAMAGE RESISTANCE and PD/ED purchased as a power, where the PD/ED was counted twice. [#1297](https://github.com/dmdorman/hero6e-foundryvtt/issues/1297)
 - Improved KNOWLEDGE_SKILL descriptions. [#1278](https://github.com/dmdorman/hero6e-foundryvtt/issues/1278)
 - Initial NIGHTVISION, INFRAREDPERCEPTION, ULTRASONICPERCEPTION, and ULTRAVIOLETPERCEPTION support.
+- Fixes for CONTINUING CHARGES and auto expiration with SIMPLE CALENDAR. 
 
 
 ## Version 4.0.1
