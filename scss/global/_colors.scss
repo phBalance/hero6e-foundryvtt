@@ -1,9 +1,13 @@
+@use "../utils/colors";
+
 .dark {
-  color: $c-black;
-  /* filter: brightness(0); */
-  /* compatibility issue with Simple Calendar */
+    color: colors.$c-black;
+
+    /* filter: brightness(0); */
+
+    /* compatibility issue with Simple Calendar */
 }
 
 .hero-warning {
-  color: $c-warning;
+    color: colors.$c-warning;
 }

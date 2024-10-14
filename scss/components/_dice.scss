@@ -1,28 +1,27 @@
 .dice-total {
-    
-  &.success {
-    color: inherit;
-    background: #c7d0c0;
-    border: 1px solid #006c00;
-  }
-  
-  &.failure {
-    color: inherit;
-    background: #ffdddd;
-    border: 1px solid #6e0000;
-  }
-  
-  &.critical {
-    color: green;
-  }
-  
-  &.fumble {
-    color: red;
-  }
+    &.success {
+        color: inherit;
+        background: #c7d0c0;
+        border: 1px solid #006c00;
+    }
+
+    &.failure {
+        color: inherit;
+        background: #fdd;
+        border: 1px solid #6e0000;
+    }
+
+    &.critical {
+        color: green;
+    }
+
+    &.fumble {
+        color: red;
+    }
 }
 
 .dice-rolls .roll {
-  &.calculated {
-    background-image: url("../icons/circle.svg");
-  }
+    &.calculated {
+        background-image: url("../icons/circle.svg");
+    }
 }

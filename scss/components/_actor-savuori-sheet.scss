@@ -1,14 +1,12 @@
-@import "../utils/_colors";
+@import "../utils/colors";
 
 $c-white: #fff;
 $c-black: #000;
-
 $sheet-lighter-background: #f6f5f7;
 $sheet-middle-background: #e2e3e7;
 $sheet-darker-background: #c2c3cd;
 $sheet-header-background: #c9c8c0;
 $sheet-highlight-background: #fefdff;
-
 $sidebar-width: 136px;
 
 ::-webkit-scrollbar-track {
@@ -21,7 +19,7 @@ $sidebar-width: 136px;
     grid:
         "sidebar header" 75px
         "sidebar nav" minmax(min-content, max-content)
-        "sidebar content" 1fr/#{$sidebar-width}  1fr;
+        "sidebar content" 1fr /#{$sidebar-width} 1fr;
 }
 
 .savuori.actor-sheet .sidebar {
@@ -35,7 +33,7 @@ $sidebar-width: 136px;
     align-items: center;
     border-bottom: inherit;
     border-top: inherit;
-    border-radius: 8px 0 0 0;
+    border-radius: 8px 0 0;
     display: inline-flex;
     justify-content: center;
     position: relative;
@@ -44,7 +42,6 @@ $sidebar-width: 136px;
     padding: 10px;
     background-color: $sheet-middle-background;
 }
-
 
 /* Sidebar */
 .savuori.actor-sheet aside {
@@ -52,25 +49,6 @@ $sidebar-width: 136px;
     flex-direction: column;
     grid-area: sidebar;
     border-right: inherit;
-}
-
-.savuori.actor-sheet .sidebar {
-    overflow: hidden;
-    padding: 4px;
-    background-color: $sheet-lighter-background;
-    height: 100%;
-}
-
-.savuori.actor-sheet nav.sheet-navigation {
-    align-items: center;
-    border-radius: 8px 0 0 0;
-    display: inline-flex;
-    justify-content: center;
-    position: relative;
-    transition: all 0.1s ease-out;
-    grid-area: nav;
-    padding: 10px;
-    background-color: $sheet-middle-background;
 }
 
 .savuori.actor-sheet .sheet-body,
@@ -86,7 +64,7 @@ $sidebar-width: 136px;
     display: flex;
     flex-direction: column;
     position: absolute;
-    top: 0px;
+    top: 0;
     left: 10px;
     width: calc(100% - 20px);
     background-color: $sheet-lighter-background;
@@ -119,8 +97,8 @@ $sidebar-width: 136px;
 
 .savuori.actor-sheet input[type="text"] {
     border-radius: 7px;
-    border-color: rgb(226, 226, 226);
-    background-color: rgb(240, 240, 240);
+    border-color: rgb(226 226 226);
+    background-color: rgb(240 240 240);
 }
 
 .savuori.actor-sheet .profile-img {
@@ -167,7 +145,7 @@ $sidebar-width: 136px;
 }
 
 .savuori.actor-sheet table tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgb(255 255 255 / 60%);
 }
 
 .savuori.actor-sheet table tr td.right,
@@ -198,6 +176,7 @@ $sidebar-width: 136px;
 .savuori.actor-sheet table tr td {
     padding: inherit;
     max-width: 300px;
+
     /* power description can be a bit too big; alternatives pct or flexbox */
 }
 
@@ -209,27 +188,19 @@ $sidebar-width: 136px;
 
 .savuori.actor-sheet button {
     border-radius: 7px;
-    border-color: rgb(236, 236, 236);
+    border-color: rgb(236 236 236);
     border-width: 2px;
     background-color: $sheet-highlight-background;
 }
-
-// .savuori.actor-sheet .sidebar-actions button {
-//     line-height: normal;
-//     margin: 2px 0px;
-//     padding: 4px 0;
-//     width: calc($sidebar-width - 20%);
-// }
 
 .savuori.actor-sheet .header-fields.flexrow {
     align-items: center;
 }
 
 .savuori.actor-sheet h1.charname input {
-    margin-top: 0px;
+    margin-top: 0;
     font-size: 80%;
 }
-
 
 /* TAB */
 .savuori .tab-body {
@@ -239,43 +210,33 @@ $sidebar-width: 136px;
     margin: 10px;
 }
 
-
 /* UPLOAD */
 .savuori .upload-button {
     height: 30px;
-  margin: 3px 5px;
-  padding: 0 4px;
-  background: rgba(255, 255, 240, 0.8);
-  font-size: 14px;
-  line-height: 28px;
-  font-family: "Signika", sans-serif;
-  align-content: center;
-  text-align: center;
-  border-radius: 7px;
-  border-style: solid;
-  border-color: rgb(226, 226, 226);
-  border-width: 2px;
-  border: 2px groove var(--color-border-light-highlight);
-  background-color: $sheet-highlight-background;
+    margin: 3px 5px;
+    padding: 0 4px;
+    background: rgb(255 255 240 / 80%);
+    font-size: 14px;
+    line-height: 28px;
+    font-family: Signika, sans-serif;
+    align-content: center;
+    text-align: center;
+    border-radius: 7px;
+    border: 2px groove var(--color-border-light-highlight);
+    background-color: $sheet-highlight-background;
 
-  &:hover,
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 5px red;
-  }
-  &:disabled {
-    color: #4b4a44;
-    box-shadow: none;
-  }
-  &>i {
-    margin-right: 3px;
-  }
+    &:hover,
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 5px red;
+    }
+
+    &:disabled {
+        color: #4b4a44;
+        box-shadow: none;
+    }
+
+    & > i {
+        margin-right: 3px;
+    }
 }
-
-
-
-
-
-
-
-

@@ -1,55 +1,55 @@
 .segment-container {
-  margin: 4px 0;
-  border: 1px solid #888;
+    margin: 4px 0;
+    border: 1px solid #888;
 }
 
 .segment-inactive {
-  flex: 1;
-  margin: 0;
-  font-size: 16px;
-  color: #555;
-  text-align: center;
-  padding: 4px 0;
-  border-bottom: hidden;
+    flex: 1;
+    margin: 0;
+    font-size: 16px;
+    color: #555;
+    text-align: center;
+    padding: 4px 0;
+    border-bottom: hidden;
 }
 
-.segment-hasItems {
-  flex: 1;
-  margin: 0;
-  font-size: 16px;
-  text-align: center;
-  padding: 4px 0;
-  border-top: 2px groove #4b4a44;
-  border-bottom: 2px groove #BBB;
+.segment-has-items {
+    flex: 1;
+    margin: 0;
+    font-size: 16px;
+    text-align: center;
+    padding: 4px 0;
+    border-top: 2px groove #4b4a44;
+    border-bottom: 2px groove #bbb;
 }
 
 .segment-active {
-  background-color: var(--color-border-highlight);
+    background-color: var(--color-border-highlight);
 }
 
 .segment-header {
-  img {
-    flex: 0 0 36px;
-    margin-right: 5px;
-  }
-
-  h3 {
-    flex: 1;
-    margin: 0;
-    line-height: 36px;
-    font-size: 20px;
-    font-weight: 700;
-    color: #4b4a44;
-    display: inline-block;
-
-    &:hover {
-      color: #111;
-      text-shadow: 0 0 10px red;
+    img {
+        flex: 0 0 36px;
+        margin-right: 5px;
     }
-  }
+
+    h3 {
+        flex: 1;
+        margin: 0;
+        line-height: 36px;
+        font-size: 20px;
+        font-weight: 700;
+        color: #4b4a44;
+        display: inline-block;
+
+        &:hover {
+            color: #111;
+            text-shadow: 0 0 10px red;
+        }
+    }
 }
 
 .hero-combat-tracker-resource {
-  font-weight: bold;
-  font-size: 20px;
+    font-weight: bold;
+    font-size: 20px;
 }

@@ -30,7 +30,7 @@
     <hr>
     <div class="tags">
         {{#each tags as |tag id|}}
-        <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
+        <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
         {{/each}}
     </div>
 
@@ -41,7 +41,7 @@
     <div class="card-section" data-visibility="gm">
         <div class="tags">
         {{#each defenseTags as |tag id|}}
-            <span class="tag tag_transparent" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
+            <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
         {{/each}}
         </div>
         <div class="description-tiny">Defense: {{ defense }}</div>
@@ -55,11 +55,11 @@
 
     {{#if (gte stunDamage targetEgo)}}
         <div>
-            <span class="Hit">SUCCESS</span> vs {{buttonText}}. {{buttonTitle}}
+            <span class="hit">SUCCESS</span> vs {{buttonText}}. {{buttonTitle}}
         </div>
     {{else}}
         <div>
-            <span class="Miss">FAIL</span> vs {{buttonText}}. You know nothing more about the target.
+            <span class="miss">FAIL</span> vs {{buttonText}}. You know nothing more about the target.
         </div>
     {{/if}}
         

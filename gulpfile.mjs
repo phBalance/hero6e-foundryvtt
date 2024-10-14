@@ -4,6 +4,7 @@ import gulpEslintNew from "gulp-eslint-new";
 import gulpPrettier from "gulp-prettier";
 import gulpSass from "gulp-sass";
 import * as dartSass from "sass";
+import gulpStylelint from "gulp-stylelint-esm";
 
 const sass = gulpSass(dartSass);
 
@@ -17,16 +18,25 @@ const JAVASCRIPT_FILES = ["**/*.js", "**/*.mjs", "!node_modules/**"];
 const eslintDefaultConfig = { overrideConfigFile: "eslint.config.mjs" };
 const eslintFixConfig = { fix: true };
 
-function validateFilesByLint() {
+function validateJavaScriptFilesByLint() {
     return gulp
         .src(JAVASCRIPT_FILES)
         .pipe(gulpEslintNew(eslintDefaultConfig))
         .pipe(gulpEslintNew.formatEach("compact", process.stderr))
         .pipe(gulpEslintNew.failAfterError());
 }
-const lint = gulp.series(validateFilesByLint);
 
-function autoFixFilesByLint() {
+function validateScssFilesByLint() {
+    return gulp.src(SASS_FILES).pipe(
+        gulpStylelint({
+            failAfterError: false,
+            reporters: [{ formatter: "string", console: true }],
+        }),
+    );
+}
+const lint = gulp.parallel(validateJavaScriptFilesByLint, validateScssFilesByLint);
+
+function autoFixJavaScriptFilesByLint() {
     return gulp
         .src(JAVASCRIPT_FILES)
         .pipe(gulpEslintNew({ ...eslintDefaultConfig, ...eslintFixConfig }))
@@ -34,23 +44,32 @@ function autoFixFilesByLint() {
         .pipe(gulpEslintNew.formatEach("compact", process.stderr))
         .pipe(gulpEslintNew.failAfterError());
 }
-const lintAutoFix = gulp.series(autoFixFilesByLint);
+
+function autoFixScssFilesByLint() {
+    return gulp.src(SASS_FILES).pipe(
+        gulpStylelint({
+            fix: true,
+            reporters: [{ formatter: "string", console: true }],
+        }),
+    );
+}
+const lintAutoFix = gulp.parallel(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint);
 
 function validateFilesByPrettier() {
-    return gulp.src(JAVASCRIPT_FILES).pipe(gulpPrettier.check());
+    return gulp.src([...JAVASCRIPT_FILES, ...SASS_FILES]).pipe(gulpPrettier.check());
 }
 const prettier = gulp.series(validateFilesByPrettier);
 
 function autoFixFilesByPrettier() {
     return gulp
-        .src(JAVASCRIPT_FILES)
+        .src([...JAVASCRIPT_FILES, ...SASS_FILES])
         .pipe(gulpPrettier())
         .pipe(gulp.dest((file) => file.base));
 }
 const prettierAutoFix = gulp.series(autoFixFilesByPrettier);
 
-const validate = gulp.parallel(validateFilesByLint, validateFilesByPrettier);
-const autoFix = gulp.series(autoFixFilesByPrettier, autoFixFilesByLint);
+const validate = gulp.parallel(validateJavaScriptFilesByLint, validateFilesByPrettier);
+const autoFix = gulp.series(autoFixFilesByPrettier, autoFixJavaScriptFilesByLint);
 
 /* ----------------------------------------- */
 /*  Compile Sass

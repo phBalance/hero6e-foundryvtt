@@ -1,5 +1,5 @@
 {{ log 'HEROSYS item-toHitAoe-card' this }}
-<div class="hero chat-card item-card toHit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+<div class="hero chat-card item-card to-hit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
     tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
     <span class="flavor-text">
@@ -40,7 +40,7 @@
         <hr>
         <div class="tags">
             {{#each tags as |tag id|}}
-            <span class="tag tag_transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}
+            <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}
                 {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}
             </span>
             {{/each}}
@@ -57,7 +57,7 @@
             <div class="hit-roll">{{{ renderedHitRoll }}}</div>
             <div class="description-medium">{{{ hitRollText }}}</div>
             {{#if (lt hitRollValue 3)}}
-            <img class="hexFacing" src="systems/{{HerosysModule}}/icons/HexFacing.svg">
+            <img class="hex-facing" src="systems/{{HerosysModule}}/icons/HexFacing.svg">
             {{/if}}
         </div>
 

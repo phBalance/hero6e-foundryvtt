@@ -1,5 +1,5 @@
 {{ log 'HEROSYS item-toHit-card' this }}
-<div class="hero chat-card item-card toHit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
+<div class="hero chat-card item-card to-hit-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
     tokenId}}data-token-id="{{tokenId}}" {{/if}}>
 
     <span class="flavor-text">
@@ -68,7 +68,7 @@
         <hr>
         <div class="tags">
             {{#each tags as |tag id|}}
-                <span class="tag tag_transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}>{{tag.name}}
+                <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}>{{tag.name}}
                     {{tag.value}}
                 </span>
             {{/each}}
