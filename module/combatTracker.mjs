@@ -10,7 +10,7 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
 
     activateListeners(html) {
         super.activateListeners(html);
-        html.find(".segment-hasItems").click((ev) => this._onSegmentToggleContent(ev));
+        html.find(".segment-has-items").click((ev) => this._onSegmentToggleContent(ev));
     }
 
     async _onCombatantControl(event) {

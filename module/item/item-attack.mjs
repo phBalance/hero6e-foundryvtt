@@ -25,7 +25,7 @@ export async function chatListeners(html) {
     html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
     html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
     html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
-    html.on("click", "button.roll-mindscanEgo", this._onRollMindScanEffectRoll.bind(this));
+    html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
 }
 
 export async function onMessageRendered(html) {

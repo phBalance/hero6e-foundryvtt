@@ -1,7 +1,7 @@
 <table>
 
     {{!-- ADDERS --}}
-    <tr class="activeEffects adders" >
+    <tr class="active-effects adders" >
         <th class="left">Adders</th>
         <th>Cost</th>
         <th class="right">
@@ -24,7 +24,7 @@
     </tr>
 
         {{#each adder.ADDER as |adder XMLID|}}
-        <tr  class="modifierAdder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
+        <tr  class="modifier-adder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
             <td class="left">{{adder.ALIAS}}</td>
             <td>{{adder.BASECOST_total}}</td>
             <td class="right">
@@ -39,7 +39,7 @@
     {{/each}}
 
     {{!-- {{Modifiers}} --}}
-    <tr class="activeEffects adders">
+    <tr class="active-effects adders">
         <th class="left">Modifiers</th>
         <th>Cost</th>
         <th class="right">
@@ -65,7 +65,7 @@
     </tr>
 
     {{#each mod.ADDER as |adder id|}}
-    <tr class="modifierAdder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
+    <tr class="modifier-adder indent" data-xmlid="{{adder.XMLID}}" data-adder="{{adder.ID}}">
         <td class="left">{{adder.ALIAS}}</td>
         <td>{{adder.BASECOST_total}}</td>
         <td class="right">

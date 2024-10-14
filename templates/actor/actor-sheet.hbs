@@ -15,7 +15,7 @@
                         <div class="attribute-value multiple characteristic">
                             <input name="Xsystem.characteristics.end.value" type="text"
                                 value="{{actor.system.characteristics.end.value}}" data-dtype="Number"
-                                class="{{#if (gt actor.system.characteristics.end.value actor.system.characteristics.end.max)}}overMax{{/if}}{{#if (lt actor.system.characteristics.end.value actor.system.characteristics.end.max)}}underMax{{/if}}">
+                                class="{{#if (gt actor.system.characteristics.end.value actor.system.characteristics.end.max)}}over-max{{/if}}{{#if (lt actor.system.characteristics.end.value actor.system.characteristics.end.max)}} under-max{{/if}}">
                             <span class="sep"> / </span>
                             <span>
                                 ({{actor.system.characteristics.end.max}})
@@ -29,7 +29,7 @@
                         <div class="attribute-value multiple characteristic">
                             <input name="Xsystem.characteristics.body.value" type="text"
                                 value="{{actor.system.characteristics.body.value}}" data-dtype="Number"
-                                class="{{#if (gt actor.system.characteristics.body.value actor.system.characteristics.body.max)}}overMax{{/if}}{{#if (lt actor.system.characteristics.body.value actor.system.characteristics.body.max)}}underMax{{/if}}">
+                                class="{{#if (gt actor.system.characteristics.body.value actor.system.characteristics.body.max)}}over-max{{/if}}{{#if (lt actor.system.characteristics.body.value actor.system.characteristics.body.max)}} under-max{{/if}}">
                             <span class="sep"> / </span>
                             <span>
                                 ({{actor.system.characteristics.body.max}})
@@ -43,7 +43,7 @@
                         <div class="attribute-value multiple characteristic">
                             <input name="Xsystem.characteristics.stun.value" type="text"
                                 value="{{actor.system.characteristics.stun.value}}" data-dtype="Number"
-                                class="{{#if (gt actor.system.characteristics.stun.value actor.system.characteristics.stun.max)}}overMax{{/if}}{{#if (lt actor.system.characteristics.stun.value actor.system.characteristics.stun.max)}}underMax{{/if}}">
+                                class="{{#if (gt actor.system.characteristics.stun.value actor.system.characteristics.stun.max)}}over-max{{/if}}{{#if (lt actor.system.characteristics.stun.value actor.system.characteristics.stun.max)}} under-max{{/if}}">
                             <span class="sep"> / </span>
                             <span>
                                 ({{actor.system.characteristics.stun.max}})
@@ -106,9 +106,9 @@
 
 
             {{#if actor.system.is5e}}
-                <div class="fifthEd flex0" title="5th edition {{#if actor.system.isHeroic}}Heroic{{else}}Superheroic{{/if}} {{actor.type}}">5{{#if actor.system.isHeroic}}h{{else}}s{{/if}}</div>
+                <div class="fifth-ed flex0" title="5th edition {{#if actor.system.isHeroic}}Heroic{{else}}Superheroic{{/if}} {{actor.type}}">5{{#if actor.system.isHeroic}}h{{else}}s{{/if}}</div>
             {{else}}
-                <div class="sixthEd flex0" title="6th edition {{#if actor.system.isHeroic}}Heroic{{else}}Superheroic{{/if}} {{actor.type}}">6{{#if actor.system.isHeroic}}h{{else}}s{{/if}}</div>
+                <div class="sixth-ed flex0" title="6th edition {{#if actor.system.isHeroic}}Heroic{{else}}Superheroic{{/if}} {{actor.type}}">6{{#if actor.system.isHeroic}}h{{else}}s{{/if}}</div>
             {{/if}}
 
             {{#if actor.system.points}}
@@ -178,7 +178,7 @@
                     </tr>
                     {{#each items as |item id|}}
                         {{#if (or (eq item.type "attack") (and (ne item.type "maneuver") (eq item.system.subType "attack")))}}
-                            <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
+                            <tr class="item {{#if (gt item.system.value item.system.max)}}over-max{{/if}}{{#if (lt item.system.value item.system.max)}} under-max{{/if}}"
                                 data-item-id="{{item._id}}" >
                                 <td>
                                     <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -254,7 +254,7 @@
                     </tr>
                     {{#each items as |item id|}}
                         {{#if (or (eq item.type "defense") (eq item.system.subType "defense") (includes item.baseInfo.type "defense")) }}
-                            <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
+                            <tr class="item {{#if (gt item.system.value item.system.max)}} over-max{{/if}}{{#if (lt item.system.value item.system.max)}} under-max{{/if}}"
                                 data-item-id="{{item._id}}">
                                 <td style="min-width: 24px">
                                     <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -427,7 +427,7 @@
                     </tr>
                     {{#each items as |item id|}}
                         {{#if (or (eq item.type "movement")(eq item.system.subType "movement")) }}
-                            <tr class="item {{#if (gt item.system.value item.system.max)}} overMax{{/if}}{{#if (lt item.system.value item.system.max)}} underMax{{/if}}"
+                            <tr class="item {{#if (gt item.system.value item.system.max)}} over-max{{/if}}{{#if (lt item.system.value item.system.max)}} under-max{{/if}}"
                                 data-item-id="{{item._id}}">
                                 <td style="min-width: 24px">
                                     <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
@@ -484,14 +484,14 @@
                             class="{{#if characteristic.valueTitle}}characteristic-locked{{/if}}">
                             <input name="system.characteristics.{{characteristic.key}}.value" type="number"
                                 value="{{characteristic.value}}" data-dtype="Number"
-                                class="{{#if (gt characteristic.value characteristic.max)}}overMax{{/if}}{{#if (lt characteristic.value characteristic.max)}}underMax{{/if}}"
+                                class="{{#if (gt characteristic.value characteristic.max)}}over-max{{/if}}{{#if (lt characteristic.value characteristic.max)}} under-max{{/if}}"
                                 {{#if characteristic.valueTitle}}disabled{{/if}}
                             >
                         </td>
                         <td data-tooltip="{{{characteristic.maxTitle}}}"
                             class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
                             <input name="system.characteristics.{{characteristic.key}}.max" type="number"
-                                class="{{#if (gt characteristic.delta 0)}} overMax{{/if}}{{#if (lt characteristic.delta 0)}} underMax{{/if}}"
+                                class="{{#if (gt characteristic.delta 0)}}over-max{{/if}}{{#if (lt characteristic.delta 0)}}under-max{{/if}}"
                                 value="{{characteristic.max}}" data-dtype="Number" {{#if
                                 characteristic.maxTitle}}disabled{{/if}}>
                         </td>
@@ -721,7 +721,7 @@
                         </tr>
                     {{/each}}
 
-                    <tr class="activeEffects ConstantEffects">
+                    <tr class="active-effects ConstantEffects">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.ActiveEffectConstant"}}</th>
                         <th>Active</th>
@@ -753,7 +753,7 @@
                         </tr>
                     {{/each}}
 
-                    <tr class="activeEffects PersistentEffects">
+                    <tr class="active-effects PersistentEffects">
                         <th></th>
                         <th class="left">{{localize "ActorSheet.ActiveEffectPersistent"}}</th>
                         <th>Active</th>

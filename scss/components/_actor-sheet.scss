@@ -16,9 +16,11 @@
         "sidebar header" 75px
         "sidebar nav" minmax(min-content, max-content)
         "sidebar content" 1fr/100px 1fr;
+
     /* height: 100%; */
+
     /* background-color: red; */
-    overflow:hidden; /* get rid of scroll bars */
+    overflow: hidden; /* get rid of scroll bars */
 }
 
 /* Sidebar */
@@ -26,6 +28,7 @@
     display: flex;
     flex-direction: column;
     grid-area: sidebar;
+
     /* background-color: lightgreen; */
     border-right: thin solid darkgrey;
 }
@@ -33,6 +36,7 @@
 .actor-sheet .sidebar {
     overflow: hidden;
     padding: 0 2px 2px 8px;
+
     /* background-color: lavender; */
 }
 
@@ -40,6 +44,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     /* background-color: lightgoldenrodyellow; */
 }
 
@@ -52,6 +57,7 @@
     position: relative;
     transition: all 0.1s ease-out;
     grid-area: nav;
+
     /* background-color: lightcyan; */
 }
 
@@ -60,6 +66,7 @@
     grid-area: content;
     position: relative;
     overflow: hidden auto;
+
     /* background-color: steelblue; */
 }
 
@@ -69,6 +76,7 @@
     flex-direction: column;
     position: absolute;
     width: 100%;
+
     /* background-color: red; */
 }
 
@@ -94,7 +102,6 @@
     line-height: 16px;
     margin: 4px 8px 2px;
     border-bottom: 1px solid #c9c7b8;
-
     white-space: nowrap;
 }
 
@@ -106,7 +113,8 @@
     width: 35px;
     min-width: 20px;
     padding: 1px 3px;
-    margin: 3px 0px;
+    margin: 3px 0;
+
     /* border-color: transparent; */
 }
 
@@ -152,7 +160,7 @@
 }
 
 .actor-sheet table tr:first-child,
-.actor-sheet table tr.activeEffects {
+.actor-sheet table tr.active-effects {
     box-shadow: inset 0 -1px 0 darkgray;
     background-color: #cfcec3;
 }
@@ -190,11 +198,6 @@ input.left {
 .actor-sheet table tr th.right {
     text-align: right;
     padding-right: 2px;
-}
-
-.actor-sheet table tr td.right,
-.actor-sheet table tr th.right {
-    text-align: right;
 }
 
 .actor-sheet .item-image {
@@ -249,8 +252,7 @@ input.left {
 }
 
 .hero-attribute.compact {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
     gap: 0 6px;
     width: 40px;
 }
@@ -271,13 +273,13 @@ input.left {
     color: #aaa;
 }
 
-.actor-sheet input.underMax {
-    background-color: rgba(255, 200, 200, 0.5);
+.actor-sheet input.under-max {
+    background-color: rgb(255 200 200 / 50%);
 }
 
-.actor-sheet input.overMax,
-.actor-sheet tr.overMax {
-    background-color: rgba(200, 255, 200, 0.5);
+.actor-sheet input.over-max,
+.actor-sheet tr.over-max {
+    background-color: rgb(200 255 200 / 50%);
 }
 
 .actor-sheet .sidebar-actions {
@@ -288,7 +290,7 @@ input.left {
 
 .actor-sheet .sidebar-actions button {
     line-height: normal;
-    margin: 2px 0px;
+    margin: 2px 0;
 }
 
 .actor-sheet div.points {
@@ -297,13 +299,14 @@ input.left {
     height: 24px;
     padding: 2px 4px;
     font-size: 14px;
+
     /* margin-top: 2px; */
-    margin: 5px 5px;
+    margin: 5px;
     text-align: center;
 }
 
 .actor-sheet .warn {
-    background-color: rgba(255, 255, 200, 0.5);
+    background-color: rgb(255 255 200 / 50%);
 }
 
 .actor-sheet table tr td.item-framework-child-name {
@@ -338,7 +341,7 @@ ul.left li {
 .editor-content {
     min-height: 36px;
     border-radius: 5px;
-    border: 1px dashed rgba(0, 0, 0, 0.3);
+    border: 1px dashed rgb(0 0 0 / 30%);
 }
 
 .actor-sheet .sidebar section ul li > span {
@@ -352,14 +355,14 @@ ul.left li {
 }
 
 .conditional-defense-card div.description {
-    border: 1px dashed rgba(0, 0, 0, 0.5);
+    border: 1px dashed rgb(0 0 0 / 50%);
     margin: 15px 0;
     padding: 5px;
 }
 
 td.characteristic-locked > input {
-  cursor: pointer;
-  pointer-events:none;
+    cursor: pointer;
+    pointer-events: none;
 }
 
 div .aoe-button {
@@ -381,7 +384,7 @@ div.xmlid {
 }
 
 form.item-sheet h1.charname input {
-    margin-top: 0px;
+    margin-top: 0;
 }
 
 .herosystem6e.sheet.item .form-group > div {
@@ -396,7 +399,7 @@ form.item-sheet h1.charname input {
     text-align: center;
 }
 
-.herosystem6e.sheet.item li.summaryBreak {
+.herosystem6e.sheet.item li.summary-break {
     margin-top: 5px;
     padding-top: 8px;
     border-top: 1px solid var(--color-border-light-tertiary);
@@ -405,13 +408,13 @@ form.item-sheet h1.charname input {
 
 .herosystem6e.sheet.item div.description,
 form div.attack-card div.description {
-    border: 1px dashed rgba(0, 0, 0, 0.5);
+    border: 1px dashed rgb(0 0 0 / 50%);
     margin: 15px 0;
     padding: 5px;
     max-width: 100%;
 }
 
-.herosystem6e.sheet.item tr.modifierAdder td:first-child {
+.herosystem6e.sheet.item tr.modifier-adder td:first-child {
     padding-left: 10px;
 }
 
@@ -419,18 +422,17 @@ form div.attack-card div.description {
     max-width: 50%;
 }
 
-.modifierAdder.indent {
+.modifier-adder.indent {
     padding-left: 5px;
-  }
-
-#item-attack-form-application .noflexwrap input[type="text"], #item-attack-form-application .noflexwrap input[type="number"]
-{
-  width: auto; 
-  margin-right: 5px;
-  margin-left: -4px; //* needed to align to previous rows, not sure why **//
 }
 
-#item-attack-form-application input[type="checkbox"]
-{
+#item-attack-form-application .noflexwrap input[type="text"],
+#item-attack-form-application .noflexwrap input[type="number"] {
+    width: auto;
+    margin-right: 5px;
+    margin-left: -4px; // needed to align to previous rows, not sure why
+}
+
+#item-attack-form-application input[type="checkbox"] {
     margin-left: -2px;
 }

@@ -1,11 +1,11 @@
 {{!-- {{log "document-partial.hbs" this}} --}}
 {{!-- TODO: DELETE?  Not being used --}}
 {{!-- {{#if this.childItems.length}}
-    <div class="parentChild">
+    <div class="parent-child">
 {{/if}}
     
 {{#unless this.parentItem}}
-    <li class="directory-item document {{#if this.childItems.length}} parentItem {{/if}}{{@root.documentCls}} flexrow" data-entry-id="{{this.id}}" data-document-id="{{this.id}}">
+    <li class="directory-item document {{#if this.childItems.length}} parent-item {{/if}}{{@root.documentCls}} flexrow" data-entry-id="{{this.id}}" data-document-id="{{this.id}}">
     {{#if this.thumbnail}}
     <img class="thumbnail" title="{{this.name}}" data-src="{{this.thumbnail}}"/>
     {{/if}}
