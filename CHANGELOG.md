@@ -17,10 +17,10 @@
 
 ## Version 4.0.0
 
-- Dropped support for FoundryV11. You must use FoundryVTT v12 to use this version of Hero System 6e (Unofficial) v2. 
+- Dropped support for FoundryV11. You must use FoundryVTT v12 to use this version of Hero System 6e (Unofficial) v2.
 - Improved ENHANCEDPERCEPTION. You now get to pick during PERCEPTION ROLL. [#1288](https://github.com/dmdorman/hero6e-foundryvtt/issues/1288)
 - Entangles can now be attacked.
-- Fixed issue where world time was not advancing during combat.  
+- Fixed issue where world time was not advancing during combat.
 - Improved FLASH and FLASHDEFENSE. [#794](https://github.com/dmdorman/hero6e-foundryvtt/issues/794) [#438](https://github.com/dmdorman/hero6e-foundryvtt/issues/438) [#303](https://github.com/dmdorman/hero6e-foundryvtt/issues/303) [#458](https://github.com/dmdorman/hero6e-foundryvtt/issues/458) [#670](https://github.com/dmdorman/hero6e-foundryvtt/issues/670)
 - Improvements for boostable Charges. [#1292](https://github.com/dmdorman/hero6e-foundryvtt/issues/1292)
 - Added missing roll icons on Martial Arts tab. [#1277](https://github.com/dmdorman/hero6e-foundryvtt/issues/1277)
@@ -41,7 +41,7 @@
 - Initial support for MULTIPLE ATTACK maneuver.
 - Fixed issue with powers sometimes uploading out of order. [#1138](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)
 - You can now drag/drop items within the same actor to change their order.
-- Equipment drag/drop between actors is now a move instead of a copy.  ChatMessages are whispered to owners of tokens when drag/drop occurs.
+- Equipment drag/drop between actors is now a move instead of a copy. ChatMessages are whispered to owners of tokens when drag/drop occurs.
 - Fixed issues where some powers were not toggleable. [#1248](https://github.com/dmdorman/hero6e-foundryvtt/issues/1138)
 - Added setting to prevent player movement when in combat and not their phase. [#1241](https://github.com/dmdorman/hero6e-foundryvtt/issues/1241)
 - Entangle improvements [#186](https://github.com/dmdorman/hero6e-foundryvtt/issues/186) [#551](https://github.com/dmdorman/hero6e-foundryvtt/issues/551) [#1230](https://github.com/dmdorman/hero6e-foundryvtt/issues/1230)
@@ -53,7 +53,7 @@
 
 ## Version 3.0.97 & 3.0.98
 
-- FoundryVTT v12 is supported. The latest Drag Ruler works with v12 although has a few minor bugs. We recommend upgrading to FoundryVTT 12 between your sessions when you do not have an active combat.  Support for FoundryVTT v11 will end soon.
+- FoundryVTT v12 is supported. The latest Drag Ruler works with v12 although has a few minor bugs. We recommend upgrading to FoundryVTT 12 between your sessions when you do not have an active combat. Support for FoundryVTT v11 will end soon.
 - Fix smart CSL selection for HTH and RANGED.
 - Fix apply knockback dialog for Firefox.
 - Applying knockback now rolls knockback skinned dice.
@@ -63,12 +63,12 @@
 - Fixed mental powers displays wrong effect for damage rolls. [#1258](https://github.com/dmdorman/hero6e-foundryvtt/issues/1258)
 - Reworked Combat Tracker
   - Existing combats may need to be deleted and started from scratch after upgrading.
-  - The background color of combatants changes based on token disposition.  Can be changed in settings.
+  - The background color of combatants changes based on token disposition. Can be changed in settings.
   - END for powers is spent on first phase of token's segment (only important with Lightning Reflexes).
   - Holding status now shows token image on right hand side of combat tracker.
   - Drag Ruler now tracks movement correctly between phases. [#1247](https://github.com/dmdorman/hero6e-foundryvtt/issues/1247)
-  - Post segment 12 chat cards only show player recoveries to everyone.  Non-player recoveries are whispered to GM.
-- Fixed issue with BASES taking a recovery.  They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
+  - Post segment 12 chat cards only show player recoveries to everyone. Non-player recoveries are whispered to GM.
+- Fixed issue with BASES taking a recovery. They do not get one. [#1218](https://github.com/dmdorman/hero6e-foundryvtt/issues/1218)
 - You can now hold SHIFT to make attacks even when you get a cannot act message. [#1213](https://github.com/dmdorman/hero6e-foundryvtt/issues/1213)
 
 ## Version 3.0.96
@@ -90,7 +90,7 @@
 - Added CLINGING as a KB modifier.
 - Fix: DRAIN has a standard range in 6e.
 - Fix: Partial STR dice is now added to damage. [#1193](https://github.com/dmdorman/hero6e-foundryvtt/issues/1193)
-- Fixed TRANSFORM to import, allowing for attack & damage rolls and END cost.  Defenses & associated effects are not implemented.
+- Fixed TRANSFORM to import, allowing for attack & damage rolls and END cost. Defenses & associated effects are not implemented.
 - Fix STUN for END calculation especially when starting with negative END. [#1202](https://github.com/dmdorman/hero6e-foundryvtt/issues/1202)
 - Fix for errant "bar3" setting that would prevent older worlds from loading after upgrading to FoundryVTT v12. [#1187](https://github.com/dmdorman/hero6e-foundryvtt/issues/1187)
 - Added support for movement powers USABLE AS a secondary type of movement. [#1200](https://github.com/dmdorman/hero6e-foundryvtt/issues/1200)
@@ -133,7 +133,7 @@
 
 ## Version 3.0.87
 
-- Reworked ruler code.  Movement type & total distance only show for last movement segment. 
+- Reworked ruler code. Movement type & total distance only show for last movement segment.
 - DragRuler support for v12. There are still [issues](https://github.com/manuelVo/foundryvtt-drag-ruler/issues/337), so not recommending upgrading to FoundryVTT v12 quite yet.
 - Fix: Players see errors when adding combatants to combat tracker [#1148](https://github.com/dmdorman/hero6e-foundryvtt/issues/1148)
 
@@ -158,31 +158,31 @@
 
 - Improved HDC upload performance.
 - Corrected presence attacks with negative presence. [#838](https://github.com/dmdorman/hero6e-foundryvtt/issues/838)
-- Default Knowledge Skills names now include the "knowledge".  This means when you roll a KS the knowledge is included in the chat message. [#1129](https://github.com/dmdorman/hero6e-foundryvtt/issues/1129)
-- Post-Segment 12 now only performed once per turn during combat.  This resolves some issues where combat is rewound or when actors change their speed. [#1113](https://github.com/dmdorman/hero6e-foundryvtt/issues/1113)
+- Default Knowledge Skills names now include the "knowledge". This means when you roll a KS the knowledge is included in the chat message. [#1129](https://github.com/dmdorman/hero6e-foundryvtt/issues/1129)
+- Post-Segment 12 now only performed once per turn during combat. This resolves some issues where combat is rewound or when actors change their speed. [#1113](https://github.com/dmdorman/hero6e-foundryvtt/issues/1113)
 - You are now prompted before using stun for endurance. [#1125](https://github.com/dmdorman/hero6e-foundryvtt/issues/1125)
 - Fixed costs for Animal Handler. [#1097](https://github.com/dmdorman/hero6e-foundryvtt/issues/1097)
 - Powers can now be used at less than full power. [#1128](https://github.com/dmdorman/hero6e-foundryvtt/issues/1128)
-- Heroic actors can now be set to use 1 END per 5 STR.  This can be changed in the settings menu.  The actor's heroic/superheroic status is now visible on the actor sheet just after the name. [#291](https://github.com/dmdorman/hero6e-foundryvtt/issues/291)
+- Heroic actors can now be set to use 1 END per 5 STR. This can be changed in the settings menu. The actor's heroic/superheroic status is now visible on the actor sheet just after the name. [#291](https://github.com/dmdorman/hero6e-foundryvtt/issues/291)
 
 ## Version 3.0.81
 
 - Fixed bug where conditional defenses prevented some attacks from applying damage. [#1116](https://github.com/dmdorman/hero6e-foundryvtt/issues/1116)
 - Improved Drag and Drop support to handle compound powers within a framework. [#1102](https://github.com/dmdorman/hero6e-foundryvtt/issues/1102) [#1100](https://github.com/dmdorman/hero6e-foundryvtt/issues/1100) [#1111](https://github.com/dmdorman/hero6e-foundryvtt/issues/1111)
 - Players no longer see token type on actor sheets. [#1096](https://github.com/dmdorman/hero6e-foundryvtt/issues/1096)
-- HeroItems and HeroMacros compendiums are now created dynamically for each world.  You can drag and drop these compendium items onto an actor sheet or hotbar slot.  Note that the Default Edition (5e/6e) setting is used to create the compendiums. [#141](https://github.com/dmdorman/hero6e-foundryvtt/issues/141) [#1101](https://github.com/dmdorman/hero6e-foundryvtt/issues/1101)
+- HeroItems and HeroMacros compendiums are now created dynamically for each world. You can drag and drop these compendium items onto an actor sheet or hotbar slot. Note that the Default Edition (5e/6e) setting is used to create the compendiums. [#141](https://github.com/dmdorman/hero6e-foundryvtt/issues/141) [#1101](https://github.com/dmdorman/hero6e-foundryvtt/issues/1101)
 - Fixed issue where to hit rolls were private for most attacks. [#1108](https://github.com/dmdorman/hero6e-foundryvtt/issues/1108)
 
 ## Version 3.0.80
 
 - Drag and Drop support for compound powers and multi-powers. [#1068](https://github.com/dmdorman/hero6e-foundryvtt/issues/1068)
-- You can upload Hero Designer Prefabs (*.hdp) as compendiums. [#1067](https://github.com/dmdorman/hero6e-foundryvtt/issues/1067) [#142](https://github.com/dmdorman/hero6e-foundryvtt/issues/142)
+- You can upload Hero Designer Prefabs (\*.hdp) as compendiums. [#1067](https://github.com/dmdorman/hero6e-foundryvtt/issues/1067) [#142](https://github.com/dmdorman/hero6e-foundryvtt/issues/142)
 
 ## Version 3.0.79
 
 - Fixed issue where the roll-to-hit window would open "inappropriately" when selecting targets.
 - Fixed Combat Tracker errors when SPD is lowered for combatant. [#1089](https://github.com/dmdorman/hero6e-foundryvtt/issues/1089)
-- Mind Scan improvements.  
+- Mind Scan improvements.
   - Can select token(s) without the need to use T to target, limiting the reveal of unwanted information.
   - Can select token(s) across scenes.
 - Video: [Hero System 6e (Unofficial) v2 - Mind Scan - Basic](https://youtu.be/eMoYvJQHVsg)
@@ -204,7 +204,7 @@
 
 ## Version 3.0.77
 
-- PD/ED characteristics with resistant modifier are now actually resistant.  Previously the resistant modifier was ignored.  Also PD/ED purchased as characteristics now show in DEFENSES tab for easy reference. [#1063](https://github.com/dmdorman/hero6e-foundryvtt/issues/1063)
+- PD/ED characteristics with resistant modifier are now actually resistant. Previously the resistant modifier was ignored. Also PD/ED purchased as characteristics now show in DEFENSES tab for easy reference. [#1063](https://github.com/dmdorman/hero6e-foundryvtt/issues/1063)
 - Fix where the CSL selections were duplicated during AOE template placement. [#1064](https://github.com/dmdorman/hero6e-foundryvtt/issues/1064)
 - Fix where DCV temporary bonuses from CSLs and other active effects were expiring on our segment instead of on our phase. [#1061](https://github.com/dmdorman/hero6e-foundryvtt/issues/1061)
 - ToHit dialog box now shows a list of all targets.
@@ -217,18 +217,18 @@
 
 ## Version 3.0.75
 
-- We recommend sticking with FoundryVTT v11.  Known v12 issues:
+- We recommend sticking with FoundryVTT v11. Known v12 issues:
   - [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module breaks several things.
   - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) mostly works. Oddities changing token images.
 - FoundryVTT 12.327 support.
 - Reworked Combat Tracker to more closely align to FoundryVTT v12.
 - Improved chat messages for power toggles to include GM & token owners.
-- Improved initial toggle states during HDC upload.  For example, items in a multipower default to off.
-- Improved BASE actor type support. PD and ED are now resistant.  BODY now shows in characteristics tab. Implied DCV=3 or 0 if adjacent.
+- Improved initial toggle states during HDC upload. For example, items in a multipower default to off.
+- Improved BASE actor type support. PD and ED are now resistant. BODY now shows in characteristics tab. Implied DCV=3 or 0 if adjacent.
 - [Barrier proof of concept](https://youtu.be/fINMDsyObK0).
-- Fix for compound powers within a list, where not all compound items were uploaded.  Also fixed issue where some compound power items were duplicating modifiers. [#964](https://github.com/dmdorman/hero6e-foundryvtt/issues/964)
+- Fix for compound powers within a list, where not all compound items were uploaded. Also fixed issue where some compound power items were duplicating modifiers. [#964](https://github.com/dmdorman/hero6e-foundryvtt/issues/964)
 - You can now make attack rolls from equipment tab.
-- Added EXPERIENCE field to the OTHER tab.  Be careful as this gets overwritten when you upload an HDC file.
+- Added EXPERIENCE field to the OTHER tab. Be careful as this gets overwritten when you upload an HDC file.
 
 ## Version 3.0.74
 
@@ -238,7 +238,7 @@
 - Support for multiple Combat Skill Levels associated with an attack.
 - Combat Skill Levels purchased as powers can be toggled. [#995](https://github.com/dmdorman/hero6e-foundryvtt/issues/995)
 - Support for REQUIRESASKILLROLL and EVERYPHASE for defenses during Apply Damage. [#457](https://github.com/dmdorman/hero6e-foundryvtt/issues/457)
-- Improved Penalty Skill Level support. PSLs can have attack(s) specified and penalty type specified.  Only the range penalty is currently supported. [#863](https://github.com/dmdorman/hero6e-foundryvtt/issues/863)
+- Improved Penalty Skill Level support. PSLs can have attack(s) specified and penalty type specified. Only the range penalty is currently supported. [#863](https://github.com/dmdorman/hero6e-foundryvtt/issues/863)
 
 ## Version 3.0.73
 
@@ -252,16 +252,15 @@
   - [Dice So Nice!](https://gitlab.com/riccisi/foundryvtt-dice-so-nice) seems to work just fine.
   - [Simple Calendar](https://github.com/vigoren/foundryvtt-simple-calendar) seems to work just fine.
   - [About Face](https://foundryvtt.com/packages/about-face) seems to work just fine.
-  - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) seems to work well.  Had to delete some of the bars on older tokens and recreate them, but it works. We plan to drop the built in 3rd bar support as Bar Brawl is superior.
-  - [Elevation Ruler](https://foundryvtt.com/packages/elevationruler) is not currently recommended, but we are looking into Drag Ruler alternatives. It overrides our custom labels that show movement type and range penalties.  Dropped tokens don't always center in hex.
+  - [Bar Brawl](https://foundryvtt.com/packages/barbrawl) seems to work well. Had to delete some of the bars on older tokens and recreate them, but it works. We plan to drop the built in 3rd bar support as Bar Brawl is superior.
+  - [Elevation Ruler](https://foundryvtt.com/packages/elevationruler) is not currently recommended, but we are looking into Drag Ruler alternatives. It overrides our custom labels that show movement type and range penalties. Dropped tokens don't always center in hex.
   - We have more testing to do, this list is not comprehensive. Feel free to submit [bug/issues](https://github.com/dmdorman/hero6e-foundryvtt/issues) if you find any v12 bugs that we haven't mentioned.
-- Improved chat messages during combat for powers that use END each phase. Powers automatically turn off when there is insufficient END.  GM gets a message when any power is toggled.
+- Improved chat messages during combat for powers that use END each phase. Powers automatically turn off when there is insufficient END. GM gets a message when any power is toggled.
 - Fixed combat tracker issues with FoundtyVTT V12 where onStartTurn was only called postSegment12. This was preventing the consumption of END for continuous powers. [#1024](https://github.com/dmdorman/hero6e-foundryvtt/issues/1024)
-- Movement radio buttons now display even when [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) is not active.  Unselecting a token removes movement radio buttons to avoid confusion.
+- Movement radio buttons now display even when [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) is not active. Unselecting a token removes movement radio buttons to avoid confusion.
 - Fixed various issues preventing the ability to toggle some powers.
-- You can hold down the control key when toggling a power to force success of associated Requires A Roll.  Useful for GM's.
+- You can hold down the control key when toggling a power to force success of associated Requires A Roll. Useful for GM's.
 - Skills now support CHARGES and COSTEND modifiers. [#908](https://github.com/dmdorman/hero6e-foundryvtt/issues/908)
-
 
 ## Version 3.0.71
 
@@ -270,16 +269,16 @@
   - Combat tracker is not consuming END for constant powers nor resetting movement history (but Drag Ruler is broken anyway).
   - We haven't tested much yet so this list is not comprehensive.
 - Improved item drag & drop behavior. Dropped item descriptions are updated on drop, and any parenting associated with frameworks is removed.
-- You can now toggle INVISIBILITY, it consumes END while in combat, and triggers the invisibility status condition if invisibility's primary option is SIGHT GROUP.  Enhanced senses are not implemented so the GM will have to address invisibility vs enhanced senses.
+- You can now toggle INVISIBILITY, it consumes END while in combat, and triggers the invisibility status condition if invisibility's primary option is SIGHT GROUP. Enhanced senses are not implemented so the GM will have to address invisibility vs enhanced senses.
 - Fix Combat Skill Levels attack enumerations. Attacks are now listed by name when provided, and by generic power when no name is provided. [#1004](https://github.com/dmdorman/hero6e-foundryvtt/issues/1004)
 - Fixed issue where some compound powers subitems were showing in the wrong actor sheet tab or not showing at all.
 - Skill Levels now default to unchecked, with some educated guessing by matching characteristic or Skill Levels options. [#1006](https://github.com/dmdorman/hero6e-foundryvtt/issues/1006)
 - Improved CSL selection of attacks for compound powers. [#1007](https://github.com/dmdorman/hero6e-foundryvtt/issues/1007)
 - Improved CP and AP on actor sheet header. Equipment is now summarized correctly. AP hover title shows breakout.
 - Fix issue where STR shows END use in chat card but not actually consumed. [#1018](https://github.com/dmdorman/hero6e-foundryvtt/issues/1018)
-- Initial KNOCKBACK damage support.  The knockback text in the chatcard is now a button that automates the damage and associated defenses. [#810](https://github.com/dmdorman/hero6e-foundryvtt/issues/810)
-- Add custom AOE templates for 5e radius (v11 and v12) and cone (v12 only) AOE to match hex counted versions.  These are enabled by default on all hexagonal scenes and be disabled in the settings. [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997)
-- Added new setting to specify 6e vs 5e rules for the world in the rare situation where an actor is not initiating the action.  Defaults to 6e, which is how it previously was.
+- Initial KNOCKBACK damage support. The knockback text in the chatcard is now a button that automates the damage and associated defenses. [#810](https://github.com/dmdorman/hero6e-foundryvtt/issues/810)
+- Add custom AOE templates for 5e radius (v11 and v12) and cone (v12 only) AOE to match hex counted versions. These are enabled by default on all hexagonal scenes and be disabled in the settings. [#997](https://github.com/dmdorman/hero6e-foundryvtt/issues/997)
+- Added new setting to specify 6e vs 5e rules for the world in the rare situation where an actor is not initiating the action. Defaults to 6e, which is how it previously was.
 
 ## Version 3.0.70
 
@@ -294,7 +293,7 @@
 - Initial support for WEAPON_MASTER talent. [#972](https://github.com/dmdorman/hero6e-foundryvtt/issues/972)
 - Initial support for DEADLYBLOW talent. [#972](https://github.com/dmdorman/hero6e-foundryvtt/issues/972)
 - Initial support for PERSONALIMMUNITY. [#973](https://github.com/dmdorman/hero6e-foundryvtt/issues/973)
-- Reworked Combat Skill Levels. They now use Custom Adders to store attack details.  You can use Custom Adder in your HD file to streamline future imports, so you don't have to update your CSLs every time you import. Educated guessing of which attacks apply if you don't provide them in the HD file as custom adders. [#883](https://github.com/dmdorman/hero6e-foundryvtt/issues/883)
+- Reworked Combat Skill Levels. They now use Custom Adders to store attack details. You can use Custom Adder in your HD file to streamline future imports, so you don't have to update your CSLs every time you import. Educated guessing of which attacks apply if you don't provide them in the HD file as custom adders. [#883](https://github.com/dmdorman/hero6e-foundryvtt/issues/883)
 
 ## Version 3.0.68
 
@@ -320,9 +319,9 @@
 - Improved in-game editing:
   - You can add most skills, powers, etc to an actor in-game. Frameworks, compound powers, and enhancers can not be added in-game yet.
   - Some editing options are confusing and will be improved in future releases.
-  - A limited number of adders and modifiers can be added to items.  Will add more in future releases.
-  - Simplified editing of attacks.  Using adders for +1/2 d6 and +1 pip.
-  - There is minimal vetting of in-game editing.  Any invalid adders/modifiers for a specific power will likely to be ignored and/or may cause automation issues.
+  - A limited number of adders and modifiers can be added to items. Will add more in future releases.
+  - Simplified editing of attacks. Using adders for +1/2 d6 and +1 pip.
+  - There is minimal vetting of in-game editing. Any invalid adders/modifiers for a specific power will likely to be ignored and/or may cause automation issues.
   - Items modified in-game may have incorrect costs and active points.
   - Be careful when re-uploading HDC files as in-game edits for that actor will be overwritten without warning.
 
@@ -339,7 +338,7 @@
 - Fix adjustment powers not getting power defense and add effects, such as penetrating, to adjustment chat card.
 - Drag Ruler will now show proper 5e colours at appropriate distances.
 - Defense are now properly applied to ADJUSTMENT POWERS. Added effect descriptions (such as penetrating) to adjustment chat card.
-- You can now add most skills and some powers in game.  We're still adding the rest of the powers, perks, etc.  Only a few items (blast for example) are functionally editable at the moment.  One small step toward Hero Designer lite.
+- You can now add most skills and some powers in game. We're still adding the rest of the powers, perks, etc. Only a few items (blast for example) are functionally editable at the moment. One small step toward Hero Designer lite.
 
 ## Version 3.0.64
 
@@ -376,7 +375,7 @@
 ## Version 3.0.60
 
 - Fixes for TELEKINESIS (TK punch/strike).
-- Effective STR specified as part of the attack is no longer ignored.  Allows for attacks at less than full power, thus conserving END.
+- Effective STR specified as part of the attack is no longer ignored. Allows for attacks at less than full power, thus conserving END.
 - Fixes for ENDURANCERESERVE. [#783](https://github.com/dmdorman/hero6e-foundryvtt/issues/783)
 - 5e now shows proper lift capacities for STR values under 5. [#709](https://github.com/dmdorman/hero6e-foundryvtt/issues/709)
 - Skill levels now apply when rolling skills. Skill rolls can now auto succeed or fail.
@@ -467,7 +466,7 @@
 - Characters with incompletely defined adjustment powers will get a warning during upload with a hint on how to fix them.
 - Fix HDC uploads when name is missing from HDC file.
 - Fix missing display of BACKGROUND an other character information. [#483](https://github.com/dmdorman/hero6e-foundryvtt/issues/483)
-- Configuration setting to toggle custom resource bars.  Existing worlds will retain custom resource bars, new worlds will default to core FoundryVTT resource bars.  The [Bar Brawl](https://foundryvtt.com/packages/barbrawl) module is superior, although requires some configuration.  Bugs related to system custom bars still exist.  We are likely to deprecate the custom resource bars in this system. [#502](https://github.com/dmdorman/hero6e-foundryvtt/issues/502) [#368](https://github.com/dmdorman/hero6e-foundryvtt/issues/368) [#274](https://github.com/dmdorman/hero6e-foundryvtt/issues/274) [#174](https://github.com/dmdorman/hero6e-foundryvtt/issues/174)
+- Configuration setting to toggle custom resource bars. Existing worlds will retain custom resource bars, new worlds will default to core FoundryVTT resource bars. The [Bar Brawl](https://foundryvtt.com/packages/barbrawl) module is superior, although requires some configuration. Bugs related to system custom bars still exist. We are likely to deprecate the custom resource bars in this system. [#502](https://github.com/dmdorman/hero6e-foundryvtt/issues/502) [#368](https://github.com/dmdorman/hero6e-foundryvtt/issues/368) [#274](https://github.com/dmdorman/hero6e-foundryvtt/issues/274) [#174](https://github.com/dmdorman/hero6e-foundryvtt/issues/174)
 - Skill characteristics can now be changed in game and will update appropriately. [#511](https://github.com/dmdorman/hero6e-foundryvtt/issues/511)
 - Power, skill, etc descriptions should now have the user given names in them. While descriptions are still not perfect they should be better. Let us know if anything particularly terrible remains.
 - Lots of behind the scenes work to help improve readability and consistency of the code.
@@ -484,7 +483,7 @@
 
 - The OTHERS tab now has a summary of the top active point powers. [#343](https://github.com/dmdorman/hero6e-foundryvtt/issues/343)
 - Fix for power modifiers being ignored (such as reduce endurance).
-- Initial support for BOOSTABLE CHARGES.  Associated burnout is not implemented.  Does not account for reducing the DC increase for powers with advantages. [#432](https://github.com/dmdorman/hero6e-foundryvtt/issues/432)
+- Initial support for BOOSTABLE CHARGES. Associated burnout is not implemented. Does not account for reducing the DC increase for powers with advantages. [#432](https://github.com/dmdorman/hero6e-foundryvtt/issues/432)
 - Fix for Combat Skill Levels where edit sheet did not allow for changing values.
 - Improved range penalty tags and associated tooltips.
 - Fixed error for cone placement.
@@ -497,10 +496,10 @@
 
 ## Version 3.0.49
 
-- Movement only consumes endurance when it is that token's phase.  Allows for improved knockback workflow. [#420](https://github.com/dmdorman/hero6e-foundryvtt/issues/420)
+- Movement only consumes endurance when it is that token's phase. Allows for improved knockback workflow. [#420](https://github.com/dmdorman/hero6e-foundryvtt/issues/420)
 - Improved velocity detection and implementation with Maneuvers. [#425](https://github.com/dmdorman/hero6e-foundryvtt/issues/425)
 - 5e Move By maneuver shows knockback details in chat card. [#347](https://github.com/dmdorman/hero6e-foundryvtt/issues/347)
-- Fixed 5e maneuvers with velocity components to account for 5e/6e differences.  Migrations of 5e worlds may take longer than normal due to this fix. [#344](https://github.com/dmdorman/hero6e-foundryvtt/issues/344)
+- Fixed 5e maneuvers with velocity components to account for 5e/6e differences. Migrations of 5e worlds may take longer than normal due to this fix. [#344](https://github.com/dmdorman/hero6e-foundryvtt/issues/344)
 - Fix when "Equipment Weight Percentage" is changed in game settings and there are tokens with no associated actor.
 - When powers are sent to chat the range of the power is included in the chat message. [#323](https://github.com/dmdorman/hero6e-foundryvtt/issues/323)
 
@@ -517,7 +516,7 @@
 
 ## Version 3.0.46
 
-- Ability to use EGO for initiative.  Can be changed on OTHER tab.  New HDC imports will assume EGO when OMCV >= OCV and EGO > DEX. [#419](https://github.com/dmdorman/hero6e-foundryvtt/issues/419)
+- Ability to use EGO for initiative. Can be changed on OTHER tab. New HDC imports will assume EGO when OMCV >= OCV and EGO > DEX. [#419](https://github.com/dmdorman/hero6e-foundryvtt/issues/419)
 - Improved AID to support attack powers and EXPANDEDEFFECT. [#415](https://github.com/dmdorman/hero6e-foundryvtt/issues/419)
 - Fix for 5e ARMOR missing toggle.
 - Fix for TRANSPORT_FAMILIARITY costs.
@@ -542,10 +541,10 @@
 
 ## Version 3.0.44
 
-- Fix some NaN issues with Maneuvers and Active Points that was unnecessarily calling migration scripts for most tokens.  Larger worlds may still experience a long migration for 3.0.44, but future migrations should be much quicker.
+- Fix some NaN issues with Maneuvers and Active Points that was unnecessarily calling migration scripts for most tokens. Larger worlds may still experience a long migration for 3.0.44, but future migrations should be much quicker.
 - Partial support for TELEPATHY. [#402](https://github.com/dmdorman/hero6e-foundryvtt/issues/402)
-- Fix to reset movement history at beginning of token phase.  DragRuler module was only resetting movement history between turns. [#401](https://github.com/dmdorman/hero6e-foundryvtt/issues/401)
-- Initial support for compound powers.  Currently treated like a multipower. [#407](https://github.com/dmdorman/hero6e-foundryvtt/issues/407)
+- Fix to reset movement history at beginning of token phase. DragRuler module was only resetting movement history between turns. [#401](https://github.com/dmdorman/hero6e-foundryvtt/issues/401)
+- Initial support for compound powers. Currently treated like a multipower. [#407](https://github.com/dmdorman/hero6e-foundryvtt/issues/407)
 
 ## Version 3.0.43
 
@@ -604,14 +603,14 @@
 
 ## Version 3.0.35
 
-- Overhauled internal data structures.  This is an important step toward improved editing.  The previous editing is likely broken.
+- Overhauled internal data structures. This is an important step toward improved editing. The previous editing is likely broken.
 - Fix for 5e HDC uploads and incorrect characteristics. [#382](https://github.com/dmdorman/hero6e-foundryvtt/issues/382) [#381](https://github.com/dmdorman/hero6e-foundryvtt/issues/381)
 - Encumbrance percentage [#388](https://github.com/dmdorman/hero6e-foundryvtt/issues/388)
 
 ## Version 3.0.34
 
-- Initial support for HOLDING BREATH.  Disallows recovery.  No check ensure 1 END is spent per phase. [#364](https://github.com/dmdorman/hero6e-foundryvtt/issues/364) [#310](https://github.com/dmdorman/hero6e-foundryvtt/issues/310) 
-- Initial support for UNDERWATER and STANDING IN WATER. If either status -2 DCV.  UNDERWATER also includes -2 DC.  No check for SCUBA or breakfall. [#363](https://github.com/dmdorman/hero6e-foundryvtt/issues/363)
+- Initial support for HOLDING BREATH. Disallows recovery. No check ensure 1 END is spent per phase. [#364](https://github.com/dmdorman/hero6e-foundryvtt/issues/364) [#310](https://github.com/dmdorman/hero6e-foundryvtt/issues/310)
+- Initial support for UNDERWATER and STANDING IN WATER. If either status -2 DCV. UNDERWATER also includes -2 DC. No check for SCUBA or breakfall. [#363](https://github.com/dmdorman/hero6e-foundryvtt/issues/363)
 - Fix 5e OCV/DCV HDC upload [#376](https://github.com/dmdorman/hero6e-foundryvtt/issues/376)
 - Fix for Characteristic rolls that were not working. [#331](https://github.com/dmdorman/hero6e-foundryvtt/issues/331)
 - Fix for incorrect REC base. [#371](https://github.com/dmdorman/hero6e-foundryvtt/issues/371)
@@ -619,7 +618,7 @@
 - Improved ENTANGLE status. 0 DCV. 1/2 OCV.
 - Initial support for STUNONLY modifier. [#374](https://github.com/dmdorman/hero6e-foundryvtt/issues/374)
 - At the end of the Segment, any non-Persistent (Constant) Powers turn off for stunned actors.
-- Talents can now be toggled.  This was specifically implemented for Combat Luck. [#312](https://github.com/dmdorman/hero6e-foundryvtt/issues/312)
+- Talents can now be toggled. This was specifically implemented for Combat Luck. [#312](https://github.com/dmdorman/hero6e-foundryvtt/issues/312)
 
 ## Version 3.0.33
 
@@ -629,14 +628,14 @@
 - Hit Locations no longer valid for AOE attacks.
 - Initial support for SELECTIVE and NONSELECTIVE. [#322](https://github.com/dmdorman/hero6e-foundryvtt/issues/322)
 - You now have to hold down SHIFT to change turn in combat tracker. [#352](https://github.com/dmdorman/hero6e-foundryvtt/issues/352)
-- Initial support for PENALTY SKILL LEVELS.  Currently limited to Aim Hit Locations.  Shown as a checkbox during attack. [#349](https://github.com/dmdorman/hero6e-foundryvtt/issues/349)
+- Initial support for PENALTY SKILL LEVELS. Currently limited to Aim Hit Locations. Shown as a checkbox during attack. [#349](https://github.com/dmdorman/hero6e-foundryvtt/issues/349)
 - Initial support for AUTOMATION and TAKES NO STUN. [#308](https://github.com/dmdorman/hero6e-foundryvtt/issues/308)
 
 ## Version 3.0.32
 
-- Initial REDUCEDPENETRATION support.  Rules as written are to split the attack into two separate dice pools, which is awkward with the current system.  A simplified solution is to apply defenses twice to the body damage. [#313](https://github.com/dmdorman/hero6e-foundryvtt/issues/313)
-- Initial Actor description.  Sends APPEARANCE and all obvious & inobvious powers to chat log.  A future improvement will include a perception roll for inobvious powers. [#311](https://github.com/dmdorman/hero6e-foundryvtt/issues/311)
-- Improved migration script.  Fixes mistakes in some power costs & power descriptions without the need to re-upload HDC.
+- Initial REDUCEDPENETRATION support. Rules as written are to split the attack into two separate dice pools, which is awkward with the current system. A simplified solution is to apply defenses twice to the body damage. [#313](https://github.com/dmdorman/hero6e-foundryvtt/issues/313)
+- Initial Actor description. Sends APPEARANCE and all obvious & inobvious powers to chat log. A future improvement will include a perception roll for inobvious powers. [#311](https://github.com/dmdorman/hero6e-foundryvtt/issues/311)
+- Improved migration script. Fixes mistakes in some power costs & power descriptions without the need to re-upload HDC.
 - Fixed missing 5e AOE sizes. [#356](https://github.com/dmdorman/hero6e-foundryvtt/issues/356) [#353](https://github.com/dmdorman/hero6e-foundryvtt/issues/353)
 - Fixed issue where Post-Segment 12 was called pre and post segment 12.[#328](https://github.com/dmdorman/hero6e-foundryvtt/issues/328)
 
@@ -654,7 +653,7 @@
 
 ## Version 3.0.29
 
-- Reworked Characteristics internal data structure.  Consolidating 6e/5e base, core, costs, bought as powers, etc into one data structure.  Improved hover descriptions.  You can now make changes to CORE characteristics, which will update BASE and COST.  Core, base, and cost are mostly for reference and have no effective gameplay function; although MAX should equal CORE  when all powers/effects are turned off.  This is a small step toward improving actor editing within FoundryVTT.
+- Reworked Characteristics internal data structure. Consolidating 6e/5e base, core, costs, bought as powers, etc into one data structure. Improved hover descriptions. You can now make changes to CORE characteristics, which will update BASE and COST. Core, base, and cost are mostly for reference and have no effective gameplay function; although MAX should equal CORE when all powers/effects are turned off. This is a small step toward improving actor editing within FoundryVTT.
 - Fixed incorrect values for some 5e movements during HDC upload. [#299](https://github.com/dmdorman/hero6e-foundryvtt/issues/299)
 
 ## Version 3.0.28
@@ -664,9 +663,9 @@
 
 ## Version 3.0.27
 
-- A work in progress proof of concept for improved editing of powers.  Open item, click on Sheet in header, then select Herosystem6eItem2Sheet to preview.
+- A work in progress proof of concept for improved editing of powers. Open item, click on Sheet in header, then select Herosystem6eItem2Sheet to preview.
 - Improved actor migration to update power modifiers. [#287](https://github.com/dmdorman/hero6e-foundryvtt/issues/287)
-- Added [FEATURES.md](FEATURES.md) file that lists all the skills, perks, talents, powers, modifiers and complications.  Each is given a support rating.
+- Added [FEATURES.md](FEATURES.md) file that lists all the skills, perks, talents, powers, modifiers and complications. Each is given a support rating.
 - Improved Aid/Drain descriptions and fixed issue where targets were not passed to apply damage. [#289](https://github.com/dmdorman/hero6e-foundryvtt/issues/289)
 
 ## Version 3.0.26
@@ -675,12 +674,12 @@
 
 ## Version 3.0.25
 
-- Support for Use Standard Effect.  Requires uploading of HDC again. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
+- Support for Use Standard Effect. Requires uploading of HDC again. [#281](https://github.com/dmdorman/hero6e-foundryvtt/issues/281)
 - Fixed AOE "Apply Damage to ALL" where full damage was applied to all tokens instead of damage based on distance.
 - Movement during combat now costs END (1 END per 10m). [#239](https://github.com/dmdorman/hero6e-foundryvtt/issues/239)
 - RoundFavorPlayerUp on DCV to ensure whole number. [#210](https://github.com/dmdorman/hero6e-foundryvtt/issues/210)
 - Reduced Endurance (half) now has minimum cost of 1 END.
-- Improved generic migration to update costs, END and descriptions.  This overwrites any manual changes that may have been made.
+- Improved generic migration to update costs, END and descriptions. This overwrites any manual changes that may have been made.
 
 ## Version 3.0.24
 
@@ -703,8 +702,8 @@
 ## Version 3.0.20
 
 - Improved AOE template targeting.
-- Initial AOE EXPLOSION support.  Sorts by range to center of template and shows distance to center.  Damage falloff not implemented yet.  [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)
-- Non PCs are marked as defeated when they drop below -10 STUN.  Once defeated they no longer get post segment 12 recoveries.
+- Initial AOE EXPLOSION support. Sorts by range to center of template and shows distance to center. Damage falloff not implemented yet. [#151](https://github.com/dmdorman/hero6e-foundryvtt/issues/151)
+- Non PCs are marked as defeated when they drop below -10 STUN. Once defeated they no longer get post segment 12 recoveries.
 - Improved handling of Mental attacks OMCV/DMCV, DMCV buffs and Mental Combat Skill Levels. [#272](https://github.com/dmdorman/hero6e-foundryvtt/issues/272)
 - Fixed inability to manually create new active effects. [#271](https://github.com/dmdorman/hero6e-foundryvtt/issues/271)
 - Improved attack cards to show all attack modifier tags.
@@ -717,7 +716,7 @@
 - Fixed edge case where Combat tracker starts before segment 12 [#267](https://github.com/dmdorman/hero6e-foundryvtt/issues/267)
 - Added FULL HEALTH button to actor sheet. [#264](https://github.com/dmdorman/hero6e-foundryvtt/issues/264)
 - Clicking on a locked characteristic will prompt to unlock [#261](https://github.com/dmdorman/hero6e-foundryvtt/issues/261)
-- Improved AOE workflow. Attacker is prompted to place an AOE template, which automatically selects visible targets within the template.  AOE attacks assume template always hits hex and that all targets are hit regardless of their DCV.
+- Improved AOE workflow. Attacker is prompted to place an AOE template, which automatically selects visible targets within the template. AOE attacks assume template always hits hex and that all targets are hit regardless of their DCV.
 
 ## Version 3.0.18
 
@@ -725,52 +724,52 @@
 
 ## Version 3.0.17
 
-- Improved CSL detection of small/large group by selecting the first 3 attacks for small group, and all attacks on the attack tab for large group.  You can edit CSL's after upload to override auto selection of relevant attacks.
+- Improved CSL detection of small/large group by selecting the first 3 attacks for small group, and all attacks on the attack tab for large group. You can edit CSL's after upload to override auto selection of relevant attacks.
 - Martial +1 HTH Damage Class(es) was incorrectly created as an attack and shown in attack tab. [#258](https://github.com/dmdorman/hero6e-foundryvtt/issues/258)
 - Fixed missing martial "+1 Ranged Damage Class(es)" upload.
-- Templates automatically select tokens within the template.  Intend to improve AOE attack workflow.
+- Templates automatically select tokens within the template. Intend to improve AOE attack workflow.
 - Initial AVAD support. [#206](https://github.com/dmdorman/hero6e-foundryvtt/issues/206)
 - Fixed everyman skills showing NaN [#259](https://github.com/dmdorman/hero6e-foundryvtt/issues/259)
-- Backend changes to Item Attack dialog.  Values now sync with other windows/players.
+- Backend changes to Item Attack dialog. Values now sync with other windows/players.
 
 ## Version 3.0.16
 
 - Migration unnecessary on new/empty worlds [#254](https://github.com/dmdorman/hero6e-foundryvtt/issues/254)
 - Initial support for vehicles, bases, computers, automatons, and ai's. [#109](https://github.com/dmdorman/hero6e-foundryvtt/issues/109)
-- Fixed issue with some talents failing to upload, that would prevent other powers from uploading.  Improved warn/error messages during upload to assist with similar issues in the future.
+- Fixed issue with some talents failing to upload, that would prevent other powers from uploading. Improved warn/error messages during upload to assist with similar issues in the future.
 - Improved defense summary tooltips/mouseovers.
 
 ## Version 3.0.15
 
-- Fixes for Requires A Roll.  Attacks spend END when RAR fails.  Hotbar macros no longer RAR when powers toggle off. [#244](https://github.com/dmdorman/hero6e-foundryvtt/issues/244)
-- Initial Abort support.  Aborted status icon.  When Stunned, Knocked Out, or Aborted you can not act (make rolls or toggle powers on).
-- Initial Block support.  Minimal automation here.  The GM/Player should speak up before the attacker rolls.  Multiple blocks are possible, but you have to remove the abort condition before making a second block at -2.  In the future it may be possible to prompt the defender if they want to block, and handle multiple blocks.  Block assume no STR/END use.  Any potential Initiative benefits to dodge are not automated.
+- Fixes for Requires A Roll. Attacks spend END when RAR fails. Hotbar macros no longer RAR when powers toggle off. [#244](https://github.com/dmdorman/hero6e-foundryvtt/issues/244)
+- Initial Abort support. Aborted status icon. When Stunned, Knocked Out, or Aborted you can not act (make rolls or toggle powers on).
+- Initial Block support. Minimal automation here. The GM/Player should speak up before the attacker rolls. Multiple blocks are possible, but you have to remove the abort condition before making a second block at -2. In the future it may be possible to prompt the defender if they want to block, and handle multiple blocks. Block assume no STR/END use. Any potential Initiative benefits to dodge are not automated.
 - Initial Dodge support. [#105](https://github.com/dmdorman/hero6e-foundryvtt/issues/105)
 - Fixed Martial Arts uploads where OCV and DCV modifiers were ignored.
-- Improved Blind and Prone statuses to include appropriate CV penalties. 
-- Fixed 1/2 DCV rounding down.  Now follows standard rounding rules that favor the player. [#153](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
-- Initial AUTOFIRE support.  Some automation for single targets.  No automation for multiple targets as the workflow of tohit/damage would be awkward unless fully automated.  Full automation limits  the ability for GM's to handle unusual situations. [#43](https://github.com/dmdorman/hero6e-foundryvtt/issues/43)
-- Initial support for Skill Levels.  Player is prompted to confirm Skill Level applies to rolled skill.  Skill rolls now show tag details. [#89](https://github.com/dmdorman/hero6e-foundryvtt/issues/89)
+- Improved Blind and Prone statuses to include appropriate CV penalties.
+- Fixed 1/2 DCV rounding down. Now follows standard rounding rules that favor the player. [#153](https://github.com/dmdorman/hero6e-foundryvtt/issues/153)
+- Initial AUTOFIRE support. Some automation for single targets. No automation for multiple targets as the workflow of tohit/damage would be awkward unless fully automated. Full automation limits the ability for GM's to handle unusual situations. [#43](https://github.com/dmdorman/hero6e-foundryvtt/issues/43)
+- Initial support for Skill Levels. Player is prompted to confirm Skill Level applies to rolled skill. Skill rolls now show tag details. [#89](https://github.com/dmdorman/hero6e-foundryvtt/issues/89)
 - Fixed issue where some active effects using icons not associated with statuses caused error when loading world.
 - Initial Encumbrance penalty support. [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118)
-- Fixed issue where END was spent twice a phase for actors with Lightning Reflexes.  Now it only spends END on the beginning of the non LR phase for that actor.
-- Improved scrolling numbers for STUN and BODY changes.  They now show when you Take a recovery.  Also show for all players, not jus the GM.
+- Fixed issue where END was spent twice a phase for actors with Lightning Reflexes. Now it only spends END on the beginning of the non LR phase for that actor.
+- Improved scrolling numbers for STUN and BODY changes. They now show when you Take a recovery. Also show for all players, not jus the GM.
 - Improved Skill and Power descriptions. [#248](https://github.com/dmdorman/hero6e-foundryvtt/issues/248)
 - Improved Skill Enhancer calculations [#249](https://github.com/dmdorman/hero6e-foundryvtt/issues/249)
 - Fixed rare and minor issue where velocity wasn't calculated when there is no token for an actor. [#250](https://github.com/dmdorman/hero6e-foundryvtt/issues/250)
-- Fixed 0d6 + 1 rolls.  [#252](https://github.com/dmdorman/hero6e-foundryvtt/issues/252)
+- Fixed 0d6 + 1 rolls. [#252](https://github.com/dmdorman/hero6e-foundryvtt/issues/252)
 
 ## Version 3.0.14
 
 - Fixed issue where some 5e powers were incorrectly calculating END.
 - Support for Activation Rolls (similar to Requires a Roll)
-- Initial support for conditional Defenses (Only Works Against & Conditional Power). GM will be prompted to select conditional defense when applying damage.  [#181](https://github.com/dmdorman/hero6e-foundryvtt/issues/181)
-- Improved Endurance/Stun (all) and Body (PCs only) recovery out of combat.  NPCs stop stun recovery once they are below -10 stun. PC stun recovery below -10 is still every phase, but should be using the Recovery Time Table (future improvement). Expected to use Simple Calendar to advance time out of combat.
-- Active Effects split out into Temporary, Constant, or Persistent. Where Constant and Persistent largely match the HERO power description; and are typically always on (such as most defenses).  Temporary is for effects with a limited duration (such as AID).  In a future release constant powers will toggle off when knocked out.  May require HDC upload on existing actors for proper assignment. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
-- Defenses show as effects in other tab. Internally they are not Active Effects, but behave similarly.  A quality of life enhancement which shows all powers & effects in one spot.
+- Initial support for conditional Defenses (Only Works Against & Conditional Power). GM will be prompted to select conditional defense when applying damage. [#181](https://github.com/dmdorman/hero6e-foundryvtt/issues/181)
+- Improved Endurance/Stun (all) and Body (PCs only) recovery out of combat. NPCs stop stun recovery once they are below -10 stun. PC stun recovery below -10 is still every phase, but should be using the Recovery Time Table (future improvement). Expected to use Simple Calendar to advance time out of combat.
+- Active Effects split out into Temporary, Constant, or Persistent. Where Constant and Persistent largely match the HERO power description; and are typically always on (such as most defenses). Temporary is for effects with a limited duration (such as AID). In a future release constant powers will toggle off when knocked out. May require HDC upload on existing actors for proper assignment. [#235](https://github.com/dmdorman/hero6e-foundryvtt/issues/235)
+- Defenses show as effects in other tab. Internally they are not Active Effects, but behave similarly. A quality of life enhancement which shows all powers & effects in one spot.
 - Combat Skill Levels (CSL) can be changed within the _Roll to Hit_ dialog. [#189](https://github.com/dmdorman/hero6e-foundryvtt/issues/189)
 - Initial support for DCV buffs/penalties associated with some attacks, that last until actors next phase. [#103](https://github.com/dmdorman/hero6e-foundryvtt/issues/103)
-- STUN and BODY changes for tokens show as scrolling combat text.  Stun is green and Body is red, matching the attribute bar colors. [#81](https://github.com/dmdorman/hero6e-foundryvtt/issues/81)
+- STUN and BODY changes for tokens show as scrolling combat text. Stun is green and Body is red, matching the attribute bar colors. [#81](https://github.com/dmdorman/hero6e-foundryvtt/issues/81)
 
 ## Version 3.0.13
 
@@ -781,14 +780,14 @@
 ## Version 3.0.12
 
 - Active Powers consume END at beginning of phase. May require HDC upload or toggle powers to work on existing actors. [#77](https://github.com/dmdorman/hero6e-foundryvtt/issues/77)
-- Range Penalty applies when targeting tokens. Fixed Set/Brace. 5e range penalties are now based on 1".  [#100](https://github.com/dmdorman/hero6e-foundryvtt/issues/100)
+- Range Penalty applies when targeting tokens. Fixed Set/Brace. 5e range penalties are now based on 1". [#100](https://github.com/dmdorman/hero6e-foundryvtt/issues/100)
 - Fixed Biography editing. [#233](https://github.com/dmdorman/hero6e-foundryvtt/issues/233)
 - END and STUN recover when time advances (with Simple Calendar) [#228](https://github.com/dmdorman/hero6e-foundryvtt/issues/228)
 - Charges reset each day [#227](https://github.com/dmdorman/hero6e-foundryvtt/issues/227)
-- Maneuvers that are attack-ish now have roll icons instead of checkboxes.  [#102](https://github.com/dmdorman/hero6e-foundryvtt/issues/102)
+- Maneuvers that are attack-ish now have roll icons instead of checkboxes. [#102](https://github.com/dmdorman/hero6e-foundryvtt/issues/102)
 - Haymaker support. [#98](https://github.com/dmdorman/hero6e-foundryvtt/issues/98)
-- Initial MOVE BY and MOVE THROUGH support.  Velocity assumes token is at rest at beginning and end of phase.  Velocity can be overwritten. [#193](https://github.com/dmdorman/hero6e-foundryvtt/issues/193)
-- Initial support for 'Only Costs END to Activate'. 
+- Initial MOVE BY and MOVE THROUGH support. Velocity assumes token is at rest at beginning and end of phase. Velocity can be overwritten. [#193](https://github.com/dmdorman/hero6e-foundryvtt/issues/193)
+- Initial support for 'Only Costs END to Activate'.
 - AID fix for END.
 
 ## Version 3.0.11
@@ -797,21 +796,21 @@
 - Initial TRANSFER (5e) support. [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)
 - POWER DEFENSE works vs DRAIN/TRANSFER.
 - DELAYED RETURN RATE works vs AID/DRAIN/TRANSFER.
-- Initial REQUIRES A ROLL support.  [#53](https://github.com/dmdorman/hero6e-foundryvtt/issues/53) [#49](https://github.com/dmdorman/hero6e-foundryvtt/issues/49)
+- Initial REQUIRES A ROLL support. [#53](https://github.com/dmdorman/hero6e-foundryvtt/issues/53) [#49](https://github.com/dmdorman/hero6e-foundryvtt/issues/49)
 - Initial ENDURANCE RESERVE support. [#54](https://github.com/dmdorman/hero6e-foundryvtt/issues/54)
 
 ## Version 3.0.10
 
 - Temporary changes to CHARACTERISTIC MAX have red/green backgrounds on character sheet, similar to how VALUE background turns red/green.
-- Combat tracker now advances time.  Confirmed compatibility with Simple Calendar when GameWorldTimeIntegrations=Mixed. [#213](https://github.com/dmdorman/hero6e-foundryvtt/issues/213)
+- Combat tracker now advances time. Confirmed compatibility with Simple Calendar when GameWorldTimeIntegrations=Mixed. [#213](https://github.com/dmdorman/hero6e-foundryvtt/issues/213)
 - Improved AID and DRAIN support. [#185](https://github.com/dmdorman/hero6e-foundryvtt/issues/185)
 
 ## Version 3.0.9
 
 - Initial support for Charges [#191](https://github.com/dmdorman/hero6e-foundryvtt/issues/191) [#47](https://github.com/dmdorman/hero6e-foundryvtt/issues/47)
 - Fixed adding skills with NaN- rolls. [#195](https://github.com/dmdorman/hero6e-foundryvtt/issues/195)
-- Partial Find Weakness (5e) support.  Shows as a skill roll.  [#208](https://github.com/dmdorman/hero6e-foundryvtt/issues/208)
-- Stunned tokens are prevented from attacking.  Stunned effect is removed and end of phase instead of start of phase. [#204](https://github.com/dmdorman/hero6e-foundryvtt/issues/204)
+- Partial Find Weakness (5e) support. Shows as a skill roll. [#208](https://github.com/dmdorman/hero6e-foundryvtt/issues/208)
+- Stunned tokens are prevented from attacking. Stunned effect is removed and end of phase instead of start of phase. [#204](https://github.com/dmdorman/hero6e-foundryvtt/issues/204)
 - Fixed "undefined id [] does not exist in the EmbeddedCollection collection" [#185](https://github.com/dmdorman/hero6e-foundryvtt/issues/185) [#211](https://github.com/dmdorman/hero6e-foundryvtt/issues/211)
 - Fixed dragging Attack powers to hotbar [#200](https://github.com/dmdorman/hero6e-foundryvtt/issues/200)
 - Fixed Post-Segment 12 errors. [#217](https://github.com/dmdorman/hero6e-foundryvtt/issues/217)
@@ -841,24 +840,24 @@
 - Fixed issue when deleting combatant in Combat Tracker before combatant begins.
 - At Post-Segment-12 all active combatants Take a Recovery.
 - Stun status is cleared at the beginning of phase.
-- Initial Combat Skill Levels (CSL) support.  OCV is added to attacks.  Simple +1DC. DCV (like all DCV modifiers) is shown but not currently implemented. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)
+- Initial Combat Skill Levels (CSL) support. OCV is added to attacks. Simple +1DC. DCV (like all DCV modifiers) is shown but not currently implemented. [#166](https://github.com/dmdorman/hero6e-foundryvtt/issues/166)
 
 ## Version 3.0.5
 
 - Initial DRAIN support.
-- Changing PC/NPC actor type moved to sheet header.  Also can be changed in the context menu of the actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).
-- Combat Tracker Improvements. Reworked underlying code so that _onEndRound and _onStartTurn are called as expected.  This should lead to future automation improvements.  For example Post-Segment-12 activities and Endurance use at the beginning of turn for continuous powers. Also changed tooltips for PREV/NEXT to align with Hero terminology. [#175](https://github.com/dmdorman/hero6e-foundryvtt/issues/175)
+- Changing PC/NPC actor type moved to sheet header. Also can be changed in the context menu of the actor sidebar. Fixes [#170](https://github.com/dmdorman/hero6e-foundryvtt/issues/170).
+- Combat Tracker Improvements. Reworked underlying code so that \_onEndRound and \_onStartTurn are called as expected. This should lead to future automation improvements. For example Post-Segment-12 activities and Endurance use at the beginning of turn for continuous powers. Also changed tooltips for PREV/NEXT to align with Hero terminology. [#175](https://github.com/dmdorman/hero6e-foundryvtt/issues/175)
 - Minor improvements to framework support.
 - Fixed issue where Reduced Endurance was not included in END calculations. [#132](https://github.com/dmdorman/hero6e-foundryvtt/issues/132)
 
 ## Version 3.0.4
 
-- Reworked Active Effects such that the effects on items remain with items.  They are no longer
-transferred from the item to the actor.  This is following [FoundryVtt v11 ActiveEffect Transferral](https://foundryvtt.com/article/v11-active-effects/) recommendations.
-- Fixed Custom martial attacks, they now show on attack tab.  Also fixed the Set & Brace martial manuevers.
+- Reworked Active Effects such that the effects on items remain with items. They are no longer
+  transferred from the item to the actor. This is following [FoundryVtt v11 ActiveEffect Transferral](https://foundryvtt.com/article/v11-active-effects/) recommendations.
+- Fixed Custom martial attacks, they now show on attack tab. Also fixed the Set & Brace martial manuevers.
 - Fixed a bug where an attack using charges would set END=0.
 - Fixed a bug where some auto created attacks were missing half die.
-- Initial AID support.  Adjustment powers do not automatically fade yet.  One step closer to DRAIN/TRANSFER [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)
+- Initial AID support. Adjustment powers do not automatically fade yet. One step closer to DRAIN/TRANSFER [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)
 
 ## Version 3.0.3
 
@@ -877,26 +876,26 @@ transferred from the item to the actor.  This is following [FoundryVtt v11 Activ
 - FoundryVTT version 11 (v10 no longer supported)
 - Knockback fixes
 - Attack OcvMod [#137](https://github.com/dmdorman/hero6e-foundryvtt/issues/137)
-- Attack powers are used directly.  No longer need to have separate attack items.
-- All attack powers are shown in Attack tab, even those not fully implemented.  A small step toward implementing additional attack types and charges.
+- Attack powers are used directly. No longer need to have separate attack items.
+- All attack powers are shown in Attack tab, even those not fully implemented. A small step toward implementing additional attack types and charges.
 - Character sheet can filter on some items. [#90](https://github.com/dmdorman/hero6e-foundryvtt/issues/90)
 
 ## Version 2.2.0-alpha
 
-- Defensive powers are used directly.  No longer need to have separate defense items splitting out PD/ED/etc.
+- Defensive powers are used directly. No longer need to have separate defense items splitting out PD/ED/etc.
 - Reworked ActiveEffects to be placed on items (per FoundryVtt design).
 - Apply damage only shown to GMs [#95](https://github.com/dmdorman/hero6e-foundryvtt/issues/95)
 - Power/item descriptions can be sent to chat [#128](https://github.com/dmdorman/hero6e-foundryvtt/issues/128)
 - Initial power framework support.
 - Improved 5e support (COM, DAMAGERESISTANCE, FORCEFIELD).
-- All movements collapsed to characteritics tab.  Movement powers are now toggles [#88](https://github.com/dmdorman/hero6e-foundryvtt/issues/128).
-- Most powers can be toggled [#38](https://github.com/dmdorman/hero6e-foundryvtt/issues/38).  The remaining powers that do not have toggles (but should) are not fully implemented in the system.  As support for those powers is added, so will the toggle.
+- All movements collapsed to characteritics tab. Movement powers are now toggles [#88](https://github.com/dmdorman/hero6e-foundryvtt/issues/128).
+- Most powers can be toggled [#38](https://github.com/dmdorman/hero6e-foundryvtt/issues/38). The remaining powers that do not have toggles (but should) are not fully implemented in the system. As support for those powers is added, so will the toggle.
 - Fixed issue where killing attacks were not applying hit location multipliers. [#136](https://github.com/dmdorman/hero6e-foundryvtt/issues/136)
 
 ## Version 2.1.9-alpha
 
-- Fixed equipment price showing NaN.  Summary weight/price for equipment now only shows when there are items with weight/price.
-- Fixed [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module errors when Drag Ruler not installed.  Drag Ruler is recommended, but not required.
+- Fixed equipment price showing NaN. Summary weight/price for equipment now only shows when there are items with weight/price.
+- Fixed [Drag Ruler](https://foundryvtt.com/packages/drag-ruler) module errors when Drag Ruler not installed. Drag Ruler is recommended, but not required.
 - Active Effects on actors are editable. A minor step toward enhancing Active Effects and associated temporary bonuses and penalties. [#126](https://github.com/dmdorman/hero6e-foundryvtt/issues/126) [#118](https://github.com/dmdorman/hero6e-foundryvtt/issues/118) [#103](https://github.com/dmdorman/hero6e-foundryvtt/issues/103)
 
 ## Version 2.1.8-alpha
@@ -912,20 +911,20 @@ transferred from the item to the actor.  This is following [FoundryVtt v11 Activ
 ## Version 2.1.7-alpha
 
 - Improved custom maneuver support. [#91](https://github.com/dmdorman/hero6e-foundryvtt/issues/91)
-- Estimation of Character Points spent and Active Points.  Still pretty rough. [#111](https://github.com/dmdorman/hero6e-foundryvtt/issues/111)
+- Estimation of Character Points spent and Active Points. Still pretty rough. [#111](https://github.com/dmdorman/hero6e-foundryvtt/issues/111)
 - Improved power descriptions. [#78](https://github.com/dmdorman/hero6e-foundryvtt/issues/78)
 - Fix for Attacks missing AP/PEN edit boxes. [#113](https://github.com/dmdorman/hero6e-foundryvtt/issues/113)
 - Attacks and Defenses created from equipment. [#114](https://github.com/dmdorman/hero6e-foundryvtt/issues/114)
 - Improved 5e support:
-  - Added Comeliness (COM) characteristic.  
-  - Fixed OCV/DCV/STUN figured characteristics. [#104](https://github.com/dmdorman/hero6e-foundryvtt/issues/104) 
-  - Fixed characteristic costs. 
+  - Added Comeliness (COM) characteristic.
+  - Fixed OCV/DCV/STUN figured characteristics. [#104](https://github.com/dmdorman/hero6e-foundryvtt/issues/104)
+  - Fixed characteristic costs.
   - Lack of Weakness as a defense (no automation). [#106](https://github.com/dmdorman/hero6e-foundryvtt/issues/106)
   - Added support for the Armor (Resistant Protection) and Growth powers. [#108](https://github.com/dmdorman/hero6e-foundryvtt/issues/108)
 
 ## Version 2.1.6-alpha
 
-- Added 3rd attribute bar. Expectation is to show body, stun, and endurance for most tokens.  [#75](https://github.com/dmdorman/hero6e-foundryvtt/issues/75)
+- Added 3rd attribute bar. Expectation is to show body, stun, and endurance for most tokens. [#75](https://github.com/dmdorman/hero6e-foundryvtt/issues/75)
 - New default character sheet.
 - Added Perception as a skill [#97](https://github.com/dmdorman/hero6e-foundryvtt/issues/97)
 - Skill rolls dynamically change with characteristic changes.
@@ -1003,9 +1002,9 @@ transferred from the item to the actor.  This is following [FoundryVtt v11 Activ
 - Now prioritizing player characters in initiative tracking
 - Known Issues
   - clicking 'Apply to Target' with an attack card generated from a power sub item displays a message
-      'Error: Item does not exist', this should be safe to ignore
+    'Error: Item does not exist', this should be safe to ignore
   - can't edit power/equipment 'sub-items' from character sheet (to add powers to a character sheet use the item tab
-      to create and edit the power there then drag the item onto a character sheet)
+    to create and edit the power there then drag the item onto a character sheet)
   - rolling initiative produces an error message, this can likely be ignored
 
 ## Version 1.1.1

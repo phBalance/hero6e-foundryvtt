@@ -1,5 +1,14 @@
 {
     "printWidth": 120,
     "tabWidth": 4,
-    "eol": "lf"
+    "eol": "lf",
+
+    "overrides": [
+        {
+            "files": ["*.md"],
+            "options": {
+                "tabWidth": 2
+            }  
+        }
+    ]
 }

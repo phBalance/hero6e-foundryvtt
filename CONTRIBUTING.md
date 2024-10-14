@@ -12,12 +12,12 @@ If you would like to report a bug then the GitHub [Quickstart for GitHub Issues]
 
 To contribute to the source you will likely need a number of things:
 
-* A licensed copy of [FoundryVTT](https://foundryvtt.com/purchase/). Be sure to follow the [license](https://foundryvtt.com/article/license/) while developing.
-* A [GitHub](https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github) account.
-* A way of editing the software and interacting with [git](https://git-scm.com/). [VSCode](https://code.visualstudio.com/download) is a free possibility but certainly not the only choice that will allow you to do both.
-* A copy of at least the 5e and 6e basic rule books or the ability to ask others for your answers. Submitted code should support both 5e and 6e and usually the rules aren't too different.
-* A licensed copy of [Hero Designer](https://www.herogames.com/store/product/1-hero-designer/) so that you can create test characters.
-* An installed copy of [Node.js](https://nodejs.org).
+- A licensed copy of [FoundryVTT](https://foundryvtt.com/purchase/). Be sure to follow the [license](https://foundryvtt.com/article/license/) while developing.
+- A [GitHub](https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github) account.
+- A way of editing the software and interacting with [git](https://git-scm.com/). [VSCode](https://code.visualstudio.com/download) is a free possibility but certainly not the only choice that will allow you to do both.
+- A copy of at least the 5e and 6e basic rule books or the ability to ask others for your answers. Submitted code should support both 5e and 6e and usually the rules aren't too different.
+- A licensed copy of [Hero Designer](https://www.herogames.com/store/product/1-hero-designer/) so that you can create test characters.
+- An installed copy of [Node.js](https://nodejs.org).
 
 #### How We Work Together
 
