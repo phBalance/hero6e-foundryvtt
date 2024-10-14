@@ -527,62 +527,18 @@ export async function AttackToHit(item, options) {
     // (so we can be sneaky and not tell the target's DCV out loud).
     heroRoller.addDice(-3);
 
-    // What resources are required to activate this power?
-    const resourcesRequired = calculateRequiredResourcesToUse(item, options);
-
-    const startingCharges = parseInt(item.system.charges?.value || 0);
-    const enduranceReserve = actor.items.find((item) => item.system.XMLID === "ENDURANCERESERVE");
-    const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
-    const actorEndurance = item.actor.system.characteristics.end.value;
-
-    // Does the actor have enough charges available?
-    if (resourcesRequired.charges > 0 && resourcesRequired.charges > startingCharges) {
-        return ui.notifications.error(
-            `${item.name} does not have ${resourcesRequired.charges} charge${
-                resourcesRequired.charges > 1 ? "s" : ""
-            } remaining.`,
-        );
+    // Consume resources
+    const {
+        error: resourceError,
+        warning: resourceWarning,
+        resourcesRequired,
+        resourcesUsedDescription,
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, options);
+    if (resourceError) {
+        return ui.notifications.error(resourceError);
+    } else if (resourceWarning) {
+        return ui.notifications.warn(resourceWarning);
     }
-
-    // Does the actor have enough endurance available?
-    let actualStunCostObj = null;
-    if (item.system.USE_END_RESERVE) {
-        if (enduranceReserve) {
-            if (resourcesRequired.end > reserveEnd) {
-                return await ui.notifications.error(
-                    `${item.name} needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
-                );
-            }
-        } else {
-            return await ui.notifications.error(`${item.name} needs an endurance reserve to spend END but none found.`);
-        }
-    } else {
-        if (resourcesRequired.end > actorEndurance) {
-            // Is the actor willing to use STUN to make up for the lack of END?
-            const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(item, resourcesRequired.end);
-
-            const confirmed = await Dialog.confirm({
-                title: "USING STUN FOR ENDURANCE",
-                content: `<p><b>${item.name}</b> requires ${resourcesRequired.end} END. 
-                <b>${actor.name}</b> has ${actorEndurance} END. 
-                Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
-            });
-            if (!confirmed) {
-                return;
-            }
-
-            actualStunCostObj = await rollStunForEnd(potentialStunCost.stunDice);
-        }
-    }
-
-    // The actor is now committed to spending the resources to activate the power
-    const resourcesUsedDescription = await spendResourcesToUse(
-        item,
-        enduranceReserve,
-        resourcesRequired.end,
-        actualStunCostObj,
-        resourcesRequired.charges,
-    );
 
     const aoeModifier = item.getAoeModifier();
     const aoeTemplate =
@@ -3085,6 +3041,87 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
 }
 
 /**
+ * Multistage helper function useful for most item activations.
+ * 1. Make sure the actor associated with the item has enough resources to activate the item.
+ * 2. Display `ui.notification.error` prompts if actor does not have enough resources and return error.
+ * 3. If the user can use STUN in place of END prompt them for permission to do so
+ * 4. If there are enough resources, spend the resources and return full information.
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {Object} options
+ *
+ * @returns Object discriminated union based on error or warning being falsy/truthy
+ */
+export async function userInteractiveVerifyOptionallyPromptThenSpendResources(item, options) {
+    // What resources are required to activate this power?
+    const resourcesRequired = calculateRequiredResourcesToUse(item, options);
+
+    const actor = item.actor;
+    const startingCharges = parseInt(item.system.charges?.value || 0);
+    const enduranceReserve = actor.items.find((item) => item.system.XMLID === "ENDURANCERESERVE");
+    const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
+    const actorEndurance = actor.system.characteristics.end.value;
+
+    // Does the actor have enough charges available?
+    if (resourcesRequired.charges > 0 && resourcesRequired.charges > startingCharges) {
+        return {
+            error: `${item.name} does not have ${resourcesRequired.charges} charge${
+                resourcesRequired.charges > 1 ? "s" : ""
+            } remaining.`,
+        };
+    }
+
+    // Does the actor have enough endurance available?
+    let actualStunCostObj = null;
+    if (item.system.USE_END_RESERVE) {
+        if (enduranceReserve) {
+            if (resourcesRequired.end > reserveEnd) {
+                return {
+                    error: `${item.name} needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
+                };
+            }
+        } else {
+            return {
+                error: `${item.name} needs an endurance reserve to spend END but none found.`,
+            };
+        }
+    } else {
+        if (resourcesRequired.end > actorEndurance) {
+            // Is the actor willing to use STUN to make up for the lack of END?
+            const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.end);
+
+            const confirmed = await Dialog.confirm({
+                title: "USING STUN FOR ENDURANCE",
+                content: `<p><b>${item.name}</b> requires ${resourcesRequired.end} END. 
+                <b>${actor.name}</b> has ${actorEndurance} END. 
+                Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
+            });
+            if (!confirmed) {
+                return {
+                    warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference.`,
+                };
+            }
+
+            actualStunCostObj = await rollStunForEnd(potentialStunCost.stunDice);
+        }
+    }
+
+    // The actor is now committed to spending the resources to activate the power
+    const resourcesUsedDescription = await spendResourcesToUse(
+        item,
+        enduranceReserve,
+        resourcesRequired.end,
+        actualStunCostObj,
+        resourcesRequired.charges,
+    );
+
+    return {
+        resourcesRequired,
+        resourcesUsedDescription,
+    };
+}
+
+/**
  * Calculate the total expendable cost to use this item
  *
  * @param {HeroSystem6eItem} item
@@ -3171,6 +3208,7 @@ function calculateRequiredEnd(item, effectiveStr) {
             if (item.system.usesTk) {
                 endToUse = Math.ceil((endToUse * effectiveStr) / parseInt(item.system.LEVELS || 1));
             } else {
+                // TODO: Endurance use from STR can only happen once per phase
                 endToUse = endToUse + strEnd;
             }
         }
@@ -3179,15 +3217,22 @@ function calculateRequiredEnd(item, effectiveStr) {
     return endToUse;
 }
 
-function calculateRequiredStunDiceForLackOfEnd(item, end) {
-    const actorEnd = item.actor.system.characteristics.end.value;
+/**
+ * How many STUN dice are required for the actor spend enduranceToUse endurance
+ *
+ * @param {HeroSystem6eActor} actor
+ * @param {number} enduranceToUse
+ * @returns
+ */
+function calculateRequiredStunDiceForLackOfEnd(actor, enduranceToUse) {
+    const actorEnd = actor.system.characteristics.end.value;
     let endSpentAboveZero = 0;
     let stunDice = 0;
 
-    if (end > 0 && actorEnd - end < 0) {
+    if (enduranceToUse > 0 && actorEnd - enduranceToUse < 0) {
         // 1d6 STUN for each 2 END spent beyond 0 END - always round END use up to the nearest larger 2 END
         endSpentAboveZero = Math.max(actorEnd, 0);
-        stunDice = Math.ceil(Math.abs(end - endSpentAboveZero) / 2);
+        stunDice = Math.ceil(Math.abs(enduranceToUse - endSpentAboveZero) / 2);
     }
 
     return {
@@ -3196,11 +3241,17 @@ function calculateRequiredStunDiceForLackOfEnd(item, end) {
     };
 }
 
+/**
+ * Roll STUN damage
+ *
+ * @param {number} stunDice
+ * @returns {Object} damage and roller
+ */
 async function rollStunForEnd(stunDice) {
     const stunForEndHeroRoller = new HeroRoller()
         .setPurpose(DICE_SO_NICE_CUSTOM_SETS.STUN_FOR_END)
         .makeBasicRoll()
-        .addDice(stunDice);
+        .addDice(stunDice, "STUN for END");
 
     await stunForEndHeroRoller.roll();
 
@@ -3212,7 +3263,17 @@ async function rollStunForEnd(stunDice) {
     };
 }
 
+/**
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {HeroSystem6eItem} enduranceReserve
+ * @param {number} endToSpend
+ * @param {Object} stunToSpendObj
+ * @param {number} chargesToSpend
+ * @returns
+ */
 async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpendObj, chargesToSpend) {
+    const actor = item.actor;
     let resourceUsageDescription;
 
     // Deduct endurance
@@ -3223,8 +3284,8 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
     const automation = game.settings.get(HEROSYS.module, "automation");
     if (
         automation === "all" ||
-        (automation === "npcOnly" && item.actor.type == "npc") ||
-        (automation === "pcEndOnly" && item.actor.type === "pc")
+        (automation === "npcOnly" && actor.type == "npc") ||
+        (automation === "pcEndOnly" && actor.type === "pc")
     ) {
         if (item.system.USE_END_RESERVE) {
             if (enduranceReserve) {
@@ -3239,8 +3300,8 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
                 });
             }
         } else {
-            const actorStun = item.actor.system.characteristics.stun.value;
-            const actorEndurance = item.actor.system.characteristics.end.value;
+            const actorStun = actor.system.characteristics.stun.value;
+            const actorEndurance = actor.system.characteristics.end.value;
             let actorNewEndurance = actorEndurance - endToSpend;
 
             const actorChanges = {};
@@ -3249,19 +3310,22 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
                 const endSpentAboveZero = Math.max(actorEndurance, 0);
                 actorNewEndurance = Math.min(actorEndurance, 0);
 
-                resourceUsageDescription =
-                    `Spent ${endSpentAboveZero} END and ${stunToSpendObj.damage} STUN <i class="fal fa-circle-info" data-tooltip="` +
-                    `<b>USING STUN FOR ENDURANCE</b><br>` +
-                    `A character at 0 END who still wishes to perform Actions
+                resourceUsageDescription = `
+                    <span>
+                        Spent ${endSpentAboveZero} END and ${stunToSpendObj.damage} STUN
+                        <i class="fal fa-circle-info" data-tooltip="<b>USING STUN FOR ENDURANCE</b><br>
+                        A character at 0 END who still wishes to perform Actions
                         may use STUN as END. The character takes 1d6 STUN Only
                         damage (with no defense) for every 2 END (or fraction thereof)
-                        expended. Yes, characters can Knock themselves out this way.` +
-                    `"></i>`;
+                        expended. Yes, characters can Knock themselves out this way.
+                        "></i>
+                    </span>
+                    `;
 
                 const stunRenderedResult = await stunToSpendObj.roller.render();
                 resourceUsageDescription += stunRenderedResult;
 
-                await ui.notifications.warn(`${item.actor.name} used ${stunToSpendObj.damage} STUN for ENDURANCE.`);
+                await ui.notifications.warn(`${actor.name} used ${stunToSpendObj.damage} STUN for ENDURANCE.`);
 
                 // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
                 //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
@@ -3272,7 +3336,7 @@ async function spendResourcesToUse(item, enduranceReserve, endToSpend, stunToSpe
 
             actorChanges["system.characteristics.end.value"] = actorNewEndurance;
 
-            await item.actor.update(actorChanges);
+            await actor.update(actorChanges);
         }
     }
 
