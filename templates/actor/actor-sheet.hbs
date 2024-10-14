@@ -517,15 +517,15 @@
                         </td>
                         <td>
                             {{#if characteristic.roll}}
-                            <div class="flexrow">
-                                <button type="button" class="characteristic-roll"
-                                    data-label="{{characteristic.key}}" title="{{characteristic.name}} Roll">{{numberFormat characteristic.roll decimals=0
-                                    sign=false}}-</button>
-                                <button type="button" class="characteristic-full"
-                                    data-label="{{characteristic.key}}" title="Full {{characteristic.name}}">F</button>
-                                <button type="button" class="characteristic-casual"
-                                    data-label="{{characteristic.key}}" title="Casual {{characteristic.name}}">C</button>
-                            </div>
+                                <div class="flexrow">
+                                    <button type="button" class="characteristic-roll"
+                                        data-label="{{characteristic.key}}" title="{{characteristic.name}} Roll">{{numberFormat characteristic.roll decimals=0
+                                        sign=false}}-</button>
+                                    <button type="button" class="characteristic-full"
+                                        data-label="{{characteristic.key}}" title="Full {{characteristic.name}}">F</button>
+                                    <button type="button" class="characteristic-casual"
+                                        data-label="{{characteristic.key}}" title="Casual {{characteristic.name}}">C</button>
+                                </div>
                             {{/if}}
                         </td>
                         <td>{{characteristic.notes}}</td>
