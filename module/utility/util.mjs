@@ -276,7 +276,7 @@ export async function expireEffects(actor) {
  * A number of HDC advantages and powers have very similar OPTIONID values.
  *
  * @param {string} optionId
- * @returns {number}
+ * @returns {number} Should be >= 0 unless there is an error.
  */
 export function hdcTimeOptionIdToSeconds(durationOptionId) {
     let seconds = 12;
@@ -351,7 +351,7 @@ export function hdcTimeOptionIdToSeconds(durationOptionId) {
             break;
 
         default:
-            console.error(`optionID for ${item.name}/${item.system.XMLID} has unhandled option ID ${durationOptionId}`);
+            seconds = -1;
             break;
     }
 

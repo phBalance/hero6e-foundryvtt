@@ -245,7 +245,13 @@ function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
         durationOptionId = delayedReturnRate ? delayedReturnRate.OPTIONID : "TURN";
     }
 
-    return hdcTimeOptionIdToSeconds(durationOptionId);
+    let seconds = hdcTimeOptionIdToSeconds(durationOptionId);
+    if (seconds) {
+        console.error(`optionID for ${item.name}/${item.system.XMLID} has unhandled option ID ${durationOptionId}`);
+        seconds = 12;
+    }
+
+    return seconds;
 }
 
 function _createNewAdjustmentEffect(
