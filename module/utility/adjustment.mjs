@@ -369,7 +369,7 @@ export async function performAdjustment(
     targetActor,
 ) {
     const isHealing = item.system.XMLID === "HEALING";
-    const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
+    const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing || isFade;
 
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
