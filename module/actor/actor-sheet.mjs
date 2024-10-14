@@ -920,7 +920,7 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     async _onPrimaryNonStrengthCharacteristicRoll(characteristicValue, flavor) {
-        // NOTE: Characteristics can't have +1 to their roll.
+        // NOTE: Characteristic rolls can't have +1 to their roll.
         const diceParts = convertToDiceParts(characteristicValue);
         const characteristicRoller = new HeroRoller()
             .makeBasicRoll()
@@ -960,7 +960,6 @@ export class HeroSystemActorSheet extends ActorSheet {
         const {
             error: resourceError,
             warning: resourceWarning,
-            resourcesRequired,
             resourcesUsedDescription,
         } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, strengthUsed);
         if (resourceError) {
@@ -969,7 +968,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             return ui.notifications.warn(resourceWarning);
         }
 
-        // NOTE: Characteristics can't have +1 to their roll.
+        // NOTE: Characteristic rolls can't have +1 to their roll.
         const diceParts = convertToDiceParts(characteristicValue);
         const characteristicRoller = new HeroRoller()
             .makeNormalRoll()
