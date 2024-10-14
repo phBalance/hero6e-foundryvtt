@@ -8,6 +8,12 @@
         {{/each}}
     </div>
 
+    {{#if resourcesUsedDescription}}
+        <div class="card-section">
+            <div class="description-tiny">{{{ resourcesUsedDescription }}}</div>
+        </div>
+    {{/if}}
+
     <div class="card-section">
         <div class="hit-roll">{{{ renderedRoll }}}</div>
     </div>

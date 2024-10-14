@@ -1,5 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
+import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-attack.mjs";
 
 async function _renderSkillForm(item, actor, stateData) {
     const token = actor.token;
@@ -84,41 +85,22 @@ async function skillRoll(item, actor, html) {
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
 
-    // Charges?
-    const charges = item.findModsByXmlid("CHARGES");
-    if (charges) {
-        if (!item.system.charges?.value || parseInt(item.system.charges?.value) <= 0) {
-            const chatData = {
-                user: game.user._id,
-                content: `${item.name} has no charges remaining.`,
-                speaker: speaker,
-            };
+    // Make sure there are enough resources and consume them
+    const {
+        error: resourceError,
+        warning: resourceWarning,
+        resourcesRequired,
+        resourcesUsedDescription,
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {});
+    if (resourceError || resourceWarning) {
+        const chatData = {
+            user: game.user._id,
+            content: resourceError || resourceWarning,
+            speaker: speaker,
+        };
 
-            await ChatMessage.create(chatData);
-            return;
-        }
-    }
-
-    // Cost END?
-    const endUse = parseInt(item.system.end);
-    const costEnd = item.findModsByXmlid("COSTSEND");
-    if (costEnd && endUse && item.actor) {
-        const newEnd = parseInt(item.actor.system.characteristics.end.value) - endUse;
-
-        if (newEnd >= 0) {
-            await item.actor.update({
-                "system.characteristics.end.value": newEnd,
-            });
-        } else {
-            const chatData = {
-                user: game.user._id,
-                content: `Insufficient END to use ${item.name}.`,
-                speaker: speaker,
-            };
-
-            await ChatMessage.create(chatData);
-            return;
-        }
+        await ChatMessage.create(chatData);
+        return;
     }
 
     const formElement = html[0].querySelector("form");
@@ -169,7 +151,7 @@ async function skillRoll(item, actor, html) {
     }
 
     await skillRoller.makeSuccessRoll(true, successValue).roll();
-    let succeeded = skillRoller.getSuccess();
+    const succeeded = skillRoller.getSuccess();
     const autoSuccess = skillRoller.getAutoSuccess();
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
@@ -177,21 +159,7 @@ async function skillRoll(item, actor, html) {
     const flavor = `${item.name.toUpperCase()} (${successValue}-) roll ${succeeded ? "succeeded" : "failed"} by ${
         autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
     }`;
-    let rollHtml = await skillRoller.render(flavor);
-
-    // Charges
-    if (charges) {
-        await item.update({
-            "system.charges.value": parseInt(item.system.charges.value) - 1,
-        });
-        await item._postUpload();
-        rollHtml += `<p>Spent 1 charge.</p>`;
-    }
-
-    // END
-    if (costEnd && endUse && item.actor) {
-        rollHtml += `<p>Spent ${endUse} END.</p>`;
-    }
+    const rollHtml = await skillRoller.render(flavor);
 
     // render card
     const cardData = {
@@ -200,6 +168,8 @@ async function skillRoll(item, actor, html) {
         }),
         rolls: skillRoller.rawRolls(),
         renderedRoll: rollHtml,
+        resourcesUsedDescription:
+            resourcesRequired.charges > 0 || resourcesRequired.end > 0 ? resourcesUsedDescription : undefined,
         user: game.user._id,
         speaker: speaker,
     };

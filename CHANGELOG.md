@@ -3,6 +3,7 @@
 ## Version 4.0.2 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Strength rolls now use endurance. [#1253](https://github.com/dmdorman/hero6e-foundryvtt/issues/1253)
+- Skills can now use STUN for END and END reserves.
 - Encumbrance related improvements.
 - Fix for 5e DAMAGE RESISTANCE and PD/ED purchased as a power, where the PD/ED was counted twice. [#1297](https://github.com/dmdorman/hero6e-foundryvtt/issues/1297)
 - Improved KNOWLEDGE_SKILL descriptions. [#1278](https://github.com/dmdorman/hero6e-foundryvtt/issues/1278)

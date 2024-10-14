@@ -527,7 +527,7 @@ export async function AttackToHit(item, options) {
     // (so we can be sneaky and not tell the target's DCV out loud).
     heroRoller.addDice(-3);
 
-    // Consume resources
+    // Make sure there are enough resources and consume them
     const {
         error: resourceError,
         warning: resourceWarning,
@@ -3051,9 +3051,11 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
 /**
  * Multistage helper function useful for most item activations.
  * 1. Make sure the actor associated with the item has enough resources to activate the item.
- * 2. Display `ui.notification.error` prompts if actor does not have enough resources and return error.
- * 3. If the user can use STUN in place of END prompt them for permission to do so
- * 4. If there are enough resources, spend the resources and return full information.
+ * 2. Return an error if actor does not have enough resources.
+ *    a. If the item doesn't have enough charges it is an error.
+ *    b. If the item uses an endurance battery and doesn't have enough END it is an error.
+ *    c. If the user can use STUN in place of END prompt them for permission to do so. Return a warning if they don't want to use STUN.
+ * 3. If there are enough resources, spend the resources and return full information.
  *
  * @param {HeroSystem6eItem} item
  * @param {Object} options
