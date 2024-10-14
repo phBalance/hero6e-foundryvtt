@@ -69,7 +69,7 @@ export async function createSkillPopOutFromItem(item, actor) {
             buttons: {
                 rollSkill: {
                     label: "Roll Skill",
-                    callback: (html) => resolve(skillRoll(item, actor, html)),
+                    callback: (target, event) => resolve(skillRoll(item, actor, target, event)),
                 },
             },
             default: "rollSkill",
@@ -80,7 +80,7 @@ export async function createSkillPopOutFromItem(item, actor) {
     });
 }
 
-async function skillRoll(item, actor, html) {
+async function skillRoll(item, actor, target, event) {
     const token = actor.token;
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
@@ -91,7 +91,7 @@ async function skillRoll(item, actor, html) {
         warning: resourceWarning,
         resourcesRequired,
         resourcesUsedDescription,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {});
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, { noResourceUse: event.shiftKey });
     if (resourceError || resourceWarning) {
         const chatData = {
             user: game.user._id,
@@ -99,11 +99,10 @@ async function skillRoll(item, actor, html) {
             speaker: speaker,
         };
 
-        await ChatMessage.create(chatData);
-        return;
+        return ChatMessage.create(chatData);
     }
 
-    const formElement = html[0].querySelector("form");
+    const formElement = target[0].querySelector("form");
     const formData = new FormDataExtended(formElement)?.object;
     const skillRoller = new HeroRoller().addDice(3);
 
@@ -184,5 +183,5 @@ async function skillRoll(item, actor, html) {
         speaker: speaker,
     };
 
-    await ChatMessage.create(chatData);
+    return ChatMessage.create(chatData);
 }
