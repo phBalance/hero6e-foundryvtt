@@ -1,4 +1,4 @@
-import { getRoundedDownDistanceInSystemUnits } from "./units.mjs";
+import { getRoundedFavorPlayerDownDistanceInSystemUnits } from "./units.mjs";
 import HeroSystem6eMeasuredTemplate from "../measuretemplate.mjs";
 
 /**
@@ -12,7 +12,8 @@ import HeroSystem6eMeasuredTemplate from "../measuretemplate.mjs";
  */
 export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, actor) {
     const is5e = actor?.system?.is5e;
-    const roundedDistanceInMetres = getRoundedDownDistanceInSystemUnits(distanceInMetres, actor) * (is5e ? 2 : 1);
+    const roundedDistanceInMetres =
+        getRoundedFavorPlayerDownDistanceInSystemUnits(distanceInMetres, actor) * (is5e ? 2 : 1);
     const basicRangePenalty = Math.ceil(Math.log2(roundedDistanceInMetres / 8)) * 2;
     const rangePenalty = Math.max(0, basicRangePenalty);
 
@@ -56,5 +57,6 @@ export function calculateDistanceBetween(origin, target) {
     const threeDDistance = Math.sqrt(
         Math.pow(originElevation - targetElevation, 2) + Math.pow(originalMeasureDistance, 2),
     );
-    return getRoundedDownDistanceInSystemUnits(threeDDistance, rulesActor);
+
+    return getRoundedFavorPlayerDownDistanceInSystemUnits(threeDDistance, rulesActor);
 }
