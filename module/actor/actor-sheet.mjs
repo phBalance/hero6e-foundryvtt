@@ -906,7 +906,6 @@ export class HeroSystemActorSheet extends ActorSheet {
         return ChatMessage.create(chatData);
     }
 
-    // TODO: static? and/or make these not methods?
     async _onPrimaryCharacteristicRoll(event, characteristicValue, flavor) {
         const element = event.currentTarget.closest("button");
         const dataset = element.dataset;
@@ -920,7 +919,6 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
     }
 
-    // TODO: static?
     async _onPrimaryNonStrengthCharacteristicRoll(characteristicValue, flavor) {
         // NOTE: Characteristics can't have +1 to their roll.
         const diceParts = convertToDiceParts(characteristicValue);
@@ -945,13 +943,11 @@ export class HeroSystemActorSheet extends ActorSheet {
         return ChatMessage.create(chatData);
     }
 
-    // TODO: static?
     async _onStrengthCharacteristicRoll(characteristicValue, flavor) {
         // STR should have an item for potential damage, just like a strike and should consume resources
         let item;
 
         // Strength use consumes resources. No other characteristic roll does.
-        // TODO: The item should be 0 base end but str based
         item = this.actor.items.find((o) => o.system.XMLID === "STRIKE");
 
         if (!item) {
