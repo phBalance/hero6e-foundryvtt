@@ -81,7 +81,7 @@ export async function onActiveEffectToggle(effect, newActiveState) {
         const charMatch = change.key.match(/characteristics\.(.+)\.max$/);
         if (charMatch) {
             const char = charMatch[1];
-            const value = newActiveState ? -parseInt(change.value) : parseInt(change.value);
+            const value = newActiveState ? parseInt(change.value) : -parseInt(change.value);
             await actor.update({
                 [`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].value) + value,
             });

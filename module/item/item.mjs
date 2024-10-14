@@ -1914,7 +1914,7 @@ export class HeroSystem6eItem extends Item {
             activeEffect.changes = [
                 {
                     key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
-                    value: this.system.value,
+                    value: parseInt(this.system.LEVELS),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
             ];
@@ -1924,7 +1924,7 @@ export class HeroSystem6eItem extends Item {
                     if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
                         activeEffect.changes.push({
                             key: `system.characteristics.${movementKey.toLowerCase()}.max`,
-                            value: this.system.value,
+                            value: parseInt(this.system.LEVELS),
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         });
                         foundMatch = true;
