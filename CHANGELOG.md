@@ -3,6 +3,13 @@
 ## Version 4.0.2 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Strength rolls should use endurance. [#1253](https://github.com/dmdorman/hero6e-foundryvtt/issues/1253)
+- Encumbrance related improvements.
+- Fix for 5e DAMAGE RESISTANCE and PD/ED purchased as a power, where the PD/ED was counted twice. [#1297](https://github.com/dmdorman/hero6e-foundryvtt/issues/1297)
+- Improved KNOWLEDGE_SKILL descriptions. [#1278](https://github.com/dmdorman/hero6e-foundryvtt/issues/1278)
+- Initial NIGHTVISION, INFRAREDPERCEPTION, ULTRASONICPERCEPTION, and ULTRAVIOLETPERCEPTION support.
+- Fixes for CONTINUING CHARGES and auto expiration with SIMPLE CALENDAR.
+- Fixes for CHARACTERISTICS toggles that were subtracting instead of adding to values. [#1293](https://github.com/dmdorman/hero6e-foundryvtt/issues/1293)
+
 
 ## Version 4.0.1
 

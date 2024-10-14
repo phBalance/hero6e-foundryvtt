@@ -173,7 +173,11 @@ export class HeroSystem6eItem extends Item {
         }
 
         if (this.actor && this.type === "equipment") {
-            this.actor.applyEncumbrancePenalty();
+            await this.actor.applyEncumbrancePenalty();
+        }
+
+        if (this.actor && this.system.XMLID === "PENALTY_SKILL_LEVELS") {
+            await this.actor.applyEncumbrancePenalty();
         }
     }
 
@@ -607,6 +611,16 @@ export class HeroSystem6eItem extends Item {
                     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
                 }
             }
+
+            // Special Visions
+            if (this.#baseInfo?.sight) {
+                const token = this.actor.getActiveTokens()?.[0];
+                if (token) {
+                    await token.document.update({
+                        sight: this.#baseInfo?.sight,
+                    });
+                }
+            }
         } else {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -624,6 +638,16 @@ export class HeroSystem6eItem extends Item {
             if (this.system.XMLID === "INVISIBILITY") {
                 if (this.actor.statuses.has("invisible")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
+                }
+            }
+
+            // Remove Special Visions
+            if (this.#baseInfo?.sight) {
+                const token = this.actor.getActiveTokens()?.[0];
+                if (token) {
+                    await token.document.update({
+                        sight: { visionMode: "basic", range: 0, color: undefined },
+                    });
                 }
             }
         }
@@ -652,13 +676,14 @@ export class HeroSystem6eItem extends Item {
 
                     // Check if there is an ActiveEffect associated with this item
                     if (firstAE) {
-                        const newState = !newValue;
-                        await item.update({ [attr]: newState });
-                        let effects = item.effects
+                        //const newState = !newValue;
+                        const newActiveState = firstAE.disabled;
+                        // await item.update({ [attr]: newState });
+                        const effects = item.effects
                             .filter(() => true)
                             .concat(item.actor.effects.filter((o) => o.origin === item.uuid));
                         for (const activeEffect of effects) {
-                            await onActiveEffectToggle(activeEffect, newState);
+                            await onActiveEffectToggle(activeEffect, newActiveState);
                         }
                     } else {
                         await item.update({ [attr]: newValue });
@@ -1859,6 +1884,8 @@ export class HeroSystem6eItem extends Item {
                     this.system.penalty ??= "range";
                 } else if (this.system.OPTION_ALIAS.match(/hit/i) || this.system.OPTION_ALIAS.match(/location/i)) {
                     this.system.penalty ??= "hitLocation";
+                } else if (this.system.OPTION_ALIAS.match(/encumbrance/i) && this.system.OPTIONID.includes("DCV")) {
+                    this.system.penalty ??= "encumbrance";
                 }
             }
         }
@@ -1887,7 +1914,7 @@ export class HeroSystem6eItem extends Item {
             activeEffect.changes = [
                 {
                     key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
-                    value: this.system.value,
+                    value: parseInt(this.system.LEVELS),
                     mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 },
             ];
@@ -1897,7 +1924,7 @@ export class HeroSystem6eItem extends Item {
                     if (usableas.ALIAS.match(new RegExp(movementKey, "i"))) {
                         activeEffect.changes.push({
                             key: `system.characteristics.${movementKey.toLowerCase()}.max`,
-                            value: this.system.value,
+                            value: parseInt(this.system.LEVELS),
                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                         });
                         foundMatch = true;
@@ -3004,8 +3031,10 @@ export class HeroSystem6eItem extends Item {
                 {
                     // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
                     const { roll } = this._getSkillRollComponents(system);
-                    system.description = `${system.ALIAS ? system.ALIAS + ": " : ""}${system.INPUT} ${roll}`;
-                    this.name = system.NAME || `${this.system.ALIAS}: ${this.system.INPUT?.trim()}`;
+                    system.description = `${system.ALIAS ? system.ALIAS + ": " : ""}${
+                        system.INPUT || system.TYPE
+                    } ${roll}`;
+                    this.name = system.NAME || `${this.system.ALIAS}: ${(this.system.INPUT || system.TYPE)?.trim()}`;
                 }
                 break;
 

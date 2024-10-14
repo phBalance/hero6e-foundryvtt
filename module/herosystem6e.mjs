@@ -736,7 +736,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         )} ${d.remaining} [${senseAffectingItem.actor.name}]`;
                         flashAe.update({ name: newName });
                     } else {
-                        flashAe.delete();
+                        await flashAe.delete();
                     }
                 }
             }
@@ -744,10 +744,23 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             // Power Toggles with charges
             // Aaron was unable to make the AE transfer from item to actor and also expire, so we handle them here.
             // There is an opportunity to improve/refactor this.
-            for (const aeWithCharges of actor.temporaryEffects.filter((o) => o.parent?.system.active)) {
-                console.log(aeWithCharges);
+            for (const aeWithCharges of actor.temporaryEffects.filter((o) =>
+                o.parent instanceof HeroSystem6eItem ? o.parent.findModsByXmlid("CONTINUING") : false,
+            )) {
+                if (!aeWithCharges.parent.system.active) {
+                    console.error(`${aeWithCharges.name} is inactive and will not expire.`);
+                    continue;
+                }
                 if (game.time.worldTime >= aeWithCharges.flags.startTime + aeWithCharges.duration.seconds) {
                     await aeWithCharges.parent.toggle();
+                    // const chatData = {
+                    //     user: game.user._id,
+                    //     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    //     content: `${aeWithCharges.name} expired`,
+                    //     whisper: whisperUserTargetsForActor(aeWithCharges.parent?.actor),
+                    // };
+                    // ChatMessage.create(chatData);
+                    // await aeWithCharges.delete();
                 } else {
                     if (game.ready) game[HEROSYS.module].effectPanel.refresh();
                 }

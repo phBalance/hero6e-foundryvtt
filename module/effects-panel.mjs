@@ -14,13 +14,15 @@ export class EffectsPanel extends Application {
     // effect-item
     activateListeners(html) {
         super.activateListeners(html);
-        html.find(".effect-item").click(this._onEffectClick.bind(this));
-        html.find(".effect-item").mouseover(this._onEffectClick.bind(this));
+        // html.find(".effect-item").click(this._onEffectClick.bind(this));
+        // html.find(".effect-item").mouseover(this._onEffectClick.bind(this));
     }
 
-    _onEffectClick(event) {
-        console.log(event);
-    }
+    // TODO: lazy load the changes and remove effectpanel updates in herosystem6e (which happen on worldtime tick).
+    // This should improve performance.  Although, performance isn't currently a problem.
+    // _onEffectClick(event) {
+    //     console.log(event);
+    // }
 
     get token() {
         return canvas.tokens.controlled.at(0)?.document ?? null;

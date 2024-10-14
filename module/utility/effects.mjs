@@ -59,12 +59,12 @@ export async function onManageActiveEffect(event, owner) {
     }
 }
 
-export async function onActiveEffectToggle(effect, newState) {
-    if (newState == undefined) {
+export async function onActiveEffectToggle(effect, newActiveState) {
+    if (newActiveState == undefined) {
         await effect.update({ disabled: !effect.disabled });
-        newState = effect.disabled;
+        newActiveState = !effect.disabled;
     } else {
-        await effect.update({ disabled: newState });
+        await effect.update({ disabled: !newActiveState });
     }
 
     // If this is an item update active state
@@ -72,7 +72,7 @@ export async function onActiveEffectToggle(effect, newState) {
     const item = origin instanceof HeroSystem6eItem ? origin : effect.parent;
     const actor = item?.actor || (item instanceof HeroSystem6eActor ? item : null);
     if (item) {
-        await item.update({ "system.active": newState });
+        await item.update({ "system.active": newActiveState });
     }
 
     // Characteristic VALUE should change when toggled on
@@ -81,7 +81,7 @@ export async function onActiveEffectToggle(effect, newState) {
         const charMatch = change.key.match(/characteristics\.(.+)\.max$/);
         if (charMatch) {
             const char = charMatch[1];
-            const value = newState ? -parseInt(change.value) : parseInt(change.value);
+            const value = newActiveState ? parseInt(change.value) : -parseInt(change.value);
             await actor.update({
                 [`system.characteristics.${char}.value`]: parseInt(actor.system.characteristics[char].value) + value,
             });

@@ -250,7 +250,7 @@ export class HeroSystem6eActor extends Actor {
 
         // If STR was change check encumbrance
         if (data?.system?.characteristics?.str && userId === game.user.id) {
-            this.applyEncumbrancePenalty();
+            await this.applyEncumbrancePenalty();
         }
 
         // Ensure natural healing effect is removed when returned to full BODY
@@ -707,142 +707,142 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async applyEncumbrancePenalty() {
-        // Encumbrance (requires permissions to mess with ActiveEffects)
-        if (game.user.isGM) {
-            const { strLiftKg } = this.strDetails();
-            let encumbrance = this.encumbrance;
+        // Only 1 GM should do this
+        if (!game.users.activeGM?.isSelf) return;
 
-            // Is actor encumbered?
-            let dcvDex = 0;
-            let move = 0;
-            if (encumbrance / strLiftKg >= 0.1) {
-                dcvDex = -1;
-            }
-            if (encumbrance / strLiftKg >= 0.25) {
-                dcvDex = -2;
-                //move = -2;
-            }
-            if (encumbrance / strLiftKg >= 0.5) {
-                dcvDex = -3;
-                //move = -4;
-            }
-            if (encumbrance / strLiftKg >= 0.75) {
-                dcvDex = -4;
-                //move = -8;
-            }
-            if (encumbrance / strLiftKg >= 0.9) {
-                dcvDex = -5;
-                //move = -16;
-            }
+        const { strLiftKg } = this.strDetails();
+        let encumbrance = this.encumbrance;
 
-            // Penalty Skill Levels for encumbrance
-            for (const pslEncumbrance of this.items.filter(
-                (o) =>
-                    o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
-                    o.system.OPTIONID.includes("DCV") &&
-                    o.system.OPTION_ALIAS.match(/encumbrance/i) &&
-                    (o.type === "skill" || o.system.active),
-            )) {
-                dcvDex = Math.min(0, dcvDex + parseInt(pslEncumbrance.system.LEVELS));
-            }
+        // Is actor encumbered?
+        let dcvDex = 0;
+        let move = 0;
+        if (encumbrance / strLiftKg >= 0.1) {
+            dcvDex = -1;
+        }
+        if (encumbrance / strLiftKg >= 0.25) {
+            dcvDex = -2;
+            //move = -2;
+        }
+        if (encumbrance / strLiftKg >= 0.5) {
+            dcvDex = -3;
+            //move = -4;
+        }
+        if (encumbrance / strLiftKg >= 0.75) {
+            dcvDex = -4;
+            //move = -8;
+        }
+        if (encumbrance / strLiftKg >= 0.9) {
+            dcvDex = -5;
+            //move = -16;
+        }
 
-            // Movement
-            switch (dcvDex) {
-                case -1:
-                    move = 0;
-                    break;
-                case -2:
-                    move = -2;
-                    break;
-                case -3:
-                    move = -4;
-                    break;
-                case -4:
-                    move = -8;
-                    break;
-                case -5:
-                    move = -16;
-                    break;
-            }
+        // Penalty Skill Levels for encumbrance
+        for (const pslEncumbrance of this.items.filter(
+            (o) =>
+                o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
+                o.system.penalty === "encumbrance" &&
+                (o.type === "skill" || o.system.active),
+        )) {
+            dcvDex = Math.min(0, dcvDex + parseInt(pslEncumbrance.system.LEVELS));
+        }
 
-            const name = `Encumbered ${Math.floor((encumbrance / strLiftKg) * 100)}%`;
-            let prevActiveEffect = this.effects.find((o) => o.flags?.encumbrance);
-            if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
-                let activeEffect = {
-                    name: name,
-                    id: "encumbered",
-                    icon: `systems/${HEROSYS.module}/icons/encumbered.svg`,
-                    changes: [
-                        {
-                            key: "system.characteristics.dcv.value",
-                            value: dcvDex,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.dex.value",
-                            value: dcvDex,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.running.value",
-                            value: move,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.swimming.value",
-                            value: move,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.leaping.value",
-                            value: move,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.flight.value",
-                            value: move,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.swinging.value",
-                            value: move,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.teleportation.value",
-                            value: move,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                        {
-                            key: "system.characteristics.tunneling.value",
-                            value: move,
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        },
-                    ],
-                    origin: this.uuid,
-                    // duration: {
-                    //     seconds: 3.154e7 * 100, // 100 years should be close to infinity
-                    // },
-                    flags: {
-                        dcvDex: dcvDex,
-                        // temporary: true,
-                        encumbrance: true,
+        // Movement
+        switch (dcvDex) {
+            case -1:
+                move = 0;
+                break;
+            case -2:
+                move = -2;
+                break;
+            case -3:
+                move = -4;
+                break;
+            case -4:
+                move = -8;
+                break;
+            case -5:
+                move = -16;
+                break;
+        }
+
+        const name = `Encumbered ${Math.floor((encumbrance / strLiftKg) * 100)}%`;
+        let prevActiveEffect = this.effects.find((o) => o.flags?.encumbrance);
+        if (dcvDex < 0 && prevActiveEffect?.flags?.dcvDex != dcvDex) {
+            let activeEffect = {
+                name: name,
+                id: "encumbered",
+                icon: `systems/${HEROSYS.module}/icons/encumbered.svg`,
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: dcvDex,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                     },
-                };
+                    {
+                        key: "system.characteristics.dex.value",
+                        value: dcvDex,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.running.value",
+                        value: move,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.swimming.value",
+                        value: move,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.leaping.value",
+                        value: move,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.flight.value",
+                        value: move,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.swinging.value",
+                        value: move,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.teleportation.value",
+                        value: move,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                    {
+                        key: "system.characteristics.tunneling.value",
+                        value: move,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    },
+                ],
+                origin: this.uuid,
+                // duration: {
+                //     seconds: 3.154e7 * 100, // 100 years should be close to infinity
+                // },
+                flags: {
+                    dcvDex: dcvDex,
+                    // temporary: true,
+                    encumbrance: true,
+                },
+            };
 
-                if (prevActiveEffect) {
-                    await prevActiveEffect.delete();
-                    prevActiveEffect = null;
-                }
-
-                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-            }
-
-            if (dcvDex === 0 && prevActiveEffect) {
+            if (prevActiveEffect) {
                 await prevActiveEffect.delete();
-            } else if (prevActiveEffect && prevActiveEffect.name != name) {
-                await prevActiveEffect.update({ name: name });
+                //prevActiveEffect = null;
             }
+
+            await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            return;
+        }
+
+        if (dcvDex === 0 && prevActiveEffect) {
+            await prevActiveEffect.delete();
+        } else if (prevActiveEffect && prevActiveEffect.name != name) {
+            await prevActiveEffect.update({ name: name });
         }
     }
 
