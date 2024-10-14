@@ -28,6 +28,8 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
  * @returns {number} distanceInMetres
  */
 export function calculateDistanceBetween(origin, target) {
+    // Note: canvas.grid.measureDistance is deprecated as of Foundry v12. When we add better support for
+    // templates here, also consider updating to use the new api (canvas.grid.measurePath)
     const originalMeasureDistance = canvas.grid.measureDistance(origin, target, {
         gridSpaces: true,
     });
