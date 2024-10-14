@@ -1,4 +1,5 @@
 import { getRoundedDownDistanceInSystemUnits } from "./units.mjs";
+import HeroSystem6eMeasuredTemplate from "../measuretemplate.mjs";
 
 /**
  * Calculate range based on a provided distance in metres. Range penalties are essentially
@@ -18,6 +19,14 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
     return rangePenalty;
 }
 
+export function measure3DDistance(origin, target) {
+    console.log("measure3DDistance", origin, target);
+    const dx = target.x - origin.x;
+    const dy = target.y - origin.y;
+    const dz = target.z - origin.z;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
 /**
  * Calculate the distance between 2 tokens
  *
@@ -27,7 +36,31 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
  * @returns {number} distanceInMetres
  */
 export function calculateDistanceBetween(origin, target) {
-    return canvas.grid.measureDistance(origin, target, {
+    const originalMeasureDistance = canvas.grid.measureDistance(origin, target, {
         gridSpaces: true,
     });
+
+    // We don't yet support measuring 3D distance between a token and a template volume, so we
+    // return the original distance
+    const templateInvolved =
+        origin._object instanceof HeroSystem6eMeasuredTemplate ||
+        target._object instanceof HeroSystem6eMeasuredTemplate;
+    if (templateInvolved) {
+        return originalMeasureDistance;
+    }
+
+    // Past this point, both origin and target are tokens, so we can access their elevation via the document
+    const originElevation = origin.document.elevation || 0;
+    const targetElevation = target.document.elevation || 0;
+    if (originElevation === targetElevation) {
+        return originalMeasureDistance;
+    }
+
+    // We need to decide on an actor to use for the system units. Since both objects being measured are tokens,
+    // we can use the origin token's actor.
+    const rulesActor = origin.actor;
+    const threeDDistance = Math.sqrt(
+        Math.pow(originElevation - targetElevation, 2) + Math.pow(originalMeasureDistance, 2),
+    );
+    return getRoundedDownDistanceInSystemUnits(threeDDistance, rulesActor);
 }
