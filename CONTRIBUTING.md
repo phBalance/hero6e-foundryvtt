@@ -47,7 +47,7 @@ node resources/app/main.js --dataPath=<the path to the data directory or the dev
 
 ### Downloading/Cloning for Development
 
-You can clone the GitHub repository from `https://github.com/dmdorman/hero6e-foundryvtt` as mentioned in the [README](./README.md). The source code is made up of JavaScript, Sass, and Handlebars/HTML. You'll want to put it into a directory that is appropriate for how you're going to develop that you probably decided in an above step.
+You can clone the GitHub repository from `https://github.com/dmdorman/hero6e-foundryvtt` as mentioned in the [README](./README.md). The source code is made up of JavaScript, Sass, and Handlebars/HTML and documentation, such as this, is written in Markdown. You'll want to put it into a directory that is appropriate for how you're going to develop that you probably decided in an above step.
 
 ```bash
 git clone https://github.com/dmdorman/hero6e-foundryvtt <your FoundryVTT data directory as above>/Data/systems/hero6efoundryvttv2
@@ -87,7 +87,7 @@ You should be able to find the appropriate labeled tests in the `module/testing`
 
 ### Code Formatting
 
-We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [eslint](https://eslint.org/) for linting/static analysis and [prettier](https://prettier.io/) for formatting. To validate the code, using `eslint` and `prettier`, you can run the following command:
+We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [eslint](https://eslint.org/) and [stylelint](https://stylelint.io/) for linting/static analysis and [prettier](https://prettier.io/) for formatting. To validate the code, using `eslint`, `stylelint`, and `prettier`, you can run the following command:
 
 ```bash
 npm run validate
@@ -115,13 +115,13 @@ Additionally, most likely your code editor will support the prettier, via an ext
 
 #### Auto Fixing
 
-If you don't want to setup your editor to auto format on save, `eslint` and `prettier` can fix the formatting of your files on an as needed basis. To let them do their thing:
+If you don't want to setup your editor to auto format on save, `eslint`, `stylelint`, and `prettier` can fix the formatting of your files on an as needed basis. To let them do their thing:
 
 ```bash
 npm run autoFix
 ```
 
-Alternatively you can run one or the other:
+Alternatively you can run one type of fixing or the other explicitly:
 
 ```bash
 npm run lint:fix
