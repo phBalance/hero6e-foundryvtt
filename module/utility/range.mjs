@@ -19,14 +19,6 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
     return rangePenalty;
 }
 
-export function measure3DDistance(origin, target) {
-    console.log("measure3DDistance", origin, target);
-    const dx = target.x - origin.x;
-    const dy = target.y - origin.y;
-    const dz = target.z - origin.z;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-}
-
 /**
  * Calculate the distance between 2 tokens
  *
