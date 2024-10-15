@@ -5592,8 +5592,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "darkvision",
-                range: 120,
-                color: "#aa0000",
+                color: "#ff9999",
             },
         },
         {},
@@ -5641,8 +5640,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "basic",
-                range: 120,
-                color: undefined,
+                color: "aaaaff",
             },
         },
         {},
@@ -5791,8 +5789,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "darkvision",
-                range: 120,
-                color: "330033",
+                color: "ffaaff",
             },
         },
         {},
@@ -5806,7 +5803,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "darkvision",
-                range: 120,
                 color: "7F00FF",
             },
         },

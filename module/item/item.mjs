@@ -516,9 +516,15 @@ export class HeroSystem6eItem extends Item {
             // Special Visions
             if (this.#baseInfo?.sight) {
                 const token = this.actor.getActiveTokens()?.[0];
+                const detectionModes = token.document.detectionModes;
+                const basicSight = detectionModes.find((o) => o.id === "basicSight");
+                if (basicSight) {
+                    basicSight.range = null; // Infinite vision range
+                }
                 if (token) {
                     await token.document.update({
                         sight: this.#baseInfo?.sight,
+                        detectionModes,
                     });
                 }
             }
@@ -545,9 +551,15 @@ export class HeroSystem6eItem extends Item {
             // Remove Special Visions
             if (this.#baseInfo?.sight) {
                 const token = this.actor.getActiveTokens()?.[0];
+                const detectionModes = token.document.detectionModes;
+                const basicSight = detectionModes.find((o) => o.id === "basicSight");
+                if (basicSight) {
+                    basicSight.range = 0; // Cannot see things in the dark without special visions
+                }
                 if (token) {
                     await token.document.update({
-                        sight: { visionMode: "basic", range: 0, color: undefined },
+                        sight: { visionMode: "basic", color: undefined },
+                        detectionModes,
                     });
                 }
             }
