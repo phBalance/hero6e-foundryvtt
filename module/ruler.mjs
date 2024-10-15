@@ -188,7 +188,7 @@ export class HeroRuler extends Ruler {
                 static getMovementSpeedInMetres(token) {
                     const key = token.actor.flags.activeMovement || "running";
                     const is5e = !!token.actor.system.is5e;
-                    const movementValue = parseInt(token.actor.system.characteristics[key].value) || 0;
+                    const movementValue = parseInt(token.actor.system.characteristics[key]?.value) || 0;
 
                     return is5e ? movementValue * 2 : movementValue;
                 }
