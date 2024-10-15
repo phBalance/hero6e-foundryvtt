@@ -10,6 +10,7 @@
 - Initial NIGHTVISION, INFRAREDPERCEPTION, ULTRASONICPERCEPTION, and ULTRAVIOLETPERCEPTION support.
 - Fixes for CONTINUING CHARGES and auto expiration with SIMPLE CALENDAR.
 - Fixes for CHARACTERISTICS toggles that were subtracting instead of adding to values. [#1293](https://github.com/dmdorman/hero6e-foundryvtt/issues/1293)
+- Various minor improvements for tokens of type BASE in an effort to improve [Token Attacher](https://github.com/KayelGee/token-attacher) support.
 
 ## Version 4.0.1
 
