@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo } from "./util.mjs";
+import { getPowerInfo, hdcTimeOptionIdToSeconds } from "./util.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
 /**
@@ -245,58 +245,13 @@ function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
         durationOptionId = delayedReturnRate ? delayedReturnRate.OPTIONID : "TURN";
     }
 
-    let durationInSeconds = 12;
-    switch (durationOptionId) {
-        case "TURN": // Not a real OPTIONID from HD
-            durationInSeconds = 12;
-            break;
-        case "MINUTE":
-            durationInSeconds = 60;
-            break;
-        case "FIVEMINUTES":
-            durationInSeconds = 60 * 5;
-            break;
-        case "20MINUTES":
-            durationInSeconds = 60 * 20;
-            break;
-        case "HOUR":
-            durationInSeconds = 60 * 60;
-            break;
-        case "6HOURS":
-            durationInSeconds = 60 * 60 * 6;
-            break;
-        case "DAY":
-            durationInSeconds = 60 * 60 * 24;
-            break;
-        case "WEEK":
-            durationInSeconds = 604800;
-            break;
-        case "MONTH":
-            durationInSeconds = 2.628e6;
-            break;
-        case "SEASON":
-            durationInSeconds = 2.628e6 * 3;
-            break;
-        case "YEAR":
-            durationInSeconds = 3.154e7;
-            break;
-        case "FIVEYEARS":
-            durationInSeconds = 3.154e7 * 5;
-            break;
-        case "TWENTYFIVEYEARS":
-            durationInSeconds = 3.154e7 * 25;
-            break;
-        case "CENTURY":
-            durationInSeconds = 3.154e7 * 100;
-            break;
-        default:
-            console.error(
-                `DELAYEDRETURNRATE for ${item.name}/${item.system.XMLID} has unhandled option ID ${durationOptionId}`,
-            );
-            break;
+    let seconds = hdcTimeOptionIdToSeconds(durationOptionId);
+    if (seconds) {
+        console.error(`optionID for ${item.name}/${item.system.XMLID} has unhandled option ID ${durationOptionId}`);
+        seconds = 12;
     }
 
-    return durationInSeconds;
+    return seconds;
 }
 
 function _createNewAdjustmentEffect(

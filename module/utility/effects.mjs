@@ -55,7 +55,11 @@ export async function onManageActiveEffect(event, owner) {
                 return onActiveEffectToggle(effect);
             }
 
-            return item.toggle();
+            return item.toggle(event);
+
+        default:
+            console.error(`Unknown dataset action ${a.dataset.action} for active effect`);
+            break;
     }
 }
 

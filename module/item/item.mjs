@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import * as ItemAttack from "../item/item-attack.mjs";
+import { AttackOptions, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
 import { enforceManeuverLimits } from "../item/manuever.mjs";
 import {
@@ -9,7 +9,12 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { onActiveEffectToggle } from "../utility/effects.mjs";
-import { getPowerInfo, getModifierInfo, whisperUserTargetsForActor } from "../utility/util.mjs";
+import {
+    getPowerInfo,
+    getModifierInfo,
+    hdcTimeOptionIdToSeconds,
+    whisperUserTargetsForActor,
+} from "../utility/util.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import { convertToDcFromItem, getDiceFormulaFromItemDC, CombatSkillLevelsForAttack } from "../utility/damage.mjs";
 import { getSystemDisplayUnits } from "../utility/units.mjs";
@@ -264,7 +269,7 @@ export class HeroSystem6eItem extends Item {
                     case "TELEKINESIS":
                     case "TRANSFER":
                     case "TRANSFORM":
-                        return ItemAttack.AttackOptions(this, event);
+                        return AttackOptions(this, event);
 
                     case "ABSORPTION":
                     case "DISPEL":
@@ -297,11 +302,11 @@ export class HeroSystem6eItem extends Item {
                     case "TRIP":
                     default:
                         ui.notifications.warn(`${this.system.XMLID} roll is not fully supported`);
-                        return ItemAttack.AttackOptions(this, event);
+                        return AttackOptions(this, event);
                 }
 
             case "defense":
-                return this.toggle();
+                return this.toggle(event);
 
             case "skill":
             default: {
@@ -444,6 +449,11 @@ export class HeroSystem6eItem extends Item {
         ChatMessage.create(chatData);
     }
 
+    /**
+     *
+     * @param {Event} [event]
+     * @returns {Promise<any>}
+     */
     async toggle(event) {
         let item = this;
 
@@ -452,158 +462,49 @@ export class HeroSystem6eItem extends Item {
                 return;
             }
 
-            // Spend END to toggle power on
-            let end = parseInt(this.system.end);
-            let value = parseInt(this.actor.system.characteristics.end.value);
-            if (end > value) {
-                if (event?.shiftKey) {
-                    const speaker = ChatMessage.getSpeaker({
-                        actor: this,
-                        //token,
-                    });
-                    speaker["alias"] = game.user.name;
-                    const chatData = {
-                        user: game.user._id,
-                        type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                        content: `${game.user.name} used SHIFT key to force <b>${this.name}</b> on.`,
-                        whisper: whisperUserTargetsForActor(this),
-                        speaker,
-                    };
-                    ChatMessage.create(chatData);
-                } else {
-                    ui.notifications.error(
-                        `Unable to active ${this.name}.  ${item.actor.name} has ${value} END.  Power requires ${end} END to activate.  Hold SHIFT to force.`,
-                    );
-                    return;
-                }
-            }
-
-            // Spend CHARGE to toggle power on
-            // Notice that item.system.charges is used to provide details
-            const charges = this.findModsByXmlid("CHARGES");
-            if (charges) {
-                if (this.system.charges.value <= 0) {
-                    if (event?.shiftKey) {
-                        const speaker = ChatMessage.getSpeaker({
-                            actor: this,
-                            //token,
-                        });
-                        speaker["alias"] = game.user.name;
-                        const chatData = {
-                            user: game.user._id,
-                            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                            content: `${game.user.name} used SHIFT key to force <b>${this.name}</b> on.`,
-                            whisper: whisperUserTargetsForActor(this),
-                            speaker,
-                        };
-                        ChatMessage.create(chatData);
-                    } else {
-                        ui.notifications.error(
-                            `Unable to active ${this.name}.  ${item.actor.name} has ${this.system.charges.value} CHARGES.  Hold SHIFT to force.`,
-                        );
-                        return;
-                    }
-                }
-                this.system.charges.value -= 1;
-                this.update({ "system.charges": this.system.charges });
-
-                // Charges expire, find the Active Effect
-                const ae = this.effects.contents?.[0];
-                if (ae) {
-                    let seconds = 1;
-                    const continuing = this.findModsByXmlid("CONTINUING");
-                    if (continuing) {
-                        // TODO: Extract (look in adjustment)
-                        switch (continuing.OPTIONID) {
-                            case "EXTRAPHASE":
-                                seconds = 2;
-                                break;
-                            case "TURN":
-                                seconds = 12;
-                                break;
-                            case "MINUTE":
-                                seconds = 60;
-                                break;
-                            case "FIVEMINUTES":
-                                seconds = 60 * 5;
-                                break;
-                            case "TWENTYMINUTES":
-                                seconds = 60 * 20;
-                                break;
-                            case "HOUR":
-                                seconds = 60 * 60;
-                                break;
-                            case "SIXHOURS":
-                                seconds = 60 * 60 * 6;
-                                break;
-                            case "ONEDAY":
-                                seconds = 60 * 60 * 24;
-                                break;
-                            case "ONEWEEK":
-                                seconds = 60 * 60 * 24 * 7;
-                                break;
-                            case "ONEMONTH":
-                                seconds = 60 * 60 * 24 * 30;
-                                break;
-                            case "ONESEASON":
-                                seconds = 60 * 60 * 24 * 90;
-                                break;
-                            case "ONEYEAR":
-                                seconds = 60 * 60 * 24 * 365;
-                                break;
-                            case "FIVEYEARS":
-                                seconds = 60 * 60 * 24 * 365 * 5;
-                                break;
-                            case "TWENTYFIVEYEARS":
-                                seconds = 60 * 60 * 24 * 365 * 25;
-                                break;
-                            case "ONECENTURY":
-                                seconds = 60 * 60 * 24 * 365 * 100;
-                                break;
-                        }
-                    }
-
-                    console.log(
-                        await ae.update({ "duration.seconds": seconds, "flags.startTime": game.time.worldTime }),
-                    );
-                } else {
-                    console.log("No associated Active Effect", this);
-                }
-            }
-
-            // Only spend the END if we are in combat.
-            if (this.actor.inCombat && end) {
-                await item.actor.update({
-                    "system.characteristics.end.value": value - end,
-                });
-
-                const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-                speaker["alias"] = item.actor.name;
-                const chatData = {
-                    user: game.user._id,
-                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                    content: `Spent ${end} END to activate ${item.name}`,
-                    whisper: whisperUserTargetsForActor(item.actor),
-                    speaker,
-                };
-                await ChatMessage.create(chatData);
-            } else {
-                const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-                speaker["alias"] = item.actor.name;
-                const chatData = {
-                    user: game.user._id,
-                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                    content: `Activated ${item.name}`,
-                    whisper: whisperUserTargetsForActor(item.actor),
-                    speaker,
-                };
-                await ChatMessage.create(chatData);
+            // Make sure there are enough resources and consume them
+            const {
+                error: resourceError,
+                warning: resourceWarning,
+                resourcesUsedDescription,
+            } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
+                userForceOverride: !!event?.shiftKey,
+            });
+            if (resourceError) {
+                return ui.notifications.error(resourceError);
+            } else if (resourceWarning) {
+                return ui.notifications.warn(resourceWarning);
             }
 
             const success = await RequiresASkillRollCheck(this, event);
             if (!success) {
+                const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+                speaker["alias"] = item.actor.name;
+                const chatData = {
+                    user: game.user._id,
+                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    content: `${resourcesUsedDescription} to attempt to activate ${item.name} but attempt failed`,
+                    whisper: whisperUserTargetsForActor(item.actor),
+                    speaker,
+                };
+                await ChatMessage.create(chatData);
+
                 return;
             }
+
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+            speaker["alias"] = item.actor.name;
+            const chatData = {
+                user: game.user._id,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: `${resourcesUsedDescription} to activate ${item.name}`,
+                whisper: whisperUserTargetsForActor(item.actor),
+                speaker,
+            };
+            await ChatMessage.create(chatData);
+
+            // A continuing charge's use is tracked by an active effect. Start it.
+            await _startIfIsAContinuingCharge(this);
 
             // Invisibility status effect for SIGHTGROUP?
             if (this.system.XMLID === "INVISIBILITY") {
@@ -4990,6 +4891,28 @@ export async function RequiresASkillRollCheck(item, event) {
         return succeeded;
     }
     return true;
+}
+
+async function _startIfIsAContinuingCharge(item) {
+    const charges = item.findModsByXmlid("CHARGES");
+    const continuing = item.findModsByXmlid("CONTINUING");
+    if (charges && continuing) {
+        // Charges expire, find the Active Effect
+        const ae = item.effects.contents?.[0];
+        if (ae) {
+            let seconds = hdcTimeOptionIdToSeconds(continuing.OPTIONID);
+            if (seconds < 0) {
+                console.error(
+                    `optionID for ${item.name}/${item.system.XMLID} has unhandled option ID ${continuing.OPTIONID}`,
+                );
+                seconds = 1;
+            }
+
+            console.log(await ae.update({ "duration.seconds": seconds, "flags.startTime": game.time.worldTime }));
+        } else {
+            console.log("No associated Active Effect", item);
+        }
+    }
 }
 
 // for testing and pack-load-from-config macro
