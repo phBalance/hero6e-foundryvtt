@@ -1506,6 +1506,23 @@ export class HeroSystem6eItem extends Item {
             ) {
                 this.system.active ??= false;
             } else {
+                if (this.system.active === undefined) {
+                    // Special Visions
+                    if (this.#baseInfo?.sight) {
+                        const token = this.actor.getActiveTokens()?.[0];
+                        if (token) {
+                            await token.document.update({
+                                sight: this.#baseInfo?.sight,
+                            });
+                        }
+                        const prototypeToken = this.actor.prototypeToken;
+                        if (prototypeToken) {
+                            await prototypeToken.update({
+                                sight: this.#baseInfo?.sight,
+                            });
+                        }
+                    }
+                }
                 this.system.active ??= true;
             }
         }

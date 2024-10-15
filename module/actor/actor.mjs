@@ -430,6 +430,9 @@ export class HeroSystem6eActor extends Actor {
 
     // When stunned, knockedout, etc you cannot act
     canAct(uiNotice, event) {
+        // Bases can always act (used for token attacher)
+        if (this.type === "base2") return true;
+
         let result = true;
         let badStatus = [];
 
