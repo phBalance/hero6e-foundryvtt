@@ -5592,7 +5592,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "darkvision",
-                color: "#ff9999",
+                range: null, // infinite
+                //color: "#ff9999",  // washes out sewer tiles.  May need to create a custom visionMode.
             },
         },
         {},
@@ -5640,6 +5641,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "basic",
+                range: null, // infinite
                 color: "aaaaff",
             },
         },
@@ -5789,6 +5791,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "darkvision",
+                range: null, // infinite
                 color: "ffaaff",
             },
         },
@@ -5803,6 +5806,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             sight: {
                 visionMode: "darkvision",
+                range: null, // infinite
                 color: "7F00FF",
             },
         },
