@@ -41,7 +41,7 @@ export function registerDefenseTests(quench) {
                     await itemAttack._postUpload();
 
                     const defense = determineDefense(actor, itemAttack);
-                    assert.equal(defense[1], 1);
+                    assert.equal(defense.resistantValue, 1);
                 });
 
                 it("rED 2", async function () {
@@ -76,7 +76,7 @@ export function registerDefenseTests(quench) {
                     await itemAttack._postUpload();
 
                     const defense = determineDefense(actor, itemAttack);
-                    assert.equal(defense[1], 2);
+                    assert.equal(defense.resistantValue, 2);
                 });
 
                 it("rMD 3", async function () {
@@ -112,7 +112,7 @@ export function registerDefenseTests(quench) {
                     await itemAttack._postUpload();
 
                     const defense = determineDefense(actor, itemAttack);
-                    assert.equal(defense[1], 3);
+                    assert.equal(defense.resistantValue, 3);
                 });
 
                 it("Power Defense 4", async function () {
@@ -149,7 +149,7 @@ export function registerDefenseTests(quench) {
                     await itemAttack._postUpload();
 
                     const defense = determineDefense(actor, itemAttack);
-                    assert.equal(defense[1], 4);
+                    assert.equal(defense.resistantValue, 4);
                 });
             });
         },

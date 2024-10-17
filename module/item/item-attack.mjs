@@ -1086,7 +1086,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     let ignoreDefenseIds = [];
 
     let defense = "";
-    let [
+    let {
         defenseValue,
         resistantValue,
         impenetrableValue,
@@ -1094,7 +1094,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         damageNegationValue,
         knockbackResistance,
         defenseTags,
-    ] = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
+    } = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }
@@ -1533,7 +1533,7 @@ export async function _onRollMindScanEffectRoll(event) {
     // determine active defenses
     // -------------------------------------------------
     let defense = "";
-    const [
+    const {
         defenseValue,
         resistantValue,
         impenetrableValue,
@@ -1541,7 +1541,7 @@ export async function _onRollMindScanEffectRoll(event) {
         damageNegationValue,
         knockbackResistance,
         defenseTags,
-    ] = determineDefense(token.actor, item, { ignoreDefenseIds });
+    } = determineDefense(token.actor, item, { ignoreDefenseIds });
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }
@@ -1751,8 +1751,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // Check for conditional defenses
+
     let ignoreDefenseIds = [];
-    const conditionalDefenses = token.actor.items.filter(
+    let conditionalDefenses = token.actor.items.filter(
         (o) =>
             (o.system.subType || o.system.type) === "defense" &&
             (o.system.active || o.effects.find(() => true)?.disabled === false) &&
@@ -1804,7 +1805,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             const option = {
                 id: defense.id,
                 name: defense.name,
-                checked: !avad,
+                checked: !avad && defense.getDefense(token.actor, item).defenseValue > 0,
                 conditions: "",
             };
 
@@ -1972,7 +1973,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // determine active defenses
     // -------------------------------------------------
     let defense = "";
-    let [
+    let {
         defenseValue,
         resistantValue,
         impenetrableValue,
@@ -1980,7 +1981,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         damageNegationValue,
         knockbackResistance,
         defenseTags,
-    ] = determineDefense(token.actor, item, { ignoreDefenseIds });
+    } = determineDefense(token.actor, item, { ignoreDefenseIds });
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }

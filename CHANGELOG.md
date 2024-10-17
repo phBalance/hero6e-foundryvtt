@@ -11,6 +11,7 @@
 - Fixes for CONTINUING CHARGES and auto expiration with SIMPLE CALENDAR.
 - Fixes for CHARACTERISTICS toggles that were subtracting instead of adding to values. [#1293](https://github.com/dmdorman/hero6e-foundryvtt/issues/1293)
 - Various minor improvements for tokens of type BASE in an effort to improve [Token Attacher](https://github.com/KayelGee/token-attacher) support.
+- Improved Conditional defenses selection where the ones that provide no defense are unchecked by default.
 
 ## Version 4.0.1
 

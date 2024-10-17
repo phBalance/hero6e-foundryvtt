@@ -23,6 +23,7 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
 import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
+import { determineDefense } from "../utility/defense.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -4734,6 +4735,10 @@ export class HeroSystem6eItem extends Item {
         const explosion5e = this.findModsByXmlid("EXPLOSION");
 
         return aoe || explosion5e;
+    }
+
+    getDefense(targetActor, attackItem) {
+        return determineDefense(targetActor, attackItem, { only: this });
     }
 }
 

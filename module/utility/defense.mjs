@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
-function determineDefense(targetActor, attackItem, options) {
+export function determineDefense(targetActor, attackItem, options) {
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem);
     }
@@ -32,15 +32,17 @@ function determineDefense(targetActor, attackItem, options) {
     const penetrating = parseInt(attackItem.system.penetrating) || attackItem.findModsByXmlid("PENETRATING") || 0;
 
     // The defenses that are active
-    const activeDefenses = targetActor.items.filter(
-        (o) =>
-            (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
-            (o.system.active || o.effects.find(() => true)?.disabled === false) &&
-            !(options?.ignoreDefenseIds || []).includes(o.id),
-    );
+    const activeDefenses = options?.only
+        ? [options.only]
+        : targetActor.items.filter(
+              (o) =>
+                  (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
+                  (o.system.active || o.effects.find(() => true)?.disabled === false) &&
+                  !(options?.ignoreDefenseIds || []).includes(o.id),
+          );
 
-    let PD = parseInt(targetActor.system.characteristics.pd.value); // physical defense
-    let ED = parseInt(targetActor.system.characteristics.ed.value); // energy defense
+    let PD = options?.only ? 0 : parseInt(targetActor.system.characteristics.pd.value); // physical defense
+    let ED = options?.only ? 0 : parseInt(targetActor.system.characteristics.ed.value); // energy defense
     let MD = 0; // mental defense
     let POWD = 0; // power defense
     let rPD = 0; // resistant physical defense
@@ -56,10 +58,10 @@ function determineDefense(targetActor, attackItem, options) {
     let knockbackResistance = 0;
 
     // Check if we are supposed to ignore PD/ED (eg AVAD)
-    if (options?.ignoreDefenseIds.includes("PD")) {
+    if (options?.ignoreDefenseIds?.includes("PD")) {
         PD = 0;
     }
-    if (options?.ignoreDefenseIds.includes("ED")) {
+    if (options?.ignoreDefenseIds?.includes("ED")) {
         ED = 0;
     }
 
@@ -634,7 +636,7 @@ function determineDefense(targetActor, attackItem, options) {
             break;
     }
 
-    return [
+    return {
         defenseValue,
         resistantValue,
         impenetrableValue,
@@ -642,7 +644,5 @@ function determineDefense(targetActor, attackItem, options) {
         damageNegationValue,
         knockbackResistance,
         defenseTags,
-    ];
+    };
 }
-
-export { determineDefense };
