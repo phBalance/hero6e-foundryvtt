@@ -644,5 +644,6 @@ export function determineDefense(targetActor, attackItem, options) {
         damageNegationValue,
         knockbackResistance,
         defenseTags,
+        defenseTotalValue: defenseValue + resistantValue,
     };
 }

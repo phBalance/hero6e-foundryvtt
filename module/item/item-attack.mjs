@@ -1761,6 +1761,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
                 avad),
     );
 
+    // Remove conditional defenses that provide no defense
+    if (!game.settings.get(HEROSYS.module, "ShowAllConditionalDefenses")) {
+        conditionalDefenses = conditionalDefenses.filter(
+            (defense) => defense.getDefense(token.actor, item).defenseTotalValue > 0,
+        );
+    }
+
     // AVAD Life Support
     if (avad) {
         const lifeSupport = token.actor.items.filter((o) => o.system.XMLID === "LIFESUPPORT");
@@ -1805,7 +1812,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             const option = {
                 id: defense.id,
                 name: defense.name,
-                checked: !avad && defense.getDefense(token.actor, item).defenseValue > 0,
+                checked: !avad && defense.getDefense(token.actor, item).defenseTotalValue > 0,
                 conditions: "",
             };
 
