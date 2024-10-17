@@ -515,9 +515,10 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Special Visions
-            const token = this.actor.getActiveTokens()?.[0];
+            const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
+            const tokenDocument = token.document || token;
             if (this.#baseInfo?.sight) {
-                const detectionModes = token.document.detectionModes;
+                const detectionModes = tokenDocument.detectionModes;
                 const basicSight = detectionModes.find((o) => o.id === "basicSight");
                 if (basicSight) {
                     basicSight.range = null; // Infinite vision range

@@ -5642,7 +5642,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
-                color: "aaaaff",
+                color: null,
+                //color: "aaaaff",
             },
         },
         {},
