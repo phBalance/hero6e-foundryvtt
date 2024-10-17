@@ -23,8 +23,8 @@ export function calculateRangePenaltyFromDistanceInMetres(distanceInMetres, acto
 /**
  * Calculate the distance between 2 tokens
  *
- * @param {object} origin MeasuredTemplate or Token
- * @param {object} target MeasuredTemplate or Token
+ * @param {object} origin MeasuredTemplate or Token or {x: number, y: number, elevation?: number}
+ * @param {object} target MeasuredTemplate or Token or {x: number, y: number, elevation?: number}
  *
  * @returns {number} distanceInMetres
  */
@@ -44,9 +44,8 @@ export function calculateDistanceBetween(origin, target) {
         return originalMeasureDistance;
     }
 
-    // Past this point, both origin and target are tokens, so we can access their elevation via the document
-    const originElevation = origin.document.elevation || 0;
-    const targetElevation = target.document.elevation || 0;
+    const originElevation = origin.document ? origin.document.elevation || 0 : origin.elevation || 0;
+    const targetElevation = target.document ? target.document.elevation || 0 : target.elevation || 0;
     if (originElevation === targetElevation) {
         return originalMeasureDistance;
     }
