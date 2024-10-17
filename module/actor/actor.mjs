@@ -18,9 +18,6 @@ export class HeroSystem6eActor extends Actor {
 
         HEROSYS.log(false, "_preCreate");
         let prototypeToken = {
-            // Leaving sight disabled.
-            // TODO: Implement various Enhanced Visions
-            // sight: { enabled: true },
             displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
             displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
         };

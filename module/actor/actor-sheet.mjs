@@ -291,15 +291,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await pdAttack._postUpload();
 
-            let [
+            let {
                 defenseValue,
                 resistantValue /*impenetrableValue*/,
-                ,
                 damageReductionValue,
                 damageNegationValue /*knockbackResistance*/,
-                ,
-                defenseTagsP,
-            ] = determineDefense(this.actor, pdAttack);
+                defenseTags: defenseTagsP,
+            } = determineDefense(this.actor, pdAttack);
             defense.PD = defenseValue;
             defense.rPD = resistantValue;
             defense.PDtags = "PHYSICAL DEFENSE\n";
@@ -337,15 +335,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await edAttack._postUpload();
 
-            let [
-                defenseValueE,
-                resistantValueE /* impenetrableValueE */,
-                ,
-                damageReductionValueE,
-                damageNegationValueE /* knockbackResistanceE */,
-                ,
-                defenseTagsE,
-            ] = determineDefense(this.actor, edAttack);
+            let {
+                defenseValue: defenseValueE,
+                resistantValue: resistantValueE /* impenetrableValueE */,
+                damageReductionValue: damageReductionValueE,
+                damageNegationValue: damageNegationValueE /* knockbackResistanceE */,
+                defenseTags: defenseTagsE,
+            } = determineDefense(this.actor, edAttack);
             defense.ED = defenseValueE;
             defense.rED = resistantValueE;
             defense.EDtags = "ENERGY DEFENSE\n";
@@ -384,15 +380,13 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await mdAttack._postUpload();
 
-            let [
-                defenseValueM,
-                resistantValueM /*impenetrableValueM*/,
-                ,
-                damageReductionValueM,
-                damageNegationValueM /*knockbackResistanceM*/,
-                ,
-                defenseTagsM,
-            ] = determineDefense(this.actor, mdAttack);
+            let {
+                defenseValue: defenseValueM,
+                resistantValue: resistantValueM /*impenetrableValueM*/,
+                damageReductionValue: damageReductionValueM,
+                damageNegationValue: damageNegationValueM /*knockbackResistanceM*/,
+                defenseTags: defenseTagsM,
+            } = determineDefense(this.actor, mdAttack);
             defense.MD = defenseValueM;
             defense.rMD = resistantValueM;
             defense.MDtags = "MENTAL DEFENSE\n";
@@ -431,15 +425,12 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await drainAttack._postUpload();
 
-            let [
-                defenseValuePOWD,
-                resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
-                ,
-                ,
-                ,
-                ,
-                defenseTagsPOWD,
-            ] = determineDefense(this.actor, drainAttack);
+            let {
+                defenseValue: defenseValuePOWD,
+                resistantValue:
+                    resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
+                defenseTags: defenseTagsPOWD,
+            } = determineDefense(this.actor, drainAttack);
             defense.POWD = defenseValuePOWD;
             defense.rPOWD = resistantValuePOWD;
             defense.POWDtags = "POWER DEFENSE\n";
@@ -834,7 +825,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             const characteristic = _char.key.toLowerCase();
             if (
                 this.actor.system.characteristics[characteristic] &&
-                expandedData.Xsystem.characteristics[characteristic].value !==
+                expandedData.Xsystem.characteristics?.[characteristic].value !==
                     this.actor.system.characteristics[characteristic].value
             ) {
                 expandedData.system.characteristics[characteristic].value =

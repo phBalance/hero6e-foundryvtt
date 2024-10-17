@@ -22,6 +22,8 @@ import { calculateVelocityInSystemUnits } from "../ruler.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
+import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
+import { determineDefense } from "../utility/defense.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -514,13 +516,22 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Special Visions
+            const token = this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken;
+            const tokenDocument = token.document || token;
             if (this.#baseInfo?.sight) {
-                const token = this.actor.getActiveTokens()?.[0];
-                if (token) {
-                    await token.document.update({
-                        sight: this.#baseInfo?.sight,
-                    });
+                const detectionModes = tokenDocument.detectionModes;
+                const basicSight = detectionModes.find((o) => o.id === "basicSight");
+                if (basicSight) {
+                    basicSight.range = null; // Infinite vision range
                 }
+                if (token) {
+                    await activateSpecialVision(this, token);
+                }
+            }
+
+            // CUSTOMPOWER LIGHT
+            if (this.system.XMLID === "CUSTOMPOWER") {
+                await activateSpecialVision(this, token);
             }
         } else {
             // Let GM know power was deactivated
@@ -543,14 +554,7 @@ export class HeroSystem6eItem extends Item {
             }
 
             // Remove Special Visions
-            if (this.#baseInfo?.sight) {
-                const token = this.actor.getActiveTokens()?.[0];
-                if (token) {
-                    await token.document.update({
-                        sight: { visionMode: "basic", range: 0, color: undefined },
-                    });
-                }
-            }
+            await removeSpecialVisions(this.actor.getActiveTokens()?.[0]);
         }
 
         const attr = "system.active";
@@ -1475,6 +1479,11 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // CUSTOMPOWER LIGHT
+        if (this.system.XMLID === "CUSTOMPOWER" && this.system.active === undefined) {
+            await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
+        }
+
         // Carried Equipment
         if (this.system.CARRIED && this.system.active === undefined) {
             this.system.active = true;
@@ -1508,19 +1517,11 @@ export class HeroSystem6eItem extends Item {
             } else {
                 if (this.system.active === undefined) {
                     // Special Visions
-                    if (this.#baseInfo?.sight) {
-                        const token = this.actor.getActiveTokens()?.[0];
-                        if (token) {
-                            await token.document.update({
-                                sight: this.#baseInfo?.sight,
-                            });
-                        }
-                        const prototypeToken = this.actor.prototypeToken;
-                        if (prototypeToken) {
-                            await prototypeToken.update({
-                                sight: this.#baseInfo?.sight,
-                            });
-                        }
+                    if (this.baseInfo?.sight) {
+                        await activateSpecialVision(
+                            this,
+                            this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken,
+                        );
                     }
                 }
                 this.system.active ??= true;
@@ -4734,6 +4735,10 @@ export class HeroSystem6eItem extends Item {
         const explosion5e = this.findModsByXmlid("EXPLOSION");
 
         return aoe || explosion5e;
+    }
+
+    getDefense(targetActor, attackItem) {
+        return determineDefense(targetActor, attackItem, { only: this });
     }
 }
 
