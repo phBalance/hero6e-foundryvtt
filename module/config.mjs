@@ -4342,7 +4342,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DENSITYINCREASE",
             type: ["body-affecting", "standard"],
-            behaviors: ["activatable"],
+            behaviors: ["activatable", "defense"],
             perceivability: "obvious",
             duration: "constant",
             target: "self only",

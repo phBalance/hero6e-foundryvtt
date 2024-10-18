@@ -215,14 +215,18 @@ export function determineDefense(targetActor, attackItem, options) {
         // PD
         if (xmlid === "PD") {
             // Making sure this isn't an AE that is already included in the natural PD numbers
-            if (activeDefense.effects.size > 0) continue;
+            if (activeDefense.effects.size > 0) {
+                PD -= parseInt(activeDefense.system.LEVELS);
+            }
             activeDefense.system.defenseType = "pd";
         }
 
         // ED
         if (xmlid === "ED") {
             // Making sure this isn't an AE that is already included in the natural ED numbers
-            if (activeDefense.effects.size > 0) continue;
+            if (activeDefense.effects.size > 0) {
+                ED -= parseInt(activeDefense.system.LEVELS);
+            }
             activeDefense.system.defenseType = "ed";
         }
 
