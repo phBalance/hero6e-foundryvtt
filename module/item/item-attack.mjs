@@ -1299,7 +1299,7 @@ export async function _onRollDamage(event) {
 
     // Apply Damage button for specific targets
     let targetTokens = [];
-    for (const id of toHitData.targetids.split(",")) {
+    for (const id of toHitData.targetIds.split(",")) {
         let token = canvas.scene.tokens.get(id);
         if (token) {
             const targetEntangle = Boolean(toHitData.targetEntangle);
@@ -1352,7 +1352,7 @@ export async function _onRollDamage(event) {
 
     // If there is only 1 target then get rid of targetIds (which is used for Apply Damage ALL)
     if (targetTokens.length <= 1) {
-        delete toHitData.targetids;
+        delete toHitData.targetIds;
     }
 
     const cardData = {
@@ -1384,7 +1384,7 @@ export async function _onRollDamage(event) {
         roller: damageRoller.toJSON(),
 
         // misc
-        targetIds: toHitData.targetids,
+        targetIds: toHitData.targetIds,
         targetEntangle: toHitData.targetEntangle,
         tags: tags,
 
@@ -1606,7 +1606,7 @@ export async function _onRollMindScanEffectRoll(event) {
         roller: damageRoller.toJSON(),
 
         // misc
-        targetIds: toHitData.targetids,
+        targetIds: toHitData.targetIds,
         tags: tags,
 
         attackTags: getAttackTags(item),
