@@ -6,6 +6,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("gameConfigValue", gameConfigValue);
     Handlebars.registerHelper("getModulePath", getModulePath);
     Handlebars.registerHelper("includes", includes);
+    Handlebars.registerHelper("jsonify", jsonify);
     Handlebars.registerHelper("increment", increment);
     Handlebars.registerHelper("indexOf", indexOf);
     Handlebars.registerHelper("is_active_segment", isActiveSegment);
@@ -37,6 +38,10 @@ function getModulePath(templateDirectory) {
 
 function includes(str, searchTerm) {
     return str?.includes(searchTerm);
+}
+
+function jsonify(context) {
+    return JSON.stringify(context);
 }
 
 function toLowerCase(str) {
