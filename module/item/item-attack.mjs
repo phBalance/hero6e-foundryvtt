@@ -972,8 +972,8 @@ export async function _onRollAoeDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
-    const item = fromUuidSync(options.itemid);
-    return AttackToHit(item, JSON.parse(options.formdata));
+    const item = fromUuidSync(options.itemId);
+    return AttackToHit(item, JSON.parse(options.formData));
 }
 
 export async function _onRollKnockback(event) {
@@ -1216,14 +1216,14 @@ export async function _onRollDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
-    const item = fromUuidSync(toHitData.itemid);
+    const item = fromUuidSync(toHitData.itemId);
     const actor = item?.actor;
 
     if (!actor) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const action = JSON.parse(toHitData.actiondata);
+    const action = JSON.parse(toHitData.actionData);
 
     let effectiveItem = item;
 
@@ -1414,7 +1414,7 @@ export async function _onRollMindScan(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
-    const item = fromUuidSync(event.currentTarget.dataset.itemid);
+    const item = fromUuidSync(event.currentTarget.dataset.itemId);
 
     const template2 = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
 
@@ -1468,7 +1468,7 @@ export async function _onRollMindScanEffectRoll(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const toHitData = { ...button.dataset };
-    const item = fromUuidSync(event.currentTarget.dataset.itemid);
+    const item = fromUuidSync(event.currentTarget.dataset.itemId);
     const actor = item?.actor;
 
     if (!actor) {
@@ -1635,18 +1635,16 @@ export async function _onRollMindScanEffectRoll(event) {
 // Notice the chatListeners function in this file.
 export async function _onApplyDamage(event) {
     const button = event.currentTarget;
-    button.blur(); // The button remains highlighted for some reason; kluge to fix.
-    const toHitData = { ...button.dataset };
-    const item = fromUuidSync(event.currentTarget.dataset.itemid);
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
+    const damageData = { ...button.dataset };
 
     // Single target
-    if (toHitData.targetTokenId) {
-        return _onApplyDamageToSpecificToken(event, toHitData.targetTokenId);
-    }
-
-    // All targets
-    if (toHitData.targetIds) {
-        const targetsArray = toHitData.targetIds.split(",");
+    if (damageData.targetTokenId) {
+        return _onApplyDamageToSpecificToken(damageData, damageData.targetTokenId);
+    } else if (damageData.targetIds) {
+        // All targets
+        const item = fromUuidSync(event.currentTarget.dataset.itemId);
+        const targetsArray = damageData.targetIds.split(",");
 
         // If AOE then sort by distance from center
         if (item.hasExplosionAdvantage()) {
@@ -1663,7 +1661,7 @@ export async function _onApplyDamage(event) {
 
         for (const id of targetsArray) {
             console.log(game.scenes.current.tokens.get(id).name);
-            await _onApplyDamageToSpecificToken(event, id);
+            await _onApplyDamageToSpecificToken(damageData, id);
         }
         return;
     }
@@ -1674,14 +1672,12 @@ export async function _onApplyDamage(event) {
     }
 
     for (const token of canvas.tokens.controlled) {
-        _onApplyDamageToSpecificToken(event, token.id);
+        _onApplyDamageToSpecificToken(damageData, token.id);
     }
 }
 
-export async function _onApplyDamageToSpecificToken(event, tokenId) {
-    const button = event.currentTarget;
-    const damageData = { ...button.dataset };
-    const item = fromUuidSync(damageData.itemid);
+export async function _onApplyDamageToSpecificToken(damageData, tokenId) {
+    const item = fromUuidSync(damageData.itemId);
 
     const heroRoller = HeroRoller.fromJSON(damageData.roller);
 
@@ -1712,7 +1708,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     if (!item) {
         // This typically happens when the attack id stored in the damage card no longer exists on the actor.
         // For example if the attack item was deleted or the HDC was uploaded again.
-        console.warn(damageData.itemid);
+        console.warn(damageData.itemId);
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
@@ -3218,7 +3214,8 @@ function calculateRequiredEnd(item, effectiveStr) {
 
         endToUse = itemEndurance;
 
-        // TODO: May want to get rid of this so we can support HKA with 0 STR (weird but possible?)
+        // TODO: May want to get rid of this so we can support HKA with 0 STR (weird but possible?) or
+        // attacks such as TK or EB which have no STR component.
         if (item.system.usesStrength || item.system.usesTk) {
             const strPerEnd =
                 item.actor.system.isHeroic && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
