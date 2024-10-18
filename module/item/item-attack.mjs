@@ -1929,6 +1929,46 @@ export async function _onApplyDamage(event) {
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const damageData = { ...button.dataset };
 
+    const targetTokens = JSON.parse(damageData.tokenData);
+
+    // Sort tokenData based on distance to apply in distance order if this is an AoE
+    // TODO: pass other stuff through targetTokens and rename
+    // TODO: confirm I don't need to implement this... done when generating?
+    // if (item.getAoeModifier()) {
+    //     const aoeTemplate =
+    //         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
+    //         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
+
+    //     targetsArray.sort(function (a, b) {
+    //         let distanceA = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(a).object);
+    //         let distanceB = calculateDistanceBetween(aoeTemplate, game.scenes.current.tokens.get(b).object);
+    //         return distanceA - distanceB;
+    //     });
+    // }
+
+    if (targetTokens.length === 0) {
+        // Check to make sure we have a selected token
+        if (canvas.tokens.controlled.length == 0) {
+            return ui.notifications.warn(`You must select at least one token before applying damage.`);
+        }
+
+        // TODO: How to get the damageData information for this? Would imply we need to pass an extra faux copy around. Wouldn't work for Explosions...
+        for (const token of canvas.tokens.controlled) {
+            _onApplyDamageToSpecificToken(damageData, null /* TODO: will fail */, token.id);
+        }
+    } else {
+        // Apply to all targets
+        for (const targetToken of targetTokens) {
+            const id = targetToken.token._id;
+            console.log(game.scenes.current.tokens.get(id).name);
+            await _onApplyDamageToSpecificToken(damageData, targetToken.roller, id);
+        }
+    }
+
+    return;
+
+    // TODO: Is else there anything here worth saving? I guess the canvas.tokens.controlled is useful.
+
     // Single target
     if (damageData.targetTokenId) {
         return _onApplyDamageToSpecificToken(damageData, damageData.targetTokenId);
@@ -1967,10 +2007,10 @@ export async function _onApplyDamage(event) {
     }
 }
 
-export async function _onApplyDamageToSpecificToken(damageData, tokenId) {
+export async function _onApplyDamageToSpecificToken(damageData, roller, tokenId) {
     const item = fromUuidSync(damageData.itemId);
 
-    const heroRoller = HeroRoller.fromJSON(damageData.roller);
+    const heroRoller = HeroRoller.fromJSON(roller || damageData.roller); // TODO: kludge only until null roller is resolved
 
     const token = canvas.tokens.get(tokenId);
     if (!token) {
