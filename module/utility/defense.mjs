@@ -192,9 +192,9 @@ export function determineDefense(targetActor, attackItem, options) {
 
     // TODO: These should be set at creation time rather than each use.
     for (const activeDefense of activeDefenses) {
-        let value = parseInt(activeDefense.system.value) || 0;
-
         const xmlid = activeDefense.system.XMLID;
+        let value = parseInt(activeDefense.system.value) || 0;
+        let tagXmlIds = [];
 
         // PD & ED
         if (xmlid === "PD") {
@@ -350,7 +350,6 @@ export function determineDefense(targetActor, attackItem, options) {
 
         let valueAp = value;
         let valueImp = 0;
-        let tagXmlIds = [];
 
         // Hardened
         const hardened =
