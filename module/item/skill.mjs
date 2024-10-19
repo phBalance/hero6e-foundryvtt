@@ -89,7 +89,6 @@ async function skillRoll(item, actor, target, event) {
     const {
         error: resourceError,
         warning: resourceWarning,
-        resourcesRequired,
         resourcesUsedDescription,
         resourcesUsedDescriptionRenderedRoll,
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, { noResourceUse: event.shiftKey });
