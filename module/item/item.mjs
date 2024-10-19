@@ -469,8 +469,9 @@ export class HeroSystem6eItem extends Item {
                 error: resourceError,
                 warning: resourceWarning,
                 resourcesUsedDescription,
+                resourcesUsedDescriptionRenderedRoll,
             } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
-                userForceOverride: !!event?.shiftKey,
+                noResourceUse: !!event?.shiftKey,
             });
             if (resourceError) {
                 return ui.notifications.error(resourceError);
@@ -485,7 +486,7 @@ export class HeroSystem6eItem extends Item {
                 const chatData = {
                     user: game.user._id,
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                    content: `${resourcesUsedDescription} to attempt to activate ${item.name} but attempt failed`,
+                    content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"} to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
                     whisper: whisperUserTargetsForActor(item.actor),
                     speaker,
                 };
@@ -499,13 +500,13 @@ export class HeroSystem6eItem extends Item {
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                content: `${resourcesUsedDescription} to activate ${item.name}`,
+                content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "} ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
                 whisper: whisperUserTargetsForActor(item.actor),
                 speaker,
             };
             await ChatMessage.create(chatData);
 
-            // A continuing charge's use is tracked by an active effect. Start it.
+            // A continuing charges use is tracked by an active effect. Start it.
             await _startIfIsAContinuingCharge(this);
 
             // Invisibility status effect for SIGHTGROUP?
@@ -1443,8 +1444,10 @@ export class HeroSystem6eItem extends Item {
             this.system.charges = {
                 ...this.system.charges,
                 max: parseInt(CHARGES.OPTION_ALIAS),
-                recoverable: (CHARGES.ADDER || []).find((o) => o.XMLID == "RECOVERABLE") ? true : false,
-                continuing: (CHARGES.ADDER || []).find((o) => o.XMLID == "CONTINUING")?.OPTIONID,
+                recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
+                continuing: (CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
+                boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
+                fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
             };
             if (this.system.charges?.value === undefined || this.system.charges?.value === null) {
                 console.log("Invalid charges. Resetting to max", this);
@@ -2283,6 +2286,15 @@ export class HeroSystem6eItem extends Item {
                 if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
                     adder.BASECOST_total = 1;
                 }
+                // else if (this.system.XMLID === "ENTANGLE") {
+                //     // 5E is just a straight 5 points per adder level, but
+                //     // 6E costs 3 points for the first LEVEL and 2 points for the next and so on (typical cost of resistent defense).
+                //     if (adder.XMLID === "ADDITIONALED" || adder.XMLID === "ADDITIONALPD") {
+                //         const groupsOfTwo = Math.floor(adderLevels / 2);
+                //         const cost = 5 * groupsOfTwo + 3 * (adderLevels - 2 * groupsOfTwo);
+                //         adder.BASECOST_total = cost;
+                //     }
+                // }
             } else {
                 adder.BASECOST_total = 0;
             }

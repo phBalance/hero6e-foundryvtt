@@ -1290,7 +1290,7 @@ export class HeroSystem6eActor extends Actor {
             heroJson.CHARACTER.POWERS.length +
             heroJson.CHARACTER.SKILLS.length +
             heroJson.CHARACTER.TALENTS.length +
-            (this.type === "pc" || this.type === "npc" ? 1 : 0) +
+            (this.type === "pc" || this.type === "npc" ? 1 : 0) + // Free stuff
             1 + // Validating adjustment and powers
             1 + // Images
             1 + // Final save
@@ -1337,8 +1337,6 @@ export class HeroSystem6eActor extends Actor {
                             }
                             break;
                     }
-                    // Indicate we're processing this aspect of the HDC. If it crashes it should remain showing this progress note.
-                    //uploadProgressBar.advance(`${this.name}: Adding ${itemTag} ${itemData.name}`);
 
                     if (this.id) {
                         itemsToCreate.push(itemData);
@@ -1468,7 +1466,7 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance.itemPromiseArray = new Date() - uploadPerformance._d;
         uploadPerformance._d = new Date();
 
-        // Do CSL's last so we can property select the attacks
+        // Do CSLs last so we can property select the attacks
         await Promise.all(
             this.items
                 .filter((o) => !["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS"].includes(o.system.XMLID))
