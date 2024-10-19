@@ -372,8 +372,8 @@ export function determineDefense(targetActor, attackItem, options) {
             valueAp = Math.round(valueAp / 2);
         }
 
-        // Penetrating
-        if (penetrating <= impenetrable) {
+        // Penetrating (defense is hardened in 5e and impenetrable in 6e)
+        if ((activeDefense.is5e && penetrating <= hardened) || (!activeDefense.is5e && penetrating <= impenetrable)) {
             valueImp = valueAp;
         }
 
