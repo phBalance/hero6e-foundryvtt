@@ -25,14 +25,14 @@
                             <div data-visibility="gm">
                                 Target: {{target.name}} ({{target.toHitChar}} {{target.value}})
                                 <br />
-                                Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
+                                Result: <span class="{{toLowerCase target.result.hit}}">{{target.result.hit}}</span>
                             </div>
                         </div>
                     {{else}}
                         <div class="target-dc" data-visibility="gm">
                             Target: {{target.name}} ({{target.toHitChar}} {{target.value}})
                             <br />
-                            Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
+                            Result: <span class="{{toLowerCase target.result.hit}}">{{target.result.hit}}</span>
                         </div>
                     {{/if}}
                 {{else}}
@@ -43,7 +43,7 @@
                         </span>
                         <br />
                         <span>
-                            Result: <span class="{{target.result.hit}}">{{target.result.hit}}</span>
+                            Result: <span class="{{toLowerCase target.result.hit}}">{{target.result.hit}}</span>
                             {{#if target.aoeAlwaysHit}}
                                 due to AOE
                             {{/if}}
