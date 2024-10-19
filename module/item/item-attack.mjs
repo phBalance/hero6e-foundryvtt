@@ -3333,7 +3333,7 @@ async function spendResourcesToUse(
     const automation = game.settings.get(HEROSYS.module, "automation");
     const actorInCombat = actor.inCombat;
     const noEnduranceUse =
-        actorInCombat && // TODO: Not sure if we should have this or not. We had it in toggle() but not elsewhere.
+        !actorInCombat && // TODO: Not sure if we should have this or not. We had it in toggle() but not elsewhere.
         (automation === "all" ||
             (automation === "npcOnly" && actor.type == "npc") ||
             (automation === "pcEndOnly" && actor.type === "pc"));
