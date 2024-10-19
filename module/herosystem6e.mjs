@@ -7,7 +7,6 @@ import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
 import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-token.mjs";
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
-//import { HeroSystem6eItem2Sheet } from "./item/item2-sheet.mjs";
 import * as chat from "./chat.mjs";
 import * as macros from "./macros.mjs";
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
@@ -106,32 +105,7 @@ Hooks.once("init", async function () {
     Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
         makeDefault: true,
     });
-    // Items.registerSheet("herosystem6e", HeroSystem6eItem2Sheet, {
-    //     makeDefault: false,
-    // });
 
-    // If you need to add Handlebars helpers, here are a few useful examples:
-    Handlebars.registerHelper("concat", function () {
-        var outStr = "";
-        for (var arg in arguments) {
-            if (typeof arguments[arg] != "object") {
-                outStr += arguments[arg];
-            }
-        }
-        return outStr;
-    });
-
-    Handlebars.registerHelper("toLowerCase", function (str) {
-        return str?.toLowerCase();
-    });
-
-    Handlebars.registerHelper("toUpperCase", function (str) {
-        return str?.toUpperCase();
-    });
-
-    Handlebars.registerHelper("is_active_segment", function (actives, index) {
-        return actives?.[index];
-    });
     const templatePaths = [
         `systems/${HEROSYS.module}/templates/item/item-common-partial.hbs`,
         `systems/${HEROSYS.module}/templates/item/item-effects-partial.hbs`,
