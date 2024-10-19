@@ -135,7 +135,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
             data.hitLoc = [];
             data.useHitLoc = false;
-            const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels }); //  getAoeModifier();
+            const aoe = item.AoeAttackParameters({ levels: data.effectiveLevels });
             if (game.settings.get(HEROSYS.module, "hit locations") && !item.system.noHitLocations && !aoe) {
                 for (const key of Object.keys(CONFIG.HERO.hitLocations)) {
                     data.hitLoc.push({ key: key, label: key });
@@ -174,8 +174,11 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.aoeText = null;
             }
 
-            // Boostable Charges
-            data.boostableChargesAvailable = item.system.charges?.value > 1 ? item.system.charges.value - 1 : 0;
+            // Boostable Charges - a maximum of 4 can be spent
+            data.boostableChargesAvailable =
+                item.system.charges?.boostable && item.system.charges?.value > 1
+                    ? Math.min(4, item.system.charges.value - 1)
+                    : 0;
             data.boostableChargesToUse ??= 0;
 
             // MINDSCAN
@@ -365,47 +368,16 @@ export class ItemAttackFormApplication extends FormApplication {
             return this._spawnAreaOfEffect(this.data);
         }
 
+        // A max of 4 boostable charges may be used and a min of 0.
+        if (formData.boostableChargesToUse) {
+            this.data.boostableChargesToUse = formData.boostableChargesToUse = Math.max(
+                0,
+                Math.min(formData.boostableChargesToUse, 4),
+            );
+        }
+
         // collect the changed data; all of these changes can go into get data
         this.data.formData = { ...this.data.formData, ...formData };
-
-        //this._updateCsl(event, formData);
-
-        // this.data.aim = formData.aim;
-        // this.data.aimSide = formData.aimSide;
-        // this.data.ocvMod = formData.ocvMod;
-        // this.data.dcvMod = formData.dcvMod;
-        // this.data.omcvMod = formData.omcvMod;
-        // this.data.dmcvMod = formData.dmcvMod;
-        // this.data.effectiveStr = formData.effectiveStr;
-        // this.data.effectiveLevels = formData.effectiveLevels;
-        // this.data.mindScanMinds = formData.mindScanMinds;
-        // this.data.mindScanFamiliar = formData.mindScanFamiliar;
-        // this.data.boostableCharges = Math.max(
-        //     0,
-        //     Math.min(parseInt(formData.boostableCharges), this.data.item.charges?.value - 1),
-        // );
-        //this.data.velocity = parseInt(formData.velocity || 0);
-
-        // const aoe = this.data.item.AoeAttackParameters({ levels: this.data.effectiveLevels }); //  getAoeModifier();
-        // if (aoe) {
-        //     this.data.aoeText = aoe.OPTION_ALIAS;
-        //     // if (!item.system.areaOfEffect) {
-        //     //     ui.notifications.error(`${item.system.ALIAS || item.name} has invalid AOE definition.`);
-        //     // }
-        //     const levels = aoe.value; //item.system.areaOfEffect.value; //parseInt(aoe.LEVELS) || parseInt(aoe.levels);
-        //     if (levels) {
-        //         this.data.aoeText += ` (${levels}${getSystemDisplayUnits(this.data.item.actor.is5e)})`;
-        //     }
-
-        //     if (this.getAoeTemplate() || game.user.targets.size > 0) {
-        //         this.data.noTargets = false;
-        //     } else {
-        //         this.data.noTargets = true;
-        //     }
-        // } else {
-        //     this.data.noTargets = game.user.targets.size === 0;
-        //     this.data.aoeText = null;
-        // }
 
         // Save conditionalAttack check
         const expandedData = foundry.utils.expandObject(formData);
