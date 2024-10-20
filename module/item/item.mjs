@@ -491,7 +491,9 @@ export class HeroSystem6eItem extends Item {
                 const chatData = {
                     user: game.user._id,
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                    content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"} to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
+                    content: `${
+                        resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"
+                    } to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
                     whisper: whisperUserTargetsForActor(item.actor),
                     speaker,
                 };
@@ -505,7 +507,9 @@ export class HeroSystem6eItem extends Item {
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "} ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
+                content: `${
+                    resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
+                } ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
                 whisper: whisperUserTargetsForActor(item.actor),
                 speaker,
             };
@@ -1308,7 +1312,9 @@ export class HeroSystem6eItem extends Item {
                     default:
                         item.system.ocv = parseInt(item.system.ocv).signedString();
 
-                        item.system.ocvEstimated = `${ocv + parseInt(item.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)}`;
+                        item.system.ocvEstimated = `${
+                            ocv + parseInt(item.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)
+                        }`;
 
                         if (parseInt(item.system.ocv) != 0) {
                             if (item.flags.tags.ocv) {
@@ -1332,7 +1338,9 @@ export class HeroSystem6eItem extends Item {
                     item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
                 }
                 item.system.dcv = parseInt(item.system.dcv).signedString();
-                item.system.dcvEstimated = `${dcv + parseInt(item.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)}`;
+                item.system.dcvEstimated = `${
+                    dcv + parseInt(item.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
+                }`;
 
                 if (parseInt(item.system.dcv) != 0) {
                     if (item.flags.tags.dcv) {
@@ -4775,8 +4783,40 @@ export class HeroSystem6eItem extends Item {
             return "FLASHDEFENSE";
         }
 
+        // MARTIAL KILLING
+        if (this.system.WEAPONEFFECT?.includes("KILLINGDC")) {
+            return "PD";
+        }
+
+        // MARTIAL FLASH
+        if (this.system.WEAPONEFFECT?.includes("FLASHDC")) {
+            return "FLASHDEFENSE";
+        }
+
         console.error(`Unable to determine defense for ${this.name}`);
         return null;
+    }
+
+    get killing() {
+        if (this.system.KILLING === true) {
+            return true;
+        }
+
+        if (this.system.KILLING === false) {
+            return false;
+        }
+
+        if (this.system.WEAPONEFFECT?.includes("KILLING")) {
+            return true;
+        }
+
+        // Legacy check
+        if (this.system.killing) {
+            console.error(`Unable to determine KILLING property for ${this.name}`);
+            return true;
+        }
+
+        return false;
     }
 }
 

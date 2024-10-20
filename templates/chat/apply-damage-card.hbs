@@ -35,9 +35,11 @@
 
   <hr>
 
+  {{!defense tags --}}
   <div class="tags">
     {{#each tags as |tag id|}}
-    <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}} {{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}</span>
+    <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}}
+      {{#if tag.valueText}}{{tag.valueText}}{{else}}{{#if (gte tag.value 0)}}+{{/if}}{{tag.value}}{{/if}}</span>
     {{/each}}
   </div>
 

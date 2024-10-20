@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 
 //export function createDefenseProfile
-export function createDefenseTag(actorItemDefense, attackItem, value, options = {}) {
+export function createDefenseProfile(actorItemDefense, attackItem, value, options = {}) {
     let itemNameExpanded =
         options.shortDesc ||
         `${actorItemDefense?.name}${
@@ -15,6 +15,7 @@ export function createDefenseTag(actorItemDefense, attackItem, value, options = 
     if (itemNameExpanded.replace(/ /g, "").toUpperCase() === options.attackDefenseVs.toUpperCase()) {
         itemNameExpanded = `[${options.attackDefenseVs} ${actorItemDefense.type}]`;
     }
+
     return {
         name:
             options.name ||
@@ -22,14 +23,15 @@ export function createDefenseTag(actorItemDefense, attackItem, value, options = 
                 options.hardened ? `h${options.hardened}` : ""
             }${options.impenetrable ? `i${options.impenetrable}` : ""}`,
         value: value,
+        valueText: options.operation === "pct" ? `${value}%` : null,
         title:
             options.title ||
             `${itemNameExpanded}${options.resistant ? `\nResistant: ${options.resistant}` : ""}${
-                options.hardened ? `\nHardened: ${options.hardened}` : ""
-            }${options.impenetrable ? `\nImpenetrable: ${options.impenetrable}` : ""}`,
+                options.hardened ? `\nHardened x${options.hardened}` : ""
+            }${options.impenetrable ? `\nImpenetrable x${options.impenetrable}` : ""}`,
         shortDesc: itemNameExpanded,
         operation: options.operation || "add",
-        defenseProfile: options,
+        options,
     };
 }
 
@@ -44,18 +46,25 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
     }
 
     options.attackDefenseVs = options.attackDefenseVs || attackItem.attackDefenseVs;
-    options.piercing = attackItem.findModsByXmlid("ARMORPIERCING") || 0;
-    options.penetrating = attackItem.findModsByXmlid("PENETRATING") || 0;
-    options.impenetrable = attackItem.findModsByXmlid("IMPENETRABLE") || 0;
-    options.hardened = attackItem.findModsByXmlid("HARDENED") || 0;
-    options.resistant = attackItem.findModsByXmlid("RESISTANT") || 0;
+    //options.piercing = attackItem.findModsByXmlid("ARMORPIERCING") || 0;
+    //options.penetrating = attackItem.findModsByXmlid("PENETRATING") || 0;
+    options.impenetrable = parseInt(actorItemDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS) || 0;
+    options.hardened = parseInt(actorItemDefense.findModsByXmlid("HARDENED")?.LEVELS) || 0;
+    options.resistant = actorItemDefense.findModsByXmlid("RESISTANT") ? true : false;
 
     if (typeof actorItemDefense.baseInfo?.defenseTagVsAttack === "function") {
-        return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, options);
+        const defenseProfile = actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, options);
+        if (!defenseProfile) return null;
+
+        // Defense is appropriate for non-killing attacks.  Resistant defenses are always appropriate.
+        if (!attackItem.killing || defenseProfile?.options.resistant) {
+            return defenseProfile;
+        }
+        return null;
     }
 
     console.error(`Unable to determine defenseTagVsAttack for ${actorItemDefense.system.XMLID}`);
-    return createDefenseTag(actorItemDefense, attackItem, 0, options);
+    return null; //createDefenseProfile(actorItemDefense, attackItem, 0, options);
 }
 
 export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) {
@@ -84,7 +93,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     const attackDefenseVs = attackItem.attackDefenseVs;
     options = { ...options, attackDefenseVs };
 
-    // Basic characteristics (PD & ED)
+    // Basic characteristics (PD & ED) for non-killing attacks
     if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {
         let value = targetActor.system.characteristics[attackDefenseVs.toLowerCase()].value;
 
@@ -128,14 +137,17 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             newOptions.resistant = true;
         }
 
-        actorDefenses.defenseTags.push(
-            createDefenseTag(actorDefenses, attackItem, value, {
-                ...newOptions,
-                //name: attackDefenseVs,
-                title: `Natural`,
-                shortDesc: `Natural`,
-            }),
-        );
+        // Make sure we have resistant defenses with killing attacks
+        if (!attackItem.killing || newOptions.resistant) {
+            actorDefenses.defenseTags.push(
+                createDefenseProfile(resistantBase, attackItem, value, {
+                    ...newOptions,
+                    //name: attackDefenseVs,
+                    title: resistantBase ? undefined : `Natural`,
+                    shortDesc: resistantBase ? undefined : `Natural`,
+                }),
+            );
+        }
     }
 
     // Items that provide defense and are active
@@ -146,9 +158,9 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             !(options?.ignoreDefenseIds || []).includes(o.id),
     );
     for (const defenseItem of activeDefenses) {
-        const itemTag = getItemDefenseVsAttack(defenseItem, attackItem, options);
-        if (itemTag) {
-            actorDefenses.defenseTags = [...actorDefenses.defenseTags, itemTag];
+        const defenseProfile = getItemDefenseVsAttack(defenseItem, attackItem, options);
+        if (defenseProfile) {
+            actorDefenses.defenseTags = [...actorDefenses.defenseTags, defenseProfile];
         }
     }
 
@@ -160,7 +172,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     // Totals
     for (const tag of actorDefenses.defenseTags) {
         if (tag.operation === "add") {
-            if (tag.options.resistant) {
+            if (tag.options?.resistant) {
                 actorDefenses.resistantValue += tag?.value || 0;
             } else {
                 actorDefenses.defenseValue += tag?.value || 0;
@@ -497,8 +509,6 @@ export function determineDefense(targetActor, attackItem, options) {
                     break;
             }
         }
-
-        let tagXmlIds = [];
 
         // Knockback Resistance
         if (game.settings.get(HEROSYS.module, "knockback") && attackItem.system.knockbackMultiplier) {

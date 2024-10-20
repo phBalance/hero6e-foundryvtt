@@ -334,17 +334,17 @@ export class HeroSystemActorSheet extends ActorSheet {
                 defenseTags: defenseTagsPD,
             } = getActorDefensesVsAttack(this.actor, pdAttack);
             if (_defenseValuePD != defenseValuePD) {
-                console.error("PD Defense mismatch", _defenseValuePD, defenseValuePD);
+                console.warn("PD Defense mismatch", _defenseValuePD, defenseValuePD);
             }
             if (_resistantValuePD != resistantValuePD) {
-                console.error("rPD Defense mismatch", _resistantValuePD, resistantValuePD);
+                console.warn("rPD Defense mismatch", _resistantValuePD, resistantValuePD);
             }
             defense.PD = defenseValuePD;
-            for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && !o.options.resistant)) {
+            for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.PDtags = `${defense.PDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.rPD = resistantValuePD;
-            for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && o.options.resistant)) {
+            for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && o.options?.resistant)) {
                 defense.rPDtags = `${defense.rPDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.drp = damageReductionValuePD;
@@ -409,17 +409,17 @@ export class HeroSystemActorSheet extends ActorSheet {
                 defenseTags: defenseTagsED,
             } = getActorDefensesVsAttack(this.actor, edAttack);
             if (_defenseValueED != defenseValueED) {
-                console.error("ED Defense mismatch", _defenseValueED, defenseValueED);
+                console.warn("ED Defense mismatch", _defenseValueED, defenseValueED);
             }
             if (_resistantValueED != resistantValueED) {
-                console.error("rED Defense mismatch", _defenseValueED, defenseValueED);
+                console.warn("rED Defense mismatch", _defenseValueED, defenseValueED);
             }
             defense.ED = defenseValueED;
-            for (const tag of defenseTagsED.filter((o) => o.operation === "add" && !o.options.resistant)) {
+            for (const tag of defenseTagsED.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.EDtags = `${defense.EDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.rED = resistantValueED;
-            for (const tag of defenseTagsED.filter((o) => o.operation === "add" && o.options.resistant)) {
+            for (const tag of defenseTagsED.filter((o) => o.operation === "add" && o.options?.resistant)) {
                 defense.rEDtags = `${defense.rEDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.dre = damageReductionValueED;
@@ -485,14 +485,14 @@ export class HeroSystemActorSheet extends ActorSheet {
                 defenseTags: defenseTagsMD,
             } = getActorDefensesVsAttack(this.actor, mdAttack);
             if (_defenseValueMD != defenseValueMD) {
-                console.error("MD Defense mismatch", _defenseValueMD, defenseValueMD, _defenseTagsMD);
+                console.warn("MD Defense mismatch", _defenseValueMD, defenseValueMD, _defenseTagsMD);
             }
             defense.MD = defenseValueMD;
-            for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && !o.options.resistant)) {
+            for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.MDtags = `${defense.MDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.rMD = resistantValueMD;
-            for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && o.options.resistant)) {
+            for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && o.options?.resistant)) {
                 defense.rMDtags = `${defense.rMDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
             defense.drm = damageReductionValueMD;
@@ -541,16 +541,16 @@ export class HeroSystemActorSheet extends ActorSheet {
                 defenseTags: defenseTagsPOWD,
             } = getActorDefensesVsAttack(this.actor, drainAttack);
             if (_defenseValuePOWD != defenseValuePOWD) {
-                console.error("POWERDEFENSE Defense mismatch", _defenseValuePOWD, defenseValuePOWD);
+                console.warn("POWERDEFENSE Defense mismatch", _defenseValuePOWD, defenseValuePOWD);
             }
             defense.POWD = defenseValuePOWD;
-            for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && !o.options.resistant)) {
+            for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.POWDtags = `${defense.POWDtags || ""}${tag.value.signedString()} ${tag.name} ${
                     tag.shortDesc
                 }\n`;
             }
             defense.rPOWD = resistantValuePOWD;
-            for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && o.options.resistant)) {
+            for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && o.options?.resistant)) {
                 defense.rPOWDtags = `${defense.rPOWDtags || ""}${tag.value.signedString()} ${tag.name} ${
                     tag.shortDesc
                 }\n`;

@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { determineDefense } from "../utility/defense.mjs";
+import { determineDefense, getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -1981,6 +1981,19 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // determine active defenses
     // -------------------------------------------------
     let defense = "";
+
+    // Old Defense Stuff
+    let {
+        defenseValue: _defenseValue,
+        resistantValue: _resistantValue,
+        impenetrableValue: _impenetrableValue,
+        damageReductionValue: _damageReductionValue,
+        damageNegationValue: _damageNegationValue,
+        knockbackResistance: _knockbackResistance,
+        defenseTags: _defenseTags,
+    } = determineDefense(token.actor, item, { ignoreDefenseIds });
+
+    // New Defense Stuff
     let {
         defenseValue,
         resistantValue,
@@ -1989,7 +2002,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         damageNegationValue,
         knockbackResistance,
         defenseTags,
-    } = determineDefense(token.actor, item, { ignoreDefenseIds });
+    } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
+
+    if (defenseValue != _defenseValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
+        console.warn("defenseValue mismatch", defenseValue, _defenseValue);
+    }
+
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }

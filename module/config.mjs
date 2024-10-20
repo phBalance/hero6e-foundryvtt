@@ -1,6 +1,6 @@
 import { getRoundedUpDistanceInSystemUnits } from "./utility/units.mjs";
 import * as heroDice from "./utility/dice.mjs";
-import { createDefenseTag } from "./utility/defense.mjs";
+import { createDefenseProfile } from "./utility/defense.mjs";
 import { RoundFavorPlayerUp } from "./utility/round.mjs";
 
 export const HERO = { heroDice };
@@ -608,7 +608,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
@@ -639,7 +639,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
@@ -3600,7 +3600,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     newOptions.operation = "add";
                     newOptions.resistant = true;
                     newOptions.hardened = (options.hardened || 0) + 1;
-                    return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -4356,7 +4356,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
                     newOptions.operation = "subtract";
-                    return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -4409,9 +4409,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
                     const resistant = actorItemDefense.system.OPTIONID.match(/RESISTANT/) ? 1 : 0;
-                    newOptions.resistant = (options.resistant || 0) + resistant;
+                    newOptions.resistant = true;
                     newOptions.operation = "pct";
-                    return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -4474,8 +4474,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
                     newOptions.operation = "add";
-                    newOptions.resistant = (options.resistant || 0) + 1;
-                    return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
+                    newOptions.resistant = true;
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -4522,7 +4522,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
@@ -4851,7 +4851,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
                     newOptions.operation = "add";
-                    return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -4892,7 +4892,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
                     newOptions.resistant = true;
-                    return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -5060,7 +5060,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
@@ -5184,7 +5184,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
@@ -5271,7 +5271,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         );
                         value += bonus;
                     }
-                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
@@ -5448,7 +5448,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
