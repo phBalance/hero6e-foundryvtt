@@ -4740,6 +4740,39 @@ export class HeroSystem6eItem extends Item {
     getDefense(targetActor, attackItem) {
         return determineDefense(targetActor, attackItem, { only: this });
     }
+
+    get attackDefenseVs() {
+        // CONFIG overrides for specific XMLIDs
+        if (this.baseInfo?.attackDefenseVs) {
+            if (typeof this.baseInfo.attackDefenseVs === "function") {
+                return his.baseInfo.attackDefenseVs();
+            }
+            return his.baseInfo.attackDefenseVs;
+        }
+
+        // Generic defense specificiation
+        if (["PD", "ED", "MD"].includes(this.system.INPUT)) {
+            return this.system.INPUT;
+        }
+
+        // Mental
+        if (this.baseInfo?.type.includes("mental")) {
+            return "MD";
+        }
+
+        // Adjustment
+        if (this.baseInfo?.type.includes("adjustment")) {
+            return "POWERDEFENSE";
+        }
+
+        // Flash
+        if (this.baseInfo?.type.includes("sense-affecting")) {
+            return "FLASHDEFENSE";
+        }
+
+        console.error(`Unable to determine defense for ${this.name}`);
+        return null;
+    }
 }
 
 export function getItem(id) {

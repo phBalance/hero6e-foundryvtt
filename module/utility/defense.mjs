@@ -1,9 +1,187 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
+
+export function createDefenseTag(actorItemDefense, attackItem, value, options = {}) {
+    let itemNameExpanded =
+        options.shortDesc ||
+        `${actorItemDefense?.name}${
+            actorItemDefense.name
+                .replace(/ /g, "")
+                .match(new RegExp(actorItemDefense?.system.XMLID.replace(/_/g, ""), "i"))
+                ? ""
+                : ` [${actorItemDefense?.system.XMLID}]`
+        }`;
+    if (itemNameExpanded.replace(/ /g, "").toUpperCase() === options.attackDefenseVs.toUpperCase()) {
+        itemNameExpanded = `[${options.attackDefenseVs} ${actorItemDefense.type}]`;
+    }
+    return {
+        name:
+            options.name ||
+            `${options.attackDefenseVs}${options.resistant ? `r${options.resistant}` : ""}${
+                options.hardened ? `h${options.hardened}` : ""
+            }${options.impenetrable ? `i${options.impenetrable}` : ""}`,
+        value: value,
+        title:
+            options.title ||
+            `${itemNameExpanded}${options.resistant ? `\nResistant: ${options.resistant}` : ""}${
+                options.hardened ? `\nHardened: ${options.hardened}` : ""
+            }${options.impenetrable ? `\nImpenetrable: ${options.impenetrable}` : ""}`,
+        shortDesc: itemNameExpanded,
+        operation: options.operation || "add",
+        options,
+    };
+}
+
+export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {}) {
+    if (!actorItemDefense) {
+        console.error("Missing actorItemDefense");
+        return {};
+    }
+    if (!attackItem) {
+        console.error("Missing attackItem");
+        return {};
+    }
+
+    options.attackDefenseVs = options.attackDefenseVs || attackItem.attackDefenseVs;
+    options.piercing = attackItem.findModsByXmlid("ARMORPIERCING") || 0;
+    options.penetrating = attackItem.findModsByXmlid("PENETRATING") || 0;
+    options.impenetrable = attackItem.findModsByXmlid("IMPENETRABLE") || 0;
+    options.hardened = attackItem.findModsByXmlid("HARDENED") || 0;
+    options.resistant = attackItem.findModsByXmlid("RESISTANT") || 0;
+
+    if (typeof actorItemDefense.baseInfo?.defenseTagVsAttack === "function") {
+        return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, options);
+    }
+
+    console.error(`Unable to determine defenseTagVsAttack for ${actorItemDefense.system.XMLID}`);
+    return createDefenseTag(actorItemDefense, attackItem, 0, options);
+}
+
+export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) {
+    const actorDefenses = {
+        defenseTotalValue: 0,
+        defenseValue: 0,
+        resistantValue: 0,
+        damageReductionValue: 0,
+        damageNegationValue: 0,
+        knockbackResistanceValue: 0,
+        defenseTags: [],
+        targetActor,
+        attackItem,
+        options,
+    };
+
+    if (!targetActor) {
+        console.error("Missing targetActor");
+        return actorDefenses;
+    }
+    if (!attackItem) {
+        console.error("Missing attackItem");
+        return actorDefenses;
+    }
+
+    const attackDefenseVs = attackItem.attackDefenseVs;
+    options = { ...options, attackDefenseVs };
+
+    // Basic characteristics (PD & ED)
+    if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {
+        let value = targetActor.system.characteristics[attackDefenseVs.toLowerCase()].value;
+
+        // back out any Active Effects
+        for (const ae of targetActor.appliedEffects) {
+            for (const change of ae.changes.filter(
+                (o) => o.key === `system.characteristics.${attackDefenseVs.toLowerCase()}.max`,
+            )) {
+                value -= parseInt(change.value) || 0;
+            }
+        }
+        // back out 5e DAMAGERESISTANCE
+        for (const damageResistance of targetActor.items.filter(
+            (o) => o.system.XMLID === "DAMAGERESISTANCE" && o.system.active,
+        )) {
+            switch (attackDefenseVs.toUpperCase()) {
+                case "PD":
+                    value -= parseInt(damageResistance.system.PDLEVELS) || 0;
+                    break;
+                case "ED":
+                    value -= parseInt(damageResistance.system.EDLEVELS) || 0;
+                    break;
+                default:
+                    console.error(`Unsupported DAMAGERESISTANCE`, attackDefenseVs);
+            }
+        }
+
+        const newOptions = foundry.utils.deepClone(options);
+
+        // Check for ADD MODIFIERS TO BASE CHARACTERISTIC (RESISTANT)
+        const resistantBase = targetActor?.items.find(
+            (o) =>
+                o.system.XMLID === attackDefenseVs && o.findModsByXmlid("RESISTANT") && o.system.ADD_MODIFIERS_TO_BASE,
+        );
+        if (resistantBase) {
+            newOptions.resistant = true;
+        }
+
+        actorDefenses.defenseTags.push(
+            createDefenseTag(actorDefenses, attackItem, value, {
+                ...newOptions,
+                name: attackDefenseVs,
+                title: `Natural`,
+                shortDesc: `Natural`,
+            }),
+        );
+    }
+
+    // Items that provide defense and are active
+    const activeDefenses = targetActor.items.filter(
+        (o) =>
+            (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
+            (o.system.active || o.effects.find(() => true)?.disabled === false) &&
+            !(options?.ignoreDefenseIds || []).includes(o.id),
+    );
+    for (const defenseItem of activeDefenses) {
+        const itemTag = getItemDefenseVsAttack(defenseItem, attackItem, options);
+        if (itemTag) {
+            actorDefenses.defenseTags = [...actorDefenses.defenseTags, itemTag];
+        }
+    }
+
+    // Sort tags by value, shortDesc.  Get rid of 0 values.
+    actorDefenses.defenseTags = actorDefenses.defenseTags
+        .sort((a, b) => b.value - a.value || a.shortDesc.localeCompare(b.shortDesc))
+        .filter((o) => o.value);
+
+    // Totals
+    for (const tag of actorDefenses.defenseTags) {
+        if (tag.operation === "add") {
+            if (tag.options.resistant) {
+                actorDefenses.resistantValue += tag?.value || 0;
+            } else {
+                actorDefenses.defenseValue += tag?.value || 0;
+            }
+        }
+
+        // Damage Resistance
+        if (tag.operation === "pct") {
+            actorDefenses.damageReductionValue += tag?.value || 0;
+        }
+
+        // Damage Negation
+        if (tag.operation === "subtract") {
+            actorDefenses.damageNegationValue += tag?.value || 0;
+        }
+    }
+    actorDefenses.defenseTotalValue = actorDefenses.defenseValue + actorDefenses.resistantValue;
+    return actorDefenses;
+}
+
 export function determineDefense(targetActor, attackItem, options) {
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem);
     }
+
+    //console.log(attackItem.attackDefenseVs);
+    getActorDefensesVsAttack(targetActor, attackItem, options);
 
     //const avad = attackItem.findModsByXmlid("AVAD");
     //const attackType = avad ? "avad" : attackItem.system.class;
@@ -106,7 +284,7 @@ export function determineDefense(targetActor, attackItem, options) {
             rED += levels;
         }
 
-        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes") {
+        if (item.system.ADD_MODIFIERS_TO_BASE) {
             ED -= targetActor.system.characteristics.ed.core;
             rED += targetActor.system.characteristics.ed.core;
         }
@@ -313,6 +491,8 @@ export function determineDefense(targetActor, attackItem, options) {
             }
         }
 
+        let tagXmlIds = [];
+
         // Knockback Resistance
         if (game.settings.get(HEROSYS.module, "knockback") && attackItem.system.knockbackMultiplier) {
             if (["KBRESISTANCE", "DENSITYINCREASE"].includes(xmlid)) {
@@ -350,7 +530,6 @@ export function determineDefense(targetActor, attackItem, options) {
 
         let valueAp = value;
         let valueImp = 0;
-        let tagXmlIds = [];
 
         // Hardened
         const hardened =

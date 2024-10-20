@@ -4,7 +4,7 @@ import { HeroSystem6eActor } from "./actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
 
-import { determineDefense } from "../utility/defense.mjs";
+import { determineDefense, getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
@@ -292,36 +292,68 @@ export class HeroSystemActorSheet extends ActorSheet {
             await pdAttack._postUpload();
 
             let {
-                defenseValue,
-                resistantValue /*impenetrableValue*/,
-                damageReductionValue,
-                damageNegationValue /*knockbackResistance*/,
-                defenseTags: defenseTagsP,
+                defenseValue: _defenseValuePD,
+                resistantValue: _resistantValuePD /*impenetrableValue*/,
+                damageReductionValue: _damageReductionValuePD,
+                damageNegationValue: _damageNegationValuePD /*knockbackResistance*/,
+                // defenseTags: defenseTagsP,
             } = determineDefense(this.actor, pdAttack);
-            defense.PD = defenseValue;
-            defense.rPD = resistantValue;
-            defense.PDtags = "PHYSICAL DEFENSE\n";
-            defense.rPDtags = "PHYSICAL DEFENSE (RESISTANT)\n";
-            for (let tag of defenseTagsP.filter((o) => o.name.match(/pd$/i))) {
-                if (tag.resistant) {
-                    defense.rPDtags += `${tag.value} ${tag.title}\n`;
-                } else if (tag.resistant != undefined) {
-                    defense.PDtags += `${tag.value} ${tag.title}\n`;
-                }
+
+            // defense.PD = defenseValue;
+            // defense.rPD = resistantValue;
+            // defense.PDtags = "PHYSICAL DEFENSE\n";
+            // defense.rPDtags = "PHYSICAL DEFENSE (RESISTANT)\n";
+            // for (let tag of defenseTagsP.filter((o) => o.name.match(/pd$/i))) {
+            //     if (tag.resistant) {
+            //         defense.rPDtags += `${tag.value} ${tag.title}\n`;
+            //     } else if (tag.resistant != undefined) {
+            //         defense.PDtags += `${tag.value} ${tag.title}\n`;
+            //     }
+            // }
+            // defense.drp = damageReductionValue;
+            // defense.drptags = "DAMAGE REDUCTION PHYSICAL\n";
+            // for (let tag of defenseTagsP.filter((o) => o.name.match(/drp$/i))) {
+            //     if (tag.resistant) {
+            //         defense.drptags += `${tag.value} ${tag.title}\n`;
+            //     } else if (tag.resistant != undefined) {
+            //         defense.drptags += `${tag.value} ${tag.title}\n`;
+            //     }
+            // }
+            // defense.dnp = damageNegationValue;
+            // defense.dnptags = "DAMAGE NEGATION PHYSICAL\n";
+            // for (let tag of defenseTagsP.filter((o) => o.name.match(/dnp$/i))) {
+            //     defense.dnptags += `${tag.value} ${tag.title}\n`;
+            // }
+
+            // New PD
+            const {
+                defenseValue: defenseValuePD,
+                resistantValue: resistantValuePD,
+                damageReductionValue: damageReductionValuePD,
+                damageNegationValue: damageNegationValuePD,
+                defenseTags: defenseTagsPD,
+            } = getActorDefensesVsAttack(this.actor, pdAttack);
+            if (_defenseValuePD != defenseValuePD) {
+                console.error("PD Defense mismatch", _defenseValuePD, defenseValuePD);
             }
-            defense.drp = damageReductionValue;
-            defense.drptags = "DAMAGE REDUCTION PHYSICAL\n";
-            for (let tag of defenseTagsP.filter((o) => o.name.match(/drp$/i))) {
-                if (tag.resistant) {
-                    defense.drptags += `${tag.value} ${tag.title}\n`;
-                } else if (tag.resistant != undefined) {
-                    defense.drptags += `${tag.value} ${tag.title}\n`;
-                }
+            if (_resistantValuePD != resistantValuePD) {
+                console.error("rPD Defense mismatch", _resistantValuePD, resistantValuePD);
             }
-            defense.dnp = damageNegationValue;
-            defense.dnptags = "DAMAGE NEGATION PHYSICAL\n";
-            for (let tag of defenseTagsP.filter((o) => o.name.match(/dnp$/i))) {
-                defense.dnptags += `${tag.value} ${tag.title}\n`;
+            defense.PD = defenseValuePD;
+            for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && !o.options.resistant)) {
+                defense.PDtags = `${defense.PDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.rPD = resistantValuePD;
+            for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && o.options.resistant)) {
+                defense.rPDtags = `${defense.rPDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.drp = damageReductionValuePD;
+            for (const tag of defenseTagsPD.filter((o) => o.operation === "pct")) {
+                defense.drptags = `${defense.drptags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.dnp = damageNegationValuePD;
+            for (const tag of defenseTagsPD.filter((o) => o.operation === "subtract")) {
+                defense.dnptags = `${defense.dnptags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
 
             // Defense ED
@@ -336,36 +368,67 @@ export class HeroSystemActorSheet extends ActorSheet {
             await edAttack._postUpload();
 
             let {
-                defenseValue: defenseValueE,
-                resistantValue: resistantValueE /* impenetrableValueE */,
-                damageReductionValue: damageReductionValueE,
-                damageNegationValue: damageNegationValueE /* knockbackResistanceE */,
-                defenseTags: defenseTagsE,
+                defenseValue: _defenseValueED,
+                resistantValue: _resistantValueED /* impenetrableValueE */,
+                damageReductionValue: _damageReductionValueED,
+                damageNegationValue: _damageNegationValueED /* knockbackResistanceE */,
+                // defenseTags: _defenseTagsE,
             } = determineDefense(this.actor, edAttack);
-            defense.ED = defenseValueE;
-            defense.rED = resistantValueE;
-            defense.EDtags = "ENERGY DEFENSE\n";
-            defense.rEDtags = "ENERGY DEFENSE (RESISTANT)\n";
-            for (let tag of defenseTagsE.filter((o) => o.name.match(/ed$/i))) {
-                if (tag.resistant) {
-                    defense.rEDtags += `${tag.value} ${tag.title}\n`;
-                } else if (tag.resistant != undefined) {
-                    defense.EDtags += `${tag.value} ${tag.title}\n`;
-                }
+            // defense.ED = defenseValueE;
+            // defense.rED = resistantValueE;
+            // defense.EDtags = "ENERGY DEFENSE\n";
+            // defense.rEDtags = "ENERGY DEFENSE (RESISTANT)\n";
+            // for (let tag of defenseTagsE.filter((o) => o.name.match(/ed$/i))) {
+            //     if (tag.resistant) {
+            //         defense.rEDtags += `${tag.value} ${tag.title}\n`;
+            //     } else if (tag.resistant != undefined) {
+            //         defense.EDtags += `${tag.value} ${tag.title}\n`;
+            //     }
+            // }
+            // defense.dre = damageReductionValueE;
+            // defense.dretags = "DAMAGE REDUCTION ENERGY\n";
+            // for (let tag of defenseTagsE.filter((o) => o.name.match(/dre$/i))) {
+            //     if (tag.resistant) {
+            //         defense.dretags += `${tag.value} ${tag.title}\n`;
+            //     } else if (tag.resistant != undefined) {
+            //         defense.dretags += `${tag.value} ${tag.title}\n`;
+            //     }
+            // }
+            // defense.dne = damageNegationValueE;
+            // defense.dnetags = "DAMAGE NEGATION ENERGY\n";
+            // for (let tag of defenseTagsE.filter((o) => o.name.match(/dne$/i))) {
+            //     defense.dnetags += `${tag.value} ${tag.title}\n`;
+            // }
+
+            // New ED
+            const {
+                defenseValue: defenseValueED,
+                resistantValue: resistantValueED,
+                damageReductionValue: damageReductionValueED,
+                damageNegationValue: damageNegationValueED,
+                defenseTags: defenseTagsED,
+            } = getActorDefensesVsAttack(this.actor, edAttack);
+            if (_defenseValueED != defenseValueED) {
+                console.error("ED Defense mismatch", _defenseValueED, defenseValueED);
             }
-            defense.dre = damageReductionValueE;
-            defense.dretags = "DAMAGE REDUCTION ENERGY\n";
-            for (let tag of defenseTagsE.filter((o) => o.name.match(/dre$/i))) {
-                if (tag.resistant) {
-                    defense.dretags += `${tag.value} ${tag.title}\n`;
-                } else if (tag.resistant != undefined) {
-                    defense.dretags += `${tag.value} ${tag.title}\n`;
-                }
+            if (_resistantValueED != resistantValueED) {
+                console.error("rED Defense mismatch", _defenseValueED, defenseValueED);
             }
-            defense.dne = damageNegationValueE;
-            defense.dnetags = "DAMAGE NEGATION ENERGY\n";
-            for (let tag of defenseTagsE.filter((o) => o.name.match(/dne$/i))) {
-                defense.dnetags += `${tag.value} ${tag.title}\n`;
+            defense.ED = defenseValueED;
+            for (const tag of defenseTagsED.filter((o) => o.operation === "add" && !o.options.resistant)) {
+                defense.EDtags = `${defense.EDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.rED = resistantValueED;
+            for (const tag of defenseTagsED.filter((o) => o.operation === "add" && o.options.resistant)) {
+                defense.rEDtags = `${defense.rEDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.dre = damageReductionValueED;
+            for (const tag of defenseTagsED.filter((o) => o.operation === "pct")) {
+                defense.dretags = `${defense.dretags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.dne = damageNegationValueED;
+            for (const tag of defenseTagsED.filter((o) => o.operation === "subtract")) {
+                defense.dnetags = `${defense.dnetags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
 
             // Defense MD
@@ -381,36 +444,64 @@ export class HeroSystemActorSheet extends ActorSheet {
             await mdAttack._postUpload();
 
             let {
-                defenseValue: defenseValueM,
-                resistantValue: resistantValueM /*impenetrableValueM*/,
-                damageReductionValue: damageReductionValueM,
-                damageNegationValue: damageNegationValueM /*knockbackResistanceM*/,
-                defenseTags: defenseTagsM,
+                defenseValue: _defenseValueMD,
+                resistantValue: _resistantValueMD /*impenetrableValueM*/,
+                damageReductionValue: _damageReductionValueMD,
+                damageNegationValue: _damageNegationValueMD /*knockbackResistanceM*/,
+                defenseTags: _defenseTagsMD,
             } = determineDefense(this.actor, mdAttack);
-            defense.MD = defenseValueM;
-            defense.rMD = resistantValueM;
-            defense.MDtags = "MENTAL DEFENSE\n";
-            defense.rMDtags = "MENTAL DEFENSE (RESISTANT)\n";
-            for (let tag of defenseTagsM.filter((o) => o.name.match(/md$/i))) {
-                if (tag.resistant) {
-                    defense.rMDtags += `${tag.value} ${tag.title}\n`;
-                } else if (tag.resistant != undefined) {
-                    defense.MDtags += `${tag.value} ${tag.title}\n`;
-                }
+            // defense.MD = defenseValueM;
+            // defense.rMD = resistantValueM;
+            // defense.MDtags = "MENTAL DEFENSE\n";
+            // defense.rMDtags = "MENTAL DEFENSE (RESISTANT)\n";
+            // for (let tag of defenseTagsM.filter((o) => o.name.match(/md$/i))) {
+            //     if (tag.resistant) {
+            //         defense.rMDtags += `${tag.value} ${tag.title}\n`;
+            //     } else if (tag.resistant != undefined) {
+            //         defense.MDtags += `${tag.value} ${tag.title}\n`;
+            //     }
+            // }
+            // defense.drm = damageReductionValueM;
+            // defense.drmtags = "DAMAGE REDUCTION MENTAL\n";
+            // for (let tag of defenseTagsM.filter((o) => o.name.match(/drm$/i))) {
+            //     if (tag.resistant) {
+            //         defense.drmtags += `${tag.value} ${tag.title}\n`;
+            //     } else if (tag.resistant != undefined) {
+            //         defense.drmtags += `${tag.value} ${tag.title}\n`;
+            //     }
+            // }
+            // defense.dnm = damageNegationValueM;
+            // defense.dnmtags = "DAMAGE NEGATION MENTAL\n";
+            // for (let tag of defenseTagsM.filter((o) => o.name.match(/dnm$/i))) {
+            //     defense.dnmtags += `${tag.value} ${tag.title}\n`;
+            // }
+
+            // New MD
+            const {
+                defenseValue: defenseValueMD,
+                resistantValue: resistantValueMD,
+                damageReductionValue: damageReductionValueMD,
+                damageNegationValue: damageNegationValueMD,
+                defenseTags: defenseTagsMD,
+            } = getActorDefensesVsAttack(this.actor, mdAttack);
+            if (_defenseValueMD != defenseValueMD) {
+                console.error("MD Defense mismatch", _defenseValueMD, defenseValueMD, _defenseTagsMD);
             }
-            defense.drm = damageReductionValueM;
-            defense.drmtags = "DAMAGE REDUCTION MENTAL\n";
-            for (let tag of defenseTagsM.filter((o) => o.name.match(/drm$/i))) {
-                if (tag.resistant) {
-                    defense.drmtags += `${tag.value} ${tag.title}\n`;
-                } else if (tag.resistant != undefined) {
-                    defense.drmtags += `${tag.value} ${tag.title}\n`;
-                }
+            defense.MD = defenseValueMD;
+            for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && !o.options.resistant)) {
+                defense.MDtags = `${defense.MDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
-            defense.dnm = damageNegationValueM;
-            defense.dnmtags = "DAMAGE NEGATION MENTAL\n";
-            for (let tag of defenseTagsM.filter((o) => o.name.match(/dnm$/i))) {
-                defense.dnmtags += `${tag.value} ${tag.title}\n`;
+            defense.rMD = resistantValueMD;
+            for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && o.options.resistant)) {
+                defense.rMDtags = `${defense.rMDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.drm = damageReductionValueMD;
+            for (const tag of defenseTagsMD.filter((o) => o.operation === "pct")) {
+                defense.drmtags = `${defense.drmtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
+            }
+            defense.dnm = damageNegationValueMD;
+            for (const tag of defenseTagsMD.filter((o) => o.operation === "subtract")) {
+                defense.dnmtags = `${defense.dnmtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
             }
 
             // Defense POWD
@@ -426,21 +517,43 @@ export class HeroSystemActorSheet extends ActorSheet {
             await drainAttack._postUpload();
 
             let {
-                defenseValue: defenseValuePOWD,
+                defenseValue: _defenseValuePOWD,
                 resistantValue:
-                    resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
-                defenseTags: defenseTagsPOWD,
+                    _resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
+                // defenseTags: defenseTagsPOWD,
             } = determineDefense(this.actor, drainAttack);
+            // defense.POWD = defenseValuePOWD;
+            // defense.rPOWD = resistantValuePOWD;
+            // defense.POWDtags = "POWER DEFENSE\n";
+            // defense.rPOWDtags = "POWER DEFENSE (RESISTANT)\n";
+            // for (let tag of defenseTagsPOWD.filter((o) => o.name.match(/powd$/i))) {
+            //     if (tag.resistant) {
+            //         defense.rPOWDtags += `${tag.value} ${tag.title}\n`;
+            //     } else if (tag.resistant != undefined) {
+            //         defense.POWDtags += `${tag.value} ${tag.title}\n`;
+            //     }
+            // }
+
+            // New POWERDEFENSE
+            const {
+                defenseValue: defenseValuePOWD,
+                resistantValue: resistantValuePOWD,
+                defenseTags: defenseTagsPOWD,
+            } = getActorDefensesVsAttack(this.actor, drainAttack);
+            if (_defenseValuePOWD != defenseValuePOWD) {
+                console.error("POWERDEFENSE Defense mismatch", _defenseValuePOWD, defenseValuePOWD);
+            }
             defense.POWD = defenseValuePOWD;
+            for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && !o.options.resistant)) {
+                defense.POWDtags = `${defense.POWDtags || ""}${tag.value.signedString()} ${tag.name} ${
+                    tag.shortDesc
+                }\n`;
+            }
             defense.rPOWD = resistantValuePOWD;
-            defense.POWDtags = "POWER DEFENSE\n";
-            defense.rPOWDtags = "POWER DEFENSE (RESISTANT)\n";
-            for (let tag of defenseTagsPOWD.filter((o) => o.name.match(/powd$/i))) {
-                if (tag.resistant) {
-                    defense.rPOWDtags += `${tag.value} ${tag.title}\n`;
-                } else if (tag.resistant != undefined) {
-                    defense.POWDtags += `${tag.value} ${tag.title}\n`;
-                }
+            for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && o.options.resistant)) {
+                defense.rPOWDtags = `${defense.rPOWDtags || ""}${tag.value.signedString()} ${tag.name} ${
+                    tag.shortDesc
+                }\n`;
             }
 
             data.defense = defense;
