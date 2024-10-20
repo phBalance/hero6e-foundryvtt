@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 
+//export function createDefenseProfile
 export function createDefenseTag(actorItemDefense, attackItem, value, options = {}) {
     let itemNameExpanded =
         options.shortDesc ||
@@ -28,7 +29,7 @@ export function createDefenseTag(actorItemDefense, attackItem, value, options = 
             }${options.impenetrable ? `\nImpenetrable: ${options.impenetrable}` : ""}`,
         shortDesc: itemNameExpanded,
         operation: options.operation || "add",
-        options,
+        defenseProfile: options,
     };
 }
 

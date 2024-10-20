@@ -3598,7 +3598,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
                     newOptions.operation = "add";
-                    newOptions.resistant = (options.resistant || 0) + 1;
+                    newOptions.resistant = true;
                     newOptions.hardened = (options.hardened || 0) + 1;
                     return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
                 }
@@ -4308,6 +4308,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1 / 3,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="CLINGING" ID="1709333852130" BASECOST="10.0" LEVELS="5" ALIAS="Clinging" POSITION="24" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -4887,14 +4891,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
-                    newOptions.resistant = (options.resistant || 0) + 1;
+                    newOptions.resistant = true;
                     return createDefenseTag(actorItemDefense, attackItem, value, newOptions);
-                    // {
-                    //     name: `${options.attackDefenseVs}r${(resistant}`,
-                    //     value: value,
-                    //     resistant: resistant,
-                    //     title: `${actorItemDefense.name}\n${actorItemDefense.system.XMLID}`,
-                    // };
                 }
                 return null;
             },
@@ -5053,6 +5051,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 return result;
+            },
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "KB":
+                        value = this.details(actorItemDefense);
+                        break;
+                }
+                if (value > 0) {
+                    return createDefenseTag(actorItemDefense, attackItem, value, options);
+                }
+                return null;
             },
             xml: `<POWER XMLID="GROWTH" ID="1711934263926" BASECOST="25.0" LEVELS="0" ALIAS="Growth" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LARGE" OPTIONID="LARGE" OPTION_ALIAS="Large" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
@@ -5472,6 +5482,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="REGENERATION" ID="1709334000761" BASECOST="0.0" LEVELS="1" ALIAS="Regeneration" POSITION="70" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="WEEK" OPTIONID="WEEK" OPTION_ALIAS="Week" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         undefined,
@@ -5539,6 +5553,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: 1,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="STRETCHING" ID="1709334014434" BASECOST="0.0" LEVELS="1" ALIAS="Stretching" POSITION="75" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         { costPerLevel: 5 },
