@@ -53,14 +53,7 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
     options.resistant = actorItemDefense.findModsByXmlid("RESISTANT") ? true : false;
 
     if (typeof actorItemDefense.baseInfo?.defenseTagVsAttack === "function") {
-        const defenseProfile = actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, options);
-        if (!defenseProfile) return null;
-
-        // Defense is appropriate for non-killing attacks.  Resistant defenses are always appropriate.
-        if (!attackItem.killing || defenseProfile?.options.resistant) {
-            return defenseProfile;
-        }
-        return null;
+        return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, options);
     }
 
     console.error(`Unable to determine defenseTagVsAttack for ${actorItemDefense.system.XMLID}`);
@@ -93,7 +86,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     const attackDefenseVs = attackItem.attackDefenseVs;
     options = { ...options, attackDefenseVs };
 
-    // Basic characteristics (PD & ED) for non-killing attacks
+    // Basic characteristics (PD & ED)
     if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {
         let value = targetActor.system.characteristics[attackDefenseVs.toLowerCase()].value;
 
@@ -137,17 +130,14 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             newOptions.resistant = true;
         }
 
-        // Make sure we have resistant defenses with killing attacks
-        if (!attackItem.killing || newOptions.resistant) {
-            actorDefenses.defenseTags.push(
-                createDefenseProfile(resistantBase, attackItem, value, {
-                    ...newOptions,
-                    //name: attackDefenseVs,
-                    title: resistantBase ? undefined : `Natural`,
-                    shortDesc: resistantBase ? undefined : `Natural`,
-                }),
-            );
-        }
+        actorDefenses.defenseTags.push(
+            createDefenseProfile(resistantBase, attackItem, value, {
+                ...newOptions,
+                //name: attackDefenseVs,
+                title: resistantBase ? undefined : `Natural`,
+                shortDesc: resistantBase ? undefined : `Natural`,
+            }),
+        );
     }
 
     // Items that provide defense and are active
