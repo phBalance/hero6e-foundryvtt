@@ -77,13 +77,18 @@ function itemIsOptionalManeuver(item) {
 function filterItem(item, filterString) {
     if (!filterString) return item;
 
-    if (
-        item.name.toLowerCase().includes(filterString.toLowerCase()) ||
-        (item.system.description && item.system.description.toLowerCase().includes(filterString.toLowerCase())) ||
-        (item.system.XMLID && item.system.XMLID.toLowerCase().includes(filterString.toLowerCase()))
-    ) {
-        return item;
+    const regex = new RegExp(filterString.trim(), "i");
+
+    const match = item.name?.match(regex) || item.system.description?.match(regex) || item.system.XMLID?.match(regex);
+    if (match) return true;
+
+    // Could be a child of a parent
+    for (const child of item.childItems) {
+        const match2 =
+            child.name?.match(regex) || child.system.description?.match(regex) || child.system.XMLID?.match(regex);
+        if (match2) return true;
     }
+    return false;
 }
 
 // function parentItem(item) {
