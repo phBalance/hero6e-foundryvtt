@@ -474,8 +474,9 @@ export class HeroSystem6eItem extends Item {
                 error: resourceError,
                 warning: resourceWarning,
                 resourcesUsedDescription,
+                resourcesUsedDescriptionRenderedRoll,
             } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
-                userForceOverride: !!event?.shiftKey,
+                noResourceUse: !!event?.shiftKey,
             });
             if (resourceError) {
                 return ui.notifications.error(resourceError);
@@ -490,7 +491,7 @@ export class HeroSystem6eItem extends Item {
                 const chatData = {
                     user: game.user._id,
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                    content: `${resourcesUsedDescription} to attempt to activate ${item.name} but attempt failed`,
+                    content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"} to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
                     whisper: whisperUserTargetsForActor(item.actor),
                     speaker,
                 };
@@ -504,13 +505,13 @@ export class HeroSystem6eItem extends Item {
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                content: `${resourcesUsedDescription} to activate ${item.name}`,
+                content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "} ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
                 whisper: whisperUserTargetsForActor(item.actor),
                 speaker,
             };
             await ChatMessage.create(chatData);
 
-            // A continuing charge's use is tracked by an active effect. Start it.
+            // A continuing charges use is tracked by an active effect. Start it.
             await _startIfIsAContinuingCharge(this);
 
             // Invisibility status effect for SIGHTGROUP?
@@ -1289,11 +1290,7 @@ export class HeroSystem6eItem extends Item {
                             const token = tokens[0];
                             const velocity = calculateVelocityInSystemUnits(item.actor, token);
 
-                            item.system.ocvEstimated = (
-                                ocv +
-                                parseInt(cslSummary.ocv) +
-                                parseInt(velocity / 10)
-                            ).signedString();
+                            item.system.ocvEstimated = `${ocv + parseInt(cslSummary.ocv) + parseInt(velocity / 10)}`;
 
                             if (parseInt(velocity / 10) != 0) {
                                 if (item.flags.tag.ocv) {
@@ -1311,11 +1308,7 @@ export class HeroSystem6eItem extends Item {
                     default:
                         item.system.ocv = parseInt(item.system.ocv).signedString();
 
-                        item.system.ocvEstimated = (
-                            ocv +
-                            parseInt(item.system.ocv) +
-                            parseInt(cslSummary.ocv || cslSummary.omcv || 0)
-                        ).signedString();
+                        item.system.ocvEstimated = `${ocv + parseInt(item.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)}`;
 
                         if (parseInt(item.system.ocv) != 0) {
                             if (item.flags.tags.ocv) {
@@ -1339,11 +1332,7 @@ export class HeroSystem6eItem extends Item {
                     item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
                 }
                 item.system.dcv = parseInt(item.system.dcv).signedString();
-                item.system.dcvEstimated = (
-                    dcv +
-                    parseInt(item.system.dcv) +
-                    parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
-                ).signedString();
+                item.system.dcvEstimated = `${dcv + parseInt(item.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)}`;
 
                 if (parseInt(item.system.dcv) != 0) {
                     if (item.flags.tags.dcv) {
@@ -1357,7 +1346,7 @@ export class HeroSystem6eItem extends Item {
 
             if (item.system.uses === "omcv") {
                 const omcv = parseInt(item.actor?.system.characteristics.omcv?.value || 0);
-                item.system.ocvEstimated = (omcv + parseInt(cslSummary.omcv || 0)).signedString();
+                item.system.ocvEstimated = `${omcv + parseInt(cslSummary.omcv || 0)}`;
                 if (omcv != 0) {
                     if (item.flags.tags.omcv) {
                         item.flags.tags.omcv += "\n";
@@ -1368,7 +1357,7 @@ export class HeroSystem6eItem extends Item {
                 }
 
                 const dmcv = parseInt(item.actor?.system.characteristics.dmcv?.value || 0);
-                item.system.dcvEstimated = (dmcv + parseInt(cslSummary.dmcv || 0)).signedString();
+                item.system.dcvEstimated = `${dmcv + parseInt(cslSummary.dmcv || 0)}`;
                 if (dmcv != 0) {
                     if (item.flags.tags.dmcv) {
                         item.flags.tags.dmcv += "\n";
@@ -1384,7 +1373,7 @@ export class HeroSystem6eItem extends Item {
                 (o) => o.type == "maneuver" && o.name === "Set" && o.system.active,
             );
             if (setManeuver) {
-                item.system.ocvEstimated = (parseInt(item.system.ocvEstimated) + 1).signedString();
+                item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + 1}`;
 
                 if (item.flags.tags.ocv) {
                     item.flags.tags.ocv += "\n";
@@ -1399,14 +1388,14 @@ export class HeroSystem6eItem extends Item {
                 (o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active,
             );
             if (haymakerManeuver) {
-                item.system.dcvEstimated = (parseInt(item.system.dcvEstimated) - 4).signedString();
+                item.system.dcvEstimated = `${parseInt(item.system.dcvEstimated) - 5}`;
 
                 if (item.flags.tags.dcv) {
                     item.flags.tags.dcv += "\n";
                 } else {
                     item.flags.tags.dcv = "";
                 }
-                item.flags.tags.dcv += `-4 Haymaker`;
+                item.flags.tags.dcv += `-5 Haymaker`;
             }
 
             item.system.phase = item.system.PHASE;
@@ -1460,8 +1449,10 @@ export class HeroSystem6eItem extends Item {
             this.system.charges = {
                 ...this.system.charges,
                 max: parseInt(CHARGES.OPTION_ALIAS),
-                recoverable: (CHARGES.ADDER || []).find((o) => o.XMLID == "RECOVERABLE") ? true : false,
-                continuing: (CHARGES.ADDER || []).find((o) => o.XMLID == "CONTINUING")?.OPTIONID,
+                recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
+                continuing: (CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
+                boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
+                fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
             };
             if (this.system.charges?.value === undefined || this.system.charges?.value === null) {
                 console.log("Invalid charges. Resetting to max", this);
@@ -2300,6 +2291,15 @@ export class HeroSystem6eItem extends Item {
                 if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
                     adder.BASECOST_total = 1;
                 }
+                // else if (this.system.XMLID === "ENTANGLE") {
+                //     // 5E is just a straight 5 points per adder level, but
+                //     // 6E costs 3 points for the first LEVEL and 2 points for the next and so on (typical cost of resistent defense).
+                //     if (adder.XMLID === "ADDITIONALED" || adder.XMLID === "ADDITIONALPD") {
+                //         const groupsOfTwo = Math.floor(adderLevels / 2);
+                //         const cost = 5 * groupsOfTwo + 3 * (adderLevels - 2 * groupsOfTwo);
+                //         adder.BASECOST_total = cost;
+                //     }
+                // }
             } else {
                 adder.BASECOST_total = 0;
             }

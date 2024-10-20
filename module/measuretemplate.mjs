@@ -1,4 +1,3 @@
-import { isGameV12OrLater } from "./utility/compatibility.mjs";
 import { HEROSYS } from "./herosystem6e.mjs";
 
 export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
@@ -30,51 +29,14 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         );
 
         if (HexTemplates && hexGrid) {
-            const isV12 = isGameV12OrLater();
-
             if (shapeType === "circle") {
-                if (!isV12) {
-                    // v11
-                    // 5e is based on hexes but 6e is based on gridless. Adapt 5e templates to gridless
-                    // but it's only an approximation as the 2 systems are not comparable.
-                    const columnarGridArrangement =
-                        game.scenes.current.grid.type === CONST.GRID_TYPES.GRIDLESS ||
-                        game.scenes.current.grid.type === CONST.GRID_TYPES.SQUARE
-                            ? true
-                            : game.canvas.grid.grid.columnar;
+                const vertices = game.canvas.grid.getCircle({ x: 0, y: 0 }, distance);
 
-                    const shapeVector = columnarGridArrangement
-                        ? [canvas.dimensions.distancePixels * Math.sqrt(3), canvas.dimensions.distancePixels * 2]
-                        : [canvas.dimensions.distancePixels * 2, canvas.dimensions.distancePixels * Math.sqrt(3)];
-
-                    // Hex based circle looks like a hexagon. The hexagon has the opposite orientation of the grid.
-                    // See https://www.redblobgames.com/grids/hexagons/#basics for instance.
-                    const gridHexagonVertices = columnarGridArrangement
-                        ? HexagonalGrid.pointyHexPoints
-                        : HexagonalGrid.flatHexPoints;
-
-                    const pixelHexagonVertices = gridHexagonVertices.map(
-                        (vertex) =>
-                            new PIXI.Point(
-                                (vertex[0] - 0.5) * distance * shapeVector[0],
-                                (vertex[1] - 0.5) * distance * shapeVector[1],
-                            ),
-                    );
-
-                    return new PIXI.Polygon(...pixelHexagonVertices);
-                } else {
-                    // v12
-                    const vertices = game.canvas.grid.getCircle({ x: 0, y: 0 }, distance);
-
-                    return new PIXI.Polygon(...vertices);
-                }
+                return new PIXI.Polygon(...vertices);
             } else if (shapeType === "cone") {
-                // 5e cones are hex counted and have a flat end. We only support v12 for these.
-                if (isV12) {
-                    const vertices = game.canvas.grid.getCone({ x: 0, y: 0 }, distance, direction, angle);
+                const vertices = game.canvas.grid.getCone({ x: 0, y: 0 }, distance, direction, angle);
 
-                    return new PIXI.Polygon(...vertices);
-                }
+                return new PIXI.Polygon(...vertices);
             }
         }
 
