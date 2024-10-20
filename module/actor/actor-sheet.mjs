@@ -1065,6 +1065,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             error: resourceError,
             warning: resourceWarning,
             resourcesUsedDescription,
+            resourcesUsedDescriptionRenderedRoll,
         } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, strengthUsed);
         if (resourceError) {
             return ui.notifications.error(resourceError);
@@ -1089,7 +1090,9 @@ export class HeroSystemActorSheet extends ActorSheet {
             item,
             targetEntangle: "true",
 
-            resourcesUsedDescription,
+            resourcesUsedDescription: resourcesUsedDescription
+                ? `Spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`
+                : "",
 
             // dice rolls
             renderedDamageRoll: damageRenderedResult,

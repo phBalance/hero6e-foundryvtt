@@ -89,8 +89,8 @@ async function skillRoll(item, actor, target, event) {
     const {
         error: resourceError,
         warning: resourceWarning,
-        resourcesRequired,
         resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, { noResourceUse: event.shiftKey });
     if (resourceError || resourceWarning) {
         const chatData = {
@@ -167,8 +167,9 @@ async function skillRoll(item, actor, target, event) {
         }),
         rolls: skillRoller.rawRolls(),
         renderedRoll: rollHtml,
-        resourcesUsedDescription:
-            resourcesRequired.charges > 0 || resourcesRequired.end > 0 ? resourcesUsedDescription : undefined,
+        resourcesUsedDescription: resourcesUsedDescription
+            ? `Spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`
+            : "",
         user: game.user._id,
         speaker: speaker,
     };

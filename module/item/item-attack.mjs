@@ -518,6 +518,7 @@ export async function AttackToHit(item, options) {
         warning: resourceWarning,
         resourcesRequired,
         resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
         ...options,
         ...{ noResourceUse: false },
@@ -720,7 +721,7 @@ export async function AttackToHit(item, options) {
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: resourcesUsedDescription,
+            content: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
             whisper: ChatMessage.getWhisperRecipients("GM"),
             speaker,
         };
@@ -782,7 +783,7 @@ export async function AttackToHit(item, options) {
 
         // endurance
         useEnd: resourcesRequired.end,
-        resourcesUsedDescription,
+        resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
 
         // misc
         tags: heroRoller.tags(),
@@ -3055,6 +3056,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  *
  * @param {HeroSystem6eItem} item
  * @param {Object} options
+ * @param {boolean} options.noResourceUse - true to not consume resources but still indicate how many would have been consumed
  *
  * @returns Object discriminated union based on error or warning being falsy/truthy
  */
@@ -3124,7 +3126,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     }
 
     // The actor is now committed to spending the resources to activate the power
-    const resourcesUsedDescription = await spendResourcesToUse(
+    const { resourcesUsedDescription, resourcesUsedDescriptionRenderedRoll } = await spendResourcesToUse(
         item,
         enduranceReserve,
         resourcesRequired.end,
@@ -3134,8 +3136,8 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         !useResources,
     );
 
-    // Let users know what resources were not consumed
-    if (!useResources) {
+    // Let users know what resources were not consumed only if there were any to be consumed
+    if (!useResources && resourcesUsedDescription) {
         const speaker = ChatMessage.getSpeaker({
             actor: actor,
         });
@@ -3144,7 +3146,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: `${game.user.name} is using SHIFT to override using ${resourcesUsedDescription} for <b>${item.name}</b>`,
+            content: `${game.user.name} is using SHIFT to override using ${resourcesUsedDescription} for <b>${item.name}</b>${resourcesUsedDescriptionRenderedRoll}`,
             whisper: whisperUserTargetsForActor(this),
             speaker,
         };
@@ -3153,9 +3155,14 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
 
     return {
         resourcesRequired,
+
+        // Provide a wordy description of what was used. Indicate if resource use was overridden except if no would have been used.
         resourcesUsedDescription: useResources
-            ? `Spent ${resourcesUsedDescription}`
-            : `${resourcesUsedDescription} overridden with SHIFT`,
+            ? `${resourcesUsedDescription}`
+            : resourcesUsedDescription
+              ? `${resourcesUsedDescription} overridden with SHIFT`
+              : resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
     };
 }
 
@@ -3302,6 +3309,37 @@ async function rollStunForEnd(stunDice) {
 }
 
 /**
+ * Parse the automation setting for the system. Return what should be automated for
+ * this actor type.
+ *
+ * none: "No Automation",
+ * npcOnly: "NPCs Only (end, stun, body)",
+ * pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
+ * all: "PCs and NPCs (end, stun, body)"
+ *
+ * @typedef {Object} HeroSystem6eActorAutomation
+ * @param {boolean} endurance - Automate END use/tracking
+ * @param {boolean} stun - Automate STUN use/tracking
+ * @param {boolean} body - Automate BODY use/tracking
+ */
+/**
+ * @param {HeroSystem6eActor} actor
+ * @returns {HeroSystem6eActorAutomation}
+ */
+export function actorAutomation(actor) {
+    const automation = game.settings.get(HEROSYS.module, "automation");
+
+    return {
+        endurance:
+            automation === "all" ||
+            (automation === "npcOnly" && actor.type == "npc") ||
+            (automation === "pcEndOnly" && actor.type === "pc"),
+        stun: automation === "all" || (automation === "npcOnly" && actor.type == "npc"),
+        body: automation === "all" || (automation === "npcOnly" && actor.type == "npc"),
+    };
+}
+
+/**
  * Spend all resources (END, STUN, charges) provided. Assumes numbers are possible.
  *
  * @param {HeroSystem6eItem} item
@@ -3311,7 +3349,7 @@ async function rollStunForEnd(stunDice) {
  * @param {HeroRoller} stunToSpendRoller
  * @param {number} chargesToSpend
  * @param {boolean} noResourceUse - true if you would like to simulate the resources being used without using them (aka dry run)
- * @returns
+ * @returns {Object}
  */
 async function spendResourcesToUse(
     item,
@@ -3323,29 +3361,26 @@ async function spendResourcesToUse(
     noResourceUse,
 ) {
     const actor = item.actor;
-    let resourceUsageDescription = "";
+    const expectedAutomation = actorAutomation(actor);
+    const canSpendResources = !noResourceUse;
+    const canSpendEndurance =
+        canSpendResources &&
+        actor.inCombat && // TODO: Not sure if we should have this or not. We had it in toggle() but not elsewhere.
+        expectedAutomation.endurance;
+    const canSpendStun = canSpendResources && expectedAutomation.stun;
+    const canSpendCharges = canSpendResources;
+    let resourcesUsedDescription = "";
+    let resourcesUsedDescriptionRenderedRoll = "";
 
     // Deduct endurance
-    // none: "No Automation",
-    // npcOnly: "NPCs Only (end, stun, body)",
-    // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
-    // all: "PCs and NPCs (end, stun, body)"
-    const automation = game.settings.get(HEROSYS.module, "automation");
-    const actorInCombat = actor.inCombat;
-    const noEnduranceUse =
-        !actorInCombat && // TODO: Not sure if we should have this or not. We had it in toggle() but not elsewhere.
-        (automation === "all" ||
-            (automation === "npcOnly" && actor.type == "npc") ||
-            (automation === "pcEndOnly" && actor.type === "pc"));
-
-    if (item.system.USE_END_RESERVE) {
+    if (item.system.USE_END_RESERVE && endToSpend) {
         if (enduranceReserve) {
             const reserveEnd = parseInt(enduranceReserve?.system.value || 0);
             const actorNewEndurance = reserveEnd - endToSpend;
 
-            resourceUsageDescription = `${endToSpend} END from Endurance Reserve`;
+            resourcesUsedDescription = `${endToSpend} END from Endurance Reserve`;
 
-            if (!noResourceUse && !noEnduranceUse) {
+            if (canSpendEndurance) {
                 await enduranceReserve.update({
                     "system.value": actorNewEndurance,
                     "system.description": enduranceReserve.system.description,
@@ -3356,52 +3391,55 @@ async function spendResourcesToUse(
         const actorStun = actor.system.characteristics.stun.value;
         const actorEndurance = actor.system.characteristics.end.value;
         const actorNewEndurance = actorEndurance - endToSpend;
-
         const actorChanges = {};
 
         if (stunToSpend > 0) {
-            resourceUsageDescription = `
-                    <span>
-                        ${endToSpend} END and ${stunToSpend} STUN
-                        <i class="fal fa-circle-info" data-tooltip="<b>USING STUN FOR ENDURANCE</b><br>
-                        A character at 0 END who still wishes to perform Actions
-                        may use STUN as END. The character takes 1d6 STUN Only
-                        damage (with no defense) for every 2 END (or fraction thereof)
-                        expended. Yes, characters can Knock themselves out this way.
-                        "></i>
-                    </span>
-                    `;
+            resourcesUsedDescription = `
+                <span>
+                    ${endToSpend} END and ${stunToSpend} STUN
+                    <i class="fal fa-circle-info" data-tooltip="<b>USING STUN FOR ENDURANCE</b><br>
+                    A character at 0 END who still wishes to perform Actions
+                    may use STUN as END. The character takes 1d6 STUN Only
+                    damage (with no defense) for every 2 END (or fraction thereof)
+                    expended. Yes, characters can Knock themselves out this way.
+                    "></i>
+                </span>
+                `;
 
-            const stunRenderedResult = await stunToSpendRoller.render();
-            resourceUsageDescription += stunRenderedResult;
+            resourcesUsedDescriptionRenderedRoll = await stunToSpendRoller.render();
 
-            await ui.notifications.warn(`${actor.name} used ${stunToSpend} STUN for ENDURANCE.`);
+            if (canSpendStun) {
+                await ui.notifications.warn(`${actor.name} used ${stunToSpend} STUN for ENDURANCE.`);
 
-            // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
-            //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
-            actorChanges["system.characteristics.stun.value"] = actorStun - stunToSpend;
+                // NOTE: Can have a negative END for reasons other than spending END (e.g. drains), however, spend END on
+                //       an attack can't lower it beyond its starting value or 0 (whichever is smaller).
+                actorChanges["system.characteristics.stun.value"] = actorStun - stunToSpend;
+            }
         } else {
-            resourceUsageDescription = `${endToSpend} END`;
+            resourcesUsedDescription = `${endToSpend} END`;
         }
 
-        actorChanges["system.characteristics.end.value"] = actorNewEndurance;
+        if (canSpendEndurance) {
+            actorChanges["system.characteristics.end.value"] = actorNewEndurance;
 
-        if (!noResourceUse && !noEnduranceUse) {
             await actor.update(actorChanges);
         }
     }
 
     // Spend charges
     if (chargesToSpend > 0) {
-        resourceUsageDescription = `${resourceUsageDescription}${
-            resourceUsageDescription ? " and " : ""
+        resourcesUsedDescription = `${resourcesUsedDescription}${
+            resourcesUsedDescription ? " and " : ""
         }${chargesToSpend} charge${chargesToSpend > 1 ? "s" : ""}`;
 
-        if (!noResourceUse) {
+        if (canSpendCharges) {
             const startingCharges = parseInt(item.system.charges?.value || 0);
             await item.update({ "system.charges.value": startingCharges - chargesToSpend });
         }
     }
 
-    return resourceUsageDescription;
+    return {
+        resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
+    };
 }

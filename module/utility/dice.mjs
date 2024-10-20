@@ -1,6 +1,4 @@
-import { isGameV12OrLater } from "./compatibility.mjs";
-
-export const DICE_SO_NICE_CUSTOM_SETS = {
+export const DICE_SO_NICE_CUSTOM_SETS = Object.freeze({
     HIT_LOC: {
         colorset: "Hit Location - Body Part",
         foreground: "black",
@@ -56,7 +54,7 @@ export const DICE_SO_NICE_CUSTOM_SETS = {
         },
         visibility: "visible",
     },
-};
+});
 
 // v11/v12 compatibility shim.
 // TODO: Cleanup eslint file with these terms
@@ -337,15 +335,14 @@ export class HeroRoller {
     }
 
     /**
-     * V11 and V12 (or later) behave differently. V11 can have a operatorTerm to start
-     * terms but it cannot have negative dice terms. V12, on the other hand, cannot handle
-     * starting with an operatorTerm and cannot handle negative dice terms.
+     * NOTE: V12, on the other hand, cannot handle starting with an operatorTerm and cannot handle negative dice terms.
+     * Potentially add an extra term to help.
      *
      * @returns {Number} numDice
      */
     static WORK_AROUND_STRING = "v12+ work around";
     #prefixFormula(numDice) {
-        if (isGameV12OrLater() && this._formulaTerms.length === 0) {
+        if (this._formulaTerms.length === 0) {
             if (numDice < 0) {
                 this._formulaTerms.push(
                     new NumericTerm({
@@ -533,12 +530,7 @@ export class HeroRoller {
             this._options,
         );
 
-        // V12 doesn't have async as an option anymore - it is the default.
-        const evaluateOptions = isGameV12OrLater() ? {} : { async: true };
-        await this._rollObj.evaluate({
-            ...options,
-            ...evaluateOptions,
-        });
+        await this._rollObj.evaluate(options);
 
         await this.#calculateResults();
 
@@ -986,9 +978,7 @@ export class HeroRoller {
                 .addDieMinus1Min1(this._killingStunMultiplier === "1d6-1" ? 1 : 0)
                 .addHalfDice(this._killingStunMultiplier === "1d3" ? 1 : 0);
 
-            // V12 doesn't have async as an option anymore - it is the default.
-            const evaluateOptions = isGameV12OrLater() ? {} : { async: true };
-            await this._killingStunMultiplierHeroRoller.roll(evaluateOptions);
+            await this._killingStunMultiplierHeroRoller.roll({});
 
             this._killingBaseStunMultiplier = this._killingStunMultiplierHeroRoller.getBasicTotal();
         }
