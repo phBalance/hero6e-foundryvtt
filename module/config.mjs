@@ -4034,6 +4034,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<TALENT XMLID="SIMULATE_DEATH" ID="1709160004972" BASECOST="3.0" LEVELS="0" ALIAS="Simulate Death" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" />`,
         },
         {},
@@ -4591,6 +4595,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 0.2,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="DUPLICATION" ID="1711933622430" BASECOST="0.0" LEVELS="0" ALIAS="Duplication" POSITION="37" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" NUMBER="1" POINTS="0"><NOTES/></POWER>`,
         },
         {},
@@ -4908,8 +4916,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: 3,
-            defenseTagVsAttack: function (args) {
-                return HERO.powers6e.find((o) => o.key === "FORCEFIELD").defenseTagVsAttack(...args);
+            defenseTagVsAttack: function (...args) {
+                // We really shouldn't include this as a defense.
+                // TODO: Impelemnt FORCEWALL englobing like we do with ENTANGLE
+                // return HERO.powers6e.find((o) => o.key === "FORCEFIELD").defenseTagVsAttack(...args);
+                return null;
             },
             xml: `<POWER XMLID="FORCEWALL" ID="1711932416775" BASECOST="3.0" LEVELS="0" ALIAS="Barrier" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0"><NOTES/></POWER>`,
         },
@@ -5135,6 +5146,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="INVISIBILITY" ID="1711934550291" BASECOST="20.0" LEVELS="0" ALIAS="Invisibility" POSITION="51" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -5180,6 +5195,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
         costPerLevel: 1,
+        defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            // Not really sure when this would be part of a defense
+            return null;
+        },
         xml: `<POWER XMLID="LACKOFWEAKNESS" ID="1709342664430" BASECOST="0.0" LEVELS="1" ALIAS="Lack Of Weakness" POSITION="40" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Mental Defense" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
     });
     addPower(

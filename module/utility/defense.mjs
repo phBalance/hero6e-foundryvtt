@@ -17,7 +17,7 @@ export function createDefenseTag(actorItemDefense, attackItem, value, options = 
     return {
         name:
             options.name ||
-            `${options.attackDefenseVs}${options.resistant ? `r${options.resistant}` : ""}${
+            `${options.resistant ? `r` : ""}${options.attackDefenseVs}${
                 options.hardened ? `h${options.hardened}` : ""
             }${options.impenetrable ? `i${options.impenetrable}` : ""}`,
         value: value,
@@ -122,10 +122,15 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             newOptions.resistant = true;
         }
 
+        // Bases & Vehicles have resistant PD & ED
+        if (["base2", "vehicle"].includes(targetActor?.type) && ["PD", "ED"].includes(attackDefenseVs)) {
+            newOptions.resistant = true;
+        }
+
         actorDefenses.defenseTags.push(
             createDefenseTag(actorDefenses, attackItem, value, {
                 ...newOptions,
-                name: attackDefenseVs,
+                //name: attackDefenseVs,
                 title: `Natural`,
                 shortDesc: `Natural`,
             }),
@@ -387,7 +392,8 @@ export function determineDefense(targetActor, attackItem, options) {
                 ED -= parseInt(activeDefense.system.LEVELS);
             }
             activeDefense.system.defenseType = "ed";
-        } else if (["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
+        } else if (["FORCEFIELD", "ARMOR"].includes(xmlid)) {
+            //"FORCEWALL" not typically a defense on a character.  Englobing not supported yet.
             // Resistant Defenses
             switch (attackType) {
                 case "physical":
