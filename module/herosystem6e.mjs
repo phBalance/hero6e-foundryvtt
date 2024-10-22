@@ -759,14 +759,6 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     }
 });
 
-Hooks.on("preCreateItem", async function (doc, d, options, userId) {
-    console.log("preCreateItem", doc, d, options, userId);
-});
-
-Hooks.on("createItem", async function (...args) {
-    console.log(...args);
-});
-
 // If compendium is created you have to reload to get the new application class.
 // This is known issue https://discord.com/channels/170995199584108546/670336275496042502/1255649814096511107
 Hooks.once("setup", function () {

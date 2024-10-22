@@ -128,6 +128,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         const folders = [];
 
         try {
+            let errorCount = 0;
             for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
                 if (heroJson.PREFAB?.[itemTag]) {
                     for (const system of heroJson.PREFAB[itemTag]) {
@@ -176,7 +177,6 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                                 itemData.folder = parentFolder.id;
                             }
 
-                            console.log(itemData);
                             const item = await HeroSystem6eItem.create(itemData, {
                                 pack: pack.metadata.id,
                             });
@@ -253,11 +253,12 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                             }
                         } catch (e) {
                             console.error(e);
-                            ui.notifications.error(
-                                `<b>${system.NAME || system.ALIAS}<b> in compendium <b>${
-                                    pack.metadata.label
-                                }</b> failed to upload.`,
-                            );
+                            if (errorCount === 0) {
+                                ui.notifications.error(
+                                    `One or more items in compendium <b>${pack.metadata.label}</b> failed to upload. See error log for details.`,
+                                );
+                            }
+                            errorCount++;
                         }
                     }
                 }
