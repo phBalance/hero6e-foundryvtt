@@ -16,6 +16,7 @@
 - COMBAT LUCK now provides hardened and impenetrable resistant defense. [#1336](https://github.com/dmdorman/hero6e-foundryvtt/issues/1336)
 - 5e now resists penetrating with hardened defenses.
 - Boostable charges, with a max of 4, will be allowed only if the charges are actually boostable. [#1327](https://github.com/dmdorman/hero6e-foundryvtt/issues/1327)
+- Fix for compendium import errors [#1358](https://github.com/dmdorman/hero6e-foundryvtt/issues/1358)
 
 ## Version 4.0.1
 
