@@ -1484,7 +1484,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // CUSTOMPOWER LIGHT
-        if (this.system.XMLID === "CUSTOMPOWER" && this.system.active === undefined) {
+        if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
             await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
         }
 
@@ -4552,18 +4552,20 @@ export class HeroSystem6eItem extends Item {
                 });
             }
 
-            for (const enhancedPerception of this.actor.items.filter(
-                (o) => o.system.XMLID === "ENHANCEDPERCEPTION" && o.system.OPTIONID === "ALL",
-            )) {
-                enhancedPerception.system.checked = true;
-                if (enhancedPerception.system.active) {
-                    const levels = parseInt(enhancedPerception.system.LEVELS);
-                    tags.push({
-                        value: levels,
-                        name: enhancedPerception.name,
-                        itemId: enhancedPerception.id,
-                    });
-                    rollVal += levels;
+            if (this.actor) {
+                for (const enhancedPerception of this.actor.items.filter(
+                    (o) => o.system.XMLID === "ENHANCEDPERCEPTION" && o.system.OPTIONID === "ALL",
+                )) {
+                    enhancedPerception.system.checked = true;
+                    if (enhancedPerception.system.active) {
+                        const levels = parseInt(enhancedPerception.system.LEVELS);
+                        tags.push({
+                            value: levels,
+                            name: enhancedPerception.name,
+                            itemId: enhancedPerception.id,
+                        });
+                        rollVal += levels;
+                    }
                 }
             }
 
