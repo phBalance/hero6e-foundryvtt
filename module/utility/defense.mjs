@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 import { distanceWithActorUnits } from "../utility/units.mjs";
+import { RoundFavorPlayerUp } from "./round.mjs";
 
 //export function createDefenseProfile
 export function createDefenseProfile(actorItemDefense, attackItem, value, options = {}) {
@@ -40,21 +41,22 @@ export function createDefenseProfile(actorItemDefense, attackItem, value, option
         });
     }
 
-    if (options?.knockback) {
-        defenseProfileArray.push({
-            name: options.name || `KB`,
-            value: options?.knockback * (actorItemDefense.actor?.is5e ? 0.5 : 1),
-            title:
-                options.title ||
-                `${itemNameExpanded}\nKnockback Resistance: ${distanceWithActorUnits(
-                    options.knockback,
-                    actorItemDefense.actor,
-                )}`,
-            shortDesc: itemNameExpanded,
-            operation: options.operation || "add",
-            options,
-        });
-    }
+    // Careful not to include KB in PD/ED defenses
+    // if (options?.knockback) {
+    //     defenseProfileArray.push({
+    //         name: options.name || `KB`,
+    //         value: options?.knockback * (actorItemDefense.actor?.is5e ? 0.5 : 1),
+    //         title:
+    //             options.title ||
+    //             `${itemNameExpanded}\nKnockback Resistance: ${distanceWithActorUnits(
+    //                 options.knockback,
+    //                 actorItemDefense.actor,
+    //             )}`,
+    //         shortDesc: itemNameExpanded,
+    //         operation: options.operation || "add",
+    //         options,
+    //     });
+    // }
 
     return defenseProfileArray;
 }
@@ -69,16 +71,18 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
         return {};
     }
 
-    options.attackDefenseVs = options.attackDefenseVs || attackItem.attackDefenseVs;
-    //options.piercing = attackItem.findModsByXmlid("ARMORPIERCING") || 0;
-    //options.penetrating = attackItem.findModsByXmlid("PENETRATING") || 0;
-    options.impenetrable = parseInt(actorItemDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS) || 0;
-    options.hardened = parseInt(actorItemDefense.findModsByXmlid("HARDENED")?.LEVELS) || 0;
-    options.resistant = actorItemDefense.findModsByXmlid("RESISTANT") ? true : false;
-    options.knockback = 0;
+    const newOptions = foundry.utils.deepClone(options);
+
+    newOptions.attackDefenseVs = newOptions.attackDefenseVs || attackItem.attackDefenseVs;
+    //newOptions.piercing = attackItem.findModsByXmlid("ARMORPIERCING") || 0;
+    //newOptions.penetrating = attackItem.findModsByXmlid("PENETRATING") || 0;
+    newOptions.impenetrable = parseInt(actorItemDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS) || 0;
+    newOptions.hardened = parseInt(actorItemDefense.findModsByXmlid("HARDENED")?.LEVELS) || 0;
+    newOptions.resistant = actorItemDefense.findModsByXmlid("RESISTANT") ? true : false;
+    newOptions.knockback = 0;
 
     if (typeof actorItemDefense.baseInfo?.defenseTagVsAttack === "function") {
-        return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, options);
+        return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, newOptions);
     }
 
     console.error(`Unable to determine defenseTagVsAttack for ${actorItemDefense.system.XMLID}`);
@@ -90,6 +94,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         defenseTotalValue: 0,
         defenseValue: 0,
         resistantValue: 0,
+        impenetrableValue: 0,
         damageReductionValue: 0,
         damageNegationValue: 0,
         knockbackResistanceValue: 0,
@@ -110,6 +115,9 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
 
     const attackDefenseVs = attackItem.attackDefenseVs;
     options = { ...options, attackDefenseVs };
+
+    const penetrating = parseInt((options.penetrating = attackItem.findModsByXmlid("PENETRATING")?.LEVELS)) || 0;
+    const armorPiercing = parseInt((options.penetrating = attackItem.findModsByXmlid("ARMORPIERCING")?.LEVELS)) || 0;
 
     // Basic characteristics (PD & ED)
     if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {
@@ -175,6 +183,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     );
     for (const defenseItem of activeDefenses) {
         const defenseProfile = getItemDefenseVsAttack(defenseItem, attackItem, options);
+
         if (defenseProfile) {
             actorDefenses.defenseTags = [...actorDefenses.defenseTags, ...defenseProfile];
         }
@@ -187,11 +196,23 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
 
     // Totals
     for (const tag of actorDefenses.defenseTags) {
+        // HARDENED
+        if (armorPiercing) {
+            if (tag.options?.hardened >= armorPiercing) {
+                //actorDefenses.impenetrableValue += tag?.value || 0;
+            } else {
+                tag.options.strikethrough = true;
+                tag.name2 = tag.name.replace(/i\d+/, "");
+                //tag.valueText2 = tag.valueText;
+                tag.value2 = RoundFavorPlayerUp(tag.value / 2);
+            }
+        }
+
         if (tag.operation === "add") {
             if (tag.options?.resistant) {
-                actorDefenses.resistantValue += tag?.value || 0;
+                actorDefenses.resistantValue += tag?.value2 || tag?.value || 0;
             } else {
-                actorDefenses.defenseValue += tag?.value || 0;
+                actorDefenses.defenseValue += tag?.value2 || tag?.value || 0;
             }
         }
 
@@ -208,6 +229,18 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         // KNOCKBACK
         if (tag.options?.knockback) {
             actorDefenses.knockbackResistanceValue += tag.options.knockback;
+        }
+
+        // IMPENETRABLE
+        if (penetrating && tag.options?.impenetrable) {
+            if (tag.options?.impenetrable >= penetrating) {
+                actorDefenses.impenetrableValue += tag?.value || 0;
+            } else {
+                tag.options.strikethrough = true;
+                tag.name2 = tag.name.replace(/i\d+/, "");
+                tag.valueText2 = tag.valueText;
+                tag.value2 = tag.value;
+            }
         }
     }
     actorDefenses.defenseTotalValue = actorDefenses.defenseValue + actorDefenses.resistantValue;

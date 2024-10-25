@@ -3600,6 +3600,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     newOptions.operation = "add";
                     newOptions.resistant = true;
                     newOptions.hardened = (options.hardened || 0) + 1;
+                    newOptions.impenetrable = (options.impenetrable || 0) + 1;
                     return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;

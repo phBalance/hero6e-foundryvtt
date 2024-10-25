@@ -12,9 +12,10 @@
 - Fixes for CHARACTERISTICS toggles that were subtracting instead of adding to values. [#1293](https://github.com/dmdorman/hero6e-foundryvtt/issues/1293)
 - Various minor improvements for tokens of type BASE in an effort to improve [Token Attacher](https://github.com/KayelGee/token-attacher) support.
 - Conditional defenses are now hidden when they provide no defense against a specific attack. There is a new setting to show All Conditional Defenses.
-- Fix where some defenses were being ignored.
-- COMBAT LUCK now provides hardened and impenetrable resistant defense. [#1336](https://github.com/dmdorman/hero6e-foundryvtt/issues/1336)
-- 5e now resists penetrating with hardened defenses.
+- Reworked how defenses tags are shown and how defenses are calculated vs attacks. [#1339](https://github.com/dmdorman/hero6e-foundryvtt/issues/1339)
+  - 5e now resists penetrating with hardened defenses.
+  - Fix where some defenses were being ignored.
+  - COMBAT LUCK now provides hardened and impenetrable resistant defense. [#1336](https://github.com/dmdorman/hero6e-foundryvtt/issues/1336)
 - Boostable charges, with a max of 4, will be allowed only if the charges are actually boostable. [#1327](https://github.com/dmdorman/hero6e-foundryvtt/issues/1327)
 - Fix for compendium import errors [#1358](https://github.com/dmdorman/hero6e-foundryvtt/issues/1358)
 

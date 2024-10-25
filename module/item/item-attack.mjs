@@ -923,7 +923,7 @@ function getAttackTags(item) {
 
             default:
                 attackTags.push({
-                    name: `${mod.ALIAS || mod.XMLID}`,
+                    name: `${mod.ALIAS || mod.XMLID} ${parseInt(mod.LEVELS || 0) ? mod.LEVELS : ""}`,
                     title: `${mod.OPTION_ALIAS || mod.XMLID}`,
                 });
         }
