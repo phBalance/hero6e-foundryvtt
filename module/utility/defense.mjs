@@ -18,7 +18,7 @@ export function createDefenseProfile(actorItemDefense, attackItem, value, option
         itemNameExpanded = `[${options.attackDefenseVs} ${actorItemDefense.type}]`;
     }
 
-    // Some defense (like INCREASEDENSITY) provide more than 1 type of defense (PD/ED + KB)
+    // Some defense (like INCREASEDENSITY) provide more than 1 type of defense (PD/ED + KB), but should pass in "KB" for attackDefenseVs, so perhaps an array is not necessary.
     const defenseProfileArray = [];
 
     if (value) {

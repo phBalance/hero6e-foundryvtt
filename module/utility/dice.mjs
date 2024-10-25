@@ -164,7 +164,7 @@ export class HeroRoller {
      * Add Dice So Nice dice skinning to rolls.
      */
     static #addDiceSoNiceSkinning(roll) {
-        if (roll?.options?.appearance) {
+        if (roll?.options?.appearance && roll.dice.length > 0) {
             roll.dice[0].options.appearance = roll.options.appearance;
         }
 
