@@ -1093,7 +1093,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         impenetrableValue,
         damageReductionValue,
         damageNegationValue,
-        knockbackResistance,
+        knockbackResistanceValue,
         defenseTags,
     } = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
     if (damageNegationValue > 0) {
@@ -1112,14 +1112,14 @@ async function _rollApplyKnockback(token, knockbackDice) {
     damageData.impenetrableValue = impenetrableValue;
     damageData.damageReductionValue = damageReductionValue;
     damageData.damageNegationValue = damageNegationValue;
-    damageData.knockbackResistance = knockbackResistance;
+    damageData.knockbackResistanceValue = knockbackResistanceValue;
     damageData.defenseAvad =
         defenseValue +
         resistantValue +
         impenetrableValue +
         damageReductionValue +
         damageNegationValue +
-        knockbackResistance;
+        knockbackResistanceValue;
     damageData.targetToken = token;
 
     const damageDetail = await _calcDamage(damageRoller, pdAttack, damageData);
@@ -1540,7 +1540,7 @@ export async function _onRollMindScanEffectRoll(event) {
         impenetrableValue,
         damageReductionValue,
         damageNegationValue,
-        knockbackResistance,
+        knockbackResistanceValue,
         defenseTags,
     } = determineDefense(token.actor, item, { ignoreDefenseIds });
     if (damageNegationValue > 0) {
@@ -1559,14 +1559,14 @@ export async function _onRollMindScanEffectRoll(event) {
     damageData.impenetrableValue = impenetrableValue;
     damageData.damageReductionValue = damageReductionValue;
     damageData.damageNegationValue = damageNegationValue;
-    damageData.knockbackResistance = knockbackResistance;
+    damageData.knockbackResistanceValue = knockbackResistanceValue;
     damageData.defenseAvad =
         defenseValue +
         resistantValue +
         impenetrableValue +
         damageReductionValue +
         damageNegationValue +
-        knockbackResistance;
+        knockbackResistanceValue;
     damageData.targetToken = token;
 
     const damageDetail = await _calcDamage(damageRoller, item, damageData);
@@ -1989,9 +1989,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         impenetrableValue: _impenetrableValue,
         damageReductionValue: _damageReductionValue,
         damageNegationValue: _damageNegationValue,
-        knockbackResistance: _knockbackResistance,
+        knockbackResistanceValue: _knockbackResistanceValue,
         defenseTags: _defenseTags,
-    } = determineDefense(token.actor, item, { ignoreDefenseIds });
+    } = determineDefense(token.actor, item, { ignoreDefenseIds, suppressDeprecationWarn: true });
 
     // New Defense Stuff
     let {
@@ -2000,12 +2000,24 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         impenetrableValue,
         damageReductionValue,
         damageNegationValue,
-        knockbackResistance,
+        knockbackResistanceValue,
         defenseTags,
     } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
 
     if (defenseValue != _defenseValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
         console.warn("defenseValue mismatch", defenseValue, _defenseValue);
+    }
+
+    if (resistantValue != _resistantValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
+        console.warn("resistantValue mismatch", resistantValue, _resistantValue);
+    }
+
+    if (
+        knockbackResistanceValue != _knockbackResistanceValue &&
+        !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
+        !item.isKilling
+    ) {
+        console.warn("knockbackResistance mismatch", knockbackResistanceValue, _knockbackResistanceValue);
     }
 
     if (damageNegationValue > 0) {
@@ -2023,14 +2035,14 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     damageData.impenetrableValue = impenetrableValue;
     damageData.damageReductionValue = damageReductionValue;
     damageData.damageNegationValue = damageNegationValue;
-    damageData.knockbackResistance = knockbackResistance;
+    damageData.knockbackResistanceValue = knockbackResistanceValue;
     damageData.defenseAvad =
         defenseValue +
         resistantValue +
         impenetrableValue +
         damageReductionValue +
         damageNegationValue +
-        knockbackResistance;
+        knockbackResistanceValue;
     damageData.targetToken = token;
 
     // AVAD All or Nothing
@@ -3033,7 +3045,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
             .addNumber(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), "Max potential knockback")
-            .addNumber(-parseInt(options.knockbackResistance || 0), "Knockback resistance")
+            .addNumber(-parseInt(options.knockbackResistanceValue || 0), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
 

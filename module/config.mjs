@@ -4517,12 +4517,15 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         value = parseInt(actorItemDefense.system.LEVELS) || 0;
                         break;
 
-                    case "KB":
-                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 2;
-                        break;
+                    // case "KB":
+                    //     value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 2;
+                    //     break;
                 }
                 if (value > 0) {
-                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "add";
+                    newOptions.knockback = value * 2;
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
                 }
                 return null;
             },
@@ -5055,12 +5058,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
-                    case "KB":
+                    case "PD":
+                    case "ED":
                         value = this.details(actorItemDefense);
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "add";
+                    newOptions.knockback = value * 2;
+                    return createDefenseProfile(actorItemDefense, attackItem, null, newOptions);
                 }
                 return null;
             },
@@ -5179,12 +5186,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
                 switch (options.attackDefenseVs) {
-                    case "KB":
+                    // case "KB":
+                    //     value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                    //     break;
+                    case "PD":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                    case "ED":
                         value = parseInt(actorItemDefense.system.LEVELS) || 0;
                         break;
                 }
                 if (value > 0) {
-                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "add";
+                    newOptions.knockback = value * (actorItemDefense.is5e ? 2 : 1);
+                    return createDefenseProfile(actorItemDefense, attackItem, null, newOptions);
                 }
                 return null;
             },

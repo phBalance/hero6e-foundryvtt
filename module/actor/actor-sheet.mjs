@@ -297,7 +297,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 damageReductionValue: _damageReductionValuePD,
                 damageNegationValue: _damageNegationValuePD /*knockbackResistance*/,
                 // defenseTags: defenseTagsP,
-            } = determineDefense(this.actor, pdAttack);
+            } = determineDefense(this.actor, pdAttack, { suppressDeprecationWarn: true });
 
             // defense.PD = defenseValue;
             // defense.rPD = resistantValue;
@@ -373,7 +373,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 damageReductionValue: _damageReductionValueED,
                 damageNegationValue: _damageNegationValueED /* knockbackResistanceE */,
                 // defenseTags: _defenseTagsE,
-            } = determineDefense(this.actor, edAttack);
+            } = determineDefense(this.actor, edAttack, { suppressDeprecationWarn: true });
             // defense.ED = defenseValueE;
             // defense.rED = resistantValueE;
             // defense.EDtags = "ENERGY DEFENSE\n";
@@ -449,7 +449,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 damageReductionValue: _damageReductionValueMD,
                 damageNegationValue: _damageNegationValueMD /*knockbackResistanceM*/,
                 defenseTags: _defenseTagsMD,
-            } = determineDefense(this.actor, mdAttack);
+            } = determineDefense(this.actor, mdAttack, { suppressDeprecationWarn: true });
             // defense.MD = defenseValueM;
             // defense.rMD = resistantValueM;
             // defense.MDtags = "MENTAL DEFENSE\n";
@@ -521,7 +521,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 resistantValue:
                     _resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
                 // defenseTags: defenseTagsPOWD,
-            } = determineDefense(this.actor, drainAttack);
+            } = determineDefense(this.actor, drainAttack, { suppressDeprecationWarn: true });
             // defense.POWD = defenseValuePOWD;
             // defense.rPOWD = resistantValuePOWD;
             // defense.POWDtags = "POWER DEFENSE\n";

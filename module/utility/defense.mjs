@@ -1,5 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
+import { distanceWithActorUnits } from "../utility/units.mjs";
 
 //export function createDefenseProfile
 export function createDefenseProfile(actorItemDefense, attackItem, value, options = {}) {
@@ -16,23 +17,46 @@ export function createDefenseProfile(actorItemDefense, attackItem, value, option
         itemNameExpanded = `[${options.attackDefenseVs} ${actorItemDefense.type}]`;
     }
 
-    return {
-        name:
-            options.name ||
-            `${options.resistant ? `r` : ""}${options.attackDefenseVs}${
-                options.hardened ? `h${options.hardened}` : ""
-            }${options.impenetrable ? `i${options.impenetrable}` : ""}`,
-        value: value,
-        valueText: options.operation === "pct" ? `${value}%` : null,
-        title:
-            options.title ||
-            `${itemNameExpanded}${options.resistant ? `\nResistant: ${options.resistant}` : ""}${
-                options.hardened ? `\nHardened x${options.hardened}` : ""
-            }${options.impenetrable ? `\nImpenetrable x${options.impenetrable}` : ""}`,
-        shortDesc: itemNameExpanded,
-        operation: options.operation || "add",
-        options,
-    };
+    // Some defense (like INCREASEDENSITY) provide more than 1 type of defense (PD/ED + KB)
+    const defenseProfileArray = [];
+
+    if (value) {
+        defenseProfileArray.push({
+            name:
+                options.name ||
+                `${options.resistant ? `r` : ""}${options.attackDefenseVs}${
+                    options.hardened ? `h${options.hardened}` : ""
+                }${options.impenetrable ? `i${options.impenetrable}` : ""}`,
+            value: value,
+            valueText: options.operation === "pct" ? `${value}%` : null,
+            title:
+                options.title ||
+                `${itemNameExpanded}${options.resistant ? `\nResistant: ${options.resistant}` : ""}${
+                    options.hardened ? `\nHardened x${options.hardened}` : ""
+                }${options.impenetrable ? `\nImpenetrable x${options.impenetrable}` : ""}`,
+            shortDesc: itemNameExpanded,
+            operation: options.operation || "add",
+            options,
+        });
+    }
+
+    if (options?.knockback) {
+        defenseProfileArray.push({
+            name: options.name || `KB`,
+            value: options?.knockback * (actorItemDefense.actor?.is5e ? 0.5 : 1),
+            title:
+                options.title ||
+                `${itemNameExpanded}\nKnockback Resistance: ${distanceWithActorUnits(
+                    options.knockback,
+                    actorItemDefense.actor,
+                )}`,
+            shortDesc: itemNameExpanded,
+            operation: options.operation || "add",
+            options,
+        });
+    }
+
+    return defenseProfileArray;
 }
 
 export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {}) {
@@ -51,6 +75,7 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
     options.impenetrable = parseInt(actorItemDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS) || 0;
     options.hardened = parseInt(actorItemDefense.findModsByXmlid("HARDENED")?.LEVELS) || 0;
     options.resistant = actorItemDefense.findModsByXmlid("RESISTANT") ? true : false;
+    options.knockback = 0;
 
     if (typeof actorItemDefense.baseInfo?.defenseTagVsAttack === "function") {
         return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, options);
@@ -130,14 +155,15 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             newOptions.resistant = true;
         }
 
-        actorDefenses.defenseTags.push(
-            createDefenseProfile(resistantBase, attackItem, value, {
+        actorDefenses.defenseTags = [
+            ...actorDefenses.defenseTags,
+            ...createDefenseProfile(resistantBase, attackItem, value, {
                 ...newOptions,
                 //name: attackDefenseVs,
                 title: resistantBase ? undefined : `Natural`,
                 shortDesc: resistantBase ? undefined : `Natural`,
             }),
-        );
+        ];
     }
 
     // Items that provide defense and are active
@@ -150,7 +176,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     for (const defenseItem of activeDefenses) {
         const defenseProfile = getItemDefenseVsAttack(defenseItem, attackItem, options);
         if (defenseProfile) {
-            actorDefenses.defenseTags = [...actorDefenses.defenseTags, defenseProfile];
+            actorDefenses.defenseTags = [...actorDefenses.defenseTags, ...defenseProfile];
         }
     }
 
@@ -178,12 +204,21 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         if (tag.operation === "subtract") {
             actorDefenses.damageNegationValue += tag?.value || 0;
         }
+
+        // KNOCKBACK
+        if (tag.options?.knockback) {
+            actorDefenses.knockbackResistanceValue += tag.options.knockback;
+        }
     }
     actorDefenses.defenseTotalValue = actorDefenses.defenseValue + actorDefenses.resistantValue;
     return actorDefenses;
 }
 
 export function determineDefense(targetActor, attackItem, options) {
+    if (!options?.suppressDeprecationWarn) {
+        console.warn("deprecated 'determineDefense' function, refactor to use 'getActorDefenseVsAttack'");
+    }
+
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem);
     }
@@ -241,7 +276,7 @@ export function determineDefense(targetActor, attackItem, options) {
     let DNP = 0; // damage negation physical
     let DNE = 0; // damage negation energy
     let DNM = 0; // damage negation mental
-    let knockbackResistance = 0;
+    let knockbackResistanceValue = 0;
 
     // Check if we are supposed to ignore PD/ED (eg AVAD)
     if (options?.ignoreDefenseIds?.includes("PD")) {
@@ -504,7 +539,7 @@ export function determineDefense(targetActor, attackItem, options) {
         if (game.settings.get(HEROSYS.module, "knockback") && attackItem.system.knockbackMultiplier) {
             if (["KBRESISTANCE", "DENSITYINCREASE"].includes(xmlid)) {
                 let _value = value * (targetActor.system.is5e ? 1 : 2);
-                knockbackResistance += _value;
+                knockbackResistanceValue += _value;
                 defenseTags.push({
                     value: _value,
                     name: "KB" + tagXmlIds,
@@ -516,7 +551,7 @@ export function determineDefense(targetActor, attackItem, options) {
                 const configPowerInfo = getPowerInfo({ item: activeDefense });
                 const details = configPowerInfo?.details(activeDefense) || {};
                 let _value = details.kb;
-                knockbackResistance += _value;
+                knockbackResistanceValue += _value;
                 defenseTags.push({
                     value: _value,
                     name: "KB" + tagXmlIds,
@@ -526,7 +561,7 @@ export function determineDefense(targetActor, attackItem, options) {
 
             if (["SHRINKING"].includes(xmlid)) {
                 let _value = -value * (targetActor.system.is5e ? 3 : 6);
-                knockbackResistance += _value;
+                knockbackResistanceValue += _value;
                 defenseTags.push({
                     value: _value,
                     name: "KB" + tagXmlIds,
@@ -747,7 +782,7 @@ export function determineDefense(targetActor, attackItem, options) {
                 break;
 
             case "kbr": // Knockback Resistance
-                knockbackResistance += value;
+                knockbackResistanceValue += value;
                 if (attackType != "mental" && game.settings.get(HEROSYS.module, "knockback")) {
                     defenseTags.push({
                         name: "KB Resistance" + tagXmlIds,
@@ -829,7 +864,7 @@ export function determineDefense(targetActor, attackItem, options) {
         impenetrableValue,
         damageReductionValue,
         damageNegationValue,
-        knockbackResistance,
+        knockbackResistanceValue,
         defenseTags,
         defenseTotalValue: defenseValue + resistantValue,
     };
