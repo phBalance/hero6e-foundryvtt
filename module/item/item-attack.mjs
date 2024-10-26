@@ -1090,12 +1090,12 @@ async function _rollApplyKnockback(token, knockbackDice) {
     // Old Defense Stuff
     let {
         defenseValue: _defenseValue,
-        resistantValue: _resistantValue,
-        impenetrableValue: _impenetrableValue,
-        damageReductionValue: _damageReductionValue,
+        // resistantValue: _resistantValue,
+        // impenetrableValue: _impenetrableValue,
+        // damageReductionValue: _damageReductionValue,
         damageNegationValue: _damageNegationValue,
         knockbackResistanceValue: _knockbackResistanceValue,
-        defenseTags: _defenseTags,
+        //defenseTags: _defenseTags,
     } = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
 
     // New Defense Stuff
@@ -1109,21 +1109,13 @@ async function _rollApplyKnockback(token, knockbackDice) {
         defenseTags,
     } = getActorDefensesVsAttack(token.actor, pdAttack, { ignoreDefenseIds });
 
-    if (
-        damageNegationValue != _damageNegationValue &&
-        !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
-        !item.isKilling
-    ) {
+    if (damageNegationValue != _damageNegationValue) {
         console.warn("damageNegationValue mismatch", damageNegationValue, _damageNegationValue);
     }
-    if (defenseValue != _defenseValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
+    if (defenseValue != _defenseValue) {
         console.warn("defenseValue mismatch", defenseValue, _defenseValue);
     }
-    if (
-        knockbackResistanceValue != _knockbackResistanceValue &&
-        !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
-        !item.isKilling
-    ) {
+    if (knockbackResistanceValue != _knockbackResistanceValue) {
         console.warn("knockbackResistanceValue mismatch", knockbackResistanceValue, _knockbackResistanceValue);
     }
 
@@ -2017,11 +2009,11 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     let {
         defenseValue: _defenseValue,
         resistantValue: _resistantValue,
-        impenetrableValue: _impenetrableValue,
-        damageReductionValue: _damageReductionValue,
-        damageNegationValue: _damageNegationValue,
-        //knockbackResistanceValue: _knockbackResistanceValue,
-        defenseTags: _defenseTags,
+        // impenetrableValue: _impenetrableValue,
+        // damageReductionValue: _damageReductionValue,
+        // damageNegationValue: _damageNegationValue,
+        //  knockbackResistanceValue: _knockbackResistanceValue,
+        // defenseTags: _defenseTags,
     } = determineDefense(token.actor, item, { ignoreDefenseIds, suppressDeprecationWarn: true });
 
     // New Defense Stuff
