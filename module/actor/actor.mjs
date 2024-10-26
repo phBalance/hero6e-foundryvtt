@@ -1468,14 +1468,16 @@ export class HeroSystem6eActor extends Actor {
         uploadPerformance._d = new Date();
 
         // Do CSLs last so we can property select the attacks
+        // TODO: infinite loop of _postUpload until no changes?
+        const doLastXmlids = ["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS", "MENTALDEFENSE"];
         await Promise.all(
             this.items
-                .filter((o) => !["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS"].includes(o.system.XMLID))
+                .filter((o) => !doLastXmlids.includes(o.system.XMLID))
                 .map((i) => i._postUpload({ render: false, uploadProgressBar })),
         );
         await Promise.all(
             this.items
-                .filter((o) => ["COMBAT_LEVELS", "MENTAL_COMBAT_LEVELS"].includes(o.system.XMLID))
+                .filter((o) => doLastXmlids.includes(o.system.XMLID))
                 .map((i) => i._postUpload({ render: false, uploadProgressBar })),
         );
         uploadPerformance.postUpload = new Date() - uploadPerformance._d;
