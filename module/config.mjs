@@ -4035,7 +4035,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
             },
@@ -4309,7 +4309,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1 / 3,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
             },
@@ -4603,7 +4603,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 0.2,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
             },
@@ -5164,7 +5164,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
             },
@@ -5222,7 +5222,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
         costPerLevel: 1,
-        defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+        defenseTagVsAttack: function () {
             // Not really sure when this would be part of a defense
             return null;
         },
@@ -5401,7 +5401,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: 1,
             privateAsAdder: true,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
             },
@@ -5499,7 +5499,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
             },
@@ -5570,7 +5570,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: 1,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Not really sure when this would be part of a defense
                 return null;
             },
