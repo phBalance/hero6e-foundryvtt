@@ -37,7 +37,7 @@ export function createDefenseProfile(actorItemDefense, attackItem, value, option
                 }${options.impenetrable ? `\nImpenetrable x${options.impenetrable}` : ""}`,
             shortDesc: itemNameExpanded,
             operation: options.operation || "add",
-            options,
+            options: { ...options, knockback: null },
         });
     }
 
@@ -196,6 +196,11 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
 
     // Totals
     for (const tag of actorDefenses.defenseTags) {
+        // KNOCKBACK doesn't add to any defense totals
+        if (tag.options?.knockback) {
+            continue;
+        }
+
         // HARDENED
         if (armorPiercing) {
             if (tag.options?.hardened >= armorPiercing) {
@@ -249,7 +254,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
 
 export function determineDefense(targetActor, attackItem, options) {
     if (!options?.suppressDeprecationWarn) {
-        console.warn("deprecated 'determineDefense' function, refactor to use 'getActorDefenseVsAttack'");
+        console.warn("deprecated 'determineDefense' function, refactor to use 'getActorDefensesVsAttack'");
     }
 
     if (!attackItem.findModsByXmlid) {

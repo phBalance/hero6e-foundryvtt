@@ -5,7 +5,6 @@
 - Strength rolls now use endurance. [#1253](https://github.com/dmdorman/hero6e-foundryvtt/issues/1253)
 - Skill rolls and toggle activations can now use STUN for END and END reserves. They can also use SHIFT to override resource consumption.
 - Encumbrance related improvements.
-- Fix for 5e DAMAGE RESISTANCE and PD/ED purchased as a power, where the PD/ED was counted twice. [#1297](https://github.com/dmdorman/hero6e-foundryvtt/issues/1297)
 - Improved KNOWLEDGE_SKILL descriptions. [#1278](https://github.com/dmdorman/hero6e-foundryvtt/issues/1278)
 - Initial NIGHTVISION, INFRAREDPERCEPTION, ULTRASONICPERCEPTION, and ULTRAVIOLETPERCEPTION support. Also if you create a custom power with the word light in it, you can toggle it on/off like a lantern (QTY = meters of bright vision).
 - Fixes for CONTINUING CHARGES and auto expiration with SIMPLE CALENDAR.
@@ -13,9 +12,11 @@
 - Various minor improvements for tokens of type BASE in an effort to improve [Token Attacher](https://github.com/KayelGee/token-attacher) support.
 - Conditional defenses are now hidden when they provide no defense against a specific attack. There is a new setting to show All Conditional Defenses.
 - Reworked how defenses tags are shown and how defenses are calculated vs attacks. [#1339](https://github.com/dmdorman/hero6e-foundryvtt/issues/1339)
+  - Fix for 5e DAMAGE RESISTANCE and PD/ED purchased as a power, where the PD/ED was counted twice. [#1297](https://github.com/dmdorman/hero6e-foundryvtt/issues/1297)
   - 5e now resists penetrating with hardened defenses.
   - Fix where some defenses were being ignored.
   - COMBAT LUCK now provides hardened and impenetrable resistant defense. [#1336](https://github.com/dmdorman/hero6e-foundryvtt/issues/1336)
+  - Defenses that are reduced (like by Armor Piercing) are shown with red strike-through, along with adjusted values.
 - Boostable charges, with a max of 4, will be allowed only if the charges are actually boostable. [#1327](https://github.com/dmdorman/hero6e-foundryvtt/issues/1327)
 - Fix for compendium import errors [#1358](https://github.com/dmdorman/hero6e-foundryvtt/issues/1358)
 

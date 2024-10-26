@@ -1087,6 +1087,18 @@ async function _rollApplyKnockback(token, knockbackDice) {
     let ignoreDefenseIds = [];
 
     let defense = "";
+    // Old Defense Stuff
+    let {
+        defenseValue: _defenseValue,
+        resistantValue: _resistantValue,
+        impenetrableValue: _impenetrableValue,
+        damageReductionValue: _damageReductionValue,
+        damageNegationValue: _damageNegationValue,
+        knockbackResistanceValue: _knockbackResistanceValue,
+        defenseTags: _defenseTags,
+    } = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
+
+    // New Defense Stuff
     let {
         defenseValue,
         resistantValue,
@@ -1095,7 +1107,26 @@ async function _rollApplyKnockback(token, knockbackDice) {
         damageNegationValue,
         knockbackResistanceValue,
         defenseTags,
-    } = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
+    } = getActorDefensesVsAttack(token.actor, pdAttack, { ignoreDefenseIds });
+
+    if (
+        damageNegationValue != _damageNegationValue &&
+        !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
+        !item.isKilling
+    ) {
+        console.warn("damageNegationValue mismatch", damageNegationValue, _damageNegationValue);
+    }
+    if (defenseValue != _defenseValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
+        console.warn("defenseValue mismatch", defenseValue, _defenseValue);
+    }
+    if (
+        knockbackResistanceValue != _knockbackResistanceValue &&
+        !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
+        !item.isKilling
+    ) {
+        console.warn("knockbackResistanceValue mismatch", knockbackResistanceValue, _knockbackResistanceValue);
+    }
+
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }
@@ -1989,7 +2020,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         impenetrableValue: _impenetrableValue,
         damageReductionValue: _damageReductionValue,
         damageNegationValue: _damageNegationValue,
-        knockbackResistanceValue: _knockbackResistanceValue,
+        //knockbackResistanceValue: _knockbackResistanceValue,
         defenseTags: _defenseTags,
     } = determineDefense(token.actor, item, { ignoreDefenseIds, suppressDeprecationWarn: true });
 
@@ -2000,7 +2031,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         impenetrableValue,
         damageReductionValue,
         damageNegationValue,
-        knockbackResistanceValue,
+        //knockbackResistanceValue,
         defenseTags,
     } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
 
@@ -2012,13 +2043,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         console.warn("resistantValue mismatch", resistantValue, _resistantValue);
     }
 
-    if (
-        knockbackResistanceValue != _knockbackResistanceValue &&
-        !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
-        !item.isKilling
-    ) {
-        console.warn("knockbackResistance mismatch", knockbackResistanceValue, _knockbackResistanceValue);
-    }
+    // if (
+    //     knockbackResistanceValue != _knockbackResistanceValue &&
+    //     !["FLASHDEFENSE"].includes(item.attackDefenseVs) &&
+    //     !item.isKilling
+    // ) {
+    //     console.warn("knockbackResistance mismatch", knockbackResistanceValue, _knockbackResistanceValue);
+    // }
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
@@ -2035,14 +2066,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     damageData.impenetrableValue = impenetrableValue;
     damageData.damageReductionValue = damageReductionValue;
     damageData.damageNegationValue = damageNegationValue;
-    damageData.knockbackResistanceValue = knockbackResistanceValue;
+    //damageData.knockbackResistanceValue = knockbackResistanceValue;
     damageData.defenseAvad =
-        defenseValue +
-        resistantValue +
-        impenetrableValue +
-        damageReductionValue +
-        damageNegationValue +
-        knockbackResistanceValue;
+        defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue; // +
+    //knockbackResistanceValue;
     damageData.targetToken = token;
 
     // AVAD All or Nothing
@@ -2209,7 +2236,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         knockbackResultTotal: damageDetail.knockbackResultTotal,
 
         // misc
-        tags: defenseTags,
+        tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
         targetToken: token,
     };
@@ -2976,9 +3003,28 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
     let knockbackTags = [];
     let knockbackRoller = null;
     let knockbackResultTotal = null;
+    let knockbackResistanceValue = 0;
+
+    // Get poossible actor
+    const actor = options?.targetToken?.actor;
 
     // BASEs do not experience KB
-    const isBase = options?.targetToken?.actor.type === "base2";
+    const isBase = actor?.type === "base2";
+
+    // KBRESISTANCE or other related power that reduces knockback
+    if (actor) {
+        const kbContentsAttack = `
+            <POWER XMLID="KNOCKBACK" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+            </POWER>
+        `;
+        const kbAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {
+            temporary: true,
+        });
+        //await pdAttack._postUpload();
+        let { defenseValue, defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
+        knockbackTags = [...knockbackTags, ...defenseTags];
+        knockbackResistanceValue += defenseValue;
+    }
 
     if (game.settings.get(HEROSYS.module, "knockback") && knockbackMultiplier && !isBase) {
         useKnockback = true;
@@ -3045,7 +3091,8 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             .setPurpose(DICE_SO_NICE_CUSTOM_SETS.KNOCKBACK)
             .makeBasicRoll()
             .addNumber(body * (knockbackMultiplier > 1 ? knockbackMultiplier : 1), "Max potential knockback")
-            .addNumber(-parseInt(options.knockbackResistanceValue || 0), "Knockback resistance")
+            //.addNumber(-parseInt(options.knockbackResistanceValue || 0), "Knockback resistance")
+            .addNumber(-parseInt(knockbackResistanceValue), "Knockback resistance")
             .addDice(-Math.max(0, knockbackDice));
         await knockbackRoller.roll();
 

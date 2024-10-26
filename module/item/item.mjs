@@ -4790,13 +4790,27 @@ export class HeroSystem6eItem extends Item {
             return "PD";
         }
 
+        // MARTIAL STR
+        if (this.system.WEAPONEFFECT?.includes("STRDC")) {
+            return "PD";
+        }
+
+        // MARTIAL generic STR
+        if (this.system.WEAPONEFFECT?.includes("STR")) {
+            return "PD";
+        }
+
         // MARTIAL FLASH
         if (this.system.WEAPONEFFECT?.includes("FLASHDC")) {
             return "FLASHDEFENSE";
         }
 
+        if (this.system.XMLID === "KNOCKBACK") {
+            return "KB";
+        }
+
         console.error(`Unable to determine defense for ${this.name}`);
-        return null;
+        return "PD"; // Default
     }
 
     get killing() {
