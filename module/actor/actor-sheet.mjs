@@ -294,8 +294,8 @@ export class HeroSystemActorSheet extends ActorSheet {
             let {
                 defenseValue: _defenseValuePD,
                 resistantValue: _resistantValuePD /*impenetrableValue*/,
-                damageReductionValue: _damageReductionValuePD,
-                damageNegationValue: _damageNegationValuePD /*knockbackResistance*/,
+                //damageReductionValue: _damageReductionValuePD,
+                //damageNegationValue: _damageNegationValuePD /*knockbackResistance*/,
                 // defenseTags: defenseTagsP,
             } = determineDefense(this.actor, pdAttack, { suppressDeprecationWarn: true });
 
@@ -370,8 +370,8 @@ export class HeroSystemActorSheet extends ActorSheet {
             let {
                 defenseValue: _defenseValueED,
                 resistantValue: _resistantValueED /* impenetrableValueE */,
-                damageReductionValue: _damageReductionValueED,
-                damageNegationValue: _damageNegationValueED /* knockbackResistanceE */,
+                //damageReductionValue: _damageReductionValueED,
+                //damageNegationValue: _damageNegationValueED /* knockbackResistanceE */,
                 // defenseTags: _defenseTagsE,
             } = determineDefense(this.actor, edAttack, { suppressDeprecationWarn: true });
             // defense.ED = defenseValueE;
@@ -445,9 +445,9 @@ export class HeroSystemActorSheet extends ActorSheet {
 
             let {
                 defenseValue: _defenseValueMD,
-                resistantValue: _resistantValueMD /*impenetrableValueM*/,
-                damageReductionValue: _damageReductionValueMD,
-                damageNegationValue: _damageNegationValueMD /*knockbackResistanceM*/,
+                //resistantValue: _resistantValueMD /*impenetrableValueM*/,
+                //damageReductionValue: _damageReductionValueMD,
+                //damageNegationValue: _damageNegationValueMD /*knockbackResistanceM*/,
                 defenseTags: _defenseTagsMD,
             } = determineDefense(this.actor, mdAttack, { suppressDeprecationWarn: true });
             // defense.MD = defenseValueM;
@@ -518,8 +518,8 @@ export class HeroSystemActorSheet extends ActorSheet {
 
             let {
                 defenseValue: _defenseValuePOWD,
-                resistantValue:
-                    _resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
+                // resistantValue:
+                //     _resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
                 // defenseTags: defenseTagsPOWD,
             } = determineDefense(this.actor, drainAttack, { suppressDeprecationWarn: true });
             // defense.POWD = defenseValuePOWD;

@@ -4409,7 +4409,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 if (value > 0) {
                     const newOptions = foundry.utils.deepClone(options);
-                    const resistant = actorItemDefense.system.OPTIONID.match(/RESISTANT/) ? 1 : 0;
+                    //const resistant = actorItemDefense.system.OPTIONID.match(/RESISTANT/) ? 1 : 0;
                     newOptions.resistant = true;
                     newOptions.operation = "pct";
                     return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
@@ -4918,7 +4918,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: 3,
-            defenseTagVsAttack: function (...args) {
+            defenseTagVsAttack: function () {
                 // We really shouldn't include this as a defense.
                 // TODO: Impelemnt FORCEWALL englobing like we do with ENTANGLE
                 // return HERO.powers6e.find((o) => o.key === "FORCEFIELD").defenseTagVsAttack(...args);
