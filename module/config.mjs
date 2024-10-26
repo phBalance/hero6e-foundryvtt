@@ -5238,7 +5238,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
-            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+            defenseTagVsAttack: function () {
                 // Only vs AVAD, which is poorly supported
                 return null;
             },
