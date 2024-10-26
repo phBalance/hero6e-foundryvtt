@@ -16,9 +16,10 @@
   - 5e now resists penetrating with hardened defenses.
   - Fix where some defenses were being ignored.
   - COMBAT LUCK now provides hardened and impenetrable resistant defense. [#1336](https://github.com/dmdorman/hero6e-foundryvtt/issues/1336)
-  - Defenses that are reduced (like by Armor Piercing) are shown with red strike-through, along with adjusted values.
+  - Defenses that are reduced (like by Armor Piercing) are shown with red strikethrough, along with adjusted values.
 - Boostable charges, with a max of 4, will be allowed only if the charges are actually boostable. [#1327](https://github.com/dmdorman/hero6e-foundryvtt/issues/1327)
 - Fix for compendium import errors [#1358](https://github.com/dmdorman/hero6e-foundryvtt/issues/1358)
+- Various adjustment power fixes.
 
 ## Version 4.0.1
 

@@ -2660,6 +2660,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     const adjustmentItemTags = getAttackTags(adjustmentItem);
 
+    // DRAIN
     const reductionChatMessages = [];
     const reductionTargetActor = token.actor;
     for (const reduce of reducesArray) {
@@ -2679,6 +2680,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
         await renderAdjustmentChatCards(reductionChatMessages, adjustmentItemTags, defenseTags);
     }
 
+    // AID
     const enhancementChatMessages = [];
     const enhancementTargetActor = adjustmentItem.system.XMLID === "TRANSFER" ? adjustmentItem.actor : token.actor;
     for (const enhance of enhancesArray) {
