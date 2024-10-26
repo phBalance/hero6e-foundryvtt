@@ -2172,27 +2172,21 @@ export class HeroSystem6eItem extends Item {
      * @returns {Array} An array of child items.
      */
     get childItems() {
-        try {
-            /// Compendiums only have the index entry, so need to get the whole item
-            // However, we apparently never need this, so commenting it out for now.
-            // If we HAVE to have this we need to make get childItems async, which is messy.
-            // if (this.pack) {
-            //     const p = game.packs.get(this.pack).getDocuments({ "system.ID": this.system.PARENTID });
-            //     p.then()
-            // }
-            // game.packs.get(this.pack).index.contents
+        /// Compendiums only have the index entry, so need to get the whole item
+        // However, we apparently never need this, so commenting it out for now.
+        // If we HAVE to have this we need to make get childItems async, which is messy.
+        // if (this.pack) {
+        //     const p = game.packs.get(this.pack).getDocuments({ "system.ID": this.system.PARENTID });
+        //     p.then()
+        // }
+        // game.packs.get(this.pack).index.contents
 
-            const items = this.actor?.items || (this.pack ? [] : game.items);
+        const items = this.actor?.items || (this.pack ? [] : game.items);
 
-            const children = items
-                .filter((item) => item.system.PARENTID === this.system.ID)
-                .sort((a, b) => (a.sort || 0) - (b.sort || 0));
-            return children; //children.length ? children : null;
-        } catch (e) {
-            console.error(e);
-            debugger;
-        }
-        return [];
+        const children = items
+            .filter((item) => item.system.PARENTID === this.system.ID)
+            .sort((a, b) => (a.sort || 0) - (b.sort || 0));
+        return children; //children.length ? children : null;
     }
 
     get childIdx() {
@@ -4776,9 +4770,9 @@ export class HeroSystem6eItem extends Item {
         // CONFIG overrides for specific XMLIDs
         if (this.baseInfo?.attackDefenseVs) {
             if (typeof this.baseInfo.attackDefenseVs === "function") {
-                return his.baseInfo.attackDefenseVs();
+                return this.baseInfo.attackDefenseVs();
             }
-            return his.baseInfo.attackDefenseVs;
+            return this.baseInfo.attackDefenseVs;
         }
 
         // Generic defense specificiation
