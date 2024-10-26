@@ -479,9 +479,9 @@ export class HeroSystem6eItem extends Item {
                 noResourceUse: overrideCanAct,
             });
             if (resourceError) {
-                return ui.notifications.error(resourceError);
+                return ui.notifications.error(`${item.name} ${resourceError}`);
             } else if (resourceWarning) {
-                return ui.notifications.warn(resourceWarning);
+                return ui.notifications.warn(`${item.name} ${resourceWarning}`);
             }
 
             const success = await RequiresASkillRollCheck(this, event);

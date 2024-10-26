@@ -96,7 +96,7 @@ async function skillRoll(item, actor, target) {
     if (resourceError || resourceWarning) {
         const chatData = {
             user: game.user._id,
-            content: resourceError || resourceWarning,
+            content: `${item.name} ${resourceError || resourceWarning}`,
             speaker: speaker,
         };
 

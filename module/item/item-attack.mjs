@@ -391,9 +391,9 @@ export async function AttackToHit(item, options) {
         ...{ noResourceUse: false },
     });
     if (resourceError) {
-        return ui.notifications.error(resourceError);
+        return ui.notifications.error(`${item.name} ${resourceError}`);
     } else if (resourceWarning) {
-        return ui.notifications.warn(resourceWarning);
+        return ui.notifications.warn(`${item.name} ${resourceWarning}`);
     }
 
     // STR 0 character must succeed with
@@ -3344,12 +3344,12 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             if (enduranceReserve) {
                 if (resourcesRequired.end > reserveEnd && useResources) {
                     return {
-                        error: `${item.name} needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
+                        error: `needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
                     };
                 }
             } else {
                 return {
-                    error: `${item.name} needs an endurance reserve to spend END but none found.`,
+                    error: `needs an endurance reserve to spend END but none found.`,
                 };
             }
         } else {
@@ -3373,7 +3373,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
                 });
                 if (!confirmed) {
                     return {
-                        warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference.`,
+                        warning: `needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference.`,
                     };
                 }
 
@@ -3390,7 +3390,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     if (resourcesRequired.charges > 0) {
         if (resourcesRequired.charges > startingCharges && useResources) {
             return {
-                error: `${item.name} does not have ${resourcesRequired.charges} charge${
+                error: `does not have ${resourcesRequired.charges} charge${
                     resourcesRequired.charges > 1 ? "s" : ""
                 } remaining.`,
             };
