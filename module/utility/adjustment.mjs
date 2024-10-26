@@ -247,7 +247,7 @@ function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
     }
 
     let seconds = hdcTimeOptionIdToSeconds(durationOptionId);
-    if (seconds) {
+    if (seconds < 0) {
         console.error(`optionID for ${item.name}/${item.system.XMLID} has unhandled option ID ${durationOptionId}`);
         seconds = 12;
     }
