@@ -77,13 +77,18 @@ function itemIsOptionalManeuver(item) {
 function filterItem(item, filterString) {
     if (!filterString) return item;
 
-    if (
-        item.name.toLowerCase().includes(filterString.toLowerCase()) ||
-        (item.system.description && item.system.description.toLowerCase().includes(filterString.toLowerCase())) ||
-        (item.system.XMLID && item.system.XMLID.toLowerCase().includes(filterString.toLowerCase()))
-    ) {
-        return item;
+    const regex = new RegExp(filterString.trim(), "i");
+
+    const match = item.name?.match(regex) || item.system.description?.match(regex) || item.system.XMLID?.match(regex);
+    if (match) return true;
+
+    // Could be a child of a parent
+    for (const child of item.childItems) {
+        const match2 =
+            child.name?.match(regex) || child.system.description?.match(regex) || child.system.XMLID?.match(regex);
+        if (match2) return true;
     }
+    return false;
 }
 
 // function parentItem(item) {
@@ -486,7 +491,9 @@ export class HeroSystem6eItem extends Item {
                 const chatData = {
                     user: game.user._id,
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                    content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"} to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
+                    content: `${
+                        resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"
+                    } to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
                     whisper: whisperUserTargetsForActor(item.actor),
                     speaker,
                 };
@@ -500,7 +507,9 @@ export class HeroSystem6eItem extends Item {
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                content: `${resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "} ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
+                content: `${
+                    resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
+                } ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
                 whisper: whisperUserTargetsForActor(item.actor),
                 speaker,
             };
@@ -1303,7 +1312,9 @@ export class HeroSystem6eItem extends Item {
                     default:
                         item.system.ocv = parseInt(item.system.ocv).signedString();
 
-                        item.system.ocvEstimated = `${ocv + parseInt(item.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)}`;
+                        item.system.ocvEstimated = `${
+                            ocv + parseInt(item.system.ocv) + parseInt(cslSummary.ocv || cslSummary.omcv || 0)
+                        }`;
 
                         if (parseInt(item.system.ocv) != 0) {
                             if (item.flags.tags.ocv) {
@@ -1327,7 +1338,9 @@ export class HeroSystem6eItem extends Item {
                     item.flags.tags.dcv = `${item.flags.tags.dcv}${dcv.signedString()} DCV`;
                 }
                 item.system.dcv = parseInt(item.system.dcv).signedString();
-                item.system.dcvEstimated = `${dcv + parseInt(item.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)}`;
+                item.system.dcvEstimated = `${
+                    dcv + parseInt(item.system.dcv) + parseInt(cslSummary.dcv || cslSummary.dmcv || 0)
+                }`;
 
                 if (parseInt(item.system.dcv) != 0) {
                     if (item.flags.tags.dcv) {
@@ -1471,7 +1484,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // CUSTOMPOWER LIGHT
-        if (this.system.XMLID === "CUSTOMPOWER" && this.system.active === undefined) {
+        if (this.system.XMLID === "CUSTOMPOWER" && this.actor && this.system.active === undefined) {
             await activateSpecialVision(this, this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken);
         }
 
@@ -2156,10 +2169,20 @@ export class HeroSystem6eItem extends Item {
     /**
      * Retrieves all child items of the current item based on the PARENTID property.
      *
-     * @returns {Array|null} An array of child items if found, otherwise null.
+     * @returns {Array} An array of child items.
      */
     get childItems() {
-        const items = this.actor?.items || game.items;
+        /// Compendiums only have the index entry, so need to get the whole item
+        // However, we apparently never need this, so commenting it out for now.
+        // If we HAVE to have this we need to make get childItems async, which is messy.
+        // if (this.pack) {
+        //     const p = game.packs.get(this.pack).getDocuments({ "system.ID": this.system.PARENTID });
+        //     p.then()
+        // }
+        // game.packs.get(this.pack).index.contents
+
+        const items = this.actor?.items || (this.pack ? [] : game.items);
+
         const children = items
             .filter((item) => item.system.PARENTID === this.system.ID)
             .sort((a, b) => (a.sort || 0) - (b.sort || 0));
@@ -4539,18 +4562,20 @@ export class HeroSystem6eItem extends Item {
                 });
             }
 
-            for (const enhancedPerception of this.actor.items.filter(
-                (o) => o.system.XMLID === "ENHANCEDPERCEPTION" && o.system.OPTIONID === "ALL",
-            )) {
-                enhancedPerception.system.checked = true;
-                if (enhancedPerception.system.active) {
-                    const levels = parseInt(enhancedPerception.system.LEVELS);
-                    tags.push({
-                        value: levels,
-                        name: enhancedPerception.name,
-                        itemId: enhancedPerception.id,
-                    });
-                    rollVal += levels;
+            if (this.actor) {
+                for (const enhancedPerception of this.actor.items.filter(
+                    (o) => o.system.XMLID === "ENHANCEDPERCEPTION" && o.system.OPTIONID === "ALL",
+                )) {
+                    enhancedPerception.system.checked = true;
+                    if (enhancedPerception.system.active) {
+                        const levels = parseInt(enhancedPerception.system.LEVELS);
+                        tags.push({
+                            value: levels,
+                            name: enhancedPerception.name,
+                            itemId: enhancedPerception.id,
+                        });
+                        rollVal += levels;
+                    }
                 }
             }
 
@@ -4739,6 +4764,85 @@ export class HeroSystem6eItem extends Item {
 
     getDefense(targetActor, attackItem) {
         return determineDefense(targetActor, attackItem, { only: this });
+    }
+
+    get attackDefenseVs() {
+        // CONFIG overrides for specific XMLIDs
+        if (this.baseInfo?.attackDefenseVs) {
+            if (typeof this.baseInfo.attackDefenseVs === "function") {
+                return this.baseInfo.attackDefenseVs();
+            }
+            return this.baseInfo.attackDefenseVs;
+        }
+
+        // Generic defense specificiation
+        if (["PD", "ED", "MD"].includes(this.system.INPUT)) {
+            return this.system.INPUT;
+        }
+
+        // Mental
+        if (this.baseInfo?.type.includes("mental")) {
+            return "MD";
+        }
+
+        // Adjustment
+        if (this.baseInfo?.type.includes("adjustment")) {
+            return "POWERDEFENSE";
+        }
+
+        // Flash
+        if (this.baseInfo?.type.includes("sense-affecting")) {
+            return "FLASHDEFENSE";
+        }
+
+        // MARTIAL KILLING
+        if (this.system.WEAPONEFFECT?.includes("KILLINGDC")) {
+            return "PD";
+        }
+
+        // MARTIAL STR
+        if (this.system.WEAPONEFFECT?.includes("STRDC")) {
+            return "PD";
+        }
+
+        // MARTIAL generic STR
+        if (this.system.WEAPONEFFECT?.includes("STR")) {
+            return "PD";
+        }
+
+        // MARTIAL FLASH
+        if (this.system.WEAPONEFFECT?.includes("FLASHDC")) {
+            return "FLASHDEFENSE";
+        }
+
+        if (this.system.XMLID === "KNOCKBACK") {
+            return "KB";
+        }
+
+        console.error(`Unable to determine defense for ${this.name}`);
+        return "PD"; // Default
+    }
+
+    get killing() {
+        if (this.system.KILLING === true) {
+            return true;
+        }
+
+        if (this.system.KILLING === false) {
+            return false;
+        }
+
+        if (this.system.WEAPONEFFECT?.includes("KILLING")) {
+            return true;
+        }
+
+        // Legacy check
+        if (this.system.killing) {
+            console.error(`Unable to determine KILLING property for ${this.name}`);
+            return true;
+        }
+
+        return false;
     }
 }
 

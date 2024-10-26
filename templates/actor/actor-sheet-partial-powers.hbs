@@ -21,7 +21,7 @@
         </tr>
         {{#each items as |item id|}}
             {{!-- Show powers and things in a framework or compound power --}}
-            {{#if (and (eq item.type "power") (not item.parentItem) (filterItem item ../options.itemFilters.power))}}
+            {{#if (and (eq item.type "power") (not item.parentItem) (filterItem item @root/options.itemFilters.power))}}
                 {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') item }}
             {{/if}}
         {{/each}}

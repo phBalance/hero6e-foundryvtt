@@ -1,5 +1,7 @@
 import { getRoundedUpDistanceInSystemUnits } from "./utility/units.mjs";
 import * as heroDice from "./utility/dice.mjs";
+import { createDefenseProfile } from "./utility/defense.mjs";
+import { RoundFavorPlayerUp } from "./utility/round.mjs";
 
 export const HERO = { heroDice };
 
@@ -598,6 +600,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["computer", "ai"],
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                }
+                return null;
+            },
             xml: `<PD XMLID="PD" ID="1712377277205" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -617,6 +631,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             ignoreFor: ["computer", "ai"],
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "ED":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                }
+                return null;
+            },
             xml: `<ED XMLID="ED" ID="1712377278856" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No" />`,
         },
         {
@@ -3558,6 +3584,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 6,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 3;
+                        break;
+
+                    case "ED":
+                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 3;
+                        break;
+                }
+                if (value > 0) {
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "add";
+                    newOptions.resistant = true;
+                    newOptions.hardened = (options.hardened || 0) + 1;
+                    newOptions.impenetrable = (options.impenetrable || 0) + 1;
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
+                }
+                return null;
+            },
             xml: `<TALENT XMLID="COMBAT_LUCK" ID="1709159939839" BASECOST="0.0" LEVELS="1" ALIAS="Combat Luck (3 PD/3 ED)" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" />`,
         },
         {},
@@ -3988,6 +4035,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1,
+            defenseTagVsAttack: function () {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<TALENT XMLID="SIMULATE_DEATH" ID="1709160004972" BASECOST="3.0" LEVELS="0" ALIAS="Simulate Death" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="GENERAL" />`,
         },
         {},
@@ -4202,6 +4253,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         target: "self only",
         range: HERO.RANGE_TYPES.SELF,
         costPerLevel: 3 / 2,
+        defenseTagVsAttack: function (...args) {
+            return HERO.powers6e.find((o) => o.key === "FORCEFIELD").defenseTagVsAttack(...args);
+        },
         xml: `<POWER XMLID="ARMOR" ID="1709342537943" BASECOST="0.0" LEVELS="0" ALIAS="Armor" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0"><NOTES/></POWER>`,
     });
     addPower(
@@ -4255,6 +4309,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1 / 3,
+            defenseTagVsAttack: function () {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="CLINGING" ID="1709333852130" BASECOST="10.0" LEVELS="5" ALIAS="Clinging" POSITION="24" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -4281,6 +4339,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                        value = parseInt(actorItemDefense.system.ADDER.find((o) => o.XMLID == "PHYSICAL")?.LEVELS) || 0;
+                        break;
+
+                    case "ED":
+                        value = parseInt(actorItemDefense.system.ADDER.find((o) => o.XMLID == "ENERGY")?.LEVELS) || 0;
+                        break;
+
+                    case "MD":
+                        value = parseInt(actorItemDefense.system.ADDER.find((o) => o.XMLID == "MENTAL")?.LEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "subtract";
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="DAMAGENEGATION" ID="1711933005926" BASECOST="0.0" LEVELS="0" ALIAS="Damage Negation" POSITION="27" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
             <ADDER XMLID="PHYSICAL" ID="1711933106772" BASECOST="0.0" LEVELS="0" ALIAS="Physical DCs" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="5.0" LVLVAL="1.0" SELECTED="YES">
@@ -4306,6 +4386,36 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                        if (actorItemDefense.system.INPUT.match(/Physical/i)) {
+                            value = parseInt(actorItemDefense.system.OPTIONID.match(/\d+/)) || 0;
+                        }
+                        break;
+
+                    case "ED":
+                        if (actorItemDefense.system.INPUT.match(/Energy/i)) {
+                            value = parseInt(actorItemDefense.system.OPTIONID.match(/\d+/)) || 0;
+                        }
+                        break;
+
+                    case "MD":
+                        if (actorItemDefense.system.INPUT.match(/Mental/i)) {
+                            value = parseInt(actorItemDefense.system.OPTIONID.match(/\d+/)) || 0;
+                        }
+                        break;
+                }
+                if (value > 0) {
+                    const newOptions = foundry.utils.deepClone(options);
+                    //const resistant = actorItemDefense.system.OPTIONID.match(/RESISTANT/) ? 1 : 0;
+                    newOptions.resistant = true;
+                    newOptions.operation = "pct";
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="DAMAGEREDUCTION" ID="1709333866040" BASECOST="10.0" LEVELS="0" ALIAS="Damage Reduction" POSITION="28" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LVL25NORMAL" OPTIONID="LVL25NORMAL" OPTION_ALIAS="Damage Reduction, 25%" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Energy" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -4322,6 +4432,54 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1 / 2,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                let maxValue = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                        value = parseInt(actorItemDefense.system.PDLEVELS) || 0;
+                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.pd.core) || 0;
+                        break;
+
+                    case "ED":
+                        value = parseInt(actorItemDefense.system.EDLEVELS) || 0;
+                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.ed.core) || 0;
+                        break;
+
+                    case "MD":
+                        value = parseInt(actorItemDefense.system.MDLEVELS) || 0;
+                        // Icky to calculate maxValue. Deferring for now.
+                        maxValue = value;
+                        break;
+
+                    case "FLASHDEFENSE":
+                        value = parseInt(actorItemDefense.system.FDLEVELS) || 0;
+                        // Icky to calculate maxValue. Deferring for now.
+                        maxValue = value;
+                        break;
+
+                    case "POWERDEFENSE":
+                        value = parseInt(actorItemDefense.system.POWDLEVELS) || 0;
+                        // Icky to calculate maxValue. Deferring for now.
+                        maxValue = value;
+                        break;
+                }
+
+                if (value > maxValue) {
+                    console.warn(
+                        `${actorItemDefense.name} has more ${options.attackDefenseVs} LEVELS than natural LEVELS. Defense summary may show negative values. This is OK when additional characteristics are purchased, which isn't currently checked for.`,
+                        actorItemDefense,
+                    );
+                    //value = maxValue;
+                }
+                if (value > 0) {
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "add";
+                    newOptions.resistant = true;
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="DAMAGERESISTANCE" ID="1709342567780" BASECOST="0.0" LEVELS="0" ALIAS="Damage Resistance" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" FDLEVELS="0" POWDLEVELS="0"><NOTES/></POWER>`,
         },
         {},
@@ -4349,6 +4507,29 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: 4,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+
+                    case "ED":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+
+                    case "KB":
+                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * 2;
+                        break;
+                }
+                if (value > 0) {
+                    // const newOptions = foundry.utils.deepClone(options);
+                    // newOptions.operation = "add";
+                    // newOptions.knockback = value * 2;
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="DENSITYINCREASE" ID="1709333874268" BASECOST="0.0" LEVELS="1" ALIAS="Density Increase" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {
@@ -4422,6 +4603,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 0.2,
+            defenseTagVsAttack: function () {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="DUPLICATION" ID="1711933622430" BASECOST="0.0" LEVELS="0" ALIAS="Duplication" POSITION="37" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" NUMBER="1" POINTS="0"><NOTES/></POWER>`,
         },
         {},
@@ -4660,13 +4845,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             costEnd: false,
             costPerLevel: 1,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "FLASHDEFENSE":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "add";
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="FLASHDEFENSE" ID="1711933981614" BASECOST="0.0" LEVELS="1" ALIAS="Flash Defense" POSITION="45" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
     );
     addPower(
         {
-            key: "FORCEFIELD",
+            key: "FORCEFIELD", // RESISTANT PROTECTION
             type: ["defense", "standard"],
             behaviors: ["activatable"],
             duration: "persistent",
@@ -4675,6 +4874,32 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1.5,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                        value = parseInt(actorItemDefense.system.PDLEVELS) || 0;
+                        break;
+
+                    case "ED":
+                        value = parseInt(actorItemDefense.system.EDLEVELS) || 0;
+                        break;
+
+                    case "MD":
+                        value = parseInt(actorItemDefense.system.MDLEVELS) || 0;
+                        break;
+
+                    case "POWERDEFENSE":
+                        value = parseInt(actorItemDefense.system.POWDLEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.resistant = true;
+                    return createDefenseProfile(actorItemDefense, attackItem, value, newOptions);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="FORCEFIELD" ID="1709334003070" BASECOST="0.0" LEVELS="0" ALIAS="Resistant Protection" POSITION="71" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0"><NOTES/></POWER>`,
         },
         {
@@ -4686,13 +4911,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
-            key: "FORCEWALL",
+            key: "FORCEWALL", //BARRIER
             type: ["defense", "standard"],
             behaviors: ["attack"],
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
             costPerLevel: 3,
+            defenseTagVsAttack: function () {
+                // We really shouldn't include this as a defense.
+                // TODO: Impelemnt FORCEWALL englobing like we do with ENTANGLE
+                // return HERO.powers6e.find((o) => o.key === "FORCEFIELD").defenseTagVsAttack(...args);
+                return null;
+            },
             xml: `<POWER XMLID="FORCEWALL" ID="1711932416775" BASECOST="3.0" LEVELS="0" ALIAS="Barrier" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0"><NOTES/></POWER>`,
         },
         {
@@ -4825,6 +5056,22 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
                 return result;
             },
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "PD":
+                    case "ED":
+                        value = this.details(actorItemDefense);
+                        break;
+                }
+                if (value > 0) {
+                    const newOptions = foundry.utils.deepClone(options);
+                    newOptions.operation = "add";
+                    newOptions.knockback = value * 2;
+                    return createDefenseProfile(actorItemDefense, attackItem, null, newOptions);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="GROWTH" ID="1711934263926" BASECOST="25.0" LEVELS="0" ALIAS="Growth" POSITION="47" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LARGE" OPTIONID="LARGE" OPTION_ALIAS="Large" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {
@@ -4917,6 +5164,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
+            defenseTagVsAttack: function () {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="INVISIBILITY" ID="1711934550291" BASECOST="20.0" LEVELS="0" ALIAS="Invisibility" POSITION="51" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -4933,6 +5184,27 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "KB":
+                        value = (parseInt(actorItemDefense.system.LEVELS) || 0) * (actorItemDefense.is5e ? 2 : 1);
+                        break;
+                    case "PD":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                    case "ED":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    // const newOptions = foundry.utils.deepClone(options);
+                    // newOptions.operation = "add";
+                    // newOptions.knockback = value * (actorItemDefense.is5e ? 2 : 1);
+                    return createDefenseProfile(actorItemDefense, attackItem, null, options);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="KBRESISTANCE" ID="1709333943639" BASECOST="0.0" LEVELS="1" ALIAS="Knockback Resistance" POSITION="54" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {
@@ -4950,6 +5222,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         range: HERO.RANGE_TYPES.SELF,
         costEnd: false,
         costPerLevel: 1,
+        defenseTagVsAttack: function () {
+            // Not really sure when this would be part of a defense
+            return null;
+        },
         xml: `<POWER XMLID="LACKOFWEAKNESS" ID="1709342664430" BASECOST="0.0" LEVELS="1" ALIAS="Lack Of Weakness" POSITION="40" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Mental Defense" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
     });
     addPower(
@@ -4962,6 +5238,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            defenseTagVsAttack: function () {
+                // Only vs AVAD, which is poorly supported
+                return null;
+            },
             xml: `<POWER XMLID="LIFESUPPORT" ID="1711934628815" BASECOST="0.0" LEVELS="0" ALIAS="Life Support" POSITION="56" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -4993,6 +5273,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             duration: "persistent",
             costPerLevel: 1,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "MD":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    // 5e gets a bonus
+                    if (actorItemDefense.actor?.is5e) {
+                        const bonus = RoundFavorPlayerUp(
+                            parseInt(actorItemDefense.actor.system.characteristics.ego.value) / 5 || 0,
+                        );
+                        value += bonus;
+                    }
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="MENTALDEFENSE" ID="1709333957464" BASECOST="0.0" LEVELS="1" ALIAS="Mental Defense" POSITION="59" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -5102,6 +5401,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: true,
             costPerLevel: 1,
             privateAsAdder: true,
+            defenseTagVsAttack: function () {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="NAKEDMODIFIER" ID="1709333972540" BASECOST="0.0" LEVELS="1" ALIAS="Naked Advantage" POSITION="65" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -5154,6 +5457,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
             costPerLevel: 1,
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
+                let value = 0;
+                switch (options.attackDefenseVs) {
+                    case "POWERDEFENSE":
+                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
+                        break;
+                }
+                if (value > 0) {
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
+                }
+                return null;
+            },
             xml: `<POWER XMLID="POWERDEFENSE" ID="1709333995936" BASECOST="0.0" LEVELS="1" ALIAS="Power Defense" POSITION="68" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -5184,6 +5499,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             costEnd: false,
+            defenseTagVsAttack: function () {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="REGENERATION" ID="1709334000761" BASECOST="0.0" LEVELS="1" ALIAS="Regeneration" POSITION="70" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="WEEK" OPTIONID="WEEK" OPTION_ALIAS="Week" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         undefined,
@@ -5251,6 +5570,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             range: HERO.RANGE_TYPES.SELF,
             costEnd: true,
             costPerLevel: 1,
+            defenseTagVsAttack: function () {
+                // Not really sure when this would be part of a defense
+                return null;
+            },
             xml: `<POWER XMLID="STRETCHING" ID="1709334014434" BASECOST="0.0" LEVELS="1" ALIAS="Stretching" POSITION="75" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         { costPerLevel: 5 },
@@ -5371,6 +5694,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return 1;
             },
             costEnd: true,
+            attackDefenseVs: "POWERDEFENSE",
             xml: `<POWER XMLID="TRANSFORM" ID="1709334039303" BASECOST="0.0" LEVELS="1" ALIAS="Transform" POSITION="84" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COSMETIC" OPTIONID="COSMETIC" OPTION_ALIAS="Cosmetic" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES/></POWER>`,
         },
         {},
@@ -5591,7 +5915,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             sight: {
-                visionMode: "darkvision",
+                visionMode: "basic",
                 range: null, // infinite
                 //color: "#ff9999",  // washes out sewer tiles.  May need to create a custom visionMode.
             },
@@ -5642,7 +5966,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             sight: {
                 visionMode: "basic",
                 range: null, // infinite
-                color: null,
+                //color: null,
                 //color: "aaaaff",
             },
         },
@@ -5791,9 +6115,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             sight: {
-                visionMode: "darkvision",
+                visionMode: "basic",
                 range: null, // infinite
-                color: "ffaaff",
+                //color: "ffaaff",
             },
         },
         {},
@@ -5806,9 +6130,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             range: HERO.RANGE_TYPES.SELF,
             sight: {
-                visionMode: "darkvision",
+                visionMode: "basic",
                 range: null, // infinite
-                color: "7F00FF",
+                //color: "7F00FF",
             },
         },
         {},

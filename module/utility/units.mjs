@@ -16,6 +16,10 @@ export function convertSystemUnitsToMetres(distanceInSystemUnits, actor) {
     return distanceInSystemUnits * actor?.system?.is5e ? 2 : 1;
 }
 
+export function distanceWithActorUnits(distanceInSystemUnits, actor) {
+    return `${distanceInSystemUnits * (actor?.system?.is5e ? 2 : 1)}${actor?.system?.is5e ? `"` : `m`}`;
+}
+
 /**
  * Return the distance in the nearest rounded down system units.
  * 8.9m is 8m in 6e and 4" in 5e.

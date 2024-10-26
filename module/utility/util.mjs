@@ -164,11 +164,11 @@ export async function expireEffects(actor) {
     let temporaryEffects = [];
 
     // Were looking for active effects that we own.
-    if (actor.inCombat) {
-        temporaryEffects = await getTemporaryEffectsOwnedByActorInCombat(actor);
-    } else {
-        temporaryEffects = actor.temporaryEffects;
-    }
+    // if (actor.inCombat) {
+    //     temporaryEffects = await getTemporaryEffectsOwnedByActorInCombat(actor);
+    // } else {
+    temporaryEffects = actor.temporaryEffects;
+    //}
 
     let adjustmentChatMessages = [];
     for (const ae of temporaryEffects) {
@@ -210,7 +210,7 @@ export async function expireEffects(actor) {
 
             // What is this effect related to?
             if (ae.flags.type === "adjustment") {
-                // Fade by 5 Active Points
+                // Fade by up to 5 Active Points
                 let _fade;
                 if (ae.flags.adjustmentActivePoints < 0) {
                     _fade = Math.max(ae.flags.adjustmentActivePoints, -5);

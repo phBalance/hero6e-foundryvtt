@@ -70,7 +70,7 @@ export function convertToDcFromItem(item, options) {
     }
 
     // Check for DC override (TELEKINESIS for example)
-    if (typeof item.baseInfo.dc === "function") {
+    if (typeof item.baseInfo?.dc === "function") {
         dc = item.baseInfo.dc(item, options);
     } else {
         // If the item.baseInfo.dc supports PIP adders then Peter thinks the PIP handling shoudld be done there.

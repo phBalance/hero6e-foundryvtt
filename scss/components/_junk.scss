@@ -41,6 +41,11 @@ div.tags {
     padding: 0.1em 0.25em;
 }
 
+.tag > .strikethrough {
+    text-decoration-line: line-through;
+    text-decoration-color: rgba(255, 0, 0, 0.8);
+}
+
 .tags .tag.area-effect-tag {
     background-color: #d06fa2;
 

@@ -12,8 +12,15 @@ export async function activateSpecialVision(item, token) {
 
     if (!item.baseInfo?.sight) return;
 
+    const detectionModes = tokenDocument.detectionModes;
+    const basicSight = detectionModes.find((o) => o.id === "basicSight");
+    if (basicSight) {
+        basicSight.range = null; // Cannot see things in the dark without special visions
+    }
+
     await tokenDocument.update({
         sight: item.baseInfo.sight,
+        detectionModes,
     });
 }
 

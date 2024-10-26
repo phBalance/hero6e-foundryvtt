@@ -1,3 +1,4 @@
+{{#if (filterItem this @root/options.itemFilters.power)}}
 <tr class="item {{#if (gt this.system.value this.system.max)}}over-max{{/if}}{{#if (lt this.system.value this.system.max)}} under-max{{/if}}"
     data-item-id="{{this._id}}">
     {{#if (eq item.system.XMLID "LIST")}}
@@ -52,6 +53,7 @@
         
     </td>
 </tr>
+{{/if}}
 {{#each this.childItems}}
     {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') this }}
 {{/each}}

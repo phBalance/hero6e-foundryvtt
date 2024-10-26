@@ -221,10 +221,11 @@ function _findExistingMatchingEffect(item, potentialCharacteristic, powerTargetN
 
 function _createAEChangeBlock(targetCharOrPower, targetSystem) {
     // TODO: Calculate this earlier so we don't have the logic in here
+
     return {
         key:
-            targetSystem.system.characteristics?.[targetCharOrPower] != null
-                ? `system.characteristics.${targetCharOrPower}.max`
+            targetSystem.system.characteristics?.[targetCharOrPower.toLowerCase()] != null
+                ? `system.characteristics.${targetCharOrPower.toLowerCase()}.max`
                 : "system.max",
         value: 0,
         mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -246,7 +247,7 @@ function _determineEffectDurationInSeconds(item, rawActivePointsDamage) {
     }
 
     let seconds = hdcTimeOptionIdToSeconds(durationOptionId);
-    if (seconds) {
+    if (seconds < 0) {
         console.error(`optionID for ${item.name}/${item.system.XMLID} has unhandled option ID ${durationOptionId}`);
         seconds = 12;
     }
@@ -287,7 +288,7 @@ function _createNewAdjustmentEffect(
             key: potentialCharacteristic,
         },
         origin: item.uuid,
-
+        //description: item.system.description,  // Issues with core FoundryVTT where description doesn't show, nor is editable.
         transfer: true,
         disabled: false,
     };
@@ -317,14 +318,14 @@ function _createNewAdjustmentEffect(
 export async function performAdjustment(
     item,
     nameOfCharOrPower,
-    thisAttackRawActivePointsDamage,
+    thisAttackRawActivePointsDamage, // Amount of AP to change (fade or initial value)
     defenseDescription,
     effectsDescription,
     isFade,
     targetActor,
 ) {
     const isHealing = item.system.XMLID === "HEALING";
-    const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing || isFade;
+    const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     const potentialCharacteristic = nameOfCharOrPower.toLowerCase();

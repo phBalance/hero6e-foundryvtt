@@ -1,9 +1,268 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
+// import { distanceWithActorUnits } from "../utility/units.mjs";
+import { RoundFavorPlayerUp } from "./round.mjs";
+
+//export function createDefenseProfile
+export function createDefenseProfile(actorItemDefense, attackItem, value, options = {}) {
+    let itemNameExpanded =
+        options.shortDesc ||
+        `${actorItemDefense?.name}${
+            actorItemDefense.name
+                .replace(/ /g, "")
+                .match(new RegExp(actorItemDefense?.system.XMLID.replace(/_/g, ""), "i"))
+                ? ""
+                : ` [${actorItemDefense?.system.XMLID}]`
+        }`;
+    if (itemNameExpanded.replace(/ /g, "").toUpperCase() === options.attackDefenseVs.toUpperCase()) {
+        itemNameExpanded = `[${options.attackDefenseVs} ${actorItemDefense.type}]`;
+    }
+
+    // Some defense (like INCREASEDENSITY) provide more than 1 type of defense (PD/ED + KB), but should pass in "KB" for attackDefenseVs, so perhaps an array is not necessary.
+    const defenseProfileArray = [];
+
+    if (value) {
+        defenseProfileArray.push({
+            name:
+                options.name ||
+                `${options.resistant ? `r` : ""}${options.attackDefenseVs}${
+                    options.hardened ? `h${options.hardened}` : ""
+                }${options.impenetrable ? `i${options.impenetrable}` : ""}`,
+            value: value,
+            valueText: options.operation === "pct" ? `${value}%` : null,
+            title:
+                options.title ||
+                `${itemNameExpanded}${options.resistant ? `\nResistant: ${options.resistant}` : ""}${
+                    options.hardened ? `\nHardened x${options.hardened}` : ""
+                }${options.impenetrable ? `\nImpenetrable x${options.impenetrable}` : ""}`,
+            shortDesc: itemNameExpanded,
+            operation: options.operation || "add",
+            options: { ...options, knockback: null },
+        });
+    }
+
+    // Careful not to include KB in PD/ED defenses
+    // if (options?.knockback) {
+    //     defenseProfileArray.push({
+    //         name: options.name || `KB`,
+    //         value: options?.knockback * (actorItemDefense.actor?.is5e ? 0.5 : 1),
+    //         title:
+    //             options.title ||
+    //             `${itemNameExpanded}\nKnockback Resistance: ${distanceWithActorUnits(
+    //                 options.knockback,
+    //                 actorItemDefense.actor,
+    //             )}`,
+    //         shortDesc: itemNameExpanded,
+    //         operation: options.operation || "add",
+    //         options,
+    //     });
+    // }
+
+    return defenseProfileArray;
+}
+
+export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {}) {
+    if (!actorItemDefense) {
+        console.error("Missing actorItemDefense");
+        return {};
+    }
+    if (!attackItem) {
+        console.error("Missing attackItem");
+        return {};
+    }
+
+    const newOptions = foundry.utils.deepClone(options);
+
+    newOptions.attackDefenseVs = newOptions.attackDefenseVs || attackItem.attackDefenseVs;
+    //newOptions.piercing = attackItem.findModsByXmlid("ARMORPIERCING") || 0;
+    //newOptions.penetrating = attackItem.findModsByXmlid("PENETRATING") || 0;
+    newOptions.impenetrable = parseInt(actorItemDefense.findModsByXmlid("IMPENETRABLE")?.LEVELS) || 0;
+    newOptions.hardened = parseInt(actorItemDefense.findModsByXmlid("HARDENED")?.LEVELS) || 0;
+    newOptions.resistant = actorItemDefense.findModsByXmlid("RESISTANT") ? true : false;
+    newOptions.knockback = 0;
+
+    if (typeof actorItemDefense.baseInfo?.defenseTagVsAttack === "function") {
+        return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, newOptions);
+    }
+
+    console.error(`Unable to determine defenseTagVsAttack for ${actorItemDefense.system.XMLID}`);
+    return null; //createDefenseProfile(actorItemDefense, attackItem, 0, options);
+}
+
+export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) {
+    const actorDefenses = {
+        defenseTotalValue: 0,
+        defenseValue: 0,
+        resistantValue: 0,
+        impenetrableValue: 0,
+        damageReductionValue: 0,
+        damageNegationValue: 0,
+        knockbackResistanceValue: 0,
+        defenseTags: [],
+        targetActor,
+        attackItem,
+        options,
+    };
+
+    if (!targetActor) {
+        console.error("Missing targetActor");
+        return actorDefenses;
+    }
+    if (!attackItem) {
+        console.error("Missing attackItem");
+        return actorDefenses;
+    }
+
+    const attackDefenseVs = attackItem.attackDefenseVs;
+    options = { ...options, attackDefenseVs };
+
+    const penetrating = parseInt((options.penetrating = attackItem.findModsByXmlid("PENETRATING")?.LEVELS)) || 0;
+    const armorPiercing = parseInt((options.penetrating = attackItem.findModsByXmlid("ARMORPIERCING")?.LEVELS)) || 0;
+
+    // Basic characteristics (PD & ED)
+    if ((targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0) {
+        let value = targetActor.system.characteristics[attackDefenseVs.toLowerCase()].value;
+
+        // back out any Active Effects
+        for (const ae of targetActor.appliedEffects) {
+            for (const change of ae.changes.filter(
+                (o) => o.key === `system.characteristics.${attackDefenseVs.toLowerCase()}.max`,
+            )) {
+                value -= parseInt(change.value) || 0;
+            }
+        }
+        // back out 5e DAMAGERESISTANCE
+        for (const damageResistance of targetActor.items.filter(
+            (o) => o.system.XMLID === "DAMAGERESISTANCE" && o.system.active,
+        )) {
+            switch (attackDefenseVs.toUpperCase()) {
+                case "PD":
+                    value -= parseInt(damageResistance.system.PDLEVELS) || 0;
+                    break;
+                case "ED":
+                    value -= parseInt(damageResistance.system.EDLEVELS) || 0;
+                    break;
+                default:
+                    console.error(`Unsupported DAMAGERESISTANCE`, attackDefenseVs);
+            }
+        }
+
+        const newOptions = foundry.utils.deepClone(options);
+
+        // Check for ADD MODIFIERS TO BASE CHARACTERISTIC (RESISTANT)
+        const resistantBase = targetActor?.items.find(
+            (o) =>
+                o.system.XMLID === attackDefenseVs && o.findModsByXmlid("RESISTANT") && o.system.ADD_MODIFIERS_TO_BASE,
+        );
+        if (resistantBase) {
+            newOptions.resistant = true;
+        }
+
+        // Bases & Vehicles have resistant PD & ED
+        if (["base2", "vehicle"].includes(targetActor?.type) && ["PD", "ED"].includes(attackDefenseVs)) {
+            newOptions.resistant = true;
+        }
+
+        actorDefenses.defenseTags = [
+            ...actorDefenses.defenseTags,
+            ...createDefenseProfile(resistantBase, attackItem, value, {
+                ...newOptions,
+                //name: attackDefenseVs,
+                title: resistantBase ? undefined : `Natural`,
+                shortDesc: resistantBase ? undefined : `Natural`,
+            }),
+        ];
+    }
+
+    // Items that provide defense and are active
+    const activeDefenses = targetActor.items.filter(
+        (o) =>
+            (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
+            (o.system.active || o.effects.find(() => true)?.disabled === false) &&
+            !(options?.ignoreDefenseIds || []).includes(o.id),
+    );
+    for (const defenseItem of activeDefenses) {
+        const defenseProfile = getItemDefenseVsAttack(defenseItem, attackItem, options);
+
+        if (defenseProfile) {
+            actorDefenses.defenseTags = [...actorDefenses.defenseTags, ...defenseProfile];
+        }
+    }
+
+    // Sort tags by value, shortDesc.  Get rid of 0 values.
+    actorDefenses.defenseTags = actorDefenses.defenseTags
+        .sort((a, b) => b.value - a.value || a.shortDesc.localeCompare(b.shortDesc))
+        .filter((o) => o.value);
+
+    // Totals
+    for (const tag of actorDefenses.defenseTags) {
+        // KNOCKBACK doesn't add to any defense totals
+        if (tag.options?.knockback) {
+            continue;
+        }
+
+        // HARDENED
+        if (armorPiercing) {
+            if (tag.options?.hardened >= armorPiercing) {
+                //actorDefenses.impenetrableValue += tag?.value || 0;
+            } else {
+                tag.options.strikethrough = true;
+                tag.name2 = tag.name.replace(/i\d+/, "");
+                //tag.valueText2 = tag.valueText;
+                tag.value2 = RoundFavorPlayerUp(tag.value / 2);
+            }
+        }
+
+        if (tag.operation === "add") {
+            if (tag.options?.resistant) {
+                actorDefenses.resistantValue += tag?.value2 || tag?.value || 0;
+            } else {
+                actorDefenses.defenseValue += tag?.value2 || tag?.value || 0;
+            }
+        }
+
+        // Damage Resistance
+        if (tag.operation === "pct") {
+            actorDefenses.damageReductionValue += tag?.value || 0;
+        }
+
+        // Damage Negation
+        if (tag.operation === "subtract") {
+            actorDefenses.damageNegationValue += tag?.value || 0;
+        }
+
+        // KNOCKBACK
+        if (tag.options?.knockback) {
+            actorDefenses.knockbackResistanceValue += tag.options.knockback;
+        }
+
+        // IMPENETRABLE
+        if (penetrating && tag.options?.impenetrable) {
+            if (tag.options?.impenetrable >= penetrating) {
+                actorDefenses.impenetrableValue += tag?.value || 0;
+            } else {
+                tag.options.strikethrough = true;
+                tag.name2 = tag.name.replace(/i\d+/, "");
+                tag.valueText2 = tag.valueText;
+                tag.value2 = tag.value;
+            }
+        }
+    }
+    actorDefenses.defenseTotalValue = actorDefenses.defenseValue + actorDefenses.resistantValue;
+    return actorDefenses;
+}
+
 export function determineDefense(targetActor, attackItem, options) {
+    if (!options?.suppressDeprecationWarn) {
+        console.warn("deprecated 'determineDefense' function, refactor to use 'getActorDefensesVsAttack'");
+    }
+
     if (!attackItem.findModsByXmlid) {
         console.error("Invalid attackItem", attackItem);
     }
+
+    //console.log(attackItem.attackDefenseVs);
+    getActorDefensesVsAttack(targetActor, attackItem, options);
 
     //const avad = attackItem.findModsByXmlid("AVAD");
     //const attackType = avad ? "avad" : attackItem.system.class;
@@ -55,7 +314,7 @@ export function determineDefense(targetActor, attackItem, options) {
     let DNP = 0; // damage negation physical
     let DNE = 0; // damage negation energy
     let DNM = 0; // damage negation mental
-    let knockbackResistance = 0;
+    let knockbackResistanceValue = 0;
 
     // Check if we are supposed to ignore PD/ED (eg AVAD)
     if (options?.ignoreDefenseIds?.includes("PD")) {
@@ -106,7 +365,7 @@ export function determineDefense(targetActor, attackItem, options) {
             rED += levels;
         }
 
-        if (item.system.ADD_MODIFIERS_TO_BASE === "Yes") {
+        if (item.system.ADD_MODIFIERS_TO_BASE) {
             ED -= targetActor.system.characteristics.ed.core;
             rED += targetActor.system.characteristics.ed.core;
         }
@@ -209,7 +468,8 @@ export function determineDefense(targetActor, attackItem, options) {
                 ED -= parseInt(activeDefense.system.LEVELS);
             }
             activeDefense.system.defenseType = "ed";
-        } else if (["FORCEFIELD", "FORCEWALL", "ARMOR"].includes(xmlid)) {
+        } else if (["FORCEFIELD", "ARMOR"].includes(xmlid)) {
+            //"FORCEWALL" not typically a defense on a character.  Englobing not supported yet.
             // Resistant Defenses
             switch (attackType) {
                 case "physical":
@@ -317,7 +577,7 @@ export function determineDefense(targetActor, attackItem, options) {
         if (game.settings.get(HEROSYS.module, "knockback") && attackItem.system.knockbackMultiplier) {
             if (["KBRESISTANCE", "DENSITYINCREASE"].includes(xmlid)) {
                 let _value = value * (targetActor.system.is5e ? 1 : 2);
-                knockbackResistance += _value;
+                knockbackResistanceValue += _value;
                 defenseTags.push({
                     value: _value,
                     name: "KB" + tagXmlIds,
@@ -329,7 +589,7 @@ export function determineDefense(targetActor, attackItem, options) {
                 const configPowerInfo = getPowerInfo({ item: activeDefense });
                 const details = configPowerInfo?.details(activeDefense) || {};
                 let _value = details.kb;
-                knockbackResistance += _value;
+                knockbackResistanceValue += _value;
                 defenseTags.push({
                     value: _value,
                     name: "KB" + tagXmlIds,
@@ -339,7 +599,7 @@ export function determineDefense(targetActor, attackItem, options) {
 
             if (["SHRINKING"].includes(xmlid)) {
                 let _value = -value * (targetActor.system.is5e ? 3 : 6);
-                knockbackResistance += _value;
+                knockbackResistanceValue += _value;
                 defenseTags.push({
                     value: _value,
                     name: "KB" + tagXmlIds,
@@ -560,7 +820,7 @@ export function determineDefense(targetActor, attackItem, options) {
                 break;
 
             case "kbr": // Knockback Resistance
-                knockbackResistance += value;
+                knockbackResistanceValue += value;
                 if (attackType != "mental" && game.settings.get(HEROSYS.module, "knockback")) {
                     defenseTags.push({
                         name: "KB Resistance" + tagXmlIds,
@@ -642,7 +902,7 @@ export function determineDefense(targetActor, attackItem, options) {
         impenetrableValue,
         damageReductionValue,
         damageNegationValue,
-        knockbackResistance,
+        knockbackResistanceValue,
         defenseTags,
         defenseTotalValue: defenseValue + resistantValue,
     };
