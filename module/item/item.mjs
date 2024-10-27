@@ -2272,10 +2272,10 @@ export class HeroSystem6eItem extends Item {
 
         if (system.XMLID === "FORCEWALL") {
             // FORCEWALL/BARRIER
-            baseCost += parseInt(system.BODYLEVELS) || 0;
-            baseCost += parseInt(system.LENGTHLEVELS) || 0;
-            baseCost += parseInt(system.HEIGHTLEVELS) || 0;
-            baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness
+            baseCost += parseInt(system.BODYLEVELS) || 0; // 6e only
+            baseCost += (parseInt(system.LENGTHLEVELS) || 0) * (system.is5e ? 2 : 1);
+            baseCost += (parseInt(system.HEIGHTLEVELS) || 0) * (system.is5e ? 2 : 1);
+            baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness (6e only)
         } else if (system.XMLID === "DUPLICATION") {
             const points = parseInt(system.POINTS || 0);
             const cost = points * configPowerInfo?.costPerLevel;
@@ -2604,7 +2604,7 @@ export class HeroSystem6eItem extends Item {
 
         // This may be a slot in a framework if so get parent
 
-        let modifiers = (system.MODIFIER || []).filter(
+        const modifiers = (system.MODIFIER || []).filter(
             (o) =>
                 parseFloat(o.BASECOST) < 0 ||
                 getPowerInfo({
@@ -2619,7 +2619,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         let limitations = 0;
-        for (let modifier of modifiers) {
+        for (const modifier of modifiers) {
             let _myLimitation = 0;
 
             const modPowerInfo = getPowerInfo({
@@ -2635,8 +2635,8 @@ export class HeroSystem6eItem extends Item {
             _myLimitation += -modifierBaseCost;
 
             // Some modifiers may have ADDERS as well (like a focus)
-            for (let adder of modifier.ADDER || []) {
-                let adderBaseCost = parseFloat(adder.BASECOST || 0);
+            for (const adder of modifier.ADDER || []) {
+                const adderBaseCost = parseFloat(adder.BASECOST || 0);
 
                 // Unique situation where JAMMED floors the limitation
                 // if (adder.XMLID == "JAMMED" && _myLimitation == 0.25) {
@@ -2652,6 +2652,20 @@ export class HeroSystem6eItem extends Item {
 
                 const multiplier = Math.max(1, parseFloat(adder.MULTIPLIER || 0));
                 _myLimitation *= multiplier;
+            }
+
+            // There are some special cases with the increased endurance modifier not found in the HDC's XML
+            if (modifier.XMLID === "INCREASEDEND") {
+                // If cost is only for activation, then increased end is worth 1/2.
+                const activationOnlyEndCost = modifiers.find(
+                    (otherModifier) =>
+                        (otherModifier.XMLID === "COSTSEND" &&
+                            otherModifier.OPTION_ALIAS === "Only Costs END to Activate") ||
+                        otherModifier.XMLID === "COSTSENDONLYTOACTIVATE",
+                );
+                if (activationOnlyEndCost) {
+                    _myLimitation = _myLimitation / 2;
+                }
             }
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.

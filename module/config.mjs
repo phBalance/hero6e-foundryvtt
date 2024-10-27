@@ -4917,10 +4917,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,
-            costPerLevel: 3,
+            costPerLevel: 3 / 2, // LEVELS are the sum of rPD and rED
             defenseTagVsAttack: function () {
                 // We really shouldn't include this as a defense.
-                // TODO: Impelemnt FORCEWALL englobing like we do with ENTANGLE
+                // TODO: Implement FORCEWALL englobing like we do with ENTANGLE
                 // return HERO.powers6e.find((o) => o.key === "FORCEFIELD").defenseTagVsAttack(...args);
                 return null;
             },
@@ -4928,7 +4928,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             duration: "constant",
-            costPerLevel: 2.5,
+            costPerLevel: 5 / 2, // LEVELS are the sum of rPD and rED
             xml: `<POWER XMLID="FORCEWALL" ID="1709342637180" BASECOST="0.0" LEVELS="0" ALIAS="Force Wall" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="0" EDLEVELS="0" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="0" HEIGHTLEVELS="0" BODYLEVELS="0" WIDTHLEVELS="0.0"><NOTES/></POWER>`,
         },
     );
