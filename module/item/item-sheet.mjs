@@ -28,7 +28,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 this.item.system.XMLID,
             )
         ) {
-            return `${path}/item-${this.item.type}-adjustment-sheet.hbs`;
+            return `${path}/item-power-adjustment-sheet.hbs`;
         }
 
         if (["ENDURANCERESERVE"].includes(this.item.system.XMLID)) {
