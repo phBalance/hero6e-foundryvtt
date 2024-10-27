@@ -1421,11 +1421,17 @@ export class HeroSystem6eItem extends Item {
         // Charges
         if (parseInt(item.system.charges?.max || 0) > 0) {
             const costsEnd = item.findModsByXmlid("COSTSEND");
-            if (item.system.endEstimate === 0 || !costsEnd) item.system.endEstimate = "";
-            item.system.endEstimate += ` [${parseInt(item.system.charges?.value || 0)}${
-                item.system.charges?.recoverable ? "rc" : ""
-            }]`;
-            item.system.endEstimate = item.system.endEstimate.trim();
+            if (item.system.endEstimate === 0 || !costsEnd) {
+                item.system.endEstimate = "";
+            }
+
+            const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1 ? `x${item.system.charges?.clips}` : ""}`;
+            const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
+            const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
+            const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
+            const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
+
+            item.system.endEstimate = `${item.system.endEstimate ? `${item.system.endEstimate} ` : ""}[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
         }
 
         // 0 END
