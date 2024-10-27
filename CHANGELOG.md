@@ -1,17 +1,17 @@
 # Releases
 
-## Version 4.0.2 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.2 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Strength rolls now use endurance. [#1253](https://github.com/dmdorman/hero6e-foundryvtt/issues/1253)
-- Skill rolls and toggle activations can now use STUN for END and END reserves. They can also use SHIFT to override resource consumption.
-- Encumbrance related improvements.
+- Skill rolls and toggle activations can now use STUN for END and END reserves (when in combat). They can also use SHIFT to override resource consumption.
+- Encumbrance related improvements, include PSL support. [#1372](https://github.com/dmdorman/hero6e-foundryvtt/issues/1372)
 - Improved KNOWLEDGE_SKILL descriptions. [#1278](https://github.com/dmdorman/hero6e-foundryvtt/issues/1278)
 - Initial NIGHTVISION, INFRAREDPERCEPTION, ULTRASONICPERCEPTION, and ULTRAVIOLETPERCEPTION support. Also if you create a custom power with the word light in it, you can toggle it on/off like a lantern (QTY = meters of bright vision).
-- Fixes for CONTINUING CHARGES and auto expiration with SIMPLE CALENDAR.
+- Fixes for some CONTINUING CHARGES and auto expiration with SIMPLE CALENDAR. Only works with Active Effects (like characteristic aid).
 - Fixes for CHARACTERISTICS toggles that were subtracting instead of adding to values. [#1293](https://github.com/dmdorman/hero6e-foundryvtt/issues/1293)
 - Various minor improvements for tokens of type BASE in an effort to improve [Token Attacher](https://github.com/KayelGee/token-attacher) support.
 - Conditional defenses are now hidden when they provide no defense against a specific attack. There is a new setting to show All Conditional Defenses.
-- Reworked how defenses tags are shown and how defenses are calculated vs attacks. [#1339](https://github.com/dmdorman/hero6e-foundryvtt/issues/1339)
+- Reworked how defense tags are shown and how defenses are calculated vs attacks. [#1339](https://github.com/dmdorman/hero6e-foundryvtt/issues/1339)
   - Fix for 5e DAMAGE RESISTANCE and PD/ED purchased as a power, where the PD/ED was counted twice. [#1297](https://github.com/dmdorman/hero6e-foundryvtt/issues/1297)
   - 5e now resists penetrating with hardened defenses.
   - Fix where some defenses were being ignored.
