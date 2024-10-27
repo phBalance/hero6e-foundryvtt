@@ -28,13 +28,19 @@
 </div>
 
 
+{{#unless editOptions.hideLEVELS}}
+    <div class="form-group">
+        <label>LEVELS</label>
+        <input {{#if (isdefined system.PDLEVELS)}}disabled{{/if}} type="text" name="system.LEVELS" value="{{system.LEVELS}}" data-dtype="Number" />
+    </div>
 
-<div class="form-group">
-    {{#unless editOptions.hideLEVELS}}
-    <label>LEVELS</label>
-    <input {{#if (isdefined system.PDLEVELS)}}disabled{{/if}} type="text" name="system.LEVELS" value="{{system.LEVELS}}" data-dtype="Number" />
-    {{/unless}}
-</div>
+    <div class="form-group">
+        {{#if system.QUANTITY}}
+            <label>QUANTITY</label>
+            <input type="text" name="system.QUANTITY" value="{{system.QUANTITY}}" data-dtype="Number" />
+        {{/if}}
+    </div>
+{{/unless}}
 
 {{#if (isdefined system.INPUT)}}
 <div class="form-group">
