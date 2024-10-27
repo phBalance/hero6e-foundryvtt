@@ -277,32 +277,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 // defenseTags: defenseTagsP,
             } = determineDefense(this.actor, pdAttack, { suppressDeprecationWarn: true });
 
-            // defense.PD = defenseValue;
-            // defense.rPD = resistantValue;
-            // defense.PDtags = "PHYSICAL DEFENSE\n";
-            // defense.rPDtags = "PHYSICAL DEFENSE (RESISTANT)\n";
-            // for (let tag of defenseTagsP.filter((o) => o.name.match(/pd$/i))) {
-            //     if (tag.resistant) {
-            //         defense.rPDtags += `${tag.value} ${tag.title}\n`;
-            //     } else if (tag.resistant != undefined) {
-            //         defense.PDtags += `${tag.value} ${tag.title}\n`;
-            //     }
-            // }
-            // defense.drp = damageReductionValue;
-            // defense.drptags = "DAMAGE REDUCTION PHYSICAL\n";
-            // for (let tag of defenseTagsP.filter((o) => o.name.match(/drp$/i))) {
-            //     if (tag.resistant) {
-            //         defense.drptags += `${tag.value} ${tag.title}\n`;
-            //     } else if (tag.resistant != undefined) {
-            //         defense.drptags += `${tag.value} ${tag.title}\n`;
-            //     }
-            // }
-            // defense.dnp = damageNegationValue;
-            // defense.dnptags = "DAMAGE NEGATION PHYSICAL\n";
-            // for (let tag of defenseTagsP.filter((o) => o.name.match(/dnp$/i))) {
-            //     defense.dnptags += `${tag.value} ${tag.title}\n`;
-            // }
-
             // New PD
             const {
                 defenseValue: defenseValuePD,
@@ -352,31 +326,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 //damageNegationValue: _damageNegationValueED /* knockbackResistanceE */,
                 // defenseTags: _defenseTagsE,
             } = determineDefense(this.actor, edAttack, { suppressDeprecationWarn: true });
-            // defense.ED = defenseValueE;
-            // defense.rED = resistantValueE;
-            // defense.EDtags = "ENERGY DEFENSE\n";
-            // defense.rEDtags = "ENERGY DEFENSE (RESISTANT)\n";
-            // for (let tag of defenseTagsE.filter((o) => o.name.match(/ed$/i))) {
-            //     if (tag.resistant) {
-            //         defense.rEDtags += `${tag.value} ${tag.title}\n`;
-            //     } else if (tag.resistant != undefined) {
-            //         defense.EDtags += `${tag.value} ${tag.title}\n`;
-            //     }
-            // }
-            // defense.dre = damageReductionValueE;
-            // defense.dretags = "DAMAGE REDUCTION ENERGY\n";
-            // for (let tag of defenseTagsE.filter((o) => o.name.match(/dre$/i))) {
-            //     if (tag.resistant) {
-            //         defense.dretags += `${tag.value} ${tag.title}\n`;
-            //     } else if (tag.resistant != undefined) {
-            //         defense.dretags += `${tag.value} ${tag.title}\n`;
-            //     }
-            // }
-            // defense.dne = damageNegationValueE;
-            // defense.dnetags = "DAMAGE NEGATION ENERGY\n";
-            // for (let tag of defenseTagsE.filter((o) => o.name.match(/dne$/i))) {
-            //     defense.dnetags += `${tag.value} ${tag.title}\n`;
-            // }
 
             // New ED
             const {
@@ -428,31 +377,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 //damageNegationValue: _damageNegationValueMD /*knockbackResistanceM*/,
                 defenseTags: _defenseTagsMD,
             } = determineDefense(this.actor, mdAttack, { suppressDeprecationWarn: true });
-            // defense.MD = defenseValueM;
-            // defense.rMD = resistantValueM;
-            // defense.MDtags = "MENTAL DEFENSE\n";
-            // defense.rMDtags = "MENTAL DEFENSE (RESISTANT)\n";
-            // for (let tag of defenseTagsM.filter((o) => o.name.match(/md$/i))) {
-            //     if (tag.resistant) {
-            //         defense.rMDtags += `${tag.value} ${tag.title}\n`;
-            //     } else if (tag.resistant != undefined) {
-            //         defense.MDtags += `${tag.value} ${tag.title}\n`;
-            //     }
-            // }
-            // defense.drm = damageReductionValueM;
-            // defense.drmtags = "DAMAGE REDUCTION MENTAL\n";
-            // for (let tag of defenseTagsM.filter((o) => o.name.match(/drm$/i))) {
-            //     if (tag.resistant) {
-            //         defense.drmtags += `${tag.value} ${tag.title}\n`;
-            //     } else if (tag.resistant != undefined) {
-            //         defense.drmtags += `${tag.value} ${tag.title}\n`;
-            //     }
-            // }
-            // defense.dnm = damageNegationValueM;
-            // defense.dnmtags = "DAMAGE NEGATION MENTAL\n";
-            // for (let tag of defenseTagsM.filter((o) => o.name.match(/dnm$/i))) {
-            //     defense.dnmtags += `${tag.value} ${tag.title}\n`;
-            // }
 
             // New MD
             const {
@@ -500,17 +424,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 //     _resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
                 // defenseTags: defenseTagsPOWD,
             } = determineDefense(this.actor, drainAttack, { suppressDeprecationWarn: true });
-            // defense.POWD = defenseValuePOWD;
-            // defense.rPOWD = resistantValuePOWD;
-            // defense.POWDtags = "POWER DEFENSE\n";
-            // defense.rPOWDtags = "POWER DEFENSE (RESISTANT)\n";
-            // for (let tag of defenseTagsPOWD.filter((o) => o.name.match(/powd$/i))) {
-            //     if (tag.resistant) {
-            //         defense.rPOWDtags += `${tag.value} ${tag.title}\n`;
-            //     } else if (tag.resistant != undefined) {
-            //         defense.POWDtags += `${tag.value} ${tag.title}\n`;
-            //     }
-            // }
 
             // New POWERDEFENSE
             const {
@@ -655,6 +568,9 @@ export class HeroSystemActorSheet extends ActorSheet {
             // Not all actor types have END & STUN
             data.hasEND = powers.find((o) => o.key === "END");
             data.hasSTUN = powers.find((o) => o.key === "STUN");
+
+            // Endurance Reserve
+            data.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
         } catch (ex) {
             console.error(ex);
         }
@@ -948,6 +864,16 @@ export class HeroSystemActorSheet extends ActorSheet {
                     expandedData.Xsystem.characteristics[characteristic].value;
             }
         }
+
+        // EndReserve
+        if (expandedData.endReserve) {
+            const endReserveId = Object.keys(expandedData.endReserve)?.[0];
+            const endReserve = this.actor.items.find((o) => o.id === endReserveId);
+            if (endReserve) {
+                await endReserve.update({ "system.value": parseInt(expandedData.endReserve[endReserveId].value || 0) });
+            }
+        }
+        console.log(formData);
 
         this.options.itemFilters.power = expandedData.itemFilters.power;
         this.options.itemFilters.skill = expandedData.itemFilters.skill;
