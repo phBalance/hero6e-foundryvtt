@@ -38,21 +38,30 @@
     </td>
 
     {{#if this.isContainer}}
-    <td>{{this.system.end}}</td>
-    <td>{{priceText}}</td>
-    <td title="Total weight of container and contents in kg"><b>{{this.weightKg}}</b></td>
-    <td></td>
+        <td>{{this.system.end}}</td>
+        <td>{{priceText}}</td>
+        <td title="Total weight of container and contents in kg">
+        {{#if this.childItems}}<b>{{this.weightKg}}</b>{{else}}{{this.weightKg}}{{/if}}
+        </td>
     {{else}}
-    <td>{{this.system.end}}</td>
-    <td>{{this.priceText}}</td>
-    <td>{{this.weightKg}}</td>
-    <td>
-        <input class="item-toggle" type="checkbox"  name="this.system.active"  {{checked
-            this.system.active}} data-dtype="Boolean" />
-    </td>
+        <td>{{this.system.end}}</td>
+        <td>{{this.priceText}}</td>
+        <td>{{this.weightKg}}</td>
     {{/if}}
     <td>
-        {{#if (or (eq this.system.subType "attack") this.system.roll)}}
+        {{#if (or this.isContainer (not this.parentItem)) }}
+            <input class="item-toggle" type="checkbox"  name="this.system.active"  {{checked
+                this.system.active}} data-dtype="Boolean" />
+        {{/if}}
+    </td>
+    
+    <td>
+        {{#if this.system.roll}}
+            <button type="button" class="item-rollable" data-roll="{{this.system.roll}}"
+                data-label="{{this._id}}">{{numberFormat this.system.roll decimals=0
+                sign=false}}-</button>
+        {{/if}}
+        {{#if (eq this.system.subType "attack")}}
                 <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
         {{/if}}
         {{#if this.system.showToggle}}
