@@ -2148,11 +2148,13 @@ export class HeroSystem6eActor extends Actor {
             parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
 
         // Hero Designer appears to store WEIGHT as LBS instead of KG.
-        const equipment = this.items.filter((o) => o.type === "equipment" && o.system.active);
-        const weightLbs = equipment.reduce((a, b) => a + parseFloat(b.system.WEIGHT), 0);
+        const equipment = this.items.filter(
+            (o) => o.type === "equipment" && (o.parentItem ? o.parentItem.system.active : o.system.active),
+        );
+        const weightLbs = equipment.reduce((a, b) => a + parseFloat(b.system?.WEIGHT || 0), 0);
         const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
 
-        return Math.ceil(weightKg);
+        return weightKg.toFixed(1);
     }
 
     get netWorth() {

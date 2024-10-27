@@ -4,6 +4,8 @@
 
 - Fixed INCREASEDEND cost and BARRIER active point calculation. [#1368](https://github.com/dmdorman/hero6e-foundryvtt/issues/1368)
 - Frameworks, lists, and compound powers can be collapsed/expanded. [#1357](https://github.com/dmdorman/hero6e-foundryvtt/issues/1357)
+- Initial support for dragging items into and out of frameworks, lists, and compound powers. [#1357](https://github.com/dmdorman/hero6e-foundryvtt/issues/1357)
+- Fixed missing price & weight of equipment.
 
 ## Version 4.0.2
 

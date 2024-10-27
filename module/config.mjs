@@ -3214,6 +3214,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["compound"],
             behaviors: [],
             costEnd: false,
+            isContainer: true,
         },
         {},
     );
@@ -3234,6 +3235,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         type: ["framework"],
         behaviors: [],
         costEnd: false,
+        isContainer: true,
     });
 
     addPower(
@@ -3242,6 +3244,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["framework"],
             behaviors: [],
             costEnd: false,
+            isContainer: true,
         },
         {},
     );
@@ -3252,6 +3255,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["framework"],
             behaviors: [],
             costEnd: false,
+            isContainer: true,
         },
         {},
     );
@@ -3262,6 +3266,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["framework"],
             behaviors: [],
             costEnd: false,
+            isContainer: true,
         },
         {},
     );

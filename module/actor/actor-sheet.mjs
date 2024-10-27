@@ -754,9 +754,28 @@ export class HeroSystemActorSheet extends ActorSheet {
         // return super._onDropItem(event, data);
         if (!this.actor.isOwner) return false;
         const item = await Item.implementation.fromDropData(data);
+        if (!item) return;
 
         const sameActor = item.actor?.id === this.actor.id;
         if (sameActor) {
+            // check if we are dragging in or out of a parent item
+            if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
+                const dropTarget = event.target.closest("[data-item-id]");
+                const item2 = item.actor.items.find((o) => o.id === dropTarget?.dataset.itemId);
+                if (!item.system.PARENTID && item2.isContainer) {
+                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${item2.name}</b>`);
+                    await item.update({ "system.PARENTID": item2.system.ID });
+                } else if (item.system.PARENTID && !item2?.system.PARENTID) {
+                    ui.notifications.info(
+                        `<b>${item.name}</b> was removed from parent <b>${item.parentItem.name}</b>.`,
+                    );
+                    await item.update({ "system.-=PARENTID": null, type: item.parentItem.type });
+                } else if (!item.isContainer && item2?.isContainer) {
+                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${item2.name}</b>`);
+                    await item.update({ "system.PARENTID": item2.system.ID });
+                }
+            }
+
             return super._onDropItem(event, data);
         }
 
