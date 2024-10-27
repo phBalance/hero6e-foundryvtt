@@ -4837,6 +4837,11 @@ export class HeroSystem6eItem extends Item {
         return "PD"; // Default
     }
 
+    get isContainer() {
+        if (this.childItems.length) return true;
+        return this.baseInfo.isContainer;
+    }
+
     get killing() {
         if (this.system.KILLING === true) {
             return true;

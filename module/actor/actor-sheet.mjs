@@ -757,6 +757,21 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         const sameActor = item.actor?.id === this.actor.id;
         if (sameActor) {
+            // check if we are dragging in or out of a parent item
+            if (!item.isContainer) {
+                const dropTarget = event.target.closest("[data-item-id]");
+                const item2 = item.actor.items.find((o) => o.id === dropTarget?.dataset.itemId);
+                if (item.system.PARENTID && !item2?.system.PARENTID) {
+                    ui.notifications.info(
+                        `<b>${item.name}</b> was removed from parent <b>${item.parentItem.name}</b>.`,
+                    );
+                    await item.update({ "system.-=PARENTID": null });
+                } else if (!item.system.PARENTID && item2?.isContainer) {
+                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${item2.name}</b>`);
+                    await item.update({ "system.PARENTID": item2.system.ID });
+                }
+            }
+
             return super._onDropItem(event, data);
         }
 
