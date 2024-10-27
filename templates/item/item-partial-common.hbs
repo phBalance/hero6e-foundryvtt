@@ -292,12 +292,21 @@
 {{/if}}
 
 {{#if system.charges}}
-<div class="form-group">
-    <label>Charges</label>
-    <div>
-        <input type="text" name="system.charges.value" value="{{system.charges.value}}" data-dtype="Number" />
-        <span>/</span>
-        <input disabled type="text" name="system.charges.max" value="{{system.charges.max}}" data-dtype="Number" />
+    <div class="form-group">
+        <label>Charges</label>
+        <div>
+            <input type="text" name="system.charges.value" value="{{system.charges.value}}" data-dtype="Number" />
+            <span>/</span>
+            <input disabled type="text" name="system.charges.max" value="{{system.charges.max}}" data-dtype="Number" />
+        </div>
     </div>
-</div>
+
+    <div class="form-group">
+        <label>Clips</label>
+        <div>
+            <input type="text" name="system.charges.clips" value="{{system.charges.clips}}" data-dtype="Number" />
+            <span>/</span>
+            <input disabled type="text" name="system.charges.clipsMax" value="{{system.charges.clipsMax}}" data-dtype="Number" />
+        </div>
+    </div>
 {{/if}}
