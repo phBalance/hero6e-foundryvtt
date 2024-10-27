@@ -1457,8 +1457,10 @@ export class HeroSystem6eItem extends Item {
             this.system.charges = {
                 ...this.system.charges,
                 max: parseInt(CHARGES.OPTION_ALIAS),
+                clipsMax: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
+                clips: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
                 recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
-                continuing: (CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
+                continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
                 boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
                 fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
             };
