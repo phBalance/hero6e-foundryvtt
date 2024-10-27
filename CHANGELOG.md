@@ -2,7 +2,8 @@
 
 ## Version 4.0.3 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Correct INCREASEDEND cost and BARRIER active point calculation. [#1368](https://github.com/dmdorman/hero6e-foundryvtt/issues/1368)
+- Fixed INCREASEDEND cost and BARRIER active point calculation. [#1368](https://github.com/dmdorman/hero6e-foundryvtt/issues/1368)
+- Frameworks, lists, and compound powers can be collapsed/expanded. [#1357](https://github.com/dmdorman/hero6e-foundryvtt/issues/1357)
 
 ## Version 4.0.2
 

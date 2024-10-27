@@ -8,9 +8,21 @@
             <td></td>
             <td></td>
     {{else}}
-        <td>
-            <div class="item-image"><img src="{{this.img}}" title="{{this.name}}" width="24"
+        <td width = "24px">
+            {{#if this.childItems.length}}
+                {{#if this.system.collapse}}
+                    <a class="item-image item-control item-expand" title="{{localize "ActorSheet.ExpandItem"}}" >
+                        <i class="fas fa-square-caret-right fa-2x"></i>
+                    </a>
+                {{else}}
+                    <a class="item-image item-control item-collapse" title="{{localize "ActorSheet.CollapseItem"}}" >
+                        <i class="fas fa-square-caret-down fa-2x"></i>
+                    </a>
+                {{/if}}
+            {{else}}
+                <div class="item-image"><img src="{{this.img}}" title="{{this.name}}" width="24"
                     height="24" /></div>
+            {{/if}}
         </td>
         <td>{{this.system.realCost}}</td>
         <td class="left{{#if this.parentItem.type}} item-framework-child-name{{/if}}{{#if this.parentItem.parentItem}}2{{/if}}">
@@ -47,13 +59,17 @@
                 class="fas fa-comment-alt"></i></a>
         <a class="item-control item-edit" title="{{localize "ActorSheet.EditItem"}}"><i class="fas fa-edit"></i></a>
         
-        <a class="item-control item-delete" title="{{localize "ActorSheet.DeleteItem"}}" {{#if this.childItems.length}}style="opacity:0.3"{{/if}}>
+        <a class="item-control item-delete" title="{{localize "ActorSheet.DeleteItem"}}" >
             <i class="fas fa-trash"></i>
         </a>
+
+        
         
     </td>
 </tr>
 {{/if}}
-{{#each this.childItems}}
-    {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') this }}
-{{/each}}
+{{#if (not this.system.collapse)}}
+    {{#each this.childItems }}
+        {{> (getModulePath 'actor/actor-sheet-partial-powers-item.hbs') this }}
+    {{/each}}
+{{/if}}
