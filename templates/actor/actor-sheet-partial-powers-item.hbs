@@ -37,20 +37,12 @@
             {{#if (or (eq this.system.subType "attack") this.system.roll)}}
                 <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
             {{/if}}
-            {{!-- {{#if (ne this.system.subType "attack")}} --}}
-                {{#if this.system.showToggle}}
-                    <input class="item-toggle" type="checkbox" 
-                        Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
-                        data-action="toggle" />
-                {{/if}}
-                {{!-- {{#if this.system.roll}}
-                    <button type="button" class="item-rollable" data-roll="{{this.system.roll}}"
-                        data-label="{{item._id}}">{{numberFormat this.system.roll decimals=0
-                        sign=false}}-</button>
-                {{/if}} --}}
-            {{!-- {{else}}
-                <a class="item-image item-rollable"><i class="fas fa-dice" title="{{this.name}}" width="24" height="24"></i></a>
-            {{/if}} --}}
+
+            {{#if this.system.showToggle}}
+                <input class="item-toggle" type="checkbox" 
+                    Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
+                    data-action="toggle" />
+            {{/if}}
 
         </td>
     {{/if}}
