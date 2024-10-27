@@ -6,6 +6,7 @@
 - Frameworks, lists, and compound powers can be collapsed/expanded. [#1357](https://github.com/dmdorman/hero6e-foundryvtt/issues/1357)
 - Initial support for dragging items into and out of frameworks, lists, and compound powers. [#1357](https://github.com/dmdorman/hero6e-foundryvtt/issues/1357)
 - Fixed missing price & weight of equipment.
+- Added END Reserve to left side panel of actor sheet. [#1370](https://github.com/dmdorman/hero6e-foundryvtt/issues/1370)
 
 ## Version 4.0.2
 
