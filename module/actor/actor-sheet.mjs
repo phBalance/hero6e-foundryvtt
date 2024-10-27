@@ -876,6 +876,12 @@ export class HeroSystemActorSheet extends ActorSheet {
         // Create Items
         html.find(".item-create").click(this._onItemCreate.bind(this));
 
+        // Collapse
+        html.find(".item-collapse").click(this._onItemCollapse.bind(this));
+
+        // Expand
+        html.find(".item-expand").click(this._onItemExpand.bind(this));
+
         // Upload HDC file
         html.find(".upload-button").change(this._uploadCharacterSheet.bind(this));
 
@@ -1312,6 +1318,18 @@ export class HeroSystemActorSheet extends ActorSheet {
             },
         });
         d.render(true);
+    }
+
+    async _onItemCollapse(event) {
+        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
+        const item = this.actor.items.get(itemId);
+        await item.update({ "system.collapse": true });
+    }
+
+    async _onItemExpand(event) {
+        const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
+        const item = this.actor.items.get(itemId);
+        await item.update({ "system.collapse": false });
     }
 
     async _onEffectCreate(event) {
