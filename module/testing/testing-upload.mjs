@@ -6810,6 +6810,153 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("BARRIER/FORCEWALL", async function () {
+                describe("FORCEWALL (5e)", async function () {
+                    const contents = `
+                        <POWER XMLID="FORCEWALL" ID="1729981883000" BASECOST="0.0" LEVELS="12" ALIAS="Force Wall" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="6" EDLEVELS="6" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="4" HEIGHTLEVELS="4" BODYLEVELS="0" WIDTHLEVELS="0.0">
+                            <NOTES />
+                            <ADDER XMLID="ALTERABLESIZE" ID="1729981996510" BASECOST="5.0" LEVELS="0" ALIAS="Alterable Size" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="No" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="INCREASEDEND" ID="1729982013659" BASECOST="-1.5" LEVELS="0" ALIAS="Increased Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="4X" OPTIONID="4X" OPTION_ALIAS="x4 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = true;
+                        await actor._postUpload();
+
+                        item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            temporary: true,
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Force Wall 6 rPD/6 rED(up to 5m long, and 5m tall, and 0.5m thick) (Alterable Size) (51 Active Points); Increased Endurance Cost (x4 END; -1 1/2)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 20);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 51);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 12);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 20);
+                    });
+                });
+
+                describe("BARRIER (6e)", async function () {
+                    const contents = `
+                        <POWER XMLID="FORCEWALL" ID="1729971675335" BASECOST="3.0" LEVELS="12" ALIAS="Barrier" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Raise Embankment - INCREASED END TEST" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="6" EDLEVELS="6" MDLEVELS="0" POWDLEVELS="0" LENGTHLEVELS="4" HEIGHTLEVELS="4" BODYLEVELS="3" WIDTHLEVELS="0.5">
+                            <NOTES />
+                            <ADDER XMLID="DISMISSABLE" ID="1729971742992" BASECOST="5.0" LEVELS="0" ALIAS="Dismissable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <MODIFIER XMLID="CHARGES" ID="1729971743057" BASECOST="-1.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="2" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="LIMITEDRECOVER" ID="1729971742993" BASECOST="-0.5" LEVELS="0" ALIAS="Recovers after 2 Hours of Study" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            <MODIFIER XMLID="COSTSEND" ID="1729971743065" BASECOST="-0.25" LEVELS="0" ALIAS="Costs Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ACTIVATE" OPTIONID="ACTIVATE" OPTION_ALIAS="Only Costs END to Activate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="GESTURES" ID="1729971743070" BASECOST="-0.25" LEVELS="0" ALIAS="Gestures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="FOCUS" ID="1729971743097" BASECOST="-0.25" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="IIF" OPTIONID="IIF" OPTION_ALIAS="IIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Component - Dirt From The Elemental Plane of Earth" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="INCANTATIONS" ID="1729971743101" BASECOST="-0.25" LEVELS="0" ALIAS="Incantations" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1729971743136" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Magic Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="LIMITEDPOWER" ID="1729971743150" BASECOST="0.0" LEVELS="0" ALIAS="Limited Power" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="1" OPTIONID="1" OPTION_ALIAS="Damages Environment" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="MODIFIER" ID="1729971743152" BASECOST="0.0" LEVELS="0" ALIAS="Last For One Hour or Until Destroyed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            <MODIFIER XMLID="INCREASEDEND" ID="1729971743170" BASECOST="-1.0" LEVELS="0" ALIAS="Increased Endurance Cost" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="3X" OPTIONID="3X" OPTION_ALIAS="x3 END" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                        </POWER>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            { temporary: true },
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            temporary: true,
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", function () {
+                        assert.equal(
+                            item.system.description,
+                            "Barrier 6 rPD/6 rED/3 BODY(up to 5m long, and 5m tall, and 1m thick) (Dismissable), Limited Power (Damages Environment; +0), Last For One Hour or Until Destroyed (+0) (38 Active Points); 2 Charges (Recovers after 2 Hours of Study, -2), Requires A Roll (Magic Skill roll; -1/2), Increased Endurance Cost (x3 END; -1/2), Costs Endurance (Only Costs END to Activate; -1/4), Gestures (-1/4), IIF (Component - Dirt From The Elemental Plane of Earth; -1/4), Incantations (-1/4)",
+                        );
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 8);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 38);
+                    });
+
+                    it("levels", function () {
+                        assert.equal(item.system.value, 12);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 12);
+                    });
+
+                    it("charges", function () {
+                        assert.equal(item.system.charges.max, 2);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

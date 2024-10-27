@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.2 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.3 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Correct INCREASEDEND cost and BARRIER active point calculation. [#1368](https://github.com/dmdorman/hero6e-foundryvtt/issues/1368)
+
+## Version 4.0.2
 
 - Strength rolls now use endurance. [#1253](https://github.com/dmdorman/hero6e-foundryvtt/issues/1253)
 - Skill rolls and toggle activations can now use STUN for END and END reserves (when in combat). They can also use SHIFT to override resource consumption.
