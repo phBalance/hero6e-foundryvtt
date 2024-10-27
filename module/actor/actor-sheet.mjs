@@ -112,34 +112,12 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                 if (item.type == "equipment") {
                     data.hasEquipment = true;
-
-                    // item.system.weight = (parseFloat(item.system.WEIGHT || 0) * equipmentWeightPercentage).toFixed(1);
-
-                    // if (item.system.active) {
-                    //     weightTotal += parseFloat(item.system.weight || 0);
-                    // }
-                    // if (parseFloat(item.system.weight || 0) > 0) {
-                    //     item.system.WEIGHTtext = parseFloat(item.system.weight) + "kg";
-                    // } else {
-                    //     item.system.WEIGHTtext = "";
-                    // }
-
-                    // priceTotal += parseFloat(item.system.PRICE || 0);
-                    // if (parseFloat(item.system.PRICE || 0) > 0) {
-                    //     item.system.PRICEtext = "$" + Math.round(parseFloat(item.system.PRICE));
-                    // } else {
-                    //     item.system.PRICEtext = "";
-                    // }
                 }
             }
 
             if (data.hasEquipment) {
                 data.weightTotal = `${this.actor.encumbrance} kg`;
                 data.priceTotal = `$${this.actor.netWorth}`;
-                // if (parseFloat(weightTotal).toFixed(1) > 0 || parseFloat(priceTotal).toFixed(2) > 0) {
-                //     data.weightTotal = parseFloat(weightTotal).toFixed(1) + "kg";
-                //     data.priceTotal = "$" + parseFloat(priceTotal).toFixed(2);
-                // }
             }
 
             // Characteristics
@@ -1162,18 +1140,24 @@ export class HeroSystemActorSheet extends ActorSheet {
         const itemId = $(event.currentTarget).closest("[data-item-id]").data().itemId;
         const item = this.actor.items.get(itemId);
 
-        // Do not allow deleting of item with children
-        if (item.childItems.length > 0) {
-            await ui.notifications.error(`You cannot delete ${item.name} because there are child items.`);
-            return;
-        }
+        const content = `You are about to delete <b>${item.name}</b>${
+            item.childItems.length ? ` and all <b>${item.childItems.length}</b> of it's sub items` : ""
+        }. ${game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")}`;
 
         const confirmed = await Dialog.confirm({
             title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
-            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),
+            content: content,
         });
 
         if (confirmed) {
+            // Delete subitems
+            for (const child of item.childItems) {
+                for (const child2 of child.childItems) {
+                    child2.delete();
+                }
+                child.delete();
+            }
+
             item.delete();
             this.render();
         }
