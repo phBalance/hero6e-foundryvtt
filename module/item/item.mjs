@@ -4839,6 +4839,10 @@ export class HeroSystem6eItem extends Item {
 
     get isContainer() {
         if (this.childItems.length) return true;
+
+        // A backpack from MiscEquipment.hdp is a CUSTOMPOWER
+        if (this.system.description.match(/can hold \d+kg/i)) return true;
+
         return this.baseInfo.isContainer;
     }
 
@@ -4862,6 +4866,22 @@ export class HeroSystem6eItem extends Item {
         }
 
         return false;
+    }
+
+    get weightKg() {
+        const equipmentWeightPercentage =
+            parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
+        let weightLbs = parseFloat(this.system?.WEIGHT) || 0;
+        for (const child of this.childItems) {
+            weightLbs += parseFloat(child.system?.WEIGHT) || 0;
+        }
+        const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
+        return weightKg.toFixed(1);
+    }
+
+    get priceText() {
+        const price = parseFloat(this.system.PRICE) || 0;
+        return `$${price.toFixed(2)}`;
     }
 }
 
