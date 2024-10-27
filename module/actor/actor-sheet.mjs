@@ -678,7 +678,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
                 const dropTarget = event.target.closest("[data-item-id]");
                 const item2 = item.actor.items.find((o) => o.id === dropTarget?.dataset.itemId);
-                if (!item.system.PARENTID && item2.isContainer) {
+                if (!item.system.PARENTID && item2?.isContainer) {
                     ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${item2.name}</b>`);
                     await item.update({ "system.PARENTID": item2.system.ID });
                 } else if (item.system.PARENTID && !item2?.system.PARENTID) {
