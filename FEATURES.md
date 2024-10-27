@@ -153,12 +153,12 @@ Our support ratings:
 | DUPLICATION                |    F    | You will have to create a separate HDC file and import that for each duplicate. No injury support.               |
 | ENDURANCE RESERVE          |    B    | Only 1 endurance reserve is supported                                                                            |
 | ENHANCED SENSES            |    C    | Enhanced Perception ALL is the only enhanced sense currently supported.                                          |
-| ENTANGLE                   |    B    | You cannot target or damage an entangle.                                                                         |
+| ENTANGLE                   |    B    | You can target and damage an entangle. Anything that gets thru is not applied to token.                          |
 | EXTRA-DIMENSIONAL MOVEMENT |    D    |                                                                                                                  |
 | EXTRA LIMBS                |    B    | Limited game mechanics, largely storytelling power.                                                              |
 | FTL TRAVEL                 |    D    |                                                                                                                  |
-| FLASH                      |    C    |                                                                                                                  |
-| FLASH DEFENSE              |    C    |                                                                                                                  |
+| FLASH                      |    C    | Implemented as simple blind. Works pretty well for SightGroup. No enhanced sense support.                        |
+| FLASH DEFENSE              |    C    | Verses simple blind, see FLASH.                                                                                  |
 | FLIGHT                     |    B    | No turn modes, or gliding. non-combat penalties not automated                                                    |
 | GROWTH                     |    B    |                                                                                                                  |
 | HAND-TO-HAND ATTACK        |    A    |                                                                                                                  |
