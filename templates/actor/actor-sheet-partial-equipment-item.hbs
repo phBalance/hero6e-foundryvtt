@@ -13,9 +13,21 @@
         <td></td>
     {{else}}
 
-    <td class="item-image-td" style="width:26px">
-        <div class="item-image" width="26px"><img src="{{this.img}}" title="{{this.name}}" width="24px"
-                height="24px" /></div>
+    <td width = "24px">
+        {{#if this.childItems.length}}
+            {{#if this.system.collapse}}
+                <a class="item-image item-control item-expand" title="{{localize "ActorSheet.ExpandItem"}}" >
+                    <i class="fas fa-square-caret-right fa-2x"></i>
+                </a>
+            {{else}}
+                <a class="item-image item-control item-collapse" title="{{localize "ActorSheet.CollapseItem"}}" >
+                    <i class="fas fa-square-caret-down fa-2x"></i>
+                </a>
+            {{/if}}
+        {{else}}
+            <div class="item-image"><img src="{{this.img}}" title="{{this.name}}" width="24"
+                height="24" /></div>
+        {{/if}}
     </td>
     
     <td class="left{{#if this.parentItem}} item-framework-child-name{{/if}}{{#if this.parentItem.parentItem}}2{{/if}}">
@@ -75,6 +87,9 @@
     </td>
     
 </tr>
-{{#each this.childItems}}
-    {{> (getModulePath 'actor/actor-sheet-partial-equipment-item.hbs') this }}
-{{/each}}
+
+{{#if (not this.system.collapse)}}
+    {{#each this.childItems}}
+        {{> (getModulePath 'actor/actor-sheet-partial-equipment-item.hbs') this }}
+    {{/each}}
+{{/if}}
