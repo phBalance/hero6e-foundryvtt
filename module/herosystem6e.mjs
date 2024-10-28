@@ -666,11 +666,13 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 const itemsWithCharges = actor.items.filter((item) => item.system.charges?.max);
                 let content = "";
                 for (const item of itemsWithCharges) {
-                    let value = parseInt(item.system.charges.value);
-                    let max = parseInt(item.system.charges.max);
-                    if (value < max) {
-                        content += `${actor.name}/${item.name} ${value} to ${max} charges.  `;
-                        item.update({ "system.charges.value": max });
+                    const charges = parseInt(item.system.charges.value);
+                    const max = parseInt(item.system.charges.max);
+                    const clips = item.system.charges.clips;
+                    const clipsMax = item.system.charges.clipsMax;
+                    if (charges < max || clips < clipsMax) {
+                        content += `${actor.name}/${item.name} ${charges} to ${max}${clips < clipsMax ? `x${clipsMax}` : ""} charges. `;
+                        await item.update({ "system.charges.value": max, "item.system.charges.clips": clipsMax });
                     }
                 }
 
