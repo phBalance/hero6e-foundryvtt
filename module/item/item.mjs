@@ -2678,8 +2678,7 @@ export class HeroSystem6eItem extends Item {
                 // If cost is only for activation, then increased end is worth 1/2.
                 const activationOnlyEndCost = modifiers.find(
                     (otherModifier) =>
-                        (otherModifier.XMLID === "COSTSEND" &&
-                            otherModifier.OPTION_ALIAS === "Only Costs END to Activate") ||
+                        (otherModifier.XMLID === "COSTSEND" && otherModifier.OPTIONID === "ACTIVATE") ||
                         otherModifier.XMLID === "COSTSENDONLYTOACTIVATE",
                 );
                 if (activationOnlyEndCost) {
