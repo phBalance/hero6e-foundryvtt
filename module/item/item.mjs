@@ -198,9 +198,14 @@ export class HeroSystem6eItem extends Item {
      */
     async resetToOriginal() {
         // Set Charges to max
-        if (this.system.charges && this.system.charges.value !== this.system.charges.max) {
+        if (
+            this.system.charges &&
+            (this.system.charges.value !== this.system.charges.max ||
+                this.system.charges.clips !== this.system.charges.clipsMax)
+        ) {
             await this.update({
-                [`system.charges.value`]: this.system.charges.max,
+                "system.charges.value": this.system.charges.max,
+                "system.charges.clips": this.system.charges.clipsMax,
             });
             await this._postUpload();
         }
@@ -1464,15 +1469,21 @@ export class HeroSystem6eItem extends Item {
                 ...this.system.charges,
                 max: parseInt(CHARGES.OPTION_ALIAS),
                 clipsMax: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
-                clips: Math.pow(parseInt((CHARGES.ADDER || []).find((o) => o.XMLID === "CLIPS")?.LEVELS || 1), 2),
                 recoverable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "RECOVERABLE"),
                 continuing: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "CONTINUING")?.OPTIONID,
                 boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
                 fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
             };
-            if (this.system.charges?.value === undefined || this.system.charges?.value === null) {
+
+            if (this.system.charges.value == null) {
                 console.log("Invalid charges. Resetting to max", this);
                 this.system.charges.value ??= this.system.charges.max;
+                changed = true;
+            }
+
+            if (this.system.charges.clips == null) {
+                console.log("Invalid charge clips. Resetting to max", this);
+                this.system.charges.clips ??= this.system.charges.clipsMax;
                 changed = true;
             }
         } else {
