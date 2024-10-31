@@ -132,6 +132,7 @@ export function determineMaxAdjustment(item) {
         item.system.XMLID !== "AID" &&
         item.system.XMLID !== "SUCCOR" &&
         item.system.XMLID !== "TRANSFER"
+        // && item.system.XMLID !== "HEALING"
     ) {
         return reallyBigInteger;
     }

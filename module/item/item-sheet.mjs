@@ -548,10 +548,10 @@ export class HeroSystem6eItemSheet extends ItemSheet {
 
         // OPTION_ALIAS may need updating
         let clearAdderAttacks = false; // Clear all attacks and infer new attacks when OPTIONID is changed
-        if (this.item.getBaseInfo()?.editOptions?.choices && expandedData.system.OPTIONID) {
-            const choiceSelected = this.item
-                .getBaseInfo()
-                .editOptions.choices.find((o) => o.OPTIONID === expandedData.system.OPTIONID);
+        if (this.item.baseInfo?.editOptions?.choices && expandedData.system.OPTIONID) {
+            const choiceSelected = this.item.baseInfo.editOptions.choices.find(
+                (o) => o.OPTIONID === expandedData.system.OPTIONID,
+            );
             // only update OPTION and OPTION_ALIAS when OPTION has changed.
             // This allows for custom OPTION_ALIAS text for things like DEADLYBLOW.
             if (this.item.system.OPTION != choiceSelected.OPTION) {
@@ -588,17 +588,16 @@ export class HeroSystem6eItemSheet extends ItemSheet {
                 this.item.system.XMLID === "SUCCOR" ||
                 this.item.system.XMLID === "TRANSFER")
         ) {
-            let newInputStr;
-
-            if (this.item.system.XMLID === "TRANSFER") {
-                newInputStr = `${Object.values(expandedData.reduces).join(", ")} -> ${Object.values(
-                    expandedData.enhances,
-                ).join(", ")}`;
-            } else {
-                newInputStr = Object.values(expandedData.reduces || expandedData.enhances).join(", ");
-            }
-
-            await this.item.update({ "system.INPUT": newInputStr });
+            // let newInputStr;
+            // if (this.item.system.XMLID === "TRANSFER") {
+            //     newInputStr = `${Object.values(expandedData.reduces).join(", ")} -> ${Object.values(
+            //         expandedData.enhances,
+            //     ).join(", ")}`;
+            // } else {
+            //     newInputStr = Object.values(expandedData.reduces || expandedData.enhances).join(", ");
+            //     //newImputStr = Object.values(formData["system.INPUT"]).join(", ");
+            // }
+            // await this.item.update({ "system.INPUT": newInputStr });
         }
 
         // Turn attack toggles into adders

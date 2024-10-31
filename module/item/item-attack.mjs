@@ -2685,7 +2685,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                 adjustmentItem.system.XMLID === "TRANSFER"
                     ? -activePointsDamageAfterDefense
                     : simplifiedHealing && enhance === "BODY"
-                      ? -damageDetail.body
+                      ? -damageDetail.bodyDamage
                       : -rawActivePointsDamageBeforeDefense,
                 "None - Beneficial",
                 "",
@@ -2802,9 +2802,16 @@ async function _calcDamage(heroRoller, item, options) {
     let bodyForPenetrating = 0;
 
     if (adjustmentPower) {
-        body = 0;
-        stun = heroRoller.getAdjustmentTotal();
-        bodyForPenetrating = (await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).getBodyTotal();
+        // Kluge for SIMPLIFIED HEALING
+        if (item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
+            const shr = await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
+            body = shr.getBodyTotal();
+            stun = shr.getStunTotal();
+        } else {
+            body = 0;
+            stun = heroRoller.getAdjustmentTotal();
+            bodyForPenetrating = (await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).getBodyTotal();
+        }
     } else if (senseAffectingPower) {
         body = heroRoller.getFlashTotal();
         stun = 0;
