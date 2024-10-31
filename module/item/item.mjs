@@ -1425,13 +1425,19 @@ export class HeroSystem6eItem extends Item {
                 item.system.endEstimate = "";
             }
 
-            const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1 ? `x${item.system.charges?.clips}` : ""}`;
+            const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${
+                item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1
+                    ? `x${item.system.charges?.clips}`
+                    : ""
+            }`;
             const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
             const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
             const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
             const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
 
-            item.system.endEstimate = `${item.system.endEstimate ? `${item.system.endEstimate} ` : ""}[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
+            item.system.endEstimate = `${
+                item.system.endEstimate ? `${item.system.endEstimate} ` : ""
+            }[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
         }
 
         // 0 END
@@ -4627,7 +4633,12 @@ export class HeroSystem6eItem extends Item {
             (this.system.XMLID === "TRANSFER" && mustBeStrict)
                 ? adjustmentSourcesStrict
                 : adjustmentSourcesPermissive;
-        const validList = Object.keys(validator(this.actor));
+        let validList = Object.keys(validator(this.actor));
+
+        // Simple Healing
+        if (this.system.XMLID === "HEALING") {
+            validList.push("SIMPLIFIED");
+        }
 
         const adjustmentTargets = targetsList.split(",");
         for (const rawAdjustmentTarget of adjustmentTargets) {
@@ -4686,6 +4697,9 @@ export class HeroSystem6eItem extends Item {
                 reduces = this.system.INPUT;
             }
         }
+
+        // Simplified HEALING
+        enhances = enhances.replace(/SIMPLIFIED/i, "BODY, STUN");
 
         return {
             valid: valid,

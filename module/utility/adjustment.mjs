@@ -330,19 +330,6 @@ export async function performAdjustment(
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
 
-    // Search the target for this power.
-    // TODO: will return first matching power. How can we distinguish without making users
-    //       setup the item for a specific? Will likely need to provide a dialog. That gets
-    //       us into the thorny question of what powers have been discovered.
-    const targetPower = targetActor.items.find(
-        (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
-    );
-    if (targetPower) {
-        // Sometimes we pass an item.id, make sure we output item.name
-        nameOfCharOrPower = item.name;
-        targetUpperCaseName = nameOfCharOrPower.toUpperCase();
-    }
-
     // Find a matching characteristic. Because movement powers are unfortunately setup as
     // characteristics and always exist as properties, we need to check that they actually
     // have been bought or naturally exist (core > 0).
@@ -351,9 +338,25 @@ export async function performAdjustment(
             ? targetActor.system.characteristics?.[potentialCharacteristic]
             : undefined;
 
+    // Search the target for this power.
+    // TODO: will return first matching power. How can we distinguish without making users
+    //       setup the item for a specific? Will likely need to provide a dialog. That gets
+    //       us into the thorny question of what powers have been discovered.
+    let targetPower;
+    if (!targetCharacteristic) {
+        targetPower = targetActor.items.find(
+            (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
+        );
+        if (targetPower) {
+            // Sometimes we pass an item.id, make sure we output item.name
+            nameOfCharOrPower = item.name;
+            targetUpperCaseName = nameOfCharOrPower.toUpperCase();
+        }
+    }
+
     // Do we have a target?
     if (!targetCharacteristic && !targetPower) {
-        console.error(`${nameOfCharOrPower} is an invalid target for the adjustment power ${item.name}`);
+        await ui.notifications.error(`${nameOfCharOrPower} is an invalid target for the adjustment power ${item.name}`);
         return;
     }
 
@@ -365,7 +368,7 @@ export async function performAdjustment(
 
     const targetStartingValue = targetCharacteristic != null ? targetCharacteristic.value : targetPower.system.value;
     const targetStartingMax = targetCharacteristic != null ? targetCharacteristic.max : targetPower.system.max;
-    const targetStartingCore = targetCharacteristic != null ? targetCharacteristic.core : targetPower.system.core;
+    //const targetStartingCore = targetCharacteristic != null ? targetCharacteristic.core : targetPower.system.core;
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
     // and calculate the total effect
@@ -423,10 +426,18 @@ export async function performAdjustment(
     // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.
     if (totalActivePointsStartingEffect < 0) {
         // Healing may not exceed the core (starting value)
+        // let thisAttackActivePointsToUse = isOnlyToStartingValues
+        //     ? Math.max(
+        //           thisAttackEffectiveAdjustmentActivePoints,
+        //           Math.min(targetStartingValue - targetStartingCore, 0) * costPerActivePoint,
+        //       )
+        //     : totalActivePointsStartingEffect;
+
+        // Real Steel purchased BODY as a power, so you can indeed exceed core values.
         let thisAttackActivePointsToUse = isOnlyToStartingValues
             ? Math.max(
                   thisAttackEffectiveAdjustmentActivePoints,
-                  Math.min(targetStartingValue - targetStartingCore, 0) * costPerActivePoint,
+                  Math.min(targetStartingValue - targetStartingMax, 0) * costPerActivePoint,
               )
             : totalActivePointsStartingEffect;
 

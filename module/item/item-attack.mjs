@@ -2582,9 +2582,6 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
         );
     }
 
-    const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
-    const activePointsDamageAfterDefense = damageDetail.stun;
-
     // Where is the adjustment taking from/giving to?
     const { valid, reducesArray, enhancesArray } = adjustmentItem.splitAdjustmentSourceAndTarget();
     if (!valid) {
@@ -2652,6 +2649,11 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     const adjustmentItemTags = getAttackTags(adjustmentItem);
 
+    const simplifiedHealing =
+        adjustmentItem.system.XMLID === "HEALING" && adjustmentItem.system.INPUT.match(/simplified/i);
+    const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
+    const activePointsDamageAfterDefense = damageDetail.stun;
+
     // DRAIN
     const reductionChatMessages = [];
     const reductionTargetActor = token.actor;
@@ -2682,7 +2684,9 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                 enhance,
                 adjustmentItem.system.XMLID === "TRANSFER"
                     ? -activePointsDamageAfterDefense
-                    : -rawActivePointsDamageBeforeDefense,
+                    : simplifiedHealing && enhance === "BODY"
+                      ? -damageDetail.body
+                      : -rawActivePointsDamageBeforeDefense,
                 "None - Beneficial",
                 "",
                 false,
