@@ -84,7 +84,7 @@ export class ItemAttackFormApplication extends FormApplication {
         return options;
     }
 
-    getData() {
+    async getData() {
         const data = this.data;
         const item = data.item;
 
@@ -114,6 +114,13 @@ export class ItemAttackFormApplication extends FormApplication {
             // Penalty Skill Levels
             // Currently only supports range PSL
             data.psls = PenaltySkillLevelsForAttack(item).filter((o) => o.system.penalty === "range");
+
+            // Check all PSLs
+            // for (const psl of data.psls) {
+            //     if (psl.system.checked !== false) {
+            //         await psl.update({ "system.checked": true });
+            //     }
+            // }
 
             // Is there an ENTANGLE on any of the targets
             // If so assume we are targeting the entangle

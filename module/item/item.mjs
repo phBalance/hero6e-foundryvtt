@@ -1209,6 +1209,11 @@ export class HeroSystem6eItem extends Item {
             item.system.showToggle = true;
         }
 
+        // Penalty Skill Levels are checked by default
+        if (item.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.checked === undefined) {
+            this.system.checked = true;
+        }
+
         // Endurance
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
