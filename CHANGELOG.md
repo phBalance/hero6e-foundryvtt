@@ -5,6 +5,7 @@
 - Penalty Skill Levels now default to checked after upload. [#1359](https://github.com/dmdorman/hero6e-foundryvtt/issues/1359)
 - Mental attacks vs Entangles without Mental Defense now default to targeting actor, not entangle by default. [#1295](https://github.com/dmdorman/hero6e-foundryvtt/issues/1295)
 - Attacking the actor instead of entangle mistakenly showed GM "Apply Damage to Entangle" even when checkbox was unchecked. [#1295](https://github.com/dmdorman/hero6e-foundryvtt/issues/1295)
+- When items are moved into or out of a framework, costs are now recalculated. [#1384](https://github.com/dmdorman/hero6e-foundryvtt/issues/1384)
 
 ## Version 4.0.3
 
