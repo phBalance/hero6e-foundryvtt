@@ -1321,17 +1321,20 @@ export async function _onRollDamage(event) {
         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
     const explosion = item.hasExplosionAdvantage();
 
+    // Coerce type to boolean
+    toHitData.targetEntangle =
+        toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
+
     // Apply Damage button for specific targets
     let targetTokens = [];
     for (const id of toHitData.targetids.split(",")) {
         let token = canvas.scene.tokens.get(id);
         if (token) {
-            const targetEntangle = Boolean(toHitData.targetEntangle);
             const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
-                subTarget: targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
+                subTarget: toHitData.targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
             };
 
             // TODO: Add in explosion handling (or flattening)

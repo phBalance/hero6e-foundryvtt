@@ -132,7 +132,16 @@ export class ItemAttackFormApplication extends FormApplication {
                 }
             }
             data.entangleExists = entangles.length > 0 ? true : false;
-            data.targetEntangle ??= data.entangleExists;
+
+            // Entangle
+            if (data.targetEntangle === undefined) {
+                data.targetEntangle ??= data.entangleExists;
+
+                // Mental attacks typically bypass entangles
+                if (item.attackDefenseVs === "MD" && entangles[0].flags.entangleDefense.rMD === 0) {
+                    data.targetEntangle = false;
+                }
+            }
 
             // But an ENTANGLE attack doesn't target an ENTANGLE
             if (data.item.system.XMLID === "ENTANGLE") {

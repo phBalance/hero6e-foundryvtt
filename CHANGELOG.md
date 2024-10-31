@@ -3,6 +3,8 @@
 ## Version 4.0.4 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Penalty Skill Levels now default to checked after upload. [#1359](https://github.com/dmdorman/hero6e-foundryvtt/issues/1359)
+- Mental attacks vs Entangles without Mental Defense now default to targeting actor, not entangle by default. [#1295](https://github.com/dmdorman/hero6e-foundryvtt/issues/1295)
+- Attacking the actor instead of entangle mistakenly showed GM "Apply Damage to Entangle" even when checkbox was unchecked. [#1295](https://github.com/dmdorman/hero6e-foundryvtt/issues/1295)
 
 ## Version 4.0.3
 
