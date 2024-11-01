@@ -617,7 +617,10 @@ export async function AttackToHit(item, options) {
         if (aoeModifier) {
             // Distance from center
             if (aoeTemplate) {
-                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center);
+                const distanceInMetres = calculateDistanceBetween(
+                    aoeTemplate,
+                    target.center || { x: target.x, y: target.y },
+                );
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from center)`;
