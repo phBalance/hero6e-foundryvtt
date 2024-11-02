@@ -194,7 +194,7 @@ export function determineMaxAdjustment(item) {
     }
 }
 
-export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) {
+export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor, isHealing) {
     // TODO: Not sure we need to use the characteristic here...
     const powerInfo =
         targetPower?.baseInfo ||
@@ -207,7 +207,9 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
         (targetPower
             ? parseFloat(targetPower.system.activePoints / targetPower.system.LEVELS)
             : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel)) *
-        defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e)
+        (isHealing
+            ? 1
+            : defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e))
     );
 }
 
@@ -369,7 +371,7 @@ export async function performAdjustment(
 
     const targetStartingValue = targetCharacteristic != null ? targetCharacteristic.value : targetPower.system.value;
     const targetStartingMax = targetCharacteristic != null ? targetCharacteristic.max : targetPower.system.max;
-    //const targetStartingCore = targetCharacteristic != null ? targetCharacteristic.core : targetPower.system.core;
+    const targetStartingCore = targetCharacteristic != null ? targetCharacteristic.core : targetPower.system.core;
 
     // Check for previous adjustment (i.e ActiveEffect) from same power against this target
     // and calculate the total effect
@@ -414,33 +416,40 @@ export async function performAdjustment(
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
         ? thisAttackRawActivePointsDamage - activeEffect.flags.adjustmentActivePoints
         : thisAttackRawActivePointsDamage;
-    const thisAttackActivePointEffectLostDueToNotExceeding = isHealing ? activeEffect.flags.adjustmentActivePoints : 0;
-    let thisAttackActivePointAdjustmentLostDueToMax;
+    const thisAttackActivePointEffectNotAppliedDueToNotExceeding = isHealing
+        ? activeEffect.flags.adjustmentActivePoints
+        : 0;
+    let thisAttackActivePointAdjustmentNotAppliedDueToMax;
     const totalActivePointsStartingEffect =
         activeEffect.flags.adjustmentActivePoints + thisAttackEffectiveAdjustmentActivePoints;
 
     // TODO: This should be based on the targeted actor ... why is it not?
     // TODO: The code below might not work correctly with non integer costs per active point
-    const costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, targetPower, targetActor);
+    const costPerActivePoint = determineCostPerActivePoint(
+        potentialCharacteristic,
+        targetPower,
+        targetActor,
+        isHealing,
+    );
 
     // Clamp max adjustment to the max allowed by the power.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.
     if (totalActivePointsStartingEffect < 0) {
         // Healing may not exceed the core (starting value)
-        // let thisAttackActivePointsToUse = isOnlyToStartingValues
-        //     ? Math.max(
-        //           thisAttackEffectiveAdjustmentActivePoints,
-        //           Math.min(targetStartingValue - targetStartingCore, 0) * costPerActivePoint,
-        //       )
-        //     : totalActivePointsStartingEffect;
-
-        // Real Steel purchased BODY as a power, so you can indeed exceed core values.
         let thisAttackActivePointsToUse = isOnlyToStartingValues
             ? Math.max(
                   thisAttackEffectiveAdjustmentActivePoints,
-                  Math.min(targetStartingValue - targetStartingMax, 0) * costPerActivePoint,
+                  Math.min(targetStartingValue - targetStartingCore, 0) * costPerActivePoint,
               )
             : totalActivePointsStartingEffect;
+
+        // Real Steel purchased BODY as a power, so you can indeed exceed core values.
+        // let thisAttackActivePointsToUse = isOnlyToStartingValues
+        //     ? Math.max(
+        //           thisAttackEffectiveAdjustmentActivePoints,
+        //           Math.min(targetStartingValue - targetStartingMax, 0) * costPerActivePoint,
+        //       )
+        //     : totalActivePointsStartingEffect;
 
         // Healing should not accumulate part points.
         if (isHealing) {
@@ -449,8 +458,8 @@ export async function performAdjustment(
 
         const max = Math.max(thisAttackActivePointsToUse, -determineMaxAdjustment(item));
 
-        thisAttackActivePointAdjustmentLostDueToMax = isOnlyToStartingValues
-            ? thisAttackRawActivePointsDamage - max - thisAttackActivePointEffectLostDueToNotExceeding
+        thisAttackActivePointAdjustmentNotAppliedDueToMax = isOnlyToStartingValues
+            ? thisAttackRawActivePointsDamage - max - thisAttackActivePointEffectNotAppliedDueToNotExceeding
             : totalActivePointsStartingEffect - max;
         thisAttackEffectiveAdjustmentActivePoints = max;
     } else {
@@ -458,8 +467,8 @@ export async function performAdjustment(
             thisAttackEffectiveAdjustmentActivePoints + activeEffect.flags.adjustmentActivePoints;
         const min = Math.min(totalAdjustmentBeforeMin, determineMaxAdjustment(item));
 
-        thisAttackActivePointAdjustmentLostDueToMax =
-            totalAdjustmentBeforeMin - min - thisAttackActivePointEffectLostDueToNotExceeding;
+        thisAttackActivePointAdjustmentNotAppliedDueToMax =
+            totalAdjustmentBeforeMin - min - thisAttackActivePointEffectNotAppliedDueToNotExceeding;
         thisAttackEffectiveAdjustmentActivePoints = min;
     }
 
@@ -482,8 +491,8 @@ export async function performAdjustment(
             thisAttackRawActivePointsDamage,
             totalActivePointAffectedDifference,
             totalAdjustmentNewActivePoints,
-            thisAttackActivePointAdjustmentLostDueToMax,
-            thisAttackActivePointEffectLostDueToNotExceeding,
+            thisAttackActivePointAdjustmentNotAppliedDueToMax,
+            thisAttackActivePointEffectNotAppliedDueToNotExceeding,
             defenseDescription,
             effectsDescription,
             potentialCharacteristic,
@@ -576,8 +585,8 @@ export async function performAdjustment(
         thisAttackRawActivePointsDamage,
         totalActivePointAffectedDifference,
         totalAdjustmentNewActivePoints,
-        thisAttackActivePointAdjustmentLostDueToMax,
-        thisAttackActivePointEffectLostDueToNotExceeding,
+        thisAttackActivePointAdjustmentNotAppliedDueToMax,
+        thisAttackActivePointEffectNotAppliedDueToNotExceeding,
         defenseDescription,
         effectsDescription,
         targetUpperCaseName, //potentialCharacteristic,
@@ -592,8 +601,8 @@ function _generateAdjustmentChatCard(
     activePointDamage,
     activePointAffectedDifference,
     totalActivePointEffect,
-    activePointEffectLostDueToMax,
-    activePointEffectLostDueToNotExceeding,
+    activePointEffectNotAppliedDueToMax,
+    activePointEffectNotAppliedDueToNotExceeding,
     defenseDescription,
     effectsDescription,
     targetCharOrPower,
@@ -612,8 +621,8 @@ function _generateAdjustmentChatCard(
             adjustmentDamageThisApplication: activePointAffectedDifference,
             adjustmentTarget: targetCharOrPower.toUpperCase(),
             adjustmentTotalActivePointEffect: totalActivePointEffect,
-            activePointEffectLostDueToMax,
-            activePointEffectLostDueToNotExceeding,
+            activePointEffectNotAppliedDueToMax,
+            activePointEffectNotAppliedDueToNotExceeding,
             isFade,
             targetActor: targetActor,
             targetToken: targetActor?.getActiveTokens()?.[0],
