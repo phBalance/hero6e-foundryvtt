@@ -285,7 +285,7 @@ export default class SettingsHelpers {
             requiresReload: true,
         });
 
-        // Keybinding for Overide
+        // Keybinding for Override
         game.keybindings.register(module, "OverrideCanAct", {
             name: game.i18n.localize("keybindings.OverrideCanAct.Name"),
             hint: game.i18n.localize("keybindings.OverrideCanAct.Hint"),
@@ -302,12 +302,19 @@ export default class SettingsHelpers {
 }
 
 function handleOverrideCanAct(event) {
+    // When a dialog box (like spend STUN for END) shows it call the event.up for some unknown reason.
+    // These extra/unwanted events are not trusted.
+    if (!event.event.isTrusted) {
+        //console.log("untrusted", event);
+        return;
+    }
+
     if (event.up) {
         overrideCanAct = false;
     } else {
         overrideCanAct = event.key;
     }
-    console.log(overrideCanAct, event);
+    //console.log(overrideCanAct, event);
 }
 
 class AutomationMenu extends FormApplication {
