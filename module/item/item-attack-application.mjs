@@ -135,10 +135,10 @@ export class ItemAttackFormApplication extends FormApplication {
 
             // Entangle
             if (data.targetEntangle === undefined) {
-                data.targetEntangle ??= data.entangleExists;
+                data.targetEntangle = data.entangleExists;
 
                 // Mental attacks typically bypass entangles
-                if (item.attackDefenseVs === "MD" && entangles[0].flags.entangleDefense.rMD === 0) {
+                if (item.attackDefenseVs === "MD" && entangles?.[0].flags.entangleDefense.rMD === 0) {
                     data.targetEntangle = false;
                 }
             }
