@@ -933,7 +933,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         speaker.alias = actor.name;
 
         const chatData = {
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             rolls: heroRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,
@@ -970,7 +970,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
         const speaker = ChatMessage.getSpeaker({ actor: this.actor });
         const chatData = {
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             rolls: characteristicRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,
@@ -1043,7 +1043,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const cardHtml = await renderTemplate(template, cardData);
         const speaker = ChatMessage.getSpeaker({ actor: this.actor });
         const chatData = {
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             rolls: characteristicRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,
