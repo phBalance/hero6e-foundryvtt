@@ -2655,8 +2655,6 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     const adjustmentItemTags = getAttackTags(adjustmentItem);
 
-    const simplifiedHealing =
-        adjustmentItem.system.XMLID === "HEALING" && adjustmentItem.system.INPUT.match(/simplified/i);
     const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
     const activePointsDamageAfterDefense = damageDetail.stun;
 
@@ -2684,21 +2682,50 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
     const enhancementChatMessages = [];
     const enhancementTargetActor = adjustmentItem.system.XMLID === "TRANSFER" ? adjustmentItem.actor : token.actor;
     for (const enhance of enhancesArray) {
-        enhancementChatMessages.push(
-            await performAdjustment(
-                adjustmentItem,
-                enhance,
-                adjustmentItem.system.XMLID === "TRANSFER"
-                    ? -activePointsDamageAfterDefense
-                    : simplifiedHealing && enhance === "BODY"
-                      ? -damageDetail.bodyDamage
-                      : -rawActivePointsDamageBeforeDefense,
-                "None - Beneficial",
-                "",
-                false,
-                enhancementTargetActor,
-            ),
-        );
+        const simplifiedHealing = adjustmentItem.system.XMLID === "HEALING" && enhance.match(/simplified/i);
+
+        if (simplifiedHealing) {
+            // STUN
+            enhancementChatMessages.push(
+                await performAdjustment(
+                    adjustmentItem,
+                    "STUN", //enhance,
+                    -rawActivePointsDamageBeforeDefense,
+                    "None - Beneficial",
+                    "",
+                    false,
+                    enhancementTargetActor,
+                ),
+            );
+            // BODY
+            enhancementChatMessages.push(
+                await performAdjustment(
+                    adjustmentItem,
+                    "BODY", //enhance,
+                    -damageDetail.bodyDamage,
+                    "None - Beneficial",
+                    "",
+                    false,
+                    enhancementTargetActor,
+                ),
+            );
+        } else {
+            enhancementChatMessages.push(
+                await performAdjustment(
+                    adjustmentItem,
+                    enhance,
+                    adjustmentItem.system.XMLID === "TRANSFER"
+                        ? -activePointsDamageAfterDefense
+                        : simplifiedHealing && enhance === "BODY"
+                          ? -damageDetail.bodyDamage
+                          : -rawActivePointsDamageBeforeDefense,
+                    "None - Beneficial",
+                    "",
+                    false,
+                    enhancementTargetActor,
+                ),
+            );
+        }
     }
     if (enhancementChatMessages.length > 0) {
         await renderAdjustmentChatCards(

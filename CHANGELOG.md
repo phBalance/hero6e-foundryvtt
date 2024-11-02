@@ -8,7 +8,8 @@
 - When items are moved into or out of a framework, costs are now recalculated. [#1384](https://github.com/dmdorman/hero6e-foundryvtt/issues/1384)
 - Strike now appears in the Attacks tab.
 - Fix for AOE Line "Confirm AOE placement" error.
-- Various HEALING effects. [#1407](https://github.com/dmdorman/hero6e-foundryvtt/issues/1407)
+- Various HEALING effect fixes. [#1407](https://github.com/dmdorman/hero6e-foundryvtt/issues/1407)
+- Implemented SIMPLIFIED healing. [#1256](https://github.com/dmdorman/hero6e-foundryvtt/issues/1407)
 
 ## Version 4.0.3
 

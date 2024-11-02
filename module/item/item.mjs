@@ -4703,16 +4703,13 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Simplified HEALING
-        const enhances2 = enhances.replace(/SIMPLIFIED/i, "BODY, STUN");
-
         return {
             valid: valid,
 
             reduces: reduces,
             enhances: enhances,
             reducesArray: reduces ? reduces.split(",").map((str) => str.trim()) : [],
-            enhancesArray: enhances2 ? enhances2.split(",").map((str) => str.trim()) : [],
+            enhancesArray: enhances ? enhances.split(",").map((str) => str.trim()) : [],
         };
     }
 
