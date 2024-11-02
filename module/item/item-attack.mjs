@@ -3257,11 +3257,11 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             actor: actor,
         });
         speaker.alias = item.actor.name;
-
+        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
         const chatData = {
             user: game.user._id,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-            content: `${game.user.name} is using SHIFT to override using ${resourcesUsedDescription} for <b>${item.name}</b>${resourcesUsedDescriptionRenderedRoll}`,
+            content: `${game.user.name} is using ${overrideKeyText} to override using ${resourcesUsedDescription} for <b>${item.name}</b>${resourcesUsedDescriptionRenderedRoll}`,
             whisper: whisperUserTargetsForActor(this),
             speaker,
         };
@@ -3275,7 +3275,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         resourcesUsedDescription: useResources
             ? `${resourcesUsedDescription}`
             : resourcesUsedDescription
-              ? `${resourcesUsedDescription} overridden with SHIFT`
+              ? `${resourcesUsedDescription} overridden with override key`
               : resourcesUsedDescription,
         resourcesUsedDescriptionRenderedRoll,
     };

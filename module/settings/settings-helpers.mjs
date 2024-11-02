@@ -1,6 +1,8 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { CreateHeroCompendiums } from "../heroCompendiums.mjs";
 
+export let overrideCanAct = false;
+
 export default class SettingsHelpers {
     // Initialize System Settings after the Init Hook
     static initLevelSettings() {
@@ -282,7 +284,30 @@ export default class SettingsHelpers {
             default: "1.0.0",
             requiresReload: true,
         });
+
+        // Keybinding for Overide
+        game.keybindings.register(module, "OverrideCanAct", {
+            name: game.i18n.localize("keybindings.OverrideCanAct.Name"),
+            hint: game.i18n.localize("keybindings.OverrideCanAct.Hint"),
+            onDown: handleOverrideCanAct,
+            onUp: handleOverrideCanAct,
+            editable: [
+                {
+                    key: "ControlLeft",
+                },
+            ],
+            precedence: -1,
+        });
     }
+}
+
+function handleOverrideCanAct(event) {
+    if (event.up) {
+        overrideCanAct = false;
+    } else {
+        overrideCanAct = event.key;
+    }
+    console.log(overrideCanAct, event);
 }
 
 class AutomationMenu extends FormApplication {

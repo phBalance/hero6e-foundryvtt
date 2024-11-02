@@ -1,4 +1,5 @@
 import { HEROSYS } from "./herosystem6e.mjs";
+import { overrideCanAct } from "./settings/settings-helpers.mjs";
 
 export class HeroSystem6eCombatTracker extends CombatTracker {
     static get defaultOptions() {
@@ -35,9 +36,12 @@ export class HeroSystem6eCombatTracker extends CombatTracker {
     }
 
     async _onCombatControl(event) {
+        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
         const target = event.target;
-        if (["fas fa-step-backward", "fas fa-step-forward"].includes(target.className) && !event.shiftKey) {
-            return await ui.notifications.warn(`Changing turns is unusual. Hold SHIFT to change turn.`);
+        if (["fas fa-step-backward", "fas fa-step-forward"].includes(target.className) && !overrideCanAct) {
+            return await ui.notifications.warn(
+                `Changing turns is unusual. Hold <b>${overrideKeyText}<b> to change turn.`,
+            );
         }
 
         await super._onCombatControl(event);

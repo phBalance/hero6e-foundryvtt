@@ -4,6 +4,7 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -391,7 +392,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     // Only used by _canDragLeftStart to prevent ENTANGLED tokens from moving
-    canMove(uiNotice, event) {
+    canMove(uiNotice) {
         let result = true;
         let badStatus = [];
 
@@ -400,7 +401,22 @@ export class HeroSystem6eActor extends Actor {
             result = false;
         }
 
-        if (!result && event?.shiftKey) {
+        if (this.statuses.has("knockedOut")) {
+            if (uiNotice) badStatus.push("KNOCKED OUT");
+            result = false;
+        }
+
+        if (this.statuses.has("stunned")) {
+            badStatus.push("STUNNED");
+            result = false;
+        }
+
+        if (this.statuses.has("aborted")) {
+            badStatus.push("ABORTED");
+            result = false;
+        }
+
+        if (!result && overrideCanAct) {
             const speaker = ChatMessage.getSpeaker({
                 actor: this,
                 //token,
@@ -409,7 +425,7 @@ export class HeroSystem6eActor extends Actor {
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                content: `${this.name} is ${badStatus.join(", ")} and cannot move. SHIFT key was used to override.`,
+                content: `${this.name} is ${badStatus.join(", ")} and cannot move. Override key was used.`,
                 whisper: whisperUserTargetsForActor(this),
                 speaker,
             };
@@ -419,7 +435,15 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (!result) {
-            ui.notifications.error(`${this.name} is ${badStatus.join(", ")} and cannot act.  Hold SHIFT to override.`);
+            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+            ui.notifications.error(
+                `${this.name} is ${badStatus.join(", ")} and cannot move.  Hold <b>${overrideKeyText}</b> to override. 
+                ${overrideKeyText === "ControlLeft" ? `Use SPACEBAR to follow measured movement path.` : ""}`,
+            );
+        }
+
+        if (result && this.statuses.has("prone")) {
+            ui.notifications.warn(`${this.name} is prone`);
         }
 
         return result;
@@ -453,7 +477,7 @@ export class HeroSystem6eActor extends Actor {
             result = false;
         }
 
-        if (!result && event?.shiftKey) {
+        if (!result && overrideCanAct) {
             const speaker = ChatMessage.getSpeaker({
                 actor: this,
                 //token,
@@ -462,7 +486,7 @@ export class HeroSystem6eActor extends Actor {
             const chatData = {
                 user: game.user._id,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                content: `${this.name} is ${badStatus.join(", ")} and cannot act. SHIFT key was used to override.`,
+                content: `${this.name} is ${badStatus.join(", ")} and cannot act. Override key was used.`,
                 whisper: whisperUserTargetsForActor(this),
                 speaker,
             };
@@ -476,7 +500,10 @@ export class HeroSystem6eActor extends Actor {
         }
 
         if (!result) {
-            ui.notifications.error(`${this.name} is ${badStatus.join(", ")} and cannot act.  Hold SHIFT to override.`);
+            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+            ui.notifications.error(
+                `${this.name} is ${badStatus.join(", ")} and cannot act.  Hold <b>${overrideKeyText}</b> to override.`,
+            );
         }
 
         return result;

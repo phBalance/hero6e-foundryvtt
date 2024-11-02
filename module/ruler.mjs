@@ -386,6 +386,15 @@ export class HeroRuler extends Ruler {
         }
         return baseLabel;
     }
+
+    async moveToken() {
+        if (this.token.actor) {
+            if (!this.token.actor.canMove(true)) {
+                return;
+            }
+        }
+        await super.moveToken();
+    }
 }
 
 /**
