@@ -412,12 +412,12 @@ export async function performAdjustment(
         return chatCard;
     }
 
-    // Healing is not cumulative. All else is.
+    // Healing is not cumulative but all else is. Healing cannot harm when lower than an existing effect.
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
-        ? thisAttackRawActivePointsDamage - activeEffect.flags.adjustmentActivePoints
+        ? Math.min(thisAttackRawActivePointsDamage - activeEffect.flags.adjustmentActivePoints, 0)
         : thisAttackRawActivePointsDamage;
     const thisAttackActivePointEffectNotAppliedDueToNotExceeding = isHealing
-        ? activeEffect.flags.adjustmentActivePoints
+        ? Math.max(activeEffect.flags.adjustmentActivePoints, thisAttackRawActivePointsDamage)
         : 0;
     let thisAttackActivePointAdjustmentNotAppliedDueToMax;
     const totalActivePointsStartingEffect =
