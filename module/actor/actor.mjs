@@ -388,6 +388,29 @@ export class HeroSystem6eActor extends Actor {
             await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
         }
 
+        if (asAction && this.inCombat) {
+            // While Recovering, a character is at ½ DCV
+            const existingEffect = Array.from(this.allApplicableEffects()).find((o) => o.id === "TakeRecovery");
+            if (!existingEffect) {
+                const activeEffect = {
+                    name: "TakeRecovery",
+                    icon: `icons/svg/downgrade.svg`,
+                    changes: [
+                        {
+                            key: "system.characteristics.dcv.value",
+                            value: 0.5,
+                            mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        },
+                    ],
+                    origin: this.uuid,
+                    duration: {
+                        seconds: 1,
+                    },
+                };
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+            }
+        }
+
         return content;
     }
 

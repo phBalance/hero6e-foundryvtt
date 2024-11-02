@@ -4849,6 +4849,10 @@ export class HeroSystem6eItem extends Item {
             return "PD";
         }
 
+        if (this.system.XMLID === "TELEKINESIS") {
+            return "PD";
+        }
+
         // MARTIAL FLASH
         if (this.system.WEAPONEFFECT?.includes("FLASHDC")) {
             return "FLASHDEFENSE";

@@ -349,7 +349,8 @@ export async function AttackAoeToHit(item, options) {
     speaker.alias = actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        //type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.ROLL,
         rolls: attackHeroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -621,7 +622,7 @@ export async function AttackToHit(item, options) {
     const aoeModifier = item.getAoeModifier();
     const aoeTemplate =
         game.scenes.current.templates.find((template) => template.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((template) => template.user.id === game.user.id);
+        game.scenes.current.templates.find((template) => template.author.id === game.user.id);
     const explosion = item.hasExplosionAdvantage();
     const SELECTIVETARGET = aoeModifier?.ADDER ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET") : null;
     const NONSELECTIVETARGET = aoeModifier?.ADDER
@@ -901,7 +902,8 @@ export async function AttackToHit(item, options) {
     speaker.alias = actor.name;
 
     const chatData = {
-        type: aoeAlwaysHit ? CONST.CHAT_MESSAGE_TYPES.OTHER : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOEs are auto hit
+        //type: aoeAlwaysHit ? CONST.CHAT_MESSAGE_TYPES.OTHER : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOEs are auto hit
+        style: aoeAlwaysHit ? CONST.CHAT_MESSAGE_STYLES.OTHER : CONST.CHAT_MESSAGE_STYLES.ROLL, // most AOEs are auto hit
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()

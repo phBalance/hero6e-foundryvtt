@@ -196,7 +196,9 @@ export async function expireEffects(actor) {
             game.settings.get(game.system.id, "alphaTesting") &&
             ae.duration?.seconds < 3.154e7 * 100
         ) {
-            return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
+            //return ui.notifications.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
+            // TakeRecovery has no XMLID, not sure why we HAVE to have one, just expire the effect.
+            console.warn(`Unable to determine XMLID for ${ae.name} active effect.`);
         }
 
         // With Simple Calendar you can move time ahead in large steps.
@@ -262,10 +264,10 @@ export async function expireEffects(actor) {
                 }
             } else {
                 // Default is to delete the expired AE
-                if (powerInfo) {
-                    await ae.delete();
-                    break;
-                }
+                //if (powerInfo) {  // Why do we care about powerInfo?
+                await ae.delete();
+                break;
+                //}
             }
         }
     }
