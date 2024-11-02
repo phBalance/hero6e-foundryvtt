@@ -1315,7 +1315,12 @@ export async function _onRollDamage(event) {
 
     await damageRoller.roll();
 
-    const damageRenderedResult = await damageRoller.render();
+    // Kluge for SIMPLIFIED HEALING
+    const isSimpleHealing = item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i);
+
+    const damageRenderedResult = isSimpleHealing
+        ? await (await damageRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).render()
+        : await damageRoller.render();
 
     const damageDetail = await _calcDamage(damageRoller, effectiveItem, toHitData);
 
@@ -2709,6 +2714,10 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     enhancementTargetActor,
                 ),
             );
+            adjustmentItemTags.push({
+                name: "SIMPLIFIED",
+                title: "Body of roll heals body.  Stun of roll heals stun.",
+            });
         } else {
             enhancementChatMessages.push(
                 await performAdjustment(
@@ -2725,6 +2734,7 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                     enhancementTargetActor,
                 ),
             );
+            adjustmentItemTags.push({ name: enhance });
         }
     }
     if (enhancementChatMessages.length > 0) {
