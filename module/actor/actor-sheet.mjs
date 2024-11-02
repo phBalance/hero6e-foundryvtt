@@ -692,6 +692,10 @@ export class HeroSystemActorSheet extends ActorSheet {
                 }
             }
 
+            // Recalculate costs
+            await item._postUpload();
+            await this.actor._postUpload();
+
             return super._onDropItem(event, data);
         }
 

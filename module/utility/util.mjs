@@ -287,6 +287,7 @@ export function hdcTimeOptionIdToSeconds(durationOptionId) {
             seconds = 2;
             break;
 
+        case "1TURN":
         case "TURN":
             seconds = 12;
             break;

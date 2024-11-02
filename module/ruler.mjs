@@ -209,6 +209,10 @@ export class HeroRuler extends Ruler {
 
                             const combatant = game.combat?.combatants.find((o) => o.actorId === actor.id);
                             if (combatant) {
+                                // We store END use in flags.dragRuler, not sure why
+                                // TODO: Remove dependency on DragRuler.
+                                if (!combatant.flags.dragRuler) continue;
+
                                 // If no waypoints then we haven't spent any END in this phase yet.
                                 if (!combatant.flags.dragRuler.passedWaypoints) {
                                     combatant.update({

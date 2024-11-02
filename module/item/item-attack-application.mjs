@@ -84,7 +84,7 @@ export class ItemAttackFormApplication extends FormApplication {
         return options;
     }
 
-    getData() {
+    async getData() {
         const data = this.data;
         const item = data.item;
 
@@ -115,6 +115,13 @@ export class ItemAttackFormApplication extends FormApplication {
             // Currently only supports range PSL
             data.psls = PenaltySkillLevelsForAttack(item).filter((o) => o.system.penalty === "range");
 
+            // Check all PSLs
+            // for (const psl of data.psls) {
+            //     if (psl.system.checked !== false) {
+            //         await psl.update({ "system.checked": true });
+            //     }
+            // }
+
             // Is there an ENTANGLE on any of the targets
             // If so assume we are targeting the entangle
             const entangles = [];
@@ -125,7 +132,16 @@ export class ItemAttackFormApplication extends FormApplication {
                 }
             }
             data.entangleExists = entangles.length > 0 ? true : false;
-            data.targetEntangle ??= data.entangleExists;
+
+            // Entangle
+            if (data.targetEntangle === undefined) {
+                data.targetEntangle = data.entangleExists;
+
+                // Mental attacks typically bypass entangles
+                if (item.attackDefenseVs === "MD" && entangles?.[0].flags.entangleDefense.rMD === 0) {
+                    data.targetEntangle = false;
+                }
+            }
 
             // But an ENTANGLE attack doesn't target an ENTANGLE
             if (data.item.system.XMLID === "ENTANGLE") {

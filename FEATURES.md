@@ -12,76 +12,76 @@ Our support ratings:
 
 ## Skills
 
-| SKILL NAME                      | Support | Comments                                                                          |
-| :------------------------------ | :-----: | :-------------------------------------------------------------------------------- |
-| ACROBATICS                      |    B    | Surprise not supported                                                            |
-| ACTING                          |    A    |                                                                                   |
-| ANALYZE                         |    A    |                                                                                   |
-| ANIMAL HANDLER                  |    A    |                                                                                   |
-| AUTOFIRE SKILLS                 |    D    |                                                                                   |
-| BREAKFALL                       |    B    | Potential automation for knockback/throw not supported                            |
-| BRIBERY                         |    A    |                                                                                   |
-| BUGGING                         |    B    | No support for placing bugs in the scene                                          |
-| BUREAUCRATICS                   |    A    |                                                                                   |
-| CHARM                           |    A    |                                                                                   |
-| CLIMBING                        |    B    | No automation of CV penalties                                                     |
-| COMBAT DRIVING                  |    B    | No support for vehicle combat                                                     |
-| COMBAT PILOTING                 |    B    | No support for vehicle combat                                                     |
-| COMBAT SKILL LEVELS             |    B    | Good overall support, minor issues with HDC as included attacks are not specified |
-| COMPUTER PROGRAMMING            |    A    |                                                                                   |
-| CONCEALMENT                     |    B    | No support for placing items in the scene                                         |
-| CONTORTIONIST                   |    A    |                                                                                   |
-| CONVERSATION                    |    A    |                                                                                   |
-| CRAMMING                        |    A    |                                                                                   |
-| CRIMINOLOGY                     |    A    |                                                                                   |
-| CRYPTOGRAPHY                    |    A    |                                                                                   |
-| DEDUCTION                       |    A    |                                                                                   |
-| DEFENSE MANEUVER                |    D    | From behind, multiple attackers not supported                                     |
-| DEMOLITIONS                     |    A    |                                                                                   |
-| DISGUISE                        |    A    |                                                                                   |
-| ELECTRONICS                     |    A    |                                                                                   |
-| FAST DRAW                       |    D    | No clip support, no held action support                                           |
-| FORENSIC MEDICINE               |    A    |                                                                                   |
-| FORGERY                         |    A    |                                                                                   |
-| GAMBLING                        |    A    |                                                                                   |
-| HIGH SOCIETY                    |    A    |                                                                                   |
-| INTERROGATION                   |    A    |                                                                                   |
-| INVENTOR                        |    A    |                                                                                   |
-| KNOWLEDGE SKILL                 |    A    |                                                                                   |
-| LANGUAGE                        |    A    |                                                                                   |
-| LIPREADING                      |    A    |                                                                                   |
-| LOCKPICKING                     |    A    |                                                                                   |
-| MARTIAL ARTS                    |    C    | Good strike, block, dodge support. No weapon element, limited NND, no escape      |
-| MECHANICS                       |    A    |                                                                                   |
-| MIMICRY                         |    A    |                                                                                   |
-| MOVEMENT SKILL LEVELS           |    D    |                                                                                   |
-| NAVIGATION                      |    A    |                                                                                   |
-| ORATORY                         |    A    |                                                                                   |
-| PARAMEDICS                      |    C    | Skill roll is automated, but removing bleeding effect is not automated            |
-| PENALTY SKILL LEVELS (Combat)   |    C    | Only the range penalty is currently supported                                     |
-| PERSUASION                      |    A    |                                                                                   |
-| POWER (Varies)                  |    D    |                                                                                   |
-| PROFESSIONAL SKILL (Background) |    A    |                                                                                   |
-| RAPID ATTACK                    |    D    |                                                                                   |
-| RIDING                          |    B    | No support for vehicle combat                                                     |
-| SCIENCE SKILL                   |    A    |                                                                                   |
-| SECURITY SYSTEMS                |    A    |                                                                                   |
-| SHADOWING                       |    A    |                                                                                   |
-| SKILL LEVELS                    |    D    |                                                                                   |
-| SLEIGHT OF HAND                 |    A    |                                                                                   |
-| STEALTH                         |    B    | No automation of stealthy tokens and who can see who                              |
-| STREETWISE                      |    A    |                                                                                   |
-| SURVIVAL                        |    A    |                                                                                   |
-| SYSTEMS OPERATION               |    A    |                                                                                   |
-| TACTICS                         |    A    |                                                                                   |
-| TEAMWORK                        |    D    | No automation of coordinating attacks                                             |
-| TRACKING                        |    A    |                                                                                   |
-| TRADING                         |    A    |                                                                                   |
-| TRANSPORT FAMILIARITY           |    A    |                                                                                   |
-| TWO-WEAPON FIGHTING             |    A    | No Multiple Attack automation                                                     |
-| VENTRILOQUISM                   |    A    |                                                                                   |
-| WEAPON FAMILIARITY              |    A    |                                                                                   |
-| WEAPONSMITH                     |    A    |                                                                                   |
+| SKILL NAME                      | Support | Comments                                                                                                                                                    |
+| :------------------------------ | :-----: | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ACROBATICS                      |    B    | Surprise not supported                                                                                                                                      |
+| ACTING                          |    A    |                                                                                                                                                             |
+| ANALYZE                         |    A    |                                                                                                                                                             |
+| ANIMAL HANDLER                  |    A    |                                                                                                                                                             |
+| AUTOFIRE SKILLS                 |    D    |                                                                                                                                                             |
+| BREAKFALL                       |    B    | Potential automation for knockback/throw not supported                                                                                                      |
+| BRIBERY                         |    A    |                                                                                                                                                             |
+| BUGGING                         |    B    | No support for placing bugs in the scene                                                                                                                    |
+| BUREAUCRATICS                   |    A    |                                                                                                                                                             |
+| CHARM                           |    A    |                                                                                                                                                             |
+| CLIMBING                        |    B    | No automation of CV penalties                                                                                                                               |
+| COMBAT DRIVING                  |    B    | No support for vehicle combat                                                                                                                               |
+| COMBAT PILOTING                 |    B    | No support for vehicle combat                                                                                                                               |
+| COMBAT SKILL LEVELS             |    B    | Good overall support, minor issues with HDC as included attacks are not specified. [Combat Skill Levels Video](https://www.youtube.com/watch?v=WuECGJAKEzA) |
+| COMPUTER PROGRAMMING            |    A    |                                                                                                                                                             |
+| CONCEALMENT                     |    B    | No support for placing items in the scene                                                                                                                   |
+| CONTORTIONIST                   |    A    |                                                                                                                                                             |
+| CONVERSATION                    |    A    |                                                                                                                                                             |
+| CRAMMING                        |    A    |                                                                                                                                                             |
+| CRIMINOLOGY                     |    A    |                                                                                                                                                             |
+| CRYPTOGRAPHY                    |    A    |                                                                                                                                                             |
+| DEDUCTION                       |    A    |                                                                                                                                                             |
+| DEFENSE MANEUVER                |    D    | From behind, multiple attackers not supported                                                                                                               |
+| DEMOLITIONS                     |    A    |                                                                                                                                                             |
+| DISGUISE                        |    A    |                                                                                                                                                             |
+| ELECTRONICS                     |    A    |                                                                                                                                                             |
+| FAST DRAW                       |    D    | No clip support, no held action support                                                                                                                     |
+| FORENSIC MEDICINE               |    A    |                                                                                                                                                             |
+| FORGERY                         |    A    |                                                                                                                                                             |
+| GAMBLING                        |    A    |                                                                                                                                                             |
+| HIGH SOCIETY                    |    A    |                                                                                                                                                             |
+| INTERROGATION                   |    A    |                                                                                                                                                             |
+| INVENTOR                        |    A    |                                                                                                                                                             |
+| KNOWLEDGE SKILL                 |    A    |                                                                                                                                                             |
+| LANGUAGE                        |    A    |                                                                                                                                                             |
+| LIPREADING                      |    A    |                                                                                                                                                             |
+| LOCKPICKING                     |    A    |                                                                                                                                                             |
+| MARTIAL ARTS                    |    C    | Good strike, block, dodge support. No weapon element, limited NND, no escape                                                                                |
+| MECHANICS                       |    A    |                                                                                                                                                             |
+| MIMICRY                         |    A    |                                                                                                                                                             |
+| MOVEMENT SKILL LEVELS           |    D    |                                                                                                                                                             |
+| NAVIGATION                      |    A    |                                                                                                                                                             |
+| ORATORY                         |    A    |                                                                                                                                                             |
+| PARAMEDICS                      |    C    | Skill roll is automated, but removing bleeding effect is not automated                                                                                      |
+| PENALTY SKILL LEVELS (Combat)   |    C    | Only the range penalty is currently supported                                                                                                               |
+| PERSUASION                      |    A    |                                                                                                                                                             |
+| POWER (Varies)                  |    D    |                                                                                                                                                             |
+| PROFESSIONAL SKILL (Background) |    A    |                                                                                                                                                             |
+| RAPID ATTACK                    |    D    |                                                                                                                                                             |
+| RIDING                          |    B    | No support for vehicle combat                                                                                                                               |
+| SCIENCE SKILL                   |    A    |                                                                                                                                                             |
+| SECURITY SYSTEMS                |    A    |                                                                                                                                                             |
+| SHADOWING                       |    A    |                                                                                                                                                             |
+| SKILL LEVELS                    |    D    |                                                                                                                                                             |
+| SLEIGHT OF HAND                 |    A    |                                                                                                                                                             |
+| STEALTH                         |    B    | No automation of stealthy tokens and who can see who                                                                                                        |
+| STREETWISE                      |    A    |                                                                                                                                                             |
+| SURVIVAL                        |    A    |                                                                                                                                                             |
+| SYSTEMS OPERATION               |    A    |                                                                                                                                                             |
+| TACTICS                         |    A    |                                                                                                                                                             |
+| TEAMWORK                        |    D    | No automation of coordinating attacks                                                                                                                       |
+| TRACKING                        |    A    |                                                                                                                                                             |
+| TRADING                         |    A    |                                                                                                                                                             |
+| TRANSPORT FAMILIARITY           |    A    |                                                                                                                                                             |
+| TWO-WEAPON FIGHTING             |    A    | No Multiple Attack automation                                                                                                                               |
+| VENTRILOQUISM                   |    A    |                                                                                                                                                             |
+| WEAPON FAMILIARITY              |    A    |                                                                                                                                                             |
+| WEAPONSMITH                     |    A    |                                                                                                                                                             |
 
 ## Perks
 
@@ -129,72 +129,72 @@ Our support ratings:
 
 ## Powers
 
-| POWER NAME                 | Support | Comments                                                                                                         |
-| :------------------------- | :-----: | :--------------------------------------------------------------------------------------------------------------- |
-| ABSORPTION                 |    B    | Does not support per segment limits                                                                              |
-| AID                        |    B    | Works for characteristics, cannot aid powers                                                                     |
-| BARRIER                    |    C    | Implemented like resistant protection, no support for destroying barriers, no placeables for a barrier           |
-| BLAST                      |    A    |                                                                                                                  |
-| BOOST                      |    C    | Works for characteristics, cannot boost powers, continuous END requirement doesn't work                          |
-| CANNOT BE STUNNED          |    B    | Not fully vetted                                                                                                 |
-| CHANGE ENVIRONMENT         |    D    |                                                                                                                  |
-| CHARACTERISTICS            |    A    |                                                                                                                  |
-| CLAIRSENTIENCE             |    D    |                                                                                                                  |
-| CLINGING                   |    B    |                                                                                                                  |
-| DAMAGE NEGATION            |    A    |                                                                                                                  |
-| DAMAGE REDUCTION           |    A    |                                                                                                                  |
-| DARKNESS                   |    D    |                                                                                                                  |
-| DEFLECTION                 |    D    |                                                                                                                  |
-| DENSITY INCREASE           |    A    | Final mass is not shown                                                                                          |
-| DESOLIDIFICATION           |    D    |                                                                                                                  |
-| DISPEL                     |    C    | Adjustments don't work against powers except for movement powers                                                 |
-| DOES NOT BLEED             |    D    |                                                                                                                  |
-| DRAIN                      |    B    | Works for characteristics, cannot drain powers                                                                   |
-| DUPLICATION                |    F    | You will have to create a separate HDC file and import that for each duplicate. No injury support.               |
-| ENDURANCE RESERVE          |    B    | Only 1 endurance reserve is supported                                                                            |
-| ENHANCED SENSES            |    C    | Enhanced Perception ALL is the only enhanced sense currently supported.                                          |
-| ENTANGLE                   |    B    | You can target and damage an entangle. Anything that gets thru is not applied to token.                          |
-| EXTRA-DIMENSIONAL MOVEMENT |    D    |                                                                                                                  |
-| EXTRA LIMBS                |    B    | Limited game mechanics, largely storytelling power.                                                              |
-| FTL TRAVEL                 |    D    |                                                                                                                  |
-| FLASH                      |    C    | Implemented as simple blind. Works pretty well for SightGroup. No enhanced sense support.                        |
-| FLASH DEFENSE              |    C    | Verses simple blind, see FLASH.                                                                                  |
-| FLIGHT                     |    B    | No turn modes, or gliding. non-combat penalties not automated                                                    |
-| GROWTH                     |    B    |                                                                                                                  |
-| HAND-TO-HAND ATTACK        |    A    |                                                                                                                  |
-| HEALING                    |    A    | Works for characteristics, cannot heal powers                                                                    |
-| IMAGES                     |    D    |                                                                                                                  |
-| INVISIBILITY               |    D    | Recommend using the invisible token effect for now                                                               |
-| KILLING ATTACK             |    A    |                                                                                                                  |
-| KNOCKBACK RESISTANCE       |    A    |                                                                                                                  |
-| LEAPING                    |    B    | Non-combat penalties not automated                                                                               |
-| LIFE SUPPORT               |    D    |                                                                                                                  |
-| LUCK                       |    D    |                                                                                                                  |
-| MENTAL BLAST               |    B    | Mental powers not fully vetted                                                                                   |
-| MENTAL DEFENSE             |    B    | Mental powers not fully vetted                                                                                   |
-| MENTAL ILLUSIONS           |    D    |                                                                                                                  |
-| MIND CONTROL               |    D    |                                                                                                                  |
-| MIND LINK                  |    D    |                                                                                                                  |
-| MIND SCAN                  |    B    |                                                                                                                  |
-| MULTIFORM                  |    F    | You will have to create a separate HDC file and import that for each duplicate. No injury or activation support. |
-| NO HIT LOCATIONS           |    D    |                                                                                                                  |
-| POWER DEFENSE              |    D    |                                                                                                                  |
-| REFLECTION                 |    D    |                                                                                                                  |
-| REGENERATION               |    D    |                                                                                                                  |
-| RESISTANT PROTECTION       |    A    |                                                                                                                  |
-| RUNNING                    |    B    | Non-combat penalties not automated                                                                               |
-| SHAPE SHIFT                |    F    | You will have to have a different token for each form. No sense support.                                         |
-| SHRINKING                  |    B    |                                                                                                                  |
-| STRETCHING                 |    C    | Currently the reach of a power is ignored                                                                        |
-| SUMMON                     |    F    | You will have to create a separate HDC file and import that for each duplicate.                                  |
-| SWIMMING                   |    B    | Non-combat penalties not automated                                                                               |
-| SWINGING                   |    B    | Non-combat penalties not automated                                                                               |
-| TAKES NO STUN              |    B    | Not fully vetted                                                                                                 |
-| TELEKINESIS                |    B    | TK strength based attacks work. Multiple TK powers are additive for STR. Non-attack uses are poorly implemented. |
-| TELEPATHY                  |    D    |                                                                                                                  |
-| TELEPORTATION              |    B    | Non-combat penalties not automated                                                                               |
-| TRANSFORM                  |    D    | Imports and Attack Rolls supported. Transform Damage application and Transform effects not supported.            |
-| TUNNELING                  |    B    | Non-combat penalties not automated                                                                               |
+| POWER NAME                 | Support | Comments                                                                                                                                                                              |
+| :------------------------- | :-----: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ABSORPTION                 |    B    | Does not support per segment limits                                                                                                                                                   |
+| AID                        |    B    | Works for characteristics, cannot aid powers                                                                                                                                          |
+| BARRIER                    |    C    | Implemented like resistant protection, no support for destroying barriers, no placeables for a barrier. [Barrier Proof of Concept Video](https://www.youtube.com/watch?v=fINMDsyObK0) |
+| BLAST                      |    A    |                                                                                                                                                                                       |
+| BOOST                      |    C    | Works for characteristics, cannot boost powers, continuous END requirement doesn't work                                                                                               |
+| CANNOT BE STUNNED          |    B    | Not fully vetted                                                                                                                                                                      |
+| CHANGE ENVIRONMENT         |    D    |                                                                                                                                                                                       |
+| CHARACTERISTICS            |    A    |                                                                                                                                                                                       |
+| CLAIRSENTIENCE             |    D    |                                                                                                                                                                                       |
+| CLINGING                   |    B    |                                                                                                                                                                                       |
+| DAMAGE NEGATION            |    A    |                                                                                                                                                                                       |
+| DAMAGE REDUCTION           |    A    |                                                                                                                                                                                       |
+| DARKNESS                   |    D    |                                                                                                                                                                                       |
+| DEFLECTION                 |    D    |                                                                                                                                                                                       |
+| DENSITY INCREASE           |    A    | Final mass is not shown                                                                                                                                                               |
+| DESOLIDIFICATION           |    D    |                                                                                                                                                                                       |
+| DISPEL                     |    C    | Adjustments don't work against powers except for movement powers                                                                                                                      |
+| DOES NOT BLEED             |    D    |                                                                                                                                                                                       |
+| DRAIN                      |    B    | Works for characteristics, cannot drain powers                                                                                                                                        |
+| DUPLICATION                |    F    | You will have to create a separate HDC file and import that for each duplicate. No injury support.                                                                                    |
+| ENDURANCE RESERVE          |    B    | Only 1 endurance reserve is supported                                                                                                                                                 |
+| ENHANCED SENSES            |    C    | Enhanced Perception ALL is the only enhanced sense currently supported.                                                                                                               |
+| ENTANGLE                   |    B    | You can target and damage an entangle. Anything that gets thru is not applied to token.                                                                                               |
+| EXTRA-DIMENSIONAL MOVEMENT |    D    |                                                                                                                                                                                       |
+| EXTRA LIMBS                |    B    | Limited game mechanics, largely storytelling power.                                                                                                                                   |
+| FTL TRAVEL                 |    D    |                                                                                                                                                                                       |
+| FLASH                      |    C    | Implemented as simple blind. Works pretty well for SightGroup. No enhanced sense support.                                                                                             |
+| FLASH DEFENSE              |    C    | Verses simple blind, see FLASH.                                                                                                                                                       |
+| FLIGHT                     |    B    | No turn modes, or gliding. non-combat penalties not automated                                                                                                                         |
+| GROWTH                     |    B    |                                                                                                                                                                                       |
+| HAND-TO-HAND ATTACK        |    A    |                                                                                                                                                                                       |
+| HEALING                    |    A    | Works for characteristics, cannot heal powers                                                                                                                                         |
+| IMAGES                     |    D    |                                                                                                                                                                                       |
+| INVISIBILITY               |    D    | Recommend using the invisible token effect for now                                                                                                                                    |
+| KILLING ATTACK             |    A    |                                                                                                                                                                                       |
+| KNOCKBACK RESISTANCE       |    A    |                                                                                                                                                                                       |
+| LEAPING                    |    B    | Non-combat penalties not automated                                                                                                                                                    |
+| LIFE SUPPORT               |    D    |                                                                                                                                                                                       |
+| LUCK                       |    D    |                                                                                                                                                                                       |
+| MENTAL BLAST               |    B    | Mental powers not fully vetted                                                                                                                                                        |
+| MENTAL DEFENSE             |    B    | Mental powers not fully vetted                                                                                                                                                        |
+| MENTAL ILLUSIONS           |    D    |                                                                                                                                                                                       |
+| MIND CONTROL               |    D    |                                                                                                                                                                                       |
+| MIND LINK                  |    D    |                                                                                                                                                                                       |
+| MIND SCAN                  |    B    |                                                                                                                                                                                       |
+| MULTIFORM                  |    F    | You will have to create a separate HDC file and import that for each duplicate. No injury or activation support.                                                                      |
+| NO HIT LOCATIONS           |    D    |                                                                                                                                                                                       |
+| POWER DEFENSE              |    D    |                                                                                                                                                                                       |
+| REFLECTION                 |    D    |                                                                                                                                                                                       |
+| REGENERATION               |    D    |                                                                                                                                                                                       |
+| RESISTANT PROTECTION       |    A    |                                                                                                                                                                                       |
+| RUNNING                    |    B    | Non-combat penalties not automated                                                                                                                                                    |
+| SHAPE SHIFT                |    F    | You will have to have a different token for each form. No sense support.                                                                                                              |
+| SHRINKING                  |    B    |                                                                                                                                                                                       |
+| STRETCHING                 |    C    | Currently the reach of a power is ignored                                                                                                                                             |
+| SUMMON                     |    F    | You will have to create a separate HDC file and import that for each duplicate.                                                                                                       |
+| SWIMMING                   |    B    | Non-combat penalties not automated                                                                                                                                                    |
+| SWINGING                   |    B    | Non-combat penalties not automated                                                                                                                                                    |
+| TAKES NO STUN              |    B    | Not fully vetted                                                                                                                                                                      |
+| TELEKINESIS                |    B    | TK strength based attacks work. Multiple TK powers are additive for STR. Non-attack uses are poorly implemented.                                                                      |
+| TELEPATHY                  |    D    |                                                                                                                                                                                       |
+| TELEPORTATION              |    B    | Non-combat penalties not automated                                                                                                                                                    |
+| TRANSFORM                  |    D    | Imports and Attack Rolls supported. Transform Damage application and Transform effects not supported.                                                                                 |
+| TUNNELING                  |    B    | Non-combat penalties not automated                                                                                                                                                    |
 
 ## Power Modifiers
 

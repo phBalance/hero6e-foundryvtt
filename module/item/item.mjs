@@ -1209,6 +1209,11 @@ export class HeroSystem6eItem extends Item {
             item.system.showToggle = true;
         }
 
+        // Penalty Skill Levels are checked by default
+        if (item.system.XMLID === "PENALTY_SKILL_LEVELS" && this.system.checked === undefined) {
+            this.system.checked = true;
+        }
+
         // Endurance
         item.system.endEstimate = parseInt(item.system.end) || 0;
 
@@ -1425,13 +1430,19 @@ export class HeroSystem6eItem extends Item {
                 item.system.endEstimate = "";
             }
 
-            const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1 ? `x${item.system.charges?.clips}` : ""}`;
+            const numChargesIndicator = `${parseInt(item.system.charges?.value || 0)}${
+                item.system.charges?.clipsMax && item.system.charges?.clipsMax > 1
+                    ? `x${item.system.charges?.clips}`
+                    : ""
+            }`;
             const boostableIndicator = `${item.system.charges?.boostable ? "b" : ""}`;
             const recoverableIndicator = `${item.system.charges?.recoverable ? "r" : ""}`;
             const continuingIndicator = `${item.system.charges?.continuing ? "c" : ""}`;
             const fuelIndicator = `${item.system.charges?.fuel ? "f" : ""}`;
 
-            item.system.endEstimate = `${item.system.endEstimate ? `${item.system.endEstimate} ` : ""}[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
+            item.system.endEstimate = `${
+                item.system.endEstimate ? `${item.system.endEstimate} ` : ""
+            }[${numChargesIndicator}${boostableIndicator}${recoverableIndicator}${continuingIndicator}${fuelIndicator}]`;
         }
 
         // 0 END
@@ -4627,7 +4638,12 @@ export class HeroSystem6eItem extends Item {
             (this.system.XMLID === "TRANSFER" && mustBeStrict)
                 ? adjustmentSourcesStrict
                 : adjustmentSourcesPermissive;
-        const validList = Object.keys(validator(this.actor));
+        let validList = Object.keys(validator(this.actor));
+
+        // Simple Healing
+        if (this.system.XMLID === "HEALING") {
+            validList.push("SIMPLIFIED");
+        }
 
         const adjustmentTargets = targetsList.split(",");
         for (const rawAdjustmentTarget of adjustmentTargets) {
@@ -4687,13 +4703,16 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Simplified HEALING
+        const enhances2 = enhances.replace(/SIMPLIFIED/i, "BODY, STUN");
+
         return {
             valid: valid,
 
             reduces: reduces,
             enhances: enhances,
             reducesArray: reduces ? reduces.split(",").map((str) => str.trim()) : [],
-            enhancesArray: enhances ? enhances.split(",").map((str) => str.trim()) : [],
+            enhancesArray: enhances2 ? enhances2.split(",").map((str) => str.trim()) : [],
         };
     }
 

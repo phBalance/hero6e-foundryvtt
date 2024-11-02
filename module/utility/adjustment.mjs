@@ -132,6 +132,7 @@ export function determineMaxAdjustment(item) {
         item.system.XMLID !== "AID" &&
         item.system.XMLID !== "SUCCOR" &&
         item.system.XMLID !== "TRANSFER"
+        // && item.system.XMLID !== "HEALING"
     ) {
         return reallyBigInteger;
     }
@@ -193,7 +194,7 @@ export function determineMaxAdjustment(item) {
     }
 }
 
-export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) {
+export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor, isHealing) {
     // TODO: Not sure we need to use the characteristic here...
     const powerInfo =
         targetPower?.baseInfo ||
@@ -206,7 +207,9 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
         (targetPower
             ? parseFloat(targetPower.system.activePoints / targetPower.system.LEVELS)
             : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel)) *
-        defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e)
+        (isHealing
+            ? 1
+            : defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e))
     );
 }
 
@@ -330,19 +333,6 @@ export async function performAdjustment(
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
 
-    // Search the target for this power.
-    // TODO: will return first matching power. How can we distinguish without making users
-    //       setup the item for a specific? Will likely need to provide a dialog. That gets
-    //       us into the thorny question of what powers have been discovered.
-    const targetPower = targetActor.items.find(
-        (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
-    );
-    if (targetPower) {
-        // Sometimes we pass an item.id, make sure we output item.name
-        nameOfCharOrPower = item.name;
-        targetUpperCaseName = nameOfCharOrPower.toUpperCase();
-    }
-
     // Find a matching characteristic. Because movement powers are unfortunately setup as
     // characteristics and always exist as properties, we need to check that they actually
     // have been bought or naturally exist (core > 0).
@@ -351,9 +341,25 @@ export async function performAdjustment(
             ? targetActor.system.characteristics?.[potentialCharacteristic]
             : undefined;
 
+    // Search the target for this power.
+    // TODO: will return first matching power. How can we distinguish without making users
+    //       setup the item for a specific? Will likely need to provide a dialog. That gets
+    //       us into the thorny question of what powers have been discovered.
+    let targetPower;
+    if (!targetCharacteristic) {
+        targetPower = targetActor.items.find(
+            (item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower,
+        );
+        if (targetPower) {
+            // Sometimes we pass an item.id, make sure we output item.name
+            nameOfCharOrPower = item.name;
+            targetUpperCaseName = nameOfCharOrPower.toUpperCase();
+        }
+    }
+
     // Do we have a target?
     if (!targetCharacteristic && !targetPower) {
-        console.error(`${nameOfCharOrPower} is an invalid target for the adjustment power ${item.name}`);
+        await ui.notifications.error(`${nameOfCharOrPower} is an invalid target for the adjustment power ${item.name}`);
         return;
     }
 
@@ -410,14 +416,21 @@ export async function performAdjustment(
     let thisAttackEffectiveAdjustmentActivePoints = isHealing
         ? thisAttackRawActivePointsDamage - activeEffect.flags.adjustmentActivePoints
         : thisAttackRawActivePointsDamage;
-    const thisAttackActivePointEffectLostDueToNotExceeding = isHealing ? activeEffect.flags.adjustmentActivePoints : 0;
-    let thisAttackActivePointAdjustmentLostDueToMax;
+    const thisAttackActivePointEffectNotAppliedDueToNotExceeding = isHealing
+        ? activeEffect.flags.adjustmentActivePoints
+        : 0;
+    let thisAttackActivePointAdjustmentNotAppliedDueToMax;
     const totalActivePointsStartingEffect =
         activeEffect.flags.adjustmentActivePoints + thisAttackEffectiveAdjustmentActivePoints;
 
     // TODO: This should be based on the targeted actor ... why is it not?
     // TODO: The code below might not work correctly with non integer costs per active point
-    const costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, targetPower, targetActor);
+    const costPerActivePoint = determineCostPerActivePoint(
+        potentialCharacteristic,
+        targetPower,
+        targetActor,
+        isHealing,
+    );
 
     // Clamp max adjustment to the max allowed by the power.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.
@@ -430,6 +443,14 @@ export async function performAdjustment(
               )
             : totalActivePointsStartingEffect;
 
+        // Real Steel purchased BODY as a power, so you can indeed exceed core values.
+        // let thisAttackActivePointsToUse = isOnlyToStartingValues
+        //     ? Math.max(
+        //           thisAttackEffectiveAdjustmentActivePoints,
+        //           Math.min(targetStartingValue - targetStartingMax, 0) * costPerActivePoint,
+        //       )
+        //     : totalActivePointsStartingEffect;
+
         // Healing should not accumulate part points.
         if (isHealing) {
             thisAttackActivePointsToUse -= thisAttackActivePointsToUse % costPerActivePoint;
@@ -437,8 +458,8 @@ export async function performAdjustment(
 
         const max = Math.max(thisAttackActivePointsToUse, -determineMaxAdjustment(item));
 
-        thisAttackActivePointAdjustmentLostDueToMax = isOnlyToStartingValues
-            ? thisAttackRawActivePointsDamage - max - thisAttackActivePointEffectLostDueToNotExceeding
+        thisAttackActivePointAdjustmentNotAppliedDueToMax = isOnlyToStartingValues
+            ? thisAttackRawActivePointsDamage - max - thisAttackActivePointEffectNotAppliedDueToNotExceeding
             : totalActivePointsStartingEffect - max;
         thisAttackEffectiveAdjustmentActivePoints = max;
     } else {
@@ -446,8 +467,8 @@ export async function performAdjustment(
             thisAttackEffectiveAdjustmentActivePoints + activeEffect.flags.adjustmentActivePoints;
         const min = Math.min(totalAdjustmentBeforeMin, determineMaxAdjustment(item));
 
-        thisAttackActivePointAdjustmentLostDueToMax =
-            totalAdjustmentBeforeMin - min - thisAttackActivePointEffectLostDueToNotExceeding;
+        thisAttackActivePointAdjustmentNotAppliedDueToMax =
+            totalAdjustmentBeforeMin - min - thisAttackActivePointEffectNotAppliedDueToNotExceeding;
         thisAttackEffectiveAdjustmentActivePoints = min;
     }
 
@@ -470,8 +491,8 @@ export async function performAdjustment(
             thisAttackRawActivePointsDamage,
             totalActivePointAffectedDifference,
             totalAdjustmentNewActivePoints,
-            thisAttackActivePointAdjustmentLostDueToMax,
-            thisAttackActivePointEffectLostDueToNotExceeding,
+            thisAttackActivePointAdjustmentNotAppliedDueToMax,
+            thisAttackActivePointEffectNotAppliedDueToNotExceeding,
             defenseDescription,
             effectsDescription,
             potentialCharacteristic,
@@ -564,8 +585,8 @@ export async function performAdjustment(
         thisAttackRawActivePointsDamage,
         totalActivePointAffectedDifference,
         totalAdjustmentNewActivePoints,
-        thisAttackActivePointAdjustmentLostDueToMax,
-        thisAttackActivePointEffectLostDueToNotExceeding,
+        thisAttackActivePointAdjustmentNotAppliedDueToMax,
+        thisAttackActivePointEffectNotAppliedDueToNotExceeding,
         defenseDescription,
         effectsDescription,
         targetUpperCaseName, //potentialCharacteristic,
@@ -580,8 +601,8 @@ function _generateAdjustmentChatCard(
     activePointDamage,
     activePointAffectedDifference,
     totalActivePointEffect,
-    activePointEffectLostDueToMax,
-    activePointEffectLostDueToNotExceeding,
+    activePointEffectNotAppliedDueToMax,
+    activePointEffectNotAppliedDueToNotExceeding,
     defenseDescription,
     effectsDescription,
     targetCharOrPower,
@@ -600,8 +621,8 @@ function _generateAdjustmentChatCard(
             adjustmentDamageThisApplication: activePointAffectedDifference,
             adjustmentTarget: targetCharOrPower.toUpperCase(),
             adjustmentTotalActivePointEffect: totalActivePointEffect,
-            activePointEffectLostDueToMax,
-            activePointEffectLostDueToNotExceeding,
+            activePointEffectNotAppliedDueToMax,
+            activePointEffectNotAppliedDueToNotExceeding,
             isFade,
             targetActor: targetActor,
             targetToken: targetActor?.getActiveTokens()?.[0],

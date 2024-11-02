@@ -617,7 +617,10 @@ export async function AttackToHit(item, options) {
         if (aoeModifier) {
             // Distance from center
             if (aoeTemplate) {
-                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center);
+                const distanceInMetres = calculateDistanceBetween(
+                    aoeTemplate,
+                    target.center || { x: target.x, y: target.y },
+                );
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
                 )} from center)`;
@@ -1321,17 +1324,20 @@ export async function _onRollDamage(event) {
         game.scenes.current.templates.find((o) => o.user.id === game.user.id);
     const explosion = item.hasExplosionAdvantage();
 
+    // Coerce type to boolean
+    toHitData.targetEntangle =
+        toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
+
     // Apply Damage button for specific targets
     let targetTokens = [];
     for (const id of toHitData.targetids.split(",")) {
         let token = canvas.scene.tokens.get(id);
         if (token) {
-            const targetEntangle = Boolean(toHitData.targetEntangle);
             const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
-                subTarget: targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
+                subTarget: toHitData.targetEntangle && entangleAE ? `${token.name} [${entangleAE.flags.XMLID}]` : null,
             };
 
             // TODO: Add in explosion handling (or flattening)
@@ -2582,9 +2588,6 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
         );
     }
 
-    const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
-    const activePointsDamageAfterDefense = damageDetail.stun;
-
     // Where is the adjustment taking from/giving to?
     const { valid, reducesArray, enhancesArray } = adjustmentItem.splitAdjustmentSourceAndTarget();
     if (!valid) {
@@ -2652,6 +2655,11 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
 
     const adjustmentItemTags = getAttackTags(adjustmentItem);
 
+    const simplifiedHealing =
+        adjustmentItem.system.XMLID === "HEALING" && adjustmentItem.system.INPUT.match(/simplified/i);
+    const rawActivePointsDamageBeforeDefense = damageDetail.stunDamage;
+    const activePointsDamageAfterDefense = damageDetail.stun;
+
     // DRAIN
     const reductionChatMessages = [];
     const reductionTargetActor = token.actor;
@@ -2682,7 +2690,9 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
                 enhance,
                 adjustmentItem.system.XMLID === "TRANSFER"
                     ? -activePointsDamageAfterDefense
-                    : -rawActivePointsDamageBeforeDefense,
+                    : simplifiedHealing && enhance === "BODY"
+                      ? -damageDetail.bodyDamage
+                      : -rawActivePointsDamageBeforeDefense,
                 "None - Beneficial",
                 "",
                 false,
@@ -2798,9 +2808,16 @@ async function _calcDamage(heroRoller, item, options) {
     let bodyForPenetrating = 0;
 
     if (adjustmentPower) {
-        body = 0;
-        stun = heroRoller.getAdjustmentTotal();
-        bodyForPenetrating = (await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).getBodyTotal();
+        // Kluge for SIMPLIFIED HEALING
+        if (item.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
+            const shr = await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL);
+            body = shr.getBodyTotal();
+            stun = shr.getStunTotal();
+        } else {
+            body = 0;
+            stun = heroRoller.getAdjustmentTotal();
+            bodyForPenetrating = (await heroRoller.cloneWhileModifyingType(HeroRoller.ROLL_TYPE.NORMAL)).getBodyTotal();
+        }
     } else if (senseAffectingPower) {
         body = heroRoller.getFlashTotal();
         stun = 0;
