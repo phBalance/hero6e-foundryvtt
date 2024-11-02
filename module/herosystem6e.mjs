@@ -590,8 +590,10 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             }
 
             // Active Effects
-            if (!actor.inCombat) {
+            if (!actor.inCombat || actor.temporaryEffects.find((o) => o.name === "TakeRecovery")) {
                 await expireEffects(actor);
+            } else {
+                console.log(`Skipping expire effects for ${actor.name}`, actor);
             }
 
             // Out of combat recovery.  When SimpleCalendar is used to advance time.
