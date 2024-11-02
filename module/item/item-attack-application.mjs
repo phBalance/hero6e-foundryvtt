@@ -552,7 +552,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
     getAoeTemplate() {
         return Array.from(canvas.templates.getDocuments()).find(
-            (o) => o.user.id === game.user.id && o.flags.itemId === this.data.item.id,
+            (o) => o.author.id === game.user.id && o.flags.itemId === this.data.item.id,
         );
     }
 }
