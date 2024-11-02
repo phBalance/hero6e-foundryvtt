@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-attack.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 async function _renderSkillForm(item, actor, stateData) {
     const token = actor.token;
@@ -80,7 +81,7 @@ export async function createSkillPopOutFromItem(item, actor) {
     });
 }
 
-async function skillRoll(item, actor, target, event) {
+async function skillRoll(item, actor, target) {
     const token = actor.token;
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
@@ -91,7 +92,7 @@ async function skillRoll(item, actor, target, event) {
         warning: resourceWarning,
         resourcesUsedDescription,
         resourcesUsedDescriptionRenderedRoll,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, { noResourceUse: event.shiftKey });
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, { noResourceUse: overrideCanAct });
     if (resourceError || resourceWarning) {
         const chatData = {
             user: game.user._id,

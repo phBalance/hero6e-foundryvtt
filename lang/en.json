@@ -260,6 +260,13 @@
             "Hint": "Automate applying the stunned condition."
         }        
     },
+    "keybindings": {
+        "OverrideCanAct": {
+            "Name": "Override Cannot Act/Move",
+            "Hint": "There are times when an actor cannot act or move (such as when stunned). There are also times when you are out of resources an cannot activate a power. You can override the automated blocking by holding down this key. Note that if you hold down a CONTROL key while trying to move you will trigger the measurement control, which uses the SPACEBAR to follow the path."
+        }
+        
+    },
 
     "TYPES": {
         "Actor": {

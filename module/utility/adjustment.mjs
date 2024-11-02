@@ -194,7 +194,7 @@ export function determineMaxAdjustment(item) {
     }
 }
 
-export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor, isHealing) {
+export function determineCostPerActivePoint(targetCharacteristic, targetPower, targetActor) {
     // TODO: Not sure we need to use the characteristic here...
     const powerInfo =
         targetPower?.baseInfo ||
@@ -207,9 +207,7 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
         (targetPower
             ? parseFloat(targetPower.system.activePoints / targetPower.system.LEVELS)
             : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel)) *
-        (isHealing
-            ? 1
-            : defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e))
+        defensivePowerAdjustmentMultiplier(targetCharacteristic.toUpperCase(), targetActor, targetActor?.is5e)
     );
 }
 
@@ -425,12 +423,12 @@ export async function performAdjustment(
 
     // TODO: This should be based on the targeted actor ... why is it not?
     // TODO: The code below might not work correctly with non integer costs per active point
-    const costPerActivePoint = determineCostPerActivePoint(
-        potentialCharacteristic,
-        targetPower,
-        targetActor,
-        isHealing,
-    );
+    let costPerActivePoint = determineCostPerActivePoint(potentialCharacteristic, targetPower, targetActor);
+
+    // SIMPLIFIED HEALING
+    if (isHealing && item.system.INPUT.match(/simplified/i)) {
+        costPerActivePoint = 1;
+    }
 
     // Clamp max adjustment to the max allowed by the power.
     // TODO: Combined effects may not exceed the largest source's maximum for a single target. Similar strange variation of this rule for healing.

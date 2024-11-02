@@ -10,6 +10,7 @@
 - Fix for AOE Line "Confirm AOE placement" error.
 - Various HEALING effect fixes. [#1407](https://github.com/dmdorman/hero6e-foundryvtt/issues/1407)
 - Implemented SIMPLIFIED healing. [#1256](https://github.com/dmdorman/hero6e-foundryvtt/issues/1407)
+- You can now select the override key you want to use. It used to be hard coded to be SHIFT. Changed the default to be ControlLeft because SHIFT movement was snapless and thus awkward. [#1410](https://github.com/dmdorman/hero6e-foundryvtt/issues/1410)
 
 ## Version 4.0.3
 

@@ -24,6 +24,7 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mj
 import { Attack } from "../utility/attack.mjs";
 import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
 import { determineDefense } from "../utility/defense.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -476,7 +477,7 @@ export class HeroSystem6eItem extends Item {
                 resourcesUsedDescription,
                 resourcesUsedDescriptionRenderedRoll,
             } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
-                noResourceUse: !!event?.shiftKey,
+                noResourceUse: overrideCanAct,
             });
             if (resourceError) {
                 return ui.notifications.error(resourceError);

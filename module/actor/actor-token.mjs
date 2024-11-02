@@ -106,15 +106,15 @@ export class HeroSystem6eToken extends Token {
             canDragLeftStart = false;
         }
 
-        // Do not allow movement when actor cannot act.  SHIFT will override in canAct()
-        if (canDragLeftStart && this.actor) {
-            canDragLeftStart = this.actor.canAct(true, event);
-        }
-
         // Entangled tokens typically can't move
         if (canDragLeftStart && this.actor) {
             canDragLeftStart = this.actor.canMove(true, event);
         }
+
+        // Do not allow movement when actor cannot act.  SHIFT will override in canAct()
+        // if (canDragLeftStart && this.actor) {
+        //     canDragLeftStart = this.actor.canAct(true, event);
+        // }
 
         return canDragLeftStart;
     }
