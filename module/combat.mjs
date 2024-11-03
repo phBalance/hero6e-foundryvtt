@@ -875,6 +875,11 @@ export class HeroSystem6eCombat extends Combat {
                     (o.flags.segment === priorState.segment && o.initiative <= priorState.initiative) ||
                     o.flags.segment > priorState.segment,
             );
+            console.log(
+                `Combat Tracker was unable to find exact match.  Should only occur when current combatant changes SPD/Initiative.`,
+                priorState,
+                this,
+            );
         }
 
         if (combatTurn > -1) {

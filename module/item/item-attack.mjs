@@ -705,15 +705,12 @@ export async function AttackToHit(item, options) {
         }
 
         if (aoeModifier) {
-            // Distance from center
-            if (aoeTemplate) {
-                const distanceInMetres = calculateDistanceBetween(
-                    aoeTemplate,
-                    target.center || { x: target.x, y: target.y },
-                );
+            // Distance from aoeTemplate origin to target/token center
+            if (aoeTemplate && target.id) {
+                const distanceInMetres = calculateDistanceBetween(aoeTemplate, target.center);
                 by += ` (${getRoundedDownDistanceInSystemUnits(distanceInMetres, item.actor)}${getSystemDisplayUnits(
                     item.actor.is5e,
-                )} from center)`;
+                )} from template origin)`;
             }
         }
 
