@@ -349,7 +349,7 @@ export async function AttackAoeToHit(item, options) {
     speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: attackHeroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -1290,9 +1290,10 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor });
+    speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -1520,8 +1521,10 @@ export async function _onRollDamage(event) {
     const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    speaker.alias = item.actor.name;
+
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -1740,8 +1743,10 @@ export async function _onRollMindScanEffectRoll(event) {
     const template = `systems/${HEROSYS.module}/templates/attack/item-mindscan-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    speaker.alias = item.actor.name;
+
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -2335,9 +2340,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    speaker.alias = item.actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageDetail.knockbackRoller?.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -2635,7 +2641,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                 speaker.alias = actor.name;
 
                 const chatData = {
-                    style: CONST.CHAT_MESSAGE_STYLES.IC,
+                    style: CONST.CHAT_MESSAGE_STYLES.OOC,
                     rolls: absorptionRoller.rawRolls(),
                     user: game.user._id,
                     content: cardHtml,

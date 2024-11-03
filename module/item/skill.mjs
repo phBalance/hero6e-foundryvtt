@@ -178,7 +178,7 @@ async function skillRoll(item, actor, target) {
     const cardHtml = await renderTemplate(template, cardData);
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: skillRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,

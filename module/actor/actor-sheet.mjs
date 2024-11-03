@@ -933,7 +933,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         speaker.alias = actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: heroRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,
@@ -969,8 +969,10 @@ export class HeroSystemActorSheet extends ActorSheet {
         const cardHtml = await characteristicRoller.render(flavor);
 
         const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+        speaker.alias = this.actor.name;
+
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: characteristicRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,
@@ -1042,8 +1044,10 @@ export class HeroSystemActorSheet extends ActorSheet {
         const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
         const cardHtml = await renderTemplate(template, cardData);
         const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+        speaker.alias = this.actor.name;
+
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: characteristicRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,

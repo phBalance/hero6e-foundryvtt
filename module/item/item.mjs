@@ -5056,7 +5056,7 @@ export async function RequiresASkillRollCheck(item, event) {
         speaker.alias = actor.name;
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: activationRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,

@@ -37,7 +37,7 @@ async function presenceAttackRoll(actor, html) {
     speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: heroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
