@@ -587,8 +587,7 @@ export class HeroSystem6eCombat extends Combat {
 
             await effect.delete();
 
-            let content = `${combatant.actor.name} recovers from being stunned.`;
-            const token = combatant.token;
+            const content = `${combatant.actor.name} recovers from being stunned.`;
 
             const chatData = {
                 user: game.user._id,
