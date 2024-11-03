@@ -349,8 +349,7 @@ export async function AttackAoeToHit(item, options) {
     speaker.alias = actor.name;
 
     const chatData = {
-        //type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        style: CONST.CHAT_MESSAGE_STYLES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: attackHeroRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -1293,7 +1292,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const speaker = ChatMessage.getSpeaker({ actor: actor });
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: damageRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -1522,7 +1521,7 @@ export async function _onRollDamage(event) {
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: damageRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -1742,7 +1741,7 @@ export async function _onRollMindScanEffectRoll(event) {
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: damageRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -2338,7 +2337,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: damageDetail.knockbackRoller?.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -2636,7 +2635,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                 speaker.alias = actor.name;
 
                 const chatData = {
-                    type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+                    style: CONST.CHAT_MESSAGE_STYLES.IC,
                     rolls: absorptionRoller.rawRolls(),
                     user: game.user._id,
                     content: cardHtml,

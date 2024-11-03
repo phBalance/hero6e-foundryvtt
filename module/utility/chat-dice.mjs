@@ -107,7 +107,7 @@ async function doRollAndGenerateChatMessage(chatMessageCmd) {
 
     const speaker = ChatMessage.getSpeaker();
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: roller.rawRolls(),
         user: game.user._id,
         content: cardHtml,

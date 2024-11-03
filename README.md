@@ -145,7 +145,7 @@ await damageRoller.roll();
 const cardHtml = await damageRoller.render("Knockback roll");
 
 const chatData = {
-  type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+  style: CONST.CHAT_MESSAGE_STYLES.IC,
   rolls: damageRoller.rawRolls(),
   user: game.user._id,
   content: cardHtml,
