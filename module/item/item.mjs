@@ -450,9 +450,8 @@ export class HeroSystem6eItem extends Item {
         const chatData = {
             user: game.user._id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            type: CONST.CHAT_MESSAGE_TYPES.ChatMessage,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
-            //speaker: speaker
         };
         ChatMessage.create(chatData);
     }
@@ -489,9 +488,10 @@ export class HeroSystem6eItem extends Item {
             if (!success) {
                 const speaker = ChatMessage.getSpeaker({ actor: item.actor });
                 speaker["alias"] = item.actor.name;
+
                 const chatData = {
                     user: game.user._id,
-                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                     content: `${
                         resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"
                     } to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
@@ -505,9 +505,10 @@ export class HeroSystem6eItem extends Item {
 
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
             speaker["alias"] = item.actor.name;
+
             const chatData = {
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `${
                     resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
                 } ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
@@ -548,9 +549,10 @@ export class HeroSystem6eItem extends Item {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
             speaker["alias"] = item.actor.name;
+
             const chatData = {
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `Turned off ${item.name}`,
                 whisper: whisperUserTargetsForActor(item.actor),
                 speaker,

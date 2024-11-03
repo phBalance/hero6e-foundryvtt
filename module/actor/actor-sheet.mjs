@@ -1339,7 +1339,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
         const chatData = {
             user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
             speaker: speaker,
         };

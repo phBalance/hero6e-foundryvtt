@@ -807,9 +807,10 @@ export async function AttackToHit(item, options) {
     if (!(await RequiresASkillRollCheck(item))) {
         const speaker = ChatMessage.getSpeaker({ actor: item.actor });
         speaker["alias"] = item.actor.name;
+
         const chatData = {
             user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
             whisper: ChatMessage.getWhisperRecipients("GM"),
             speaker,
@@ -846,9 +847,10 @@ export async function AttackToHit(item, options) {
     if (item.system.EFFECT?.toLowerCase().indexOf("dodge") > -1) {
         const speaker = ChatMessage.getSpeaker({ actor: item.actor });
         speaker["alias"] = item.actor.name;
+
         const chatData = {
             user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${item.name} ${dcv.signedString()} DCV`,
             speaker,
         };
@@ -898,8 +900,7 @@ export async function AttackToHit(item, options) {
     speaker.alias = actor.name;
 
     const chatData = {
-        //type: aoeAlwaysHit ? CONST.CHAT_MESSAGE_TYPES.OTHER : CONST.CHAT_MESSAGE_TYPES.ROLL, // most AOEs are auto hit
-        style: aoeAlwaysHit ? CONST.CHAT_MESSAGE_STYLES.OTHER : CONST.CHAT_MESSAGE_STYLES.ROLL, // most AOEs are auto hit
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: targetData
             .map((target) => target.roller?.rawRolls())
             .flat()
@@ -1581,7 +1582,7 @@ export async function _onRollMindScan(event) {
     const content = await renderTemplate(template2, data);
     const chatData = {
         user: game.user._id,
-        type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
         content,
         speaker: ChatMessage.getSpeaker({ actor: item.actor }),
     };
@@ -2076,7 +2077,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             speaker["alias"] = token.actor.name;
             const chatData = {
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content,
                 whisper: ChatMessage.getWhisperRecipients("GM"),
                 speaker,
@@ -2390,8 +2391,8 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     // If a character is affected by more than one Entangle, use the
     // highest BODY and the highest PD and ED for all the Entangles,
     // then add +1 BODY for each additional Entangle.
-    // NOTE: Having a normal ENTANGLE combined witha MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
-    const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled")); //token.actor.temporaryEffects.find((o) => o.flags.XMLID === "ENTANGLE");
+    // NOTE: Having a normal ENTANGLE combined with a MENTAL PARALYSIS is unusual, not not sure this code works properly in those cases.
+    const prevEntangle = token.actor.effects.find((o) => o.statuses.has("entangled"));
     const prevBody = parseInt(prevEntangle?.changes?.find((o) => o.key === "body")?.value) || 0;
     if (prevEntangle) {
         entangleDefense.rPD = Math.max(entangleDefense.rPD, parseInt(prevEntangle.flags.entangleDefense?.rPD) || 0);
@@ -2404,8 +2405,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         }`),
             (body = Math.max(body, prevBody + 1));
     }
-    const effecttData = {
-        //...HeroSystem6eActorActiveEffects.entangledEffect,
+    const effectData = {
         id: "entangled",
         icon: HeroSystem6eActorActiveEffects.entangledEffect.icon,
         changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.entangledEffect.changes),
@@ -2417,23 +2417,23 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         },
         origin: item.uuid,
     };
-    const changeBody = effecttData.changes?.find((o) => o.key === "body");
+    const changeBody = effectData.changes?.find((o) => o.key === "body");
     if (changeBody) {
         changeBody.value === body;
     } else {
-        effecttData.changes ??= [];
-        effecttData.changes.push({ key: "body", value: body, mode: 5 });
+        effectData.changes ??= [];
+        effectData.changes.push({ key: "body", value: body, mode: 5 });
     }
 
     if (prevEntangle) {
         prevEntangle.update({
-            name: effecttData.name,
-            flags: effecttData.flags,
-            changes: effecttData.changes,
-            origin: effecttData.origin,
+            name: effectData.name,
+            flags: effectData.flags,
+            changes: effectData.changes,
+            origin: effectData.origin,
         });
     } else {
-        token.actor.addActiveEffect(effecttData);
+        token.actor.addActiveEffect(effectData);
     }
 
     const cardData = {
@@ -2460,9 +2460,10 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
+    speaker.alias = item.actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -2503,7 +2504,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
     if (!defense) {
         return ui.notifications.error(
-            `Unable to determine appropraite defenses for ${entangleAE.name} vs ${attackItem.name}.`,
+            `Unable to determine appropriate defenses for ${entangleAE.name} vs ${attackItem.name}.`,
         );
     }
 
@@ -2553,31 +2554,18 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
         // dice rolls
         roller: originalRoll,
-        // renderedDamageRoll: damageRenderedResult,
-        // renderedStunMultiplierRoll: damageDetail.renderedStunMultiplierRoll,
 
         // body
-        //bodyDamage: damageDetail.bodyDamage,
         bodyDamageEffective: bodyDamage,
 
         // stun
-        // stunDamage: damageDetail.stunDamage,
         stunDamageEffective: stunDamage,
-        // hasRenderedDamageRoll: true,
-        // stunMultiplier: damageDetail.stunMultiplier,
-        // hasStunMultiplierRoll: damageDetail.hasStunMultiplierRoll,
-
-        // damage info
-        // damageString: heroRoller.getTotalSummary(),
-        // useHitLoc: damageDetail.useHitLoc,
-        // hitLocText: damageDetail.hitLocText,
 
         // effects
         effects: effectsFinal,
 
         // defense
         defense: `${defense} resistant`,
-        // damageNegationValue: damageNegationValue,
 
         // misc
         tags: defenseTags,
@@ -2590,10 +2578,10 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
     const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: attackItem.actor });
+    speaker.alias = attackItem.actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        //rolls: damageDetail.knockbackRoller?.rawRolls(),
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         user: game.user._id,
         content: cardHtml,
         speaker: speaker,
@@ -3363,7 +3351,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
         const chatData = {
             user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${game.user.name} is using ${overrideKeyText} to override using ${resourcesUsedDescription} for <b>${item.name}</b>${resourcesUsedDescriptionRenderedRoll}`,
             whisper: whisperUserTargetsForActor(this),
             speaker,
