@@ -2,9 +2,10 @@
 
 ## Version 4.0.5 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- OCV/OMCV bonuses are no longer active effects. They only work for a specific instant attack. (#1285)(https://github.com/dmdorman/hero6e-foundryvtt/issues/1285)
+- OCV/OMCV bonuses are no longer active effects. They only work for a specific instant attack. [#1285](https://github.com/dmdorman/hero6e-foundryvtt/issues/1285)
 - Fixed rare issue where adding some 6e powers to a 5e actor would prevent actor sheet from opening.
-- Support for STR Minimum OCV penalty. (#384)(https://github.com/dmdorman/hero6e-foundryvtt/issues/384)
+- Support for STR Minimum OCV penalty. [#384](https://github.com/dmdorman/hero6e-foundryvtt/issues/384)
+- Support for STR 0 rolls including DCV and movement penalties. [#1401](https://github.com/dmdorman/hero6e-foundryvtt/issues/1401)
 
 ## Version 4.0.4
 

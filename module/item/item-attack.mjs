@@ -11,7 +11,7 @@ import {
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
+import { HeroSystem6eItem, RequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
@@ -396,6 +396,25 @@ export async function AttackToHit(item, options) {
 
     const actor = item.actor;
     let effectiveItem = item;
+
+    // STR 0 character must succeed with
+    // a STR Roll in order to perform any Action that uses STR, such
+    // as aiming an attack, pulling a trigger, or using a Power with the
+    // Gestures Limitation.
+    if (actor && (effectiveItem.system.usesStrength || effectiveItem.findModsByXmlid("GESTURES"))) {
+        if (parseInt(actor.system.characteristics.str.value) <= 0) {
+            if (
+                !(await RequiresACharacteristicRollCheck(
+                    actor,
+                    "str",
+                    `Actions that use STR or GESTURES require STR roll when at 0 STR`,
+                ))
+            ) {
+                await ui.notifications.warn(`${actor.name} failed STR 0 roll. Action with ${item.name} failed.`);
+                return;
+            }
+        }
+    }
 
     // Create a temporary item based on effectiveLevels
     if (options?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
@@ -815,7 +834,7 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    if (!(await RequiresASkillRollCheck(item))) {
+    if (!(await item)) {
         const speaker = ChatMessage.getSpeaker({ actor: item.actor });
         speaker["alias"] = item.actor.name;
         const chatData = {

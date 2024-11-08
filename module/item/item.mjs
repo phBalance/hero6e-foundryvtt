@@ -621,6 +621,11 @@ export class HeroSystem6eItem extends Item {
                 break;
         }
 
+        // DENSITYINCREASE can affect Encumbrance & Movements
+        if (this.system.XMLID === "DENSITYINCREASE") {
+            await this.actor.applyEncumbrancePenalty();
+        }
+
         // Charges expire
         // if (charges) {
         //     // Find the active effect
@@ -4953,7 +4958,47 @@ export function getItem(id) {
     return null;
 }
 
-export async function RequiresASkillRollCheck(item, event) {
+export async function RequiresACharacteristicRollCheck(actor, characteristic, reasonText) {
+    console.log(characteristic, this);
+    const successValue = parseInt(actor?.system.characteristics[characteristic.toLowerCase()].roll) || 8;
+    const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
+    await activationRoller.roll();
+    let succeeded = activationRoller.getSuccess();
+    const autoSuccess = activationRoller.getAutoSuccess();
+    const total = activationRoller.getSuccessTotal();
+    const margin = successValue - total;
+
+    const flavor = `${reasonText ? `${reasonText}. ` : ``}${characteristic.toUpperCase()} roll ${successValue}- ${
+        succeeded ? "succeeded" : "failed"
+    } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+    let cardHtml = await activationRoller.render(flavor);
+
+    // FORCE success
+    if (!succeeded && overrideCanAct) {
+        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+        ui.notifications.info(`${actor.name} succeeded roll because override key.`);
+        succeeded = true;
+        cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
+    }
+
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+    speaker.alias = actor.name;
+
+    const chatData = {
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: activationRoller.rawRolls(),
+        user: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
+
+    return succeeded;
+}
+
+export async function RequiresASkillRollCheck(item) {
     // Toggles don't need a roll to turn off
     //if (item.system?.active === true) return true;
 
@@ -5067,10 +5112,11 @@ export async function RequiresASkillRollCheck(item, event) {
         let cardHtml = await activationRoller.render(flavor);
 
         // FORCE success
-        if (!succeeded && event?.ctrlKey) {
-            ui.notifications.info(`${item.actor.name} succeeded roll because ${game.user.name} used CTRL key.`);
+        if (!succeeded && overrideCanAct) {
+            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+            ui.notifications.info(`${item.actor.name} succeeded roll because override key.`);
             succeeded = true;
-            cardHtml += `<p>Succeeded roll because ${game.user.name} used CTRL key.</p>`;
+            cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
         }
 
         const actor = item.actor;
