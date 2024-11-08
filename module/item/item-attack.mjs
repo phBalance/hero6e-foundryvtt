@@ -373,6 +373,23 @@ export async function AttackToHit(item, options) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
+    // Make sure there are enough resources and consume them
+    const {
+        error: resourceError,
+        warning: resourceWarning,
+        resourcesRequired,
+        resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
+        ...options,
+        ...{ noResourceUse: false },
+    });
+    if (resourceError) {
+        return ui.notifications.error(resourceError);
+    } else if (resourceWarning) {
+        return ui.notifications.warn(resourceWarning);
+    }
+
     const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
@@ -611,23 +628,6 @@ export async function AttackToHit(item, options) {
     // and lastly we subtract the die roll. The value returned is the maximum DCV hit
     // (so we can be sneaky and not tell the target's DCV out loud).
     heroRoller.addDice(-3);
-
-    // Make sure there are enough resources and consume them
-    const {
-        error: resourceError,
-        warning: resourceWarning,
-        resourcesRequired,
-        resourcesUsedDescription,
-        resourcesUsedDescriptionRenderedRoll,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
-        ...options,
-        ...{ noResourceUse: false },
-    });
-    if (resourceError) {
-        return ui.notifications.error(resourceError);
-    } else if (resourceWarning) {
-        return ui.notifications.warn(resourceWarning);
-    }
 
     const aoeModifier = item.getAoeModifier();
     const aoeTemplate =

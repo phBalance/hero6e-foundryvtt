@@ -109,6 +109,7 @@ export class ItemAttackFormApplication extends FormApplication {
             data.omcvMod ??= parseInt(item.system.ocv); //TODO: May need to make a distinction between OCV/OMCV
             data.dmcvMod ??= parseInt(item.system.dcv);
             data.effectiveStr ??= parseInt(data.str);
+            data.effectiveStr = Math.max(0, data.effectiveStr);
             data.effectiveLevels ??= parseInt(data.item.system.LEVELS);
 
             // Penalty Skill Levels
