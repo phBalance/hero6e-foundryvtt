@@ -8,7 +8,10 @@ export class Attack {
         const actor = action.system.actor;
         Attack.removeActionActiveEffects(actor);
         cvModifiers.forEach((cvModifier) => {
-            Attack.makeActionActiveEffect(action, cvModifier);
+            // Do not create an AE for OCV as it only works for an instant, no need to keep track of it.
+            if (!cvModifier.cvMod.ocv) {
+                Attack.makeActionActiveEffect(action, cvModifier);
+            }
         });
     }
     // discontinue any effects for the action

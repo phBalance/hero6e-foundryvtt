@@ -262,7 +262,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             const pdContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             </POWER>
-        `;
+            `;
             const pdAttack = await new HeroSystem6eItem(
                 HeroSystem6eItem.itemDataFromXml(pdContentsAttack, defenseCalculationActor),
                 { temporary: true, parent: defenseCalculationActor },
@@ -312,7 +312,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             const edContentsAttack = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             </POWER>
-        `;
+            `;
             const edAttack = await new HeroSystem6eItem(
                 HeroSystem6eItem.itemDataFromXml(edContentsAttack, defenseCalculationActor),
                 { temporary: true, parent: defenseCalculationActor },
@@ -363,7 +363,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             <POWER XMLID="EGOATTACK" ID="1695575160315" BASECOST="0.0" LEVELS="1" ALIAS="Mental Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             <NOTES />
             </POWER>
-        `;
+            `;
             const mdAttack = await new HeroSystem6eItem(
                 HeroSystem6eItem.itemDataFromXml(mdContentsAttack, defenseCalculationActor),
                 { temporary: true, parent: defenseCalculationActor },
@@ -411,7 +411,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             <POWER XMLID="DRAIN" ID="1703727634494" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                 <NOTES />
             </POWER>
-        `;
+            `;
             const drainAttack = await new HeroSystem6eItem(
                 HeroSystem6eItem.itemDataFromXml(drainContentsAttack, defenseCalculationActor),
                 { temporary: true, parent: defenseCalculationActor },

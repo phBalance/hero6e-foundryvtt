@@ -138,7 +138,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.targetEntangle = data.entangleExists;
 
                 // Mental attacks typically bypass entangles
-                if (item.attackDefenseVs === "MD" && entangles?.[0].flags.entangleDefense.rMD === 0) {
+                if (item.attackDefenseVs === "MD" && entangles?.[0]?.flags.entangleDefense.rMD === 0) {
                     data.targetEntangle = false;
                 }
             }

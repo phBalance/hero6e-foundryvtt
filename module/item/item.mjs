@@ -4876,7 +4876,7 @@ export class HeroSystem6eItem extends Item {
         // A backpack from MiscEquipment.hdp is a CUSTOMPOWER
         if (this.system.description.match(/can hold \d+kg/i)) return true;
 
-        return this.baseInfo.isContainer;
+        return this.baseInfo?.isContainer;
     }
 
     get killing() {
