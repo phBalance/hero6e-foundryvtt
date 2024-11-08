@@ -1412,6 +1412,25 @@ export class HeroSystem6eItem extends Item {
                 item.flags.tags.dcv += `-5 Haymaker`;
             }
 
+            // STRMINIMUM
+            const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
+            if (STRMINIMUM) {
+                const strMinimumValue = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+                const extraStr =
+                    Math.max(0, parseInt(item.actor?.system.characteristics.str.value || 0)) - strMinimumValue;
+                if (extraStr < 0) {
+                    const adjustment = Math.floor(extraStr / 5);
+                    item.system.ocvEstimated = `${parseInt(item.system.ocvEstimated) + adjustment}`;
+
+                    if (item.flags.tags.ocv) {
+                        item.flags.tags.ocv += "\n";
+                    } else {
+                        item.flags.tags.ocv = "";
+                    }
+                    item.flags.tags.ocv += `${adjustment.signedString()} ${STRMINIMUM.ALIAS}`;
+                }
+            }
+
             item.system.phase = item.system.PHASE;
         }
 

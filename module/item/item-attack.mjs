@@ -558,6 +558,16 @@ export async function AttackToHit(item, options) {
         dcv -= 4;
     }
 
+    // STRMINIMUM
+    const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
+    if (STRMINIMUM) {
+        const strMinimumValue = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+        const extraStr = Math.max(0, parseInt(actor.system.characteristics.str.value)) - strMinimumValue;
+        if (extraStr < 0) {
+            heroRoller.addNumber(Math.floor(extraStr / 5), STRMINIMUM.ALIAS);
+        }
+    }
+
     cvModifiers.forEach((cvModifier) => {
         if (cvModifier.cvMod.ocv) {
             heroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
