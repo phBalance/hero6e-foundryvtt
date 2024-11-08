@@ -1,6 +1,8 @@
 # Releases
 
-## Version 4.0.4 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.5 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+## Version 4.0.4
 
 - Penalty Skill Levels now default to checked after upload. [#1359](https://github.com/dmdorman/hero6e-foundryvtt/issues/1359)
 - Mental attacks vs Entangles without Mental Defense now default to targeting actor, not entangle by default. [#1295](https://github.com/dmdorman/hero6e-foundryvtt/issues/1295)

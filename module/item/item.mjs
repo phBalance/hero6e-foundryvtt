@@ -4862,7 +4862,11 @@ export class HeroSystem6eItem extends Item {
             return "KB";
         }
 
-        console.error(`Unable to determine defense for ${this.name}`);
+        if (this.system.XMLID === "HANDTOHANDATTACK") {
+            return "PD";
+        }
+
+        console.warn(`Unable to determine defense for ${this.name}`);
         return "PD"; // Default
     }
 
