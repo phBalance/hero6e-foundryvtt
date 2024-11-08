@@ -3,7 +3,7 @@
 ## Version 4.0.5 (So Far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - OCV/OMCV bonuses are no longer active effects. They only work for a specific instant attack. (#1285)(https://github.com/dmdorman/hero6e-foundryvtt/issues/1285)
-- Fixed rare issue where adding 6e powers to a 5e actor would prevent actor sheet from opening.
+- Fixed rare issue where adding some 6e powers to a 5e actor would prevent actor sheet from opening.
 
 ## Version 4.0.4
 
