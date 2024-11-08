@@ -3199,13 +3199,23 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         // Target is in the air -1d6
         // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
         //       when more than 0m off the ground? This same effect should also be considered for gliding.
-        if (options.targetToken?.actor?.flags?.activeMovement === "flight") {
-            knockbackDice -= 1;
-            knockbackTags.push({
-                value: "-1d6KB",
-                name: "target is in the air",
-                title: "Knockback Modifier",
-            });
+        const activeMovement = options.targetToken?.actor?.flags?.activeMovement;
+        if (["flight", "gliding"].includes(activeMovement)) {
+            // Double check to make sure FLIGHT or GLIDING is still on
+            if (
+                options.targetToken.actor.items.find(
+                    (o) => o.system.XMLID === activeMovement.toUpperCase() && o.system.active,
+                )
+            ) {
+                knockbackDice -= 1;
+                knockbackTags.push({
+                    value: "-1d6KB",
+                    name: "target is in the air",
+                    title: `Knockback Modifier ${options.targetToken?.actor?.flags?.activeMovement}`,
+                });
+            } else {
+                console.warn(`${activeMovement} selected but that power is not active.`);
+            }
         }
 
         // TODO: Target Rolled With A Punch -1d6
