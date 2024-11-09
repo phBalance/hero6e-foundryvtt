@@ -329,7 +329,7 @@ export class ItemAttackFormApplication extends FormApplication {
             }
         }
         if (updates) {
-            const actualUpdates = await this.data.actor.updateEmbeddedDocuments("Item", updates);
+            await this.data.actor.updateEmbeddedDocuments("Item", updates);
         }
 
         // Take all the data we updated in the form and apply it.
