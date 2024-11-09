@@ -4873,6 +4873,11 @@ export class HeroSystem6eItem extends Item {
             return "PD";
         }
 
+        // STRIKE
+        if (this.system.EFFECT?.includes("STR")) {
+            return "PD";
+        }
+
         if (this.system.XMLID === "TELEKINESIS") {
             return "PD";
         }

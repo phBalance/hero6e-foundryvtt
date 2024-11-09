@@ -9,6 +9,7 @@
 - Support for PRE 0 rolls. [#1403](https://github.com/dmdorman/hero6e-foundryvtt/issues/1403)
 - Fixed issue where FLIGHT was impacting KB rolls even when FLIGHT was turned off. [#1400](https://github.com/dmdorman/hero6e-foundryvtt/issues/1400)
 - Fixed issue where full END for an attack was used even when lowering Effective Strength. [#1399](https://github.com/dmdorman/hero6e-foundryvtt/issues/1399)
+- AUTOMATION's can't use STUN in place of END. [#1398](https://github.com/dmdorman/hero6e-foundryvtt/issues/1398)
 
 ## Version 4.0.4
 

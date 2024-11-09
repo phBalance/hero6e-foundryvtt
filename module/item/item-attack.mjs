@@ -3365,6 +3365,14 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             }
         } else {
             if (resourcesRequired.end > actorEndurance && useResources) {
+                // Auotmation
+                const AUTOMATON = actor.items.find((o) => o.system.XMLID === "AUTOMATON");
+                if (AUTOMATON) {
+                    return {
+                        warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. AUTOMATION's cannot use STUN for END.`,
+                    };
+                }
+
                 // Is the actor willing to use STUN to make up for the lack of END?
                 const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.end);
 
