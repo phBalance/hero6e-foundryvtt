@@ -3321,8 +3321,9 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
  * @param {HeroSystem6eItem} item
  * @param {Object} options
  * @param {boolean} options.noResourceUse - true to not consume resources but still indicate how many would have been consumed
+ * @param {boolean} options.forceStunUsage - true to force STUN to be used if there is insufficient END
  *
- * @returns Object discriminated union based on error or warning being falsy/truthy
+ * @returns Object - discriminated union based on error or warning being falsy/truthy
  */
 export async function userInteractiveVerifyOptionallyPromptThenSpendResources(item, options) {
     const useResources = !options.noResourceUse;
@@ -3344,37 +3345,38 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             if (enduranceReserve) {
                 if (resourcesRequired.end > reserveEnd && useResources) {
                     return {
-                        error: `needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END.`,
+                        error: `needs ${resourcesRequired.end} END but ${enduranceReserve.name} only has ${reserveEnd} END`,
                     };
                 }
             } else {
                 return {
-                    error: `needs an endurance reserve to spend END but none found.`,
+                    error: `needs an endurance reserve to spend END but none found`,
                 };
             }
         } else {
             if (resourcesRequired.end > actorEndurance && useResources) {
-                // Auotmation or other actor without STUN
+                // Automation or other actor without STUN
                 const hasSTUN = getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN");
                 if (!hasSTUN) {
                     return {
-                        warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. This actor cannot use STUN for END.`,
+                        error: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. This actor cannot use STUN for END`,
                     };
                 }
 
                 // Is the actor willing to use STUN to make up for the lack of END?
                 const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.end);
 
-                const confirmed = await Dialog.confirm({
-                    title: "USING STUN FOR ENDURANCE",
-                    content: `<p><b>${item.name}</b> requires ${resourcesRequired.end} END. 
-                <b>${actor.name}</b> has ${actorEndurance} END. 
-                Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
-                });
-                if (!confirmed) {
-                    return {
-                        warning: `needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference.`,
-                    };
+                if (!options.forceStunUsage) {
+                    const confirmed = await Dialog.confirm({
+                        title: "USING STUN FOR ENDURANCE",
+                        content: `<p><b>${item.name}</b> requires ${resourcesRequired.end} END. <b>${actor.name}</b> has ${actorEndurance} END. 
+                                Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
+                    });
+                    if (!confirmed) {
+                        return {
+                            warning: `needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference`,
+                        };
+                    }
                 }
 
                 ({ damage: actualStunDamage, roller: actualStunRoller } = await rollStunForEnd(
@@ -3392,7 +3394,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             return {
                 error: `does not have ${resourcesRequired.charges} charge${
                     resourcesRequired.charges > 1 ? "s" : ""
-                } remaining.`,
+                } remaining`,
             };
         }
     }
@@ -3439,20 +3441,32 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
 }
 
 /**
+ * @typedef {Object} HeroSystemItemResourcesToUse
+ * @property {number} totalEnd - Total endurance consumed. This is the sum of actor endurance and reserve endurance
+ * @property {number} end - Total endurance consumed from actor's characteristic.
+ * @property {number} reserveEnd - Total endurance consumed from the item's associated endurance reserve.
+ *
+ * @property {number} charges - Total charges consumed from the item.
+ *
+ */
+/**
  * Calculate the total expendable cost to use this item
  *
  * @param {HeroSystem6eItem} item
  * @param {Object} options
  *
- * @returns Object
+ * @returns HeroSystemItemResourcesToUse
  */
 function calculateRequiredResourcesToUse(item, options) {
     const chargesRequired = calculateRequiredCharges(item, options.boostableChargesToUse || 0);
     const endRequired = calculateRequiredEnd(item, parseInt(options.effectiveStr) || 0);
 
     return {
-        charges: chargesRequired,
+        totalEnd: endRequired, // TODO: Needs to be implemented
         end: endRequired,
+        reserveEnd: 0, // TODO: Needs to be implemented
+
+        charges: chargesRequired,
     };
 }
 
