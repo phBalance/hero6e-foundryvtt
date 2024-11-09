@@ -3365,11 +3365,11 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             }
         } else {
             if (resourcesRequired.end > actorEndurance && useResources) {
-                // Auotmation
-                const AUTOMATON = actor.items.find((o) => o.system.XMLID === "AUTOMATON");
-                if (AUTOMATON) {
+                // Auotmation or other actor without STUN
+                const hasSTUN = getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN");
+                if (!hasSTUN) {
                     return {
-                        warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. AUTOMATION's cannot use STUN for END.`,
+                        warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. This actor cannot use STUN for END.`,
                     };
                 }
 

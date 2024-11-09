@@ -567,7 +567,8 @@ export class HeroSystemActorSheet extends ActorSheet {
 
             // Not all actor types have END & STUN
             data.hasEND = powers.find((o) => o.key === "END");
-            data.hasSTUN = powers.find((o) => o.key === "STUN");
+            data.hasSTUN =
+                powers.find((o) => o.key === "STUN") && !this.actor.items.find((o) => o.system.XMLID === "AUTOMATON");
 
             // Endurance Reserve
             data.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
