@@ -56,11 +56,9 @@ export const DICE_SO_NICE_CUSTOM_SETS = Object.freeze({
     },
 });
 
-// v11/v12 compatibility shim.
-// TODO: Cleanup eslint file with these terms
-const Die = CONFIG.Dice.terms.d;
-const NumericTerm = CONFIG.Dice.termTypes.NumericTerm;
-const OperatorTerm = CONFIG.Dice.termTypes.OperatorTerm;
+const Die = foundry.dice.terms.Die;
+const NumericTerm = foundry.dice.terms.NumericTerm;
+const OperatorTerm = foundry.dice.terms.OperatorTerm;
 
 // foundry.dice.terms.RollTerm is the v12 way of finding the class
 const RollTermClass = foundry.dice?.terms.RollTerm ? foundry.dice.terms.RollTerm : RollTerm;
