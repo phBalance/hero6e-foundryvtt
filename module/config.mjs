@@ -6871,6 +6871,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+
+    addPower(
+        {
+            key: "VISIBLE",
+            xml: `<MODIFIER XMLID="VISIBLE" ID="1731124293164" BASECOST="-0.25" LEVELS="0" ALIAS="Visible" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
 })();
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
