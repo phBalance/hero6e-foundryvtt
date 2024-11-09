@@ -158,12 +158,12 @@ export function registerDamageFunctionTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
+                    actor.system.is5e = false;
                     await actor._postUpload();
 
-                    item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        temporary: true,
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
                     await item._postUpload();
@@ -197,13 +197,12 @@ export function registerDamageFunctionTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
                     actor.system.is5e = true;
                     await actor._postUpload();
 
-                    item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        temporary: true,
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
                     await item._postUpload();
@@ -237,12 +236,12 @@ export function registerDamageFunctionTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
+                    actor.system.is5e = false;
                     await actor._postUpload();
 
-                    item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        temporary: true,
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
                     await item._postUpload();
@@ -276,12 +275,12 @@ export function registerDamageFunctionTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
+                    actor.system.is5e = false;
                     await actor._postUpload();
 
-                    item = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
-                        temporary: true,
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                         parent: actor,
                     });
                     await item._postUpload();

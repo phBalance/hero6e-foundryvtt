@@ -445,7 +445,7 @@ export async function AttackToHit(item, options) {
             const effectiveItemData = item.toObject();
             effectiveItemData._id = null;
             effectiveItemData.system.LEVELS = options.effectiveLevels;
-            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { parent: item.actor, temporary: true });
+            effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: item.actor });
             await effectiveItem._postUpload();
         }
     }
@@ -1220,9 +1220,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
                 </MODIFIER>
             </POWER>
         `;
-    const pdAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {
-        temporary: true,
-    });
+    const pdAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {});
     await pdAttack._postUpload();
     pdAttack.name ??= "KNOCKBACK";
 
@@ -1402,7 +1400,7 @@ export async function _onRollDamage(event) {
             const effectiveItemData = item.toObject();
             effectiveItemData._id = null;
             effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
-            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { parent: item.actor, temporary: true });
+            effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: item.actor });
             await effectiveItem._postUpload();
         }
     }
@@ -1662,7 +1660,7 @@ export async function _onRollMindScanEffectRoll(event) {
             const effectiveItemData = item.toObject();
             effectiveItemData._id = null;
             effectiveItemData.system.LEVELS = toHitData.effectiveLevels;
-            effectiveItem = await HeroSystem6eItem.create(effectiveItemData, { parent: item.actor, temporary: true });
+            effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: item.actor });
             await effectiveItem._postUpload();
         }
     }
@@ -3198,9 +3196,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             <POWER XMLID="KNOCKBACK" ID="1695402954902" BASECOST="0.0" LEVELS="1" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
             </POWER>
         `;
-        const kbAttack = await new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {
-            temporary: true,
-        });
+        const kbAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(kbContentsAttack, actor), {});
         //await pdAttack._postUpload();
         let { defenseValue, defenseTags } = getActorDefensesVsAttack(actor, kbAttack);
         knockbackTags = [...knockbackTags, ...defenseTags];

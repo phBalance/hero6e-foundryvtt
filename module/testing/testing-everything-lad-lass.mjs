@@ -953,7 +953,7 @@ export function registerEverythingLadLass(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
@@ -1938,7 +1938,7 @@ export function registerEverythingLadLass(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
