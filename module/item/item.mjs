@@ -2584,7 +2584,7 @@ export class HeroSystem6eItem extends Item {
                 });
 
                 if (!adderPowerInfo) {
-                    console.warn(`Missing powerInfo for ${adder.XMLID}`, adder);
+                    console.warn(`Missing powerInfo for adder ${adder.XMLID}`, adder);
                 }
 
                 let adderCost = adderPowerInfo?.cost ? adderPowerInfo.cost(adder, this) : 0;
@@ -2674,7 +2674,7 @@ export class HeroSystem6eItem extends Item {
                 is5e: this.is5e,
             });
             if (!modPowerInfo) {
-                console.warn(`Missing powerInfo for ${modifier.XMLID}`, modifier);
+                console.warn(`Missing powerInfo for modifier ${modifier.XMLID}`, modifier);
             }
 
             const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
