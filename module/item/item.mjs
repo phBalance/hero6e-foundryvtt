@@ -3751,7 +3751,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Disadvantages sorted low to high
-        for (let modifier of modifiers) {
+        for (const modifier of modifiers) {
             system.description += this.createPowerDescriptionModifier(modifier);
         }
 
@@ -3822,8 +3822,9 @@ export class HeroSystem6eItem extends Item {
                 {
                     // 1 Recoverable Continuing Charge lasting 1 Minute
                     result += ", ";
+
                     const maxCharges = parseInt(modifier.OPTION_ALIAS);
-                    if (maxCharges != parseInt(this.system.charges.max)) {
+                    if (maxCharges !== parseInt(system.charges.max)) {
                         console.error("CHARGES mismatch", item);
                     }
                     const currentCharges = parseInt(this.system.charges.value);
@@ -3832,17 +3833,33 @@ export class HeroSystem6eItem extends Item {
                     }
                     result += modifier.OPTION_ALIAS;
 
-                    let recoverable = (modifier.ADDER || []).find((o) => o.XMLID == "RECOVERABLE");
+                    const recoverable = (modifier.ADDER || []).find((o) => o.XMLID === "RECOVERABLE");
                     if (recoverable) {
-                        result += " " + recoverable.ALIAS;
+                        result += ` ${recoverable.ALIAS}`;
                     }
 
-                    let continuing = (modifier.ADDER || []).find((o) => o.XMLID == "CONTINUING");
+                    const boostable = (modifier.ADDER || []).find((o) => o.XMLID === "BOOSTABLE");
+                    if (boostable) {
+                        result += ` ${boostable.ALIAS}`;
+                    }
+
+                    const continuing = (modifier.ADDER || []).find((o) => o.XMLID === "CONTINUING");
                     if (continuing) {
-                        result += " " + continuing.ALIAS;
+                        result += ` ${continuing.ALIAS}`;
+                    }
+
+                    const fuel = (modifier.ADDER || []).find((o) => o.XMLID === "FUEL");
+                    if (fuel) {
+                        result += ` ${fuel.ALIAS}`;
                     }
 
                     result += maxCharges > 1 ? " Charges" : " Charge";
+
+                    const totalClips = this.system.charges.clipsMax;
+                    if (totalClips > 1) {
+                        const currentClips = this.system.charges.clips;
+                        result += ` (${currentClips}/${totalClips} clips)`;
+                    }
 
                     if (continuing) {
                         result += " lasting " + continuing.OPTION_ALIAS;
