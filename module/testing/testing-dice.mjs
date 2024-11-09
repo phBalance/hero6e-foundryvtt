@@ -1,8 +1,6 @@
 import { HeroRoller } from "../utility/dice.mjs";
 
-// v11/v12 compatibility shim
-// TODO: Cleanup eslint file with these terms
-const Die = CONFIG.Dice.terms.d;
+const Die = foundry.dice.terms.Die;
 
 function FixedDieRoll(fixedRollResult) {
     return class extends Die {
@@ -11,7 +9,7 @@ function FixedDieRoll(fixedRollResult) {
         }
 
         /**
-         * Roll for this Die, but always roll rollResult (i.e. it's not random)
+         * Roll for this die, but always roll rollResult (i.e. it's not random)
          */
         _evaluate() {
             for (let i = 0; i < this.number; ++i) {
@@ -31,7 +29,7 @@ function DynamicDieRoll(generateRollResult) {
         }
 
         /**
-         * Roll for this Die based on the provided function
+         * Roll for this die based on the provided function
          */
         _evaluate() {
             for (let i = 0; i < this.number; ++i) {
@@ -49,7 +47,7 @@ class RollMock extends Roll {
 
     static fromTerms(terms, options) {
         const newTerms = terms.map((term) => {
-            // Replace all Die with a Die class that will always return 1 when rolling
+            // Replace all Die with a DieClass that will always return an expected behaviour when rolling
             if (term instanceof Die) {
                 return new this.DieClass({
                     number: term.number,

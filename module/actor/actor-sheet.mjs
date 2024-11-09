@@ -69,7 +69,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             data.isGM = game.user.isGM;
 
             // enrichedData
-            for (let field of [
+            for (const field of [
                 "BIOGRAPHY",
                 "BACKGROUND",
                 "PERSONALITY",
@@ -1003,9 +1003,9 @@ export class HeroSystemActorSheet extends ActorSheet {
             resourcesUsedDescriptionRenderedRoll,
         } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, strengthUsed);
         if (resourceError) {
-            return ui.notifications.error(resourceError);
+            return ui.notifications.error(`${item.name} ${resourceError}`);
         } else if (resourceWarning) {
-            return ui.notifications.warn(resourceWarning);
+            return ui.notifications.warn(`${item.name} ${resourceWarning}`);
         }
 
         // NOTE: Characteristic rolls can't have +1 to their roll.

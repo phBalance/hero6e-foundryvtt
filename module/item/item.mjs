@@ -479,9 +479,9 @@ export class HeroSystem6eItem extends Item {
                 noResourceUse: overrideCanAct,
             });
             if (resourceError) {
-                return ui.notifications.error(resourceError);
+                return ui.notifications.error(`${item.name} ${resourceError}`);
             } else if (resourceWarning) {
-                return ui.notifications.warn(resourceWarning);
+                return ui.notifications.warn(`${item.name} ${resourceWarning}`);
             }
 
             const success = await RequiresASkillRollCheck(this, event);
@@ -1508,9 +1508,10 @@ export class HeroSystem6eItem extends Item {
                 boostable: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "BOOSTABLE"),
                 fuel: !!(CHARGES.ADDER || []).find((o) => o.XMLID === "FUEL"),
             };
-            if (this.system.charges?.value === undefined || this.system.charges?.value === null) {
-                console.log("Invalid charges. Resetting to max", this);
-                this.system.charges.value ??= this.system.charges.max;
+
+            // The first time through, on creation, there will be no value (number of charges) defined.
+            if (this.system.charges?.value == null) {
+                this.system.charges.value = this.system.charges.max;
                 changed = true;
             }
         } else {
