@@ -6,6 +6,7 @@
 - Fixed rare issue where adding some 6e powers to a 5e actor would prevent actor sheet from opening.
 - Support for STR Minimum OCV penalty. [#384](https://github.com/dmdorman/hero6e-foundryvtt/issues/384)
 - Support for STR 0 rolls including DCV and movement penalties. [#1401](https://github.com/dmdorman/hero6e-foundryvtt/issues/1401)
+- Support for PRE 0 rolls. [#1403](https://github.com/dmdorman/hero6e-foundryvtt/issues/1403)
 - Fixed issue where FLIGHT was impacting KB rolls even when FLIGHT was turned off. [#1400](https://github.com/dmdorman/hero6e-foundryvtt/issues/1400)
 - Fixed issue where full END for an attack was used even when lowering Effective Strength. [#1399](https://github.com/dmdorman/hero6e-foundryvtt/issues/1399)
 

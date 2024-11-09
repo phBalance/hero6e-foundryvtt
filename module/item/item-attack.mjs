@@ -401,7 +401,12 @@ export async function AttackToHit(item, options) {
     // a STR Roll in order to perform any Action that uses STR, such
     // as aiming an attack, pulling a trigger, or using a Power with the
     // Gestures Limitation.
-    if (actor && (effectiveItem.system.usesStrength || effectiveItem.findModsByXmlid("GESTURES"))) {
+    // Not all token types (base) will have STR
+    if (
+        actor &&
+        actor.system.characteristics.str &&
+        (effectiveItem.system.usesStrength || effectiveItem.findModsByXmlid("GESTURES"))
+    ) {
         if (parseInt(actor.system.characteristics.str.value) <= 0) {
             if (
                 !(await RequiresACharacteristicRollCheck(
@@ -413,6 +418,24 @@ export async function AttackToHit(item, options) {
                 await ui.notifications.warn(`${actor.name} failed STR 0 roll. Action with ${item.name} failed.`);
                 return;
             }
+        }
+    }
+
+    // PRE 0
+    // At PRE 0, a character must attempt an PRE Roll to take any
+    // offensive action, or to remain in the face of anything even
+    // remotely threatening.
+    // Not all token types (base) will have PRE
+    if (actor && actor.system.characteristics.pre && parseInt(actor.system.characteristics.pre.value) <= 0) {
+        if (
+            !(await RequiresACharacteristicRollCheck(
+                actor,
+                "pre",
+                `Offensive actions when at PRE 0 requires PRE roll, failure typically results in actor avoiding threats`,
+            ))
+        ) {
+            await ui.notifications.warn(`${actor.name} failed PRE 0 roll. Action with ${item.name} failed.`);
+            return;
         }
     }
 
