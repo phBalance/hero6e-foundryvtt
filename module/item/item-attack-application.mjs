@@ -109,6 +109,7 @@ export class ItemAttackFormApplication extends FormApplication {
             data.omcvMod ??= parseInt(item.system.ocv); //TODO: May need to make a distinction between OCV/OMCV
             data.dmcvMod ??= parseInt(item.system.dcv);
             data.effectiveStr ??= parseInt(data.str);
+            data.effectiveStr = Math.max(0, data.effectiveStr);
             data.effectiveLevels ??= parseInt(data.item.system.LEVELS);
 
             // Penalty Skill Levels
@@ -138,7 +139,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 data.targetEntangle = data.entangleExists;
 
                 // Mental attacks typically bypass entangles
-                if (item.attackDefenseVs === "MD" && entangles?.[0].flags.entangleDefense.rMD === 0) {
+                if (item.attackDefenseVs === "MD" && entangles?.[0]?.flags.entangleDefense.rMD === 0) {
                     data.targetEntangle = false;
                 }
             }
@@ -328,8 +329,7 @@ export class ItemAttackFormApplication extends FormApplication {
             }
         }
         if (updates) {
-            const actualUpdates = await this.data.actor.updateEmbeddedDocuments("Item", updates);
-            console.log(actualUpdates);
+            await this.data.actor.updateEmbeddedDocuments("Item", updates);
         }
 
         // Take all the data we updated in the form and apply it.

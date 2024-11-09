@@ -887,6 +887,13 @@ export class HeroSystem6eActor extends Actor {
             }
 
             await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+
+            // If we have control of this token, re-acquire to update movement types
+            const myToken = this.getActiveTokens()?.[0];
+            if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+                myToken.release();
+                myToken.control();
+            }
             return;
         }
 
@@ -894,6 +901,88 @@ export class HeroSystem6eActor extends Actor {
             await prevActiveEffect.delete();
         } else if (prevActiveEffect && prevActiveEffect.name != name) {
             await prevActiveEffect.update({ name: name });
+        }
+
+        // At STR 0, halve the character’s Running,
+        // Leaping, Swimming, Swinging, Tunneling, and
+        // Flight based on muscle power (such as most types
+        // of wings). The GM may require the character to
+        // succeed with STR Rolls just to stand up, walk, and
+        // perform similar mundane exertions.
+        // At STR 0, halve the character’s DCV.
+        // For every 2x mass a character has above the
+        // standard human mass of 100 kg, the effects of STR
+        // 0 on movement and DCV occur 5 points of STR
+        // sooner.
+        const massMultiplier = this.items
+            .filter((o) => o.system.XMLID === "DENSITYINCREASE" && o.system.active)
+            .reduce((p, a) => p + parseInt(a.system.LEVELS), 0);
+        const minStr = massMultiplier * 5;
+
+        const prevStr0ActiveEffect = this.effects.find((o) => o.flags?.str0);
+        if (this.system.characteristics.str.value <= minStr && !prevStr0ActiveEffect) {
+            const str0ActiveEffect = {
+                name: "STR0",
+                id: "STR0",
+                icon: `systems/${HEROSYS.module}/icons/encumbered.svg`,
+                changes: [
+                    {
+                        key: "system.characteristics.dcv.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                    {
+                        key: "system.characteristics.running.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                    {
+                        key: "system.characteristics.leaping.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                    {
+                        key: "system.characteristics.swimming.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                    {
+                        key: "system.characteristics.swinging.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                    {
+                        key: "system.characteristics.tunneling.value",
+                        value: 0.5,
+                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                    },
+                ],
+                origin: this.uuid,
+                // duration: {
+                //     seconds: 3.154e7 * 100, // 100 years should be close to infinity
+                // },
+                flags: {
+                    str0: true,
+                },
+            };
+
+            await this.createEmbeddedDocuments("ActiveEffect", [str0ActiveEffect]);
+            // If we have control of this token, re-acquire to update movement types
+            const myToken = this.getActiveTokens()?.[0];
+            if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+                myToken.release();
+                myToken.control();
+            }
+        } else {
+            if (prevStr0ActiveEffect && this.system.characteristics.str.value > minStr) {
+                await prevStr0ActiveEffect.delete();
+                // If we have control of this token, re-acquire to update movement types
+                const myToken = this.getActiveTokens()?.[0];
+                if (canvas.tokens.controlled.find((t) => t.id == myToken.id)) {
+                    myToken.release();
+                    myToken.control();
+                }
+            }
         }
     }
 

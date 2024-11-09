@@ -11,7 +11,7 @@ import {
 } from "../utility/damage.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { getRoundedDownDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { HeroSystem6eItem, RequiresASkillRollCheck } from "../item/item.mjs";
+import { HeroSystem6eItem, RequiresASkillRollCheck, RequiresACharacteristicRollCheck } from "../item/item.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
@@ -379,6 +379,65 @@ export async function AttackToHit(item, options) {
     const actor = item.actor;
     let effectiveItem = item;
 
+    // Make sure there are enough resources and consume them
+    const {
+        error: resourceError,
+        warning: resourceWarning,
+        resourcesRequired,
+        resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveItem, {
+        ...options,
+        ...{ noResourceUse: false },
+    });
+    if (resourceError) {
+        return ui.notifications.error(resourceError);
+    } else if (resourceWarning) {
+        return ui.notifications.warn(resourceWarning);
+    }
+
+    // STR 0 character must succeed with
+    // a STR Roll in order to perform any Action that uses STR, such
+    // as aiming an attack, pulling a trigger, or using a Power with the
+    // Gestures Limitation.
+    // Not all token types (base) will have STR
+    if (
+        actor &&
+        actor.system.characteristics.str &&
+        (effectiveItem.system.usesStrength || effectiveItem.findModsByXmlid("GESTURES"))
+    ) {
+        if (parseInt(actor.system.characteristics.str.value) <= 0) {
+            if (
+                !(await RequiresACharacteristicRollCheck(
+                    actor,
+                    "str",
+                    `Actions that use STR or GESTURES require STR roll when at 0 STR`,
+                ))
+            ) {
+                await ui.notifications.warn(`${actor.name} failed STR 0 roll. Action with ${item.name} failed.`);
+                return;
+            }
+        }
+    }
+
+    // PRE 0
+    // At PRE 0, a character must attempt an PRE Roll to take any
+    // offensive action, or to remain in the face of anything even
+    // remotely threatening.
+    // Not all token types (base) will have PRE
+    if (actor && actor.system.characteristics.pre && parseInt(actor.system.characteristics.pre.value) <= 0) {
+        if (
+            !(await RequiresACharacteristicRollCheck(
+                actor,
+                "pre",
+                `Offensive actions when at PRE 0 requires PRE roll, failure typically results in actor avoiding threats`,
+            ))
+        ) {
+            await ui.notifications.warn(`${actor.name} failed PRE 0 roll. Action with ${item.name} failed.`);
+            return;
+        }
+    }
+
     // Create a temporary item based on effectiveLevels
     if (options?.effectiveLevels && parseInt(item.system.LEVELS) > 0) {
         options.effectiveLevels = parseInt(options.effectiveLevels) || 0;
@@ -557,6 +616,16 @@ export async function AttackToHit(item, options) {
         dcv -= 4;
     }
 
+    // STRMINIMUM
+    const STRMINIMUM = item.findModsByXmlid("STRMINIMUM");
+    if (STRMINIMUM) {
+        const strMinimumValue = parseInt(STRMINIMUM.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+        const extraStr = Math.max(0, parseInt(actor.system.characteristics.str.value)) - strMinimumValue;
+        if (extraStr < 0) {
+            heroRoller.addNumber(Math.floor(extraStr / 5), STRMINIMUM.ALIAS);
+        }
+    }
+
     cvModifiers.forEach((cvModifier) => {
         if (cvModifier.cvMod.ocv) {
             heroRoller.addNumber(cvModifier.cvMod.ocv, cvModifier.name);
@@ -600,23 +669,6 @@ export async function AttackToHit(item, options) {
     // and lastly we subtract the die roll. The value returned is the maximum DCV hit
     // (so we can be sneaky and not tell the target's DCV out loud).
     heroRoller.addDice(-3);
-
-    // Make sure there are enough resources and consume them
-    const {
-        error: resourceError,
-        warning: resourceWarning,
-        resourcesRequired,
-        resourcesUsedDescription,
-        resourcesUsedDescriptionRenderedRoll,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
-        ...options,
-        ...{ noResourceUse: false },
-    });
-    if (resourceError) {
-        return ui.notifications.error(resourceError);
-    } else if (resourceWarning) {
-        return ui.notifications.warn(resourceWarning);
-    }
 
     const aoeModifier = item.getAoeModifier();
     const aoeTemplate =
@@ -804,7 +856,7 @@ export async function AttackToHit(item, options) {
         }
     }
 
-    if (!(await RequiresASkillRollCheck(item))) {
+    if (!(await item)) {
         const speaker = ChatMessage.getSpeaker({ actor: item.actor });
         speaker["alias"] = item.actor.name;
 
@@ -3163,13 +3215,23 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
         // Target is in the air -1d6
         // TODO: This is perhaps not the right check as they could just have the movement radio on. Consider a flying status
         //       when more than 0m off the ground? This same effect should also be considered for gliding.
-        if (options.targetToken?.actor?.flags?.activeMovement === "flight") {
-            knockbackDice -= 1;
-            knockbackTags.push({
-                value: "-1d6KB",
-                name: "target is in the air",
-                title: "Knockback Modifier",
-            });
+        const activeMovement = options.targetToken?.actor?.flags?.activeMovement;
+        if (["flight", "gliding"].includes(activeMovement)) {
+            // Double check to make sure FLIGHT or GLIDING is still on
+            if (
+                options.targetToken.actor.items.find(
+                    (o) => o.system.XMLID === activeMovement.toUpperCase() && o.system.active,
+                )
+            ) {
+                knockbackDice -= 1;
+                knockbackTags.push({
+                    value: "-1d6KB",
+                    name: "target is in the air",
+                    title: `Knockback Modifier ${options.targetToken?.actor?.flags?.activeMovement}`,
+                });
+            } else {
+                console.warn(`${activeMovement} selected but that power is not active.`);
+            }
         }
 
         // TODO: Target Rolled With A Punch -1d6
@@ -3296,6 +3358,14 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             }
         } else {
             if (resourcesRequired.end > actorEndurance && useResources) {
+                // Auotmation or other actor without STUN
+                const hasSTUN = getCharacteristicInfoArrayForActor(actor).find((o) => o.key === "STUN");
+                if (!hasSTUN) {
+                    return {
+                        warning: `${item.name} needs ${resourcesRequired.end} END but ${actor.name} only has ${actorEndurance} END. This actor cannot use STUN for END.`,
+                    };
+                }
+
                 // Is the actor willing to use STUN to make up for the lack of END?
                 const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.end);
 
