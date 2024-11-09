@@ -93,7 +93,7 @@ export async function migrateWorld() {
     // }
     const chatData = {
         user: game.user._id,
-        type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
         content: content,
     };
 

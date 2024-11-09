@@ -450,9 +450,8 @@ export class HeroSystem6eItem extends Item {
         const chatData = {
             user: game.user._id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            type: CONST.CHAT_MESSAGE_TYPES.ChatMessage,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
-            //speaker: speaker
         };
         ChatMessage.create(chatData);
     }
@@ -489,9 +488,10 @@ export class HeroSystem6eItem extends Item {
             if (!success) {
                 const speaker = ChatMessage.getSpeaker({ actor: item.actor });
                 speaker["alias"] = item.actor.name;
+
                 const chatData = {
                     user: game.user._id,
-                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                     content: `${
                         resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"
                     } to activate ${item.name} but attempt failed${resourcesUsedDescriptionRenderedRoll}`,
@@ -505,9 +505,10 @@ export class HeroSystem6eItem extends Item {
 
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
             speaker["alias"] = item.actor.name;
+
             const chatData = {
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `${
                     resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
                 } ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
@@ -548,9 +549,10 @@ export class HeroSystem6eItem extends Item {
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
             speaker["alias"] = item.actor.name;
+
             const chatData = {
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `Turned off ${item.name}`,
                 whisper: whisperUserTargetsForActor(item.actor),
                 speaker,
@@ -3773,7 +3775,7 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Disadvantages sorted low to high
-        for (let modifier of modifiers) {
+        for (const modifier of modifiers) {
             system.description += this.createPowerDescriptionModifier(modifier);
         }
 
@@ -3844,8 +3846,9 @@ export class HeroSystem6eItem extends Item {
                 {
                     // 1 Recoverable Continuing Charge lasting 1 Minute
                     result += ", ";
+
                     const maxCharges = parseInt(modifier.OPTION_ALIAS);
-                    if (maxCharges != parseInt(this.system.charges.max)) {
+                    if (maxCharges !== parseInt(system.charges.max)) {
                         console.error("CHARGES mismatch", item);
                     }
                     const currentCharges = parseInt(this.system.charges.value);
@@ -3854,17 +3857,33 @@ export class HeroSystem6eItem extends Item {
                     }
                     result += modifier.OPTION_ALIAS;
 
-                    let recoverable = (modifier.ADDER || []).find((o) => o.XMLID == "RECOVERABLE");
+                    const recoverable = (modifier.ADDER || []).find((o) => o.XMLID === "RECOVERABLE");
                     if (recoverable) {
-                        result += " " + recoverable.ALIAS;
+                        result += ` ${recoverable.ALIAS}`;
                     }
 
-                    let continuing = (modifier.ADDER || []).find((o) => o.XMLID == "CONTINUING");
+                    const boostable = (modifier.ADDER || []).find((o) => o.XMLID === "BOOSTABLE");
+                    if (boostable) {
+                        result += ` ${boostable.ALIAS}`;
+                    }
+
+                    const continuing = (modifier.ADDER || []).find((o) => o.XMLID === "CONTINUING");
                     if (continuing) {
-                        result += " " + continuing.ALIAS;
+                        result += ` ${continuing.ALIAS}`;
+                    }
+
+                    const fuel = (modifier.ADDER || []).find((o) => o.XMLID === "FUEL");
+                    if (fuel) {
+                        result += ` ${fuel.ALIAS}`;
                     }
 
                     result += maxCharges > 1 ? " Charges" : " Charge";
+
+                    const totalClips = this.system.charges.clipsMax;
+                    if (totalClips > 1) {
+                        const currentClips = this.system.charges.clips;
+                        result += ` (${currentClips}/${totalClips} clips)`;
+                    }
 
                     if (continuing) {
                         result += " lasting " + continuing.OPTION_ALIAS;
@@ -5130,7 +5149,7 @@ export async function RequiresASkillRollCheck(item) {
         speaker.alias = actor.name;
 
         const chatData = {
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: activationRoller.rawRolls(),
             user: game.user._id,
             content: cardHtml,

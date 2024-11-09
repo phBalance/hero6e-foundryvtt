@@ -727,14 +727,6 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 }
                 if (game.time.worldTime >= aeWithCharges.flags.startTime + aeWithCharges.duration.seconds) {
                     await aeWithCharges.parent.toggle();
-                    // const chatData = {
-                    //     user: game.user._id,
-                    //     type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-                    //     content: `${aeWithCharges.name} expired`,
-                    //     whisper: whisperUserTargetsForActor(aeWithCharges.parent?.actor),
-                    // };
-                    // ChatMessage.create(chatData);
-                    // await aeWithCharges.delete();
                 } else {
                     if (game.ready) game[HEROSYS.module].effectPanel.refresh();
                 }

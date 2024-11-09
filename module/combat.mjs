@@ -531,7 +531,7 @@ export class HeroSystem6eCombat extends Combat {
 
             const chatData = {
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: content,
                 whisper: whisperUserTargetsForActor(combatant.actor),
                 speaker,
@@ -587,18 +587,12 @@ export class HeroSystem6eCombat extends Combat {
 
             await effect.delete();
 
-            let content = `${combatant.actor.name} recovers from being stunned.`;
-            const token = combatant.token;
-            const speaker = ChatMessage.getSpeaker({
-                actor: combatant.actor,
-                token,
-            });
-            speaker["alias"] = combatant.actor.name;
+            const content = `${combatant.actor.name} recovers from being stunned.`;
+
             const chatData = {
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: content,
-                //speaker: speaker
             };
 
             await ChatMessage.create(chatData);
@@ -650,8 +644,8 @@ export class HeroSystem6eCombat extends Combat {
             <p>Skipping because this has already been performed on this turn during this combat.
             This typically occurs when rewinding combat or during speed changes.</p>`;
             const chatData = {
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 user: game.user._id,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                 content: content,
             };
 
@@ -731,8 +725,8 @@ export class HeroSystem6eCombat extends Combat {
         content += "</ul>";
         contentHidden += "</ul>";
         const chatData = {
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             user: game.user._id,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             content: content,
         };
 
