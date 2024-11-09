@@ -871,19 +871,14 @@ export class HeroSystem6eActor extends Actor {
                     },
                 ],
                 origin: this.uuid,
-                // duration: {
-                //     seconds: 3.154e7 * 100, // 100 years should be close to infinity
-                // },
                 flags: {
                     dcvDex: dcvDex,
-                    // temporary: true,
                     encumbrance: true,
                 },
             };
 
             if (prevActiveEffect) {
                 await prevActiveEffect.delete();
-                //prevActiveEffect = null;
             }
 
             await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -1335,12 +1330,12 @@ export class HeroSystem6eActor extends Actor {
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Reset system properties to defaults
-        const _actor = await HeroSystem6eActor.create(
+        const _actor = new HeroSystem6eActor(
             {
                 name: "Test Actor",
                 type: this.type,
             },
-            { temporary: true },
+            {},
         );
         const _system = _actor.system;
 
@@ -1532,8 +1527,7 @@ export class HeroSystem6eActor extends Actor {
                             }
                         }
                     } else {
-                        const item = await HeroSystem6eItem.create(itemData, {
-                            temporary: true,
+                        const item = new HeroSystem6eItem(itemData, {
                             parent: this,
                         });
                         this.items.set(item.system.XMLID + item.system.POSITION, item);
@@ -1580,8 +1574,7 @@ export class HeroSystem6eActor extends Actor {
                                         POSITION: parseInt(system2.POSITION),
                                     },
                                 };
-                                const item = await HeroSystem6eItem.create(itemData2, {
-                                    temporary: true,
+                                const item = new HeroSystem6eItem(itemData2, {
                                     parent: this,
                                 });
                                 this.items.set(item.system.XMLID + item.system.POSITION, item);
@@ -1829,10 +1822,13 @@ export class HeroSystem6eActor extends Actor {
                     levels: "0",
                 },
             };
-            const perceptionItem = await HeroSystem6eItem.create(itemDataPerception, {
-                temporary: this.id ? false : true,
-                parent: this,
-            });
+            const perceptionItem = this.id
+                ? await HeroSystem6eItem.create(itemDataPerception, {
+                      parent: this,
+                  })
+                : new HeroSystem6eItem(itemDataPerception, {
+                      parent: this,
+                  });
             if (!this.id) {
                 this.items.set(perceptionItem.system.XMLID, perceptionItem);
             }

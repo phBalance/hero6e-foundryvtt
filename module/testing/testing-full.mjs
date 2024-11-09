@@ -96,7 +96,7 @@ export function registerFullTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
@@ -373,7 +373,7 @@ export function registerFullTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
@@ -846,7 +846,7 @@ export function registerFullTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
@@ -1107,7 +1107,7 @@ export function registerFullTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
@@ -1381,7 +1381,7 @@ export function registerFullTests(quench) {
                             name: defaultActorName,
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
@@ -1537,7 +1537,7 @@ export function registerFullTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
@@ -1710,7 +1710,7 @@ export function registerFullTests(quench) {
                             name: "Quench Actor",
                             type: "pc",
                         },
-                        { temporary: true },
+                        {},
                     );
 
                     await actor.uploadFromXml(contents);
