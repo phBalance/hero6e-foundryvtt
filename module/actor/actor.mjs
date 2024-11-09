@@ -1409,8 +1409,7 @@ export class HeroSystem6eActor extends Actor {
 
         if (this.system.is5e && this.id) {
             // We can't delay this with the changes array because any items based on this actor needs this value.
-            // Speifically compound power is a problem if we don't set is5e properly for a 5e actor.
-            // changes[`system.is5e`] = this.system.is5e;
+            // Specifically compound power is a problem if we don't set is5e properly for a 5e actor.
             await this.update({ "system.is5e": this.system.is5e });
         }
 
