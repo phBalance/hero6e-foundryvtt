@@ -2,22 +2,6 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "./adjustment.mjs";
 
-export function modifyRollEquation(equation, value) {
-    if (!value) {
-        return equation;
-    }
-
-    if (value != 0) {
-        let sign = " + ";
-        if (value < 0) {
-            sign = " - ";
-        }
-        equation = equation + sign + Math.abs(value);
-    }
-
-    return equation;
-}
-
 export function getPowerInfo(options) {
     const xmlid =
         options.xmlid ||
