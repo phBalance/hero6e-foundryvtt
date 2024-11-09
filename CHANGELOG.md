@@ -7,6 +7,7 @@
 - Support for STR Minimum OCV penalty. [#384](https://github.com/dmdorman/hero6e-foundryvtt/issues/384)
 - Support for STR 0 rolls including DCV and movement penalties. [#1401](https://github.com/dmdorman/hero6e-foundryvtt/issues/1401)
 - Fixed issue where FLIGHT was impacting KB rolls even when FLIGHT was turned off. [#1400](https://github.com/dmdorman/hero6e-foundryvtt/issues/1400)
+- Fixed issue where full END for an attack was used even when lowering Effective Strength. [#1399](https://github.com/dmdorman/hero6e-foundryvtt/issues/1399)
 
 ## Version 4.0.4
 

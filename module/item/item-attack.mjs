@@ -373,6 +373,13 @@ export async function AttackToHit(item, options) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
+    const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
+    item = action.system.item[action.current.itemId];
+    const targets = action.system.currentTargets;
+
+    const actor = item.actor;
+    let effectiveItem = item;
+
     // Make sure there are enough resources and consume them
     const {
         error: resourceError,
@@ -380,7 +387,7 @@ export async function AttackToHit(item, options) {
         resourcesRequired,
         resourcesUsedDescription,
         resourcesUsedDescriptionRenderedRoll,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveItem, {
         ...options,
         ...{ noResourceUse: false },
     });
@@ -389,13 +396,6 @@ export async function AttackToHit(item, options) {
     } else if (resourceWarning) {
         return ui.notifications.warn(resourceWarning);
     }
-
-    const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
-    item = action.system.item[action.current.itemId];
-    const targets = action.system.currentTargets;
-
-    const actor = item.actor;
-    let effectiveItem = item;
 
     // STR 0 character must succeed with
     // a STR Roll in order to perform any Action that uses STR, such
