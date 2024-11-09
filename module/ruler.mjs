@@ -49,7 +49,7 @@ export class HeroRuler extends Ruler {
             const activeMovement =
                 movementItems.length === 0
                     ? "none"
-                    : movementItems.find((o) => o._id == relevantToken.actor.flags.activeMovement)?._id ||
+                    : movementItems.find((o) => o._id === relevantToken.actor.flags.activeMovement)?._id ||
                       movementItems[0]._id;
 
             const radioOptions = movementItems
@@ -201,7 +201,7 @@ export class HeroRuler extends Ruler {
 
                         if (
                             automation === "all" ||
-                            (automation === "npcOnly" && actor.type == "npc") ||
+                            (automation === "npcOnly" && actor.type === "npc") ||
                             (automation === "pcEndOnly" && actor.type === "pc")
                         ) {
                             // Only consume endurance on token's phase, allowing for Knockback movement (which does not consume END)
@@ -318,10 +318,10 @@ export class HeroRuler extends Ruler {
                 return;
             }
 
-            // Kluge to update actor right away so the render has proper data.
+            // Kludge to update actor right away so the render has proper data.
             // There is likely a better way to deal with this, possibly in the refreshToken hook.
             if (args?.flags?.activeMovement) {
-                actor.flags.activeMovement = args?.flags?.activeMovement;
+                actor.flags.activeMovement = args.flags.activeMovement;
             }
 
             that._movementRadioSelectRender();
@@ -346,15 +346,6 @@ export class HeroRuler extends Ruler {
      * @returns {string}
      * @protected
      */
-
-    /** V11
-     * Get the text label for a segment of the measured path
-     * @param {RulerMeasurementSegment} segment
-     * @param {number} totalDistance
-     * @returns {string}
-     * @protected
-     */
-
     _getSegmentLabel(_segment, _totalDistance) {
         // second argument only provided in v11
         // however total distance is avail in v12
@@ -376,7 +367,7 @@ export class HeroRuler extends Ruler {
             const activeMovement =
                 movementItems.length === 0
                     ? "none"
-                    : movementItems.find((o) => o._id == actor.flags.activeMovement)?._id || movementItems[0]._id;
+                    : movementItems.find((o) => o._id === actor.flags.activeMovement)?._id || movementItems[0]._id;
             const activeMovementLabel =
                 activeMovement === "none" ? "Running" : movementItems.find((e) => e._id === activeMovement)?.name;
 
