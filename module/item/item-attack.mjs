@@ -379,23 +379,6 @@ export async function AttackToHit(item, options) {
     const actor = item.actor;
     let effectiveItem = item;
 
-    // Make sure there are enough resources and consume them
-    const {
-        error: resourceError,
-        warning: resourceWarning,
-        resourcesRequired,
-        resourcesUsedDescription,
-        resourcesUsedDescriptionRenderedRoll,
-    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveItem, {
-        ...options,
-        ...{ noResourceUse: false },
-    });
-    if (resourceError) {
-        return ui.notifications.error(`${item.name} ${resourceError}`);
-    } else if (resourceWarning) {
-        return ui.notifications.warn(`${item.name} ${resourceWarning}`);
-    }
-
     // STR 0 character must succeed with
     // a STR Roll in order to perform any Action that uses STR, such
     // as aiming an attack, pulling a trigger, or using a Power with the
@@ -448,6 +431,23 @@ export async function AttackToHit(item, options) {
             effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: item.actor });
             await effectiveItem._postUpload();
         }
+    }
+
+    // Make sure there are enough resources and consume them
+    const {
+        error: resourceError,
+        warning: resourceWarning,
+        resourcesRequired,
+        resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(effectiveItem, {
+        ...options,
+        ...{ noResourceUse: false },
+    });
+    if (resourceError) {
+        return ui.notifications.error(`${item.name} ${resourceError}`);
+    } else if (resourceWarning) {
+        return ui.notifications.warn(`${item.name} ${resourceWarning}`);
     }
 
     const itemData = item.system;

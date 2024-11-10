@@ -5011,7 +5011,7 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     speaker.alias = actor.name;
 
     const chatData = {
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: activationRoller.rawRolls(),
         user: game.user._id,
         content: cardHtml,
@@ -5083,7 +5083,6 @@ export async function RequiresASkillRollCheck(item) {
                     } else {
                         ui.notifications.warn(
                             `${item.actor.name} has a power ${item.name}. Expecting 'SKILL roll', where SKILL is the name of an owned skill.`,
-                            // { console: true, permanent: true },
                         );
                     }
                 }
