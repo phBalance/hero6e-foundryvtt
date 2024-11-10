@@ -578,7 +578,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 const activeEffect = {
                     name: `Natural Body Healing (${bodyPerMonth}/month)`,
                     id: "naturalBodyHealing",
-                    icon: `systems/${HEROSYS.module}/icons/heartbeat.svg`,
+                    img: `systems/${HEROSYS.module}/icons/heartbeat.svg`,
                     duration: {
                         seconds: secondsPerBody,
                     },

@@ -2,24 +2,14 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 export class HeroSystem6eActorActiveEffects extends ActiveEffect {
-    // Rhair3 suggestion:
-    // First line is Dead / Unconscious/Asleep/Stunned
-    // Second Line: Prone/ Entangled/Paralysed/Flying
-    // Third Line: Blind/ Deaf/ Mute/Frightened
-    // Forth Line: Burning/Frozen/Shocked/Corroding
-    // Fith Line: Bleeding/Diseased/Poisoned/Cursed
-    // Sixth Line: Regenerating/Degenerationg/Aid/Drain
-    // seventh Line: Invisible/ Targeted/ Marked/ Blessed
-    // Last Line: Fire Shield/ Ice Shield/ Magic Shield/ Holy Shield
-
     static getEffects(module) {
         return Object.keys(HeroSystem6eActorActiveEffects)
             .filter((effectKey) => effectKey.includes("Effect"))
             .sort()
             .map((effectKey) => {
-                let heroIcon = HeroSystem6eActorActiveEffects[effectKey].heroIcon;
+                const heroIcon = HeroSystem6eActorActiveEffects[effectKey].heroIcon;
                 if (heroIcon) {
-                    HeroSystem6eActorActiveEffects[effectKey].icon = `systems/${module}/${heroIcon}`;
+                    HeroSystem6eActorActiveEffects[effectKey].img = `systems/${module}/${heroIcon}`;
                 }
                 return HeroSystem6eActorActiveEffects[effectKey];
             });
@@ -29,7 +19,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static stunEffect = {
         name: "EFFECT.StatusStunned",
         id: "stunned",
-        icon: "icons/svg/daze.svg",
+        img: "icons/svg/daze.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -47,13 +37,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static bleedingEffect = {
         name: "EFFECT.StatusBleeding",
         id: "bleeding",
-        icon: "icons/svg/blood.svg",
+        img: "icons/svg/blood.svg",
     };
 
     static unconsciousEffect = {
         name: "EFFECT.StatusUnconscious",
         id: "unconscious",
-        icon: "icons/svg/unconscious.svg",
+        img: "icons/svg/unconscious.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -71,7 +61,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static knockedOutEffect = {
         name: "EFFECT.StatusKnockedOut",
         id: "knockedOut",
-        icon: "icons/svg/stoned.svg",
+        img: "icons/svg/stoned.svg",
         changes: [
             {
                 key: "system.characteristics.ocv.value",
@@ -99,7 +89,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static deadEffect = {
         name: "EFFECT.StatusDead",
         id: "dead",
-        icon: "icons/svg/skull.svg",
+        img: "icons/svg/skull.svg",
         changes: [
             {
                 key: "system.characteristics.ocv.value",
@@ -127,7 +117,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static blindEffect = {
         name: "EFFECT.StatusBlind",
         id: "blind",
-        icon: "icons/svg/blind.svg",
+        img: "icons/svg/blind.svg",
         changes: [
             {
                 key: "system.characteristics.ocv.value",
@@ -145,7 +135,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static asleepEffect = {
         name: "EFFECT.StatusAsleep",
         id: "asleep",
-        icon: "icons/svg/sleep.svg",
+        img: "icons/svg/sleep.svg",
         // changes: [
         //     { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
         //     { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
@@ -155,7 +145,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static proneEffect = {
         id: "prone",
         name: "EFFECT.StatusProne",
-        icon: "icons/svg/falling.svg",
+        img: "icons/svg/falling.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -168,7 +158,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static entangledEffect = {
         id: "entangled",
         name: "Entangled",
-        icon: "icons/svg/net.svg",
+        img: "icons/svg/net.svg",
         changes: [
             {
                 key: "system.characteristics.dcv.value",
@@ -186,92 +176,92 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     static paralysisEffect = {
         id: "paralysis",
         name: "EFFECT.StatusParalysis",
-        icon: "icons/svg/paralysis.svg",
+        img: "icons/svg/paralysis.svg",
     };
 
     static flyingEffect = {
         id: "fly",
         name: "EFFECT.StatusFlying",
-        icon: "icons/svg/wing.svg",
+        img: "icons/svg/wing.svg",
     };
 
     static deafEffect = {
         id: "deaf",
         name: "EFFECT.StatusDeaf",
-        icon: "icons/svg/deaf.svg",
+        img: "icons/svg/deaf.svg",
     };
     static silencedEffect = {
         id: "silence",
         name: "EFFECT.StatusSilenced",
-        icon: "icons/svg/silenced.svg",
+        img: "icons/svg/silenced.svg",
     };
     static frightenedEffect = {
         id: "fear",
         name: "EFFECT.StatusFear",
-        icon: "icons/svg/terror.svg",
+        img: "icons/svg/terror.svg",
     };
 
     static regenEffect = {
         id: "regen",
         name: "EFFECT.StatusRegen",
-        icon: "icons/svg/regen.svg",
+        img: "icons/svg/regen.svg",
     };
 
     static aidEffect = {
         id: "upgrade",
         name: "Aid",
-        icon: "icons/svg/upgrade.svg",
+        img: "icons/svg/upgrade.svg",
     };
 
     static drainEffect = {
         id: "downgrade",
         name: "Drain",
-        icon: "icons/svg/downgrade.svg",
+        img: "icons/svg/downgrade.svg",
     };
 
     static invisibleEffect = {
         id: "invisible",
         name: "EFFECT.StatusInvisible",
-        icon: "icons/svg/invisible.svg",
+        img: "icons/svg/invisible.svg",
     };
 
     static targetedEffect = {
         id: "target",
         name: "EFFECT.StatusTarget",
-        icon: "icons/svg/target.svg",
+        img: "icons/svg/target.svg",
     };
 
     static shieldFireEffect = {
         id: "fireShield",
         name: "Shield: Fire",
-        icon: "icons/svg/fire-shield.svg",
+        img: "icons/svg/fire-shield.svg",
     };
     static shieldIceEffect = {
         id: "coldShield",
         name: "Shield: Ice",
-        icon: "icons/svg/ice-shield.svg",
+        img: "icons/svg/ice-shield.svg",
     };
     static shieldMagicEffect = {
         id: "magicShield",
         name: "Shield: Magic",
-        icon: "icons/svg/mage-shield.svg",
+        img: "icons/svg/mage-shield.svg",
     };
     static shieldHolyEffect = {
         id: "holyShield",
         name: "Shield: holy",
-        icon: "icons/svg/holy-shield.svg",
+        img: "icons/svg/holy-shield.svg",
     };
 
     static abortEffect = {
         id: "aborted",
         name: "Aborted",
-        heroIcon: `icons/aborted.svg`,
+        heroimg: `icons/aborted.svg`,
     };
 
     static holdingEffect = {
         id: "holding",
         name: "Holding An Action",
-        icon: `icons/svg/clockwork.svg`,
+        img: `icons/svg/clockwork.svg`,
     };
 
     static underwaterEffect = {

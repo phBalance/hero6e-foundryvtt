@@ -646,7 +646,7 @@ async function migrate_actor_active_effects_to_3_0_54(actor) {
                     presentAdjustmentActiveEffect.flags.activePoints,
                 )} AP) [by ${presentAdjustmentActiveEffect.flags.source}]`,
                 id: presentAdjustmentActiveEffect.id, // No change
-                icon: presentAdjustmentActiveEffect.icon, // No change
+                img: presentAdjustmentActiveEffect.icon, // No change
                 changes: presentAdjustmentActiveEffect.changes, // No change but for 5e there may be additional indices (see below)
                 duration: presentAdjustmentActiveEffect.duration, // No change even though it might be wrong for transfer it's too complicated to try to figure it out
                 flags: {

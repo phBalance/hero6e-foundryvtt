@@ -406,7 +406,7 @@ export class HeroSystem6eActor extends Actor {
             if (!existingEffect) {
                 const activeEffect = {
                     name: "TakeRecovery",
-                    icon: `icons/svg/downgrade.svg`,
+                    img: `icons/svg/downgrade.svg`,
                     changes: [
                         {
                             key: "system.characteristics.dcv.value",
@@ -834,7 +834,7 @@ export class HeroSystem6eActor extends Actor {
             let activeEffect = {
                 name: name,
                 id: "encumbered",
-                icon: `systems/${HEROSYS.module}/icons/encumbered.svg`,
+                img: `systems/${HEROSYS.module}/icons/encumbered.svg`,
                 changes: [
                     {
                         key: "system.characteristics.dcv.value",
@@ -931,7 +931,7 @@ export class HeroSystem6eActor extends Actor {
             const str0ActiveEffect = {
                 name: "STR0",
                 id: "STR0",
-                icon: `systems/${HEROSYS.module}/icons/encumbered.svg`,
+                img: `systems/${HEROSYS.module}/icons/encumbered.svg`,
                 changes: [
                     {
                         key: "system.characteristics.dcv.value",

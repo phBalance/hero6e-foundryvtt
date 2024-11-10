@@ -1880,7 +1880,7 @@ export class HeroSystem6eItem extends Item {
         if (changed && this.id && configPowerInfo && configPowerInfo.type?.includes("movement")) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
-            activeEffect.icon = "icons/svg/upgrade.svg";
+            activeEffect.img = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
                     key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
@@ -1927,7 +1927,7 @@ export class HeroSystem6eItem extends Item {
         if (changed && this.id && configPowerInfo?.type?.includes("characteristic")) {
             const activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${this.system.value}`;
-            activeEffect.icon = "icons/svg/upgrade.svg";
+            activeEffect.img = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
                     key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
@@ -1961,7 +1961,7 @@ export class HeroSystem6eItem extends Item {
 
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
-            activeEffect.icon = "icons/svg/upgrade.svg";
+            activeEffect.img = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
                     key: "system.characteristics.str.max",
@@ -2010,7 +2010,7 @@ export class HeroSystem6eItem extends Item {
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name = (this.system.ALIAS || this.system.XMLID || this.name) + ": ";
             activeEffect.name += `${this.system.XMLID} ${this.is5e ? this.system.value : this.system.OPTIONID}`;
-            activeEffect.icon = "icons/svg/upgrade.svg";
+            activeEffect.img = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
                     key: "system.characteristics.str.max",
@@ -2091,7 +2091,7 @@ export class HeroSystem6eItem extends Item {
 
             let activeEffect = Array.from(this.effects)?.[0] || {};
             activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
-            activeEffect.icon = "icons/svg/upgrade.svg";
+            activeEffect.img = "icons/svg/upgrade.svg";
             activeEffect.changes = [
                 {
                     key: "system.characteristics.dcv.max",

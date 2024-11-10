@@ -273,7 +273,7 @@ function _createNewAdjustmentEffect(
         id: `${item.system.XMLID}.${item.id}.${
             targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         }`,
-        icon: item.img,
+        img: item.img,
         changes: [_createAEChangeBlock(potentialCharacteristic, targetSystem)],
         duration: {
             seconds: _determineEffectDurationInSeconds(item, rawActivePointsDamage),
