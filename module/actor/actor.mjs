@@ -264,6 +264,18 @@ export class HeroSystem6eActor extends Actor {
             }
         }
 
+        if (data?.system?.characteristics) {
+            const changes = {};
+
+            for (const charName of Object.keys(data.system.characteristics)) {
+                const charChanges = this.updateRollable(charName);
+
+                foundry.utils.mergeObject(changes, charChanges);
+            }
+
+            await this.update(changes);
+        }
+
         // Display changes from _preUpdate
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);
@@ -2063,7 +2075,6 @@ export class HeroSystem6eActor extends Actor {
             if (rollableChanges) {
                 changed = true;
 
-                // TODO: FIXME: Not quite right.
                 foundry.utils.mergeObject(changes, rollableChanges);
             }
         }

@@ -126,9 +126,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             const powers = getCharacteristicInfoArrayForActor(this.actor);
 
             for (const powerInfo of powers) {
-                this.actor.updateRollable(powerInfo.key.toLowerCase());
-
-                let characteristic = {
+                const characteristic = {
                     ...data.actor.system.characteristics[powerInfo.key.toLowerCase()],
                 };
 
