@@ -1999,6 +1999,13 @@ export class HeroSystem6eActor extends Actor {
             await this.update({ [`system.is5e`]: this.system.is5e });
         }
 
+        // ONLY IN ALTERNATE IDENTITY (OIAID)
+        // Assume we are in our super/heroic identity
+        if (this.system.alternateIdentity === undefined) {
+            this.system.alternateIdentity = false;
+            changes[`system.alternateIdentity`] = true;
+        }
+
         // isHeroic
         // Need to be a careful as there are custom templates ('Nekhbet Vulture Child Goddess')
         // that we are unlikely able to decode heroic status.
