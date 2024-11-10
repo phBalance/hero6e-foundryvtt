@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.5 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.6 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Migrations are no longer supported from versions before 3.0.76. Migrate through any version prior to 4.0.6 if you find your world in this situation.
+
+## Version 4.0.5
 
 - OCV/OMCV bonuses are no longer active effects. They only work for a specific instant attack. [#1285](https://github.com/dmdorman/hero6e-foundryvtt/issues/1285)
 - Fixed rare issue where adding some 6e powers to a 5e actor would prevent actor sheet from opening.
@@ -9,7 +13,7 @@
 - Support for PRE 0 rolls. [#1403](https://github.com/dmdorman/hero6e-foundryvtt/issues/1403)
 - Fixed issue where FLIGHT was impacting KB rolls even when FLIGHT was turned off. [#1400](https://github.com/dmdorman/hero6e-foundryvtt/issues/1400)
 - Fixed issue where full END for an attack was used even when lowering Effective Strength/Levels. [#1399](https://github.com/dmdorman/hero6e-foundryvtt/issues/1399)
-- AUTOMATION's can't use STUN in place of END. [#1398](https://github.com/dmdorman/hero6e-foundryvtt/issues/1398)
+- AUTOMATONs can't use STUN in place of END. [#1398](https://github.com/dmdorman/hero6e-foundryvtt/issues/1398)
 
 ## Version 4.0.4
 

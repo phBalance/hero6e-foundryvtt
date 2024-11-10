@@ -732,7 +732,7 @@ export class HeroSystem6eItemSheet extends ItemSheet {
         return await this.actor.createEmbeddedDocuments("ActiveEffect", [
             {
                 label: "New Effect",
-                icon: "icons/svg/aura.svg",
+                img: "icons/svg/aura.svg",
                 origin: this.actor.uuid,
                 //"duration.rounds": li.dataset.effectType === "temporary" ? 1 : undefined,
                 disabled: true,
