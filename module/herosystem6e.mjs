@@ -721,7 +721,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
             for (const aeWithCharges of actor.temporaryEffects.filter((o) =>
                 o.parent instanceof HeroSystem6eItem ? o.parent.findModsByXmlid("CONTINUING") : false,
             )) {
-                if (!aeWithCharges.parent.system.active) {
+                if (!aeWithCharges.parent.isActive) {
                     console.error(`${aeWithCharges.name} is inactive and will not expire.`);
                     continue;
                 }

@@ -36,6 +36,7 @@ export class HeroSystemActorSheet extends ActorSheet {
     /** @override */
     async getData() {
         const data = super.getData();
+        data.system = data.actor.system;
 
         try {
             // Show an unsupported actor warning when the sheet opens. An actor can be unsupported if:
@@ -267,14 +268,6 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await pdAttack._postUpload();
 
-            let {
-                defenseValue: _defenseValuePD,
-                resistantValue: _resistantValuePD /*impenetrableValue*/,
-                //damageReductionValue: _damageReductionValuePD,
-                //damageNegationValue: _damageNegationValuePD /*knockbackResistance*/,
-                // defenseTags: defenseTagsP,
-            } = determineDefense(this.actor, pdAttack, { suppressDeprecationWarn: true });
-
             // New PD
             const {
                 defenseValue: defenseValuePD,
@@ -283,12 +276,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 damageNegationValue: damageNegationValuePD,
                 defenseTags: defenseTagsPD,
             } = getActorDefensesVsAttack(this.actor, pdAttack);
-            if (_defenseValuePD != defenseValuePD) {
-                console.warn("PD Defense mismatch", _defenseValuePD, defenseValuePD);
-            }
-            if (_resistantValuePD != resistantValuePD) {
-                console.warn("rPD Defense mismatch", _resistantValuePD, resistantValuePD);
-            }
             defense.PD = defenseValuePD;
             for (const tag of defenseTagsPD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.PDtags = `${defense.PDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
@@ -317,14 +304,6 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await edAttack._postUpload();
 
-            let {
-                defenseValue: _defenseValueED,
-                resistantValue: _resistantValueED /* impenetrableValueE */,
-                //damageReductionValue: _damageReductionValueED,
-                //damageNegationValue: _damageNegationValueED /* knockbackResistanceE */,
-                // defenseTags: _defenseTagsE,
-            } = determineDefense(this.actor, edAttack, { suppressDeprecationWarn: true });
-
             // New ED
             const {
                 defenseValue: defenseValueED,
@@ -333,12 +312,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 damageNegationValue: damageNegationValueED,
                 defenseTags: defenseTagsED,
             } = getActorDefensesVsAttack(this.actor, edAttack);
-            if (_defenseValueED != defenseValueED) {
-                console.warn("ED Defense mismatch", _defenseValueED, defenseValueED);
-            }
-            if (_resistantValueED != resistantValueED) {
-                console.warn("rED Defense mismatch", _defenseValueED, defenseValueED);
-            }
             defense.ED = defenseValueED;
             for (const tag of defenseTagsED.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.EDtags = `${defense.EDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
@@ -368,14 +341,6 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await mdAttack._postUpload();
 
-            let {
-                defenseValue: _defenseValueMD,
-                //resistantValue: _resistantValueMD /*impenetrableValueM*/,
-                //damageReductionValue: _damageReductionValueMD,
-                //damageNegationValue: _damageNegationValueMD /*knockbackResistanceM*/,
-                defenseTags: _defenseTagsMD,
-            } = determineDefense(this.actor, mdAttack, { suppressDeprecationWarn: true });
-
             // New MD
             const {
                 defenseValue: defenseValueMD,
@@ -384,9 +349,6 @@ export class HeroSystemActorSheet extends ActorSheet {
                 damageNegationValue: damageNegationValueMD,
                 defenseTags: defenseTagsMD,
             } = getActorDefensesVsAttack(this.actor, mdAttack);
-            if (_defenseValueMD != defenseValueMD) {
-                console.warn("MD Defense mismatch", _defenseValueMD, defenseValueMD, _defenseTagsMD);
-            }
             defense.MD = defenseValueMD;
             for (const tag of defenseTagsMD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.MDtags = `${defense.MDtags || ""}${tag.value.signedString()} ${tag.name} ${tag.shortDesc}\n`;
@@ -461,7 +423,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 (o) => (o.system.subType || o.type) === "defense" && !o.effects.size,
             );
             for (let d of defensePowers) {
-                d.disabled = !d.system.active;
+                d.disabled = !d.isActive;
                 switch (getPowerInfo({ xmlid: d.system.XMLID, actor: this.actor })?.duration) {
                     case "instant":
                         // Might Vary
@@ -849,9 +811,12 @@ export class HeroSystemActorSheet extends ActorSheet {
     }
 
     /** @override */
-    async _updateObject(_event, formData) {
+    async _updateObject(event, formData) {
+        event.preventDefault();
+
         let expandedData = foundry.utils.expandObject(formData);
 
+        // Left Sidebar of actor sheet has Xsystem characteristics
         const characteristics = getCharacteristicInfoArrayForActor(this.actor).filter((o) =>
             ["BODY", "STUN", "END"].includes(o.key),
         );
@@ -867,7 +832,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             }
         }
 
-        // EndReserve
+        // Left Sidebar may have EndReserve
         if (expandedData.endReserve) {
             const endReserveId = Object.keys(expandedData.endReserve)?.[0];
             const endReserve = this.actor.items.find((o) => o.id === endReserveId);
@@ -875,20 +840,28 @@ export class HeroSystemActorSheet extends ActorSheet {
                 await endReserve.update({ "system.value": parseInt(expandedData.endReserve[endReserveId].value || 0) });
             }
         }
-        console.log(formData);
 
         this.options.itemFilters.power = expandedData.itemFilters.power;
         this.options.itemFilters.skill = expandedData.itemFilters.skill;
         this.options.itemFilters.equipment = expandedData.itemFilters.equipment;
 
-        await this.actor.update(expandedData);
+        // If core characteristics changed the re-calculate costs
+        let recalculateCosts = false;
+        for (const char of Object.keys(expandedData.system.characteristics)) {
+            if (this.actor.system.characteristics[char].core !== expandedData.system.characteristics[char].core) {
+                recalculateCosts = true;
+            }
+        }
 
-        if (expandedData.system.characteristics) {
+        // Do all the standard things like updating item properties that match the name of input boxes
+        await super._updateObject(event, formData);
+
+        if (recalculateCosts) {
             await this.actor.calcCharacteristicsCost();
             await this.actor.CalcActorRealAndActivePoints();
         }
 
-        this.render();
+        await this.render();
     }
 
     async _onItemRoll(event) {

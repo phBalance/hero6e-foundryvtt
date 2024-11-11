@@ -489,7 +489,7 @@ export class HeroSystem6eCombat extends Combat {
 
         for (const powerUsingResourcesToContinue of combatant.actor.items.filter(
             (item) =>
-                item.system.active === true && // Is the power active?
+                item.isActive === true && // Is the power active?
                 item.baseInfo.duration !== "instant" && // Is the power non instant
                 ((parseInt(item.system.end || 0) > 0 && // Does the power use END?
                     !item.system.MODIFIER?.find((o) => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE")) || // Does the power use END continuously?
@@ -541,7 +541,11 @@ export class HeroSystem6eCombat extends Combat {
         if (content !== "" && (spentResources.totalEnd > 0 || spentResources.charges > 0)) {
             const segment = this.combatant.flags.segment;
 
-            content = `Spent ${spentResources.end} END, ${spentResources.reserveEnd} reserve END, and ${spentResources.charges} charge${spentResources.charges > 1 ? "s" : ""} on turn ${this.round} segment ${segment}:<ul>${content}</ul>`;
+            content = `Spent ${spentResources.end} END, ${spentResources.reserveEnd} reserve END, and ${
+                spentResources.charges
+            } charge${spentResources.charges > 1 ? "s" : ""} on turn ${
+                this.round
+            } segment ${segment}:<ul>${content}</ul>`;
 
             const token = combatant.token;
             const speaker = ChatMessage.getSpeaker({

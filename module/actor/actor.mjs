@@ -276,6 +276,42 @@ export class HeroSystem6eActor extends Actor {
             await this.update(changes);
         }
 
+        // Heroic ID
+        if (data.system?.heroicIdentity !== undefined) {
+            // Loop thru all the active effects, checking if source has OIHID
+            const allEffects = await this.allApplicableEffects();
+            for (const ae of allEffects) {
+                const item = ae.parent;
+                if (!item) continue;
+                if (item instanceof HeroSystem6eItem === false) continue;
+                if (item.findModsByXmlid("OIHID")) {
+                    await ae.update({ disabled: !data.system.heroicIdentity });
+
+                    // Modify characteristics as appropriate
+                    for (const change of ae.changes) {
+                        if (change.key.match(/max$/) && change.mode === 2 && change.value > 0) {
+                            const valueKey = change.key.replace(/.max$/, ".value");
+                            let max = this;
+                            valueKey.split(".").forEach((subPath) => {
+                                max = max[subPath] || null;
+                            });
+                            if (parseInt(max || 0) > 0) {
+                                if (ae.disabled) {
+                                    await this.update({
+                                        [valueKey]: max - parseInt(change.value),
+                                    });
+                                } else {
+                                    await this.update({
+                                        [valueKey]: max + parseInt(change.value),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Display changes from _preUpdate
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);
@@ -804,7 +840,7 @@ export class HeroSystem6eActor extends Actor {
             (o) =>
                 o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
                 o.system.penalty === "encumbrance" &&
-                (o.type === "skill" || o.system.active),
+                (o.type === "skill" || o.isActive),
         )) {
             dcvDex = Math.min(0, dcvDex + parseInt(pslEncumbrance.system.LEVELS));
         }
@@ -922,7 +958,7 @@ export class HeroSystem6eActor extends Actor {
         // 0 on movement and DCV occur 5 points of STR
         // sooner.
         const massMultiplier = this.items
-            .filter((o) => o.system.XMLID === "DENSITYINCREASE" && o.system.active)
+            .filter((o) => o.system.XMLID === "DENSITYINCREASE" && o.isActive)
             .reduce((p, a) => p + parseInt(a.system.LEVELS), 0);
         const minStr = massMultiplier * 5;
 
@@ -1233,7 +1269,7 @@ export class HeroSystem6eActor extends Actor {
 
     getActiveConstantItems() {
         let results = [];
-        for (let item of this.items.filter((o) => o.system.active)) {
+        for (let item of this.items.filter((o) => o.isActive)) {
             let duration = getPowerInfo({
                 xmlid: item.system.XMLID,
                 actor: this,
@@ -1999,6 +2035,13 @@ export class HeroSystem6eActor extends Actor {
             await this.update({ [`system.is5e`]: this.system.is5e });
         }
 
+        // ONLY IN ALTERNATE IDENTITY (OIAID)
+        // Assume we are in our super/heroic identity
+        if (this.system.heroicIdentity === undefined) {
+            this.system.heroicIdentity = false;
+            changes[`system.heroicIdentity`] = true;
+        }
+
         // isHeroic
         // Need to be a careful as there are custom templates ('Nekhbet Vulture Child Goddess')
         // that we are unlikely able to decode heroic status.
@@ -2295,7 +2338,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Hero Designer appears to store WEIGHT as LBS instead of KG.
         const equipment = this.items.filter(
-            (o) => o.type === "equipment" && (o.parentItem ? o.parentItem.system.active : o.system.active),
+            (o) => o.type === "equipment" && (o.parentItem ? o.parentItem.isActive : o.isActive),
         );
         const weightLbs = equipment.reduce((a, b) => a + parseFloat(b.system?.WEIGHT || 0), 0);
         const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
@@ -2304,7 +2347,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     get netWorth() {
-        const equipment = this.items.filter((o) => o.type === "equipment" && o.system.active);
+        const equipment = this.items.filter((o) => o.type === "equipment" && o.isActive);
         const price = equipment.reduce((a, b) => a + parseFloat(b.system.PRICE), 0);
         return price.toFixed(2);
     }

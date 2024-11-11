@@ -4965,6 +4965,24 @@ export class HeroSystem6eItem extends Item {
         const price = parseFloat(this.system.PRICE) || 0;
         return `$${price.toFixed(2)}`;
     }
+
+    // Is this power disabled because we are not in our superheroic identity?
+    get disabledOIHID() {
+        if (!this.actor) return false;
+        if (this.actor.system.heroicIdentity) return false;
+        if (this.findModsByXmlid("OIHID")) return true;
+        return false;
+    }
+
+    get isActive() {
+        try {
+            if (this.disabledOIHID) return false;
+        } catch (e) {
+            console.error(e);
+        }
+
+        return this.system.active;
+    }
 }
 
 export function getItem(id) {
