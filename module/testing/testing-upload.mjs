@@ -6897,6 +6897,195 @@ export function registerUploadTests(quench) {
                     });
                 });
             });
+
+            describe("AUTOMATON", async function () {
+                describe("AUTOMATON that takes no STUN has PD/ED that costs 3x", async function () {
+                    const automatonContent = `
+                        <POWER XMLID="AUTOMATON" ID="1731200633282" BASECOST="45.0" LEVELS="0" ALIAS="Automaton" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="NOSTUN1" OPTIONID="NOSTUN1" OPTION_ALIAS="Takes No STUN (loses abilities when takes BODY)" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    `;
+                    const pdContent = `
+                        <PD XMLID="PD" ID="1731357785313" BASECOST="0.0" LEVELS="3" ALIAS="PD" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                            <NOTES />
+                        </PD>
+                    `;
+                    const edContent = `
+                        <ED XMLID="ED" ID="1731357791224" BASECOST="0.0" LEVELS="5" ALIAS="ED" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                            <NOTES />
+                        </ED>
+                    `;
+
+                    let pdItem;
+                    let edItem;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+                        await actor._postUpload();
+
+                        const automatonItem = new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(automatonContent, actor),
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await automatonItem._postUpload();
+                        actor.items.set(automatonItem.system.XMLID, automatonItem);
+
+                        pdItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContent, actor), {
+                            parent: actor,
+                        });
+                        await pdItem._postUpload();
+                        actor.items.set(pdItem.system.XMLID, pdItem);
+
+                        edItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edContent, actor), {
+                            parent: actor,
+                        });
+                        await edItem._postUpload();
+                        actor.items.set(edItem.system.XMLID, edItem);
+                    });
+
+                    it("PD description", function () {
+                        assert.equal(pdItem.system.description, "+3 PD");
+                    });
+
+                    it("PD realCost", function () {
+                        assert.equal(pdItem.system.realCost, 9);
+                    });
+
+                    it("PD activePoints", function () {
+                        assert.equal(pdItem.system.activePoints, 9);
+                    });
+
+                    it("PD levels", function () {
+                        assert.equal(pdItem.system.value, 3);
+                    });
+
+                    it("PD end", function () {
+                        assert.equal(pdItem.system.end, 0);
+                    });
+
+                    it("ED description", function () {
+                        assert.equal(edItem.system.description, "+5 ED");
+                    });
+
+                    it("ED realCost", function () {
+                        assert.equal(edItem.system.realCost, 15);
+                    });
+
+                    it("ED activePoints", function () {
+                        assert.equal(edItem.system.activePoints, 15);
+                    });
+
+                    it("ED levels", function () {
+                        assert.equal(edItem.system.value, 5);
+                    });
+
+                    it("ED end", function () {
+                        assert.equal(edItem.system.end, 0);
+                    });
+                });
+                describe("AUTOMATON that does take STUN has PD/ED that costs 1x", async function () {
+                    const automatonContent = `
+                        <POWER XMLID="AUTOMATON" ID="1731358924108" BASECOST="15.0" LEVELS="0" ALIAS="Automaton" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CANNOTBESTUNNED" OPTIONID="CANNOTBESTUNNED" OPTION_ALIAS="Cannot Be Stunned" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    `;
+                    const pdContent = `
+                        <PD XMLID="PD" ID="1731357785313" BASECOST="0.0" LEVELS="3" ALIAS="PD" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                            <NOTES />
+                        </PD>
+                    `;
+                    const edContent = `
+                        <ED XMLID="ED" ID="1731357791224" BASECOST="0.0" LEVELS="5" ALIAS="ED" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                            <NOTES />
+                        </ED>
+                    `;
+
+                    let pdItem;
+                    let edItem;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = true;
+                        await actor._postUpload();
+
+                        const automatonItem = new HeroSystem6eItem(
+                            HeroSystem6eItem.itemDataFromXml(automatonContent, actor),
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await automatonItem._postUpload();
+                        actor.items.set(automatonItem.system.XMLID, automatonItem);
+
+                        pdItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContent, actor), {
+                            parent: actor,
+                        });
+                        await pdItem._postUpload();
+                        actor.items.set(pdItem.system.XMLID, pdItem);
+
+                        edItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(edContent, actor), {
+                            parent: actor,
+                        });
+                        await edItem._postUpload();
+                        actor.items.set(edItem.system.XMLID, edItem);
+                    });
+
+                    it("PD description", function () {
+                        assert.equal(pdItem.system.description, "+3 PD");
+                    });
+
+                    it("PD realCost", function () {
+                        assert.equal(pdItem.system.realCost, 3);
+                    });
+
+                    it("PD activePoints", function () {
+                        assert.equal(pdItem.system.activePoints, 3);
+                    });
+
+                    it("PD levels", function () {
+                        assert.equal(pdItem.system.value, 3);
+                    });
+
+                    it("PD end", function () {
+                        assert.equal(pdItem.system.end, 0);
+                    });
+
+                    it("ED description", function () {
+                        assert.equal(edItem.system.description, "+5 ED");
+                    });
+
+                    it("ED realCost", function () {
+                        assert.equal(edItem.system.realCost, 5);
+                    });
+
+                    it("ED activePoints", function () {
+                        assert.equal(edItem.system.activePoints, 5);
+                    });
+
+                    it("ED levels", function () {
+                        assert.equal(edItem.system.value, 5);
+                    });
+
+                    it("ED end", function () {
+                        assert.equal(edItem.system.end, 0);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

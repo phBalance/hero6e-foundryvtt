@@ -292,6 +292,16 @@ function costPerLevelFixedValue(value) {
     };
 }
 
+function pdEdCostPerLevel(item) {
+    const isAutomatonWithNoStun = !!item.actor?.items.find(
+        (power) =>
+            power.system.XMLID === "AUTOMATON" &&
+            (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+    );
+
+    return isAutomatonWithNoStun ? 3 : 1;
+}
+
 /**
  * @typedef {Object} PowerDescription
  * @param {string} key - Hero Designer XMLID of the power
@@ -598,7 +608,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "PD",
             name: "Physical Defense",
             base: 2,
-            costPerLevel: costPerLevelFixedValue(1),
+            costPerLevel: pdEdCostPerLevel,
             type: ["characteristic", "defense"],
             behaviors: [],
             duration: "persistent",
@@ -629,7 +639,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ED",
             name: "Energy Defense",
             base: 2,
-            costPerLevel: costPerLevelFixedValue(1),
+            costPerLevel: pdEdCostPerLevel,
             type: ["characteristic", "defense"],
             behaviors: [],
             duration: "persistent",
