@@ -275,6 +275,15 @@ function validatePowers() {
     }
     numViolations += powersWithoutDuration.length;
 
+    // All powers have a costPerLevel function
+    const powersWithoutCostPerLevelFunction = this.filter(
+        (power) => !(power.costPerLevel && typeof power.costPerLevel === "function"),
+    );
+    if (powersWithoutCostPerLevelFunction.length > 0) {
+        console.log(`Powers without costPerLevel function: `, powersWithoutCostPerLevelFunction);
+    }
+    numViolations += powersWithoutCostPerLevelFunction.length;
+
     if (numViolations === 0) {
         console.log(`Powers look valid`);
     }
@@ -4014,6 +4023,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         key: "FOLLOWTHROUGHATTACK",
         type: ["talent"],
         behaviors: [],
+        costPerLevel: costPerLevelFixedValue(0),
         duration: "instant",
         target: "target's dcv",
         range: HERO.RANGE_TYPES.NO_RANGE,
@@ -6675,12 +6685,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 (function addAddersToPowerList() {
     addPower(undefined, {
         key: "DOUBLEAREA",
+        costPerLevel: costPerLevelFixedValue(1 / 4),
         xml: `<ADDER XMLID="DOUBLEAREA" ID="1707272359920" BASECOST="0.0" LEVELS="1" ALIAS="x2 Radius" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" LVLCOST="0.25" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
     });
 
     addPower(
         {
             key: "DOUBLEHEIGHT",
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             cost: function (adder) {
                 const levels = parseInt(adder.LEVELS);
                 const baseCost = parseFloat(adder.BASECOST);
@@ -6694,6 +6706,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(undefined, {
         key: "DOUBLELENGTH",
+        costPerLevel: costPerLevelFixedValue(1 / 4),
         cost: function (adder) {
             const levels = parseInt(adder.LEVELS);
             const baseCost = parseFloat(adder.BASECOST);
@@ -6706,6 +6719,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DOUBLEWIDTH",
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             cost: function (adder) {
                 const levels = parseInt(adder.LEVELS);
                 const baseCost = parseFloat(adder.BASECOST);
@@ -6720,12 +6734,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "FIXEDSHAPE",
-            // cost: function (adder) {
-            //     const levels = parseInt(adder.LEVELS);
-            //     const baseCost = parseFloat(adder.BASECOST);
-            //     adder.BASECOST_total = baseCost + levels * 0.25;
-            //     return adder.BASECOST_total;
-            // },
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             xml: `<ADDER XMLID="FIXEDSHAPE" ID="1707357527471" BASECOST="-0.25" LEVELS="0" ALIAS="Fixed Shape" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -6734,6 +6743,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MOBILE",
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             cost: function (adder) {
                 const levels = parseInt(adder.LEVELS);
                 const baseCost = parseFloat(adder.BASECOST);
@@ -6748,6 +6758,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PLUSONEHALFDIE",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<ADDER XMLID="PLUSONEHALFDIE" ID="1712342067007" BASECOST="3.0" LEVELS="0" ALIAS="+1/2 d6" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -6756,6 +6767,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PLUSONEPIP",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<ADDER XMLID="PLUSONEPIP" ID="1712342367072" BASECOST="2.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
@@ -6764,6 +6776,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "MINUSONEPIP",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<ADDER XMLID="MINUSONEPIP" ID="1712344286624" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES"><NOTES/></ADDER>`,
         },
         {},
@@ -6774,6 +6787,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "AOE",
+            costPerLevel: costPerLevelFixedValue(0),
             cost: function (modifier) {
                 const levels = parseInt(modifier.LEVELS) || 0;
                 let _cost = 0;
@@ -6881,6 +6895,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "AUTOFIRE",
+            costPerLevel: costPerLevelFixedValue(0),
             dc: true,
             xml: `<MODIFIER XMLID="AUTOFIRE" ID="1713378198591" BASECOST="0.25" LEVELS="0" ALIAS="Autofire" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWO" OPTIONID="TWO" OPTION_ALIAS="2 Shots" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
@@ -6890,6 +6905,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CHARGES",
+            costPerLevel: costPerLevelFixedValue(0), // TODO: Needs a function
             xml: `<MODIFIER XMLID="CHARGES" ID="1712257766011" BASECOST="-2.0" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONE" OPTIONID="ONE" OPTION_ALIAS="1" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -6898,6 +6914,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "COSTSEND",
+            costPerLevel: costPerLevelFixedValue(0), // TODO: Needs a function
             dc: true,
             xml: `<MODIFIER XMLID="COSTSEND" ID="1728919937538" BASECOST="-0.25" LEVELS="0" ALIAS="Costs Endurance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ACTIVATE" OPTIONID="ACTIVATE" OPTION_ALIAS="Only Costs END to Activate" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
@@ -6907,6 +6924,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CONCENTRATION",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="CONCENTRATION" ID="1727749190399" BASECOST="-0.5" LEVELS="0" ALIAS="Concentration" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ZERO" OPTIONID="ZERO" OPTION_ALIAS="0 DCV" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -6915,6 +6933,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "CONTINUOUS",
+            costPerLevel: costPerLevelFixedValue(0),
             dc: true,
             xml: `<MODIFIER XMLID="CONTINUOUS" ID="1713378099716" BASECOST="1.0" LEVELS="0" ALIAS="Continuous" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
@@ -6934,6 +6953,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "EXPLOSION",
+            costPerLevel: costPerLevelFixedValue(0),
             cost: function (modifier, item) {
                 const baseCost = parseFloat(modifier.BASECOST);
                 const levels = parseInt(modifier.LEVELS);
@@ -6985,6 +7005,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "FOCUS",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="FOCUS" ID="1442342142790" BASECOST="-0.5" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OIF" OPTIONID="OIF" OPTION_ALIAS="OIF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No"></MODIFIER>`,
         },
         {},
@@ -6993,6 +7014,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "GESTURES",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="GESTURES" ID="1727749190389" BASECOST="-0.25" LEVELS="0" ALIAS="Gestures" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7010,18 +7032,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "INCANTATIONS",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="INCANTATIONS" ID="1727749190392" BASECOST="-0.25" LEVELS="0" ALIAS="Incantations" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
-
-    // addPower(
-    //     {
-    //         key: "LINKED",
-    //         xml: `<MODIFIER XMLID="LINKED" ID="1731170384135" BASECOST="-0.5" LEVELS="0" ALIAS="Linked" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ENTANGLE" OPTIONID="ENTANGLE" OPTION_ALIAS="Entangle" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" LINKED_ID="1726444520895"></MODIFIER>`,
-    //     },
-    //     {},
-    // );
 
     addPower(
         {
@@ -7035,6 +7050,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "NOBARRIERS",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="NOBARRIERS" ID="1726539977732" BASECOST="-0.25" LEVELS="0" ALIAS="Cannot Form Barriers" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7043,6 +7059,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "NORANGE",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="NORANGE" ID="1727749190370" BASECOST="-0.5" LEVELS="0" ALIAS="No Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7051,6 +7068,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "OIHID",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="OIHID" ID="1712092697365" BASECOST="-0.25" LEVELS="0" ALIAS="Only In Heroic Identity" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7069,6 +7087,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REDUCEDEND",
+            costPerLevel: costPerLevelFixedValue(0),
             cost: function (modifier, item) {
                 // Reduced endurance is double the cost if it's applying against a power with autofire
                 if (item.findModsByXmlid("AUTOFIRE")) {
@@ -7084,6 +7103,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REQUIRESASKILLROLL",
+            costPerLevel: costPerLevelFixedValue(0),
             minimumLimitation: -0.25,
             xml: `<MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
@@ -7093,6 +7113,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "SELFONLY",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="SELFONLY" ID="1716495880091" BASECOST="-0.5" LEVELS="0" ALIAS="Self Only" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7101,6 +7122,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "VISIBLE",
+            costPerLevel: costPerLevelFixedValue(0),
             xml: `<MODIFIER XMLID="VISIBLE" ID="1731124293164" BASECOST="-0.25" LEVELS="0" ALIAS="Visible" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
