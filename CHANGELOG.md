@@ -3,6 +3,7 @@
 ## Version 4.0.6 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Migrations are no longer supported from versions before 3.0.76. Migrate through any version prior to 4.0.6 if you find your world in this situation.
+- Initial support for Only In Heroic ID. There is a checkbox on the OTHER tab. Powers/skills with OIHID will be disabled when not in heroic ID. (#232)(https://github.com/dmdorman/hero6e-foundryvtt/issues/232)
 
 ## Version 4.0.5
 

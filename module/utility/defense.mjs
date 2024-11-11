@@ -178,7 +178,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     const activeDefenses = targetActor.items.filter(
         (o) =>
             (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
-            (o.isActive || o.effects.find(() => true)?.disabled === false) &&
+            o.isActive &&
             !(options?.ignoreDefenseIds || []).includes(o.id),
     );
     for (const defenseItem of activeDefenses) {

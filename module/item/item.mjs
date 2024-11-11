@@ -4975,7 +4975,12 @@ export class HeroSystem6eItem extends Item {
     }
 
     get isActive() {
-        if (this.disabledOIHID()) return false;
+        try {
+            if (this.disabledOIHID) return false;
+        } catch (e) {
+            console.error(e);
+        }
+
         return this.system.active;
     }
 }

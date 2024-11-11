@@ -237,7 +237,11 @@
                                     {{/if}}
                                 </td>
                                 <td>
-                                    <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
+                                    {{#if this.disabledOIHID}}
+                                        <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                    {{else}}
+                                        <a class="item-image item-rollable"><i class="fas fa-dice" title="{{item.name}}" width="24" height="24"></i></a>
+                                    {{/if}}
                                 </td>
                                 <td>
                                     <div class="item-controls" data-group="mode">
@@ -283,8 +287,15 @@
                                 </td>
                                 <td>{{item.system.end}}</td>
                                 <td>
-                                    <input class="item-toggle" type="checkbox" {{checked item.system.active}}
-                                        data-dtype="Boolean" />
+                                    {{#if this.system.showToggle}}
+                                        {{#if this.disabledOIHID}}
+                                            <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                        {{else}}
+                                            <input class="item-toggle" type="checkbox"
+                                            Xname="this.system.active" {{checked this.system.active}} data-dtype="Boolean"
+                                            data-action="toggle" />
+                                        {{/if}}
+                                    {{/if}}
                                 </td>
                                 <td>
                                     <a class="item-control item-chat" title="{{localize "ActorSheet.SendToChat"}}"><i
@@ -356,9 +367,13 @@
                                 </td>
                                 <td>
                                     {{#if item.system.roll}}
-                                        <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
+                                        {{#if this.disabledOIHID}}
+                                            <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                        {{else}}
+                                            <button type="button" class="item-rollable" data-roll="{{item.system.roll}}"
                                             data-label="{{item._id}}">{{numberFormat item.system.roll decimals=0
                                             sign=false}}-</button>
+                                        {{/if}}
                                     {{/if}}
                                 </td>
                                 <td>
@@ -454,9 +469,14 @@
                                 <td>{{item.system.value}}</td>
                                 <td>{{item.system.velValue}}</td>
                                 <td>
-                                    {{#if item.system.showToggle}}<input class="item-toggle" type="checkbox"  
+                                    {{#if this.system.showToggle}}
+                                        {{#if this.disabledOIHID}}
+                                            <i class="fal fa-minus-square fa-xl item-oihid" title="This power only works when in Heroic ID, which can be enabled in the OTHERS tab." width="24" height="24"></i>
+                                        {{else}}
+                                            <input class="item-toggle" type="checkbox"  
                                         name="item.system.active" {{checked item.system.active}} data-dtype="Boolean"
                                         data-action="toggle" />
+                                        {{/if}}
                                     {{/if}}
                                 </td>
                                 <td class="right">

@@ -276,6 +276,24 @@ export class HeroSystem6eActor extends Actor {
             await this.update(changes);
         }
 
+        // Heroic ID
+        if (data.system?.heroicIdentity !== undefined) {
+            // Loop thru all the active effects, checking if source has OIHID
+            const allEffects = await this.allApplicableEffects();
+            for (const ae of allEffects) {
+                const item = ae.parent;
+                if (!item) continue;
+                if (item instanceof HeroSystem6eItem === false) continue;
+                if (item.findModsByXmlid("OIHID")) {
+                    await ae.update({ disabled: !data.system.heroicIdentity });
+
+                    //TODO: Any characteristic bonuses likely remain.
+                    //Need to simulate a toggle off, without actually toggling the power off.
+                    //Similar when turn AE back on.
+                }
+            }
+        }
+
         // Display changes from _preUpdate
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);
