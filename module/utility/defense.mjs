@@ -133,7 +133,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         }
         // back out 5e DAMAGERESISTANCE
         for (const damageResistance of targetActor.items.filter(
-            (o) => o.system.XMLID === "DAMAGERESISTANCE" && o.system.active,
+            (o) => o.system.XMLID === "DAMAGERESISTANCE" && o.isActive,
         )) {
             switch (attackDefenseVs.toUpperCase()) {
                 case "PD":
@@ -178,7 +178,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     const activeDefenses = targetActor.items.filter(
         (o) =>
             (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
-            (o.system.active || o.effects.find(() => true)?.disabled === false) &&
+            (o.isActive || o.effects.find(() => true)?.disabled === false) &&
             !(options?.ignoreDefenseIds || []).includes(o.id),
     );
     for (const defenseItem of activeDefenses) {
@@ -296,7 +296,7 @@ export function determineDefense(targetActor, attackItem, options) {
         : targetActor.items.filter(
               (o) =>
                   (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
-                  (o.system.active || o.effects.find(() => true)?.disabled === false) &&
+                  (o.isActive || o.effects.find(() => true)?.disabled === false) &&
                   !(options?.ignoreDefenseIds || []).includes(o.id),
           );
 
@@ -372,7 +372,7 @@ export function determineDefense(targetActor, attackItem, options) {
     }
 
     // PD bought as hardened
-    for (const item of activeDefenses.filter((o) => o.system.XMLID == "PD" && o.system.active)) {
+    for (const item of activeDefenses.filter((o) => o.system.XMLID == "PD" && o.isActive)) {
         if (item.findModsByXmlid("HARDENED")) {
             const levels = parseInt(item.system.value) || 0;
             PD -= levels;
@@ -380,7 +380,7 @@ export function determineDefense(targetActor, attackItem, options) {
     }
 
     // ED bought as hardened
-    for (const item of activeDefenses.filter((o) => o.system.XMLID == "ED" && o.system.active)) {
+    for (const item of activeDefenses.filter((o) => o.system.XMLID == "ED" && o.isActive)) {
         if (item.findModsByXmlid("HARDENED")) {
             const levels = parseInt(item.system.value) || 0;
             ED -= levels;

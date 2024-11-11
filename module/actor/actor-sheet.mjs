@@ -462,7 +462,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                 (o) => (o.system.subType || o.type) === "defense" && !o.effects.size,
             );
             for (let d of defensePowers) {
-                d.disabled = !d.system.active;
+                d.disabled = !d.isActive;
                 switch (getPowerInfo({ xmlid: d.system.XMLID, actor: this.actor })?.duration) {
                     case "instant":
                         // Might Vary

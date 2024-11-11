@@ -153,7 +153,7 @@ export async function AttackAoeToHit(item, options) {
 
     const hitCharacteristic = actor.system.characteristics.ocv.value;
     const setManeuver = item.actor.items.find(
-        (item) => item.type == "maneuver" && item.name === "Set" && item.system.active,
+        (item) => item.type == "maneuver" && item.name === "Set" && item.isActive,
     );
 
     const attackHeroRoller = new HeroRoller()
@@ -200,7 +200,7 @@ export async function AttackAoeToHit(item, options) {
 
         // Brace (+2 OCV only to offset the Range Modifier)
         const braceManeuver = item.actor.items.find(
-            (item) => item.type == "maneuver" && item.name === "Brace" && item.system.active,
+            (item) => item.type == "maneuver" && item.name === "Brace" && item.isActive,
         );
         if (braceManeuver) {
             let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
@@ -276,7 +276,7 @@ export async function AttackAoeToHit(item, options) {
         cvModifiers.push(cvMod);
     });
     // Haymaker -5 DCV
-    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active);
+    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
     if (haymakerManeuver) {
         //todo: if it is -5 , then why -4?
         dcv -= 4;
@@ -467,7 +467,7 @@ export async function AttackToHit(item, options) {
     // -------------------------------------------------
     // attack roll
     // -------------------------------------------------
-    const setManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.system.active);
+    const setManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Set" && o.isActive);
 
     let stunForEndHeroRoller = null;
 
@@ -533,9 +533,7 @@ export async function AttackToHit(item, options) {
         }
 
         // Brace (+2 OCV only to offset the Range Modifier)
-        const braceManeuver = item.actor.items.find(
-            (o) => o.type == "maneuver" && o.name === "Brace" && o.system.active,
-        );
+        const braceManeuver = item.actor.items.find((o) => o.type == "maneuver" && o.name === "Brace" && o.isActive);
         if (braceManeuver) {
             let brace = Math.min(-rangePenalty, braceManeuver.system.ocv);
             if (brace > 0) {
@@ -610,7 +608,7 @@ export async function AttackToHit(item, options) {
         cvModifiers.push(cvMod);
     });
     // Haymaker -5 DCV
-    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.system.active);
+    const haymakerManeuver = actor.items.find((o) => o.type == "maneuver" && o.name === "Haymaker" && o.isActive);
     if (haymakerManeuver) {
         //todo: if it is -5 , then why -4?
         dcv -= 4;
@@ -1934,7 +1932,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     let conditionalDefenses = token.actor.items.filter(
         (o) =>
             (o.system.subType || o.system.type) === "defense" &&
-            (o.system.active || o.effects.find(() => true)?.disabled === false) &&
+            (o.isActive || o.effects.find(() => true)?.disabled === false) &&
             ((o.system.MODIFIER || []).find((p) => ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID)) ||
                 avad),
     );
@@ -2141,7 +2139,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const defenseEveryPhase = token.actor.items.filter(
         (o) =>
             (o.system.subType || o.system.type) === "defense" &&
-            o.system.active &&
+            o.isActive &&
             (o.findModsByXmlid("EVERYPHASE") || o.findModsByXmlid("ACTIVATIONROLL")),
     );
 
@@ -2647,7 +2645,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
 
     // Match attack against absorption type. If we match we can do some absorption.
     for (const absorptionItem of absorptionItems) {
-        if (absorptionItem.system.OPTION === attackType.toUpperCase() && absorptionItem.system.active) {
+        if (absorptionItem.system.OPTION === attackType.toUpperCase() && absorptionItem.isActive) {
             const actor = absorptionItem.actor;
             let maxAbsorption;
             if (actor.system.is5e) {
@@ -2882,7 +2880,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     let totalDefense = 0;
 
     // FLASHDEFENSE
-    for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.system.active)) {
+    for (const flashDefense of token.actor.items.filter((o) => o.system.XMLID === "FLASHDEFENSE" && o.isActive)) {
         if (
             senseAffectingItem.system.OPTIONID === flashDefense.system.OPTIONID ||
             flashDefense.system.OPTIONID.includes(senseAffectingItem.system.INPUT?.toUpperCase())
@@ -3216,7 +3214,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
             // Double check to make sure FLIGHT or GLIDING is still on
             if (
                 options.targetToken.actor.items.find(
-                    (o) => o.system.XMLID === activeMovement.toUpperCase() && o.system.active,
+                    (o) => o.system.XMLID === activeMovement.toUpperCase() && o.isActive,
                 )
             ) {
                 knockbackDice -= 1;
@@ -3245,7 +3243,7 @@ async function _calcKnockback(body, item, options, knockbackMultiplier) {
 
         // Target is using Clinging +1d6
         const clinging = options.targetToken?.actor?.items.find((o) => o.system.XMLID === "CLINGING");
-        if (clinging && clinging.system.active) {
+        if (clinging && clinging.isActive) {
             knockbackDice += 1;
             knockbackTags.push({
                 value: "+1d6KB",

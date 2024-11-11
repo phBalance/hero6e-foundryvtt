@@ -566,7 +566,7 @@ export function CombatSkillLevelsForAttack(item) {
         (o) =>
             ["MENTAL_COMBAT_LEVELS", "COMBAT_LEVELS"].includes(o.system.XMLID) &&
             (o.system.ADDER || []).find((p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name) &&
-            o.system.active != false,
+            o.isActive != false,
     );
 
     for (const cslSkill of cslSkills) {
@@ -605,7 +605,7 @@ export function PenaltySkillLevelsForAttack(item) {
         (o) =>
             ["PENALTY_SKILL_LEVELS"].includes(o.system.XMLID) &&
             (o.system.ADDER || []).find((p) => p.ALIAS === item.system.ALIAS || p.ALIAS === item.name) &&
-            o.system.active != false,
+            o.isActive != false,
     );
 
     return psls;

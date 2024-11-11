@@ -804,7 +804,7 @@ export class HeroSystem6eActor extends Actor {
             (o) =>
                 o.system.XMLID === "PENALTY_SKILL_LEVELS" &&
                 o.system.penalty === "encumbrance" &&
-                (o.type === "skill" || o.system.active),
+                (o.type === "skill" || o.isActive),
         )) {
             dcvDex = Math.min(0, dcvDex + parseInt(pslEncumbrance.system.LEVELS));
         }
@@ -922,7 +922,7 @@ export class HeroSystem6eActor extends Actor {
         // 0 on movement and DCV occur 5 points of STR
         // sooner.
         const massMultiplier = this.items
-            .filter((o) => o.system.XMLID === "DENSITYINCREASE" && o.system.active)
+            .filter((o) => o.system.XMLID === "DENSITYINCREASE" && o.isActive)
             .reduce((p, a) => p + parseInt(a.system.LEVELS), 0);
         const minStr = massMultiplier * 5;
 
@@ -1233,7 +1233,7 @@ export class HeroSystem6eActor extends Actor {
 
     getActiveConstantItems() {
         let results = [];
-        for (let item of this.items.filter((o) => o.system.active)) {
+        for (let item of this.items.filter((o) => o.isActive)) {
             let duration = getPowerInfo({
                 xmlid: item.system.XMLID,
                 actor: this,
@@ -2001,9 +2001,9 @@ export class HeroSystem6eActor extends Actor {
 
         // ONLY IN ALTERNATE IDENTITY (OIAID)
         // Assume we are in our super/heroic identity
-        if (this.system.alternateIdentity === undefined) {
-            this.system.alternateIdentity = false;
-            changes[`system.alternateIdentity`] = true;
+        if (this.system.heroicIdentity === undefined) {
+            this.system.heroicIdentity = false;
+            changes[`system.heroicIdentity`] = true;
         }
 
         // isHeroic
@@ -2302,7 +2302,7 @@ export class HeroSystem6eActor extends Actor {
 
         // Hero Designer appears to store WEIGHT as LBS instead of KG.
         const equipment = this.items.filter(
-            (o) => o.type === "equipment" && (o.parentItem ? o.parentItem.system.active : o.system.active),
+            (o) => o.type === "equipment" && (o.parentItem ? o.parentItem.isActive : o.isActive),
         );
         const weightLbs = equipment.reduce((a, b) => a + parseFloat(b.system?.WEIGHT || 0), 0);
         const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
@@ -2311,7 +2311,7 @@ export class HeroSystem6eActor extends Actor {
     }
 
     get netWorth() {
-        const equipment = this.items.filter((o) => o.type === "equipment" && o.system.active);
+        const equipment = this.items.filter((o) => o.type === "equipment" && o.isActive);
         const price = equipment.reduce((a, b) => a + parseFloat(b.system.PRICE), 0);
         return price.toFixed(2);
     }
