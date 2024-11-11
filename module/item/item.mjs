@@ -2286,22 +2286,13 @@ export class HeroSystem6eItem extends Item {
         // We will try to get cost per level via config.mjs
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
 
-        // Default costPerLevel 1
-        let costPerLevel = 1;
-
-        // Skills typically cost 2CP for every +1
-        if (configPowerInfo?.type == "skill") {
-            costPerLevel = 2;
+        if (!configPowerInfo?.costPerLevel) {
+            console.error(
+                `Unable to calculate costs for ${this.system.XMLID}: ${configPowerInfo} && ${configPowerInfo?.costPerLevel}`,
+            );
         }
 
-        // Check if configPowerInfo has a more specific costPerLevel
-        if (configPowerInfo?.costPerLevel !== undefined) {
-            if (typeof configPowerInfo?.costPerLevel === "function") {
-                costPerLevel = parseFloat(configPowerInfo?.costPerLevel(this)) || 0;
-            } else {
-                costPerLevel = parseFloat(configPowerInfo?.costPerLevel) || 0;
-            }
-        }
+        const costPerLevel = configPowerInfo?.costPerLevel?.(this) || 0;
         this.system.costPerLevel = costPerLevel;
 
         // The number of levels for cost is based on the original power, not
