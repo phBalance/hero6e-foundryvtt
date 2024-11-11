@@ -5,6 +5,7 @@ import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsFor
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
+import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -1066,11 +1067,17 @@ export class HeroSystem6eActor extends Actor {
 
     // Raw base is insufficient for 5e characters
     getCharacteristicBase(key) {
-        let powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
-
-        let base = parseInt(powerInfo?.base) || 0;
+        const powerInfo = getPowerInfo({ xmlid: key.toUpperCase(), actor: this });
+        const base = parseInt(powerInfo?.base) || 0;
 
         if (!this.system.is5e) return base;
+
+        // TODO: Can this be combined with getCharacteristicInfoArrayForActor? See also actor-sheet.mjs changes
+        const isAutomatonWithNoStun = !!this.items.find(
+            (power) =>
+                power.system.XMLID === "AUTOMATON" &&
+                (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+        );
 
         const _str = this.appliedEffects
             .filter(
@@ -1154,13 +1161,17 @@ export class HeroSystem6eActor extends Actor {
         };
 
         switch (key.toLowerCase()) {
-            // Physical Defense (PD) STR/5
+            // Physical Defense (PD) STR/5, STR/5 and an extra /3 if the right type of automaton
             case "pd":
-                return base + Math.round((charBase("STR") + _str) / 5);
+                return RoundFavorPlayerUp(
+                    base + Math.round((charBase("STR") + _str) / 5) / (isAutomatonWithNoStun ? 3 : 1),
+                );
 
-            // Energy Defense (ED) CON/5
+            // Energy Defense (ED) CON/5, CON/5 and /3 if the right type of automaton
             case "ed":
-                return base + Math.round((charBase("CON") + _con) / 5);
+                return RoundFavorPlayerUp(
+                    base + Math.round((charBase("CON") + _con) / 5) / (isAutomatonWithNoStun ? 3 : 1),
+                );
 
             // Speed (SPD) 1 + (DEX/10)   can be fractional
             case "spd":
@@ -1242,24 +1253,21 @@ export class HeroSystem6eActor extends Actor {
 
             const base = this.getCharacteristicBase(key);
             const levels = core - base;
-            let cost = Math.round(levels * (powerInfo.costPerLevel || 0));
+            let cost = Math.round(levels * (powerInfo.costPerLevel(this) || 0));
 
             // 5e hack for fractional speed
             if (key === "spd" && cost < 0) {
                 cost = Math.ceil(cost / 10);
             }
 
-            if (characteristic.realCost != cost) {
+            if (characteristic.realCost !== cost) {
                 changes[`system.characteristics.${key}.realCost`] = cost;
                 this.system.characteristics[key].realCost = cost;
             }
-            if (characteristic.core != core) {
+            if (characteristic.core !== core) {
                 changes[`system.characteristics.${key}.core`] = core;
                 this.system.characteristics[key].core = core;
             }
-            // changes[`system.characteristics.${key}.basePointsPlusAdders`] = cost
-            // changes[`system.characteristics.${key}.realCost`] = cost
-            // changes[`system.characteristics.${key}.activePoints`] = cost
         }
         if (Object.keys(changes).length > 0 && this.id) {
             await this.update(changes);
@@ -1423,7 +1431,7 @@ export class HeroSystem6eActor extends Actor {
         // A few critical items.
         this.system.CHARACTER = heroJson.CHARACTER;
         this.system.versionHeroSystem6eUpload = game.system.version;
-        changes[`system.versionHeroSystem6eUpload`] = game.system.version;
+        changes["system.versionHeroSystem6eUpload"] = game.system.version;
 
         // CHARACTERISTICS
         if (heroJson.CHARACTER?.CHARACTERISTICS) {
@@ -2008,13 +2016,13 @@ export class HeroSystem6eActor extends Actor {
         let changed = false;
 
         // is5e
-        if (typeof this.system.CHARACTER?.TEMPLATE == "string") {
+        if (typeof this.system.CHARACTER?.TEMPLATE === "string") {
             if (
                 this.system.CHARACTER.TEMPLATE.includes("builtIn.") &&
                 !this.system.CHARACTER.TEMPLATE.includes("6E.") &&
                 !this.system.is5e
             ) {
-                changes[`system.is5e`] = true;
+                changes["system.is5e"] = true;
                 this.system.is5e = true;
             }
             if (
@@ -2022,12 +2030,12 @@ export class HeroSystem6eActor extends Actor {
                 this.system.CHARACTER.TEMPLATE.includes("6E.") &&
                 this.system.is5e === undefined
             ) {
-                changes[`system.is5e`] = false;
+                changes["system.is5e"] = false;
                 this.system.is5e = false;
             }
         }
         if (this.system.COM && !this.system.is5e) {
-            changes[`system.is5e`] = true;
+            changes["system.is5e"] = true;
             this.system.is5e = true;
         }
 
@@ -2053,8 +2061,8 @@ export class HeroSystem6eActor extends Actor {
             } else if (JSON.stringify(this.system.CHARACTER?.TEMPLATE)?.match(/\.Superheroic/i)) {
                 isHeroic = false;
             }
-            if (isHeroic != this.system.isHeroic) {
-                changes[`system.isHeroic`] = isHeroic;
+            if (isHeroic !== this.system.isHeroic) {
+                changes["system.isHeroic"] = isHeroic;
             }
             if (typeof isHeroic === "undefined") {
                 // Custom Templates
@@ -2077,7 +2085,7 @@ export class HeroSystem6eActor extends Actor {
                 newValue = Math.floor(newValue);
             }
 
-            if (this.system.characteristics[key].max != newValue) {
+            if (this.system.characteristics[key].max !== newValue) {
                 if (this.id) {
                     //changes[`system.characteristics.${key.toLowerCase()}.max`] = Math.floor(newValue)
                     await this.update({
@@ -2090,7 +2098,7 @@ export class HeroSystem6eActor extends Actor {
                 changed = true;
             }
             if (
-                this.system.characteristics[key].value != this.system.characteristics[key.toLowerCase()].max &&
+                this.system.characteristics[key].value !== this.system.characteristics[key.toLowerCase()].max &&
                 overrideValues
             ) {
                 if (this.id) {
@@ -2107,7 +2115,7 @@ export class HeroSystem6eActor extends Actor {
                 }
                 changed = true;
             }
-            if (this.system.characteristics[key].core != newValue && overrideValues) {
+            if (this.system.characteristics[key].core !== newValue && overrideValues) {
                 changes[`system.characteristics.${key.toLowerCase()}.core`] = newValue;
                 this.system.characteristics[key.toLowerCase()].core = newValue;
                 changed = true;

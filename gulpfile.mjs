@@ -30,7 +30,7 @@ function validateJavaScriptFilesByLint() {
 function validateScssFilesByLint() {
     return gulp.src(SASS_FILES).pipe(
         gulpStylelint({
-            failAfterError: false,
+            failAfterError: true,
             reporters: [{ formatter: "string", console: true }],
         }),
     );
@@ -50,6 +50,7 @@ function autoFixScssFilesByLint() {
     return gulp.src(SASS_FILES).pipe(
         gulpStylelint({
             fix: true,
+            failAfterError: true,
             reporters: [{ formatter: "string", console: true }],
         }),
     );

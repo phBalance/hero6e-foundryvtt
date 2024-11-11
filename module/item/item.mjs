@@ -2286,22 +2286,13 @@ export class HeroSystem6eItem extends Item {
         // We will try to get cost per level via config.mjs
         // Default cost per level will be BASECOST, or 3/2 for skill, or 1 for everything else
 
-        // Default costPerLevel 1
-        let costPerLevel = 1;
-
-        // Skills typically cost 2CP for every +1
-        if (configPowerInfo?.type == "skill") {
-            costPerLevel = 2;
+        if (!configPowerInfo?.costPerLevel) {
+            console.error(
+                `Unable to calculate costs for ${this.system.XMLID}: ${configPowerInfo} && ${configPowerInfo?.costPerLevel}`,
+            );
         }
 
-        // Check if configPowerInfo has a more specific costPerLevel
-        if (configPowerInfo?.costPerLevel !== undefined) {
-            if (typeof configPowerInfo?.costPerLevel === "function") {
-                costPerLevel = parseFloat(configPowerInfo?.costPerLevel(this)) || 0;
-            } else {
-                costPerLevel = parseFloat(configPowerInfo?.costPerLevel) || 0;
-            }
-        }
+        const costPerLevel = configPowerInfo?.costPerLevel?.(this) || 0;
         this.system.costPerLevel = costPerLevel;
 
         // The number of levels for cost is based on the original power, not
@@ -2325,7 +2316,7 @@ export class HeroSystem6eItem extends Item {
             baseCost += Math.ceil(parseFloat(system.WIDTHLEVELS * 2)) || 0; // per +½m of thickness (6e only)
         } else if (system.XMLID === "DUPLICATION") {
             const points = parseInt(system.POINTS || 0);
-            const cost = points * configPowerInfo?.costPerLevel;
+            const cost = points * configPowerInfo?.costPerLevel(this) || 0;
             baseCost += cost;
         }
 
@@ -2349,22 +2340,12 @@ export class HeroSystem6eItem extends Item {
                 //TRANSPORT_FAMILIARITY
                 const adderCostPerLevel = parseFloat(adder.LVLCOST || 0) / parseFloat(adder.LVLVAL || 1) || 1;
                 const adderLevels = parseInt(adder.LEVELS);
-                //adderCost += Math.ceil(adderCostPerLevel * adderLevels);
                 adder.BASECOST_total = adderBaseCost + Math.ceil(adderCostPerLevel * adderLevels);
 
                 // WEAPONSMITH (selections over 1 cost only 1)
                 if (this.system.XMLID === "WEAPONSMITH" && adderCost > 0) {
                     adder.BASECOST_total = 1;
                 }
-                // else if (this.system.XMLID === "ENTANGLE") {
-                //     // 5E is just a straight 5 points per adder level, but
-                //     // 6E costs 3 points for the first LEVEL and 2 points for the next and so on (typical cost of resistent defense).
-                //     if (adder.XMLID === "ADDITIONALED" || adder.XMLID === "ADDITIONALPD") {
-                //         const groupsOfTwo = Math.floor(adderLevels / 2);
-                //         const cost = 5 * groupsOfTwo + 3 * (adderLevels - 2 * groupsOfTwo);
-                //         adder.BASECOST_total = cost;
-                //     }
-                // }
             } else {
                 adder.BASECOST_total = 0;
             }
@@ -2411,16 +2392,6 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        // Categorized skills cost 2 per category and +1 per each subcategory.
-        // If no catagories selected then assume 3 pts
-        // if (configPowerInfo?.categorized && adderCost >= 4) {
-        //     if (adderCost == 0) {
-        //         adderCost = 3
-        //     } else {
-        //         adderCost = Math.floor(adderCost / 2) + 1
-        //     }
-        // }
-
         // POWERS (likely ENDURANCERESERVEREC)
         if (system.POWER) {
             for (const adderPower of system.POWER) {
@@ -2431,7 +2402,9 @@ export class HeroSystem6eItem extends Item {
                     actor: this.actor,
                     is5e: this.is5e,
                 });
-                const adderCostPerLevel = adderPowerInfo?.costPerLevel || 0;
+
+                // TODO: Add all adders into the system so that we can simplify this
+                const adderCostPerLevel = adderPowerInfo?.costPerLevel(adderPower) || 0;
                 adderCost += Math.ceil(adderCostPerLevel * adderLevels);
             }
         }
@@ -2449,7 +2422,7 @@ export class HeroSystem6eItem extends Item {
         //if (system.XMLID == "NAKEDMODIFIER" && system.MODIFIER) {
         if (configPowerInfo?.privateAsAdder && system.MODIFIER) {
             let advantages = 0;
-            for (let modifier of (system.MODIFIER || []).filter((o) => !o.PRIVATE)) {
+            for (const modifier of (system.MODIFIER || []).filter((o) => !o.PRIVATE)) {
                 const modPowerInfo = getPowerInfo({
                     item: modifier,
                     actor: this.actor,
@@ -2466,6 +2439,8 @@ export class HeroSystem6eItem extends Item {
                 if (!modCost) {
                     const modifierBaseCost = parseFloat(modifier.BASECOST) || 0;
                     modCost += modifierBaseCost;
+
+                    // TODO: Add all modifiers into the system so that we can simplify this
                     const modifierCostPerLevel =
                         typeof modPowerInfo?.costPerLevel === "function"
                             ? modPowerInfo.costPerLevel(modifier)
@@ -2536,6 +2511,8 @@ export class HeroSystem6eItem extends Item {
             // If not use a the default cost formula
             if (!modCost) {
                 modCost += modifierBaseCost;
+
+                // TODO: Add all powers and modifiers into the system so that we can simplify this.
                 const modifierCostPerLevel =
                     typeof modPowerInfo?.costPerLevel === "function"
                         ? modPowerInfo.costPerLevel(modifier)
@@ -2592,6 +2569,8 @@ export class HeroSystem6eItem extends Item {
 
                 if (!adderCost) {
                     adderCost += parseFloat(adder.BASECOST);
+
+                    // TODO: Add all adders into the system so that we can simplify this
                     const adderCostPerLevel =
                         typeof adderPowerInfo?.costPerLevel === "function"
                             ? adderPowerInfo.costPerLevel(adder)
@@ -2766,7 +2745,7 @@ export class HeroSystem6eItem extends Item {
         // ADD_MODIFIERS_TO_BASE
         if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
             const _base = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].core;
-            const _cost = getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor }).costPerLevel || 1;
+            const _cost = getPowerInfo({ xmlid: this.system.XMLID, actor: this.actor }).costPerLevel(this) || 1;
             const _baseCost = _base * _cost;
             const _discount = _baseCost - RoundFavorPlayerDown(_baseCost / (1 + limitations));
             _realCost -= _discount;
