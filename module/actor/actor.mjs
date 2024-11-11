@@ -1242,24 +1242,21 @@ export class HeroSystem6eActor extends Actor {
 
             const base = this.getCharacteristicBase(key);
             const levels = core - base;
-            let cost = Math.round(levels * (powerInfo.costPerLevel || 0));
+            let cost = Math.round(levels * (powerInfo.costPerLevel(this) || 0));
 
             // 5e hack for fractional speed
             if (key === "spd" && cost < 0) {
                 cost = Math.ceil(cost / 10);
             }
 
-            if (characteristic.realCost != cost) {
+            if (characteristic.realCost !== cost) {
                 changes[`system.characteristics.${key}.realCost`] = cost;
                 this.system.characteristics[key].realCost = cost;
             }
-            if (characteristic.core != core) {
+            if (characteristic.core !== core) {
                 changes[`system.characteristics.${key}.core`] = core;
                 this.system.characteristics[key].core = core;
             }
-            // changes[`system.characteristics.${key}.basePointsPlusAdders`] = cost
-            // changes[`system.characteristics.${key}.realCost`] = cost
-            // changes[`system.characteristics.${key}.activePoints`] = cost
         }
         if (Object.keys(changes).length > 0 && this.id) {
             await this.update(changes);

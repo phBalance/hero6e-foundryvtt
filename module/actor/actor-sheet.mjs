@@ -491,8 +491,9 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                     if (dc > 0) {
                         let costPerDice =
-                            Math.max(Math.floor((item.system.activePoints || 0) / dc) || item.baseInfo.costPerLevel) ||
-                            (item.system.targets === "dcv" ? 5 : 10);
+                            Math.max(
+                                Math.floor((item.system.activePoints || 0) / dc) || item.baseInfo.costPerLevel(item),
+                            ) || (item.system.targets === "dcv" ? 5 : 10);
                         dc += csl.dc + Math.floor((csl.ocv + csl.dcv) / 2); // Assume CSL are converted to DCs
                         let ap = dc * costPerDice;
 

@@ -2,6 +2,7 @@ import { getRoundedUpDistanceInSystemUnits } from "./utility/units.mjs";
 import * as heroDice from "./utility/dice.mjs";
 import { createDefenseProfile } from "./utility/defense.mjs";
 import { RoundFavorPlayerUp } from "./utility/round.mjs";
+import { HeroSystem6eActor } from "./actor/actor.mjs";
 
 export const HERO = { heroDice };
 
@@ -292,8 +293,9 @@ function costPerLevelFixedValue(value) {
     };
 }
 
-function pdEdCostPerLevel(item) {
-    const isAutomatonWithNoStun = !!item.actor?.items.find(
+function pdEdCostPerLevel(itemOrActor) {
+    const actor = itemOrActor instanceof HeroSystem6eActor ? itemOrActor : itemOrActor.actor;
+    const isAutomatonWithNoStun = !!actor.items.find(
         (power) =>
             power.system.XMLID === "AUTOMATON" &&
             (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
@@ -682,7 +684,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: 0,
-            costPerLevel: 2,
+            costPerLevel: costPerLevelFixedValue(2),
         },
     );
     addPower(
@@ -6867,12 +6869,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "ARMORPIERCING",
-            costPerLevel: 0.25,
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             dc: true,
             xml: `<MODIFIER XMLID="ARMORPIERCING" ID="1712696642037" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {
-            costPerLevel: 0.5,
+            costPerLevel: costPerLevelFixedValue(1 / 2),
         },
     );
 
@@ -6923,7 +6925,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CUMULATIVE",
             dc: true,
-            costPerLevel: 0.25,
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             xml: `<MODIFIER XMLID="CUMULATIVE" ID="1714280316745" BASECOST="0.5" LEVELS="0" ALIAS="Cumulative" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -6999,7 +7001,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "HARDENED",
-            costPerLevel: 0.25,
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             xml: `<MODIFIER XMLID="HARDENED" ID="1712344562459" BASECOST="0.0" LEVELS="1" ALIAS="Hardened" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7024,7 +7026,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "IMPENETRABLE",
-            costPerLevel: 0.25,
+            costPerLevel: costPerLevelFixedValue(1 / 4),
             xml: `<MODIFIER XMLID="IMPENETRABLE" ID="1712345241001" BASECOST="0.0" LEVELS="1" ALIAS="Impenetrable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         undefined,
@@ -7057,11 +7059,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "PENETRATING",
-            costPerLevel: 0.5,
+            costPerLevel: costPerLevelFixedValue(1 / 2),
             dc: true,
-            // cost: function (modifier) {
-            //     return parseInt(modifier.LEVELS) * this.costPerLevel;
-            // },
             xml: `<MODIFIER XMLID="PENETRATING" ID="1712697142089" BASECOST="0.0" LEVELS="1" ALIAS="Penetrating" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
@@ -7070,8 +7069,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REDUCEDEND",
-            // costPerLevel: 0.5,
-            // dc: true,
             cost: function (modifier, item) {
                 // Reduced endurance is double the cost if it's applying against a power with autofire
                 if (item.findModsByXmlid("AUTOFIRE")) {
@@ -7087,8 +7084,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REQUIRESASKILLROLL",
-            // costPerLevel: 0.5,
-            // dc: true,
             minimumLimitation: -0.25,
             xml: `<MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
