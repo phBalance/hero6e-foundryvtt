@@ -287,9 +287,27 @@ export class HeroSystem6eActor extends Actor {
                 if (item.findModsByXmlid("OIHID")) {
                     await ae.update({ disabled: !data.system.heroicIdentity });
 
-                    //TODO: Any characteristic bonuses likely remain.
-                    //Need to simulate a toggle off, without actually toggling the power off.
-                    //Similar when turn AE back on.
+                    // Modify characteristics as appropriate
+                    for (const change of ae.changes) {
+                        if (change.key.match(/max$/) && change.mode === 2 && change.value > 0) {
+                            const valueKey = change.key.replace(/.max$/, ".value");
+                            let max = this;
+                            valueKey.split(".").forEach((subPath) => {
+                                max = max[subPath] || null;
+                            });
+                            if (parseInt(max || 0) > 0) {
+                                if (ae.disabled) {
+                                    await this.update({
+                                        [valueKey]: max - parseInt(change.value),
+                                    });
+                                } else {
+                                    await this.update({
+                                        [valueKey]: max + parseInt(change.value),
+                                    });
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
