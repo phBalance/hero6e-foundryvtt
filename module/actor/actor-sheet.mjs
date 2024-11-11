@@ -125,6 +125,11 @@ export class HeroSystemActorSheet extends ActorSheet {
             const characteristicSet = [];
 
             const powers = getCharacteristicInfoArrayForActor(this.actor);
+            const isAutomatonWithNoStun = !!this.actor.items.find(
+                (power) =>
+                    power.system.XMLID === "AUTOMATON" &&
+                    (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+            );
 
             for (const powerInfo of powers) {
                 const characteristic = {
@@ -150,21 +155,22 @@ export class HeroSystemActorSheet extends ActorSheet {
                     }${getSystemDisplayUnits(data.actor.is5e)}`;
                 }
 
-                if (powerInfo.key === "LEAPING")
+                if (powerInfo.key === "LEAPING") {
                     characteristic.notes = `${Math.max(0, characteristic.value)}${getSystemDisplayUnits(
                         data.actor.system.is5e,
                     )} forward, ${Math.max(0, Math.round(characteristic.value / 2))}${getSystemDisplayUnits(
                         data.actor.system.is5e,
                     )} upward`;
+                }
 
                 characteristic.delta = 0;
                 if (data.actor.system.is5e) {
                     if (powerInfo.key.toLowerCase() === "pd") {
-                        characteristic.notes = "5e figured STR/5";
+                        characteristic.notes = `5e figured STR/5${isAutomatonWithNoStun ? " and /3 again" : ""}`;
                     }
 
                     if (powerInfo.key.toLowerCase() === "ed") {
-                        characteristic.notes = "5e figured CON/5";
+                        characteristic.notes = `5e figured CON/5${isAutomatonWithNoStun ? " and /3 again" : ""}`;
                     }
 
                     if (powerInfo.key.toLowerCase() === "spd") {

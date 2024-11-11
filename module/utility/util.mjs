@@ -94,11 +94,15 @@ export function getCharacteristicInfoArrayForActor(actor) {
     const powerList = actor?.system?.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
 
     let powers = powerList.filter(isCharOrMovePowerForActor);
-    const AUTOMATION = actor.items.find((o) => o.system.XMLID === "AUTOMATON");
-    if (AUTOMATION && powers.find((o) => o.key === "STUN" || o.key === "EGO" || o.key === "OMCV" || o.key === "DMCV")) {
+    const AUTOMATON = !!actor.items.find(
+        (power) =>
+            power.system.XMLID === "AUTOMATON" &&
+            (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
+    );
+    if (AUTOMATON && powers.find((o) => o.key === "STUN")) {
         console.warn("Wrong actor type", actor);
-        // TODO: change actor type to AUTOMATION or whatever is appropriate?
-        powers = powers.filter((o) => o.key !== "STUN" && o.key !== "EGO" && o.key !== "OMCV" && o.key !== "DMCV");
+        // TODO: change actor type to AUTOMATON or whatever is appropriate?
+        powers = powers.filter((o) => o.key !== "STUN");
     }
 
     return powers;
