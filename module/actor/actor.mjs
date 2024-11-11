@@ -5,6 +5,7 @@ import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsFor
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { clamp } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
+import { RoundFavorPlayerUp } from "../utility/round.mjs";
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -1160,13 +1161,17 @@ export class HeroSystem6eActor extends Actor {
         };
 
         switch (key.toLowerCase()) {
-            // Physical Defense (PD) STR/5, STR/5 and /3 if the right type of automaton
+            // Physical Defense (PD) STR/5, STR/5 and an extra /3 if the right type of automaton
             case "pd":
-                return base + Math.round((charBase("STR") + _str) / 5) / (isAutomatonWithNoStun ? 3 : 1);
+                return RoundFavorPlayerUp(
+                    base + Math.round((charBase("STR") + _str) / 5) / (isAutomatonWithNoStun ? 3 : 1),
+                );
 
             // Energy Defense (ED) CON/5, CON/5 and /3 if the right type of automaton
             case "ed":
-                return base + Math.round((charBase("CON") + _con) / 5) / (isAutomatonWithNoStun ? 3 : 1);
+                return RoundFavorPlayerUp(
+                    base + Math.round((charBase("CON") + _con) / 5) / (isAutomatonWithNoStun ? 3 : 1),
+                );
 
             // Speed (SPD) 1 + (DEX/10)   can be fractional
             case "spd":
