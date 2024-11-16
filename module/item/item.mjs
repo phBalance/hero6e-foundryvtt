@@ -4972,6 +4972,15 @@ export class HeroSystem6eItem extends Item {
 
         return this.system.active;
     }
+
+    get compoundCost() {
+        if (this.system.XMLID !== "COMPOUNDPOWER") return 0;
+        let cost = 0;
+        for (const child of this.childItems) {
+            cost += parseInt(child.system.realCost);
+        }
+        return cost;
+    }
 }
 
 export function getItem(id) {

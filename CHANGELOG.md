@@ -9,6 +9,7 @@
 - Initial support for Only in Alternate Identity (OIAID). There is a "Heroic Identity" checkbox in the OTHERS tab. [#1431](https://github.com/dmdorman/hero6e-foundryvtt/issues/1431) [#232](https://github.com/dmdorman/hero6e-foundryvtt/issues/232)
 - Improved automatic spending of END during combat for continuous powers to prevent spending of resources when rewinding or re-doing a turn. [#1448](https://github.com/dmdorman/hero6e-foundryvtt/issues/1448)
 - MAX characteristic is now color coded when different than CORE. [#1461](https://github.com/dmdorman/hero6e-foundryvtt/issues/1461)
+- Improved display of COMPOUNDPOWER costs. [#1434](https://github.com/dmdorman/hero6e-foundryvtt/issues/1461)
 
 ## Version 4.0.5
 
