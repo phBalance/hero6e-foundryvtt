@@ -520,11 +520,14 @@ export class HeroSystem6eItem extends Item {
             // A continuing charges use is tracked by an active effect. Start it.
             await _startIfIsAContinuingCharge(this);
 
-            // Invisibility status effect for SIGHTGROUP?
+            // Toggle status effect on based on power
             if (this.system.XMLID === "INVISIBILITY") {
+                // Invisibility status effect for SIGHTGROUP?
                 if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
                     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
                 }
+            } else if (this.system.XMLID === "FLIGHT") {
+                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
             }
 
             // Special Visions
@@ -559,12 +562,17 @@ export class HeroSystem6eItem extends Item {
             };
             await ChatMessage.create(chatData);
 
-            // Remove Invisibility status effect
+            // Toggle status effect off based on power
             if (this.system.XMLID === "INVISIBILITY") {
+                // Remove Invisibility status effect
                 if (this.actor.statuses.has("invisible")) {
                     await this.actor.removeActiveEffect(
                         HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
                     );
+                }
+            } else if (this.system.XMLID === "FLIGHT") {
+                if (this.actor.statuses.has("fly")) {
+                    await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
             }
 
