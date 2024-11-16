@@ -861,7 +861,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         }
 
         // Do all the standard things like updating item properties that match the name of input boxes
-        await super._updateObject(event, formData);
+        await super._updateObject(event, expandedData); //formData);
 
         if (recalculateCosts) {
             await this.actor.calcCharacteristicsCost();
