@@ -79,8 +79,9 @@ Hooks.once("init", async function () {
     CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
+
     // We can't use the information from system.json in a static context; so we change the load path here.
-    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.getEffects(HEROSYS.module);
+    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.initialize(HEROSYS.module);
 
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
 
@@ -632,7 +633,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                             parseInt(actor.system.characteristics.stun.value) + rec,
                         );
 
-                        await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+                        await actor.removeActiveEffect(CONFIG.statusEffects.stunEffect);
 
                         await actor.update(
                             {

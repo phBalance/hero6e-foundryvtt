@@ -523,7 +523,7 @@ export class HeroSystem6eItem extends Item {
             // Invisibility status effect for SIGHTGROUP?
             if (this.system.XMLID === "INVISIBILITY") {
                 if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-                    this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
+                    this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
                 }
             }
 
@@ -562,7 +562,9 @@ export class HeroSystem6eItem extends Item {
             // Remove Invisibility status effect
             if (this.system.XMLID === "INVISIBILITY") {
                 if (this.actor.statuses.has("invisible")) {
-                    await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.invisibleEffect);
+                    await this.actor.removeActiveEffect(
+                        HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
+                    );
                 }
             }
 
