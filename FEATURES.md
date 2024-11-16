@@ -290,7 +290,7 @@ Our support ratings:
 | NONPERSISTENT                                  |    D    |                                                                                               |
 | NONRESISTANT DEFENSES                          |    D    |                                                                                               |
 | ONE USE AT A TIME                              |    D    |                                                                                               |
-| ONLY IN ALTERNATE IDENTITY (OIAID)             |    D    |                                                                                               |
+| ONLY IN ALTERNATE IDENTITY (OIAID)             |    A    | There is a "Heroic Identity" checkbox in the OTHERS tab                                       |
 | ONLY PROTECTS BARRIER                          |    D    |                                                                                               |
 | ONLY RESTORES TO STARTING VALUES               |    D    |                                                                                               |
 | ONLY WORKS AGAINST [LIMITED TYPE OF ATTACK]    |    D    |                                                                                               |
