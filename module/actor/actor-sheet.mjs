@@ -163,7 +163,7 @@ export class HeroSystemActorSheet extends ActorSheet {
                     )} upward`;
                 }
 
-                characteristic.delta = 0;
+                characteristic.delta = characteristic.max - characteristic.core;
                 if (data.actor.system.is5e) {
                     if (powerInfo.key.toLowerCase() === "pd") {
                         characteristic.notes = `5e figured STR/5${isAutomatonWithNoStun ? " and /3 again" : ""}`;
@@ -196,7 +196,6 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                     if (["omcv", "dmcv"].includes(powerInfo.key.toLowerCase())) {
                         characteristic.notes = "5e figured EGO/3";
-                        characteristic.delta = characteristic.max - characteristic.base;
                     }
                 }
 
