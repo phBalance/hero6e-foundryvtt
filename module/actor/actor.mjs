@@ -279,38 +279,71 @@ export class HeroSystem6eActor extends Actor {
 
         // Heroic ID
         if (data.system?.heroicIdentity !== undefined) {
-            // Loop thru all the active effects, checking if source has OIHID
-            const allEffects = await this.allApplicableEffects();
-            for (const ae of allEffects) {
-                const item = ae.parent;
-                if (!item) continue;
-                if (item instanceof HeroSystem6eItem === false) continue;
-                if (item.findModsByXmlid("OIHID")) {
-                    await ae.update({ disabled: !data.system.heroicIdentity });
+            // Chatcard about entering/leaving heroic identity
+            const token = this.getActiveTokens()[0];
+            const speaker = ChatMessage.getSpeaker({ actor: this, token });
+            const tokenName = token?.name || this.name;
+            speaker["alias"] = game.user.name; //game.token?.name || this.name;
+            const content = `<b>${tokenName}</b> ${data.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
+            const chatData = {
+                user: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                content: content,
+                speaker: speaker,
+            };
+            await ChatMessage.create(chatData);
 
-                    // Modify characteristics as appropriate
-                    for (const change of ae.changes) {
-                        if (change.key.match(/max$/) && change.mode === 2 && change.value > 0) {
-                            const valueKey = change.key.replace(/.max$/, ".value");
-                            let max = this;
-                            valueKey.split(".").forEach((subPath) => {
-                                max = max[subPath] || null;
-                            });
-                            if (parseInt(max || 0) > 0) {
-                                if (ae.disabled) {
-                                    await this.update({
-                                        [valueKey]: max - parseInt(change.value),
-                                    });
-                                } else {
-                                    await this.update({
-                                        [valueKey]: max + parseInt(change.value),
-                                    });
-                                }
-                            }
-                        }
+            // Toggled on (entering ID)
+            if (data.system.heroicIdentity) {
+                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID"))) {
+                    if (item.flags.preOIHID) {
+                        await item.toggle(); // toggle on
+                    }
+                }
+            } else {
+                // Use flags to keep track which items were disabled so we will enable them when we go back into heroic ID
+                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID"))) {
+                    await item.update({ "flags.preOIHID": item.system.active });
+                    if (item.system.active) {
+                        await item.toggle(); // toggle off
                     }
                 }
             }
+
+            // Loop thru all the active effects, checking if source has OIHID
+            // const allEffects = await this.allApplicableEffects();
+            // for (const ae of allEffects) {
+            //     const item = ae.parent;
+            //     if (!item) continue;
+            //     if (item instanceof HeroSystem6eItem === false) continue;
+            //     if (item.findModsByXmlid("OIHID")) {
+            //         // Use flags to keep track which items were disabled so we will enable them when we go back into heroic ID
+            //         await item.update({ "flags.preOIHID": ae.disabled });
+            //         //await ae.update({ disabled: !data.system.heroicIdentity });
+
+            //         // Modify characteristics as appropriate
+            //         // for (const change of ae.changes) {
+            //         //     if (change.key.match(/max$/) && change.mode === 2 && change.value > 0) {
+            //         //         const valueKey = change.key.replace(/.max$/, ".value");
+            //         //         let max = this;
+            //         //         valueKey.split(".").forEach((subPath) => {
+            //         //             max = max[subPath] || null;
+            //         //         });
+            //         //         if (parseInt(max || 0) > 0) {
+            //         //             if (ae.disabled) {
+            //         //                 await this.update({
+            //         //                     [valueKey]: max - parseInt(change.value),
+            //         //                 });
+            //         //             } else {
+            //         //                 await this.update({
+            //         //                     [valueKey]: max + parseInt(change.value),
+            //         //                 });
+            //         //             }
+            //         //         }
+            //         //     }
+            //         // }
+            //     }
+            // }
         }
 
         // Display changes from _preUpdate
