@@ -10,6 +10,7 @@
 - Improved automatic spending of END during combat for continuous powers to prevent spending of resources when rewinding or re-doing a turn. [#1448](https://github.com/dmdorman/hero6e-foundryvtt/issues/1448)
 - MAX characteristic is now color coded when different than CORE. [#1461](https://github.com/dmdorman/hero6e-foundryvtt/issues/1461)
 - Improved display of COMPOUNDPOWER costs. [#1434](https://github.com/dmdorman/hero6e-foundryvtt/issues/1461)
+- FullHealth now also sets characteristic MAX to match CORE.
 
 ## Version 4.0.5
 
