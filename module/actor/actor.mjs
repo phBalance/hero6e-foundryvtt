@@ -1076,22 +1076,31 @@ export class HeroSystem6eActor extends Actor {
             await ae.delete();
         }
 
-        // Set Characteristics MAX to CORE & VALUE to MAX
-        const characteristicChanges = {};
+        // Set Characteristics MAX to CORE
+        const characteristicChangesMax = {};
         for (const char of Object.keys(this.system.characteristics)) {
             const core = parseInt(this.system.characteristics[char].core);
             const max = parseInt(this.system.characteristics[char].max);
-            const value = parseInt(this.system.characteristics[char].value);
             if (core !== max) {
-                characteristicChanges[`system.characteristics.${char}.max`] = core;
+                characteristicChangesMax[`system.characteristics.${char}.max`] = core;
             }
-            if (value !== core) {
-                characteristicChanges[`system.characteristics.${char}.value`] = core;
+        }
+        if (Object.keys(characteristicChangesMax).length > 0) {
+            await this.update(characteristicChangesMax);
+        }
+
+        // Set Characteristics VALUE to MAX
+        const characteristicChangesValue = {};
+        for (const char of Object.keys(this.system.characteristics)) {
+            const max = parseInt(this.system.characteristics[char].max);
+            const value = parseInt(this.system.characteristics[char].value);
+            if (value !== max) {
+                characteristicChangesValue[`system.characteristics.${char}.value`] = max;
             }
         }
 
-        if (Object.keys(characteristicChanges).length > 0) {
-            await this.update(characteristicChanges);
+        if (Object.keys(characteristicChangesValue).length > 0) {
+            await this.update(characteristicChangesValue);
         }
 
         // Reset all items
