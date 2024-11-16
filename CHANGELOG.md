@@ -7,6 +7,7 @@
 - New effect icons for danger sense disabled, detect sense disabled, mental sense disabled, radio sense disabled, smell/taste sense disabled, sonar sense disabled, spatial awareness disabled, touch sense disabled. Abort icon corrected. [#1443](https://github.com/dmdorman/hero6e-foundryvtt/issues/1443)
 - Flight toggle now shows/hides the flight effect. [#1444](https://github.com/dmdorman/hero6e-foundryvtt/issues/1444)
 - Initial support for Only in Alternate Identity (OIAID). There is a "Heroic Identity" checkbox in the OTHERS tab. [#1431](https://github.com/dmdorman/hero6e-foundryvtt/issues/1431) [#232](https://github.com/dmdorman/hero6e-foundryvtt/issues/232)
+- Improved automatic spending of END during combat for continuous powers to prevent spending of resources when rewinding or re-doing a turn. [#1448](https://github.com/dmdorman/hero6e-foundryvtt/issues/1448)
 
 ## Version 4.0.5
 
