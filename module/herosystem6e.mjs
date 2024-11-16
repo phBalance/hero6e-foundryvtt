@@ -633,7 +633,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                             parseInt(actor.system.characteristics.stun.value) + rec,
                         );
 
-                        await actor.removeActiveEffect(CONFIG.statusEffects.stunEffect);
+                        await actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
 
                         await actor.update(
                             {
