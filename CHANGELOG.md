@@ -4,6 +4,7 @@
 
 - Migrations are no longer supported from versions before 3.0.76. Migrate through any version prior to 4.0.6 if you find your world in this situation.
 - Initial support for Only In Heroic ID. There is a checkbox on the OTHER tab. Powers/skills with OIHID will be disabled when not in heroic ID. (#232)(https://github.com/dmdorman/hero6e-foundryvtt/issues/232)
+- New effect icons for danger sense disabled, detect sense disabled, mental sense disabled, radio sense disabled, smell/taste sense disabled, sonar sense disabled, spatial awareness disabled, touch sense disabled. Abort icon corrected. (#1443)(https://github.com/dmdorman/hero6e-foundryvtt/issues/1443)
 
 ## Version 4.0.5
 
