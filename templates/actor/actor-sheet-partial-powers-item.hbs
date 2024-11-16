@@ -24,7 +24,16 @@
                     height="24" /></div>
             {{/if}}
         </td>
-        <td>{{this.system.realCost}}</td>
+        <td>{{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
+                {{this.compoundCost}}
+            {{else}}
+                {{#if (eq this.parentItem.system.XMLID "COMPOUNDPOWER")}}
+                    <span style="opacity: 0.5">{{this.system.realCost}}</span>
+                {{else}}
+                    {{this.system.realCost}}
+                {{/if}}
+            {{/if}}
+        </td>
         <td class="left{{#if this.parentItem.type}} item-framework-child-name{{/if}}{{#if this.parentItem.parentItem}}2{{/if}}">
             {{#if (and this.childIdx this.parentItem)}}
                 {{this.childIdx}})
