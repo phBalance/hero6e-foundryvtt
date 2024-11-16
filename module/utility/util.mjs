@@ -100,7 +100,10 @@ export function getCharacteristicInfoArrayForActor(actor) {
             (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
     );
     if (AUTOMATON && powers.find((o) => o.key === "STUN")) {
-        console.warn("Wrong actor type", actor);
+        if (["pc", "npc"].includes(actor.type)) {
+            console.warn(`${actor.name} has the wrong actor type ${actor.type}`, actor);
+        }
+
         // TODO: change actor type to AUTOMATON or whatever is appropriate?
         powers = powers.filter((o) => o.key !== "STUN");
     }

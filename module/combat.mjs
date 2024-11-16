@@ -418,6 +418,9 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`Hero | _onStartTurn: ${combatant.name}`);
         }
 
+        // We need a single combatant to store some flags. Like for DragRuler, end tracking, etc.
+        const masterCombatant = this.getCombatantByToken(combatant.tokenId);
+
         // Only run onStartTurn on our first combatant per segment
         const lightningReflexes = combatant.actor?.items.find(
             (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
@@ -430,9 +433,9 @@ export class HeroSystem6eCombat extends Combat {
         // Save some properties for future support for rewinding combat tracker
         // TODO: Include charges for various items
         combatant.flags.heroHistory ||= {};
-        if (combatant.actor) {
+        if (combatant.actor && this.round && combatant.flags.segment) {
             combatant.flags.heroHistory[
-                `r${String(this.round).padStart(2, "0")}s${String(this.flags.segment).padStart(2, "0")}`
+                `r${String(this.round).padStart(2, "0")}s${String(combatant.flags.segment).padStart(2, "0")}`
             ] = {
                 end: combatant.actor.system.characteristics.end?.value,
                 stun: combatant.actor.system.characteristics.stun?.value,
@@ -454,17 +457,11 @@ export class HeroSystem6eCombat extends Combat {
 
         // Reset movement history
         if (window.dragRuler) {
-            const dragRulerCombatant = this.getCombatantByToken(combatant.tokenId);
-            if (dragRulerCombatant) {
-                await dragRuler.resetMovementHistory(this, dragRulerCombatant.id);
+            if (masterCombatant) {
+                await dragRuler.resetMovementHistory(this, masterCombatant.id);
             } else {
-                console.error("Unable to find dragRulerCombatant");
+                console.error("Unable to find masterCombatant for DragRuler");
             }
-        }
-
-        if (lightningReflexes && !combatant.flags.lightningReflexes) {
-            //console.log("Early exit for onStartTurn for non-lightning reflexes combatant");
-            return;
         }
 
         // STUNNING
@@ -475,94 +472,104 @@ export class HeroSystem6eCombat extends Combat {
         // Remove STUNNED effect _onEndTurn
 
         // Spend resources for all active powers
-        let content = "";
+        // But only if we haven't already done so (like when rewinding combat tracker and moving forward again)
+        const roundSegmentKey = this.round + combatant.flags.segment / 100;
+        if ((masterCombatant.flags.spentEndOn || 0) < roundSegmentKey) {
+            await masterCombatant.update({ "flags.spentEndOn": roundSegmentKey });
 
-        /**
-         * @type {HeroSystemItemResourcesToUse}
-         */
-        const spentResources = {
-            totalEnd: 0,
-            end: 0,
-            reserveEnd: 0,
-            charges: 0,
-        };
+            let content = "";
 
-        for (const powerUsingResourcesToContinue of combatant.actor.items.filter(
-            (item) =>
-                item.isActive === true && // Is the power active?
-                item.baseInfo.duration !== "instant" && // Is the power non instant
-                ((parseInt(item.system.end || 0) > 0 && // Does the power use END?
-                    !item.system.MODIFIER?.find((o) => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE")) || // Does the power use END continuously?
-                    item.system.charges), // Does the power use charges?
-        )) {
-            const {
-                error,
-                warning,
-                resourcesUsedDescription,
-                resourcesUsedDescriptionRenderedRoll,
-                resourcesRequired,
-            } = await userInteractiveVerifyOptionallyPromptThenSpendResources(powerUsingResourcesToContinue, {});
-            if (error || warning) {
-                content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
-                await powerUsingResourcesToContinue.toggle();
-            } else {
-                content += resourcesUsedDescription
-                    ? `<li>${powerUsingResourcesToContinue.name} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
-                    : "";
-
-                spentResources.totalEnd += resourcesRequired.totalEnd;
-                spentResources.end += resourcesRequired.end;
-                spentResources.reserveEnd += resourcesRequired.reserveEnd;
-                spentResources.charges += resourcesRequired.charges;
-            }
-        }
-
-        // TODO: This should be END per turn calculated on the first phase of action for the actor.
-        const encumbered = combatant.actor.effects.find((effect) => effect.flags.encumbrance);
-        if (encumbered) {
-            const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.dcvDex)) - 1;
-            if (endCostPerTurn > 0) {
-                spentResources.totalEnd += endCostPerTurn;
-                spentResources.end += endCostPerTurn;
-
-                content += `<li>${encumbered.name} (${endCostPerTurn})</li>`;
-
-                // TODO: There should be a better way of integrating this with userInteractiveVerifyOptionallyPromptThenSpendResources
-                // TODO: This is wrong as it does not use STUN when there is no END
-                const value = parseInt(this.combatant.actor.system.characteristics.end.value);
-                const newEnd = value - endCostPerTurn;
-
-                await this.combatant.actor.update({
-                    "system.characteristics.end.value": newEnd,
-                });
-            }
-        }
-
-        if (content !== "" && (spentResources.totalEnd > 0 || spentResources.charges > 0)) {
-            const segment = this.combatant.flags.segment;
-
-            content = `Spent ${spentResources.end} END, ${spentResources.reserveEnd} reserve END, and ${
-                spentResources.charges
-            } charge${spentResources.charges > 1 ? "s" : ""} on turn ${
-                this.round
-            } segment ${segment}:<ul>${content}</ul>`;
-
-            const token = combatant.token;
-            const speaker = ChatMessage.getSpeaker({
-                actor: combatant.actor,
-                token,
-            });
-            speaker["alias"] = combatant.actor.name;
-
-            const chatData = {
-                user: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                content: content,
-                whisper: whisperUserTargetsForActor(combatant.actor),
-                speaker,
+            /**
+             * @type {HeroSystemItemResourcesToUse}
+             */
+            const spentResources = {
+                totalEnd: 0,
+                end: 0,
+                reserveEnd: 0,
+                charges: 0,
             };
 
-            await ChatMessage.create(chatData);
+            for (const powerUsingResourcesToContinue of combatant.actor.items.filter(
+                (item) =>
+                    item.isActive === true && // Is the power active?
+                    item.baseInfo.duration !== "instant" && // Is the power non instant
+                    ((parseInt(item.system.end || 0) > 0 && // Does the power use END?
+                        !item.system.MODIFIER?.find((o) => o.XMLID === "COSTSEND" && o.OPTION === "ACTIVATE")) || // Does the power use END continuously?
+                        item.system.charges), // Does the power use charges?
+            )) {
+                const {
+                    error,
+                    warning,
+                    resourcesUsedDescription,
+                    resourcesUsedDescriptionRenderedRoll,
+                    resourcesRequired,
+                } = await userInteractiveVerifyOptionallyPromptThenSpendResources(powerUsingResourcesToContinue, {});
+                if (error || warning) {
+                    content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
+                    await powerUsingResourcesToContinue.toggle();
+                } else {
+                    content += resourcesUsedDescription
+                        ? `<li>${powerUsingResourcesToContinue.name} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
+                        : "";
+
+                    spentResources.totalEnd += resourcesRequired.totalEnd;
+                    spentResources.end += resourcesRequired.end;
+                    spentResources.reserveEnd += resourcesRequired.reserveEnd;
+                    spentResources.charges += resourcesRequired.charges;
+                }
+            }
+
+            // TODO: This should be END per turn calculated on the first phase of action for the actor.
+            const encumbered = combatant.actor.effects.find((effect) => effect.flags.encumbrance);
+            if (encumbered) {
+                const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.dcvDex)) - 1;
+                if (endCostPerTurn > 0) {
+                    spentResources.totalEnd += endCostPerTurn;
+                    spentResources.end += endCostPerTurn;
+
+                    content += `<li>${encumbered.name} (${endCostPerTurn})</li>`;
+
+                    // TODO: There should be a better way of integrating this with userInteractiveVerifyOptionallyPromptThenSpendResources
+                    // TODO: This is wrong as it does not use STUN when there is no END
+                    const value = parseInt(this.combatant.actor.system.characteristics.end.value);
+                    const newEnd = value - endCostPerTurn;
+
+                    await this.combatant.actor.update({
+                        "system.characteristics.end.value": newEnd,
+                    });
+                }
+            }
+
+            if (content !== "" && (spentResources.totalEnd > 0 || spentResources.charges > 0)) {
+                const segment = this.combatant.flags.segment;
+
+                content = `Spent ${spentResources.end} END, ${spentResources.reserveEnd} reserve END, and ${
+                    spentResources.charges
+                } charge${spentResources.charges > 1 ? "s" : ""} on turn ${
+                    this.round
+                } segment ${segment}:<ul>${content}</ul>`;
+
+                const token = combatant.token;
+                const speaker = ChatMessage.getSpeaker({
+                    actor: combatant.actor,
+                    token,
+                });
+                speaker["alias"] = combatant.actor.name;
+
+                const chatData = {
+                    user: game.user._id,
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                    content: content,
+                    whisper: whisperUserTargetsForActor(combatant.actor),
+                    speaker,
+                };
+
+                await ChatMessage.create(chatData);
+            }
+        } else {
+            console.log(
+                `Skipping the check to spend resources for all active powers for ${combatant.name} because this was already performed up thru ${masterCombatant.flags.spentEndOn}`,
+            );
         }
 
         // Some attacks include a DCV penalty which was added as an ActiveEffect.
