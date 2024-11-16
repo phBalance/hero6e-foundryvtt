@@ -421,11 +421,6 @@ export class HeroSystem6eCombat extends Combat {
         // We need a single combatant to store some flags. Like for DragRuler, end tracking, etc.
         const masterCombatant = this.getCombatantByToken(combatant.tokenId);
 
-        // Only run onStartTurn on our first combatant per segment
-        const lightningReflexes = combatant.actor?.items.find(
-            (o) => o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
-        );
-
         await super._onStartTurn(combatant);
 
         if (!combatant) return;
