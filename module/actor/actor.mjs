@@ -85,7 +85,7 @@ export class HeroSystem6eActor extends Actor {
 
         if (activeEffect.id == "knockedOut") {
             // Knocked Out overrides Stunned
-            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
         }
     }
 
@@ -223,7 +223,7 @@ export class HeroSystem6eActor extends Actor {
         // If stun was changed and running under triggering users context
         if (data?.system?.characteristics?.stun && userId === game.user.id) {
             if (data.system.characteristics.stun.value <= 0) {
-                this.addActiveEffect(HeroSystem6eActorActiveEffects.knockedOutEffect);
+                this.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
             }
 
             // Mark as defeated in combat tracker
@@ -243,7 +243,7 @@ export class HeroSystem6eActor extends Actor {
             }
 
             if (data.system.characteristics.stun.value > 0) {
-                this.removeActiveEffect(HeroSystem6eActorActiveEffects.knockedOutEffect);
+                this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
             }
         }
 
@@ -434,7 +434,7 @@ export class HeroSystem6eActor extends Actor {
             // Remove stunned condition.
             // While not technically part of the rules, it is here as a convenience.
             // For example when Combat Tracker isn't being used.
-            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
         }
 
         if (asAction && this.inCombat) {

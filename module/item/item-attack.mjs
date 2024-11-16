@@ -885,7 +885,7 @@ export async function AttackToHit(item, options) {
     // Abort
     if (item.system.EFFECT?.toLowerCase().indexOf("abort") > -1) {
         item.actor.addActiveEffect({
-            ...HeroSystem6eActorActiveEffects.abortEffect,
+            ...HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect,
             name: `Aborted [${item.name}]`,
             flags: {
                 itemId: item.uuid,
@@ -1370,7 +1370,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     }
 
     // Token falls prone
-    token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.proneEffect);
+    token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect);
 }
 
 // Event handler for when the Roll Damage button is
@@ -2317,7 +2317,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             // pcEndOnly: "PCs (end) and NPCs (end, stun, body)",
             // all: "PCs and NPCs (end, stun, body)"
             if (automation === "all" || (automation === "npcOnly" && token.actor.type === "npc")) {
-                token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.stunEffect);
+                token.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect);
             }
         }
     }
@@ -2455,8 +2455,8 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     }
     const effectData = {
         id: "entangled",
-        img: HeroSystem6eActorActiveEffects.entangledEffect.img,
-        changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.entangledEffect.changes),
+        img: HeroSystem6eActorActiveEffects.statusEffectsObj.entangledEffect.img,
+        changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.entangledEffect.changes),
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
         flags: {
             entangleDefense,
@@ -2901,7 +2901,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     // Create new ActiveEffect
     if (damageData.bodyDamage > 0) {
         token.actor.addActiveEffect({
-            ...HeroSystem6eActorActiveEffects.blindEffect,
+            ...HeroSystem6eActorActiveEffects.statusEffectsObj.blindEffect,
             name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${
                 damageData.bodyDamage
             } [${senseAffectingItem.actor.name}]`,
