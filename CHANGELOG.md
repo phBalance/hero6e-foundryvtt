@@ -11,6 +11,7 @@
 - Improved display of COMPOUNDPOWER costs. [#1434](https://github.com/dmdorman/hero6e-foundryvtt/issues/1461)
 - FullHealth now also sets characteristic MAX to match CORE.
 - Added a dialog box for GM to select target list when confirming AOE placement on behalf of the player. [#1453](https://github.com/dmdorman/hero6e-foundryvtt/issues/1453)
+- When GM moves a player template, the player targets will now be updated to match the template.
 
 ## Version 4.0.5
 
