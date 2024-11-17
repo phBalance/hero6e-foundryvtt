@@ -323,6 +323,9 @@ export async function AttackAoeToHit(item, options) {
         } in the <b>${facingRollResult}</b> direction.`;
     }
 
+    // May need this to confirm targets based on user
+    options.userId = game.user.id;
+
     const cardData = {
         HerosysModule: HEROSYS.module,
         // dice rolls
@@ -372,7 +375,47 @@ export async function AttackToHit(item, options) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    const action = Attack.getActionInfo(item, Array.from(game.user.targets), options);
+    let _targetArray = Array.from(game.user.targets);
+    // Make sure player who rolled attack is still the same
+    if (options.userId && options.userId !== game.user.id && game.users.get(options.userId)) {
+        // GM or someone else intervened.  Likely an AOE template placement confirmation.
+        // Need to check if they are the same targets
+        const _userTargetArray = Array.from(game.users.get(options.userId).targets);
+        if (
+            JSON.stringify(_targetArray.map((o) => o.document.id)) !==
+            JSON.stringify(_userTargetArray.map((o) => o.document.id))
+        ) {
+            let html = `<table><tr><th width="50%">${game.user.name}</th><th width="50%">${game.users.get(options.userId).name}</th></tr><tr><td><ol>`;
+            for (const target of _targetArray) {
+                html += `<li style="text-align:left">${target.name}</li>`;
+            }
+            html += "</ol></td><td><ol>";
+            for (const target of _userTargetArray) {
+                html += `<li style="text-align:left">${target.name}</li>`;
+            }
+            html += "</ol></td></tr></table>";
+            _targetArray = await Dialog.wait({
+                title: `Pick target list`,
+                content: html,
+                buttons: {
+                    gm: {
+                        label: game.user.name,
+                        callback: async function () {
+                            return _targetArray;
+                        },
+                    },
+                    user: {
+                        label: game.users.get(options.userId).name,
+                        callback: async function () {
+                            return _userTargetArray;
+                        },
+                    },
+                },
+            });
+        }
+    }
+
+    const action = Attack.getActionInfo(item, _targetArray, options);
     item = action.system.item[action.current.itemId];
     const targets = action.system.currentTargets;
 
