@@ -215,6 +215,26 @@ export class HeroSystem6eActor extends Actor {
             };
             await ChatMessage.create(chatData);
         }
+
+        // Chatcard about entering/leaving heroic identity
+        if (
+            changed.system?.heroicIdentity !== undefined &&
+            this.system.heroicIdentity !== undefined &&
+            changed.system.heroicIdentity !== this.system.heroicIdentity
+        ) {
+            const token = this.getActiveTokens()[0];
+            const speaker = ChatMessage.getSpeaker({ actor: this, token });
+            const tokenName = token?.name || this.name;
+            speaker["alias"] = game.user.name; //game.token?.name || this.name;
+            const content = `<b>${tokenName}</b> ${changed.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
+            const chatData = {
+                user: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                content: content,
+                speaker: speaker,
+            };
+            await ChatMessage.create(chatData);
+        }
     }
 
     async _onUpdate(data, options, userId) {
@@ -279,23 +299,9 @@ export class HeroSystem6eActor extends Actor {
 
         // Heroic ID
         if (data.system?.heroicIdentity !== undefined) {
-            // Chatcard about entering/leaving heroic identity
-            const token = this.getActiveTokens()[0];
-            const speaker = ChatMessage.getSpeaker({ actor: this, token });
-            const tokenName = token?.name || this.name;
-            speaker["alias"] = game.user.name; //game.token?.name || this.name;
-            const content = `<b>${tokenName}</b> ${data.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
-            const chatData = {
-                user: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                content: content,
-                speaker: speaker,
-            };
-            await ChatMessage.create(chatData);
-
             // Toggled on (entering ID)
             if (data.system.heroicIdentity) {
-                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID"))) {
+                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID") && !item.system.active)) {
                     if (item.flags.preOIHID) {
                         await item.toggle(); // toggle on
                     }
@@ -1386,6 +1392,7 @@ export class HeroSystem6eActor extends Actor {
             stun: parseInt(this.system.characteristics?.stun?.max) - parseInt(this.system.characteristics?.stun?.value),
             end: parseInt(this.system.characteristics?.end?.max) - parseInt(this.system.characteristics?.end?.value),
             hap: this.system.hap?.value,
+            heroicIdentity: this.system.heroicIdentity ?? true,
         };
         if (retainValuesOnUpload.body || retainValuesOnUpload.stun || retainValuesOnUpload.end) {
             let content = `${this.name} has:<ul>`;
@@ -1474,6 +1481,9 @@ export class HeroSystem6eActor extends Actor {
 
         // Heroic Action Points (always keep the value)
         changes["system.hap.value"] = retainValuesOnUpload.hap;
+
+        // Heroic Identity
+        changes["system.heroicIdentity"] = retainValuesOnUpload.heroicIdentity;
 
         // A few critical items.
         this.system.CHARACTER = heroJson.CHARACTER;
@@ -2093,7 +2103,7 @@ export class HeroSystem6eActor extends Actor {
         // ONLY IN ALTERNATE IDENTITY (OIAID)
         // Assume we are in our super/heroic identity
         if (this.system.heroicIdentity === undefined) {
-            this.system.heroicIdentity = false;
+            //this.system.heroicIdentity = true;
             changes[`system.heroicIdentity`] = true;
         }
 

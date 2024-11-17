@@ -39,12 +39,16 @@ export class ItemAttackFormApplication extends FormApplication {
         // Hooks.on("updateItem", _updateItem.bind(this));
 
         const _targetToken = async function () {
-            this.refresh();
+            // Necessary for situations where it is not possible
+            // to properly wait for promises to resolve before refreshing the UI.
+            window.setTimeout(() => this.refresh(), 1);
         };
         Hooks.on("targetToken", _targetToken.bind(this));
 
         const _controlToken = async function () {
-            this.refresh();
+            // Necessary for situations where it is not possible
+            // to properly wait for promises to resolve before refreshing the UI.
+            window.setTimeout(() => this.refresh(), 1);
         };
         Hooks.on("controlToken", _controlToken.bind(this));
 
