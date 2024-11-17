@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.6 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.6 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Migrations are no longer supported from versions before 3.0.76. Migrate through any version prior to 4.0.6 if you find your world in this situation.
 - New effect icons for danger sense disabled, detect sense disabled, mental sense disabled, radio sense disabled, smell/taste sense disabled, sonar sense disabled, spatial awareness disabled, touch sense disabled. Abort icon corrected. Most of these status effects are preparatory for future senses/flash features. [#1443](https://github.com/dmdorman/hero6e-foundryvtt/issues/1443)
