@@ -85,7 +85,9 @@ export function getItemDefenseVsAttack(actorItemDefense, attackItem, options = {
         return actorItemDefense.baseInfo?.defenseTagVsAttack(actorItemDefense, attackItem, newOptions);
     }
 
-    console.error(`Unable to determine defenseTagVsAttack for ${actorItemDefense.system.XMLID}`);
+    console.error(
+        `Unable to determine defenseTagVsAttack for ${actorItemDefense.actor.name}::${actorItemDefense.system.XMLID}`,
+    );
     return null; //createDefenseProfile(actorItemDefense, attackItem, 0, options);
 }
 

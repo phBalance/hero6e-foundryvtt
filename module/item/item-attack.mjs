@@ -2222,13 +2222,13 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         defenseTags,
     } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
 
-    if (defenseValue != _defenseValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
-        console.warn("defenseValue mismatch", defenseValue, _defenseValue);
-    }
+    // if (defenseValue != _defenseValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
+    //     console.warn("defenseValue mismatch", defenseValue, _defenseValue);
+    // }
 
-    if (resistantValue != _resistantValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
-        console.warn("resistantValue mismatch", resistantValue, _resistantValue);
-    }
+    // if (resistantValue != _resistantValue && !["FLASHDEFENSE"].includes(item.attackDefenseVs) && !item.isKilling) {
+    //     console.warn("resistantValue mismatch", resistantValue, _resistantValue);
+    // }
 
     // if (
     //     knockbackResistanceValue != _knockbackResistanceValue &&
