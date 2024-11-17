@@ -2200,17 +2200,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // -------------------------------------------------
     let defense = "";
 
-    // Old Defense Stuff
-    let {
-        defenseValue: _defenseValue,
-        resistantValue: _resistantValue,
-        // impenetrableValue: _impenetrableValue,
-        // damageReductionValue: _damageReductionValue,
-        // damageNegationValue: _damageNegationValue,
-        //  knockbackResistanceValue: _knockbackResistanceValue,
-        // defenseTags: _defenseTags,
-    } = determineDefense(token.actor, item, { ignoreDefenseIds, suppressDeprecationWarn: true });
-
     // New Defense Stuff
     let {
         defenseValue,

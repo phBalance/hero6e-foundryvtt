@@ -238,7 +238,6 @@ export class HeroSystem6eActor extends Actor {
     }
 
     async _onUpdate(data, options, userId) {
-        const oldHeroicIdentity = this.system.heroicIdentity;
         super._onUpdate(data, options, userId);
 
         // If stun was changed and running under triggering users context
