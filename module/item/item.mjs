@@ -862,17 +862,13 @@ export class HeroSystem6eItem extends Item {
     }
 
     setInitialRange(power) {
-        let changed = false;
-
         if (power) {
             this.system.range = power.range;
-
-            changed = true;
         } else {
-            ui.notifications.warn(`${this.actor?.name}/${this.name} doesn't have power (${power}) defined`);
+            // This should never happen, missing something from CONFIG.mjs?  Perhaps with super old actors?
+            this.system.range = HERO.RANGE_TYPES.SELF;
         }
-
-        return changed;
+        return true;
     }
 
     determinePointCosts() {
@@ -1496,6 +1492,13 @@ export class HeroSystem6eItem extends Item {
 
     async _postUpload(options) {
         const configPowerInfo = this.baseInfo;
+        if (!configPowerInfo) {
+            if (this.system.XMLID) {
+                ui.notifications.warn(`${this.actor?.name}/${this.system.XMLID}} doesn't have power defined`);
+            } else {
+                console.error(`${this.actor?.name}/${this.name} doesn't have power defined`);
+            }
+        }
 
         let changed = this.setInitialItemValueAndMax();
 

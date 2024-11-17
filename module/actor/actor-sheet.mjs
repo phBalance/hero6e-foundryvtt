@@ -48,8 +48,8 @@ export class HeroSystemActorSheet extends ActorSheet {
                 !foundry.utils.isNewerVersion(data.actor.system.versionHeroSystem6eCreated, "3.0.63") &&
                 this._priorState <= 0
             ) {
-                ui.notifications.warn(
-                    `The Actor "${data.actor.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please re-upload from HDC.`,
+                ui.notifications.error(
+                    `The Actor "${data.actor.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please delete this actor and/or re-upload from HDC`,
                 );
             }
 
