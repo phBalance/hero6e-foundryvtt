@@ -4,7 +4,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
     async _onClickLeft(event) {
         await super._onClickLeft(event);
 
-        await this.selectObjects();
+        await this.selectObjects({ checkPositions: true, templateData: this });
         await game.user.broadcastActivity({
             targets: Array.from(game.user.targets.map((o) => o.id)),
         });
@@ -50,7 +50,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         if (game.user.id !== userId && game.user.id !== this.document.user.id) return;
 
         this._computeShape();
-        this.selectObjects({ checkPositions: true, templateData: data });
+        await this.selectObjects({ checkPositions: true, templateData: data });
         game.user.broadcastActivity({
             targets: Array.from(game.user.targets.map((target) => target.id)),
         });
@@ -67,7 +67,7 @@ export default class HeroSystem6eMeasuredTemplate extends MeasuredTemplate {
         // A tad hacky here. When template is first rendered we don't want to selectObjects
         if (game.user.id !== this.document.author.id) return;
 
-        await this.selectObjects();
+        await this.selectObjects({ checkPositions: true, templateData: this });
 
         if (!this.isPreview) {
             await game.user.broadcastActivity({

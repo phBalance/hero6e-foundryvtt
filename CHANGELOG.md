@@ -3,7 +3,7 @@
 ## Version 4.0.6 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Migrations are no longer supported from versions before 3.0.76. Migrate through any version prior to 4.0.6 if you find your world in this situation.
-- New effect icons for danger sense disabled, detect sense disabled, mental sense disabled, radio sense disabled, smell/taste sense disabled, sonar sense disabled, spatial awareness disabled, touch sense disabled. Abort icon corrected. [#1443](https://github.com/dmdorman/hero6e-foundryvtt/issues/1443)
+- New effect icons for danger sense disabled, detect sense disabled, mental sense disabled, radio sense disabled, smell/taste sense disabled, sonar sense disabled, spatial awareness disabled, touch sense disabled. Abort icon corrected. Most of these status effects are preparatory for future senses/flash features. [#1443](https://github.com/dmdorman/hero6e-foundryvtt/issues/1443)
 - Flight toggle now shows/hides the flight effect. [#1444](https://github.com/dmdorman/hero6e-foundryvtt/issues/1444)
 - Initial support for Only in Alternate Identity (OIAID). There is a "Heroic Identity" checkbox in the OTHERS tab. [#1431](https://github.com/dmdorman/hero6e-foundryvtt/issues/1431) [#232](https://github.com/dmdorman/hero6e-foundryvtt/issues/232)
 - Improved automatic spending of END during combat for continuous powers to prevent spending of resources when rewinding or re-doing a turn. [#1448](https://github.com/dmdorman/hero6e-foundryvtt/issues/1448)
@@ -12,6 +12,7 @@
 - FullHealth now also sets characteristic MAX to match CORE.
 - Added a dialog box for GM to select target list when confirming AOE placement on behalf of the player. [#1453](https://github.com/dmdorman/hero6e-foundryvtt/issues/1453)
 - When GM moves a player template, the player targets will now be updated to match the template.
+- Improved consistency between the targeting reticules and the list of targets shown in the attack dialog box for AOE templates.
 
 ## Version 4.0.5
 
