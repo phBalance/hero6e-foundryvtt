@@ -484,7 +484,10 @@ export class HeroSystemActorSheet extends ActorSheet {
 
             for (const item of this.actor.items.filter((o) => o.type !== "maneuver")) {
                 if (!item.baseInfo) {
-                    console.warn(`${item?.system?.XMLID} (${item?.name}) has no powerInfo`);
+                    // Don't bother warning about super old items
+                    if (item.system.XMLID) {
+                        console.warn(`${item?.system?.XMLID} (${item?.name}) has no powerInfo`);
+                    }
                     continue;
                 }
 

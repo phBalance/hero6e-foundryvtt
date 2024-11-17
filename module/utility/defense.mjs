@@ -181,6 +181,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
         (o) =>
             (o.system.subType === "defense" || o.type === "defense" || o.baseInfo?.type?.includes("defense")) &&
             o.isActive &&
+            o.system.XMLID &&
             !(options?.ignoreDefenseIds || []).includes(o.id),
     );
     for (const defenseItem of activeDefenses) {
