@@ -79,12 +79,7 @@ Hooks.once("init", async function () {
     CONFIG.Token.documentClass = HeroSystem6eTokenDocument;
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
-
-    // We can't use the information from system.json in a static context; so we change the load path here.
-    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.initialize(HEROSYS.module);
-
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-
     CONFIG.Canvas.rulerClass = HeroRuler;
 
     HeroRuler.initialize();
@@ -126,9 +121,7 @@ Hooks.once("init", async function () {
     ];
     // Handlebars Templates and Partials
     loadTemplates(templatePaths);
-});
 
-Hooks.once("init", () => {
     // Assign the Sidebar subclasses
     //CONFIG.ui.actors =
     CONFIG.ui.items = HeroSystem6eItemDirectory;
@@ -147,6 +140,12 @@ Hooks.once("init", () => {
     }
     game[HEROSYS.module] ??= {};
     game[HEROSYS.module].effectPanel = new EffectsPanel();
+});
+
+// Functionality that requires localization to have been loaded
+Hooks.once("i18nInit", () => {
+    // Override the default statusEffects
+    CONFIG.statusEffects = HeroSystem6eActorActiveEffects.initialize(HEROSYS.module);
 });
 
 Hooks.on("canvasReady", () => {
