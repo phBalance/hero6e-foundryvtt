@@ -48,13 +48,13 @@ export class HeroSystemActorSheet extends ActorSheet {
                 !foundry.utils.isNewerVersion(data.actor.system.versionHeroSystem6eCreated, "3.0.63") &&
                 this._priorState <= 0
             ) {
-                ui.notifications.error(
+                await ui.notifications.error(
                     `The Actor "${data.actor.name}" was uploaded with an older HeroSystem version and is no longer supported.  Please delete this actor and/or re-upload from HDC`,
                 );
             }
 
             // Items returned by the super have been neutered, we want the full class so we can use parentItem and childItem getters.
-            data.items = Array.from(data.actor.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
+            data.items = Array.from(data.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
             // const equipmentWeightPercentage =
             //     parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
@@ -484,7 +484,10 @@ export class HeroSystemActorSheet extends ActorSheet {
 
             for (const item of this.actor.items.filter((o) => o.type !== "maneuver")) {
                 if (!item.baseInfo) {
-                    console.warn(`${item?.system?.XMLID} (${item?.name}) has no powerInfo`);
+                    // Don't bother warning about super old items
+                    if (item.system.XMLID) {
+                        console.warn(`${item?.system?.XMLID} (${item?.name}) has no powerInfo`);
+                    }
                     continue;
                 }
 
