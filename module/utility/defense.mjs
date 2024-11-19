@@ -255,3 +255,41 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
 
     return actorDefenses;
 }
+
+export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
+    // Does attacking item have a special effect
+    if (!attackingItem.system.SFX) return false;
+
+    // Double check to make sure defense is conditional
+    const conditionals = (defenseItem.system.MODIFIER || []).filter((p) =>
+        ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID),
+    );
+    if (conditionals.length === 0) return false;
+
+    // Loop thru all conditionals to find some sort of a match
+    for (const condition of conditionals) {
+        switch (condition.XMLID) {
+            case "ONLYAGAINSTLIMITEDTYPE":
+                // Only Works Against Cold
+                for (const sfx of attackingItem.system.SFX.split("/")) {
+                    if (condition.ALIAS.match(new RegExp(sfx, "i"))) {
+                        return true;
+                    }
+                }
+                break;
+            case "CONDITIONALPOWER":
+                // Power does not work in Very Uncommon Circumstances
+                for (const sfx of attackingItem.system.SFX.split("/")) {
+                    if (condition.ALIAS.match(new RegExp(sfx, "i"))) {
+                        return false;
+                    }
+                }
+                return true;
+
+            default:
+                console.warn("Unknown conditional", condition);
+        }
+    }
+
+    return false;
+}

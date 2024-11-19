@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { getActorDefensesVsAttack } from "../utility/defense.mjs";
+import { getActorDefensesVsAttack, defenseConditionalCheckedByDefault } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -2008,7 +2008,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             const option = {
                 id: defense.id,
                 name: defense.name,
-                checked: !avad && defense.getDefense(token.actor, item).conditionalGuess,
+                checked: !avad && defenseConditionalCheckedByDefault(defense, item),
                 conditions: "",
             };
 
