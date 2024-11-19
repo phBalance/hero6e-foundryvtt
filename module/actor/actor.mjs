@@ -2136,7 +2136,7 @@ export class HeroSystem6eActor extends Actor {
         // Characteristics
         for (const key of Object.keys(this.system.characteristics)) {
             let newValue = parseInt(this.system?.[key.toUpperCase()]?.LEVELS || 0);
-            newValue += this.getCharacteristicBase(key);
+            newValue += this.getCharacteristicBase(key) || 0; // 5e will have empty base for ocv/dcv and other figured characteristics
             if (this.system.is5e && key === "spd") {
                 // SPD is always an integer, but in 5e due to figured characteristics, the base can be fractional.
                 newValue = Math.floor(newValue);
@@ -2156,6 +2156,7 @@ export class HeroSystem6eActor extends Actor {
             }
             if (
                 this.system.characteristics[key].value !== this.system.characteristics[key.toLowerCase()].max &&
+                this.system.characteristics[key.toLowerCase()].max !== null &&
                 overrideValues
             ) {
                 if (this.id) {

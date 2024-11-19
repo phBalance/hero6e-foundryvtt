@@ -4,7 +4,7 @@ import { HeroSystem6eActor } from "./actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
 
-import { determineDefense, getActorDefensesVsAttack } from "../utility/defense.mjs";
+import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { presenceAttackPopOut } from "../utility/presence-attack.mjs";
 import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
@@ -54,7 +54,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             }
 
             // Items returned by the super have been neutered, we want the full class so we can use parentItem and childItem getters.
-            data.items = Array.from(data.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
+            data.items = Array.from(data.actor.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
             // const equipmentWeightPercentage =
             //     parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
@@ -383,22 +383,12 @@ export class HeroSystemActorSheet extends ActorSheet {
             );
             await drainAttack._postUpload();
 
-            let {
-                defenseValue: _defenseValuePOWD,
-                // resistantValue:
-                //     _resistantValuePOWD /*impenetrableValuePOWD*/ /*damageReductionValuePOWD*/ /*damageNegationValuePOWD*/ /*knockbackResistancePOWD*/,
-                // defenseTags: defenseTagsPOWD,
-            } = determineDefense(this.actor, drainAttack, { suppressDeprecationWarn: true });
-
             // New POWERDEFENSE
             const {
                 defenseValue: defenseValuePOWD,
                 resistantValue: resistantValuePOWD,
                 defenseTags: defenseTagsPOWD,
             } = getActorDefensesVsAttack(this.actor, drainAttack);
-            if (_defenseValuePOWD != defenseValuePOWD) {
-                console.warn("POWERDEFENSE Defense mismatch", _defenseValuePOWD, defenseValuePOWD);
-            }
             defense.POWD = defenseValuePOWD;
             for (const tag of defenseTagsPOWD.filter((o) => o.operation === "add" && !o.options?.resistant)) {
                 defense.POWDtags = `${defense.POWDtags || ""}${tag.value.signedString()} ${tag.name} ${

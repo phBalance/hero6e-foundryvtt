@@ -4685,7 +4685,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DARKNESS",
             type: ["sense-affecting", "attack", "standard"],
             behaviors: ["attack"],
-            costPerLevel: costPerLevelFixedValue(0),
+            costPerLevel: function (item) {
+                switch (item?.system?.OPTIONID) {
+                    case "SIGHTGROUP":
+                        return 5; // Targeting sense gruop
+                    case "HEARINGGROUP":
+                    case "MENTALGROUP":
+                    case "RADIOGROUP":
+                    case "SMELLGROUP":
+                    case "TOUCHGROUP":
+                        return 3; // Non-targeting sense group
+                }
+                return 0;
+            },
             duration: "constant",
             range: HERO.RANGE_TYPES.STANDARD,
             costEnd: true,

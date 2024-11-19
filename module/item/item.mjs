@@ -23,7 +23,7 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
 import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
-import { determineDefense } from "../utility/defense.mjs";
+import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 export function initializeItemHandlebarsHelpers() {
@@ -432,6 +432,9 @@ export class HeroSystem6eItem extends Item {
                     break;
             }
         }
+
+        // Perceivability
+        content += ` ${this.perceivability}.`;
 
         if (this.system.end) {
             content += ` Estimated End: ${this.system.end}.`;
@@ -2221,6 +2224,7 @@ export class HeroSystem6eItem extends Item {
     get parentItem() {
         const parentId = this.system?.PARENTID;
         if (!parentId) return null;
+        if (!this.system?.ID) return null;
 
         const items = this.actor?.items || game.items;
         return items.find((item) => item.system?.ID === parentId) || null;
@@ -2240,6 +2244,9 @@ export class HeroSystem6eItem extends Item {
         //     p.then()
         // }
         // game.packs.get(this.pack).index.contents
+
+        // Super old items may not have an ID
+        if (!this.system?.ID) return [];
 
         const items = this.actor?.items || (this.pack ? [] : game.items);
 
@@ -4838,7 +4845,8 @@ export class HeroSystem6eItem extends Item {
     }
 
     getDefense(targetActor, attackItem) {
-        return determineDefense(targetActor, attackItem, { only: this });
+        //return determineDefense(targetActor, attackItem, { only: this });
+        return getItemDefenseVsAttack(this, attackItem);
     }
 
     get attackDefenseVs() {
@@ -4940,6 +4948,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         return false;
+    }
+
+    get perceivability() {
+        return this.baseInfo.perceivability;
     }
 
     get weightKg() {
