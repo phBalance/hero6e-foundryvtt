@@ -54,12 +54,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             }
 
             // Items returned by the super have been neutered, we want the full class so we can use parentItem and childItem getters.
-            try {
-                data.items = Array.from(data.actor.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
-            } catch (e) {
-                console.error(e);
-                data.items = Array.from(data.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
-            }
+            data.items = Array.from(data.actor.items).sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
             // const equipmentWeightPercentage =
             //     parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;

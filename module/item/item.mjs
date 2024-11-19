@@ -2221,6 +2221,7 @@ export class HeroSystem6eItem extends Item {
     get parentItem() {
         const parentId = this.system?.PARENTID;
         if (!parentId) return null;
+        if (!this.system?.ID) return null;
 
         const items = this.actor?.items || game.items;
         return items.find((item) => item.system?.ID === parentId) || null;
@@ -2240,6 +2241,9 @@ export class HeroSystem6eItem extends Item {
         //     p.then()
         // }
         // game.packs.get(this.pack).index.contents
+
+        // Super old items may not have an ID
+        if (!this.system?.ID) return [];
 
         const items = this.actor?.items || (this.pack ? [] : game.items);
 
