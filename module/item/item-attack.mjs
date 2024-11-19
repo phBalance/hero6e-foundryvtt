@@ -1970,7 +1970,6 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     }
 
     // Check for conditional defenses
-
     let ignoreDefenseIds = [];
     let conditionalDefenses = token.actor.items.filter(
         (o) =>
@@ -1983,7 +1982,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     // Remove conditional defenses that provide no defense
     if (!game.settings.get(HEROSYS.module, "ShowAllConditionalDefenses")) {
         conditionalDefenses = conditionalDefenses.filter(
-            (defense) => defense.getDefense(token.actor, item).defenseTotalValue > 0,
+            (defense) => defense.getDefense(token.actor, item).providesDefense,
         );
     }
 

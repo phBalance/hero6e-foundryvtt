@@ -433,6 +433,9 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
+        // Perceivability
+        content += ` ${this.perceivability}.`;
+
         if (this.system.end) {
             content += ` Estimated End: ${this.system.end}.`;
         }
@@ -4944,6 +4947,10 @@ export class HeroSystem6eItem extends Item {
         }
 
         return false;
+    }
+
+    get perceivability() {
+        return this.baseInfo.perceivability;
     }
 
     get weightKg() {

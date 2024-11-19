@@ -899,6 +899,8 @@ export function determineDefense(targetActor, attackItem, options) {
             break;
     }
 
+    const providesDefense = defenseValue + resistantValue + damageReductionValue + damageNegationValue > 0;
+
     return {
         defenseValue,
         resistantValue,
@@ -908,5 +910,6 @@ export function determineDefense(targetActor, attackItem, options) {
         knockbackResistanceValue,
         defenseTags,
         defenseTotalValue: defenseValue + resistantValue,
+        providesDefense,
     };
 }
