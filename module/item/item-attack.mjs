@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { determineDefense, getActorDefensesVsAttack } from "../utility/defense.mjs";
+import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { RoundFavorPlayerDown, RoundFavorPlayerUp } from "../utility/round.mjs";
 import {
@@ -1269,16 +1269,6 @@ async function _rollApplyKnockback(token, knockbackDice) {
     let ignoreDefenseIds = [];
 
     let defense = "";
-    // Old Defense Stuff
-    let {
-        defenseValue: _defenseValue,
-        // resistantValue: _resistantValue,
-        // impenetrableValue: _impenetrableValue,
-        // damageReductionValue: _damageReductionValue,
-        damageNegationValue: _damageNegationValue,
-        knockbackResistanceValue: _knockbackResistanceValue,
-        //defenseTags: _defenseTags,
-    } = determineDefense(token.actor, pdAttack, { ignoreDefenseIds });
 
     // New Defense Stuff
     let {
@@ -1290,16 +1280,6 @@ async function _rollApplyKnockback(token, knockbackDice) {
         knockbackResistanceValue,
         defenseTags,
     } = getActorDefensesVsAttack(token.actor, pdAttack, { ignoreDefenseIds });
-
-    if (damageNegationValue != _damageNegationValue) {
-        console.warn("damageNegationValue mismatch", damageNegationValue, _damageNegationValue);
-    }
-    if (defenseValue != _defenseValue) {
-        console.warn("defenseValue mismatch", defenseValue, _defenseValue);
-    }
-    if (knockbackResistanceValue != _knockbackResistanceValue) {
-        console.warn("knockbackResistanceValue mismatch", knockbackResistanceValue, _knockbackResistanceValue);
-    }
 
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
@@ -1758,7 +1738,7 @@ export async function _onRollMindScanEffectRoll(event) {
         damageNegationValue,
         knockbackResistanceValue,
         defenseTags,
-    } = determineDefense(token.actor, item, { ignoreDefenseIds });
+    } = getActorDefensesVsAttack(token.actor, item, { ignoreDefenseIds });
     if (damageNegationValue > 0) {
         defense += "Damage Negation " + damageNegationValue + "DC(s); ";
     }
@@ -1981,9 +1961,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
 
     // Remove conditional defenses that provide no defense
     if (!game.settings.get(HEROSYS.module, "ShowAllConditionalDefenses")) {
-        conditionalDefenses = conditionalDefenses.filter(
-            (defense) => defense.getDefense(token.actor, item).providesDefense,
-        );
+        conditionalDefenses = conditionalDefenses.filter((defense) => defense.getDefense(token.actor, item));
     }
 
     // AVAD Life Support
@@ -2030,7 +2008,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             const option = {
                 id: defense.id,
                 name: defense.name,
-                checked: !avad && defense.getDefense(token.actor, item).defenseTotalValue > 0,
+                checked: !avad && defense.getDefense(token.actor, item).conditionalGuess,
                 conditions: "",
             };
 

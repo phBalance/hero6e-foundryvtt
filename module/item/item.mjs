@@ -23,7 +23,7 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { Attack } from "../utility/attack.mjs";
 import { activateSpecialVision, removeSpecialVisions } from "../utility/vision.mjs";
-import { determineDefense } from "../utility/defense.mjs";
+import { getActorDefensesVsAttack, getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 export function initializeItemHandlebarsHelpers() {
@@ -4845,7 +4845,8 @@ export class HeroSystem6eItem extends Item {
     }
 
     getDefense(targetActor, attackItem) {
-        return determineDefense(targetActor, attackItem, { only: this });
+        //return determineDefense(targetActor, attackItem, { only: this });
+        return getItemDefenseVsAttack(this, attackItem);
     }
 
     get attackDefenseVs() {

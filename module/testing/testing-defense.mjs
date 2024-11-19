@@ -1,6 +1,6 @@
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { determineDefense } from "../utility/defense.mjs";
+import { getActorDefensesVsAttack } from "../utility/defense.mjs";
 
 export function registerDefenseTests(quench) {
     quench.registerBatch(
@@ -38,7 +38,7 @@ export function registerDefenseTests(quench) {
                     });
                     await itemAttack._postUpload();
 
-                    const defense = determineDefense(actor, itemAttack);
+                    const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 1);
                 });
 
@@ -71,7 +71,7 @@ export function registerDefenseTests(quench) {
                     });
                     await itemAttack._postUpload();
 
-                    const defense = determineDefense(actor, itemAttack);
+                    const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 2);
                 });
 
@@ -105,7 +105,7 @@ export function registerDefenseTests(quench) {
                     });
                     await itemAttack._postUpload();
 
-                    const defense = determineDefense(actor, itemAttack);
+                    const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 3);
                 });
 
@@ -140,7 +140,7 @@ export function registerDefenseTests(quench) {
 
                     await itemAttack._postUpload();
 
-                    const defense = determineDefense(actor, itemAttack);
+                    const defense = getActorDefensesVsAttack(actor, itemAttack);
                     assert.equal(defense.resistantValue, 4);
                 });
             });
