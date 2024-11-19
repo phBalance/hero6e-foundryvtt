@@ -1,6 +1,3 @@
-import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo } from "../utility/util.mjs";
-// import { distanceWithActorUnits } from "../utility/units.mjs";
 import { RoundFavorPlayerUp } from "./round.mjs";
 
 //export function createDefenseProfile
