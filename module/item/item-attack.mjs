@@ -2229,6 +2229,50 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     //knockbackResistanceValue;
     damageData.targetToken = token;
 
+    // VULNERABILITY
+    for (const vuln of conditionalDefenses.filter((o) => o.system.XMLID === "VULNERABILITY")) {
+        if (vuln.system.MODIFIER) {
+            for (const modifier of vuln.system.MODIFIER || []) {
+                switch (modifier.OPTIONID) {
+                    case "HALFSTUN":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 0.5;
+                        break;
+                    case "TWICESTUN":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 1;
+                        break;
+                    case "HALFBODY":
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 0.5;
+                        break;
+                    case "TWICEBODY":
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 1;
+                        break;
+                    case "HALFEFFECT":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 0.5;
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 0.5;
+                        break;
+                    case "TWICEEFFECT":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 1;
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 1;
+                        break;
+
+                    default:
+                        console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
+                }
+            }
+        } else {
+            // DEFAULT VULNERABILITY isi 1.5 STUN
+            damageData.vulnStunMultiplier = 1.5;
+        }
+    }
+
     // AVAD All or Nothing
     if (avad) {
         const nnd = avad.ADDER?.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
@@ -3062,6 +3106,18 @@ async function _calcDamage(heroRoller, item, options) {
     if (targetActor?.statuses.has("knockedOut")) {
         effects += "Knocked Out x2 STUN;";
         stun *= 2;
+    }
+
+    // VULNERABILITY
+    if (options.vulnStunMultiplier) {
+        const vulnStunDamage = Math.floor(stun * (options.vulnStunMultiplier - 1));
+        stun += vulnStunDamage;
+        effects += `Vunlerability x${options.vulnStunMultiplier} STUN (${vulnStunDamage});`;
+    }
+    if (options.vulnBodyMultiplier) {
+        const vulnBodyDamage = Math.floor(stun * (options.vulnBodyMultiplier - 1));
+        body += vulnBodyDamage;
+        effects += `Vunlerability x${options.vulnBodyMultiplier} BODY (${vulnBodyDamage});`;
     }
 
     let bodyDamage = body;

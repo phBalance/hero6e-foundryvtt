@@ -3,7 +3,8 @@
 ## Version 4.0.7 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Conditional DAMAGEREDUCTION and DAMAGENEGATION defenses now prompt for applicability. [#1478](https://github.com/dmdorman/hero6e-foundryvtt/issues/1478)
-- Conditional defenses with special effects will attempt to automatically determine if it applies. GM still has to confirm conditional effects.
+- Initial support for extra damage from vulnerabilities. [#1479](https://github.com/dmdorman/hero6e-foundryvtt/issues/1479)
+- Conditional defenses and vulnerabilities will attempt to automatically determine if it applies (uses SFX and Description). GM still has to confirm conditional effects.
 
 ## Version 4.0.6
 
