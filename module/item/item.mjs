@@ -434,7 +434,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Perceivability
-        content += ` ${this.perceivability}.`;
+        if (this.isPerceivable()) {
+            content += ` ${this.isPerceivable()}.`;
+        }
 
         if (this.system.end) {
             content += ` Estimated End: ${this.system.end}.`;
@@ -655,7 +657,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     isPerceivable(perceptionSuccess) {
-        if (["NAKEDMODIFIER", "LIST"].includes(this.system.XMLID)) {
+        if (["NAKEDMODIFIER", "LIST", "COMPOUNDPOWER"].includes(this.system.XMLID)) {
             return false;
         }
 
@@ -695,7 +697,11 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        const configPowerInfo = getPowerInfo({ item: this });
+        const configPowerInfo = this.baseInfo; // getPowerInfo({ item: this });
+
+        if (!configPowerInfo?.perceivability && !["skill", "disadvantage"].includes(this.type)) {
+            console.warn(`Missing perceivability: for ${this.system.XMLID}`, this);
+        }
 
         if (configPowerInfo?.duration?.toLowerCase() === "instant") {
             return false;
@@ -3691,7 +3697,7 @@ export class HeroSystem6eItem extends Item {
                         }
 
                         // DARKNESS radius
-                        // <i>Silence Bolt:</i>  Darkness to Hearing Group 16m radius (48 Active Points); OAF (-1), Physical Manifestation (Bolt; -1/4)
+                        // Darkness to Hearing Group 16m radius
                         if (powerXmlId === "DARKNESS") {
                             system.description += ` ${system.LEVELS}${getSystemDisplayUnits(this.is5e)} radius`;
                         }
@@ -4954,10 +4960,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         return false;
-    }
-
-    get perceivability() {
-        return this.baseInfo.perceivability;
     }
 
     get weightKg() {

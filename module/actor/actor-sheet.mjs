@@ -1293,7 +1293,9 @@ export class HeroSystemActorSheet extends ActorSheet {
         const perceivable = [];
         for (let item of this.actor.items) {
             if (item.isPerceivable(true)) {
-                perceivable.push(`<b>${item.name}</b> ${item.system.description}`);
+                perceivable.push(
+                    `<b>${item.parentItem ? `${item.parentItem.name}:` : ""}${item.name}</b> ${item.system.description}`,
+                );
             }
         }
         if (perceivable.length > 0) {
