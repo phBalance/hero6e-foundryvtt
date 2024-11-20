@@ -2230,7 +2230,9 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     damageData.targetToken = token;
 
     // VULNERABILITY
-    for (const vuln of conditionalDefenses.filter((o) => o.system.XMLID === "VULNERABILITY")) {
+    for (const vuln of conditionalDefenses.filter(
+        (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
+    )) {
         if (vuln.system.MODIFIER) {
             for (const modifier of vuln.system.MODIFIER || []) {
                 switch (modifier.OPTIONID) {
@@ -2955,10 +2957,37 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
         }
     }
 
+    // Determine sense group
+    let senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect;
+    switch (senseAffectingItem.system.OPTIONID) {
+        case "SIGHTGROUP":
+            break; // This is already the default
+        case "HEARINGGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.hearingSenseDisabledEffect;
+            break;
+        case "MENTALGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.mentalSenseDisabledEffect;
+            break;
+        case "RADIOGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.radioSenseDisabledEffect;
+            break;
+        case "SMELLGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.smellTasteSenseDisabledEffect;
+            break;
+        case "TOUCHGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect;
+            break;
+        default:
+            console.warn(
+                `Unable to determine FLASH effect for ${senseAffectingItem.system.OPTIONID}`,
+                senseAffectingItem,
+            );
+    }
+
     // Create new ActiveEffect
     if (damageData.bodyDamage > 0) {
         token.actor.addActiveEffect({
-            ...HeroSystem6eActorActiveEffects.statusEffectsObj.blindEffect,
+            ...senseDisabledEffect,
             name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${
                 damageData.bodyDamage
             } [${senseAffectingItem.actor.name}]`,
