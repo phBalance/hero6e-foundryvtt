@@ -1964,6 +1964,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         conditionalDefenses = conditionalDefenses.filter((defense) => defense.getDefense(token.actor, item));
     }
 
+    // VULNERABILITY
+    const vulnerabilities = token.actor.items.filter((o) => o.system.XMLID === "VULNERABILITY");
+    conditionalDefenses.push(...vulnerabilities);
+
     // AVAD Life Support
     if (avad) {
         const lifeSupport = token.actor.items.filter((o) => o.system.XMLID === "LIFESUPPORT");
