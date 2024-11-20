@@ -2988,7 +2988,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     if (damageData.bodyDamage > 0) {
         token.actor.addActiveEffect({
             ...senseDisabledEffect,
-            name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${
+            name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseAffectingItem.system.OPTIONID} ${
                 damageData.bodyDamage
             } [${senseAffectingItem.actor.name}]`,
             duration: {
