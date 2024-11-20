@@ -434,8 +434,8 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Perceivability
-        if (this.isPerceivable()) {
-            content += ` ${this.isPerceivable()}.`;
+        if (this.baseInfo.perceivability) {
+            content += ` ${this.baseInfo.perceivability}.`;
         }
 
         if (this.system.end) {
