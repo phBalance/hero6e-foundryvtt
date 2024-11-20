@@ -3690,6 +3690,12 @@ export class HeroSystem6eItem extends Item {
                             }
                         }
 
+                        // DARKNESS radius
+                        // <i>Silence Bolt:</i>  Darkness to Hearing Group 16m radius (48 Active Points); OAF (-1), Physical Manifestation (Bolt; -1/4)
+                        if (powerXmlId === "DARKNESS") {
+                            system.description += ` ${system.LEVELS}${getSystemDisplayUnits(this.is5e)} radius`;
+                        }
+
                         break;
 
                     case "FLASH":
