@@ -3763,6 +3763,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "COMBAT_LUCK",
             type: ["talent"],
             behaviors: ["activatable", "defense"],
+            perceivability: "inobvious", // See HS6E volume 1 pg 477.  Based on Resistant Protection which is inobivous
             name: "Combat Luck",
             duration: "constant",
             target: "self only",
@@ -4685,6 +4686,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "DARKNESS",
             type: ["sense-affecting", "attack", "standard"],
             behaviors: ["attack"],
+            perceivability: "obvious",
             costPerLevel: function (item) {
                 switch (item?.system?.OPTIONID) {
                     case "SIGHTGROUP":
@@ -4875,6 +4877,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ENERGYBLAST",
             type: ["attack"],
             behaviors: ["attack", "dice"],
+            perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: costPerLevelFixedValue(5),
@@ -4890,6 +4893,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "ENTANGLE",
             type: ["attack", "standard"],
             behaviors: ["attack", "dice"],
+            perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: costPerLevelFixedValue(10),
@@ -5722,6 +5726,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             key: "RKA",
             type: ["attack"],
             behaviors: ["attack", "dice"],
+            perceivability: "obvious",
             duration: "instant",
             range: HERO.RANGE_TYPES.STANDARD,
             costPerLevel: costPerLevelFixedValue(15),

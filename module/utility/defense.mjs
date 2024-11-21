@@ -257,6 +257,22 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
     // Does attacking item have a special effect
     if (!attackingItem.system.SFX) return false;
 
+    if (defenseItem.system.XMLID === "VULNERABILITY") {
+        // Vulnerability:  Fire (Common)
+        for (const sfx of attackingItem.system.SFX.split("/")) {
+            if (defenseItem.system.INPUT.match(new RegExp(sfx, "i"))) {
+                return true;
+            }
+        }
+
+        // Simple Description match
+        if (attackingItem.system.description.match(new RegExp(defenseItem.system.INPUT, "i"))) {
+            return true;
+        }
+
+        return false;
+    }
+
     // Double check to make sure defense is conditional
     const conditionals = (defenseItem.system.MODIFIER || []).filter((p) =>
         ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER"].includes(p.XMLID),

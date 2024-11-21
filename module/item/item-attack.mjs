@@ -1964,6 +1964,10 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         conditionalDefenses = conditionalDefenses.filter((defense) => defense.getDefense(token.actor, item));
     }
 
+    // VULNERABILITY
+    const vulnerabilities = token.actor.items.filter((o) => o.system.XMLID === "VULNERABILITY");
+    conditionalDefenses.push(...vulnerabilities);
+
     // AVAD Life Support
     if (avad) {
         const lifeSupport = token.actor.items.filter((o) => o.system.XMLID === "LIFESUPPORT");
@@ -2224,6 +2228,52 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         defenseValue + resistantValue + impenetrableValue + damageReductionValue + damageNegationValue; // +
     //knockbackResistanceValue;
     damageData.targetToken = token;
+
+    // VULNERABILITY
+    for (const vuln of conditionalDefenses.filter(
+        (o) => o.system.XMLID === "VULNERABILITY" && !ignoreDefenseIds.includes(o.id),
+    )) {
+        if (vuln.system.MODIFIER) {
+            for (const modifier of vuln.system.MODIFIER || []) {
+                switch (modifier.OPTIONID) {
+                    case "HALFSTUN":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 0.5;
+                        break;
+                    case "TWICESTUN":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 1;
+                        break;
+                    case "HALFBODY":
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 0.5;
+                        break;
+                    case "TWICEBODY":
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 1;
+                        break;
+                    case "HALFEFFECT":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 0.5;
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 0.5;
+                        break;
+                    case "TWICEEFFECT":
+                        damageData.vulnStunMultiplier ??= 1;
+                        damageData.vulnStunMultiplier += 1;
+                        damageData.vulnBodyMultiplier ??= 1;
+                        damageData.vulnBodyMultiplier += 1;
+                        break;
+
+                    default:
+                        console.warn(`Unhandled VULNERABILITY ${modifier.modifier.OPTIONID}`, vuln);
+                }
+            }
+        } else {
+            // DEFAULT VULNERABILITY isi 1.5 STUN
+            damageData.vulnStunMultiplier = 1.5;
+        }
+    }
 
     // AVAD All or Nothing
     if (avad) {
@@ -2907,11 +2957,38 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
         }
     }
 
+    // Determine sense group
+    let senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect;
+    switch (senseAffectingItem.system.OPTIONID) {
+        case "SIGHTGROUP":
+            break; // This is already the default
+        case "HEARINGGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.hearingSenseDisabledEffect;
+            break;
+        case "MENTALGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.mentalSenseDisabledEffect;
+            break;
+        case "RADIOGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.radioSenseDisabledEffect;
+            break;
+        case "SMELLGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.smellTasteSenseDisabledEffect;
+            break;
+        case "TOUCHGROUP":
+            senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect;
+            break;
+        default:
+            console.warn(
+                `Unable to determine FLASH effect for ${senseAffectingItem.system.OPTIONID}`,
+                senseAffectingItem,
+            );
+    }
+
     // Create new ActiveEffect
     if (damageData.bodyDamage > 0) {
         token.actor.addActiveEffect({
-            ...HeroSystem6eActorActiveEffects.statusEffectsObj.blindEffect,
-            name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${
+            ...senseDisabledEffect,
+            name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseAffectingItem.system.OPTIONID} ${
                 damageData.bodyDamage
             } [${senseAffectingItem.actor.name}]`,
             duration: {
@@ -3058,6 +3135,18 @@ async function _calcDamage(heroRoller, item, options) {
     if (targetActor?.statuses.has("knockedOut")) {
         effects += "Knocked Out x2 STUN;";
         stun *= 2;
+    }
+
+    // VULNERABILITY
+    if (options.vulnStunMultiplier) {
+        const vulnStunDamage = Math.floor(stun * (options.vulnStunMultiplier - 1));
+        stun += vulnStunDamage;
+        effects += `Vunlerability x${options.vulnStunMultiplier} STUN (${vulnStunDamage});`;
+    }
+    if (options.vulnBodyMultiplier) {
+        const vulnBodyDamage = Math.floor(stun * (options.vulnBodyMultiplier - 1));
+        body += vulnBodyDamage;
+        effects += `Vunlerability x${options.vulnBodyMultiplier} BODY (${vulnBodyDamage});`;
     }
 
     let bodyDamage = body;

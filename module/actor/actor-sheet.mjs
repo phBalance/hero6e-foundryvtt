@@ -1292,8 +1292,11 @@ export class HeroSystemActorSheet extends ActorSheet {
         let content = `${this.actor.system.APPEARANCE || ""}`;
         const perceivable = [];
         for (let item of this.actor.items) {
-            if (item.isPerceivable(true)) {
-                perceivable.push(`<b>${item.name}</b> ${item.system.description}`);
+            const p = item.isPerceivable("maybe");
+            if (p) {
+                perceivable.push(
+                    `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PRE roll"` : ""}>${item.parentItem ? `${item.parentItem.name}:` : ""}${item.name}</b> ${item.system.description}`,
+                );
             }
         }
         if (perceivable.length > 0) {

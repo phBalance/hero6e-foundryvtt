@@ -434,7 +434,9 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Perceivability
-        content += ` ${this.perceivability}.`;
+        if (this.baseInfo.perceivability) {
+            content += ` ${this.baseInfo.perceivability}.`;
+        }
 
         if (this.system.end) {
             content += ` Estimated End: ${this.system.end}.`;
@@ -655,7 +657,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     isPerceivable(perceptionSuccess) {
-        if (["NAKEDMODIFIER", "LIST"].includes(this.system.XMLID)) {
+        if (["NAKEDMODIFIER", "LIST", "COMPOUNDPOWER"].includes(this.system.XMLID)) {
             return false;
         }
 
@@ -695,7 +697,11 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        const configPowerInfo = getPowerInfo({ item: this });
+        const configPowerInfo = this.baseInfo; // getPowerInfo({ item: this });
+
+        if (!configPowerInfo?.perceivability && !["skill", "disadvantage"].includes(this.type)) {
+            console.warn(`Missing perceivability: for ${this.system.XMLID}`, this);
+        }
 
         if (configPowerInfo?.duration?.toLowerCase() === "instant") {
             return false;
@@ -3690,6 +3696,12 @@ export class HeroSystem6eItem extends Item {
                             }
                         }
 
+                        // DARKNESS radius
+                        // Darkness to Hearing Group 16m radius
+                        if (powerXmlId === "DARKNESS") {
+                            system.description += ` ${system.LEVELS}${getSystemDisplayUnits(this.is5e)} radius`;
+                        }
+
                         break;
 
                     case "FLASH":
@@ -4948,10 +4960,6 @@ export class HeroSystem6eItem extends Item {
         }
 
         return false;
-    }
-
-    get perceivability() {
-        return this.baseInfo.perceivability;
     }
 
     get weightKg() {
