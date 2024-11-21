@@ -2351,7 +2351,7 @@ export class HeroSystem6eActor extends Actor {
             const _activePoints = parseInt(item.system?.activePoints) || 0;
 
             if ((item.parentItem?.type || item.type) != "equipment") {
-                if ((item.system.XMLID === "COMPOUNDPOWER" && parseInt(item.parentItem?.system.realCost)) || 0 > 0) {
+                if (item.system.XMLID === "COMPOUNDPOWER") {
                     // This compound power may be within a framework, so use that cost
                     _realCost = parseInt(item.compoundCost);
                 }
@@ -2373,6 +2373,10 @@ export class HeroSystem6eActor extends Actor {
 
                 this.system.pointsDetail[item.parentItem?.type || item.type] += _realCost;
                 this.system.activePointsDetail[item.parentItem?.type || item.type] += _activePoints;
+
+                if ((item.parentItem?.type || item.type) === "power") {
+                    console.log(_realCost, item.name);
+                }
             }
         }
 
