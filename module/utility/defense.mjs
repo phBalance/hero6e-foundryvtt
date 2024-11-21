@@ -254,19 +254,29 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
 }
 
 export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
-    // Does attacking item have a special effect
-    if (!attackingItem.system.SFX) return false;
-
     if (defenseItem.system.XMLID === "VULNERABILITY") {
         // Vulnerability:  Fire (Common)
-        for (const sfx of attackingItem.system.SFX.split("/")) {
+        for (const sfx of attackingItem.system.SFX?.split("/") || []) {
             if (defenseItem.system.INPUT.match(new RegExp(sfx, "i"))) {
                 return true;
             }
         }
 
-        // Simple Description match
-        if (attackingItem.system.description.match(new RegExp(defenseItem.system.INPUT, "i"))) {
+        // Only Works Against. Simple Description match
+        if (
+            defenseItem.findModsByXmlid("ONLYAGAINSTLIMITEDTYPE") &&
+            attackingItem.system.description.match(new RegExp(defenseItem.system.INPUT, "i"))
+        ) {
+            return true;
+        }
+
+        // Power does not work vs. Simple Description match on last word in OPTION_ALIAS
+        if (
+            defenseItem.findModsByXmlid("CONDITIONALPOWER") &&
+            !attackingItem.system.description.match(
+                new RegExp(defenseItem.system.OPTION_ALIAS.split(" ").slice(-1), "i"),
+            )
+        ) {
             return true;
         }
 
@@ -284,7 +294,7 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
         switch (condition.XMLID) {
             case "ONLYAGAINSTLIMITEDTYPE":
                 // Only Works Against Cold
-                for (const sfx of attackingItem.system.SFX.split("/")) {
+                for (const sfx of attackingItem.system.SFX?.split("/") || []) {
                     if (condition.ALIAS.match(new RegExp(sfx, "i"))) {
                         return true;
                     }
@@ -292,7 +302,7 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
                 break;
             case "CONDITIONALPOWER":
                 // Power does not work in Very Uncommon Circumstances
-                for (const sfx of attackingItem.system.SFX.split("/")) {
+                for (const sfx of attackingItem.system.SFX?.split("/") || []) {
                     if (condition.ALIAS.match(new RegExp(sfx, "i"))) {
                         return false;
                     }
