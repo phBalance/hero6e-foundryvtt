@@ -2500,10 +2500,7 @@ export class HeroSystem6eItem extends Item {
         let minAdvantage = 0;
         let endModifierCost = 0;
 
-        const configPowerInfo = getPowerInfo({
-            item: this,
-            actor: this.actor,
-        });
+        const configPowerInfo = this.baseInfo;
 
         for (const modifier of (system.MODIFIER || []).filter(
             (mod) =>
@@ -5002,7 +4999,27 @@ export class HeroSystem6eItem extends Item {
         for (const child of this.childItems) {
             cost += parseInt(child.system.realCost);
         }
-        return cost;
+
+        let costSuffix = "";
+
+        // Is this in a framework?
+        if (this.parentItem.system.XMLID === "MULTIPOWER") {
+            // Fixed
+            if (this.system.ULTRA_SLOT) {
+                costSuffix = this.actor?.system.is5e ? "u" : "f";
+                cost /= 10.0;
+            }
+
+            // Variable
+            else {
+                costSuffix = this.actor?.system.is5e ? "m" : "v";
+                cost /= 5.0;
+            }
+        } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
+            cost = cost - this.parentItem.system.BASECOST;
+        }
+
+        return RoundFavorPlayerDown(cost) + costSuffix;
     }
 }
 

@@ -2347,8 +2347,18 @@ export class HeroSystem6eActor extends Actor {
         for (const item of this.items.filter(
             (o) => o.type != "attack" && o.type != "defense" && o.type != "movement",
         )) {
-            const _realCost = parseInt(item.system?.realCost) || 0;
+            let _realCost = parseInt(item.system?.realCost) || 0;
             const _activePoints = parseInt(item.system?.activePoints) || 0;
+
+            if ((item.system.XMLID === "COMPOUNDPOWER" && parseInt(item.parentItem.system.realCost)) || 0 > 0) {
+                // This compound power may be within a framework, so use that cost
+                _realCost = parseInt(item.compoundCost);
+            }
+
+            // Don't include costs from COMPOUNDPOWER children as we added them above
+            if (item.parentItem?.system.XMLID === "COMPOUNDPOWER") {
+                _realCost = 0;
+            }
 
             if (_realCost != 0) {
                 // Equipment is typically purchased with money, not character points
