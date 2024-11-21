@@ -2502,12 +2502,7 @@ export class HeroSystem6eItem extends Item {
 
         const configPowerInfo = this.baseInfo;
 
-        for (const modifier of (system.MODIFIER || []).filter(
-            (mod) =>
-                //system.XMLID != "NAKEDMODIFIER" ||
-                //!mod.PRIVATE &&
-                parseFloat(mod.BASECOST) >= 0,
-        )) {
+        for (const modifier of system.MODIFIER || []) {
             let _myAdvantage = 0;
 
             const modPowerInfo = getPowerInfo({
@@ -2545,18 +2540,12 @@ export class HeroSystem6eItem extends Item {
 
             _myAdvantage += modCost;
 
+            // We are only intertested in Advantages
+            if (_myAdvantage < 0) {
+                continue;
+            }
+
             switch (modifier.XMLID) {
-                // case "EXPLOSION":
-                // case "AOE":
-                //     _myAdvantage += modifierBaseCost;
-                //     break;
-
-                // case "CUMULATIVE":
-                //     // Cumulative, in HD, is 0 based rather than 1 based so a 0 level is a valid value.
-                //     _myAdvantage +=
-                //         modifierBaseCost + parseInt(modifier.LEVELS) * 0.25;
-                //     break;
-
                 case "REDUCEDEND":
                     {
                         // Reduced endurance is double the cost if it's applying against a power with autofire
@@ -2570,11 +2559,6 @@ export class HeroSystem6eItem extends Item {
                         //_myAdvantage = _myAdvantage + endModifierCost;
                     }
                     break;
-
-                // default:
-                //     _myAdvantage +=
-                //         modifierBaseCost *
-                //         Math.max(1, parseInt(modifier.LEVELS));
             }
 
             // Some modifiers may have ADDERS
@@ -2625,6 +2609,9 @@ export class HeroSystem6eItem extends Item {
                     advantagesDC += Math.max(0, _myAdvantage);
                 }
             }
+
+            // Save _myAdvantage
+            modifier.advantage = _myAdvantage;
         }
 
         const _activePoints = system.basePointsPlusAdders * (1 + advantages);
@@ -2653,18 +2640,25 @@ export class HeroSystem6eItem extends Item {
 
         // This may be a slot in a framework if so get parent
 
-        const modifiers = (system.MODIFIER || []).filter(
-            (o) =>
-                parseFloat(o.BASECOST) < 0 ||
-                getPowerInfo({
-                    item: o,
-                    actor: this.actor,
-                })?.minimumLimitation,
-        );
+        const modifiers = system.MODIFIER || [];
+        // .filter(
+        //     (o) =>
+        //         //parseFloat(o.BASECOST) < 0 ||
+        //         getPowerInfo({
+        //             item: o,
+        //             actor: this.actor,
+        //         })?.minimumLimitation,
+        // );
 
         // Add limitations from parent
         if (this.parentItem) {
-            modifiers.push(...(this.parentItem.system.MODIFIER || []).filter((o) => parseFloat(o.BASECOST) < 0));
+            for (const parentAllSlots of (this.parentItem?.system.MODIFIER || []).filter(
+                (o) => parseFloat(o.BASECOST_total) < 0,
+            )) {
+                if (!modifiers.find((mod) => mod.ID === parentAllSlots.ID)) {
+                    modifiers.push(parentAllSlots);
+                }
+            }
         }
 
         let limitations = 0;
@@ -2680,8 +2674,29 @@ export class HeroSystem6eItem extends Item {
                 console.warn(`Missing powerInfo for modifier ${modifier.XMLID}`, modifier);
             }
 
+            // Is there a cost function
+            let modCost = modPowerInfo?.cost ? modPowerInfo.cost(modifier, this) : 0;
+
             const modifierBaseCost = parseFloat(modifier.BASECOST || 0);
-            _myLimitation += -modifierBaseCost;
+
+            // If not use a the default cost formula
+            if (!modCost) {
+                modCost += modifierBaseCost;
+
+                // TODO: Add all powers and modifiers into the system so that we can simplify this.
+                const modifierCostPerLevel =
+                    typeof modPowerInfo?.costPerLevel === "function"
+                        ? modPowerInfo.costPerLevel(modifier)
+                        : modPowerInfo?.costPerLevel || 0;
+                modCost += parseFloat(modifier.LEVELS || 0) * modifierCostPerLevel;
+            }
+
+            _myLimitation += modCost;
+
+            // We are only intertested in Limitations
+            if (_myLimitation >= 0 && !modPowerInfo?.minimumLimitation) {
+                continue;
+            }
 
             // Some modifiers may have ADDERS as well (like a focus)
             for (const adder of modifier.ADDER || []) {
@@ -2697,7 +2712,7 @@ export class HeroSystem6eItem extends Item {
 
                 // can be positive or negative (like charges).
                 // Requires a roll gets interesting with Jammed / Can choose which of two rolls to make from use to use
-                _myLimitation += -adderBaseCost;
+                _myLimitation += adderBaseCost;
 
                 const multiplier = Math.max(1, parseFloat(adder.MULTIPLIER || 0));
                 _myLimitation *= multiplier;
@@ -2718,15 +2733,15 @@ export class HeroSystem6eItem extends Item {
             }
 
             // NOTE: REQUIRESASKILLROLL The minimum value is -1/4, regardless of modifiers.
-            if (_myLimitation < 0.25) {
+            if (_myLimitation > -0.25) {
                 console.warn(`${modifier.XMLID} Limitation clamped to -1/4`, modifier, this);
-                _myLimitation = 0.25;
+                _myLimitation = -0.25;
                 system.title =
                     (system.title || "") +
                     "Limitations are below the minimum of -1/4; \nConsider removing unnecessary limitations.";
             }
 
-            modifier.BASECOST_total = -_myLimitation;
+            modifier.BASECOST_total = _myLimitation;
 
             limitations += _myLimitation;
         }
@@ -2763,7 +2778,7 @@ export class HeroSystem6eItem extends Item {
             }
         }
 
-        _realCost = _realCost / (1 + limitations);
+        _realCost = _realCost / (1 + -limitations);
 
         // ADD_MODIFIERS_TO_BASE
         if (this.system.ADD_MODIFIERS_TO_BASE && this.actor) {
@@ -3744,7 +3759,7 @@ export class HeroSystem6eItem extends Item {
 
         // Advantages sorted low to high
         for (let modifier of (system.MODIFIER || [])
-            .filter((o) => o.BASECOST >= 0)
+            .filter((o) => o.BASECOST_total >= 0)
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             })) {
@@ -3773,15 +3788,16 @@ export class HeroSystem6eItem extends Item {
             .sort((a, b) => {
                 return a.BASECOST_total - b.BASECOST_total;
             });
-        if (this.parentItem) {
-            modifiers.push(
-                ...(this.parentItem.system.MODIFIER || [])
-                    .filter((o) => o.BASECOST < 0)
-                    .sort((a, b) => {
-                        return a.BASECOST_total - b.BASECOST_total;
-                    }),
-            );
-        }
+        // Looks like atting parentItem mods is handed in the calc functions
+        // if (this.parentItem) {
+        //     modifiers.push(
+        //         ...(this.parentItem.system.MODIFIER || [])
+        //             .filter((o) => o.BASECOST < 0)
+        //             .sort((a, b) => {
+        //                 return a.BASECOST_total - b.BASECOST_total;
+        //             }),
+        //     );
+        // }
 
         // Disadvantages sorted low to high
         for (const modifier of modifiers) {
@@ -4978,7 +4994,7 @@ export class HeroSystem6eItem extends Item {
     // Is this power disabled because we are not in our superheroic identity?
     get disabledOIHID() {
         if (!this.actor) return false;
-        if (this.actor.system.heroicIdentity) return false;
+        if (this.actor.system?.heroicIdentity) return false;
         if (this.findModsByXmlid("OIHID")) return true;
         return false;
     }
@@ -4994,7 +5010,7 @@ export class HeroSystem6eItem extends Item {
     }
 
     get compoundCost() {
-        if (this.system.XMLID !== "COMPOUNDPOWER") return 0;
+        if (this.system?.XMLID !== "COMPOUNDPOWER") return 0;
         let cost = 0;
         for (const child of this.childItems) {
             cost += parseInt(child.system.realCost);
@@ -5003,7 +5019,7 @@ export class HeroSystem6eItem extends Item {
         let costSuffix = "";
 
         // Is this in a framework?
-        if (this.parentItem.system.XMLID === "MULTIPOWER") {
+        if (this.parentItem?.system.XMLID === "MULTIPOWER") {
             // Fixed
             if (this.system.ULTRA_SLOT) {
                 costSuffix = this.actor?.system.is5e ? "u" : "f";
@@ -5015,7 +5031,7 @@ export class HeroSystem6eItem extends Item {
                 costSuffix = this.actor?.system.is5e ? "m" : "v";
                 cost /= 5.0;
             }
-        } else if (this.parentItem.system.XMLID === "ELEMENTAL_CONTROL") {
+        } else if (this.parentItem?.system.XMLID === "ELEMENTAL_CONTROL") {
             cost = cost - this.parentItem.system.BASECOST;
         }
 
