@@ -1,7 +1,8 @@
-@import "../utils/colors";
+@use "../utils/colors";
 
-$c-white: #fff;
-$c-black: #000;
+colors.$c-white: #fff;
+colors.$c-black: #000;
+
 $sheet-lighter-background: #f6f5f7;
 $sheet-middle-background: #e2e3e7;
 $sheet-darker-background: #c2c3cd;
