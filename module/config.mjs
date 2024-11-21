@@ -6969,6 +6969,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            key: "EXPANDEDEFFECT",
+            costPerLevel: costPerLevelFixedValue(1 / 2), // HD shows BASECOST -0.5 (limitation), but this is really an advantage +1/2
+            dc: true,
+            xml: `<MODIFIER XMLID="EXPANDEDEFFECT" ID="1732212865433" BASECOST="-0.5" LEVELS="2" ALIAS="Expanded Effect (x2 Characteristics or Powers simultaneously)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "EXPLOSION",
             costPerLevel: costPerLevelFixedValue(0),
             cost: function (modifier, item) {
@@ -7148,6 +7158,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
 // For some reason the BASECOST of some modifiers/adder are 0, some are just wrong
 // Turns out this is actually correct BASECOST can be 0, and COSTPERLEVEL is calculated.
+// Some MODIFIERS (like EXPANDEDEFFECT) base a BASECOST -0.5 with LEVELS=2 and CostPerLevel 0.5, making them appear to be limitations, but actually advantages.
 // Plan is to remove ModifierOverride and add them to the powers list as modifiers.
 HERO.ModifierOverride = {
     ADDITIONALED: { BASECOST: 5 / 2 },

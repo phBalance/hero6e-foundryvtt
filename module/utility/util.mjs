@@ -12,8 +12,8 @@ export function getPowerInfo(options) {
 
     const actor = options?.actor || options?.item?.actor;
 
-    // perhaps is5e is in item (compendium)
-    let is5e = actor?.system?.is5e;
+    // Determine is5e
+    let is5e = actor?.is5e; //?.system?.is5e;
     if (is5e === undefined) {
         is5e = options.item?.system?.is5e;
     }
@@ -36,7 +36,10 @@ export function getPowerInfo(options) {
     // TODO: Why are we modifying the power entries from config here?
     if (powerInfo) {
         powerInfo.xmlid = xmlid;
-        powerInfo.XMLID = xmlid;
+        if (powerInfo.XMLID !== xmlid) {
+            //console.warn(`XMLID mismatch ${xmlid}`, powerInfo);  // OCV?
+            powerInfo.XMLID = xmlid;
+        }
     }
 
     // LowerCase

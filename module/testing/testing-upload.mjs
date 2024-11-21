@@ -4663,7 +4663,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
-                        assert.equal(item.system.description, "Darkness to Hearing Group");
+                        assert.equal(item.system.description, `Darkness to Hearing Group 1" radius`);
                     });
 
                     // TODO: Doesn't work yet.
@@ -4710,7 +4710,7 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
-                        assert.equal(item.system.description, "Darkness to Sight and Smell/Taste Groups");
+                        assert.equal(item.system.description, `Darkness to Sight and Smell/Taste Groups 8" radius`);
                     });
 
                     // TODO: Doesn't work yet.
@@ -4769,7 +4769,7 @@ export function registerUploadTests(quench) {
                     it("description", function () {
                         assert.equal(
                             item.system.description,
-                            "Darkness to Sight and Hearing Groups, Danger Sense, Normal Taste and Alterable Size",
+                            `Darkness to Sight and Hearing Groups, Danger Sense, Normal Taste and Alterable Size 10" radius`,
                         );
                     });
 
@@ -7084,6 +7084,61 @@ export function registerUploadTests(quench) {
                     it("ED end", function () {
                         assert.equal(edItem.system.end, 0);
                     });
+                });
+            });
+
+            describe("Drain w/Expanded Effect", () => {
+                const contents = `
+                    <POWER XMLID="DRAIN" ID="1732212766144" BASECOST="0.0" LEVELS="3" ALIAS="Drain" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1732212668097" ULTRA_SLOT="Yes" NAME="Siphon Life" INPUT="BODY, OCV" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    <ADDER XMLID="PLUSONEPIP" ID="1732212915607" BASECOST="3.0" LEVELS="0" ALIAS="+1 pip" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                        <NOTES />
+                    </ADDER>
+                    <MODIFIER XMLID="EXPANDEDEFFECT" ID="1732212865433" BASECOST="-0.5" LEVELS="2" ALIAS="Expanded Effect (x2 Characteristics or Powers simultaneously)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                        <NOTES />
+                    </MODIFIER>
+                    </POWER>
+                `;
+                let item;
+
+                before(async () => {
+                    const actor = new HeroSystem6eActor(
+                        {
+                            name: "Quench Actor",
+                            type: "pc",
+                        },
+                        {},
+                    );
+                    actor.system.is5e = false;
+                    await actor._postUpload();
+
+                    item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                        parent: actor,
+                    });
+                    await item._postUpload();
+                    actor.items.set(item.system.XMLID, item);
+                });
+
+                it("description", async function () {
+                    expect(item.system.description).to.be.equal(
+                        "Drain BODY, OCV 3d6+1, Expanded Effect (x2 Characteristics or Powers simultaneously) (+1/2)",
+                    );
+                });
+
+                it("levels", async function () {
+                    assert.equal(item.system.value, 3);
+                });
+
+                it("realCost", function () {
+                    assert.equal(item.system.realCost, 49);
+                });
+
+                it("activePoints", function () {
+                    assert.equal(item.system.activePoints, 49);
+                });
+
+                it("end", function () {
+                    assert.equal(item.system.end, 5);
                 });
             });
         },
