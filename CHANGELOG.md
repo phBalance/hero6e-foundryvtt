@@ -8,6 +8,7 @@
 - Fixed Flash, which now has a unique icon per sense group. [#1486](https://github.com/dmdorman/hero6e-foundryvtt/issues/1486)
 - Kluge to ensure valid 5e targets of adjustment powers. For example OCV/DCV are invalid 5e adjustment targets, which are now replaced with DEX. [#1402](https://github.com/dmdorman/hero6e-foundryvtt/issues/1402)
 - 5e Calculated characteristics are updated when dependant characteristics are updated.
+- Fixed issue where KBRESISTANCE was not working.
 
 ## Version 4.0.6
 

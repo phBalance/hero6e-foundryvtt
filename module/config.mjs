@@ -5402,18 +5402,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     case "KB":
                         value = (parseInt(actorItemDefense.system.LEVELS) || 0) * (actorItemDefense.is5e ? 2 : 1);
                         break;
-                    case "PD":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
-                        break;
-                    case "ED":
-                        value = parseInt(actorItemDefense.system.LEVELS) || 0;
-                        break;
                 }
                 if (value > 0) {
                     // const newOptions = foundry.utils.deepClone(options);
                     // newOptions.operation = "add";
                     // newOptions.knockback = value * (actorItemDefense.is5e ? 2 : 1);
-                    return createDefenseProfile(actorItemDefense, attackItem, null, options);
+                    return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;
             },
