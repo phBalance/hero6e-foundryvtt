@@ -190,12 +190,12 @@ export class HeroSystemActorSheet extends ActorSheet {
                     }
 
                     if (["ocv", "dcv"].includes(powerInfo.key.toLowerCase())) {
-                        characteristic.notes = "5e figured DEX/3";
+                        characteristic.notes = "5e calculated DEX/3";
                         characteristic.delta = characteristic.max - characteristic.base;
                     }
 
                     if (["omcv", "dmcv"].includes(powerInfo.key.toLowerCase())) {
-                        characteristic.notes = "5e figured EGO/3";
+                        characteristic.notes = "5e calculated EGO/3";
                     }
                 }
 

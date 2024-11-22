@@ -352,6 +352,32 @@ export class HeroSystem6eActor extends Actor {
             // }
         }
 
+        // 5e calculated characteristics
+        if (this.is5e && data.system?.characteristics?.dex?.value) {
+            const dex = parseInt(data.system.characteristics.dex.value);
+            if (dex) {
+                const cv = Math.round(dex / 3);
+                await this.update({
+                    "system.characteristics.ocv.max": cv,
+                    "system.characteristics.ocv.value": cv,
+                    "system.characteristics.dcv.max": cv,
+                    "system.characteristics.dcv.value": cv,
+                });
+            }
+        }
+        if (this.is5e && data.system?.characteristics?.ego?.value) {
+            const ego = parseInt(data.system.characteristics.ego.value);
+            if (ego) {
+                const cv = Math.round(ego / 3);
+                await this.update({
+                    "system.characteristics.omcv.max": cv,
+                    "system.characteristics.omcv.value": cv,
+                    "system.characteristics.dmcv.max": cv,
+                    "system.characteristics.dmcv.value": cv,
+                });
+            }
+        }
+
         // Display changes from _preUpdate
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);

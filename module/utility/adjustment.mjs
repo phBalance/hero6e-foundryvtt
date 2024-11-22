@@ -328,6 +328,30 @@ export async function performAdjustment(
     const isHealing = item.system.XMLID === "HEALING";
     const isOnlyToStartingValues = item.findModsByXmlid("ONLYTOSTARTING") || isHealing;
 
+    // 5e conversions for Calculated Characteristics
+    // Adjustment Powers
+    // that affect Primary Characteristics have no effect
+    // on Figured Characteristics, but do affect abilities
+    // calculated from Primary Characteristics (such as
+    // the lifting capacity of and damage caused by STR,
+    // a character’s Combat Value derived from DEX, and
+    // so forth).
+    if (targetActor.is5e) {
+        switch (nameOfCharOrPower.toLowerCase()) {
+            case "ocv":
+            case "dcv":
+                console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using DEX instead.`);
+                nameOfCharOrPower = "dex";
+
+                break;
+            case "omcv":
+            case "dmcv":
+                console.warn(`${nameOfCharOrPower.toUpperCase()} is invalid for a 5e actor, using EGO instead.`);
+                nameOfCharOrPower = "ego";
+                break;
+        }
+    }
+
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
     const potentialCharacteristic = nameOfCharOrPower.toLowerCase();
 
