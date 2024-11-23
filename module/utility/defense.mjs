@@ -262,21 +262,7 @@ export function defenseConditionalCheckedByDefault(defenseItem, attackingItem) {
             }
         }
 
-        // Only Works Against. Simple Description match
-        if (
-            defenseItem.findModsByXmlid("ONLYAGAINSTLIMITEDTYPE") &&
-            attackingItem.system.description.match(new RegExp(defenseItem.system.INPUT, "i"))
-        ) {
-            return true;
-        }
-
-        // Power does not work vs. Simple Description match on last word in OPTION_ALIAS
-        if (
-            defenseItem.findModsByXmlid("CONDITIONALPOWER") &&
-            !attackingItem.system.description.match(
-                new RegExp(defenseItem.system.OPTION_ALIAS.split(" ").slice(-1), "i"),
-            )
-        ) {
+        if (attackingItem.system.description.match(new RegExp(defenseItem.system.INPUT, "i"))) {
             return true;
         }
 
