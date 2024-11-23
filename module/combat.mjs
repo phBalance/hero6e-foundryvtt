@@ -553,7 +553,7 @@ export class HeroSystem6eCombat extends Combat {
                 speaker["alias"] = combatant.actor.name;
 
                 const chatData = {
-                    user: game.user._id,
+                    author: game.user._id,
                     style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                     content: content,
                     whisper: whisperUserTargetsForActor(combatant.actor),
@@ -618,7 +618,7 @@ export class HeroSystem6eCombat extends Combat {
             const content = `${combatant.actor.name} recovers from being stunned.`;
 
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: content,
             };
@@ -673,7 +673,7 @@ export class HeroSystem6eCombat extends Combat {
             This typically occurs when rewinding combat or during speed changes.</p>`;
             const chatData = {
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                user: game.user._id,
+                author: game.user._id,
                 content: content,
             };
 
@@ -754,7 +754,7 @@ export class HeroSystem6eCombat extends Combat {
         contentHidden += "</ul>";
         const chatData = {
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-            user: game.user._id,
+            author: game.user._id,
             content: content,
         };
 

@@ -207,7 +207,7 @@ export class HeroSystem6eActor extends Actor {
 
         if (content) {
             const chatData = {
-                user: game.user.id,
+                author: game.user.id,
                 whisper: ChatMessage.getWhisperRecipients("GM"),
                 speaker: ChatMessage.getSpeaker({ actor: this }),
                 blind: true,
@@ -225,10 +225,10 @@ export class HeroSystem6eActor extends Actor {
             const token = this.getActiveTokens()[0];
             const speaker = ChatMessage.getSpeaker({ actor: this, token });
             const tokenName = token?.name || this.name;
-            speaker["alias"] = game.user.name; //game.token?.name || this.name;
+            speaker["alias"] = game.user.name;
             const content = `<b>${tokenName}</b> ${changed.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: content,
                 speaker: speaker,
@@ -437,7 +437,7 @@ export class HeroSystem6eActor extends Actor {
             const content = `${tokenName} <i>is holding their breath</i>.`;
             if (asAction) {
                 const chatData = {
-                    user: game.user._id,
+                    author: game.user._id,
                     style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                     content: content,
                     speaker: speaker,
@@ -486,7 +486,7 @@ export class HeroSystem6eActor extends Actor {
         }
 
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
             speaker: speaker,
@@ -556,12 +556,11 @@ export class HeroSystem6eActor extends Actor {
         if (!result && overrideCanAct) {
             const speaker = ChatMessage.getSpeaker({
                 actor: this,
-                //token,
             });
             speaker["alias"] = game.user.name;
 
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `${this.name} is ${badStatus.join(", ")} and cannot move. Override key was used.`,
                 whisper: whisperUserTargetsForActor(this),
@@ -622,7 +621,7 @@ export class HeroSystem6eActor extends Actor {
             speaker["alias"] = game.user.name;
 
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `${this.name} is ${badStatus.join(", ")} and cannot act. Override key was used.`,
                 whisper: whisperUserTargetsForActor(this),
