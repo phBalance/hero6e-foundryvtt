@@ -4688,7 +4688,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["attack"],
             perceivability: "obvious",
             costPerLevel: function (item) {
-                switch (item?.system?.OPTIONID) {
+                switch (item.system.OPTIONID) {
                     case "SIGHTGROUP":
                         return 5; // Targeting sense gruop
                     case "HEARINGGROUP":
@@ -4697,8 +4697,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     case "SMELLGROUP":
                     case "TOUCHGROUP":
                         return 3; // Non-targeting sense group
+                    default:
+                        console.error(`DARKNESS OPTIONID ${item.system.OPTIONID} is not handled`);
                 }
-                return 0;
+                return 5;
             },
             duration: "constant",
             range: HERO.RANGE_TYPES.STANDARD,
