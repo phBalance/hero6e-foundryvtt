@@ -352,6 +352,32 @@ export class HeroSystem6eActor extends Actor {
             // }
         }
 
+        // 5e calculated characteristics
+        if (this.is5e && data.system?.characteristics?.dex?.value) {
+            const dex = parseInt(data.system.characteristics.dex.value);
+            if (dex) {
+                const cv = Math.round(dex / 3);
+                await this.update({
+                    "system.characteristics.ocv.max": cv,
+                    "system.characteristics.ocv.value": cv,
+                    "system.characteristics.dcv.max": cv,
+                    "system.characteristics.dcv.value": cv,
+                });
+            }
+        }
+        if (this.is5e && data.system?.characteristics?.ego?.value) {
+            const ego = parseInt(data.system.characteristics.ego.value);
+            if (ego) {
+                const cv = Math.round(ego / 3);
+                await this.update({
+                    "system.characteristics.omcv.max": cv,
+                    "system.characteristics.omcv.value": cv,
+                    "system.characteristics.dmcv.max": cv,
+                    "system.characteristics.dmcv.value": cv,
+                });
+            }
+        }
+
         // Display changes from _preUpdate
         for (let d of options.displayScrollingChanges) {
             this._displayScrollingChange(d.value, d.options);
@@ -1003,7 +1029,7 @@ export class HeroSystem6eActor extends Actor {
         const minStr = massMultiplier * 5;
 
         const prevStr0ActiveEffect = this.effects.find((o) => o.flags?.str0);
-        if (this.system.characteristics.str.value <= minStr && !prevStr0ActiveEffect) {
+        if (this.system.characteristics.str?.value <= minStr && !prevStr0ActiveEffect) {
             const str0ActiveEffect = {
                 name: "STR0",
                 id: "STR0",
@@ -2351,7 +2377,7 @@ export class HeroSystem6eActor extends Actor {
             const _activePoints = parseInt(item.system?.activePoints) || 0;
 
             if ((item.parentItem?.type || item.type) != "equipment") {
-                if ((item.system.XMLID === "COMPOUNDPOWER" && parseInt(item.parentItem?.system.realCost)) || 0 > 0) {
+                if (item.system.XMLID === "COMPOUNDPOWER") {
                     // This compound power may be within a framework, so use that cost
                     _realCost = parseInt(item.compoundCost);
                 }
@@ -2373,6 +2399,10 @@ export class HeroSystem6eActor extends Actor {
 
                 this.system.pointsDetail[item.parentItem?.type || item.type] += _realCost;
                 this.system.activePointsDetail[item.parentItem?.type || item.type] += _activePoints;
+
+                if ((item.parentItem?.type || item.type) === "power") {
+                    console.log(_realCost, item.name);
+                }
             }
         }
 

@@ -2,10 +2,13 @@
 
 ## Version 4.0.7 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- Fixed Flash, which now has a unique icon per sense group. [#1486](https://github.com/dmdorman/hero6e-foundryvtt/issues/1486)
 - Conditional DAMAGEREDUCTION and DAMAGENEGATION defenses now prompt for applicability. [#1478](https://github.com/dmdorman/hero6e-foundryvtt/issues/1478)
 - Initial support for extra damage from vulnerabilities. [#1479](https://github.com/dmdorman/hero6e-foundryvtt/issues/1479)
 - Conditional defenses and vulnerabilities will attempt to automatically determine if it applies (uses SFX and Description). GM still has to confirm conditional effects.
-- Fixed Flash, which now has a unique icon per sense group. [#1486](https://github.com/dmdorman/hero6e-foundryvtt/issues/1486)
+- Kluge to ensure valid 5e targets of adjustment powers. For example OCV/DCV are invalid 5e adjustment targets, which are now replaced with DEX. [#1402](https://github.com/dmdorman/hero6e-foundryvtt/issues/1402)
+- 5e Calculated characteristics are updated when dependant characteristics are updated.
+- Fixed issue where KBRESISTANCE was not working.
 - Support the 1/2 endurance version of COSTSEND. [#1497](https://github.com/dmdorman/hero6e-foundryvtt/issues/1497)
 
 ## Version 4.0.6
