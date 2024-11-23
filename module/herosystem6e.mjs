@@ -707,7 +707,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                         const newName = `${senseAffectingItem.system.XMLID.replace(
                             "MANEUVER",
                             senseAffectingItem.system.ALIAS,
-                        )} ${senseAffectingItem.system.OPTIONID} ${d.remaining} [${senseAffectingItem.actor.name}]`;
+                        )} ${senseAffectingItem.system.OPTIONID} ${d.remaining} segments remaining [${senseAffectingItem.actor.name}]`;
                         flashAe.update({ name: newName });
                     } else {
                         await flashAe.delete();

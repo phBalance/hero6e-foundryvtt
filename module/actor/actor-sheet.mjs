@@ -1295,7 +1295,7 @@ export class HeroSystemActorSheet extends ActorSheet {
             const p = item.isPerceivable("maybe");
             if (p) {
                 perceivable.push(
-                    `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PRE roll"` : ""}>${item.parentItem ? `${item.parentItem.name}:` : ""}${item.name}</b> ${item.system.description}`,
+                    `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
                 );
             }
         }
