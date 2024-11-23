@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.7 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.7 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fixed Flash, which now has a unique icon per sense group. [#1486](https://github.com/dmdorman/hero6e-foundryvtt/issues/1486)
 - Conditional DAMAGEREDUCTION and DAMAGENEGATION defenses now prompt for applicability. [#1478](https://github.com/dmdorman/hero6e-foundryvtt/issues/1478)
