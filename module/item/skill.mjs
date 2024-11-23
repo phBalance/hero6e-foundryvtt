@@ -95,7 +95,7 @@ async function skillRoll(item, actor, target) {
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, { noResourceUse: overrideCanAct });
     if (resourceError || resourceWarning) {
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             content: `${item.name} ${resourceError || resourceWarning}`,
             speaker: speaker,
         };
@@ -180,7 +180,7 @@ async function skillRoll(item, actor, target) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: skillRoller.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };

@@ -354,7 +354,7 @@ export async function AttackAoeToHit(item, options) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: attackHeroRoller.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -903,7 +903,7 @@ export async function AttackToHit(item, options) {
         speaker["alias"] = item.actor.name;
 
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
             whisper: ChatMessage.getWhisperRecipients("GM"),
@@ -943,7 +943,7 @@ export async function AttackToHit(item, options) {
         speaker["alias"] = item.actor.name;
 
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${item.name} ${dcv.signedString()} DCV`,
             speaker,
@@ -1000,7 +1000,7 @@ export async function AttackToHit(item, options) {
             .flat()
             .concat(stunForEndHeroRoller?.rawRolls())
             .filter(Boolean),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -1384,7 +1384,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageRoller.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -1615,7 +1615,7 @@ export async function _onRollDamage(event) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageRoller.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -1669,7 +1669,7 @@ export async function _onRollMindScan(event) {
 
     const content = await renderTemplate(template2, data);
     const chatData = {
-        user: game.user._id,
+        author: game.user._id,
         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
         content,
         speaker: ChatMessage.getSpeaker({ actor: item.actor }),
@@ -1837,7 +1837,7 @@ export async function _onRollMindScanEffectRoll(event) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageRoller.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -2165,7 +2165,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             const speaker = ChatMessage.getSpeaker({ actor: token.actor });
             speaker["alias"] = token.actor.name;
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content,
                 whisper: ChatMessage.getWhisperRecipients("GM"),
@@ -2176,7 +2176,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         }
     }
 
-    // Some defenses requre a roll not just to active, but on each use.  6e EVERYPHASE.  5e ACTIVATIONROLL
+    // Some defenses require a roll not just to active, but on each use.  6e EVERYPHASE.  5e ACTIVATIONROLL
     const defenseEveryPhase = token.actor.items.filter(
         (o) =>
             (o.system.subType || o.system.type) === "defense" &&
@@ -2300,7 +2300,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
             let speaker = ChatMessage.getSpeaker({ actor: item.actor });
 
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 content: `${item.name} did no damage.`,
                 speaker: speaker,
             };
@@ -2470,7 +2470,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: damageDetail.knockbackRoller?.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -2588,7 +2588,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -2706,7 +2706,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -2755,7 +2755,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                 const chatData = {
                     style: CONST.CHAT_MESSAGE_STYLES.OOC,
                     rolls: absorptionRoller.rawRolls(),
-                    user: game.user._id,
+                    author: game.user._id,
                     content: cardHtml,
                     speaker: speaker,
                 };
@@ -3042,7 +3042,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     const speaker = ChatMessage.getSpeaker({ actor: senseAffectingItem.actor });
 
     const chatData = {
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -3531,7 +3531,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         speaker.alias = item.actor.name;
         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${game.user.name} is using ${overrideKeyText} to override using ${resourcesUsedDescription} for <b>${item.name}</b>${resourcesUsedDescriptionRenderedRoll}`,
             whisper: whisperUserTargetsForActor(this),
