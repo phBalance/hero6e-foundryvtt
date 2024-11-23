@@ -2399,10 +2399,6 @@ export class HeroSystem6eActor extends Actor {
 
                 this.system.pointsDetail[item.parentItem?.type || item.type] += _realCost;
                 this.system.activePointsDetail[item.parentItem?.type || item.type] += _activePoints;
-
-                if ((item.parentItem?.type || item.type) === "power") {
-                    console.log(_realCost, item.name);
-                }
             }
         }
 

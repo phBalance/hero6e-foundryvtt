@@ -167,7 +167,7 @@ async function CreateHeroItems() {
     )) {
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
-        console.log(power, itemData, bogusActor);
+        //console.log(power, itemData, bogusActor);
         if (power.type.includes("characteristic")) {
             itemData.folder = folderPowerCharacteristic[0].id;
         } else if (power.type.includes("perk")) {
