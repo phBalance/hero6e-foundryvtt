@@ -9,6 +9,7 @@
 - Kluge to ensure valid 5e targets of adjustment powers. For example OCV/DCV are invalid 5e adjustment targets, which are now replaced with DEX. [#1402](https://github.com/dmdorman/hero6e-foundryvtt/issues/1402)
 - 5e Calculated characteristics are updated when dependant characteristics are updated.
 - Fixed issue where KBRESISTANCE was not working.
+- Support the 1/2 endurance version of COSTSEND. [#1497](https://github.com/dmdorman/hero6e-foundryvtt/issues/1497)
 
 ## Version 4.0.6
 

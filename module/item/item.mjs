@@ -3828,7 +3828,8 @@ export class HeroSystem6eItem extends Item {
         }
 
         // Some powers do not use Endurance
-        if (!this.findModsByXmlid("COSTSEND")) {
+        const costsEnd = this.findModsByXmlid("COSTSEND");
+        if (!costsEnd) {
             if (!configPowerInfo?.costEnd) {
                 system.end = 0;
             }
@@ -3836,6 +3837,11 @@ export class HeroSystem6eItem extends Item {
             // Charges typically do not cost END
             if (this.findModsByXmlid("CHARGES")) {
                 system.end = 0;
+            }
+        } else {
+            // Full endurance cost unless it's purchased with half endurance
+            if (costsEnd.OPTIONID === "HALFEND") {
+                system.end = RoundFavorPlayerDown(system.end / 2);
             }
         }
 
