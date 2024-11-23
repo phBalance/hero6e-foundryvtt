@@ -1029,7 +1029,7 @@ export class HeroSystem6eActor extends Actor {
         const minStr = massMultiplier * 5;
 
         const prevStr0ActiveEffect = this.effects.find((o) => o.flags?.str0);
-        if (this.system.characteristics.str.value <= minStr && !prevStr0ActiveEffect) {
+        if (this.system.characteristics.str?.value <= minStr && !prevStr0ActiveEffect) {
             const str0ActiveEffect = {
                 name: "STR0",
                 id: "STR0",
