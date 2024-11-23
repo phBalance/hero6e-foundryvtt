@@ -754,7 +754,8 @@ export async function AttackToHit(item, options) {
         // Bases have no DCV.  DCV=3; 0 if adjacent
         // Mind Scan defers DMCV so use 3 for now
         if (isNaN(targetDefenseValue) || target.actor.type === "base2") {
-            if (!target.actor || calculateDistanceBetween(actor.token, target) > 2) {
+            const _token = actor.token || actor.getActiveTokens()[0];
+            if (!target.actor || calculateDistanceBetween(_token, target) > 2) {
                 targetDefenseValue = 3;
             } else {
                 targetDefenseValue = 0;
