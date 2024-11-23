@@ -5404,9 +5404,6 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         break;
                 }
                 if (value > 0) {
-                    // const newOptions = foundry.utils.deepClone(options);
-                    // newOptions.operation = "add";
-                    // newOptions.knockback = value * (actorItemDefense.is5e ? 2 : 1);
                     return createDefenseProfile(actorItemDefense, attackItem, value, options);
                 }
                 return null;

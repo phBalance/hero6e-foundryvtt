@@ -1063,8 +1063,24 @@ function getAttackTags(item) {
     }
 
     // FLASH
+    // TODO: Additional SENSE GROUPS
     if (item.system.XMLID === "FLASH") {
         attackTags.push({ name: item.system.OPTION_ALIAS });
+    }
+
+    // ADJUSTMENT should include what we are adjusting
+    if (item.baseInfo.type.includes("adjustment")) {
+        const { valid, reducesArray, enhancesArray } = item.splitAdjustmentSourceAndTarget();
+        if (!valid) {
+            attackTags.push({ name: item.system.INPUT });
+        } else {
+            for (const adjustTarget of reducesArray) {
+                attackTags.push({ name: `-${adjustTarget}` });
+            }
+            for (const adjustTarget of enhancesArray) {
+                attackTags.push({ name: `+${adjustTarget}` });
+            }
+        }
     }
 
     // item modifiers
@@ -2959,6 +2975,9 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
     }
 
     // Determine sense group
+    // TODO: Not all flashes are an entire group, such as vision only.
+    // TODO: Need loop for multiple sense groups.
+    // TODO: Flash defense should target approprate sense group
     let senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.sightSenseDisabledEffect;
     switch (senseAffectingItem.system.OPTIONID) {
         case "SIGHTGROUP":
@@ -2979,10 +2998,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
             senseDisabledEffect = HeroSystem6eActorActiveEffects.statusEffectsObj.touchSenseDisabledEffect;
             break;
         default:
-            console.warn(
-                `Unable to determine FLASH effect for ${senseAffectingItem.system.OPTIONID}`,
-                senseAffectingItem,
-            );
+            ui.notifications.warn(`Unable to determine FLASH effect for ${senseAffectingItem.system.OPTIONID}`);
     }
 
     // Create new ActiveEffect
@@ -2991,7 +3007,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, token, 
             ...senseDisabledEffect,
             name: `${senseAffectingItem.system.XMLID.replace("MANEUVER", senseAffectingItem.system.ALIAS)} ${senseAffectingItem.system.OPTIONID} ${
                 damageData.bodyDamage
-            } [${senseAffectingItem.actor.name}]`,
+            } segments remaining [${senseAffectingItem.actor.name}]`,
             duration: {
                 seconds: damageData.bodyDamage,
             },
