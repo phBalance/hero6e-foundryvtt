@@ -156,8 +156,9 @@ export async function presenceAttackPopOut(actor) {
     const content = await _renderForm(actor, {});
 
     // Attack Card as a Pop Out
-    let options = {
-        width: 300,
+    const options = {
+        width: "auto",
+        classes: ["hero"],
     };
 
     return new Promise((resolve) => {

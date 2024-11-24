@@ -1,6 +1,6 @@
 # Releases
 
-## Version 4.0.8 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.8 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Support striking appearance. Striking appearance and reputation can be optionally enabled for presence and interaction skill rolls. [#1509](https://github.com/dmdorman/hero6e-foundryvtt/issues/1509)
 - Improved DEADLYBLOW so it does not apply to adjustment powers, sense-affecting powers, or ENTANGLES. Also the extra DCs are not shown in the Attacks tab (which was confusing). GM still has to confirm DEADLYBLOW with applicable powers. [#1493](https://github.com/dmdorman/hero6e-foundryvtt/issues/1493)
