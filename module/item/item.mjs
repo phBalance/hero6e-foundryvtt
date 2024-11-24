@@ -3461,6 +3461,13 @@ export class HeroSystem6eItem extends Item {
             case "NIGHTVISION":
                 system.description = `${system.ALIAS}`;
                 break;
+
+            case "STRIKING_APPEARANCE": {
+                const levels = parseInt(system.LEVELS);
+                system.description = `+${levels}/+${levels}d6 ${system.ALIAS} (${system.OPTION_ALIAS})`;
+                break;
+            }
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {

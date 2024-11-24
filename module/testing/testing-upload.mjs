@@ -7141,6 +7141,102 @@ export function registerUploadTests(quench) {
                     assert.equal(item.system.end, 5);
                 });
             });
+
+            describe("STRIKING_APPEARANCE", () => {
+                describe("vs all", () => {
+                    const contents = `
+                        <TALENT XMLID="STRIKING_APPEARANCE" ID="1732405107921" BASECOST="0.0" LEVELS="5" ALIAS="Striking Appearance" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ALL" OPTIONID="ALL" OPTION_ALIAS="vs. all characters" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                        </TALENT>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal("+5/+5d6 Striking Appearance (vs. all characters)");
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 5);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 15);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 15);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+
+                describe("vs some characters (iguanas)", () => {
+                    const contents = `
+                        <TALENT XMLID="STRIKING_APPEARANCE" ID="1732405128954" BASECOST="0.0" LEVELS="3" ALIAS="Striking Appearance" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="GROUP" OPTIONID="GROUP" OPTION_ALIAS="vs. iguanas" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                        </TALENT>
+                    `;
+                    let item;
+
+                    before(async () => {
+                        const actor = new HeroSystem6eActor(
+                            {
+                                name: "Quench Actor",
+                                type: "pc",
+                            },
+                            {},
+                        );
+                        actor.system.is5e = false;
+                        await actor._postUpload();
+
+                        item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                            parent: actor,
+                        });
+                        await item._postUpload();
+                        actor.items.set(item.system.XMLID, item);
+                    });
+
+                    it("description", async function () {
+                        expect(item.system.description).to.be.equal("+3/+3d6 Striking Appearance (vs. iguanas)");
+                    });
+
+                    it("levels", async function () {
+                        assert.equal(item.system.value, 3);
+                    });
+
+                    it("realCost", function () {
+                        assert.equal(item.system.realCost, 6);
+                    });
+
+                    it("activePoints", function () {
+                        assert.equal(item.system.activePoints, 6);
+                    });
+
+                    it("end", function () {
+                        assert.equal(item.system.end, 0);
+                    });
+                });
+            });
         },
         { displayName: "HERO: Upload" },
     );

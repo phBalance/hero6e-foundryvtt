@@ -8,7 +8,6 @@ import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./actor/actor-toke
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 import * as chat from "./chat.mjs";
-import * as macros from "./macros.mjs";
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
@@ -46,7 +45,6 @@ Hooks.once("init", async function () {
             HeroSystem6eTokenDocument,
             HeroSystem6eToken,
         },
-        macros: macros,
         rollItemMacro: rollItemMacro,
         CreateCustomAttack: CreateCustomAttack,
         config: HERO,
