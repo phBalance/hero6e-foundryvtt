@@ -9,7 +9,7 @@
     -webkit-box-orient: vertical;
 }
 
-// When item-notes-elidable-content is hovered, show all content
-.item-notes-elidable-content:hover {
-    display: initial;
+// When item-notes-elidable-content is active (e.g. left mouse hold down), show all content
+.item-notes-elidable-content:active {
+    display: block;
 }
