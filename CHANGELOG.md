@@ -6,6 +6,9 @@
 - Improved DEADLYBLOW so it does not apply to adjustment powers, sense-affecting powers, or ENTANGLES. Also the extra DCs are not shown in the Attacks tab (which was confusing). GM still has to confirm DEADLYBLOW with applicable powers. [#1493](https://github.com/dmdorman/hero6e-foundryvtt/issues/1493)
 - Improved workflow when attacking ENTANGLED tokens. [#1500](https://github.com/dmdorman/hero6e-foundryvtt/issues/1500)
 - The Attack type is now included in the Attack Tags on the chat card.
+- Conditional defenses used in main damage are also used in knockback damage. [#1498](https://github.com/dmdorman/hero6e-foundryvtt/issues/1498)
+- Only the GM can click on the button to apply knockback. [#1454](https://github.com/dmdorman/hero6e-foundryvtt/issues/1454)
+- Improved VULNERABILITY description. [#1484](https://github.com/dmdorman/hero6e-foundryvtt/issues/1484)
 
 ## Version 4.0.7
 
