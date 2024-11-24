@@ -4910,6 +4910,15 @@ export class HeroSystem6eItem extends Item {
         const aoe = this.findModsByXmlid("AOE");
         const explosion5e = this.findModsByXmlid("EXPLOSION");
 
+        // Kluge: DARKNESS is inherently and AOE
+        // if (this.system.XMLID === "DARKNESS" && !aoe) {
+        //     const _darknessAoe = {
+        //         XMLID: "AOE",
+        //         LEVELS: this.system.LEVELS,
+        //     };
+        //     return _darknessAoe;
+        // }
+
         return aoe || explosion5e;
     }
 
