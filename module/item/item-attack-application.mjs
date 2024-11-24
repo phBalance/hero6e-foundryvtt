@@ -142,14 +142,18 @@ export class ItemAttackFormApplication extends FormApplication {
             if (data.targetEntangle === undefined) {
                 data.targetEntangle = data.entangleExists;
 
-                // Mental attacks typically bypass entangles
-                if (item.attackDefenseVs === "MD" && entangles?.[0]?.flags.entangleDefense.rMD === 0) {
-                    data.targetEntangle = false;
-                }
+                const entangle = entangles?.[0];
 
-                // TAKESNODAMAGE
-                if (fromUuidSync(entangles?.[0].origin)?.findModsByXmlid("TAKESNODAMAGE")) {
-                    data.targetEntangle = false;
+                if (entangle) {
+                    // Mental attacks typically bypass entangles
+                    if (item.attackDefenseVs === "MD" && entangle.flags.entangleDefense.rMD === 0) {
+                        data.targetEntangle = false;
+                    }
+
+                    // TAKESNODAMAGE
+                    if (fromUuidSync(entangle.origin)?.findModsByXmlid("TAKESNODAMAGE")) {
+                        data.targetEntangle = false;
+                    }
                 }
             }
 
