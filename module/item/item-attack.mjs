@@ -1015,6 +1015,8 @@ function getAttackTags(item) {
 
     if (!item) return attackTags;
 
+    attackTags.push({ name: `${item.system.ALIAS}`, title: `${item.system.XMLID}` });
+
     attackTags.push({ name: item.system.class });
 
     if (item.system.killing) {
