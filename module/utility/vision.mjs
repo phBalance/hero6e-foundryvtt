@@ -1,3 +1,31 @@
+// class ThoughtsDetectionMode extends DetectionMode {
+//     constructor() {
+//         super({
+//             id: "thoughtsense",
+//             label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
+//             walls: false,
+//             angle: false,
+//             type: DetectionMode.DETECTION_TYPES.OTHER,
+//         });
+//     }
+//     static getDetectionFilter() {
+//         const filter2 = (this._detectionFilter ??= OutlineOverlayFilter.create({
+//             wave: true,
+//             knockout: false,
+//         }));
+//         return (filter2.thickness = 1), filter2;
+//     }
+//     _canDetect(visionSource, target) {
+//         return (
+//             target instanceof CONFIG.Token.objectClass /*TokenPF2e*/ &&
+//             !target.document.hidden &&
+//             !target.actor?.isOfType("loot") &&
+//             !target.actor?.system.traits.value.includes("mindless") &&
+//             super._canDetect(visionSource, target)
+//         );
+//     }
+// }
+
 // Turn on Special Vision
 export async function activateSpecialVision(item, token) {
     if (!token) return;
