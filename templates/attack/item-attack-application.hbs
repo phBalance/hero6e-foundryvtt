@@ -1,4 +1,4 @@
-{{!-- {{ log 'HEROSYS ITEM ATTACK APPLICATION CARD item-attack-application' this }} --}}
+{{ log 'HEROSYS ITEM ATTACK APPLICATION CARD item-attack-application' this }}
 <form data-actor-id="{{actor.id}}" data-item-id="{{item.id}}" data-token-id="{{token.id}}">
   <div class="hero chat-card item-card attack-card">
     <header class="card-header flexrow">
@@ -303,19 +303,22 @@
 
   {{!-- Conditional attack selection. DEADLY BLOW --}}
   <div class="form-fields  csl-attack-list">
-        <table>
-            {{#each item.system.conditionalAttacks}}
-            <tr>
-                <td>
-                    <input name="system.conditionalAttacks.{{this.id}}.checked" type="checkbox" _id="{{this.id}}" {{checked this.checked}} data-dtype="Boolean" />
-                </td>
-                <td class="left">
-                    <b>{{this.name}}{{#if item.system.SFX}} ({{item.system.SFX}}){{/if}}</b>: {{this.system.description}}
-                </td>
-            </tr>
-            {{/each}}
-        </table>
-    </div>
+    <table>        
+      {{#each item.system.conditionalAttacks}}
+      {{! Don't show DEADLYBLOW/conditional attacks for adjustment or sense-affecting powers --}}
+        {{#if (appliesTo this @root/item)}}
+          <tr>
+              <td>
+                  <input name="system.conditionalAttacks.{{this.id}}.system.checked" type="checkbox" _id="{{this.id}}" {{checked this.system.checked}} data-dtype="Boolean" />
+              </td>
+              <td class="left">
+                  <b>{{this.name}}{{#if @root/item.system.SFX}} ({{@root/item.system.SFX}}){{/if}}</b>: {{this.system.description}}
+              </td>
+          </tr>
+        {{/if}}
+      {{/each}}
+    </table>
+  </div>
 
   
   

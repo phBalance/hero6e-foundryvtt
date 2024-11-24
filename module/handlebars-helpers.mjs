@@ -12,6 +12,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("isdefined", isDefined);
     Handlebars.registerHelper("toLowerCase", toLowerCase);
     Handlebars.registerHelper("toUpperCase", toUpperCase);
+    Handlebars.registerHelper("appliesTo", appliesTo);
 }
 
 function indexOf(str, searchTerm) {
@@ -62,4 +63,10 @@ function concat() {
 
 function isDefined(value) {
     return value !== undefined;
+}
+
+// Typically to determine if DEADLYBLOW applies to a specific attack
+function appliesTo(power, attack) {
+    if (typeof power?.baseInfo?.appliesTo !== "function") return false;
+    return power.baseInfo.appliesTo(attack);
 }

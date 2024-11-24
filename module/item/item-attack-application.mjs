@@ -262,11 +262,8 @@ export class ItemAttackFormApplication extends FormApplication {
             const DEADLYBLOW = item.actor.items.find((o) => o.system.XMLID === "DEADLYBLOW");
             if (DEADLYBLOW) {
                 item.system.conditionalAttacks ??= {};
-                item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
-                    ...DEADLYBLOW,
-                    id: DEADLYBLOW.id,
-                };
-                item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
+                item.system.conditionalAttacks[DEADLYBLOW.id] = DEADLYBLOW;
+                item.system.conditionalAttacks[DEADLYBLOW.id].system.checked ??= true;
             }
 
             data.action = Attack.getActionInfo(
@@ -402,10 +399,10 @@ export class ItemAttackFormApplication extends FormApplication {
         // Save conditionalAttack check
         const expandedData = foundry.utils.expandObject(formData);
         for (const ca in expandedData?.system?.conditionalAttacks) {
-            console.log(ca);
-            this.data.item.system.conditionalAttacks[ca].checked = expandedData.system.conditionalAttacks[ca].checked;
-            await this.data.item.update({
-                [`system.conditionalAttacks`]: this.data.item.system.conditionalAttacks,
+            // this.data.item.system.conditionalAttacks[ca].system.checked =
+            //     expandedData.system.conditionalAttacks[ca].system.checked;
+            await this.data.item.system.conditionalAttacks[ca].update({
+                [`system.checked`]: expandedData.system.conditionalAttacks[ca].system.checked,
             });
         }
 
