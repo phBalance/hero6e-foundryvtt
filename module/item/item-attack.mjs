@@ -35,6 +35,7 @@ export async function onMessageRendered(html) {
     }
     if (game.user.isGM) {
         html.find(`[data-visibility="redacted"]`).remove();
+        html.find(`[data-visibility="!gm"]`).remove();
     }
 
     // visibility based on actor owner

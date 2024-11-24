@@ -83,9 +83,15 @@
 
 
       {{#if (gt knockbackResultTotal 0)}}
-        <div data-visibility="{{actor.id}}">
+        <div data-visibility="gm">
           <button class="roll-knockback" data-item-Id="{{item.uuid}}" data-target-Token-Id="{{targetToken.id}}"
             data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}">
+            {{ knockbackMessage }}
+          </button>
+        </div>
+        <div data-visibility="!gm">
+          <button class="roll-knockback" data-item-Id="{{item.uuid}}" data-target-Token-Id="{{targetToken.id}}"
+            data-knockback-Result-Total="{{knockbackResultTotal}}" data-ignore-Defense-Ids-Json="{{ignoreDefenseIdsJson}}" disabled title="Only a GM can perform KB">
             {{ knockbackMessage }}
           </button>
         </div>
