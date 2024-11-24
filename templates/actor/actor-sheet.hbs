@@ -350,7 +350,7 @@
                                     {{#if (and (ne item.system.realCost 0) (ne item.system.XMLID "LIST"))}}
                                         {{item.system.realCost}}</td>
                                     {{/if}}
-                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{/if}}{{#if item.parentItem.parentItem}}2{{/if}}">
+                                <td class="left{{#if (eq item.parentItem.type "skill")}} item-framework-child-name{{#if item.parentItem.parentItem}}2{{/if}}{{/if}}">
                                     {{#if item.system.childIdx}}
                                         {{#if (eq item.parentItem.type "skill")}}
                                             {{item.system.childIdx}})
