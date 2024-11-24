@@ -41,10 +41,6 @@ function itemFullDescription(item) {
         desc = `<i>${item.system.NAME}:</i> ${item.system.description}`;
     }
 
-    if (item.system.NOTES) {
-        desc += `<p class="item-notes"><b>Notes:</b> ${item.system.NOTES}</p>`;
-    }
-
     return desc;
 }
 
@@ -442,11 +438,6 @@ export class HeroSystem6eItem extends Item {
 
         if (this.system.realCost && !isNaN(this.system.realCost)) {
             content += ` Total Cost: ${this.system.realCost} CP.`;
-        }
-
-        // TODO: Chat shouldn't provide the note (I don't think)
-        if (this.system.NOTES) {
-            content += `<p class="item-notes"><b>Notes:</b> ${this.system.NOTES}</p>`;
         }
 
         content += `</div>`;
@@ -3185,7 +3176,7 @@ export class HeroSystem6eItem extends Item {
 
             case "ELEMENTAL_CONTROL":
                 // Elemental Control, 12-point powers
-                system.description = `${system.NAME || system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`;
+                system.description = `${system.ALIAS}, ${parseInt(system.BASECOST) * 2}-point powers`;
                 break;
 
             case "MANEUVER":
@@ -3306,7 +3297,7 @@ export class HeroSystem6eItem extends Item {
             case "VPP":
             case "MULTIPOWER":
                 // <i>Repligun:</i>  Multipower, 60-point reserve, all slots Reduced Endurance (0 END; +1/2) (90 Active Points); all slots OAF Durable Expendable (Difficult to obtain new Focus; Ray gun; -1 1/4)
-                system.description = `${system.NAME || system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`;
+                system.description = `${system.ALIAS}, ${parseInt(system.BASECOST)}-point reserve`;
                 break;
 
             case "FLASH":
