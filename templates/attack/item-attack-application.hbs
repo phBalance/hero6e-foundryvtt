@@ -306,7 +306,7 @@
     <table>        
       {{#each item.system.conditionalAttacks}}
       {{! Don't show DEADLYBLOW/conditional attacks for adjustment or sense-affecting powers --}}
-        {{#unless (or (includes @root/item.baseInfo.type "adjustment") (includes @root/item.baseInfo.type "sense-affecting"))}}
+        {{#if (appliesTo this @root/item)}}
           <tr>
               <td>
                   <input name="system.conditionalAttacks.{{this.id}}.checked" type="checkbox" _id="{{this.id}}" {{checked this.checked}} data-dtype="Boolean" />
@@ -315,7 +315,7 @@
                   <b>{{this.name}}{{#if @root/item.system.SFX}} ({{@root/item.system.SFX}}){{/if}}</b>: {{this.system.description}}
               </td>
           </tr>
-        {{/unless}}
+        {{/if}}
       {{/each}}
     </table>
   </div>

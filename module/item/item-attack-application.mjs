@@ -262,10 +262,7 @@ export class ItemAttackFormApplication extends FormApplication {
             const DEADLYBLOW = item.actor.items.find((o) => o.system.XMLID === "DEADLYBLOW");
             if (DEADLYBLOW) {
                 item.system.conditionalAttacks ??= {};
-                item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
-                    ...DEADLYBLOW,
-                    id: DEADLYBLOW.id,
-                };
+                item.system.conditionalAttacks[DEADLYBLOW.id] = DEADLYBLOW;
                 item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
             }
 

@@ -3921,6 +3921,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         return 0;
                 }
             },
+            appliesTo: function (item) {
+                // Maneuver or other poorly defined item, assume it applies
+                if (!item || !item.baseInfo) return true;
+                if (item.baseInfo.type.includes("adjustment")) return false;
+                if (item.baseInfo.type.includes("sense-affecting")) return false;
+                if (item.system.XMLID === "ENTANGLE") return false;
+                return true;
+            },
             xml: `<TALENT XMLID="DEADLYBLOW" ID="1709159979031" BASECOST="0.0" LEVELS="2" ALIAS="Deadly Blow:  +2d6" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="VERYLIMITED" OPTIONID="VERYLIMITED" OPTION_ALIAS="[very limited circumstances]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" />`,
         },
         {},
