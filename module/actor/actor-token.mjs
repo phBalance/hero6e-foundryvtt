@@ -55,19 +55,19 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
     //     return data;
     // }
 
-    static defineSchema() {
-        //HEROSYS.log(false, "defineSchema")
-        let schema = super.defineSchema();
-        schema.bar3 = new foundry.data.fields.SchemaField({
-            attribute: new foundry.data.fields.StringField({
-                required: true,
-                nullable: true,
-                blank: false,
-                initial: () => "characteristics.end",
-            }),
-        });
-        return schema;
-    }
+    // static defineSchema() {
+    //     //HEROSYS.log(false, "defineSchema")
+    //     let schema = super.defineSchema();
+    //     schema.bar3 = new foundry.data.fields.SchemaField({
+    //         attribute: new foundry.data.fields.StringField({
+    //             required: true,
+    //             nullable: true,
+    //             blank: false,
+    //             initial: () => "characteristics.end",
+    //         }),
+    //     });
+    //     return schema;
+    // }
 }
 
 export class HeroSystem6eToken extends Token {
