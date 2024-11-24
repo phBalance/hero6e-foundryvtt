@@ -3,39 +3,97 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-attack.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
+export function isAgilitySkill(item) {
+    return item.system.CHARACTERISTIC === "DEX";
+}
+
+export function isBackgroundSkill(item) {
+    switch (item.system.XMLID) {
+        case "KNOWLEDGE_SKILL":
+        case "LANGUAGES":
+        case "PROFESSIONAL_SKILL":
+        case "SCIENCE_SKILL":
+        case "TRANSPORT_FAMILIARITY":
+            return true;
+    }
+
+    return false;
+}
+
+export function isCombatSkill(item) {
+    if (
+        item.system.XMLID === "AUTOFIRE_SKILLS" || // Autofire Skills
+        item.system.XMLID === "COMBAT_LEVELS" || // CSLs
+        item.system.XMLID === "MENTAL_COMBAT_LEVELS" ||
+        item.system.XMLID === "DEFENSE_MANEUVER" || // Defense maneuver
+        item.system.XMLID === "MANEUVER" || // Martial Arts
+        item.system.XMLID === "PENALTY_SKILL_LEVELS" || // PSLs
+        item.system.XMLID === "RAPID_ATTACK_HTH" || // Rapid Attack
+        item.system.XMLID === "RAPID_ATTACK_RANGED" ||
+        item.system.XMLID === "TWO_WEAPON_FIGHTING_HTH" || // Two Weapon Fighting
+        item.system.XMLID === "TWO_WEAPON_FIGHTING_RANGED" ||
+        item.system.XMLID === "WEAPON_FAMILIARITY" // Weapon Familiarity
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+export function isIntellectSkill(item) {
+    return item.system.CHARACTERISTIC === "INT";
+}
+
+export function isInteractionSkill(item) {
+    return item.system.CHARACTERISTIC === "PRE";
+}
+
 async function _renderSkillForm(item, actor, stateData) {
     const token = actor.token;
 
     // Skill Levels (in most cases it will apply so check it)
-    let skillLevels = Array.from(actor.items.filter((o) => o.system.XMLID === "SKILL_LEVELS"));
-    for (let s of skillLevels) {
-        s.system.checked = false;
-        s.system.active = true;
+    const skillLevels = actor.items.filter((o) => o.system.XMLID === "SKILL_LEVELS");
+    for (const skill of skillLevels) {
+        skill.system.checked = false;
+        skill.system.active = true;
 
         // OPTION_ALIAS has name of skill
-        if (s.system.OPTION_ALIAS.toUpperCase().indexOf(item.name.toUpperCase()) > -1) {
-            s.system.checked = true;
+        if (skill.system.OPTION_ALIAS.toUpperCase().indexOf(item.name.toUpperCase()) > -1) {
+            skill.system.checked = true;
         }
 
         // OPTION_ALIAS has XMLID of skill
-        if (s.system.OPTION_ALIAS.toUpperCase().indexOf(item.system.XMLID) > -1) {
-            s.system.checked = true;
+        if (skill.system.OPTION_ALIAS.toUpperCase().indexOf(item.system.XMLID) > -1) {
+            skill.system.checked = true;
         }
 
         // CHARACTERISTIC match
-        if (s.name.toUpperCase().indexOf(item.system.CHARACTERISTIC) > -1) {
-            s.system.checked = true;
+        if (skill.name.toUpperCase().indexOf(item.system.CHARACTERISTIC) > -1) {
+            skill.system.checked = true;
         }
 
         // INTERACTION match (really PRE match)
-        if (s.name.toUpperCase().indexOf("INTERACTION") > -1 && item.system.CHARACTERISTIC === "PRE") {
-            s.system.checked = true;
+        if (skill.name.toUpperCase().indexOf("INTERACTION") > -1 && item.system.CHARACTERISTIC === "PRE") {
+            skill.system.checked = true;
+        }
+    }
+
+    // Certain skills/talents/powers may help or hinder this roll
+    const helperItems = [];
+    if (isInteractionSkill(item)) {
+        // Striking appearance may help
+        const strikingAppearance = actor.items.filter((item) => item.system.XMLID === "STRIKING_APPEARANCE");
+        for (const saTalent of strikingAppearance) {
+            saTalent.system.checked = false;
+            saTalent.system.active = true;
+            helperItems.push(saTalent);
         }
     }
 
     // Enhanced Perception + Skill Levels
     const skillMods = [
         ...skillLevels,
+        ...helperItems,
         ...(item.system.XMLID === "PERCEPTION"
             ? actor.items.filter((o) => o.system.XMLID === "ENHANCEDPERCEPTION")
             : []),
