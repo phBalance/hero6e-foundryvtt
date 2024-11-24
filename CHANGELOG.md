@@ -8,6 +8,7 @@
 - The Attack type is now included in the Attack Tags on the chat card.
 - Conditional defenses used in main damage are also used in knockback damage. [#1498](https://github.com/dmdorman/hero6e-foundryvtt/issues/1498)
 - Only the GM can click on the button to apply knockback. [#1454](https://github.com/dmdorman/hero6e-foundryvtt/issues/1454)
+- Improved VULNERABILITY description. [#1484](https://github.com/dmdorman/hero6e-foundryvtt/issues/1484)
 
 ## Version 4.0.7
 

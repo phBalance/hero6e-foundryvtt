@@ -3563,6 +3563,11 @@ export class HeroSystem6eItem extends Item {
                 case "SCIENCE_SKILL":
                     break;
 
+                case "VULNERABILITY":
+                    // Vulnerability:  Mental (Common)
+                    system.description += `${system.INPUT}`;
+                    break;
+
                 default:
                     if (configPowerInfo?.type?.includes("skill")) {
                         break;
@@ -3588,6 +3593,10 @@ export class HeroSystem6eItem extends Item {
                     case "RECOGNIZED":
                     case "SLEEPING":
                     case "USEFUL":
+                        if (system.XMLID === "VULNERABILITY") {
+                            system.description += ` (${adder.OPTION_ALIAS})`.replace("((", "("); // Unclear why there is a parand in the OPTION_ALIAS
+                            break;
+                        }
                         _adderArray.push(`${adder.ALIAS} ${adder.OPTION_ALIAS}`);
                         break;
 
