@@ -1939,11 +1939,38 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         return _onApplyEntangleToSpecificToken(item, token, originalRoll);
     }
 
-    // Targeting ENTANGLE
-    const targetEntangle = damageData.targetEntangle === "true" || damageData.targetEntangle === true;
+    // Target ENTANGLE
     const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
-    if (targetEntangle && entangleAE) {
-        return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE);
+    if (entangleAE) {
+        // Targeting ENTANGLE based on attack-application checkbox
+        let targetEntangle = damageData.targetEntangle === "true" || damageData.targetEntangle === true;
+
+        // If they clicked "Apply Damage" then prompt
+        if (!button.textContent.includes("[ENTANGLE]")) {
+            console.log("do something");
+            targetEntangle = await Dialog.wait({
+                title: `Confirm Target`,
+                content: `Target ${token.name} or the ENTANGLE effecting ${token.name}?`,
+                buttons: {
+                    token: {
+                        label: `${token.name}`,
+                        callback: async function () {
+                            return false;
+                        },
+                    },
+                    entangle: {
+                        label: `ENTANGLE`,
+                        callback: async function () {
+                            return true;
+                        },
+                    },
+                },
+            });
+        }
+
+        if (targetEntangle && entangleAE) {
+            return _onApplyDamageToEntangle(item, token, originalRoll, entangleAE);
+        }
     }
 
     if (heroRoller.getHitLocation().item) {
