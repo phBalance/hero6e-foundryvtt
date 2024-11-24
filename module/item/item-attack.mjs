@@ -1201,6 +1201,7 @@ export async function _onRollKnockback(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kluge to fix.
     const options = { ...button.dataset };
+    const ignoreDefenseIds = JSON.parse(options.ignoreDefenseIdsJson) || [];
     const item = fromUuidSync(options.itemId);
     const token = game.scenes.current.tokens.get(options.targetTokenId);
     const knockbackResultTotal = options.knockbackResultTotal;
@@ -1260,7 +1261,7 @@ export async function _onRollKnockback(event) {
                     label: "Roll & Apply",
                     callback: async function (html) {
                         const dice = html.find("input")[0].value;
-                        await _rollApplyKnockback(token, parseInt(dice));
+                        await _rollApplyKnockback(token, parseInt(dice), ignoreDefenseIds);
                     },
                 },
                 cancel: {
@@ -1279,7 +1280,7 @@ export async function _onRollKnockback(event) {
  * @param {HeroSystem6eToken} token
  * @param {number} knockbackDice
  */
-async function _rollApplyKnockback(token, knockbackDice) {
+async function _rollApplyKnockback(token, knockbackDice, ignoreDefenseIds) {
     const actor = token.actor;
 
     const damageRoller = new HeroRoller()
@@ -1300,9 +1301,6 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const pdAttack = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContentsAttack, actor), {});
     await pdAttack._postUpload();
     pdAttack.name ??= "KNOCKBACK";
-
-    // TODO: Conditional defenses?
-    let ignoreDefenseIds = [];
 
     let defense = "";
 
@@ -2493,6 +2491,7 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
         // defense
         defense: defense,
         damageNegationValue: damageNegationValue,
+        ignoreDefenseIdsJson: JSON.stringify(ignoreDefenseIds),
 
         // knockback
         knockbackMessage: damageDetail.knockbackMessage,
