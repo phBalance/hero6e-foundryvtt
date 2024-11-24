@@ -35,14 +35,16 @@
                 {{/if}}
             {{/if}}
         </td>
-        <td class="left{{#if this.parentItem.type}} item-framework-child-name{{/if}}{{#if this.parentItem.parentItem}}2{{/if}}">
+        <td class="left{{#if this.parentItem.type}} item-framework-child-name{{#if this.parentItem.parentItem}}2{{/if}}{{/if}}">
             {{#if (and this.childIdx this.parentItem)}}
                 {{this.childIdx}})
             {{/if}}
             {{{itemFullDescription this}}}
+            {{#if item.system.NOTES}}
+                <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+            {{/if}}
         </td>
         <td>{{this.system.endEstimate}}</td>
-
         <td>
             {{#if (or (eq this.system.subType "attack") this.system.roll)}}
                 {{#if this.disabledOIHID}}

@@ -1,0 +1,15 @@
+// Note content is preformatted so make sure we are honouring it, but only show 1 line
+.item-notes-elidable-content {
+    white-space: pre-wrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: -webkit-box;
+    line-clamp: 1;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+// When item-notes-elidable-content is hovered, show all content
+.item-notes-elidable-content:hover {
+    display: inherit;
+}

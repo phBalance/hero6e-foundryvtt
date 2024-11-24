@@ -35,6 +35,9 @@
             {{this.childIdx}})
         {{/if}}
         {{{itemFullDescription this}}}
+        {{#if item.system.NOTES}}
+            <div class="item-notes-elidable-content"><b>Notes:</b> {{{item.system.NOTES}}}</div>
+        {{/if}}
     </td>
 
     {{#if this.isContainer}}
