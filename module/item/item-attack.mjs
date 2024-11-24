@@ -141,7 +141,7 @@ export async function AttackAoeToHit(item, options) {
 
     const aoeTemplate =
         game.scenes.current.templates.find((o) => o.flags.itemId === item.id) ||
-        game.scenes.current.templates.find((o) => o.user.id === game.user.id);
+        game.scenes.current.templates.find((o) => o.author.id === game.user.id);
     if (!aoeTemplate) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
@@ -2789,7 +2789,7 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
                     maxAbsorption = 0;
                 }
 
-                // Present the roll.
+                // `Presen`t the roll.
                 const cardHtml = await absorptionRoller.render(`${attackType} attack vs ${absorptionItem.name}`);
 
                 const speaker = ChatMessage.getSpeaker({
