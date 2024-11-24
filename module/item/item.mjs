@@ -42,11 +42,7 @@ function itemFullDescription(item) {
     }
 
     if (item.system.NOTES) {
-        desc += `
-        <a class="item-image item-control item-collapse" title="Collapse Item">
-            <i class="fas fa-square-caret-down fa-2x"></i>
-        </a>
-        <p class="item-notes"><b>Notes:</b> ${item.system.NOTES}</p>`;
+        desc += `<p class="item-notes"><b>Notes:</b> ${item.system.NOTES}</p>`;
     }
 
     return desc;
