@@ -427,23 +427,25 @@ export function convertToDcFromItem(item, options) {
 
             switch (conditionalAttack.system.XMLID) {
                 case "DEADLYBLOW": {
-                    const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
-                    const deadlyDc = RoundDc(dcPlus * apRatio);
-                    dc += deadlyDc;
-                    tags.push({
-                        value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
-                        name: "DeadlyBlow",
-                        title:
-                            conditionalAttack.system.OPTION_ALIAS +
-                            `${
-                                deadlyDc != dcPlus
-                                    ? `\n${getDiceFormulaFromItemDC(
-                                          item,
-                                          dcPlus,
-                                      )} reduced to ${getDiceFormulaFromItemDC(item, deadlyDc)} due to advantages`
-                                    : ""
-                            }`,
-                    });
+                    if (!options?.ignoreDeadlyBlow) {
+                        const dcPlus = 3 * Math.max(1, parseInt(conditionalAttack.system.LEVELS) || 1);
+                        const deadlyDc = RoundDc(dcPlus * apRatio);
+                        dc += deadlyDc;
+                        tags.push({
+                            value: `${getDiceFormulaFromItemDC(item, deadlyDc)}`,
+                            name: "DeadlyBlow",
+                            title:
+                                conditionalAttack.system.OPTION_ALIAS +
+                                `${
+                                    deadlyDc != dcPlus
+                                        ? `\n${getDiceFormulaFromItemDC(
+                                              item,
+                                              dcPlus,
+                                          )} reduced to ${getDiceFormulaFromItemDC(item, deadlyDc)} due to advantages`
+                                        : ""
+                                }`,
+                        });
+                    }
 
                     break;
                 }

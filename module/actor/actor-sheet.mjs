@@ -485,7 +485,7 @@ export class HeroSystemActorSheet extends ActorSheet {
 
                 if (item.type == "attack" || item.system.subType === "attack" || item.system.XMLID === "martialart") {
                     const csl = CombatSkillLevelsForAttack(item);
-                    let { dc } = convertToDcFromItem(item);
+                    let { dc } = convertToDcFromItem(item, { ignoreDeadlyBlow: true });
 
                     if (dc > 0) {
                         let costPerDice =

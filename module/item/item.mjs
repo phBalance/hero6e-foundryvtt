@@ -1272,7 +1272,7 @@ export class HeroSystem6eItem extends Item {
                     }
                 }
             }
-            let { dc, end } = convertToDcFromItem(item);
+            let { dc, end } = convertToDcFromItem(item, { ignoreDeadlyBlow: true });
             item.system.endEstimate = Math.max(item.system.endEstimate, end);
 
             // text description of damage
@@ -1645,7 +1645,7 @@ export class HeroSystem6eItem extends Item {
                 // if (this.system.ID === "1723406694834") {
                 //     debugger;
                 // }
-                let { dc, end } = convertToDcFromItem(this);
+                let { dc, end } = convertToDcFromItem(this, { ignoreDeadlyBlow: true });
                 this.system.endEstimate = Math.max(this.system.endEstimate, end);
 
                 // text description of damage
@@ -2902,7 +2902,10 @@ export class HeroSystem6eItem extends Item {
 
             case "MINDSCAN":
                 {
-                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const diceFormula = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
                     system.description = `${diceFormula} ${system.ALIAS}`;
                 }
                 break;
@@ -2944,7 +2947,10 @@ export class HeroSystem6eItem extends Item {
             case "ABSORPTION":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const diceFormula = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
 
                     system.description = `${system.ALIAS} ${is5e ? `${diceFormula}` : `${system.value} BODY`} (${
                         system.OPTION_ALIAS
@@ -2964,7 +2970,10 @@ export class HeroSystem6eItem extends Item {
             case "HEALING":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const diceFormula = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
 
                     system.description = `${system.ALIAS} ${
                         reduceAndEnhanceTargets.valid
@@ -2977,7 +2986,10 @@ export class HeroSystem6eItem extends Item {
             case "TRANSFER":
                 {
                     const reduceAndEnhanceTargets = this.splitAdjustmentSourceAndTarget();
-                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const diceFormula = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
 
                     system.description = `${system.ALIAS} ${diceFormula} from ${
                         reduceAndEnhanceTargets.valid ? reduceAndEnhanceTargets.reduces : "unknown"
@@ -2987,7 +2999,10 @@ export class HeroSystem6eItem extends Item {
 
             case "TRANSFORM":
                 {
-                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const diceFormula = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
                     system.description = `${system.OPTION_ALIAS} ${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -3128,7 +3143,10 @@ export class HeroSystem6eItem extends Item {
             case "MINDCONTROL":
             case "HANDTOHANDATTACK":
                 {
-                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const diceFormula = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
                     system.description = `${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -3188,12 +3206,12 @@ export class HeroSystem6eItem extends Item {
                     }
                     system.description += `, ${dcv.signedString()} DCV`;
                     if (system.EFFECT) {
-                        let dc = convertToDcFromItem(this).dc;
+                        let dc = convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc;
                         if (system.EFFECT.search(/\[STRDC\]/) > -1) {
                             const effectiveStrength = 5 * dc;
                             system.description += `, ${system.EFFECT.replace("[STRDC]", `${effectiveStrength} STR`)}`;
                         } else if (dc) {
-                            const damageDiceFormula = getDiceFormulaFromItemDC(this, dc);
+                            const damageDiceFormula = getDiceFormulaFromItemDC(this, { ignoreDeadlyBlow: true }, dc);
                             if (damageDiceFormula) {
                                 system.description += `,`;
 
@@ -3328,7 +3346,10 @@ export class HeroSystem6eItem extends Item {
                         system.description += " and " + _singles.slice(-1);
                     }
 
-                    const diceFormula = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const diceFormula = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
                     system.description += ` ${system.ALIAS} ${diceFormula}`;
                 }
                 break;
@@ -3496,7 +3517,10 @@ export class HeroSystem6eItem extends Item {
 
                     // Provide dice if this is an attack
                     // TODO: Look at behaviors
-                    const value2 = getDiceFormulaFromItemDC(this, convertToDcFromItem(this).dc);
+                    const value2 = getDiceFormulaFromItemDC(
+                        this,
+                        convertToDcFromItem(this, { ignoreDeadlyBlow: true }).dc,
+                    );
                     if (value2 && !isNaN(value2)) {
                         if (system.description.indexOf(value2) === -1) {
                             system.description = ` ${value2} ${system.class || ""}`;
