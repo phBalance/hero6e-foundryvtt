@@ -83,10 +83,13 @@ async function _renderSkillForm(item, actor, stateData) {
     if (isInteractionSkill(item)) {
         // Striking appearance may help
         const strikingAppearance = actor.items.filter((item) => item.system.XMLID === "STRIKING_APPEARANCE");
-        for (const saTalent of strikingAppearance) {
-            saTalent.system.checked = false;
-            saTalent.system.active = true;
-            helperItems.push(saTalent);
+        const reputations = actor.items.filter((item) => item.system.XMLID === "REPUTATION");
+        const interactionModifiers = strikingAppearance.concat(reputations);
+
+        for (const interactionModifier of interactionModifiers) {
+            interactionModifier.system.checked = false;
+            interactionModifier.system.active = true;
+            helperItems.push(interactionModifier);
         }
     }
 
@@ -188,22 +191,43 @@ async function skillRoll(item, actor, target) {
     // Skill Levels
     const skillLevelInputs = formElement.querySelectorAll("INPUT:checked");
     for (const skillLevelInput of skillLevelInputs) {
-        const skillLevel = actor.items.get(skillLevelInput.id);
-        const level = parseInt(skillLevel.system.LEVELS || 0);
-        if (level > 0 && !tags.find((o) => o.itemId === skillLevel.id)) {
+        const skillModItem = actor.items.get(skillLevelInput.id);
+
+        let modifier = parseInt(skillModItem.system.LEVELS || 0);
+        if (skillModItem.system.XMLID === "REPUTATION") {
+            if (skillModItem.type === "disadvantage") {
+                const recognizedOptionId = (skillModItem.system.ADDER || []).find(
+                    (adder) => adder.XMLID === "RECOGNIZED",
+                )?.OPTIONID;
+
+                if (recognizedOptionId === "SOMETIMES") {
+                    modifier = -1;
+                } else if (recognizedOptionId === "FREQUENTLY") {
+                    modifier = -2;
+                } else if (recognizedOptionId === "ALWAYS") {
+                    modifier = -3;
+                } else {
+                    console.error(`Unrecognized REPUTATION (disad) OPTIONID ${recognizedOptionId}`);
+                    modifier = 0;
+                }
+            }
+        }
+
+        // TODO: Do we need this find check?
+        if (modifier !== 0 && !tags.find((o) => o.itemId === skillModItem.id)) {
             tags.push({
-                value: level,
-                name: skillLevel.name,
-                title: skillLevel.system.description,
+                value: modifier,
+                name: skillModItem.name,
+                title: skillModItem.system.description,
             });
-            successValue = successValue + level;
+            successValue += modifier;
         }
     }
 
     // Roll Modifier, from form, which can be negative or positive.
     const modValue = parseInt(formElement.mod.value || 0);
     if (modValue !== 0) {
-        tags.push({ value: modValue, name: "Roll Mod" });
+        tags.push({ value: modValue, name: "Roll Modifier", title: `User Entered Roll Modifier ${modValue}` });
         successValue = successValue + modValue;
     }
 
