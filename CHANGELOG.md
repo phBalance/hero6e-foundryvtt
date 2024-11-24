@@ -3,8 +3,9 @@
 ## Version 4.0.8 (So far...) [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Support striking appearance. Can be optionally enabled for presence and interaction skill rolls. [#1509](https://github.com/dmdorman/hero6e-foundryvtt/issues/1509)
-- Improved DEADLYBLOW so it does not apply to adjustment powers, sense-affecting powers, or ENTANGLES. GM still has to confirm DEADLYBLOW with applicable powers. [#1493](https://github.com/dmdorman/hero6e-foundryvtt/issues/1493)
+- Improved DEADLYBLOW so it does not apply to adjustment powers, sense-affecting powers, or ENTANGLES. Also the extra DCs are not shown in the Attacks tab (which was confusing). GM still has to confirm DEADLYBLOW with applicable powers. [#1493](https://github.com/dmdorman/hero6e-foundryvtt/issues/1493)
 - Improved workflow when attacking ENTANGLED tokens. [#1500](https://github.com/dmdorman/hero6e-foundryvtt/issues/1500)
+- The Attack type is now included in the Attack Tags on the chat card.
 
 ## Version 4.0.7
 
