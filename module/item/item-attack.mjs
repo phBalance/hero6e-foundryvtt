@@ -1015,9 +1015,14 @@ function getAttackTags(item) {
 
     if (!item) return attackTags;
 
-    attackTags.push({ name: `${item.system.ALIAS}`, title: `${item.system.XMLID}` });
+    if (item.system.ALIAS || item.system.XMLID) {
+        attackTags.push({ name: `${item.system.ALIAS || item.system.XMLID}`, title: `${item.system.XMLID}` });
+    }
 
-    attackTags.push({ name: item.system.class });
+    // Only add in class (which we should probably rename/deprecate) when we don't already have it from the ALIAS/XMLID
+    if (!attackTags.find((tag) => tag.name?.toLowerCase() === item.system.class?.toLowerCase())) {
+        attackTags.push({ name: item.system.class });
+    }
 
     if (item.system.killing) {
         attackTags.push({ name: `killing` });
@@ -1124,11 +1129,23 @@ function getAttackTags(item) {
                 break;
             }
 
-            default:
+            case "AVAD": {
                 attackTags.push({
-                    name: `${mod.ALIAS || mod.XMLID} ${parseInt(mod.LEVELS || 0) ? mod.LEVELS : ""}`,
-                    title: `${mod.OPTION_ALIAS || mod.XMLID}`,
+                    name: `${mod.ALIAS || mod.XMLID}`,
+                    title: `${mod.XMLID}\n${mod.INPUT}`,
                 });
+                break;
+            }
+
+            default: {
+                const _name = `${mod.ALIAS || mod.XMLID} ${parseInt(mod.LEVELS || 0) ? mod.LEVELS : ""}`.trim();
+                if (!attackTags.find((tag) => tag.name?.toLowerCase() === _name.toLowerCase())) {
+                    attackTags.push({
+                        name: _name,
+                        title: `${mod.OPTION_ALIAS || mod.XMLID}`,
+                    });
+                }
+            }
         }
 
         // item modifier adders
