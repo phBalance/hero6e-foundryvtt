@@ -116,14 +116,14 @@ Our support ratings:
 | EIDETIC MEMORY         |    D    |                                                                                             |
 | ENVIRONMENTAL MOVEMENT |    D    |                                                                                             |
 | LIGHTNING CALCULATOR   |    D    |                                                                                             |
-| LIGHTNING REFLEXES     |    B    | A second token in the combat tracker is shown, but up to player/gm to determine when to use |
+| LIGHTNING REFLEXES     |    B    | A second token in the combat tracker is shown, but up to player/GM to determine when to use |
 | LIGHTSLEEP             |    D    |                                                                                             |
 | OFF-HAND DEFENSE       |    D    |                                                                                             |
 | PERFECT PITCH          |    D    |                                                                                             |
 | RESISTANCE             |    D    |                                                                                             |
 | SIMULATE DEATH         |    D    |                                                                                             |
 | SPEED READING          |    D    |                                                                                             |
-| STRIKING APPEARANCE    |    D    |                                                                                             |
+| STRIKING APPEARANCE    |    B    | Up to player/GM to determine when to use                                                    |
 | UNIVERSAL TRANSLATOR   |    D    |                                                                                             |
 | WEAPONMASTER           |    B    |                                                                                             |
 

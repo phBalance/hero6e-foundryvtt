@@ -3,4 +3,34 @@
         <label>Roll Modifier</label>
         <input type="number" name="mod" value="0"/>
     </div>
+
+    {{#if preAttackMods.length}}
+        <div class="form-group">
+            <label>Attack Modifiers</label>
+            <table>
+                {{#each preAttackMods}}
+                    {{#if this.system.active}}
+                        <tr>
+                            <td style="width:1%">
+                                <input class="item-toggle" id="{{this.id}}" type="checkbox" {{checked
+                                this.system.checked}} data-dtype="Boolean"/>
+                            </td>
+                            <td style="text-align:left">
+                                {{this.system.description}}
+                            </td>
+                        </tr>   
+                    {{else}}
+                        <tr title="This power is inactive" style="opacity:50%">
+                            <td>
+                                <i class="fas fa-ban"></i>
+                            </td>
+                            <td style="text-align:left">
+                                {{this.system.description}}
+                            </td>
+                        </tr>
+                    {{/if}}   
+                {{/each}}
+            </table>
+        </div>
+    {{/if}}
 </form>

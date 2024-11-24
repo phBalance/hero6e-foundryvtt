@@ -90,7 +90,6 @@ async function _renderSkillForm(item, actor, stateData) {
         }
     }
 
-    // Enhanced Perception + Skill Levels
     const skillMods = [
         ...skillLevels,
         ...helperItems,

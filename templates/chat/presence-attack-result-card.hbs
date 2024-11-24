@@ -1,0 +1,14 @@
+{{ log 'HEROSYS presence-attack-result-card' this }}
+<div class="hero chat-card">
+    <div class="card-section tags">
+        {{#each tags as |tag id|}}
+            <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}>{{tag.name}}
+                {{tag.value}}
+            </span>
+        {{/each}}
+    </div>
+
+    <div class="card-section">
+        <div class="damage-roll">{{{ renderedRoll }}}</div>
+    </div>
+</div>
