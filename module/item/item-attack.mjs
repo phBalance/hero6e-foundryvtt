@@ -1533,7 +1533,7 @@ export async function _onRollDamage(event) {
     for (const id of toHitData.targetids.split(",")) {
         let token = canvas.scene.tokens.get(id);
         if (token) {
-            const entangleAE = token.actor.temporaryEffects.find((o) => o.flags?.XMLID === "ENTANGLE");
+            const entangleAE = token.actor?.temporaryEffects?.find((o) => o.flags?.XMLID === "ENTANGLE");
             let targetToken = {
                 token,
                 roller: damageRoller.toJSON(),
@@ -1922,6 +1922,12 @@ export async function _onApplyDamageToSpecificToken(event, tokenId) {
     const token = canvas.tokens.get(tokenId);
     if (!token) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
+    }
+
+    if (!token.actor) {
+        return ui.notifications.error(
+            `Actor for ${token.name} is missing.  Unable to apply damage.  You will have to create a new actor & token.`,
+        );
     }
 
     // TESTING - VISION TESTING - AARON
