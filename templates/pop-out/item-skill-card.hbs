@@ -8,63 +8,38 @@
         </header>
     </div>
 
-    {{!-- {{#if skillLevels}}
-    <div class="form-fields  csl-attack-list">
-        <div class="hero chat-card item-card">
-            <h3>Verify the following Skill Levels apply to this skill.</h3>
-        </div>
-        <table>
-            {{#each skillLevels}}
-            <tr>
-                <td>
-                    <input type="checkbox" id="{{this.id}}" {{checked this.system.checked}} data-dtype="Boolean" />
-                </td>
-                <td class="left">
-                    <b>{{this.name}}</b>: {{this.system.description}}
-                </td>
-            </tr>
-            {{/each}}
-        </table>
-    </div>
-    {{/if}} --}}
-
     <div class="form-group">
-        <label>Roll Modifier</label>
+        <label>Roll Modifier<br>(- is harder, + is easier)</label>
         <input type="number" name="mod" value="0" />
     </div>
 
     {{#if skillMods.length}}
         <div class="form-group">
-        <label>Skill Mods</label>
+        <label>Skill Modifiers</label>
             <table>
-            {{#each skillMods}}
-                {{#if this.system.active}}
-                <tr>
-                    <td style="width:1%">
-                        <input class="item-toggle" id="{{this.id}}" type="checkbox" {{checked
-                        this.system.checked}} data-dtype="Boolean" {{#if (eq this.system.OPTIONID "ALL")}}disabled{{/if}}/>
-                    </td>
-                    <td style="text-align:left">
-                        {{this.system.description}}
-                    </td>
-                </tr>   
-                {{else}}
-                <tr title="This power is inactive" style="opacity:50%">
-                    <td>
-                        <i class="fas fa-ban"></i>
-                    </td>
-                    <td style="text-align:left">
-                        {{this.system.description}}
-                    </td>
-                </tr>
-                {{/if}}   
-            {{/each}}
+                {{#each skillMods}}
+                    {{#if this.system.active}}
+                        <tr>
+                            <td style="width:1%">
+                                <input class="item-toggle" id="{{this.id}}" type="checkbox" {{checked
+                                this.system.checked}} data-dtype="Boolean"/>
+                            </td>
+                            <td style="text-align:left">
+                                {{this.system.description}}
+                            </td>
+                        </tr>   
+                    {{else}}
+                        <tr title="This power is inactive" style="opacity:50%">
+                            <td>
+                                <i class="fas fa-ban"></i>
+                            </td>
+                            <td style="text-align:left">
+                                {{this.system.description}}
+                            </td>
+                        </tr>
+                    {{/if}}   
+                {{/each}}
             </table>
-            </div>
+        </div>
     {{/if}}
-
-    <hr>
-    <div>
-        <center><h4>(- is harder, + is easier)</h4></center>
-    </div>
 </form>
