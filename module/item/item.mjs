@@ -1588,15 +1588,17 @@ export class HeroSystem6eItem extends Item {
                 this.system.active ??= false;
             } else {
                 if (this.system.active === undefined) {
-                    // Special Visions
-                    if (this.baseInfo?.sight) {
-                        await activateSpecialVision(
-                            this,
-                            this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken,
-                        );
-                    }
+                    // Special Visions (causes issues when actor is first created & uploaded)
+                    // TODO: Impelment custom HeroSystem vision mode(s)
+                    // if (this.baseInfo?.sight) {
+                    //     await activateSpecialVision(
+                    //         this,
+                    //         this.actor.getActiveTokens()?.[0] || this.actor.prototypeToken,
+                    //     );
+                    // }
+                    changed = true;
+                    this.system.active ??= true;
                 }
-                this.system.active ??= true;
             }
         }
 
@@ -2791,7 +2793,7 @@ export class HeroSystem6eItem extends Item {
         _realCost = RoundFavorPlayerDown(_realCost);
 
         // Minimum cost
-        if (_realCost == 0 && system.activePoints > 0) {
+        if (_realCost === 0 && system.activePoints > 0) {
             _realCost = 1;
         }
 
