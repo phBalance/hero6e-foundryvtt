@@ -3462,10 +3462,11 @@ export class HeroSystem6eItem extends Item {
                 system.description = `${system.ALIAS}`;
                 break;
 
-            case "STRIKING_APPEARANCE":
+            case "STRIKING_APPEARANCE": {
                 const levels = parseInt(system.LEVELS);
                 system.description = `+${levels}/+${levels}d6 ${system.ALIAS} (${system.OPTION_ALIAS})`;
                 break;
+            }
 
             default:
                 {
