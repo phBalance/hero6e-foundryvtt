@@ -396,11 +396,8 @@ export function convertToDcFromItem(item, options) {
     const DEADLYBLOW = item.actor?.items.find((o) => o.system.XMLID === "DEADLYBLOW");
     if (DEADLYBLOW) {
         item.system.conditionalAttacks ??= {};
-        item.system.conditionalAttacks[DEADLYBLOW.id] ??= {
-            ...DEADLYBLOW,
-            id: DEADLYBLOW.id,
-        };
-        item.system.conditionalAttacks[DEADLYBLOW.id].checked ??= true;
+        item.system.conditionalAttacks[DEADLYBLOW.id] = DEADLYBLOW;
+        item.system.conditionalAttacks[DEADLYBLOW.id].system.checked ??= true;
     }
 
     if (item.actor) {
@@ -421,7 +418,12 @@ export function convertToDcFromItem(item, options) {
             }
 
             // If unchecked or missing then assume it is enabled
-            if (!item.system.conditionalAttacks[key].checked) continue;
+            if (!conditionalAttack.system.checked) continue;
+
+            // Make sure conditionalAttack applies (only for DEADLYBLOW at the moment)
+            if (typeof conditionalAttack.baseInfo?.appliesTo === "function") {
+                if (!conditionalAttack.baseInfo.appliesTo(item)) continue;
+            }
 
             switch (conditionalAttack.system.XMLID) {
                 case "DEADLYBLOW": {
@@ -442,6 +444,7 @@ export function convertToDcFromItem(item, options) {
                                     : ""
                             }`,
                     });
+
                     break;
                 }
                 default:

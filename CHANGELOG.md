@@ -1,6 +1,10 @@
 # Releases
 
-## Version 4.0.7 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+## Version 4.0.8 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Improved DEADLYBLOW so it does not apply to adjustment powers, sense-affecting powers, or ENTANGLES. GM still has to confirm DEADLYBLOW with applicable powers. [#1493](https://github.com/dmdorman/hero6e-foundryvtt/issues/1493)
+
+## Version 4.0.7
 
 - Fixed Flash, which now has a unique icon per sense group. [#1486](https://github.com/dmdorman/hero6e-foundryvtt/issues/1486)
 - Conditional DAMAGEREDUCTION and DAMAGENEGATION defenses now prompt for applicability. [#1478](https://github.com/dmdorman/hero6e-foundryvtt/issues/1478)

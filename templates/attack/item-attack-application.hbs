@@ -309,7 +309,7 @@
         {{#if (appliesTo this @root/item)}}
           <tr>
               <td>
-                  <input name="system.conditionalAttacks.{{this.id}}.checked" type="checkbox" _id="{{this.id}}" {{checked this.checked}} data-dtype="Boolean" />
+                  <input name="system.conditionalAttacks.{{this.id}}.system.checked" type="checkbox" _id="{{this.id}}" {{checked this.system.checked}} data-dtype="Boolean" />
               </td>
               <td class="left">
                   <b>{{this.name}}{{#if @root/item.system.SFX}} ({{@root/item.system.SFX}}){{/if}}</b>: {{this.system.description}}
