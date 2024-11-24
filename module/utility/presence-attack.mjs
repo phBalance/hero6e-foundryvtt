@@ -4,55 +4,125 @@ import { HeroRoller } from "./dice.mjs";
 async function _renderForm(actor, stateData) {
     const token = actor.token;
 
-    // Certain skills/talents/powers may help or hinder this roll
-    const attackMods = [];
+    // Certain skills/talents/powers may help this roll
+    const preAttackMods = [];
+
     // Striking appearance may help
-    const strikingAppearance = actor.items.filter((item) => item.system.XMLID === "STRIKING_APPEARANCE");
-    for (const saTalent of strikingAppearance) {
+    const strikingAppearances = actor.items.filter((item) => item.system.XMLID === "STRIKING_APPEARANCE");
+    for (const saTalent of strikingAppearances) {
         saTalent.system.checked = false;
         saTalent.system.active = true;
-        attackMods.push(saTalent);
+        preAttackMods.push(saTalent);
+    }
+
+    // Positive reputation or negative reputation may help this roll
+    const reputations = actor.items.filter((item) => item.system.XMLID === "REPUTATION");
+    for (const reputation of reputations) {
+        reputation.system.checked = false;
+        reputation.system.active = true;
+        preAttackMods.push(reputation);
     }
 
     const templateData = {
         actor: actor.system,
         tokenId: token?.uuid || null,
         state: stateData,
-        preAttackMods: attackMods,
+        preAttackMods,
     };
 
     const path = `systems/${HEROSYS.module}/templates/pop-out/presence-attack-card.hbs`;
     return await renderTemplate(path, templateData);
 }
 
+function clampFractionalPortionToZeroOrHalf(value) {
+    const fractional = value % 1;
+    if (fractional) {
+        return Math.trunc(value) + Math.sign(value) * 0.5;
+    }
+
+    return value;
+}
+
 async function presenceAttackRoll(actor, html) {
-    const form = html[0].querySelector("form");
-    const rollModifier = parseFloat(form.mod.value);
+    const tags = [];
+
     const presence = parseInt(actor.system.characteristics.pre.value);
-    const presenceDice = presence / 5;
-    const partialDice = presenceDice % 1;
+    const presenceAttackBasicDice = clampFractionalPortionToZeroOrHalf(presence / 5);
+    if (presenceAttackBasicDice !== 0) {
+        tags.push({
+            value: presenceAttackBasicDice,
+            name: "Presence Attack",
+            title: `Presence Attack (${presence} PRE)`,
+        });
+    }
+
+    const form = html[0].querySelector("form");
+    const rollModifier = clampFractionalPortionToZeroOrHalf(parseFloat(form.mod.value));
+    if (rollModifier !== 0) {
+        tags.push({
+            value: rollModifier,
+            name: "Roll Modifier",
+            title: `User Added Roll Modifier ${rollModifier}`,
+        });
+    }
+
+    // Presence Attack Modifiers (striking appearance & reputation)
+    let preAttackMods = 0;
+    const preAttackModInputs = form.querySelectorAll("INPUT:checked");
+    for (const preAttackInput of preAttackModInputs) {
+        const preAttackModItem = actor.items.get(preAttackInput.id);
+
+        let numDice = 0;
+        if (preAttackModItem.system.XMLID === "STRIKING_APPEARANCE") {
+            numDice = parseInt(preAttackModItem.system.LEVELS || 0);
+        } else if (preAttackModItem.system.XMLID === "REPUTATION") {
+            if (preAttackModItem.type === "disadvantage") {
+                const recognizedOptionId = (preAttackModItem.system.ADDER || []).find(
+                    (adder) => adder.XMLID === "RECOGNIZED",
+                )?.OPTIONID;
+
+                if (recognizedOptionId === "SOMETIMES") {
+                    numDice = -1;
+                } else if (recognizedOptionId === "FREQUENTLY") {
+                    numDice = -2;
+                } else if (recognizedOptionId === "ALWAYS") {
+                    numDice = -3;
+                } else {
+                    console.error(`Unrecognized REPUTATION (disad) OPTIONID ${recognizedOptionId}`);
+                    numDice = 0;
+                }
+            } else {
+                numDice = parseInt(preAttackModItem.system.LEVELS || 0);
+            }
+        } else {
+            console.warn(
+                `Unexpected item ${preAttackModItem.system.XMLID}/${preAttackModItem.type} providing modification for presence attack`,
+            );
+            numDice = parseInt(preAttackModItem.system.LEVELS || 0);
+        }
+
+        if (numDice !== 0) {
+            tags.push({
+                value: numDice,
+                name: preAttackModItem.name,
+                title: preAttackModItem.system.description,
+            });
+        }
+
+        preAttackMods += numDice;
+    }
+
+    const presenceAttackDice = presenceAttackBasicDice + preAttackMods + rollModifier;
+    const presenceAttackFullDice = Math.trunc(presenceAttackDice);
+    const presenceAttackPartialDice = Math.sign(presenceAttackDice) * (Math.abs(presenceAttackDice % 1) >= 0.5 ? 1 : 0);
 
     const preAttackRoller = new HeroRoller()
         .makeBasicRoll()
-        .addDice(Math.trunc(presenceDice), "Presence Attack")
-        .addHalfDice(Math.sign(partialDice) * (Math.abs(partialDice) >= 0.5 ? 1 : 0), "Presence Attack Half Dice")
-        .addDice(Math.trunc(rollModifier), "Roll Modifier")
-        .addHalfDice(Math.abs(rollModifier) % 1 >= 0.5 ? 1 : 0, "Roll Modifier");
-
-    // Presence Attack Modifiers
-    const preAttackModInputs = form.querySelectorAll("INPUT:checked");
-    for (const preAttackInput of preAttackModInputs) {
-        const preAttack = actor.items.get(preAttackInput.id);
-        const levels = parseInt(preAttack.system.LEVELS || 0);
-        if (levels > 0) {
-            preAttackRoller.addDice(levels, preAttack.name);
-        }
-    }
-
+        .addDice(presenceAttackFullDice, "Presence Attack")
+        .addHalfDice(presenceAttackPartialDice, "Presence Attack Half Dice");
     await preAttackRoller.roll();
 
     const rollHtml = await preAttackRoller.render("Presence Attack");
-    const tags = await preAttackRoller.tags();
 
     // render card
     const token = actor.token;
