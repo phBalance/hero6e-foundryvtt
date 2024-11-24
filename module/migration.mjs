@@ -21,7 +21,7 @@ async function willNotMigrate() {
         const message = `<strong>FATAL ERROR</strong><br>The compendia, actors, and items in this world were were created with an older ${game.system.title || game.system.name} version that is no longer supported for automatic migration. Please re-upload everything from HDC or migrate through one, or more, supported versions (3.0.76 - 4.0.5) before upgrading to ${game.system.version}.`;
 
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: message,
         };
@@ -68,7 +68,7 @@ export async function migrateWorld() {
         game.system.title || game.system.name
     }</a>.`;
     const chatData = {
-        user: game.user._id,
+        author: game.user._id,
         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
         content: content,
     };

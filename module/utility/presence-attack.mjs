@@ -39,7 +39,7 @@ async function presenceAttackRoll(actor, html) {
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: heroRoller.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };

@@ -32,8 +32,6 @@ export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemIsManeuver", itemIsManeuver);
     Handlebars.registerHelper("itemIsOptionalManeuver", itemIsOptionalManeuver);
     Handlebars.registerHelper("filterItem", filterItem);
-    // Handlebars.registerHelper("parentItem", parentItem);
-    // Handlebars.registerHelper("parentItemType", parentItemType);
 }
 
 // Returns HTML so expects to not escaped in handlebars (i.e. triple braces)
@@ -44,7 +42,11 @@ function itemFullDescription(item) {
     }
 
     if (item.system.NOTES) {
-        desc += `<br><b>Notes:</b> ${item.system.NOTES}`;
+        desc += `
+        <a class="item-image item-control item-collapse" title="Collapse Item">
+            <i class="fas fa-square-caret-down fa-2x"></i>
+        </a>
+        <p class="item-notes"><b>Notes:</b> ${item.system.NOTES}</p>`;
     }
 
     return desc;
@@ -446,14 +448,15 @@ export class HeroSystem6eItem extends Item {
             content += ` Total Cost: ${this.system.realCost} CP.`;
         }
 
+        // TODO: Chat shouldn't provide the note (I don't think)
         if (this.system.NOTES) {
-            content += `<br><b>Notes:</b> ${this.system.NOTES}`;
+            content += `<p class="item-notes"><b>Notes:</b> ${this.system.NOTES}</p>`;
         }
 
         content += `</div>`;
 
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
@@ -495,7 +498,7 @@ export class HeroSystem6eItem extends Item {
                 speaker["alias"] = item.actor.name;
 
                 const chatData = {
-                    user: game.user._id,
+                    author: game.user._id,
                     style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                     content: `${
                         resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to attempt` : "Attempted"
@@ -512,7 +515,7 @@ export class HeroSystem6eItem extends Item {
             speaker["alias"] = item.actor.name;
 
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `${
                     resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
@@ -531,7 +534,7 @@ export class HeroSystem6eItem extends Item {
                 if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
                     this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
                 }
-            } else if (this.system.XMLID === "FLIGHT") {
+            } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
             }
 
@@ -559,7 +562,7 @@ export class HeroSystem6eItem extends Item {
             speaker["alias"] = item.actor.name;
 
             const chatData = {
-                user: game.user._id,
+                author: game.user._id,
                 style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                 content: `Turned off ${item.name}`,
                 whisper: whisperUserTargetsForActor(item.actor),
@@ -575,7 +578,7 @@ export class HeroSystem6eItem extends Item {
                         HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect,
                     );
                 }
-            } else if (this.system.XMLID === "FLIGHT") {
+            } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
                 if (this.actor.statuses.has("fly")) {
                     await this.actor.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect);
                 }
@@ -3458,6 +3461,13 @@ export class HeroSystem6eItem extends Item {
             case "NIGHTVISION":
                 system.description = `${system.ALIAS}`;
                 break;
+
+            case "STRIKING_APPEARANCE": {
+                const levels = parseInt(system.LEVELS);
+                system.description = `+${levels}/+${levels}d6 ${system.ALIAS} (${system.OPTION_ALIAS})`;
+                break;
+            }
+
             default:
                 {
                     if (configPowerInfo?.type?.includes("characteristic")) {
@@ -3860,11 +3870,6 @@ export class HeroSystem6eItem extends Item {
         if (["perk", "talent", "complication"]?.includes(type)) {
             system.end = 0;
         }
-
-        // Notes (moved to item-partial-common.hbs)
-        // if (system.NOTES) {
-        //     system.description += `<br> <b>Notes:</b> ${system.NOTES}`;
-        // }
     }
 
     createPowerDescriptionModifier(modifier) {
@@ -5091,7 +5096,7 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     const chatData = {
         style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: activationRoller.rawRolls(),
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };
@@ -5229,7 +5234,7 @@ export async function RequiresASkillRollCheck(item) {
         const chatData = {
             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: activationRoller.rawRolls(),
-            user: game.user._id,
+            author: game.user._id,
             content: cardHtml,
             speaker: speaker,
         };

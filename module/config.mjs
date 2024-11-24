@@ -4279,7 +4279,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 switch (item.system.OPTIONID) {
                     case "ALL":
                         return 3;
+                    case "GROUP":
+                        return 2;
                     default:
+                        console.error(`STRIKING_APPEARANCE unknown OPTIONID ${item.system.OPTIONID}`);
                         return 2;
                 }
             },
