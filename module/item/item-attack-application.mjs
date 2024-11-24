@@ -146,6 +146,11 @@ export class ItemAttackFormApplication extends FormApplication {
                 if (item.attackDefenseVs === "MD" && entangles?.[0]?.flags.entangleDefense.rMD === 0) {
                     data.targetEntangle = false;
                 }
+
+                // TAKESNODAMAGE
+                if (fromUuidSync(entangles?.[0].origin)?.findModsByXmlid("TAKESNODAMAGE")) {
+                    data.targetEntangle = false;
+                }
             }
 
             // But an ENTANGLE attack doesn't target an ENTANGLE

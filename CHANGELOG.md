@@ -4,6 +4,7 @@
 
 - Support striking appearance. Can be optionally enabled for presence and interaction skill rolls. [#1509](https://github.com/dmdorman/hero6e-foundryvtt/issues/1509)
 - Improved DEADLYBLOW so it does not apply to adjustment powers, sense-affecting powers, or ENTANGLES. GM still has to confirm DEADLYBLOW with applicable powers. [#1493](https://github.com/dmdorman/hero6e-foundryvtt/issues/1493)
+- Improved workflow when attacking ENTANGLED tokens. [#1500](https://github.com/dmdorman/hero6e-foundryvtt/issues/1500)
 
 ## Version 4.0.7
 
