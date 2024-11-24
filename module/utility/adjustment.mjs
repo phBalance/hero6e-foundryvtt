@@ -700,7 +700,7 @@ export async function renderAdjustmentChatCards(cardOrCards, adjustmentItemTags,
     });
 
     const chatData = {
-        user: game.user._id,
+        author: game.user._id,
         content: cardHtml,
         speaker: speaker,
     };

@@ -703,12 +703,9 @@ export class HeroSystemActorSheet extends ActorSheet {
             item.actor?.name ||
             item.compendium?.name ||
             (item.uuid.startsWith("Item.") ? "ItemSidebar" : null);
-        // const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-        // speaker.alias = actor.name;
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             whisper: [...whisperUserTargetsForActor(actor), ...whisperUserTargetsForActor(item.actor)],
-            //speaker: speaker,
         };
 
         // Delete original if equipment and it belonged to an actor (as opposed to item sidebar or compendium)?
@@ -905,7 +902,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const chatData = {
             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: heroRoller.rawRolls(),
-            user: game.user._id,
+            author: game.user._id,
             content: cardHtml,
             speaker: speaker,
         };
@@ -944,7 +941,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const chatData = {
             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: characteristicRoller.rawRolls(),
-            user: game.user._id,
+            author: game.user._id,
             content: cardHtml,
             speaker: speaker,
         };
@@ -1019,7 +1016,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const chatData = {
             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             rolls: characteristicRoller.rawRolls(),
-            user: game.user._id,
+            author: game.user._id,
             content: cardHtml,
             speaker: speaker,
         };
@@ -1311,7 +1308,7 @@ export class HeroSystemActorSheet extends ActorSheet {
         const token = this.actor.token;
         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
         const chatData = {
-            user: game.user._id,
+            author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
             speaker: speaker,

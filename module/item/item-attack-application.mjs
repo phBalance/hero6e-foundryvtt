@@ -470,7 +470,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const templateData = {
             t: templateType,
-            user: game.user.id,
+            author: game.user.id,
             distance: distance,
             direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
             fillColor: game.user.color,
